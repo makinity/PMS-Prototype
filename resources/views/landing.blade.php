@@ -373,7 +373,7 @@
                             </div>
                             <a href="#" id="openPasswordReset" class="text-sm text-purple-400 hover:text-purple-300">Forgot Password?</a>
                         </div>
-                        <button type="submit" class="btn-gradient w-full py-3 rounded-lg font-medium">Login to PMS Dashboard</button>
+                        <a href="{{ route('employee.dashboard') }}" class="btn-gradient w-full py-3 rounded-lg font-medium">Login to PMS Dashboard</a>
                         <div class="text-sm font-medium text-gray-400 text-center">
                             Need to activate your account? <a href="#" id="openAccountActivationFromLogin" class="text-purple-400 hover:text-purple-300">Activate here</a>
                         </div>

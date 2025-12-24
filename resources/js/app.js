@@ -2,6 +2,9 @@ import './bootstrap';
 
 // Landing Page
 document.addEventListener('DOMContentLoaded', function() {
+if (!document.getElementById('mainNav')) {
+    return;
+}
 // Mobile menu functionality
 const mobileMenuBtn = document.getElementById('mobileMenuBtn');
 const mobileMenu = document.getElementById('mobileMenu');
@@ -245,6 +248,10 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 
 
 document.addEventListener('DOMContentLoaded', function() {
+const activationForm = document.getElementById('activationForm');
+if (!activationForm) {
+    return;
+}
 // Get DOM elements
 const verifyPhase = document.getElementById('activationPhaseVerify');
 const passwordPhase = document.getElementById('activationPhasePassword');
@@ -593,3 +600,6 @@ passwordStrengthBar.className = 'h-1.5 rounded-full';
 goToStep(1);
 });
 // End Landing Page
+
+
+
