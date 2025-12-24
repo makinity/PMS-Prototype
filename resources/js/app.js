@@ -602,4 +602,84 @@ goToStep(1);
 // End Landing Page
 
 
+// Employee-Dashboard
+document.addEventListener('DOMContentLoaded', function() {
+if (!document.body.classList.contains('employee-layout')) {
+    return;
+}
 
+const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+const sidebar = document.getElementById('sidebar');
+const sidebarOverlay = document.getElementById('sidebarOverlay');
+const logoutBtn = document.getElementById('logoutBtn');
+
+if (mobileMenuBtn && sidebar && sidebarOverlay) {
+    // Toggle mobile menu
+    mobileMenuBtn.addEventListener('click', function() {
+        sidebar.classList.toggle('active');
+        sidebarOverlay.classList.toggle('active');
+        document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+    });
+
+    // Close menu when clicking overlay
+    sidebarOverlay.addEventListener('click', function() {
+        sidebar.classList.remove('active');
+        sidebarOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+    });
+
+    // Close menu when clicking a link (for mobile)
+    sidebar.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', function() {
+            if (window.innerWidth <= 1024) {
+                sidebar.classList.remove('active');
+                sidebarOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+    });
+}
+
+// Logout functionality
+if (logoutBtn) {
+    const logoutUrl = logoutBtn.getAttribute('data-logout-url') || '/';
+    logoutBtn.addEventListener('click', function() {
+        window.location.href = logoutUrl;
+    });
+}
+
+if (sidebar) {
+    function setActiveMenuItem() {
+        const currentPath = window.location.hash || '#';
+        const menuItems = sidebar.querySelectorAll('a');
+
+        menuItems.forEach(item => {
+            item.classList.remove('active');
+            if (item.getAttribute('href') === currentPath) {
+                item.classList.add('active');
+            }
+        });
+
+        // Default to dashboard if no match
+        if (!sidebar.querySelector('a.active')) {
+            sidebar.querySelector('.dashboard-item a').classList.add('active');
+        }
+    }
+
+    setActiveMenuItem();
+
+    // Close menu on window resize (if resized to desktop)
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 1024) {
+            sidebar.classList.remove('active');
+            if (sidebarOverlay) {
+                sidebarOverlay.classList.remove('active');
+            }
+            document.body.style.overflow = '';
+        }
+    });
+}
+});
+
+
+//End Employee-Dashboard

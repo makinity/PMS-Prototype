@@ -16,96 +16,6 @@
     @if (class_exists(\Livewire\Livewire::class))
         @livewireStyles
     @endif
-    <style>
-        @keyframes rise-in {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .page-enter {
-            animation: rise-in 0.6s ease-out both;
-        }
-
-        .menu-stagger > li {
-            animation: rise-in 0.4s ease-out both;
-        }
-
-        .menu-stagger > li:nth-child(2) {
-            animation-delay: 0.05s;
-        }
-
-        .menu-stagger > li:nth-child(3) {
-            animation-delay: 0.1s;
-        }
-
-        .menu-stagger > li:nth-child(4) {
-            animation-delay: 0.15s;
-        }
-
-        .menu-stagger > li:nth-child(5) {
-            animation-delay: 0.2s;
-        }
-
-        .sidebar-link {
-            position: relative;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            border-radius: 0.75rem;
-            padding: 0.5rem 0.75rem;
-            color: #cbd5e1;
-            transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .sidebar-link:hover {
-            background-color: rgba(30, 41, 59, 0.7);
-            color: #f8fafc;
-        }
-
-        .sidebar-link[aria-current="page"] {
-            background-color: rgba(15, 23, 42, 0.9);
-            color: #f8fafc;
-            box-shadow: inset 0 0 0 1px rgba(52, 211, 153, 0.35);
-        }
-
-        .sidebar-link[aria-current="page"]::before {
-            content: '';
-            position: absolute;
-            left: -10px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 4px;
-            height: 26px;
-            border-radius: 9999px;
-            background: linear-gradient(180deg, #34d399, #22d3ee);
-            box-shadow: 0 0 8px rgba(16, 185, 129, 0.55);
-        }
-
-        .sidebar-link .sidebar-icon {
-            color: #94a3b8;
-            transition: color 0.2s ease;
-        }
-
-        .sidebar-link:hover .sidebar-icon {
-            color: #e2e8f0;
-        }
-
-        .sidebar-link[aria-current="page"] .sidebar-icon {
-            color: #34d399;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            .menu-stagger > li {
-                animation: none;
-            }
-        }
-    </style>
 </head>
 <body class="min-h-screen antialiased font-sans">
     <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-slate-900 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white">Skip to content</a>
@@ -272,7 +182,7 @@
         </aside>
 
         <!-- Main Content -->
-        <div class="pt-16 sm:ml-72">
+        <div class="pt-2 sm:ml-72">
             <main id="main-content" class="px-4 pb-12 pt-6 lg:px-8">
                 <div class="mx-auto max-w-7xl">
                     {{ $slot }}
@@ -288,5 +198,6 @@
     @endif
     <!-- Font Awesome -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    @stack('scripts')
 </body>
 </html>

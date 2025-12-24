@@ -1,0 +1,1 @@
+@include('layouts.manager', ['slot' => $slot])
