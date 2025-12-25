@@ -55,6 +55,31 @@ Route::get('/administrator-dashboard', function () {
 Route::get('/manager-dashboard', function () {
     return view('manager.dashboard');
 })->name('manager.dashboard');    
+
+Route::get('/manager-team', function () {
+    return view('manager.my-team');
+})->name('manager.my-team');     
+
 Route::get('/manager-task-monitoring', function () {
     return view('manager.task-monitoring');
 })->name('manager.task-monitoring');   
+
+Route::get('/manager-productivity-analysis', function () {
+    return view('manager.productivity');
+})->name('manager.productivity'); 
+
+Route::get('/manager-bottleneck-analysis', function () {
+    return view('manager.bottleneck');
+})->name('manager.bottleneck');   
+
+Route::get('/manager-performance-rating', function () {
+    return view('manager.performance-rate');
+})->name('manager.performance-rate');  
+
+Route::get('/manager/ipcr-reports', function () {
+    return view('manager.ipcr-reports');
+})->name('manager.ipcr-reports');   
+
+Route::get('/manager-Profile', function () {
+    return view('manager.profile');
+})->name('manager.profile');

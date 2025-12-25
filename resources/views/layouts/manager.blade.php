@@ -235,7 +235,7 @@
                         <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Team Management</p>
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
-                                <a href="#" class="sidebar-link">
+                                <a href="{{ route('manager.my-team') }}" class="sidebar-link">
                                     <i class="sidebar-icon fa-solid fa-users"></i>
                                     <span>My Team</span>
                                 </a>
@@ -253,19 +253,19 @@
                         <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Performance</p>
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
-                                <a href="#" class="sidebar-link">
+                                <a href="{{ route('manager.productivity') }}" class="sidebar-link">
                                     <i class="sidebar-icon fa-solid fa-chart-line"></i>
                                     <span>Productivity Analytics</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="#" class="sidebar-link">
+                                <a href="{{ route('manager.bottleneck') }}" class="sidebar-link">
                                     <i class="sidebar-icon fa-solid fa-stopwatch"></i>
                                     <span>Bottleneck Analysis</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="#" class="sidebar-link">
+                                <a href="{{ route('manager.performance-rate') }}" class="sidebar-link">
                                     <i class="sidebar-icon fa-solid fa-star"></i>
                                     <span>Performance Ratings</span>
                                 </a>
@@ -277,7 +277,7 @@
                         <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Reports</p>
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
-                                <a href="#" class="sidebar-link">
+                                <a href="{{ route('manager.ipcr-reports') }}" class="sidebar-link">
                                     <i class="sidebar-icon fa-solid fa-file-lines"></i>
                                     <span>IPCR Reports</span>
                                 </a>
@@ -289,7 +289,7 @@
                         <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Account</p>
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
-                                <a href="#" class="sidebar-link">
+                                <a href="{{ route('manager.profile') }}" class="sidebar-link">
                                     <i class="sidebar-icon fa-solid fa-user-gear"></i>
                                     <span>Profile &amp; Security</span>
                                 </a>
