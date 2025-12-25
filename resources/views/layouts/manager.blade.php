@@ -13,6 +13,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @if (class_exists(\Livewire\Livewire::class))
@@ -98,6 +99,38 @@
             color: #34d399;
         }
 
+        select {
+            color-scheme: dark;
+        }
+
+        select option {
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+
+        .manager-filter-select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-color: #020617;
+            color: #e2e8f0;
+            border-color: #1e293b;
+            padding-right: 2.5rem;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 20 20' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 8l4 4 4-4'/></svg>");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 0.75rem;
+        }
+
+        .manager-filter-select:focus {
+            outline: none;
+        }
+
+        .manager-filter-select option {
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+
         @media (prefers-reduced-motion: reduce) {
             .menu-stagger > li {
                 animation: none;
@@ -148,7 +181,7 @@
                     @endif
                     <div class="relative">
                         <button type="button" id="manager-user-menu-button" data-dropdown-toggle="manager-user-menu" class="flex items-center gap-3 rounded-full border border-slate-800 bg-slate-900/70 px-2 py-1.5 text-left text-slate-100 shadow-sm transition hover:bg-slate-800">
-                            <span class="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-900">MG</span>
+                            <span class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 via-blue-600 to-emerald-500 text-xs font-semibold text-white shadow-sm">MG</span>
                             <span class="hidden sm:block">
                                 <span class="block text-sm font-semibold text-white">Department Manager</span>
                                 <span class="block text-xs text-slate-400">Manager</span>
@@ -167,10 +200,10 @@
                                 <li><a href="#" class="block px-4 py-2 transition hover:bg-slate-800">Support</a></li>
                             </ul>
                             <div class="py-2">
-                                <button type="button" class="flex w-full items-center gap-2 px-4 py-2 text-sm font-semibold text-rose-300 transition hover:bg-rose-500/10">
+                                <a href="/" type="button" id="logoutBtn"class="flex w-full items-center gap-2 px-4 py-2 text-sm font-semibold text-rose-300 transition hover:bg-rose-500/10">
                                     <i class="fa-solid fa-arrow-right-from-bracket"></i>
                                     <span>Sign out</span>
-                                </button>
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -208,7 +241,7 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="#" class="sidebar-link">
+                                <a href="{{ route('manager.task-monitoring') }}" class="sidebar-link">
                                     <i class="sidebar-icon fa-solid fa-list-check"></i>
                                     <span>Task Monitoring</span>
                                 </a>
@@ -283,6 +316,7 @@
     @endif
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     @stack('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
 </body>
 </html>

@@ -12,6 +12,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @if (class_exists(\Livewire\Livewire::class))
         @livewireStyles
@@ -43,10 +45,6 @@
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <button type="button" class="hidden items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-400/15 px-4 py-2 text-sm font-semibold text-emerald-100 shadow-sm transition hover:bg-emerald-400/25 sm:inline-flex">
-                        <i class="fa-solid fa-plus"></i>
-                        <span>New Output</span>
-                    </button>
                     @if (class_exists(\Livewire\Livewire::class))
                         <livewire:notification-dropdown />
                     @else
@@ -58,7 +56,7 @@
                     @endif
                     <div class="relative">
                         <button type="button" id="employee-user-menu-button" data-dropdown-toggle="employee-user-menu" class="flex items-center gap-3 rounded-full border border-slate-800 bg-slate-900/70 px-2 py-1.5 text-left text-slate-100 shadow-sm transition hover:bg-slate-800">
-                            <span class="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-900">JD</span>
+                            <span class="flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold text-white shadow-sm" style="background: linear-gradient(135deg, #0284c7, #2563eb, #10b981);">JD</span>
                             <span class="hidden sm:block">
                                 <span class="block text-sm font-semibold text-white">Juan Dela Cruz</span>
                                 <span class="block text-xs text-slate-400">Senior Developer</span>
@@ -110,19 +108,19 @@
                         <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">My Work</p>
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
-                                <a href="#" class="sidebar-link">
+                                <a href="{{ route('employee.uwp') }}" class="sidebar-link">
                                     <i class="sidebar-icon fa-regular fa-clipboard"></i>
                                     <span>Unit Work Plan</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="#" class="sidebar-link">
+                                <a href="{{ route('employee.my-task') }}" class="sidebar-link">
                                     <i class="sidebar-icon fa-solid fa-list-check"></i>
                                     <span>My Tasks</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="#" class="sidebar-link">
+                                <a href="{{ route('employee.submit-output') }}" class="sidebar-link">
                                     <i class="sidebar-icon fa-solid fa-arrow-up-from-bracket"></i>
                                     <span>Submit Output</span>
                                 </a>
@@ -134,19 +132,19 @@
                         <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">My Performance</p>
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
-                                <a href="#" class="sidebar-link">
+                                <a href="{{ route('employee.ors') }}" class="sidebar-link">
                                     <i class="sidebar-icon fa-regular fa-chart-bar"></i>
                                     <span>Output Rating Sheet</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="#" class="sidebar-link">
+                                <a href="{{ route('employee.opcr') }}" class="sidebar-link">
                                     <i class="sidebar-icon fa-regular fa-calendar"></i>
-                                    <span>SMPOR</span>
+                                    <span>OPCR</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="#" class="sidebar-link">
+                                <a href="{{ route('employee.ipcr') }}" class="sidebar-link">
                                     <i class="sidebar-icon fa-solid fa-arrow-trend-up"></i>
                                     <span>IPCR</span>
                                 </a>
@@ -158,7 +156,7 @@
                         <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Development</p>
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
-                                <a href="#" class="sidebar-link">
+                                <a href="{{ route('employee.idp') }}" class="sidebar-link">
                                     <i class="sidebar-icon fa-solid fa-bullseye"></i>
                                     <span>Individual Development Plan</span>
                                 </a>
@@ -170,7 +168,7 @@
                         <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Account</p>
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
-                                <a href="#" class="sidebar-link">
+                                <a href="{{ route('employee.profile') }}" class="sidebar-link">
                                     <i class="sidebar-icon fa-solid fa-user-gear"></i>
                                     <span>Profile &amp; Security</span>
                                 </a>
@@ -196,6 +194,7 @@
     @if (class_exists(\Livewire\Livewire::class))
         @livewireScripts
     @endif
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
     <!-- Font Awesome -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     @stack('scripts')

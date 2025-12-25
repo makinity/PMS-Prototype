@@ -54,7 +54,7 @@
                     @endif
                     <div class="relative">
                         <button type="button" id="admin-user-menu-button" data-dropdown-toggle="admin-user-menu" class="flex items-center gap-3 rounded-full border border-slate-800 bg-slate-900/70 px-2 py-1.5 text-left text-slate-100 shadow-sm transition hover:bg-slate-800">
-                            <span class="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-900">SA</span>
+                            <span class="flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold text-white shadow-sm" style="background: linear-gradient(135deg, #7c3aed, #4f46e5, #06b6d4);">SA</span>
                             <span class="hidden sm:block">
                                 <span class="block text-sm font-semibold text-white">PMS Administrator</span>
                                 <span class="block text-xs text-slate-400">System Admin</span>
@@ -73,10 +73,10 @@
                                 <li><a href="#" class="block px-4 py-2 transition hover:bg-slate-800">Support</a></li>
                             </ul>
                             <div class="py-2">
-                                <button type="button" class="flex w-full items-center gap-2 px-4 py-2 text-sm font-semibold text-rose-300 transition hover:bg-rose-500/10">
+                                <a href="/" type="button" id="logoutBtn"class="flex w-full items-center gap-2 px-4 py-2 text-sm font-semibold text-rose-300 transition hover:bg-rose-500/10">
                                     <i class="fa-solid fa-arrow-right-from-bracket"></i>
                                     <span>Sign out</span>
-                                </button>
+                                </a>
                             </div>
                         </div>
                     </div>
