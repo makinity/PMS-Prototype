@@ -105,13 +105,13 @@
                         <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">User Management</p>
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
-                                <a href="#" class="sidebar-link">
+                                <a href="{{ route('admin.users') }}" class="sidebar-link">
                                     <i class="sidebar-icon fa-solid fa-users"></i>
                                     <span>Users</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="#" class="sidebar-link">
+                                <a href="{{ route('admin.roles') }}" class="sidebar-link">
                                     <i class="sidebar-icon fa-solid fa-user-shield"></i>
                                     <span>Roles &amp; Permissions</span>
                                 </a>
@@ -123,19 +123,19 @@
                         <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">System Setup</p>
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
-                                <a href="#" class="sidebar-link">
+                                <a href="{{ route('admin.task-config') }}" class="sidebar-link">
                                     <i class="sidebar-icon fa-solid fa-list-check"></i>
                                     <span>Task Configuration</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="#" class="sidebar-link">
+                                <a href="{{ route('admin.performance-metrics') }}" class="sidebar-link">
                                     <i class="sidebar-icon fa-solid fa-chart-line"></i>
                                     <span>Performance Metrics</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="#" class="sidebar-link">
+                                <a href="{{ route('admin.system') }}" class="sidebar-link">
                                     <i class="sidebar-icon fa-solid fa-gears"></i>
                                     <span>System Settings</span>
                                 </a>
@@ -147,13 +147,13 @@
                         <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Data &amp; Integration</p>
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
-                                <a href="#" class="sidebar-link">
+                                <a href="{{ route('admin.hris') }}" class="sidebar-link">
                                     <i class="sidebar-icon fa-solid fa-link"></i>
                                     <span>HRIS Integration</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="#" class="sidebar-link">
+                                <a href="{{ route('admin.data') }}" class="sidebar-link">
                                     <i class="sidebar-icon fa-solid fa-file-export"></i>
                                     <span>Data Export</span>
                                 </a>
@@ -165,13 +165,13 @@
                         <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Audit &amp; Logs</p>
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
-                                <a href="#" class="sidebar-link">
+                                <a href="{{ route('admin.audit-trail') }}" class="sidebar-link">
                                     <i class="sidebar-icon fa-solid fa-clipboard-list"></i>
                                     <span>Audit Trail</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="#" class="sidebar-link">
+                                <a href="{{ route('admin.system-logs') }}" class="sidebar-link">
                                     <i class="sidebar-icon fa-solid fa-file-lines"></i>
                                     <span>System Logs</span>
                                 </a>
@@ -183,7 +183,7 @@
                         <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Account</p>
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
-                                <a href="#" class="sidebar-link">
+                                <a href="{{ route('admin.profile') }}" class="sidebar-link">
                                     <i class="sidebar-icon fa-solid fa-user-gear"></i>
                                     <span>Profile &amp; Security</span>
                                 </a>

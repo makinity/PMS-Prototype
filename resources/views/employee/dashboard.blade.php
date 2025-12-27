@@ -4,7 +4,7 @@
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">Welcome, Juan Dela Cruz</h2>
-                    <p class="text-gray-300">Senior Developer • IT Department</p>
+                    <p class="text-gray-300">Senior Developer - IT Department</p>
                 </div>
                 <div class="flex items-center gap-3">
                     <span class="px-4 py-2 rounded-full bg-gradient-to-r from-green-900/30 to-green-800/30 border border-green-700/50 text-green-300 text-sm font-medium flex items-center gap-2">
@@ -130,7 +130,7 @@
                             <div>
                                 <h4 class="font-medium text-white mb-1">Missing Output</h4>
                                 <p class="text-sm text-gray-300">Missing output for <span class="text-amber-300 font-medium">Client Form Review</span>. Please submit before deadline.</p>
-                                <p class="text-xs text-amber-400 mt-2">Priority: High • Action Required</p>
+                                <p class="text-xs text-amber-400 mt-2">Priority: High - Action Required</p>
                             </div>
                         </div>
                     </div>
@@ -144,7 +144,7 @@
                             <div>
                                 <h4 class="font-medium text-white mb-1">SMPOR Deadline</h4>
                                 <p class="text-sm text-gray-300">SMPOR cutoff is approaching in <span class="text-blue-300 font-medium">3 days</span>. Please prepare your submissions.</p>
-                                <p class="text-xs text-blue-400 mt-2">Due: Dec 15, 2024 • Department</p>
+                                <p class="text-xs text-blue-400 mt-2">Due: Dec 15, 2024 - Department</p>
                             </div>
                         </div>
                     </div>
@@ -158,12 +158,47 @@
                             <div>
                                 <h4 class="font-medium text-white mb-1">Performance Review</h4>
                                 <p class="text-sm text-gray-300">Monthly performance review scheduled for <span class="text-green-300 font-medium">next week</span>.</p>
-                                <p class="text-xs text-green-400 mt-2">Schedule: Dec 18, 2024 • 2:00 PM</p>
+                                <p class="text-xs text-green-400 mt-2">Schedule: Dec 18, 2024 - 2:00 PM</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- 4b. Auto-Logging & Data Integrity -->
+        <div class="mb-8 p-6 rounded-xl bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 shadow-lg">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                    <i class="fas fa-clock text-emerald-400"></i>
+                    Auto-Logging & Data Integrity
+                </h3>
+                <span class="px-3 py-1 text-xs rounded bg-emerald-900 text-emerald-300 border border-emerald-800">
+                    LIVE TRACKING
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div class="rounded-lg border border-gray-700 bg-gray-800/50 p-4">
+                    <p class="text-gray-400">Active task tracking</p>
+                    <p class="mt-1 text-lg font-semibold text-white">1 running</p>
+                    <p class="text-xs text-gray-500">Auto-started from My Tasks</p>
+                </div>
+                <div class="rounded-lg border border-gray-700 bg-gray-800/50 p-4">
+                    <p class="text-gray-400">Linked outputs</p>
+                    <p class="mt-1 text-lg font-semibold text-white">4 of 5</p>
+                    <p class="text-xs text-gray-500">Missing links trigger alerts</p>
+                </div>
+                <div class="rounded-lg border border-gray-700 bg-gray-800/50 p-4">
+                    <p class="text-gray-400">Incomplete fields</p>
+                    <p class="mt-1 text-lg font-semibold text-amber-300">1 flagged</p>
+                    <p class="text-xs text-gray-500">Waiting for submission</p>
+                </div>
+            </div>
+
+            <p class="mt-4 text-xs text-gray-400">
+                Start/end times and output links are captured automatically to keep performance stats objective.
+            </p>
         </div>
 
         <!-- 5. Performance Snapshot -->
@@ -289,7 +324,7 @@
                     </div>
                     <div class="flex-1">
                         <p class="text-sm text-white">Submitted output for <span class="text-green-300">Client Form Review</span></p>
-                        <p class="text-xs text-gray-400">2 hours ago • Rating: 4.5/5.0</p>
+                        <p class="text-xs text-gray-400">2 hours ago - Rating: 4.5/5.0</p>
                     </div>
                 </div>
 
@@ -299,7 +334,7 @@
                     </div>
                     <div class="flex-1">
                         <p class="text-sm text-white">Started working on <span class="text-blue-300">E-Bank Scanning</span></p>
-                        <p class="text-xs text-gray-400">4 hours ago • In Progress</p>
+                        <p class="text-xs text-gray-400">4 hours ago - In Progress</p>
                     </div>
                 </div>
 
@@ -309,7 +344,7 @@
                     </div>
                     <div class="flex-1">
                         <p class="text-sm text-white">Performance rating updated to <span class="text-purple-300">4.8</span></p>
-                        <p class="text-xs text-gray-400">Yesterday • +0.2 improvement</p>
+                        <p class="text-xs text-gray-400">Yesterday - +0.2 improvement</p>
                     </div>
                 </div>
             </div>

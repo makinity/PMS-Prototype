@@ -31,7 +31,8 @@
                             <th class="px-4 py-3 text-left font-medium text-white">Task</th>
                             <th class="px-4 py-3 text-left font-medium text-white">Client</th>
                             <th class="px-4 py-3 text-left font-medium text-white">Date</th>
-                            <th class="px-4 py-3 text-left font-medium text-white">Status</th>
+                            <th class="px-4 py-3 text-left font-medium text-white">Status / Tracking</th>
+                            <th class="px-4 py-3 text-left font-medium text-white">Link</th>
                             <th class="px-4 py-3 text-left font-medium text-white">Action</th>
                         </tr>
                     </thead>
@@ -44,6 +45,11 @@
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-900 text-blue-300">
                                     In Progress
                                 </span>
+                                <p class="mt-1 text-xs text-gray-400">Tracking: Active since 11:00</p>
+                            </td>
+                            <td class="px-4 py-3">
+                                <p class="text-xs text-gray-400">Request: REQ-2025-021</p>
+                                <span class="text-xs font-medium text-amber-300">Output pending</span>
                             </td>
                             <td class="px-4 py-3">
                                 <button type="button" data-modal-target="task-view-modal" data-modal-toggle="task-view-modal" class="text-blue-400 hover:text-blue-300 font-medium text-sm transition-colors duration-200">
@@ -59,6 +65,11 @@
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-900 text-emerald-300">
                                     Completed
                                 </span>
+                                <p class="mt-1 text-xs text-gray-400">Tracking: Completed in 2.3h</p>
+                            </td>
+                            <td class="px-4 py-3">
+                                <p class="text-xs text-gray-400">Request: REQ-2025-009</p>
+                                <span class="text-xs font-medium text-emerald-400">Output linked</span>
                             </td>
                             <td class="px-4 py-3">
                                 <button type="button" data-modal-target="task-view-modal" data-modal-toggle="task-view-modal" class="text-blue-400 hover:text-blue-300 font-medium text-sm transition-colors duration-200">
@@ -74,6 +85,11 @@
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-900 text-amber-300">
                                     Pending Review
                                 </span>
+                                <p class="mt-1 text-xs text-gray-400">Tracking: Completed in 1.1h</p>
+                            </td>
+                            <td class="px-4 py-3">
+                                <p class="text-xs text-gray-400">Request: REQ-2025-012</p>
+                                <span class="text-xs font-medium text-emerald-400">Output submitted</span>
                             </td>
                             <td class="px-4 py-3">
                                 <button type="button" data-modal-target="task-view-modal" data-modal-toggle="task-view-modal" class="text-blue-400 hover:text-blue-300 font-medium text-sm transition-colors duration-200">
@@ -89,6 +105,13 @@
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-900 text-rose-300">
                                     Overdue
                                 </span>
+                                <p class="mt-1 text-xs text-gray-400">Tracking: Paused at 3.0h</p>
+                            </td>
+                            <td class="px-4 py-3">
+                                <p class="text-xs text-gray-400">Request: REQ-2025-018</p>
+                                <a href="{{ route('employee.submit-output') }}" class="text-xs font-medium text-rose-300 hover:text-rose-200">
+                                    Output missing
+                                </a>
                             </td>
                             <td class="px-4 py-3">
                                 <button type="button" data-modal-target="task-view-modal" data-modal-toggle="task-view-modal" class="text-blue-400 hover:text-blue-300 font-medium text-sm transition-colors duration-200">
@@ -104,6 +127,13 @@
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-900 text-blue-300">
                                     In Progress
                                 </span>
+                                <p class="mt-1 text-xs text-gray-400">Tracking: Active since 09:10</p>
+                            </td>
+                            <td class="px-4 py-3">
+                                <p class="text-xs text-gray-400">Request: REQ-2025-014</p>
+                                <a href="{{ route('employee.submit-output') }}" class="text-xs font-medium text-blue-400 hover:text-blue-300">
+                                    Submit output
+                                </a>
                             </td>
                             <td class="px-4 py-3">
                                 <button type="button" data-modal-target="task-view-modal" data-modal-toggle="task-view-modal" class="text-blue-400 hover:text-blue-300 font-medium text-sm transition-colors duration-200">
@@ -119,6 +149,11 @@
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-700 text-slate-200">
                                     Not Started
                                 </span>
+                                <p class="mt-1 text-xs text-gray-400">Tracking: Not started</p>
+                            </td>
+                            <td class="px-4 py-3">
+                                <p class="text-xs text-gray-400">Request: --</p>
+                                <span class="text-xs font-medium text-slate-400">Output not started</span>
                             </td>
                             <td class="px-4 py-3">
                                 <button type="button" data-modal-target="task-view-modal" data-modal-toggle="task-view-modal" class="text-blue-400 hover:text-blue-300 font-medium text-sm transition-colors duration-200">
@@ -135,7 +170,7 @@
             <svg class="flex-shrink-0 inline w-4 h-4 mr-3 text-blue-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
             </svg>
-            <span>Tasks are linked to ORS entries and IPCR actual accomplishments.</span>
+            <span>Tasks are linked to ORS entries, client requests, and IPCR actual accomplishments.</span>
         </div>
 
         <div id="task-view-modal" tabindex="-1" aria-hidden="true" class="fixed left-0 right-0 top-0 z-50 hidden h-[calc(100%-1rem)] max-h-full w-full items-center justify-center overflow-y-auto overflow-x-hidden md:inset-0">
@@ -170,14 +205,27 @@
                                 </span>
                             </div>
                             <div>
-                                <p class="text-xs uppercase tracking-wide text-gray-500">Linked Entry</p>
-                                <p class="text-sm font-medium text-white">ORS-2025-014</p>
+                                <p class="text-xs uppercase tracking-wide text-gray-500">Request ID</p>
+                                <p class="text-sm font-medium text-white">REQ-2025-014</p>
+                            </div>
+                            <div>
+                                <p class="text-xs uppercase tracking-wide text-gray-500">Tracking</p>
+                                <p class="text-sm font-medium text-white">Active since 09:10</p>
+                            </div>
+                            <div>
+                                <p class="text-xs uppercase tracking-wide text-gray-500">Output Link</p>
+                                <p class="text-sm font-medium text-white">Pending submission</p>
+                            </div>
+                            <div>
+                                <p class="text-xs uppercase tracking-wide text-gray-500">Time Window</p>
+                                <p class="text-sm font-medium text-white">09:10 - --</p>
                             </div>
                         </div>
                         <div>
                             <p class="text-xs uppercase tracking-wide text-gray-500">Details</p>
                             <p class="mt-1 text-sm text-gray-300">
                                 Compile weekly analytics, validate against source data, and export the report for review.
+                                Start and end times are recorded automatically during the task session.
                             </p>
                         </div>
                     </div>
@@ -185,9 +233,12 @@
                         <button type="button" data-modal-hide="task-view-modal" class="rounded-lg border border-gray-600 px-4 py-2 text-sm font-medium text-gray-200 transition hover:bg-gray-800">
                             Close
                         </button>
-                        <button type="button" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-500">
-                            Open linked ORS
-                        </button>
+                        <a href="{{ route('employee.submit-output') }}" class="rounded-lg border border-blue-600 px-4 py-2 text-sm font-medium text-blue-200 transition hover:bg-blue-900/40">
+                            Submit Output
+                        </a>
+                        <a href="{{ route('employee.ors') }}" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-500">
+                            Open ORS
+                        </a>
                     </div>
                 </div>
             </div>

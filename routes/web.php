@@ -49,6 +49,46 @@ Route::get('/administrator-dashboard', function () {
     return view('admin.dashboard');
 })->name('admin.dashboard');    
 
+Route::get('/administrator/users', function () {
+    return view('admin.users');
+})->name('admin.users');
+
+Route::get('/administrator/roles', function () {
+    return view('admin.roles');
+})->name('admin.roles');
+
+Route::get('/administrator/task-configuration', function () {
+    return view('admin.task-config');
+})->name('admin.task-config');
+
+Route::get('/administrator/performance-metrics', function () {
+    return view('admin.performance-metrics');
+})->name('admin.performance-metrics');
+
+Route::get('/administrator/system-settings', function () {
+    return view('admin.system');
+})->name('admin.system');
+
+Route::get('/administrator/HRIS-integration', function () {
+    return view('admin.hris');
+})->name('admin.hris');
+
+Route::get('/administrator/data-export', function () {
+    return view('admin.data');
+})->name('admin.data');
+
+Route::get('/administrator/audit-trails', function () {
+    return view('admin.audit-trail');
+})->name('admin.audit-trail');
+
+Route::get('/administrator/system-logs', function () {
+    return view('admin.system-logs');
+})->name('admin.system-logs');
+
+Route::get('/administrator/profile', function () {
+    return view('admin.profile');
+})->name('admin.profile');
+
 
 
 

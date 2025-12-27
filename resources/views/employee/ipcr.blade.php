@@ -17,6 +17,38 @@
             </span>
         </div>
 
+        {{-- Prototype Clarity --}}
+        <div class="bg-gray-800 border border-gray-700 rounded-lg p-5">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-semibold text-white">Prototype Notes</h2>
+                    <p class="text-sm text-gray-400">IPCR is auto-filled from UWP and ORS logs.</p>
+                </div>
+                <span class="px-2 py-1 text-xs rounded bg-blue-900 text-blue-300 border border-blue-800">
+                    PROTOTYPE
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 text-sm">
+                <div class="bg-gray-700 rounded-lg p-3">
+                    <p class="text-gray-400 mb-1">Data sources</p>
+                    <p class="font-medium text-white">UWP + ORS outputs</p>
+                </div>
+                <div class="bg-gray-700 rounded-lg p-3">
+                    <p class="text-gray-400 mb-1">Ratings</p>
+                    <p class="font-medium text-white">System calculated</p>
+                </div>
+                <div class="bg-gray-700 rounded-lg p-3">
+                    <p class="text-gray-400 mb-1">Alerts</p>
+                    <p class="font-medium text-white">Missing submissions flagged</p>
+                </div>
+            </div>
+
+            <p class="mt-3 text-xs text-gray-400">
+                Supervisor review locks final ratings and notes.
+            </p>
+        </div>
+
         {{-- EMPLOYEE INFO --}}
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-gray-800 border border-gray-700 rounded-lg p-5">
             <div>
@@ -44,7 +76,7 @@
                 <label class="block mb-2 text-sm font-medium text-white">Rating Period</label>
                 <input type="text" 
                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
-                       value="January – June 2025" disabled>
+                       value="January - June 2025" disabled>
             </div>
         </div>
 

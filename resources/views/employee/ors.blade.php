@@ -6,7 +6,7 @@
     <div>
         <h1 class="text-2xl font-semibold text-white">Task Calendar (ORS)</h1>
         <p class="text-sm text-slate-400">
-            Log and view your tasks by date. All durations and performance ratings are system-generated.
+            Log and view your tasks by date. Link each task to a client request and output. All durations and performance ratings are system-generated.
         </p>
     </div>
 
@@ -60,6 +60,51 @@
         </div>
     </div>
 
+    <!-- Active Task Timer -->
+    <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+        <div class="flex flex-wrap items-start justify-between gap-4">
+            <div>
+                <h2 class="text-lg font-semibold text-white">Active Task Timer</h2>
+                <p class="text-sm text-slate-400">Prototype view of automatic start and end tracking.</p>
+            </div>
+            <span class="rounded-full border border-emerald-600/60 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300">
+                AUTO TRACKING
+            </span>
+        </div>
+
+        <div class="mt-4 grid grid-cols-1 gap-4 text-sm md:grid-cols-4">
+            <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                <p class="text-xs text-slate-400">Task</p>
+                <p class="font-medium text-white">E-Bank Scanning</p>
+            </div>
+            <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                <p class="text-xs text-slate-400">Start</p>
+                <p class="font-medium text-white">09:12</p>
+            </div>
+            <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                <p class="text-xs text-slate-400">Elapsed</p>
+                <p class="font-medium text-white">1h 08m</p>
+            </div>
+            <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                <p class="text-xs text-slate-400">Status</p>
+                <p class="font-medium text-emerald-300">Recording</p>
+            </div>
+        </div>
+
+        <div class="mt-4 flex flex-wrap gap-2">
+            <button type="button" class="rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-slate-800">
+                Pause Tracking
+            </button>
+            <a href="{{ route('employee.submit-output') }}" class="rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-slate-900 hover:bg-emerald-600">
+                Stop and Submit
+            </a>
+        </div>
+
+        <p class="mt-3 text-xs text-slate-500">
+            Timing data is captured in real time and attached to the linked output.
+        </p>
+    </div>
+
     <!-- Calendar -->
     <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
         <div id="ors-calendar"></div>
@@ -67,17 +112,19 @@
 
     <!-- System Notice -->
     <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-4 text-xs text-slate-400">
-        ⚠ Task start/end times and performance ratings are recorded automatically.
-        Manual duration entry or rating is not allowed.
+        Note: Task start/end times and performance ratings are recorded automatically.
+        Manual duration entry or rating is not allowed. Missing fields generate alerts.
     </div>
 
 </section>
 
 <!-- ORS Task Modal (Compact) -->
 <div id="orsTaskModal"
-     class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60">
+     role="dialog"
+     aria-modal="true"
+     class="ors-modal fixed inset-0 z-[60] hidden flex items-start justify-center overflow-y-auto bg-black/60 px-4 py-6 sm:px-6">
 
-    <div class="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
+    <div class="w-full max-w-md max-h-[calc(100vh-3rem)] overflow-y-auto rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
 
         <!-- Header -->
         <div class="mb-4">
@@ -101,7 +148,7 @@
             <!-- Task Type -->
             <div>
                 <label class="text-[11px] uppercase text-slate-400">Task</label>
-                <select class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
+                <select id="orsTaskType" class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
                     <option value="">Select task</option>
                     <option value="bank_scanning">E-Bank Statement Scanning</option>
                     <option value="form_review">Client Form Review</option>
@@ -117,7 +164,7 @@
             <!-- Client -->
             <div>
                 <label class="text-[11px] uppercase text-slate-400">Client</label>
-                <select class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
+                <select id="orsClient" class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
                     <option value="">Select client</option>
                     <option value="abc">ABC Corporation</option>
                     <option value="xyz">XYZ Limited</option>
@@ -128,10 +175,19 @@
                 </select>
             </div>
 
+            <!-- Client Request ID -->
+            <div>
+                <label class="text-[11px] uppercase text-slate-400">Client Request ID</label>
+                <input id="orsRequestId"
+                       type="text"
+                       placeholder="REQ-2025-01234"
+                       class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
+            </div>
+
             <!-- Output -->
             <div>
-                <label class="text-[11px] uppercase text-slate-400">Form / Output</label>
-                <select class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
+                <label class="text-[11px] uppercase text-slate-400">Form / Output Type</label>
+                <select id="orsOutput" class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
                     <option value="">Select form/output</option>
                     <option value="bank_form">Bank Statement Form (BSF-01)</option>
                     <option value="expense_report">Expense Report (ER-02)</option>
@@ -145,22 +201,22 @@
             <!-- Notes -->
             <div>
                 <label class="text-[11px] uppercase text-slate-400">Notes (optional)</label>
-                <textarea rows="2"
+                <textarea id="orsNotes" rows="2"
                           class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200"
                           placeholder="Additional details, special instructions, etc."></textarea>
             </div>
 
             <!-- System Rule -->
             <div class="rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-[11px] text-slate-400">
-                ⏱️ Duration will be tracked automatically<br>
-                ⭐ Performance rating calculated by system<br>
-                📊 Efficiency metrics generated daily
+                - Duration is tracked automatically.<br>
+                - Performance rating calculated by system.<br>
+                - Missing fields trigger alerts and follow-ups.
             </div>
 
             <!-- Actions -->
             <div class="flex justify-end gap-2 pt-2">
                 <button type="button"
-                        onclick="document.getElementById('orsTaskModal').classList.add('hidden')"
+                        onclick="closeOrsModal('orsTaskModal')"
                         class="rounded-lg border border-slate-700 px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-800">
                     Cancel
                 </button>
@@ -176,16 +232,18 @@
 
 <!-- Task Details Modal -->
 <div id="taskDetailsModal"
-     class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60">
-    <div class="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
+     role="dialog"
+     aria-modal="true"
+     class="ors-modal fixed inset-0 z-[60] hidden flex items-start justify-center overflow-y-auto bg-black/60 px-4 py-6 sm:px-6">
+    <div class="w-full max-w-md max-h-[calc(100vh-3rem)] overflow-y-auto rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
         <div class="mb-4 flex items-start justify-between">
             <div>
                 <h2 class="text-lg font-semibold text-white" id="taskDetailTitle">Task Details</h2>
                 <p class="text-xs text-slate-400" id="taskDetailDate">Date: --</p>
             </div>
-            <button onclick="document.getElementById('taskDetailsModal').classList.add('hidden')"
+            <button onclick="closeOrsModal('taskDetailsModal')"
                     class="text-slate-400 hover:text-white">
-                ✕
+                x
             </button>
         </div>
         
@@ -195,8 +253,16 @@
                 <p class="text-slate-200" id="taskDetailClient">--</p>
             </div>
             <div>
+                <p class="text-xs text-slate-400">Request ID</p>
+                <p class="text-slate-200" id="taskDetailRequest">--</p>
+            </div>
+            <div>
                 <p class="text-xs text-slate-400">Status</p>
                 <p class="text-slate-200" id="taskDetailStatus">--</p>
+            </div>
+            <div>
+                <p class="text-xs text-slate-400">Output Type</p>
+                <p class="text-slate-200" id="taskDetailOutput">--</p>
             </div>
             <div>
                 <p class="text-xs text-slate-400">Duration</p>
@@ -213,7 +279,7 @@
         </div>
         
         <div class="mt-6 flex justify-end">
-            <button onclick="document.getElementById('taskDetailsModal').classList.add('hidden')"
+            <button onclick="closeOrsModal('taskDetailsModal')"
                     class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800">
                 Close
             </button>
@@ -227,6 +293,44 @@
 document.addEventListener('DOMContentLoaded', function () {
 
     const calendarEl = document.getElementById('ors-calendar');
+    const orsModals = Array.from(document.querySelectorAll('.ors-modal'));
+
+    function updateModalState() {
+        const anyOpen = orsModals.some((modal) => !modal.classList.contains('hidden'));
+        document.body.classList.toggle('overflow-hidden', anyOpen);
+    }
+
+    window.openOrsModal = function (modalId) {
+        orsModals.forEach((modal) => modal.classList.add('hidden'));
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.remove('hidden');
+        }
+        updateModalState();
+    };
+
+    window.closeOrsModal = function (modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.add('hidden');
+        }
+        updateModalState();
+    };
+
+    orsModals.forEach((modal) => {
+        modal.addEventListener('click', function (event) {
+            if (event.target === modal) {
+                window.closeOrsModal(modal.id);
+            }
+        });
+    });
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            orsModals.forEach((modal) => modal.classList.add('hidden'));
+            updateModalState();
+        }
+    });
 
     const calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
@@ -247,7 +351,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         dateClick(info) {
             document.getElementById('orsSelectedDate').value = info.dateStr;
-            document.getElementById('orsTaskModal').classList.remove('hidden');
+            window.openOrsModal('orsTaskModal');
         },
 
         eventClick(info) {
@@ -255,11 +359,13 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('taskDetailTitle').textContent = task.title;
             document.getElementById('taskDetailDate').textContent = `Date: ${task.start.toLocaleDateString()}`;
             document.getElementById('taskDetailClient').textContent = task.extendedProps.client || '--';
+            document.getElementById('taskDetailRequest').textContent = task.extendedProps.requestId || '--';
             document.getElementById('taskDetailStatus').textContent = task.extendedProps.status || '--';
+            document.getElementById('taskDetailOutput').textContent = task.extendedProps.output || '--';
             document.getElementById('taskDetailDuration').textContent = task.extendedProps.duration || '--';
             document.getElementById('taskDetailRating').textContent = task.extendedProps.rating || '--';
             document.getElementById('taskDetailNotes').textContent = task.extendedProps.notes || '--';
-            document.getElementById('taskDetailsModal').classList.remove('hidden');
+            window.openOrsModal('taskDetailsModal');
         },
 
         events: [
@@ -270,6 +376,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 color: '#10b981',
                 extendedProps: {
                     client: 'ABC Corporation',
+                    requestId: 'REQ-2025-014',
+                    output: 'Bank Statement Form (BSF-01)',
                     status: 'Completed',
                     duration: '1.8 hours',
                     rating: '4.5/5',
@@ -282,6 +390,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 color: '#10b981',
                 extendedProps: {
                     client: 'XYZ Limited',
+                    requestId: 'REQ-2025-009',
+                    output: 'Client Summary Report (CSR-04)',
                     status: 'Completed',
                     duration: '2.3 hours',
                     rating: '4.2/5',
@@ -295,6 +405,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 color: '#f59e0b',
                 extendedProps: {
                     client: 'Global Enterprises',
+                    requestId: 'REQ-2025-017',
+                    output: 'Financial Statement (FS-03)',
                     status: 'In Progress',
                     duration: '1.5 hours (ongoing)',
                     rating: '--',
@@ -308,6 +420,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 color: '#3b82f6',
                 extendedProps: {
                     client: 'Tech Solutions Inc.',
+                    requestId: 'REQ-2025-012',
+                    output: 'Financial Statement (FS-03)',
                     status: 'Pending Review',
                     duration: '3.2 hours',
                     rating: '4.0/5',
@@ -321,6 +435,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 color: '#ef4444',
                 extendedProps: {
                     client: 'Prime Services Group',
+                    requestId: 'REQ-2025-018',
+                    output: 'Client Follow-up Notes',
                     status: 'Overdue',
                     duration: '--',
                     rating: '--',
@@ -334,6 +450,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 color: '#8b5cf6',
                 extendedProps: {
                     client: 'Alpha Financials',
+                    requestId: 'REQ-2025-023',
+                    output: 'Tax Compliance Form (TCF-05)',
                     status: 'Scheduled',
                     duration: '--',
                     rating: '--',
@@ -399,30 +517,42 @@ document.addEventListener('DOMContentLoaded', function () {
         taskForm.addEventListener('submit', function(e) {
             e.preventDefault();
             const date = document.getElementById('orsSelectedDate').value;
-            const taskType = this.querySelector('select:nth-of-type(1)').value;
-            const client = this.querySelector('select:nth-of-type(2)').value;
+            const taskTypeSelect = document.getElementById('orsTaskType');
+            const clientSelect = document.getElementById('orsClient');
+            const outputSelect = document.getElementById('orsOutput');
+            const requestInput = document.getElementById('orsRequestId');
+            const notesInput = document.getElementById('orsNotes');
+
+            const taskType = taskTypeSelect ? taskTypeSelect.value : '';
+            const client = clientSelect ? clientSelect.value : '';
+            const outputType = outputSelect ? outputSelect.value : '';
+            const requestId = requestInput ? requestInput.value.trim() : '';
             
-            if (taskType && client && date) {
+            if (taskType && client && date && requestId && outputType) {
                 // Add new event to calendar
                 calendar.addEvent({
-                    title: this.querySelector('select:nth-of-type(1) option:checked').text,
+                    title: taskTypeSelect.options[taskTypeSelect.selectedIndex].text,
                     start: date,
                     color: '#f59e0b', // Default to "In Progress" color
                     extendedProps: {
-                        client: this.querySelector('select:nth-of-type(2) option:checked').text,
+                        client: clientSelect.options[clientSelect.selectedIndex].text,
+                        requestId: requestId,
+                        output: outputSelect.options[outputSelect.selectedIndex].text,
                         status: 'In Progress',
                         duration: 'Tracking...',
                         rating: 'Pending',
-                        notes: this.querySelector('textarea').value || 'No notes'
+                        notes: notesInput && notesInput.value ? notesInput.value : 'No notes'
                     }
                 });
                 
                 // Close modal and reset form
-                document.getElementById('orsTaskModal').classList.add('hidden');
+                window.closeOrsModal('orsTaskModal');
                 this.reset();
                 
                 // Show success message
                 alert('Task logged successfully! Duration and rating will be calculated automatically.');
+            } else {
+                alert('Please complete required fields: task, client, request ID, and output type.');
             }
         });
     }

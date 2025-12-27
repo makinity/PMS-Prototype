@@ -16,6 +16,38 @@
             </span>
         </div>
 
+        {{-- Prototype Clarity --}}
+        <div class="bg-gray-800 border border-gray-700 rounded-lg p-5">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-semibold text-white">Prototype Notes</h2>
+                    <p class="text-sm text-gray-400">UWP entries become tracked task categories.</p>
+                </div>
+                <span class="px-2 py-1 text-xs rounded bg-blue-900 text-blue-300 border border-blue-800">
+                    PROTOTYPE
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 text-sm">
+                <div class="bg-gray-700 rounded-lg p-3">
+                    <p class="text-gray-400 mb-1">Generated into</p>
+                    <p class="font-medium text-white">IPCR and OPCR</p>
+                </div>
+                <div class="bg-gray-700 rounded-lg p-3">
+                    <p class="text-gray-400 mb-1">ORS linking</p>
+                    <p class="font-medium text-white">Task-to-output mapping</p>
+                </div>
+                <div class="bg-gray-700 rounded-lg p-3">
+                    <p class="text-gray-400 mb-1">Data checks</p>
+                    <p class="font-medium text-white">Missing output alerts</p>
+                </div>
+            </div>
+
+            <p class="mt-3 text-xs text-gray-400">
+                Each output will link to client requests and drive objective performance metrics.
+            </p>
+        </div>
+
         {{-- BASIC INFORMATION --}}
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-gray-800 border border-gray-700 rounded-lg p-5">
             <div>
@@ -29,7 +61,7 @@
                 <label class="block mb-2 text-sm font-medium text-white">Period Covered</label>
                 <input type="text" 
                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                       value="January – June 2025">
+                       value="January - June 2025">
             </div>
 
             <div>

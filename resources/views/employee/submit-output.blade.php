@@ -32,6 +32,38 @@
 
         <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 space-y-6">
 
+            {{-- Auto-Logging Status --}}
+            <div class="bg-gray-750 border border-gray-600 rounded-lg p-5">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-white">Auto-Logging Status</h3>
+                        <p class="text-sm text-gray-400">Prototype preview of system-captured task data.</p>
+                    </div>
+                    <span class="px-2 py-1 text-xs rounded bg-emerald-900 text-emerald-300 border border-emerald-800">
+                        TRACKING ON
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 text-sm">
+                    <div class="bg-gray-700 rounded-lg p-3">
+                        <p class="text-gray-400 mb-1">Tracking Source</p>
+                        <p class="font-medium text-white">My Tasks</p>
+                    </div>
+                    <div class="bg-gray-700 rounded-lg p-3">
+                        <p class="text-gray-400 mb-1">Active Session</p>
+                        <p class="font-medium text-white">E-Bank Scanning</p>
+                    </div>
+                    <div class="bg-gray-700 rounded-lg p-3">
+                        <p class="text-gray-400 mb-1">Time Window</p>
+                        <p class="font-medium text-white">09:12 - 10:42</p>
+                    </div>
+                </div>
+
+                <div class="mt-4 rounded-lg border border-amber-800 bg-amber-900/20 p-3 text-xs text-amber-300">
+                    Incomplete submissions trigger alerts. Missing: output file, completion date, request ID.
+                </div>
+            </div>
+
             {{-- Task Selection Card --}}
             <div class="bg-gray-750 border border-gray-600 rounded-lg p-5">
                 <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
@@ -43,7 +75,7 @@
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {{-- Task Cards --}}
-                    <div class="border border-gray-600 rounded-lg p-4 hover:border-blue-500 hover:bg-gray-700 transition-all duration-200 cursor-pointer group">
+                    <div class="border border-gray-600 rounded-lg p-4 hover:border-blue-500 hover:bg-gray-700 transition-all duration-200 cursor-pointer group" data-task-card data-task-name="Report Generation" data-task-client="ABC Corp">
                         <div class="flex justify-between items-start mb-2">
                             <div>
                                 <h4 class="font-medium text-white group-hover:text-blue-300">Report Generation</h4>
@@ -60,7 +92,7 @@
                         </div>
                     </div>
 
-                    <div class="border border-gray-600 rounded-lg p-4 hover:border-blue-500 hover:bg-gray-700 transition-all duration-200 cursor-pointer group">
+                    <div class="border border-gray-600 rounded-lg p-4 hover:border-blue-500 hover:bg-gray-700 transition-all duration-200 cursor-pointer group" data-task-card data-task-name="Client Form Review" data-task-client="XYZ Ltd">
                         <div class="flex justify-between items-start mb-2">
                             <div>
                                 <h4 class="font-medium text-white group-hover:text-blue-300">Client Form Review</h4>
@@ -81,13 +113,42 @@
                 {{-- Manual Selection Fallback --}}
                 <div class="mt-6">
                     <label class="block mb-2 text-sm font-medium text-white">Or select manually:</label>
-                    <select class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                    <select id="submitTaskSelect" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                         <option class="bg-gray-700">Select task from list</option>
-                        <option class="bg-gray-700">Report Generation – ABC Corp</option>
-                        <option class="bg-gray-700">Client Form Review – XYZ Ltd</option>
-                        <option class="bg-gray-700">Data Analysis – DEF Inc</option>
-                        <option class="bg-gray-700">Presentation Preparation – GHI Co</option>
+                        <option class="bg-gray-700">Report Generation - ABC Corp</option>
+                        <option class="bg-gray-700">Client Form Review - XYZ Ltd</option>
+                        <option class="bg-gray-700">Data Analysis - DEF Inc</option>
+                        <option class="bg-gray-700">Presentation Preparation - GHI Co</option>
                     </select>
+                </div>
+
+                <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block mb-2 text-sm font-medium text-white">
+                            Client Request ID
+                            <span class="text-xs text-rose-300">Required</span>
+                        </label>
+                        <input id="submitRequestId" type="text"
+                               class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                               placeholder="REQ-2025-01234">
+                        <p class="mt-1 text-xs text-gray-400">Links this output to the exact client request.</p>
+                    </div>
+                    <div>
+                        <label class="block mb-2 text-sm font-medium text-white">
+                            Output Type
+                            <span class="text-xs text-rose-300">Required</span>
+                        </label>
+                        <select id="submitOutputType" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                            <option class="bg-gray-700">Select form or output type</option>
+                            <option class="bg-gray-700">Bank Statement Form (BSF-01)</option>
+                            <option class="bg-gray-700">Expense Report (ER-02)</option>
+                            <option class="bg-gray-700">Financial Statement (FS-03)</option>
+                            <option class="bg-gray-700">Client Summary Report (CSR-04)</option>
+                            <option class="bg-gray-700">Tax Compliance Form (TCF-05)</option>
+                            <option class="bg-gray-700">Audit Report (AR-06)</option>
+                        </select>
+                        <p class="mt-1 text-xs text-gray-400">Matches the form required in the client request.</p>
+                    </div>
                 </div>
             </div>
 
@@ -103,7 +164,7 @@
                 {{-- Upload Area --}}
                 <div class="mb-6">
                     <div class="flex items-center justify-center w-full">
-                        <label for="file-upload" class="flex flex-col items-center justify-center w-full h-40 border-2 border-gray-600 border-dashed rounded-xl cursor-pointer bg-gray-700 hover:bg-gray-750 hover:border-blue-500 transition-all duration-200 group">
+                        <label id="submitFileLabel" for="file-upload" class="flex flex-col items-center justify-center w-full h-40 border-2 border-gray-600 border-dashed rounded-xl cursor-pointer bg-gray-700 hover:bg-gray-750 hover:border-blue-500 transition-all duration-200 group">
                             <div class="flex flex-col items-center justify-center pt-5 pb-6">
                                 <svg class="w-10 h-10 mb-3 text-gray-400 group-hover:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
@@ -129,7 +190,7 @@
                                 </svg>
                                 <div>
                                     <p class="text-sm font-medium text-white">report_q3_2025.pdf</p>
-                                    <p class="text-xs text-gray-400">Uploaded: Aug 12, 2025 • 2.4 MB</p>
+                                    <p class="text-xs text-gray-400">Uploaded: Aug 12, 2025 - 2.4 MB</p>
                                 </div>
                             </div>
                             <button class="text-red-400 hover:text-red-300 text-sm">
@@ -177,7 +238,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block mb-2 text-sm font-medium text-white">Completion Date</label>
-                            <input type="date" 
+                            <input id="submitCompletionDate" type="date" 
                                    class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                         </div>
                         <div>
@@ -190,7 +251,29 @@
                             </select>
                         </div>
                     </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block mb-2 text-sm font-medium text-white">Auto-Logged Start</label>
+                            <input type="text" 
+                                   class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
+                                   value="09:12 AM" disabled>
+                        </div>
+                        <div>
+                            <label class="block mb-2 text-sm font-medium text-white">Auto-Logged End</label>
+                            <input type="text" 
+                                   class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
+                                   value="10:42 AM" disabled>
+                        </div>
+                    </div>
                 </div>
+            </div>
+
+            <div id="submit-output-alert" class="hidden rounded-lg border border-rose-800 bg-rose-900/20 p-4 text-sm text-rose-200">
+                <p class="font-semibold text-rose-100">Missing required fields</p>
+                <p class="mt-1 text-xs text-rose-300">
+                    Complete: <span id="submit-output-missing">task, request ID, output type, output file, completion date</span>
+                </p>
             </div>
 
             {{-- Action Buttons --}}
@@ -199,14 +282,14 @@
                     <svg class="w-4 h-4 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    Submitted outputs are subject to supervisor review and contribute to IPCR ratings.
+                    Submitted outputs are auto-linked to tracked tasks and contribute to IPCR ratings.
                 </div>
 
                 <div class="flex gap-3">
                     <button class="px-5 py-2.5 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors duration-200">
                         Save as Draft
                     </button>
-                    <button class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg focus:ring-4 focus:ring-blue-800 transition-colors duration-200 flex items-center">
+                    <button id="submitOutputBtn" type="button" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg focus:ring-4 focus:ring-blue-800 transition-colors duration-200 flex items-center">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
@@ -218,4 +301,114 @@
         </div>
 
     </section>
+
+    @push('scripts')
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const submitBtn = document.getElementById('submitOutputBtn');
+        if (!submitBtn) {
+            return;
+        }
+
+        const taskSelect = document.getElementById('submitTaskSelect');
+        const requestInput = document.getElementById('submitRequestId');
+        const outputSelect = document.getElementById('submitOutputType');
+        const fileInput = document.getElementById('file-upload');
+        const fileLabel = document.getElementById('submitFileLabel');
+        const completionDate = document.getElementById('submitCompletionDate');
+        const alertBox = document.getElementById('submit-output-alert');
+        const missingText = document.getElementById('submit-output-missing');
+        const taskCards = document.querySelectorAll('[data-task-card]');
+        let selectedTask = '';
+
+        function clearFieldState(element) {
+            if (!element) {
+                return;
+            }
+            element.classList.remove('border-rose-500');
+        }
+
+        function markFieldInvalid(element) {
+            if (!element) {
+                return;
+            }
+            element.classList.add('border-rose-500');
+        }
+
+        function clearLabelState(element) {
+            if (!element) {
+                return;
+            }
+            element.classList.remove('ring-2', 'ring-rose-500');
+        }
+
+        function markLabelInvalid(element) {
+            if (!element) {
+                return;
+            }
+            element.classList.add('ring-2', 'ring-rose-500');
+        }
+
+        taskCards.forEach((card) => {
+            card.addEventListener('click', function () {
+                selectedTask = this.dataset.taskName || '';
+                taskCards.forEach((item) => item.classList.remove('ring-2', 'ring-blue-500'));
+                this.classList.add('ring-2', 'ring-blue-500');
+            });
+        });
+
+        submitBtn.addEventListener('click', function () {
+            clearFieldState(taskSelect);
+            clearFieldState(requestInput);
+            clearFieldState(outputSelect);
+            clearFieldState(completionDate);
+            clearLabelState(fileLabel);
+
+            const missing = [];
+            const taskSelected = (taskSelect && taskSelect.selectedIndex > 0) || selectedTask;
+
+            if (!taskSelected) {
+                missing.push('task');
+                markFieldInvalid(taskSelect);
+            }
+
+            if (!requestInput || !requestInput.value.trim()) {
+                missing.push('request ID');
+                markFieldInvalid(requestInput);
+            }
+
+            if (!outputSelect || !outputSelect.value) {
+                missing.push('output type');
+                markFieldInvalid(outputSelect);
+            }
+
+            if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+                missing.push('output file');
+                markLabelInvalid(fileLabel);
+            }
+
+            if (!completionDate || !completionDate.value) {
+                missing.push('completion date');
+                markFieldInvalid(completionDate);
+            }
+
+            if (missing.length > 0) {
+                if (missingText) {
+                    missingText.textContent = missing.join(', ');
+                }
+                if (alertBox) {
+                    alertBox.classList.remove('hidden');
+                }
+                return;
+            }
+
+            if (alertBox) {
+                alertBox.classList.add('hidden');
+            }
+
+            alert('All required fields complete. Ready for submission (prototype).');
+        });
+    });
+    </script>
+    @endpush
 </x-layouts.employee>
