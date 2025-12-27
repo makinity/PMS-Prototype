@@ -92,8 +92,15 @@
         </div>
 
         <div class="mt-4 flex flex-wrap gap-2">
-            <button type="button" class="rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-slate-800">
-                Pause Tracking
+            <button type="button"
+                    data-employee-action
+                    data-action-title="Pause tracking"
+                    data-action-message="Pause the current timer and mark this task as on hold."
+                    data-action-confirm="Pause"
+                    data-action-loading="Pausing..."
+                    class="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-slate-800">
+                <span data-button-label>Pause Tracking</span>
+                <span data-button-spinner class="hidden h-3 w-3 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
             </button>
             <a href="{{ route('employee.submit-output') }}" class="rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-slate-900 hover:bg-emerald-600">
                 Stop and Submit
@@ -221,8 +228,9 @@
                     Cancel
                 </button>
                 <button type="submit"
-                        class="rounded-lg bg-emerald-500 px-4 py-1.5 text-xs font-semibold text-slate-900 hover:bg-emerald-600">
-                    Log Task
+                        class="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-1.5 text-xs font-semibold text-slate-900 hover:bg-emerald-600">
+                    <span data-button-label>Log Task</span>
+                    <span data-button-spinner class="hidden h-3 w-3 animate-spin rounded-full border-2 border-emerald-900/30 border-t-emerald-900"></span>
                 </button>
             </div>
 
@@ -287,10 +295,132 @@
     </div>
 </div>
 
+<div id="employee-action-modal" role="dialog" aria-modal="true" class="fixed inset-0 z-[70] hidden flex items-center justify-center bg-black/60 px-4 py-6">
+    <div class="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
+        <div class="flex items-start justify-between">
+            <div>
+                <h2 id="employee-action-title" class="text-lg font-semibold text-white">Action</h2>
+                <p id="employee-action-body" class="mt-1 text-sm text-slate-400">Prototype action preview.</p>
+            </div>
+            <button type="button" data-employee-modal-close class="text-slate-400 hover:text-white">x</button>
+        </div>
+        <div class="mt-6 flex justify-end gap-2">
+            <button type="button" data-employee-modal-close class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800">Close</button>
+            <button type="button" id="employee-action-confirm" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500">
+                <span data-button-label>Proceed</span>
+                <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+            </button>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    const actionModal = document.getElementById('employee-action-modal');
+    const actionTitle = document.getElementById('employee-action-title');
+    const actionBody = document.getElementById('employee-action-body');
+    const actionConfirm = document.getElementById('employee-action-confirm');
+    let activeTrigger = null;
+
+    function setButtonLoading(button, isLoading, loadingText) {
+        if (!button) {
+            return;
+        }
+        const label = button.querySelector('[data-button-label]');
+        const spinner = button.querySelector('[data-button-spinner]');
+        if (label && !button.dataset.originalLabel) {
+            button.dataset.originalLabel = label.textContent.trim();
+        }
+
+        if (isLoading) {
+            button.disabled = true;
+            button.classList.add('opacity-70', 'cursor-wait');
+            if (spinner) {
+                spinner.classList.remove('hidden');
+            }
+            if (label && loadingText) {
+                label.textContent = loadingText;
+            }
+        } else {
+            button.disabled = false;
+            button.classList.remove('opacity-70', 'cursor-wait');
+            if (spinner) {
+                spinner.classList.add('hidden');
+            }
+            if (label && button.dataset.originalLabel) {
+                label.textContent = button.dataset.originalLabel;
+            }
+        }
+    }
+
+    function closeActionModal() {
+        if (!actionModal) {
+            return;
+        }
+        actionModal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+        activeTrigger = null;
+        setButtonLoading(actionConfirm, false);
+    }
+
+    function openActionModal(trigger) {
+        if (!actionModal || !actionTitle || !actionBody || !actionConfirm) {
+            return;
+        }
+        activeTrigger = trigger;
+        actionTitle.textContent = trigger.dataset.actionTitle || 'Action';
+        actionBody.textContent = trigger.dataset.actionMessage || 'Prototype action preview.';
+        actionConfirm.dataset.actionLoading = trigger.dataset.actionLoading || 'Working...';
+        actionModal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+    }
+
+    window.openEmployeeActionModal = openActionModal;
+
+    if (actionModal && actionTitle && actionBody && actionConfirm) {
+        document.querySelectorAll('[data-employee-action]').forEach((button) => {
+            if (button.dataset.actionRequiresValidation === 'true') {
+                return;
+            }
+            button.addEventListener('click', function (event) {
+                event.preventDefault();
+                openActionModal(button);
+            });
+        });
+
+        actionConfirm.addEventListener('click', function () {
+            setButtonLoading(actionConfirm, true, actionConfirm.dataset.actionLoading);
+            if (activeTrigger) {
+                setButtonLoading(activeTrigger, true, activeTrigger.dataset.actionLoading || actionConfirm.dataset.actionLoading);
+            }
+
+            setTimeout(() => {
+                setButtonLoading(actionConfirm, false);
+                if (activeTrigger) {
+                    setButtonLoading(activeTrigger, false);
+                }
+                closeActionModal();
+            }, 1200);
+        });
+
+        actionModal.addEventListener('click', function (event) {
+            if (event.target === actionModal) {
+                closeActionModal();
+            }
+        });
+
+        actionModal.querySelectorAll('[data-employee-modal-close]').forEach((button) => {
+            button.addEventListener('click', closeActionModal);
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                closeActionModal();
+            }
+        });
+    }
 
     const calendarEl = document.getElementById('ors-calendar');
     const orsModals = Array.from(document.querySelectorAll('.ors-modal'));
@@ -522,6 +652,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const outputSelect = document.getElementById('orsOutput');
             const requestInput = document.getElementById('orsRequestId');
             const notesInput = document.getElementById('orsNotes');
+            const submitBtn = taskForm.querySelector('button[type="submit"]');
 
             const taskType = taskTypeSelect ? taskTypeSelect.value : '';
             const client = clientSelect ? clientSelect.value : '';
@@ -529,28 +660,33 @@ document.addEventListener('DOMContentLoaded', function () {
             const requestId = requestInput ? requestInput.value.trim() : '';
             
             if (taskType && client && date && requestId && outputType) {
-                // Add new event to calendar
-                calendar.addEvent({
-                    title: taskTypeSelect.options[taskTypeSelect.selectedIndex].text,
-                    start: date,
-                    color: '#f59e0b', // Default to "In Progress" color
-                    extendedProps: {
-                        client: clientSelect.options[clientSelect.selectedIndex].text,
-                        requestId: requestId,
-                        output: outputSelect.options[outputSelect.selectedIndex].text,
-                        status: 'In Progress',
-                        duration: 'Tracking...',
-                        rating: 'Pending',
-                        notes: notesInput && notesInput.value ? notesInput.value : 'No notes'
-                    }
-                });
-                
-                // Close modal and reset form
-                window.closeOrsModal('orsTaskModal');
-                this.reset();
-                
-                // Show success message
-                alert('Task logged successfully! Duration and rating will be calculated automatically.');
+                setButtonLoading(submitBtn, true, 'Logging...');
+
+                setTimeout(() => {
+                    // Add new event to calendar
+                    calendar.addEvent({
+                        title: taskTypeSelect.options[taskTypeSelect.selectedIndex].text,
+                        start: date,
+                        color: '#f59e0b', // Default to "In Progress" color
+                        extendedProps: {
+                            client: clientSelect.options[clientSelect.selectedIndex].text,
+                            requestId: requestId,
+                            output: outputSelect.options[outputSelect.selectedIndex].text,
+                            status: 'In Progress',
+                            duration: 'Tracking...',
+                            rating: 'Pending',
+                            notes: notesInput && notesInput.value ? notesInput.value : 'No notes'
+                        }
+                    });
+                    
+                    // Close modal and reset form
+                    window.closeOrsModal('orsTaskModal');
+                    this.reset();
+                    setButtonLoading(submitBtn, false);
+                    
+                    // Show success message
+                    alert('Task logged successfully! Duration and rating will be calculated automatically.');
+                }, 700);
             } else {
                 alert('Please complete required fields: task, client, request ID, and output type.');
             }

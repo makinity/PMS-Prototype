@@ -28,7 +28,7 @@
                 <div class="lg:col-span-1 flex flex-col items-center">
                     <div class="relative mb-4">
                         <img class="w-32 h-32 rounded-full border-4 border-gray-700 object-cover" 
-                             src="https://ui-avatars.com/api/?name=Juan+Dela+Cruz&background=1e40af&color=fff&size=128" 
+                             src="https://ui-avatars.com/api/-name=Juan+Dela+Cruz&background=1e40af&color=fff&size=128" 
                              alt="Profile picture">
                         <button class="absolute bottom-2 right-2 p-2 bg-blue-600 hover:bg-blue-700 rounded-full text-white transition-colors duration-200">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -96,11 +96,18 @@
                     </div>
 
                     <div class="pt-4 border-t border-gray-700">
-                        <button class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 flex items-center">
+                        <button type="button"
+                                data-employee-action
+                                data-action-title="Save profile changes"
+                                data-action-message="Save updated contact info and account details."
+                                data-action-confirm="Save changes"
+                                data-action-loading="Saving..."
+                                class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 flex items-center gap-2">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                             </svg>
-                            Save Profile Changes
+                            <span data-button-label>Save Profile Changes</span>
+                            <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
                         </button>
                     </div>
                 </div>
@@ -161,11 +168,18 @@
                     </div>
 
                     <div class="pt-4">
-                        <button class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 flex items-center">
+                        <button type="button"
+                                data-employee-action
+                                data-action-title="Update password"
+                                data-action-message="Update your account password and refresh active sessions."
+                                data-action-confirm="Update password"
+                                data-action-loading="Updating..."
+                                class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 flex items-center gap-2">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
                             </svg>
-                            Update Password
+                            <span data-button-label>Update Password</span>
+                            <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
                         </button>
                     </div>
                 </div>
@@ -186,8 +200,15 @@
                         </svg>
                         Last used: Today, 2:30 PM
                     </div>
-                    <button class="w-full px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors duration-200">
-                        Manage 2FA
+                    <button type="button"
+                            data-employee-action
+                            data-action-title="Manage 2FA"
+                            data-action-message="Review recovery codes and update two-factor authentication settings."
+                            data-action-confirm="Open 2FA"
+                            data-action-loading="Loading..."
+                            class="inline-flex w-full items-center justify-center gap-2 px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors duration-200">
+                        <span data-button-label>Manage 2FA</span>
+                        <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
                     </button>
                 </div>
 
@@ -201,20 +222,27 @@
                         <div class="flex items-center">
                             <div class="w-2 h-2 rounded-full bg-emerald-500 mr-2"></div>
                             <div>
-                                <p class="text-sm text-white">Chrome • Windows</p>
-                                <p class="text-xs text-gray-400">Current session • Manila, PH</p>
+                                <p class="text-sm text-white">Chrome - Windows</p>
+                                <p class="text-xs text-gray-400">Current session - Manila, PH</p>
                             </div>
                         </div>
                         <div class="flex items-center">
                             <div class="w-2 h-2 rounded-full bg-yellow-500 mr-2"></div>
                             <div>
-                                <p class="text-sm text-white">Safari • iOS</p>
-                                <p class="text-xs text-gray-400">3 hours ago • Quezon City, PH</p>
+                                <p class="text-sm text-white">Safari - iOS</p>
+                                <p class="text-xs text-gray-400">3 hours ago - Quezon City, PH</p>
                             </div>
                         </div>
                     </div>
-                    <button class="w-full px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors duration-200">
-                        View All Sessions
+                    <button type="button"
+                            data-employee-action
+                            data-action-title="View all sessions"
+                            data-action-message="Review and revoke active sessions across devices."
+                            data-action-confirm="Open sessions"
+                            data-action-loading="Loading..."
+                            class="inline-flex w-full items-center justify-center gap-2 px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors duration-200">
+                        <span data-button-label>View All Sessions</span>
+                        <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
                     </button>
                 </div>
             </div>
@@ -234,16 +262,16 @@
                         </thead>
                         <tbody class="divide-y divide-gray-700">
                             <tr>
-                                <td class="px-4 py-2 text-gray-300">Aug 13, 2025 • 14:30</td>
-                                <td class="px-4 py-2 text-gray-300">Chrome • Windows</td>
+                                <td class="px-4 py-2 text-gray-300">Aug 13, 2025 - 14:30</td>
+                                <td class="px-4 py-2 text-gray-300">Chrome - Windows</td>
                                 <td class="px-4 py-2 text-gray-300">Manila, PH</td>
                                 <td class="px-4 py-2">
                                     <span class="px-2 py-1 text-xs rounded bg-emerald-900 text-emerald-300">Success</span>
                                 </td>
                             </tr>
                             <tr>
-                                <td class="px-4 py-2 text-gray-300">Aug 13, 2025 • 09:15</td>
-                                <td class="px-4 py-2 text-gray-300">Safari • iOS</td>
+                                <td class="px-4 py-2 text-gray-300">Aug 13, 2025 - 09:15</td>
+                                <td class="px-4 py-2 text-gray-300">Safari - iOS</td>
                                 <td class="px-4 py-2 text-gray-300">Quezon City, PH</td>
                                 <td class="px-4 py-2">
                                     <span class="px-2 py-1 text-xs rounded bg-emerald-900 text-emerald-300">Success</span>
@@ -264,16 +292,159 @@
                 Account Actions
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <button class="p-4 border border-gray-600 rounded-lg hover:bg-gray-750 transition-colors duration-200 text-left">
-                    <h3 class="font-medium text-white mb-1">Export Account Data</h3>
+                <button type="button"
+                        data-employee-action
+                        data-action-title="Export account data"
+                        data-action-message="Generate a ZIP file containing your profile and activity data."
+                        data-action-confirm="Export data"
+                        data-action-loading="Exporting..."
+                        class="p-4 border border-gray-600 rounded-lg hover:bg-gray-750 transition-colors duration-200 text-left">
+                    <div class="flex items-center gap-2">
+                        <h3 class="font-medium text-white mb-1" data-button-label>Export Account Data</h3>
+                        <span data-button-spinner class="hidden h-3 w-3 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                    </div>
                     <p class="text-sm text-gray-400">Download all your personal data in ZIP format</p>
                 </button>
-                <button class="p-4 border border-red-600/50 rounded-lg hover:bg-red-900/20 transition-colors duration-200 text-left">
-                    <h3 class="font-medium text-white mb-1">Deactivate Account</h3>
+                <button type="button"
+                        data-employee-action
+                        data-action-title="Deactivate account"
+                        data-action-message="Temporarily disable your account and pause active sessions."
+                        data-action-confirm="Deactivate"
+                        data-action-loading="Deactivating..."
+                        class="p-4 border border-red-600/50 rounded-lg hover:bg-red-900/20 transition-colors duration-200 text-left">
+                    <div class="flex items-center gap-2">
+                        <h3 class="font-medium text-white mb-1" data-button-label>Deactivate Account</h3>
+                        <span data-button-spinner class="hidden h-3 w-3 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                    </div>
                     <p class="text-sm text-gray-400">Temporarily disable your account</p>
                 </button>
             </div>
         </div>
 
     </section>
+
+    <div id="employee-action-modal" role="dialog" aria-modal="true" class="fixed inset-0 z-[70] hidden flex items-center justify-center bg-black/60 px-4 py-6">
+        <div class="w-full max-w-md rounded-2xl border border-gray-700 bg-gray-900 p-5 shadow-xl">
+            <div class="flex items-start justify-between">
+                <div>
+                    <h2 id="employee-action-title" class="text-lg font-semibold text-white">Action</h2>
+                    <p id="employee-action-body" class="mt-1 text-sm text-gray-400">Prototype action preview.</p>
+                </div>
+                <button type="button" data-employee-modal-close class="text-gray-400 hover:text-white">x</button>
+            </div>
+            <div class="mt-6 flex justify-end gap-2">
+                <button type="button" data-employee-modal-close class="rounded-lg border border-gray-600 px-4 py-2 text-xs text-gray-300 hover:bg-gray-800">Close</button>
+                <button type="button" id="employee-action-confirm" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500">
+                    <span data-button-label>Proceed</span>
+                    <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    @push('scripts')
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const modal = document.getElementById('employee-action-modal');
+        const title = document.getElementById('employee-action-title');
+        const body = document.getElementById('employee-action-body');
+        const confirmBtn = document.getElementById('employee-action-confirm');
+        let activeTrigger = null;
+
+        if (!modal || !title || !body || !confirmBtn) {
+            return;
+        }
+
+        function setButtonLoading(button, isLoading, loadingText) {
+            if (!button) {
+                return;
+            }
+            const label = button.querySelector('[data-button-label]');
+            const spinner = button.querySelector('[data-button-spinner]');
+            if (label && !button.dataset.originalLabel) {
+                button.dataset.originalLabel = label.textContent.trim();
+            }
+
+            if (isLoading) {
+                button.disabled = true;
+                button.classList.add('opacity-70', 'cursor-wait');
+                if (spinner) {
+                    spinner.classList.remove('hidden');
+                }
+                if (label && loadingText) {
+                    label.textContent = loadingText;
+                }
+            } else {
+                button.disabled = false;
+                button.classList.remove('opacity-70', 'cursor-wait');
+                if (spinner) {
+                    spinner.classList.add('hidden');
+                }
+                if (label && button.dataset.originalLabel) {
+                    label.textContent = button.dataset.originalLabel;
+                }
+            }
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+            activeTrigger = null;
+            setButtonLoading(confirmBtn, false);
+        }
+
+        function openModal(trigger) {
+            activeTrigger = trigger;
+            title.textContent = trigger.dataset.actionTitle || 'Action';
+            body.textContent = trigger.dataset.actionMessage || 'Prototype action preview.';
+            confirmBtn.dataset.actionLoading = trigger.dataset.actionLoading || 'Working...';
+            modal.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+        }
+
+        window.openEmployeeActionModal = openModal;
+
+        document.querySelectorAll('[data-employee-action]').forEach((button) => {
+            if (button.dataset.actionRequiresValidation === 'true') {
+                return;
+            }
+            button.addEventListener('click', function (event) {
+                event.preventDefault();
+                openModal(button);
+            });
+        });
+
+        confirmBtn.addEventListener('click', function () {
+            setButtonLoading(confirmBtn, true, confirmBtn.dataset.actionLoading);
+            if (activeTrigger) {
+                setButtonLoading(activeTrigger, true, activeTrigger.dataset.actionLoading || confirmBtn.dataset.actionLoading);
+            }
+
+            setTimeout(() => {
+                setButtonLoading(confirmBtn, false);
+                if (activeTrigger) {
+                    setButtonLoading(activeTrigger, false);
+                }
+                closeModal();
+            }, 1200);
+        });
+
+        modal.addEventListener('click', function (event) {
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+
+        modal.querySelectorAll('[data-employee-modal-close]').forEach((button) => {
+            button.addEventListener('click', closeModal);
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+    });
+    </script>
+    @endpush
 </x-layouts.employee>
