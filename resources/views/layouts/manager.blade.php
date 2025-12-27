@@ -265,6 +265,12 @@
                                 </a>
                             </li>
                             <li>
+                                <a href="{{ route('manager.predictive-analytics') }}" class="sidebar-link">
+                                    <i class="sidebar-icon fa-solid fa-chart-area"></i>
+                                    <span>Predictive Analytics</span>
+                                </a>
+                            </li>
+                            <li>
                                 <a href="{{ route('manager.performance-rate') }}" class="sidebar-link">
                                     <i class="sidebar-icon fa-solid fa-star"></i>
                                     <span>Performance Ratings</span>

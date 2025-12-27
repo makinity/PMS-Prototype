@@ -112,6 +112,10 @@ Route::get('/manager-bottleneck-analysis', function () {
     return view('manager.bottleneck');
 })->name('manager.bottleneck');   
 
+Route::get('/manager-predictive-analytics', function () {
+    return view('manager.predictive-analytics');
+})->name('manager.predictive-analytics');
+
 Route::get('/manager-performance-rating', function () {
     return view('manager.performance-rate');
 })->name('manager.performance-rate');  

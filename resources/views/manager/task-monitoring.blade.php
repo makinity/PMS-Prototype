@@ -35,6 +35,29 @@
                 </select>
             </div>
 
+            <div>
+                <label class="text-xs uppercase text-slate-400">Client Type</label>
+                <select id="clientTypeFilter"
+                        class="manager-filter-select mt-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
+                    <option value="all">All Clients</option>
+                    <option value="government">Government</option>
+                    <option value="private">Private</option>
+                    <option value="internal">Internal</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="text-xs uppercase text-slate-400">Task Category</label>
+                <select id="taskCategoryFilter"
+                        class="manager-filter-select mt-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
+                    <option value="all">All Categories</option>
+                    <option value="scanning">Scanning</option>
+                    <option value="validation">Validation</option>
+                    <option value="reporting">Reporting</option>
+                    <option value="followup">Client Follow-up</option>
+                </select>
+            </div>
+
             <!-- Overdue Tasks Toggle -->
             <div class="flex items-end">
                 <button id="toggleOverdue" 
@@ -127,23 +150,23 @@
         <div class="space-y-3 text-sm text-slate-300">
             <div>
                 <p class="text-xs uppercase text-slate-400">Employee</p>
-                <p id="detailEmployee">—</p>
+                <p id="detailEmployee">--</p>
             </div>
             <div>
                 <p class="text-xs uppercase text-slate-400">Task</p>
-                <p id="detailTask">—</p>
+                <p id="detailTask">--</p>
             </div>
             <div>
                 <p class="text-xs uppercase text-slate-400">Client</p>
-                <p id="detailClient">—</p>
+                <p id="detailClient">--</p>
             </div>
             <div>
                 <p class="text-xs uppercase text-slate-400">Status</p>
-                <p id="detailStatus">—</p>
+                <p id="detailStatus">--</p>
             </div>
             <div>
                 <p class="text-xs uppercase text-slate-400">Duration</p>
-                <p id="detailDuration">—</p>
+                <p id="detailDuration">--</p>
             </div>
         </div>
         <div class="mt-6 flex justify-end">
@@ -178,7 +201,7 @@ document.addEventListener('DOMContentLoaded', function() {
         selectable: true,
         editable: false,
         
-        // Feature 3: Click date → list view under calendar
+        // Feature 3: Click date -> list view under calendar
         dateClick: function(info) {
             showTasksForDate(info.dateStr);
         },
@@ -199,7 +222,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     calendar.render();
 
-    // Feature 1: Employee filter → dynamic reload
+    // Feature 1: Employee filter -> dynamic reload
     document.getElementById('employeeFilter').addEventListener('change', function() {
         currentEmployeeFilter = this.value;
         calendar.refetchEvents();
@@ -337,7 +360,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="flex items-center justify-between">
                         <div>
                             <h3 class="font-medium text-white">${task.title}</h3>
-                            <p class="text-sm text-slate-400">${task.extendedProps.employee} • ${task.extendedProps.client}</p>
+                            <p class="text-sm text-slate-400">${task.extendedProps.employee} - ${task.extendedProps.client}</p>
                         </div>
                         <div class="flex items-center gap-3">
                             <span class="text-sm ${task.extendedProps.overdue ? 'text-rose-400' : 'text-slate-300'}">

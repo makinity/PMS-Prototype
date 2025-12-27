@@ -28,13 +28,13 @@
         <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
             <p class="text-xs uppercase tracking-widest text-slate-400">Avg Task Duration</p>
             <p class="mt-2 text-3xl font-semibold text-white">2.8h</p>
-            <p class="text-xs text-slate-400 mt-1">↓ 0.3h from last week</p>
+            <p class="text-xs text-slate-400 mt-1">Down 0.3h from last week</p>
         </div>
 
         <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
             <p class="text-xs uppercase tracking-widest text-slate-400">On-Time Completion</p>
             <p class="mt-2 text-3xl font-semibold text-emerald-400">94%</p>
-            <p class="text-xs text-slate-400 mt-1">↑ 2% from last week</p>
+            <p class="text-xs text-slate-400 mt-1">Up 2% from last week</p>
         </div>
 
     </div>
@@ -86,19 +86,19 @@
 
             <ul class="space-y-3 text-sm text-slate-300">
                 <li class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-                    <span class="font-medium text-emerald-400">✓ Completed:</span> Redistributed workload among team members
+                    <span class="font-medium text-emerald-400">Completed:</span> Redistributed workload among team members
                 </li>
                 <li class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-                    <span class="font-medium text-amber-400">⚠ Action Needed:</span> Review tasks with unusually long processing times
+                    <span class="font-medium text-amber-400">Action Needed:</span> Review tasks with unusually long processing times
                 </li>
                 <li class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-                    <span class="font-medium text-amber-400">⚠ Action Needed:</span> Monitor employees with repeated incomplete submissions
+                    <span class="font-medium text-amber-400">Action Needed:</span> Monitor employees with repeated incomplete submissions
                 </li>
                 <li class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-                    <span class="font-medium text-blue-400">ℹ️ Suggestion:</span> Provide training on documentation tasks
+                    <span class="font-medium text-blue-400">Suggestion:</span> Provide training on documentation tasks
                 </li>
                 <li class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-                    <span class="font-medium text-blue-400">ℹ️ Suggestion:</span> Schedule team review session for bottleneck tasks
+                    <span class="font-medium text-blue-400">Suggestion:</span> Schedule team review session for bottleneck tasks
                 </li>
             </ul>
         </div>
