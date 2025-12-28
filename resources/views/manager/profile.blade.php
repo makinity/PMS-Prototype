@@ -30,7 +30,12 @@
                         <img class="w-32 h-32 rounded-full border-4 border-gray-700 object-cover" 
                              src="https://ui-avatars.com/api/?name=Juan+Dela+Cruz&background=1e40af&color=fff&size=128" 
                              alt="Profile picture">
-                        <button class="absolute bottom-2 right-2 p-2 bg-blue-600 hover:bg-blue-700 rounded-full text-white transition-colors duration-200">
+                        <button type="button"
+                                data-manager-action
+                                data-action-title="Update profile photo"
+                                data-action-message="Upload a new profile image (JPG/PNG, max 5MB)."
+                                data-action-confirm="Choose file"
+                                class="absolute bottom-2 right-2 p-2 bg-blue-600 hover:bg-blue-700 rounded-full text-white transition-colors duration-200">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -96,11 +101,15 @@
                     </div>
 
                     <div class="pt-4 border-t border-gray-700">
-                        <button class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 flex items-center">
+                        <button type="button"
+                                data-manager-loading="true"
+                                data-loading-text="Saving..."
+                                class="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                             </svg>
-                            Save Profile Changes
+                            <span data-button-label>Save Profile Changes</span>
+                            <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
                         </button>
                     </div>
                 </div>
@@ -161,11 +170,15 @@
                     </div>
 
                     <div class="pt-4">
-                        <button class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 flex items-center">
+                        <button type="button"
+                                data-manager-loading="true"
+                                data-loading-text="Updating..."
+                                class="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
                             </svg>
-                            Update Password
+                            <span data-button-label>Update Password</span>
+                            <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
                         </button>
                     </div>
                 </div>
@@ -186,7 +199,12 @@
                         </svg>
                         Last used: Today, 2:30 PM
                     </div>
-                    <button class="w-full px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors duration-200">
+                    <button type="button"
+                            data-manager-action
+                            data-action-title="Manage 2FA"
+                            data-action-message="Review devices and update two-factor authentication settings."
+                            data-action-confirm="Open 2FA"
+                            class="w-full px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors duration-200">
                         Manage 2FA
                     </button>
                 </div>
@@ -213,7 +231,12 @@
                             </div>
                         </div>
                     </div>
-                    <button class="w-full px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors duration-200">
+                    <button type="button"
+                            data-manager-action
+                            data-action-title="View all sessions"
+                            data-action-message="Open the full session list and sign out other devices if needed."
+                            data-action-confirm="View sessions"
+                            class="w-full px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors duration-200">
                         View All Sessions
                     </button>
                 </div>
@@ -264,11 +287,24 @@
                 Account Actions
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <button class="p-4 border border-gray-600 rounded-lg hover:bg-gray-750 transition-colors duration-200 text-left">
-                    <h3 class="font-medium text-white mb-1">Export Account Data</h3>
-                    <p class="text-sm text-gray-400">Download all your personal data in ZIP format</p>
+                <button type="button"
+                        data-manager-loading="true"
+                        data-loading-text="Exporting..."
+                        class="p-4 border border-gray-600 rounded-lg hover:bg-gray-750 transition-colors duration-200 text-left">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <h3 class="font-medium text-white mb-1"><span data-button-label>Export Account Data</span></h3>
+                            <p class="text-sm text-gray-400">Download all your personal data in ZIP format</p>
+                        </div>
+                        <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                    </div>
                 </button>
-                <button class="p-4 border border-red-600/50 rounded-lg hover:bg-red-900/20 transition-colors duration-200 text-left">
+                <button type="button"
+                        data-manager-action
+                        data-action-title="Deactivate account"
+                        data-action-message="Temporarily disable this account. You can reactivate through HR or admin support."
+                        data-action-confirm="Deactivate"
+                        class="p-4 border border-red-600/50 rounded-lg hover:bg-red-900/20 transition-colors duration-200 text-left">
                     <h3 class="font-medium text-white mb-1">Deactivate Account</h3>
                     <p class="text-sm text-gray-400">Temporarily disable your account</p>
                 </button>
@@ -276,4 +312,138 @@
         </div>
 
     </section>
+
+    <div id="manager-action-modal" role="dialog" aria-modal="true" class="fixed inset-0 z-[70] hidden flex items-center justify-center bg-black/60 px-4 py-6">
+        <div class="w-full max-w-md rounded-2xl border border-gray-700 bg-gray-900 p-5 shadow-xl">
+            <div class="flex items-start justify-between">
+                <div>
+                    <h2 id="manager-action-title" class="text-lg font-semibold text-white">Action</h2>
+                    <p id="manager-action-body" class="mt-1 text-sm text-gray-400">Prototype action preview.</p>
+                </div>
+                <button type="button" data-manager-modal-close class="text-gray-400 hover:text-white">x</button>
+            </div>
+            <div class="mt-6 flex justify-end gap-2">
+                <button type="button" data-manager-modal-close class="rounded-lg border border-gray-600 px-4 py-2 text-xs text-gray-300 hover:bg-gray-800">Close</button>
+                <button type="button" id="manager-action-confirm" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500">
+                    <span data-button-label>Proceed</span>
+                    <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    @push('scripts')
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const modal = document.getElementById('manager-action-modal');
+        const title = document.getElementById('manager-action-title');
+        const body = document.getElementById('manager-action-body');
+        const confirmBtn = document.getElementById('manager-action-confirm');
+
+        if (!modal || !title || !body || !confirmBtn) {
+            return;
+        }
+
+        function setButtonLoading(button, isLoading, loadingText) {
+            if (!button) {
+                return;
+            }
+            const label = button.querySelector('[data-button-label]');
+            const spinner = button.querySelector('[data-button-spinner]');
+            if (label && !button.dataset.originalLabel) {
+                button.dataset.originalLabel = label.textContent.trim();
+            }
+
+            if (isLoading) {
+                button.disabled = true;
+                button.classList.add('opacity-70', 'cursor-wait');
+                if (spinner) {
+                    spinner.classList.remove('hidden');
+                }
+                if (label && loadingText) {
+                    label.textContent = loadingText;
+                }
+            } else {
+                button.disabled = false;
+                button.classList.remove('opacity-70', 'cursor-wait');
+                if (spinner) {
+                    spinner.classList.add('hidden');
+                }
+                if (label && button.dataset.originalLabel) {
+                    label.textContent = button.dataset.originalLabel;
+                }
+            }
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+            setButtonLoading(confirmBtn, false);
+        }
+
+        function openModal(trigger) {
+            const label = confirmBtn.querySelector('[data-button-label]');
+            title.textContent = trigger.dataset.actionTitle || 'Action';
+            body.textContent = trigger.dataset.actionMessage || 'Prototype action preview.';
+            if (label) {
+                label.textContent = trigger.dataset.actionConfirm || 'Proceed';
+                confirmBtn.dataset.originalLabel = label.textContent.trim();
+            }
+            confirmBtn.dataset.loadingText = trigger.dataset.actionLoading || 'Working...';
+            setButtonLoading(confirmBtn, false);
+            modal.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+        }
+
+        document.querySelectorAll('[data-manager-action]').forEach((button) => {
+            button.addEventListener('click', function (event) {
+                event.preventDefault();
+                openModal(button);
+            });
+        });
+
+        modal.addEventListener('click', function (event) {
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+
+        modal.querySelectorAll('[data-manager-modal-close]').forEach((button) => {
+            button.addEventListener('click', closeModal);
+        });
+
+        confirmBtn.addEventListener('click', function () {
+            setButtonLoading(confirmBtn, true, confirmBtn.dataset.loadingText || 'Working...');
+            setTimeout(() => {
+                setButtonLoading(confirmBtn, false);
+                closeModal();
+            }, 1200);
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        document.querySelectorAll('[data-manager-loading="true"]').forEach((button) => {
+            button.addEventListener('click', function () {
+                if (button.dataset.loadingActive === 'true') {
+                    return;
+                }
+                button.dataset.loadingActive = 'true';
+                setButtonLoading(button, true, button.dataset.loadingText || 'Loading...');
+
+                const duration = Number.parseInt(button.dataset.loadingDuration || '1200', 10);
+                if (!Number.isNaN(duration)) {
+                    setTimeout(() => {
+                        setButtonLoading(button, false);
+                        button.dataset.loadingActive = 'false';
+                    }, duration);
+                }
+            });
+        });
+    });
+    </script>
+    @endpush
 </x-layouts.manager>

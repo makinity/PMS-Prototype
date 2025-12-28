@@ -1,5 +1,16 @@
 <x-layouts.manager>
 
+<style>
+    #manager-ors-calendar .fc-col-header-cell {
+        background-color: rgba(15, 23, 42, 0.85);
+    }
+
+    #manager-ors-calendar .fc-col-header-cell-cushion,
+    #manager-ors-calendar .fc-daygrid-day-number {
+        color: #e2e8f0;
+    }
+</style>
+
 <section class="space-y-6">
     <!-- Page Header -->
     <div>

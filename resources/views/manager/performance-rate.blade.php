@@ -7,20 +7,18 @@
             </div>
             <div class="flex gap-2">
                 <button type="button"
-                        data-manager-action
-                        data-action-title="Export ratings"
-                        data-action-message="Download a CSV file with objective performance ratings for the selected filters."
-                        data-action-confirm="Download CSV"
-                        class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800">
-                    Export CSV
+                        data-manager-loading="true"
+                        data-loading-text="Exporting..."
+                        class="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800">
+                    <span data-button-label>Export CSV</span>
+                    <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
                 </button>
                 <button type="button"
-                        data-manager-action
-                        data-action-title="Generate report"
-                        data-action-message="Compile an IPCR-ready report using auto-logged ORS output data."
-                        data-action-confirm="Generate report"
-                        class="rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-500">
-                    Generate Report
+                        data-manager-loading="true"
+                        data-loading-text="Generating..."
+                        class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-500">
+                    <span data-button-label>Generate Report</span>
+                    <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
                 </button>
             </div>
         </div>
@@ -145,22 +143,6 @@
         </div>
     </section>
 
-    <div id="manager-action-modal" role="dialog" aria-modal="true" class="fixed inset-0 z-[70] hidden flex items-center justify-center bg-black/60 px-4 py-6">
-        <div class="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
-            <div class="flex items-start justify-between">
-                <div>
-                    <h2 id="manager-action-title" class="text-lg font-semibold text-white">Action</h2>
-                    <p id="manager-action-body" class="mt-1 text-sm text-slate-400">Prototype action preview.</p>
-                </div>
-                <button type="button" data-manager-modal-close class="text-slate-400 hover:text-white">x</button>
-            </div>
-            <div class="mt-6 flex justify-end gap-2">
-                <button type="button" data-manager-modal-close class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800">Close</button>
-                <button type="button" id="manager-action-confirm" class="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500">Proceed</button>
-            </div>
-        </div>
-    </div>
-
     @push('scripts')
     <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -196,51 +178,53 @@
     </script>
     <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const modal = document.getElementById('manager-action-modal');
-        const title = document.getElementById('manager-action-title');
-        const body = document.getElementById('manager-action-body');
-        const confirmBtn = document.getElementById('manager-action-confirm');
+        function setButtonLoading(button, isLoading, loadingText) {
+            if (!button) {
+                return;
+            }
+            const label = button.querySelector('[data-button-label]');
+            const spinner = button.querySelector('[data-button-spinner]');
+            if (label && !button.dataset.originalLabel) {
+                button.dataset.originalLabel = label.textContent.trim();
+            }
 
-        if (!modal || !title || !body || !confirmBtn) {
-            return;
+            if (isLoading) {
+                button.disabled = true;
+                button.classList.add('opacity-70', 'cursor-wait');
+                if (spinner) {
+                    spinner.classList.remove('hidden');
+                }
+                if (label && loadingText) {
+                    label.textContent = loadingText;
+                }
+            } else {
+                button.disabled = false;
+                button.classList.remove('opacity-70', 'cursor-wait');
+                if (spinner) {
+                    spinner.classList.add('hidden');
+                }
+                if (label && button.dataset.originalLabel) {
+                    label.textContent = button.dataset.originalLabel;
+                }
+            }
         }
 
-        function closeModal() {
-            modal.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
-        }
+        document.querySelectorAll('[data-manager-loading="true"]').forEach((button) => {
+            button.addEventListener('click', function () {
+                if (button.dataset.loadingActive === 'true') {
+                    return;
+                }
+                button.dataset.loadingActive = 'true';
+                setButtonLoading(button, true, button.dataset.loadingText || 'Loading...');
 
-        function openModal(trigger) {
-            title.textContent = trigger.dataset.actionTitle || 'Action';
-            body.textContent = trigger.dataset.actionMessage || 'Prototype action preview.';
-            confirmBtn.textContent = trigger.dataset.actionConfirm || 'Proceed';
-            modal.classList.remove('hidden');
-            document.body.classList.add('overflow-hidden');
-        }
-
-        document.querySelectorAll('[data-manager-action]').forEach((button) => {
-            button.addEventListener('click', function (event) {
-                event.preventDefault();
-                openModal(button);
+                const duration = Number.parseInt(button.dataset.loadingDuration || '1200', 10);
+                if (!Number.isNaN(duration)) {
+                    setTimeout(() => {
+                        setButtonLoading(button, false);
+                        button.dataset.loadingActive = 'false';
+                    }, duration);
+                }
             });
-        });
-
-        modal.addEventListener('click', function (event) {
-            if (event.target === modal) {
-                closeModal();
-            }
-        });
-
-        modal.querySelectorAll('[data-manager-modal-close]').forEach((button) => {
-            button.addEventListener('click', closeModal);
-        });
-
-        confirmBtn.addEventListener('click', closeModal);
-
-        document.addEventListener('keydown', function (event) {
-            if (event.key === 'Escape') {
-                closeModal();
-            }
         });
     });
     </script>

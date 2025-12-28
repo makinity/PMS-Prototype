@@ -353,7 +353,10 @@
                 
                 <div class="mt-6 flex justify-end gap-2">
                     <button type="button" data-bottleneck-modal-close class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800">Cancel</button>
-                    <button type="button" id="bottleneck-confirm" class="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500">Proceed</button>
+                    <button type="button" id="bottleneck-confirm" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500">
+                        <span data-button-label>Proceed</span>
+                        <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -370,7 +373,10 @@
             </div>
             <div class="mt-6 flex justify-end gap-2">
                 <button type="button" data-manager-modal-close class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800">Close</button>
-                <button type="button" id="manager-action-confirm" class="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500">Proceed</button>
+                <button type="button" id="manager-action-confirm" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500">
+                    <span data-button-label>Proceed</span>
+                    <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                </button>
             </div>
         </div>
     </div>
@@ -409,6 +415,37 @@
             trendFallback.classList.remove('hidden');
         }
 
+        function setButtonLoading(button, isLoading, loadingText) {
+            if (!button) {
+                return;
+            }
+            const label = button.querySelector('[data-button-label]');
+            const spinner = button.querySelector('[data-button-spinner]');
+            if (label && !button.dataset.originalLabel) {
+                button.dataset.originalLabel = label.textContent.trim();
+            }
+
+            if (isLoading) {
+                button.disabled = true;
+                button.classList.add('opacity-70', 'cursor-wait');
+                if (spinner) {
+                    spinner.classList.remove('hidden');
+                }
+                if (label && loadingText) {
+                    label.textContent = loadingText;
+                }
+            } else {
+                button.disabled = false;
+                button.classList.remove('opacity-70', 'cursor-wait');
+                if (spinner) {
+                    spinner.classList.add('hidden');
+                }
+                if (label && button.dataset.originalLabel) {
+                    label.textContent = button.dataset.originalLabel;
+                }
+            }
+        }
+
         const managerModal = document.getElementById('manager-action-modal');
         const managerTitle = document.getElementById('manager-action-title');
         const managerBody = document.getElementById('manager-action-body');
@@ -418,12 +455,19 @@
             function closeManagerModal() {
                 managerModal.classList.add('hidden');
                 document.body.classList.remove('overflow-hidden');
+                setButtonLoading(managerConfirmBtn, false);
             }
 
             function openManagerModal(trigger) {
+                const label = managerConfirmBtn.querySelector('[data-button-label]');
                 managerTitle.textContent = trigger.dataset.actionTitle || 'Action';
                 managerBody.textContent = trigger.dataset.actionMessage || 'Prototype action preview.';
-                managerConfirmBtn.textContent = trigger.dataset.actionConfirm || 'Proceed';
+                if (label) {
+                    label.textContent = trigger.dataset.actionConfirm || 'Proceed';
+                    managerConfirmBtn.dataset.originalLabel = label.textContent.trim();
+                }
+                managerConfirmBtn.dataset.loadingText = trigger.dataset.actionLoading || 'Working...';
+                setButtonLoading(managerConfirmBtn, false);
                 managerModal.classList.remove('hidden');
                 document.body.classList.add('overflow-hidden');
             }
@@ -445,7 +489,13 @@
                 button.addEventListener('click', closeManagerModal);
             });
 
-            managerConfirmBtn.addEventListener('click', closeManagerModal);
+            managerConfirmBtn.addEventListener('click', function () {
+                setButtonLoading(managerConfirmBtn, true, managerConfirmBtn.dataset.loadingText || 'Working...');
+                setTimeout(() => {
+                    setButtonLoading(managerConfirmBtn, false);
+                    closeManagerModal();
+                }, 1200);
+            });
 
             document.addEventListener('keydown', function (event) {
                 if (event.key === 'Escape') {
@@ -518,6 +568,7 @@
             bottleneckModal.classList.add('hidden');
             feedback.classList.add('hidden');
             document.body.classList.remove('overflow-hidden');
+            setButtonLoading(bottleneckConfirmBtn, false);
             currentActionType = null;
             currentImpactTask = null;
         }
@@ -530,9 +581,15 @@
             const actionData = bottleneckActions[currentActionType] || {};
 
             // Set modal content
+            const label = bottleneckConfirmBtn.querySelector('[data-button-label]');
             bottleneckTitle.textContent = trigger.dataset.actionTitle || 'Bottleneck Optimization';
             bottleneckMessage.textContent = trigger.dataset.actionMessage || 'No details available.';
-            bottleneckConfirmBtn.textContent = trigger.dataset.actionConfirm || 'Proceed';
+            if (label) {
+                label.textContent = trigger.dataset.actionConfirm || 'Proceed';
+                bottleneckConfirmBtn.dataset.originalLabel = label.textContent.trim();
+            }
+            bottleneckConfirmBtn.dataset.loadingText = trigger.dataset.actionLoading || 'Working...';
+            setButtonLoading(bottleneckConfirmBtn, false);
 
             // Set impacted task and current delay
             impactedTask.textContent = actionData.impactedTask || currentImpactTask || '--';
@@ -583,6 +640,7 @@
         // Handle confirmation
         bottleneckConfirmBtn.addEventListener('click', function() {
             if (!currentActionType) return;
+            setButtonLoading(bottleneckConfirmBtn, true, bottleneckConfirmBtn.dataset.loadingText || 'Working...');
 
             const actionData = bottleneckActions[currentActionType];
             if (!actionData) return;
@@ -598,6 +656,7 @@
 
             // Auto-close after 2 seconds
             setTimeout(() => {
+                setButtonLoading(bottleneckConfirmBtn, false);
                 closeBottleneckModal();
 
                 // Update the button to show completed state

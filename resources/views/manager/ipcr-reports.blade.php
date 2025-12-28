@@ -7,20 +7,18 @@
             </div>
             <div class="flex gap-2">
                 <button type="button"
-                        data-manager-action
-                        data-action-title="Export IPCR reports"
-                        data-action-message="Download all IPCR reports for the selected filters as a ZIP file."
-                        data-action-confirm="Export reports"
-                        class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800">
-                    Export All
+                        data-manager-loading="true"
+                        data-loading-text="Exporting..."
+                        class="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800">
+                    <span data-button-label>Export All</span>
+                    <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
                 </button>
                 <button type="button"
-                        data-manager-action
-                        data-action-title="Generate IPCR report"
-                        data-action-message="Create a new IPCR report using auto-logged ORS and output data."
-                        data-action-confirm="Generate"
-                        class="rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-500">
-                    Generate New
+                        data-manager-loading="true"
+                        data-loading-text="Generating..."
+                        class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-500">
+                    <span data-button-label>Generate New</span>
+                    <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
                 </button>
             </div>
         </div>
@@ -136,12 +134,11 @@
                             <td class="px-4 py-3"><span class="rounded-full bg-rose-500/20 px-2 py-1 text-xs text-rose-300">Missing Output</span></td>
                             <td class="px-4 py-3">
                                 <button type="button"
-                                        data-manager-action
-                                        data-action-title="Notify employee"
-                                        data-action-message="Send an automated reminder about missing outputs and incomplete fields."
-                                        data-action-confirm="Send alert"
-                                        class="text-blue-400 hover:text-blue-300">
-                                    Notify
+                                        data-manager-loading="true"
+                                        data-loading-text="Sending..."
+                                        class="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300">
+                                    <span data-button-label>Notify</span>
+                                    <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
                                 </button>
                             </td>
                         </tr>
@@ -162,7 +159,10 @@
             </div>
             <div class="mt-6 flex justify-end gap-2">
                 <button type="button" data-manager-modal-close class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800">Close</button>
-                <button type="button" id="manager-action-confirm" class="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500">Proceed</button>
+                <button type="button" id="manager-action-confirm" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500">
+                    <span data-button-label>Proceed</span>
+                    <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                </button>
             </div>
         </div>
     </div>
@@ -179,15 +179,53 @@
             return;
         }
 
+        function setButtonLoading(button, isLoading, loadingText) {
+            if (!button) {
+                return;
+            }
+            const label = button.querySelector('[data-button-label]');
+            const spinner = button.querySelector('[data-button-spinner]');
+            if (label && !button.dataset.originalLabel) {
+                button.dataset.originalLabel = label.textContent.trim();
+            }
+
+            if (isLoading) {
+                button.disabled = true;
+                button.classList.add('opacity-70', 'cursor-wait');
+                if (spinner) {
+                    spinner.classList.remove('hidden');
+                }
+                if (label && loadingText) {
+                    label.textContent = loadingText;
+                }
+            } else {
+                button.disabled = false;
+                button.classList.remove('opacity-70', 'cursor-wait');
+                if (spinner) {
+                    spinner.classList.add('hidden');
+                }
+                if (label && button.dataset.originalLabel) {
+                    label.textContent = button.dataset.originalLabel;
+                }
+            }
+        }
+
         function closeModal() {
             modal.classList.add('hidden');
             document.body.classList.remove('overflow-hidden');
+            setButtonLoading(confirmBtn, false);
         }
 
         function openModal(trigger) {
+            const label = confirmBtn.querySelector('[data-button-label]');
             title.textContent = trigger.dataset.actionTitle || 'Action';
             body.textContent = trigger.dataset.actionMessage || 'Prototype action preview.';
-            confirmBtn.textContent = trigger.dataset.actionConfirm || 'Proceed';
+            if (label) {
+                label.textContent = trigger.dataset.actionConfirm || 'Proceed';
+                confirmBtn.dataset.originalLabel = label.textContent.trim();
+            }
+            confirmBtn.dataset.loadingText = trigger.dataset.actionLoading || 'Working...';
+            setButtonLoading(confirmBtn, false);
             modal.classList.remove('hidden');
             document.body.classList.add('overflow-hidden');
         }
@@ -209,12 +247,36 @@
             button.addEventListener('click', closeModal);
         });
 
-        confirmBtn.addEventListener('click', closeModal);
+        confirmBtn.addEventListener('click', function () {
+            setButtonLoading(confirmBtn, true, confirmBtn.dataset.loadingText || 'Working...');
+            setTimeout(() => {
+                setButtonLoading(confirmBtn, false);
+                closeModal();
+            }, 1200);
+        });
 
         document.addEventListener('keydown', function (event) {
             if (event.key === 'Escape') {
                 closeModal();
             }
+        });
+
+        document.querySelectorAll('[data-manager-loading="true"]').forEach((button) => {
+            button.addEventListener('click', function () {
+                if (button.dataset.loadingActive === 'true') {
+                    return;
+                }
+                button.dataset.loadingActive = 'true';
+                setButtonLoading(button, true, button.dataset.loadingText || 'Loading...');
+
+                const duration = Number.parseInt(button.dataset.loadingDuration || '1200', 10);
+                if (!Number.isNaN(duration)) {
+                    setTimeout(() => {
+                        setButtonLoading(button, false);
+                        button.dataset.loadingActive = 'false';
+                    }, duration);
+                }
+            });
         });
     });
     </script>

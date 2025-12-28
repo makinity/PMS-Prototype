@@ -272,7 +272,10 @@
         
         <div class="mt-6 flex justify-end gap-2">
             <button type="button" data-optimization-modal-close class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800">Cancel</button>
-            <button type="button" id="optimization-confirm" class="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500">Proceed</button>
+            <button type="button" id="optimization-confirm" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500">
+                <span data-button-label>Proceed</span>
+                <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+            </button>
         </div>
     </div>
 </div>
@@ -386,11 +389,43 @@
             }
         };
         
+        function setButtonLoading(button, isLoading, loadingText) {
+            if (!button) {
+                return;
+            }
+            const label = button.querySelector('[data-button-label]');
+            const spinner = button.querySelector('[data-button-spinner]');
+            if (label && !button.dataset.originalLabel) {
+                button.dataset.originalLabel = label.textContent.trim();
+            }
+
+            if (isLoading) {
+                button.disabled = true;
+                button.classList.add('opacity-70', 'cursor-wait');
+                if (spinner) {
+                    spinner.classList.remove('hidden');
+                }
+                if (label && loadingText) {
+                    label.textContent = loadingText;
+                }
+            } else {
+                button.disabled = false;
+                button.classList.remove('opacity-70', 'cursor-wait');
+                if (spinner) {
+                    spinner.classList.add('hidden');
+                }
+                if (label && button.dataset.originalLabel) {
+                    label.textContent = button.dataset.originalLabel;
+                }
+            }
+        }
+
         function closeModal() {
             modal.classList.add('hidden');
             impactSection.classList.add('hidden');
             feedback.classList.add('hidden');
             document.body.classList.remove('overflow-hidden');
+            setButtonLoading(confirmBtn, false);
             currentAction = null;
             currentActionType = null;
         }
@@ -400,9 +435,15 @@
             currentActionType = trigger.dataset.actionType;
             
             // Set modal content
+            const label = confirmBtn.querySelector('[data-button-label]');
             title.textContent = trigger.dataset.actionTitle || 'Optimization Action';
             message.textContent = trigger.dataset.actionMessage || 'No details available.';
-            confirmBtn.textContent = trigger.dataset.actionConfirm || 'Proceed';
+            if (label) {
+                label.textContent = trigger.dataset.actionConfirm || 'Proceed';
+                confirmBtn.dataset.originalLabel = label.textContent.trim();
+            }
+            confirmBtn.dataset.loadingText = trigger.dataset.actionLoading || 'Working...';
+            setButtonLoading(confirmBtn, false);
             
             // Show impact metrics if available
             if (currentActionType && actionImpacts[currentActionType]) {
@@ -445,6 +486,7 @@
         // Handle confirmation
         confirmBtn.addEventListener('click', function() {
             if (!currentActionType) return;
+            setButtonLoading(confirmBtn, true, confirmBtn.dataset.loadingText || 'Working...');
             
             // Action success messages
             const successMessages = {
@@ -462,6 +504,7 @@
             
             // Auto-close after 2 seconds
             setTimeout(() => {
+                setButtonLoading(confirmBtn, false);
                 closeModal();
                 
                 // Update the button to show completed state
@@ -479,7 +522,8 @@
             // Update relevant metrics on the page based on action
             const outputsElement = document.querySelector('.text-2xl.font-semibold.text-white:first-of-type');
             const onTimeElement = document.querySelector('.text-2xl.font-semibold.text-emerald-400');
-            const durationElement = document.querySelector('.text-2xl.font-semibold.text-white:contains("2.6")');
+            const durationElement = Array.from(document.querySelectorAll('.text-2xl.font-semibold.text-white'))
+                .find((element) => element.textContent.trim() === '2.6h');
             const riskElement = document.querySelector('.text-2xl.font-semibold.text-amber-300');
             
             switch(actionType) {

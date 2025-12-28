@@ -229,7 +229,10 @@
             </div>
             <div class="mt-6 flex justify-end gap-2">
                 <button type="button" data-manager-modal-close class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800">Cancel</button>
-                <button type="button" id="manager-action-confirm" class="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500">Proceed</button>
+                <button type="button" id="manager-action-confirm" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500">
+                    <span data-button-label>Proceed</span>
+                    <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                </button>
             </div>
         </div>
     </div>
@@ -329,10 +332,42 @@
 
         let currentAction = null;
 
+        function setButtonLoading(button, isLoading, loadingText) {
+            if (!button) {
+                return;
+            }
+            const label = button.querySelector('[data-button-label]');
+            const spinner = button.querySelector('[data-button-spinner]');
+            if (label && !button.dataset.originalLabel) {
+                button.dataset.originalLabel = label.textContent.trim();
+            }
+
+            if (isLoading) {
+                button.disabled = true;
+                button.classList.add('opacity-70', 'cursor-wait');
+                if (spinner) {
+                    spinner.classList.remove('hidden');
+                }
+                if (label && loadingText) {
+                    label.textContent = loadingText;
+                }
+            } else {
+                button.disabled = false;
+                button.classList.remove('opacity-70', 'cursor-wait');
+                if (spinner) {
+                    spinner.classList.add('hidden');
+                }
+                if (label && button.dataset.originalLabel) {
+                    label.textContent = button.dataset.originalLabel;
+                }
+            }
+        }
+
         function closeModal() {
             modal.classList.add('hidden');
             feedback.classList.add('hidden');
             document.body.classList.remove('overflow-hidden');
+            setButtonLoading(confirmBtn, false);
             currentAction = null;
         }
 
@@ -342,10 +377,16 @@
         }
 
         function openModal(trigger) {
+            const label = confirmBtn.querySelector('[data-button-label]');
             currentAction = trigger.dataset.actionTitle;
             title.textContent = trigger.dataset.actionTitle || 'Action';
             body.textContent = trigger.dataset.actionMessage || 'Prototype action preview.';
-            confirmBtn.textContent = trigger.dataset.actionConfirm || 'Proceed';
+            if (label) {
+                label.textContent = trigger.dataset.actionConfirm || 'Proceed';
+                confirmBtn.dataset.originalLabel = label.textContent.trim();
+            }
+            confirmBtn.dataset.loadingText = trigger.dataset.actionLoading || 'Working...';
+            setButtonLoading(confirmBtn, false);
             modal.classList.remove('hidden');
             document.body.classList.add('overflow-hidden');
             feedback.classList.add('hidden');
@@ -362,6 +403,7 @@
         // Handle confirmation of actions
         confirmBtn.addEventListener('click', function() {
             if (currentAction) {
+                setButtonLoading(confirmBtn, true, confirmBtn.dataset.loadingText || 'Working...');
                 // Simulate action success
                 const successMessages = {
                     'Add Monday Scanning Slots': '✅ Monday scanning slots scheduled. Backlog reduction estimated at 15%.',
@@ -380,6 +422,7 @@
                 
                 // Auto-close after 2 seconds
                 setTimeout(() => {
+                    setButtonLoading(confirmBtn, false);
                     closeModal();
                 }, 2000);
             }
