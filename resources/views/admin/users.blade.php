@@ -1,5 +1,5 @@
 <x-layouts.admin>
-    <section class="space-y-6">
+    <section class="space-y-6 admin-page">
         <div class="flex flex-wrap items-center justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-semibold text-white">Users</h1>
@@ -28,7 +28,7 @@
         </div>
 
         <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-            <div class="flex flex-wrap gap-3">
+            <div class="flex flex-wrap items-end gap-3">
                 <div class="min-w-[220px] flex-1">
                     <label class="text-xs uppercase text-slate-400">Search</label>
                     <input type="text"
@@ -206,12 +206,11 @@
                     </div>
                     <div class="flex gap-2">
                         <button type="button"
-                                data-admin-action
-                                data-action-title="Approve access request"
-                                data-action-message="Grant manager role and notify user."
-                                data-action-confirm="Approve"
-                                class="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-500">
-                            Approve
+                                data-admin-loading="true"
+                                data-loading-text="Approving..."
+                                class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-500">
+                            <span data-button-label>Approve</span>
+                            <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
                         </button>
                         <button type="button"
                                 data-admin-action
@@ -230,12 +229,11 @@
                     </div>
                     <div class="flex gap-2">
                         <button type="button"
-                                data-admin-action
-                                data-action-title="Approve access request"
-                                data-action-message="Grant temporary admin access for 7 days."
-                                data-action-confirm="Approve"
-                                class="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-500">
-                            Approve
+                                data-admin-loading="true"
+                                data-loading-text="Approving..."
+                                class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-500">
+                            <span data-button-label>Approve</span>
+                            <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
                         </button>
                         <button type="button"
                                 data-admin-action

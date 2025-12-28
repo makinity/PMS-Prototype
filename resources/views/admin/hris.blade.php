@@ -1,5 +1,5 @@
 <x-layouts.admin>
-    <section class="space-y-6">
+    <section class="space-y-6 admin-page">
         <div class="flex flex-wrap items-center justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-semibold text-white">HRIS Integration</h1>
@@ -7,22 +7,20 @@
             </div>
             <div class="flex flex-wrap gap-2">
                 <button type="button"
-                        data-admin-action
-                        data-action-title="Test connection"
-                        data-action-message="Validate API connectivity and credentials."
-                        data-action-confirm="Run test"
+                        data-admin-loading="true"
+                        data-loading-text="Testing..."
                         class="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-200 hover:bg-slate-800">
                     <i class="fa-solid fa-plug"></i>
-                    Test Connection
+                    <span data-button-label>Test Connection</span>
+                    <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
                 </button>
                 <button type="button"
-                        data-admin-action
-                        data-action-title="Run sync"
-                        data-action-message="Start a manual HRIS sync now."
-                        data-action-confirm="Run sync"
+                        data-admin-loading="true"
+                        data-loading-text="Syncing..."
                         class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-500">
                     <i class="fa-solid fa-rotate"></i>
-                    Run Sync
+                    <span data-button-label>Run Sync</span>
+                    <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
                 </button>
             </div>
         </div>
@@ -139,12 +137,11 @@
                             <td class="px-4 py-3 text-amber-300">Needs Review</td>
                             <td class="px-4 py-3">
                                 <button type="button"
-                                        data-admin-action
-                                        data-action-title="Resolve mapping"
-                                        data-action-message="Map missing department codes."
-                                        data-action-confirm="Resolve"
-                                        class="text-blue-400 hover:text-blue-300">
-                                    Resolve
+                                        data-admin-loading="true"
+                                        data-loading-text="Resolving..."
+                                        class="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300">
+                                    <span data-button-label>Resolve</span>
+                                    <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
                                 </button>
                             </td>
                         </tr>

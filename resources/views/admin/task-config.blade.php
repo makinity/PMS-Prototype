@@ -1,5 +1,5 @@
 <x-layouts.admin>
-    <section class="space-y-6">
+    <section class="space-y-6 admin-page">
         <div class="flex flex-wrap items-center justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-semibold text-white">Task Configuration</h1>

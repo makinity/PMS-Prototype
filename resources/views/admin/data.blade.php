@@ -1,5 +1,5 @@
 <x-layouts.admin>
-    <section class="space-y-6">
+    <section class="space-y-6 admin-page">
         <div class="flex flex-wrap items-center justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-semibold text-white">Data Export</h1>
@@ -186,12 +186,11 @@
                             <td class="px-4 py-3 text-emerald-300">Ready</td>
                             <td class="px-4 py-3">
                                 <button type="button"
-                                        data-admin-action
-                                        data-action-title="Download export"
-                                        data-action-message="Download the generated export file."
-                                        data-action-confirm="Download"
-                                        class="text-blue-400 hover:text-blue-300">
-                                    Download
+                                        data-admin-loading="true"
+                                        data-loading-text="Downloading..."
+                                        class="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300">
+                                    <span data-button-label>Download</span>
+                                    <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
                                 </button>
                             </td>
                         </tr>
@@ -220,12 +219,11 @@
                             <td class="px-4 py-3 text-rose-300">Failed</td>
                             <td class="px-4 py-3">
                                 <button type="button"
-                                        data-admin-action
-                                        data-action-title="Retry export"
-                                        data-action-message="Restart the export job with the same parameters."
-                                        data-action-confirm="Retry"
-                                        class="text-blue-400 hover:text-blue-300">
-                                    Retry
+                                        data-admin-loading="true"
+                                        data-loading-text="Retrying..."
+                                        class="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300">
+                                    <span data-button-label>Retry</span>
+                                    <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
                                 </button>
                             </td>
                         </tr>

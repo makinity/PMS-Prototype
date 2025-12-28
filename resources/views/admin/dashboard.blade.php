@@ -1,5 +1,5 @@
 <x-layouts.admin>
-    <section class="space-y-8">
+    <section class="space-y-8 admin-page">
 
         <!-- Page Header -->
         <div class="flex items-center justify-between">

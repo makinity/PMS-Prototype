@@ -97,11 +97,8 @@
 
                     <div class="pt-4 border-t border-gray-700">
                         <button type="button"
-                                data-employee-action
-                                data-action-title="Save profile changes"
-                                data-action-message="Save updated contact info and account details."
-                                data-action-confirm="Save changes"
-                                data-action-loading="Saving..."
+                                data-employee-loading="true"
+                                data-loading-text="Saving..."
                                 class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 flex items-center gap-2">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
@@ -169,11 +166,8 @@
 
                     <div class="pt-4">
                         <button type="button"
-                                data-employee-action
-                                data-action-title="Update password"
-                                data-action-message="Update your account password and refresh active sessions."
-                                data-action-confirm="Update password"
-                                data-action-loading="Updating..."
+                                data-employee-loading="true"
+                                data-loading-text="Updating..."
                                 class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 flex items-center gap-2">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
@@ -293,11 +287,8 @@
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <button type="button"
-                        data-employee-action
-                        data-action-title="Export account data"
-                        data-action-message="Generate a ZIP file containing your profile and activity data."
-                        data-action-confirm="Export data"
-                        data-action-loading="Exporting..."
+                        data-employee-loading="true"
+                        data-loading-text="Exporting..."
                         class="p-4 border border-gray-600 rounded-lg hover:bg-gray-750 transition-colors duration-200 text-left">
                     <div class="flex items-center gap-2">
                         <h3 class="font-medium text-white mb-1" data-button-label>Export Account Data</h3>
@@ -411,6 +402,24 @@
             button.addEventListener('click', function (event) {
                 event.preventDefault();
                 openModal(button);
+            });
+        });
+
+        document.querySelectorAll('[data-employee-loading="true"]').forEach((button) => {
+            button.addEventListener('click', function () {
+                if (button.dataset.loadingActive === 'true') {
+                    return;
+                }
+                button.dataset.loadingActive = 'true';
+                setButtonLoading(button, true, button.dataset.loadingText || 'Loading...');
+
+                const duration = Number.parseInt(button.dataset.loadingDuration || '1200', 10);
+                if (!Number.isNaN(duration)) {
+                    setTimeout(() => {
+                        setButtonLoading(button, false);
+                        button.dataset.loadingActive = 'false';
+                    }, duration);
+                }
             });
         });
 

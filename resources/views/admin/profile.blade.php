@@ -1,5 +1,5 @@
 <x-layouts.admin>
-    <section class="space-y-6">
+    <section class="space-y-6 admin-page">
         <div>
             <h1 class="text-2xl font-semibold text-white">Profile &amp; Security</h1>
             <p class="text-sm text-slate-400">Manage administrator account details and security settings.</p>
@@ -56,13 +56,12 @@
 
             <div class="mt-6 flex justify-end">
                 <button type="button"
-                        data-admin-action
-                        data-action-title="Save profile"
-                        data-action-message="Save profile changes for this administrator."
-                        data-action-confirm="Save"
+                        data-admin-loading="true"
+                        data-loading-text="Saving..."
                         class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500">
                     <i class="fa-solid fa-check"></i>
-                    Save Profile
+                    <span data-button-label>Save Profile</span>
+                    <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
                 </button>
             </div>
         </div>
@@ -90,13 +89,12 @@
                                class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
                     </div>
                     <button type="button"
-                            data-admin-action
-                            data-action-title="Update password"
-                            data-action-message="Change administrator password and update active sessions."
-                            data-action-confirm="Update"
+                            data-admin-loading="true"
+                            data-loading-text="Updating..."
                             class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500">
                         <i class="fa-solid fa-key"></i>
-                        Update Password
+                        <span data-button-label>Update Password</span>
+                        <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
                     </button>
                 </div>
             </div>

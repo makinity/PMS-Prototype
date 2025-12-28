@@ -1,5 +1,5 @@
 <x-layouts.admin>
-    <section class="space-y-6">
+    <section class="space-y-6 admin-page">
         <div class="flex flex-wrap items-center justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-semibold text-white">System Logs</h1>
@@ -7,22 +7,20 @@
             </div>
             <div class="flex flex-wrap gap-2">
                 <button type="button"
-                        data-admin-action
-                        data-action-title="Download logs"
-                        data-action-message="Export logs for the selected time range."
-                        data-action-confirm="Download"
+                        data-admin-loading="true"
+                        data-loading-text="Downloading..."
                         class="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-200 hover:bg-slate-800">
                     <i class="fa-solid fa-file-arrow-down"></i>
-                    Download
+                    <span data-button-label>Download</span>
+                    <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
                 </button>
                 <button type="button"
-                        data-admin-action
-                        data-action-title="Clear logs"
-                        data-action-message="Archive current logs and clear the view."
-                        data-action-confirm="Clear logs"
+                        data-admin-loading="true"
+                        data-loading-text="Clearing..."
                         class="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-3 py-2 text-xs font-semibold text-white hover:bg-rose-500">
                     <i class="fa-solid fa-trash"></i>
-                    Clear
+                    <span data-button-label>Clear</span>
+                    <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
                 </button>
             </div>
         </div>

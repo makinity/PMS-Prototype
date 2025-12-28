@@ -1,5 +1,5 @@
 <x-layouts.admin>
-    <section class="space-y-6">
+    <section class="space-y-6 admin-page">
         <div class="flex flex-wrap items-center justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-semibold text-white">Performance Metrics</h1>
@@ -7,13 +7,12 @@
             </div>
             <div class="flex flex-wrap gap-2">
                 <button type="button"
-                        data-admin-action
-                        data-action-title="Save metric set"
-                        data-action-message="Save this configuration as the active scoring model."
-                        data-action-confirm="Save metrics"
+                        data-admin-loading="true"
+                        data-loading-text="Saving..."
                         class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-500">
                     <i class="fa-solid fa-floppy-disk"></i>
-                    Save Metrics
+                    <span data-button-label>Save Metrics</span>
+                    <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
                 </button>
                 <button type="button"
                         data-admin-action

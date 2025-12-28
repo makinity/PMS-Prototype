@@ -1,18 +1,17 @@
 <x-layouts.admin>
-    <section class="space-y-6">
+    <section class="space-y-6 admin-page">
         <div class="flex flex-wrap items-center justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-semibold text-white">Audit Trail</h1>
                 <p class="text-sm text-slate-400">Track privileged actions and system access history.</p>
             </div>
             <button type="button"
-                    data-admin-action
-                    data-action-title="Export audit trail"
-                    data-action-message="Download the filtered audit trail as CSV."
-                    data-action-confirm="Export CSV"
+                    data-admin-loading="true"
+                    data-loading-text="Exporting..."
                     class="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-200 hover:bg-slate-800">
                 <i class="fa-solid fa-file-export"></i>
-                Export
+                <span data-button-label>Export</span>
+                <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
             </button>
         </div>
 

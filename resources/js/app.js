@@ -683,3 +683,60 @@ if (sidebar) {
 
 
 //End Employee-Dashboard
+
+// Admin Loading Buttons
+document.addEventListener('DOMContentLoaded', function () {
+const adminLoadingButtons = document.querySelectorAll('[data-admin-loading="true"]');
+if (!adminLoadingButtons.length) {
+    return;
+}
+
+function setButtonLoading(button, isLoading, loadingText) {
+    if (!button) {
+        return;
+    }
+    const label = button.querySelector('[data-button-label]');
+    const spinner = button.querySelector('[data-button-spinner]');
+    if (label && !button.dataset.originalLabel) {
+        button.dataset.originalLabel = label.textContent.trim();
+    }
+
+    if (isLoading) {
+        button.disabled = true;
+        button.classList.add('opacity-70', 'cursor-wait');
+        if (spinner) {
+            spinner.classList.remove('hidden');
+        }
+        if (label && loadingText) {
+            label.textContent = loadingText;
+        }
+    } else {
+        button.disabled = false;
+        button.classList.remove('opacity-70', 'cursor-wait');
+        if (spinner) {
+            spinner.classList.add('hidden');
+        }
+        if (label && button.dataset.originalLabel) {
+            label.textContent = button.dataset.originalLabel;
+        }
+    }
+}
+
+adminLoadingButtons.forEach((button) => {
+    button.addEventListener('click', function () {
+        if (button.dataset.loadingActive === 'true') {
+            return;
+        }
+        button.dataset.loadingActive = 'true';
+        setButtonLoading(button, true, button.dataset.loadingText || 'Loading...');
+
+        const duration = Number.parseInt(button.dataset.loadingDuration || '1200', 10);
+        if (!Number.isNaN(duration)) {
+            setTimeout(() => {
+                setButtonLoading(button, false);
+                button.dataset.loadingActive = 'false';
+            }, duration);
+        }
+    });
+});
+});

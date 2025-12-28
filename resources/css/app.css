@@ -874,6 +874,42 @@
     color: #34d399;
     }
 
+/* ORS Modal Inputs */
+.ors-modal input,
+.ors-modal select,
+.ors-modal textarea {
+    background-color: #020617 !important;
+    color: #e2e8f0 !important;
+    border-color: #1e293b !important;
+}
+
+.ors-modal input::placeholder,
+.ors-modal textarea::placeholder {
+    color: #64748b !important;
+}
+
+.ors-modal input:disabled {
+    background-color: #0f172a !important;
+    color: #94a3b8 !important;
+}
+
+.ors-modal select {
+    color-scheme: dark;
+}
+
+.ors-modal select option {
+    background-color: #020617;
+    color: #e2e8f0;
+}
+
+.ors-modal input:focus,
+.ors-modal select:focus,
+.ors-modal textarea:focus {
+    outline: none;
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
     @media (prefers-reduced-motion: reduce) {
     .menu-stagger > li {
         animation: none;
@@ -885,5 +921,68 @@
 
 
 /* Admin Layout */
+.admin-page input:not([type='checkbox']):not([type='radio']),
+.admin-page select,
+.admin-page textarea {
+    background-color: #020617 !important;
+    color: #e2e8f0 !important;
+    border-color: #1e293b !important;
+}
+
+.admin-page input::placeholder,
+.admin-page textarea::placeholder {
+    color: #64748b !important;
+}
+
+.admin-page select {
+    color-scheme: dark;
+}
+
+.admin-page select option {
+    background-color: #020617;
+    color: #e2e8f0;
+}
+
+.admin-page input:not([type='checkbox']):not([type='radio']),
+.admin-page select {
+    min-height: 2.5rem;
+}
+
+.admin-page input[type='checkbox'] {
+    accent-color: #38bdf8;
+}
+
+.admin-page input:focus,
+.admin-page select:focus,
+.admin-page textarea:focus {
+    outline: none;
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.manager-filter-select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-color: #020617;
+    color: #e2e8f0;
+    border-color: #1e293b;
+    padding-right: 2.5rem;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 20 20' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 8l4 4 4-4'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 0.75rem;
+}
+
+.manager-filter-select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.manager-filter-select option {
+    background-color: #020617;
+    color: #e2e8f0;
+}
 
 /* End Admin Layout */
