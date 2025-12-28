@@ -24,6 +24,14 @@
     <div class="min-h-screen">
         @php
             $isDashboard = request()->routeIs('employee.dashboard');
+            $isUnitWorkPlan = request()->routeIs('employee.uwp');
+            $isMyTasks = request()->routeIs('employee.my-task');
+            $isSubmitOutput = request()->routeIs('employee.submit-output');
+            $isOutputRating = request()->routeIs('employee.ors');
+            $isOpcr = request()->routeIs('employee.opcr');
+            $isIpcr = request()->routeIs('employee.ipcr');
+            $isIdp = request()->routeIs('employee.idp');
+            $isProfile = request()->routeIs('employee.profile');
         @endphp
         <!-- Top Navigation -->
         <nav class="fixed top-0 z-50 w-full border-b border-slate-800/80 bg-slate-950/90 text-slate-100 shadow-lg shadow-slate-950/30 backdrop-blur">
@@ -108,19 +116,19 @@
                         <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">My Work</p>
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
-                                <a href="{{ route('employee.uwp') }}" class="sidebar-link">
+                                <a href="{{ route('employee.uwp') }}" class="sidebar-link" @if($isUnitWorkPlan) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-regular fa-clipboard"></i>
                                     <span>Unit Work Plan</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('employee.my-task') }}" class="sidebar-link">
+                                <a href="{{ route('employee.my-task') }}" class="sidebar-link" @if($isMyTasks) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-list-check"></i>
                                     <span>My Tasks</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('employee.submit-output') }}" class="sidebar-link">
+                                <a href="{{ route('employee.submit-output') }}" class="sidebar-link" @if($isSubmitOutput) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-arrow-up-from-bracket"></i>
                                     <span>Submit Output</span>
                                 </a>
@@ -132,19 +140,19 @@
                         <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">My Performance</p>
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
-                                <a href="{{ route('employee.ors') }}" class="sidebar-link">
+                                <a href="{{ route('employee.ors') }}" class="sidebar-link" @if($isOutputRating) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-regular fa-chart-bar"></i>
                                     <span>Output Rating Sheet</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('employee.opcr') }}" class="sidebar-link">
+                                <a href="{{ route('employee.opcr') }}" class="sidebar-link" @if($isOpcr) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-regular fa-calendar"></i>
                                     <span>OPCR</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('employee.ipcr') }}" class="sidebar-link">
+                                <a href="{{ route('employee.ipcr') }}" class="sidebar-link" @if($isIpcr) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-arrow-trend-up"></i>
                                     <span>IPCR</span>
                                 </a>
@@ -156,7 +164,7 @@
                         <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Development</p>
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
-                                <a href="{{ route('employee.idp') }}" class="sidebar-link">
+                                <a href="{{ route('employee.idp') }}" class="sidebar-link" @if($isIdp) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-bullseye"></i>
                                     <span>Individual Development Plan</span>
                                 </a>
@@ -168,7 +176,7 @@
                         <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Account</p>
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
-                                <a href="{{ route('employee.profile') }}" class="sidebar-link">
+                                <a href="{{ route('employee.profile') }}" class="sidebar-link" @if($isProfile) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-user-gear"></i>
                                     <span>Profile &amp; Security</span>
                                 </a>

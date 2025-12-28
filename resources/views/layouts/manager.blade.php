@@ -144,6 +144,14 @@
     <div class="min-h-screen">
         @php
             $isManagerDashboard = request()->routeIs('manager.dashboard');
+            $isManagerTeam = request()->routeIs('manager.my-team');
+            $isManagerTaskMonitoring = request()->routeIs('manager.task-monitoring');
+            $isManagerProductivity = request()->routeIs('manager.productivity');
+            $isManagerBottleneck = request()->routeIs('manager.bottleneck');
+            $isManagerPredictive = request()->routeIs('manager.predictive-analytics');
+            $isManagerPerformanceRate = request()->routeIs('manager.performance-rate');
+            $isManagerIpcrReports = request()->routeIs('manager.ipcr-reports');
+            $isManagerProfile = request()->routeIs('manager.profile');
         @endphp
         <!-- Top Navigation -->
         <nav class="fixed top-0 z-50 w-full border-b border-slate-800/80 bg-slate-950/90 text-slate-100 shadow-lg shadow-slate-950/30 backdrop-blur">
@@ -235,13 +243,13 @@
                         <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Team Management</p>
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
-                                <a href="{{ route('manager.my-team') }}" class="sidebar-link">
+                                <a href="{{ route('manager.my-team') }}" class="sidebar-link" @if($isManagerTeam) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-users"></i>
                                     <span>My Team</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('manager.task-monitoring') }}" class="sidebar-link">
+                                <a href="{{ route('manager.task-monitoring') }}" class="sidebar-link" @if($isManagerTaskMonitoring) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-list-check"></i>
                                     <span>Task Monitoring</span>
                                 </a>
@@ -253,25 +261,25 @@
                         <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Performance</p>
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
-                                <a href="{{ route('manager.productivity') }}" class="sidebar-link">
+                                <a href="{{ route('manager.productivity') }}" class="sidebar-link" @if($isManagerProductivity) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-chart-line"></i>
                                     <span>Productivity Analytics</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('manager.bottleneck') }}" class="sidebar-link">
+                                <a href="{{ route('manager.bottleneck') }}" class="sidebar-link" @if($isManagerBottleneck) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-stopwatch"></i>
                                     <span>Bottleneck Analysis</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('manager.predictive-analytics') }}" class="sidebar-link">
+                                <a href="{{ route('manager.predictive-analytics') }}" class="sidebar-link" @if($isManagerPredictive) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-chart-area"></i>
                                     <span>Predictive Analytics</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('manager.performance-rate') }}" class="sidebar-link">
+                                <a href="{{ route('manager.performance-rate') }}" class="sidebar-link" @if($isManagerPerformanceRate) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-star"></i>
                                     <span>Performance Ratings</span>
                                 </a>
@@ -283,7 +291,7 @@
                         <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Reports</p>
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
-                                <a href="{{ route('manager.ipcr-reports') }}" class="sidebar-link">
+                                <a href="{{ route('manager.ipcr-reports') }}" class="sidebar-link" @if($isManagerIpcrReports) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-file-lines"></i>
                                     <span>IPCR Reports</span>
                                 </a>
@@ -295,7 +303,7 @@
                         <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Account</p>
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
-                                <a href="{{ route('manager.profile') }}" class="sidebar-link">
+                                <a href="{{ route('manager.profile') }}" class="sidebar-link" @if($isManagerProfile) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-user-gear"></i>
                                     <span>Profile &amp; Security</span>
                                 </a>
