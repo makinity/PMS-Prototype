@@ -144,6 +144,14 @@
     <div class="min-h-screen">
         @php
             $isSupervisorDashboard = request()->routeIs('supervisor.dashboard');
+            $isSupervisorTeamTasks = request()->routeIs('supervisor.team-tasks');
+            $isSupervisorOverdueAlerts = request()->routeIs('supervisor.overdue-alerts');
+            $isSupervisorTaskValidation = request()->routeIs('supervisor.task-validation');
+            $isSupervisorTeamProductivity = request()->routeIs('supervisor.team-productivity');
+            $isSupervisorBottleneckReports = request()->routeIs('supervisor.bottleneck-reports');
+            $isSupervisorRecommendations = request()->routeIs('supervisor.recommendations');
+            $isSupervisorReports = request()->routeIs('supervisor.reports');
+            $isSupervisorProfile = request()->routeIs('supervisor.profile');
         @endphp
         <!-- Top Navigation -->
         <nav class="fixed top-0 z-50 w-full border-b border-slate-800/80 bg-slate-950/90 text-slate-100 shadow-lg shadow-slate-950/30 backdrop-blur">
@@ -235,15 +243,15 @@
                         <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Team Management</p>
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
-                                <a href="#" class="sidebar-link">
+                                <a href="{{ route('supervisor.team-tasks') }}" class="sidebar-link" @if($isSupervisorTeamTasks) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-users"></i>
                                     <span>Team Tasks</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="#" class="sidebar-link">
+                                <a href="{{ route('supervisor.overdue-alerts') }}" class="sidebar-link" @if($isSupervisorOverdueAlerts) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-list-check"></i>
-                                    <span>Overdue & alerts</span>
+                                    <span>Overdue &amp; alerts</span>
                                 </a>
                             </li>
                         </ul>
@@ -253,25 +261,25 @@
                         <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Performance</p>
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
-                                <a href="#" class="sidebar-link">
+                                <a href="{{ route('supervisor.task-validation') }}" class="sidebar-link" @if($isSupervisorTaskValidation) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-clipboard-check"></i>
                                     <span>Task Validation</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="#" class="sidebar-link">
+                                <a href="{{ route('supervisor.team-productivity') }}" class="sidebar-link" @if($isSupervisorTeamProductivity) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-chart-line"></i>
                                     <span>Team Productivity</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="#" class="sidebar-link">
+                                <a href="{{ route('supervisor.bottleneck-reports') }}" class="sidebar-link" @if($isSupervisorBottleneckReports) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-stopwatch"></i>
                                     <span>Bottleneck Reports</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="#" class="sidebar-link">
+                                <a href="{{ route('supervisor.recommendations') }}" class="sidebar-link" @if($isSupervisorRecommendations) aria-current="page" @endif>
                                      <i class="sidebar-icon fa-solid fa-lightbulb"></i>
                                     <span>Recommendations</span>
                                 </a>
@@ -283,7 +291,7 @@
                         <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Reports</p>
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
-                                <a href="#" class="sidebar-link">
+                                <a href="{{ route('supervisor.reports') }}" class="sidebar-link" @if($isSupervisorReports) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-file-lines"></i>
                                     <span>Reports</span>
                                 </a>
@@ -295,7 +303,7 @@
                         <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Account</p>
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
-                                <a href="#" class="sidebar-link">
+                                <a href="{{ route('supervisor.profile') }}" class="sidebar-link" @if($isSupervisorProfile) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-user-gear"></i>
                                     <span>Profile &amp; Security</span>
                                 </a>

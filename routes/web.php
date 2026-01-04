@@ -49,10 +49,37 @@ Route::get('/supervisor-dashboard', function () {
     return view('supervisor.dashboard');
 })->name('supervisor.dashboard');
 
-
 Route::get('/supervisor/team-tasks', function () {
     return view('supervisor.team-tasks');
 })->name('supervisor.team-tasks');
+
+Route::get('/supervisor/overdue-alerts', function () {
+    return view('supervisor.overdue-alerts');
+})->name('supervisor.overdue-alerts');
+
+Route::get('/supervisor/task-validation', function () {
+    return view('supervisor.task-validation');
+})->name('supervisor.task-validation');
+
+Route::get('/supervisor/team-productivity', function () {
+    return view('supervisor.team-productivity');
+})->name('supervisor.team-productivity');
+
+Route::get('/supervisor/bottleneck-reports', function () {
+    return view('supervisor.bottleneck-reports');
+})->name('supervisor.bottleneck-reports');
+
+Route::get('/supervisor/recommendations', function () {
+    return view('supervisor.recommendations');
+})->name('supervisor.recommendations');
+
+Route::get('/supervisor/reports', function () {
+    return view('supervisor.reports');
+})->name('supervisor.reports');
+
+Route::get('/supervisor/profile', function () {
+    return view('supervisor.profile');
+})->name('supervisor.profile');
 
 
 
