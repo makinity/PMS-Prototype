@@ -223,7 +223,7 @@
                         <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Overview</p>
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
-                                <a href="" class="sidebar-link" @if($isSupervisorDashboard) aria-current="page" @endif>
+                                <a href="{{ route('supervisor.dashboard') }}" class="sidebar-link" @if($isSupervisorDashboard) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-house"></i>
                                     <span>Dashboard</span>
                                 </a>

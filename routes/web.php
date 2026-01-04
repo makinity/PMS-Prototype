@@ -50,6 +50,12 @@ Route::get('/supervisor-dashboard', function () {
 })->name('supervisor.dashboard');
 
 
+Route::get('/supervisor/team-tasks', function () {
+    return view('supervisor.team-tasks');
+})->name('supervisor.team-tasks');
+
+
+
 
 
 Route::get('/administrator-dashboard', function () {
