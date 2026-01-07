@@ -37,6 +37,7 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-700">
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-gray-750">
                             <td class="px-4 py-3 text-gray-300">Report Generation</td>
                             <td class="px-4 py-3 text-gray-300">ABC Corp</td>
@@ -57,6 +58,7 @@
                                 </button>
                             </td>
                         </tr>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-gray-750">
                             <td class="px-4 py-3 text-gray-300">Client Feedback Review</td>
                             <td class="px-4 py-3 text-gray-300">Nova Health</td>
@@ -77,6 +79,7 @@
                                 </button>
                             </td>
                         </tr>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-gray-750">
                             <td class="px-4 py-3 text-gray-300">Weekly Sprint Planning</td>
                             <td class="px-4 py-3 text-gray-300">Internal</td>
@@ -97,6 +100,7 @@
                                 </button>
                             </td>
                         </tr>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-gray-750">
                             <td class="px-4 py-3 text-gray-300">Bug Triage</td>
                             <td class="px-4 py-3 text-gray-300">Brighton Labs</td>
@@ -119,6 +123,7 @@
                                 </button>
                             </td>
                         </tr>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-gray-750">
                             <td class="px-4 py-3 text-gray-300">Quarterly Metrics Update</td>
                             <td class="px-4 py-3 text-gray-300">River City Bank</td>
@@ -141,6 +146,7 @@
                                 </button>
                             </td>
                         </tr>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-gray-750">
                             <td class="px-4 py-3 text-gray-300">Documentation Cleanup</td>
                             <td class="px-4 py-3 text-gray-300">Internal</td>
@@ -179,6 +185,7 @@
                     <div class="flex items-start justify-between border-b border-gray-700 p-4">
                         <div>
                             <h3 id="task-view-modal-title" class="text-lg font-semibold text-white">Task Details</h3>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <p class="text-sm text-gray-400">Report Generation</p>
                         </div>
                         <button type="button" data-modal-hide="task-view-modal" class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-800 hover:text-white">
@@ -189,6 +196,7 @@
                         </button>
                     </div>
                     <div class="space-y-4 p-4 text-sm text-gray-300">
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <div class="grid gap-4 sm:grid-cols-2">
                             <div>
                                 <p class="text-xs uppercase tracking-wide text-gray-500">Client</p>
@@ -223,6 +231,7 @@
                         </div>
                         <div>
                             <p class="text-xs uppercase tracking-wide text-gray-500">Details</p>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <p class="mt-1 text-sm text-gray-300">
                                 Compile weekly analytics, validate against source data, and export the report for review.
                                 Start and end times are recorded automatically during the task session.

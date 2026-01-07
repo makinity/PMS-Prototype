@@ -29,21 +29,26 @@
         <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Active Profile</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-white">Standard 2025</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="text-xs text-slate-500">Applies to all teams</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Timeliness Weight</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-emerald-400">40%</p>
                 <p class="text-xs text-slate-500">Auto-logged time</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Quality Weight</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-white">35%</p>
                 <p class="text-xs text-slate-500">Validation results</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Alert Rules</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-amber-300">6</p>
                 <p class="text-xs text-slate-500">Active triggers</p>
             </div>
@@ -56,6 +61,7 @@
                     <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-4">
                         <div class="flex items-center justify-between">
                             <p class="font-medium text-white">Timeliness</p>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <input type="number" value="40" class="w-20 rounded-md border border-slate-700 bg-slate-950 px-2 py-1 text-xs text-slate-200">
                         </div>
                         <div class="mt-3 h-2 rounded-full bg-slate-800">
@@ -66,6 +72,7 @@
                     <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-4">
                         <div class="flex items-center justify-between">
                             <p class="font-medium text-white">Quality</p>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <input type="number" value="35" class="w-20 rounded-md border border-slate-700 bg-slate-950 px-2 py-1 text-xs text-slate-200">
                         </div>
                         <div class="mt-3 h-2 rounded-full bg-slate-800">
@@ -76,6 +83,7 @@
                     <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-4">
                         <div class="flex items-center justify-between">
                             <p class="font-medium text-white">Volume</p>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <input type="number" value="25" class="w-20 rounded-md border border-slate-700 bg-slate-950 px-2 py-1 text-xs text-slate-200">
                         </div>
                         <div class="mt-3 h-2 rounded-full bg-slate-800">
@@ -98,24 +106,28 @@
                             </tr>
                         </thead>
                         <tbody>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <tr class="border-t border-slate-800">
                                 <td class="px-4 py-3 text-white">On-Time Rate</td>
                                 <td class="px-4 py-3">95%</td>
                                 <td class="px-4 py-3 text-amber-300">90%</td>
                                 <td class="px-4 py-3 text-rose-300">85%</td>
                             </tr>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <tr class="border-t border-slate-800">
                                 <td class="px-4 py-3 text-white">Missing Outputs</td>
                                 <td class="px-4 py-3">0-2</td>
                                 <td class="px-4 py-3 text-amber-300">3-5</td>
                                 <td class="px-4 py-3 text-rose-300">6+</td>
                             </tr>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <tr class="border-t border-slate-800">
                                 <td class="px-4 py-3 text-white">Quality Rework</td>
                                 <td class="px-4 py-3">Below 5%</td>
                                 <td class="px-4 py-3 text-amber-300">5-10%</td>
                                 <td class="px-4 py-3 text-rose-300">Above 10%</td>
                             </tr>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <tr class="border-t border-slate-800">
                                 <td class="px-4 py-3 text-white">Avg Duration</td>
                                 <td class="px-4 py-3">Baseline</td>
@@ -142,15 +154,21 @@
             </div>
             <div class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3 text-sm text-slate-300">
                 <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <p class="font-medium text-white">Incomplete Output</p>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <p class="text-xs text-slate-500">Alert after 4 hours idle</p>
                 </div>
                 <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <p class="font-medium text-white">Baseline Overrun</p>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <p class="text-xs text-slate-500">Trigger at 120% baseline</p>
                 </div>
                 <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <p class="font-medium text-white">Missing Client Link</p>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <p class="text-xs text-slate-500">Block rating until linked</p>
                 </div>
             </div>

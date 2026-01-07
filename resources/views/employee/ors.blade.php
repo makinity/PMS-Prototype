@@ -51,21 +51,25 @@
     <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
         <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
             <p class="text-xs text-slate-400">This Week</p>
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             <p class="mt-1 text-2xl font-semibold text-white">12</p>
             <p class="text-xs text-slate-400">Tasks logged</p>
         </div>
         <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
             <p class="text-xs text-slate-400">Pending</p>
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             <p class="mt-1 text-2xl font-semibold text-amber-400">3</p>
             <p class="text-xs text-slate-400">Require action</p>
         </div>
         <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
             <p class="text-xs text-slate-400">Avg Duration</p>
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             <p class="mt-1 text-2xl font-semibold text-white">2.4h</p>
             <p class="text-xs text-slate-400">Per task</p>
         </div>
         <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
             <p class="text-xs text-slate-400">Rating</p>
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             <p class="mt-1 text-2xl font-semibold text-emerald-400">4.2</p>
             <p class="text-xs text-slate-400">This month</p>
         </div>
@@ -78,6 +82,7 @@
                 <h2 class="text-lg font-semibold text-white">Active Task Timer</h2>
                 <p class="text-sm text-slate-400">Prototype view of automatic start and end tracking.</p>
             </div>
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             <span class="rounded-full border border-emerald-600/60 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300">
                 AUTO TRACKING
             </span>
@@ -86,18 +91,22 @@
         <div class="mt-4 grid grid-cols-1 gap-4 text-sm md:grid-cols-4">
             <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                 <p class="text-xs text-slate-400">Task</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="font-medium text-white">E-Bank Scanning</p>
             </div>
             <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                 <p class="text-xs text-slate-400">Start</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="font-medium text-white">09:12</p>
             </div>
             <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                 <p class="text-xs text-slate-400">Elapsed</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="font-medium text-white">1h 08m</p>
             </div>
             <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                 <p class="text-xs text-slate-400">Status</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="font-medium text-emerald-300">Recording</p>
             </div>
         </div>
@@ -166,6 +175,7 @@
             <!-- Task Type -->
             <div>
                 <label class="text-[11px] uppercase text-slate-400">Task</label>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <select id="orsTaskType" class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
                     <option value="">Select task</option>
                     <option value="bank_scanning">E-Bank Statement Scanning</option>
@@ -182,6 +192,7 @@
             <!-- Client -->
             <div>
                 <label class="text-[11px] uppercase text-slate-400">Client</label>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <select id="orsClient" class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
                     <option value="">Select client</option>
                     <option value="abc">ABC Corporation</option>
@@ -196,6 +207,7 @@
             <!-- Client Request ID -->
             <div>
                 <label class="text-[11px] uppercase text-slate-400">Client Request ID</label>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <input id="orsRequestId"
                        type="text"
                        placeholder="REQ-2025-01234"
@@ -205,6 +217,7 @@
             <!-- Output -->
             <div>
                 <label class="text-[11px] uppercase text-slate-400">Form / Output Type</label>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <select id="orsOutput" class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
                     <option value="">Select form/output</option>
                     <option value="bank_form">Bank Statement Form (BSF-01)</option>
@@ -266,6 +279,7 @@
             </button>
         </div>
         
+        {{-- DUMMY_DATA: replace with dynamic value --}}
         <div class="space-y-3 text-sm">
             <div>
                 <p class="text-xs text-slate-400">Client</p>

@@ -7,10 +7,13 @@
                 <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">
                     Supervisor Overview
                 </h2>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="text-gray-300">
                     IT Department · Team Oversight & Validation
                 </p>
             </div>
+            {{-- DUMMY_DATA: replace with dynamic value --}}
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             <span class="px-4 py-2 rounded-full bg-gradient-to-r from-emerald-900/30 to-emerald-800/30 border border-emerald-700/50 text-emerald-300 text-sm font-medium flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
                 Active Supervision
@@ -22,21 +25,25 @@
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div class="p-6 rounded-xl bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 shadow-lg">
             <h3 class="text-sm text-gray-400">Team Members</h3>
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             <p class="mt-2 text-3xl font-bold text-white">8</p>
         </div>
 
         <div class="p-6 rounded-xl bg-gradient-to-br from-blue-900/20 to-blue-800/10 border border-blue-700/30 shadow-lg">
             <h3 class="text-sm text-blue-300">Active Tasks</h3>
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             <p class="mt-2 text-3xl font-bold text-white">21</p>
         </div>
 
         <div class="p-6 rounded-xl bg-gradient-to-br from-amber-900/20 to-amber-800/10 border border-amber-700/30 shadow-lg">
             <h3 class="text-sm text-amber-300">Pending Validation</h3>
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             <p class="mt-2 text-3xl font-bold text-white">5</p>
         </div>
 
         <div class="p-6 rounded-xl bg-gradient-to-br from-red-900/20 to-red-800/10 border border-red-700/30 shadow-lg">
             <h3 class="text-sm text-red-300">Overdue Tasks</h3>
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             <p class="mt-2 text-3xl font-bold text-white">3</p>
         </div>
     </div>
@@ -71,6 +78,7 @@
         </h3>
 
         <div class="space-y-4">
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             <div class="p-4 rounded-lg bg-amber-900/20 border border-amber-800/40">
                 <p class="text-white font-medium">3 tasks overdue</p>
                 <p class="text-sm text-amber-300">
@@ -78,6 +86,7 @@
                 </p>
             </div>
 
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             <div class="p-4 rounded-lg bg-blue-900/20 border border-blue-800/40">
                 <p class="text-white font-medium">5 tasks awaiting validation</p>
                 <p class="text-sm text-blue-300">
@@ -95,6 +104,7 @@
         </h3>
 
         <div class="space-y-3 text-sm">
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             <div class="p-3 rounded-lg bg-gray-800/40">
                 <p class="text-white">
                     <span class="text-emerald-300">Maria S.</span> completed
@@ -103,6 +113,7 @@
                 <p class="text-xs text-gray-400">1 hour ago</p>
             </div>
 
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             <div class="p-3 rounded-lg bg-gray-800/40">
                 <p class="text-white">
                     <span class="text-amber-300">Juan D.</span> submitted output

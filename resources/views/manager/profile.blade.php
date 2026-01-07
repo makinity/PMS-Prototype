@@ -18,6 +18,7 @@
                     </svg>
                     Profile Information
                 </h2>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <span class="px-3 py-1 text-xs rounded bg-blue-900 text-blue-300 border border-blue-800">
                     VERIFIED
                 </span>
@@ -27,6 +28,7 @@
                 {{-- Profile Picture --}}
                 <div class="lg:col-span-1 flex flex-col items-center">
                     <div class="relative mb-4">
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <img class="w-32 h-32 rounded-full border-4 border-gray-700 object-cover" 
                              src="https://ui-avatars.com/api/?name=Juan+Dela+Cruz&background=1e40af&color=fff&size=128" 
                              alt="Profile picture">
@@ -51,6 +53,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block mb-2 text-sm font-medium text-white">Full Name</label>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <input type="text" 
                                    class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
                                    value="Juan Dela Cruz" disabled>
@@ -60,9 +63,11 @@
                         <div>
                             <label class="block mb-2 text-sm font-medium text-white">Email Address</label>
                             <div class="flex items-center">
+                                {{-- DUMMY_DATA: replace with dynamic value --}}
                                 <input type="email" 
                                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                        value="juan.delacruz@email.com">
+                                {{-- DUMMY_DATA: replace with dynamic value --}}
                                 <span class="ml-2 px-2 py-1 text-xs rounded bg-emerald-900 text-emerald-300 border border-emerald-800">
                                     Verified
                                 </span>
@@ -72,6 +77,7 @@
 
                         <div>
                             <label class="block mb-2 text-sm font-medium text-white">Position</label>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <input type="text" 
                                    class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
                                    value="Administrative Assistant I" disabled>
@@ -80,13 +86,15 @@
 
                         <div>
                             <label class="block mb-2 text-sm font-medium text-white">Employee ID</label>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <input type="text" 
                                    class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
-                                   value="EMP-2023-04567" disabled>
+                                  value="EMP-2023-04567" disabled>
                         </div>
 
                         <div>
                             <label class="block mb-2 text-sm font-medium text-white">Department</label>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <input type="text" 
                                    class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
                                    value="Provincial Human Resource Management Office" disabled>
@@ -94,6 +102,7 @@
 
                         <div>
                             <label class="block mb-2 text-sm font-medium text-white">Phone Number</label>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <input type="tel" 
                                    class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                    placeholder="+63 912 345 6789">
@@ -190,9 +199,11 @@
                 <div class="bg-gray-750 border border-gray-600 rounded-lg p-5">
                     <div class="flex justify-between items-start mb-4">
                         <h3 class="font-medium text-white">Two-Factor Authentication</h3>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <span class="px-2 py-1 text-xs rounded bg-emerald-900 text-emerald-300">Enabled</span>
                     </div>
                     <p class="text-sm text-gray-400 mb-4">Add an extra layer of security to your account</p>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <div class="flex items-center text-sm text-gray-400 mb-4">
                         <svg class="w-4 h-4 mr-2 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -213,9 +224,11 @@
                 <div class="bg-gray-750 border border-gray-600 rounded-lg p-5">
                     <div class="flex justify-between items-start mb-4">
                         <h3 class="font-medium text-white">Active Sessions</h3>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <span class="px-2 py-1 text-xs rounded bg-blue-900 text-blue-300">2 Active</span>
                     </div>
                     <div class="space-y-3 mb-4">
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <div class="flex items-center">
                             <div class="w-2 h-2 rounded-full bg-emerald-500 mr-2"></div>
                             <div>
@@ -223,6 +236,7 @@
                                 <p class="text-xs text-gray-400">Current session • Manila, PH</p>
                             </div>
                         </div>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <div class="flex items-center">
                             <div class="w-2 h-2 rounded-full bg-yellow-500 mr-2"></div>
                             <div>
@@ -256,6 +270,7 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-700">
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <tr>
                                 <td class="px-4 py-2 text-gray-300">Aug 13, 2025 • 14:30</td>
                                 <td class="px-4 py-2 text-gray-300">Chrome • Windows</td>
@@ -264,6 +279,7 @@
                                     <span class="px-2 py-1 text-xs rounded bg-emerald-900 text-emerald-300">Success</span>
                                 </td>
                             </tr>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <tr>
                                 <td class="px-4 py-2 text-gray-300">Aug 13, 2025 • 09:15</td>
                                 <td class="px-4 py-2 text-gray-300">Safari • iOS</td>

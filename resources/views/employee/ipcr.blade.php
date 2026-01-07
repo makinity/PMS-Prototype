@@ -12,6 +12,7 @@
                 </p>
             </div>
 
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             <span class="px-3 py-1 text-xs font-medium rounded bg-blue-900 text-blue-300 border border-blue-800">
                 COMMITMENT
             </span>
@@ -53,6 +54,7 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-gray-800 border border-gray-700 rounded-lg p-5">
             <div>
                 <label class="block mb-2 text-sm font-medium text-white">Employee Name</label>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <input type="text" 
                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
                        value="Juan Dela Cruz" disabled>
@@ -60,6 +62,7 @@
 
             <div>
                 <label class="block mb-2 text-sm font-medium text-white">Position</label>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <input type="text" 
                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
                        value="Administrative Assistant I" disabled>
@@ -67,6 +70,7 @@
 
             <div>
                 <label class="block mb-2 text-sm font-medium text-white">Office / Unit</label>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <input type="text" 
                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
                        value="Provincial Human Resource Management Office" disabled>
@@ -74,6 +78,7 @@
 
             <div>
                 <label class="block mb-2 text-sm font-medium text-white">Rating Period</label>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <input type="text" 
                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
                        value="January - June 2025" disabled>
@@ -83,6 +88,7 @@
         {{-- CORE FUNCTIONS --}}
         <div class="bg-gray-800 border border-gray-700 rounded-lg p-5 space-y-4">
             <h2 class="font-semibold text-lg text-white">
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 Core Functions <span class="text-sm text-gray-400">(80%)</span>
             </h2>
 
@@ -98,7 +104,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {{-- Generated from UWP --}}
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-gray-750">
                             <td class="border border-gray-700 px-4 py-3 text-gray-300">
                                 HRIS records updated
@@ -126,6 +132,7 @@
         {{-- SUPPORT FUNCTIONS --}}
         <div class="bg-gray-800 border border-gray-700 rounded-lg p-5 space-y-4">
             <h2 class="font-semibold text-lg text-white">
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 Support Functions <span class="text-sm text-gray-400">(20%)</span>
             </h2>
 
@@ -141,6 +148,7 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-gray-750">
                             <td class="border border-gray-700 px-4 py-3 text-gray-300">
                                 Reports prepared
@@ -169,6 +177,7 @@
         <div class="bg-gray-800 border border-gray-700 rounded-lg p-5 grid grid-cols-1 md:grid-cols-3 gap-5">
             <div>
                 <label class="block mb-2 text-sm font-medium text-white">Immediate Supervisor</label>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <input type="text" 
                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
                        value="Supervisor Name" disabled>
@@ -176,6 +185,7 @@
 
             <div>
                 <label class="block mb-2 text-sm font-medium text-white">Employee Confirmation</label>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <input type="text" 
                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
                        value="Juan Dela Cruz" disabled>

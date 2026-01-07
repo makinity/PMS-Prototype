@@ -12,6 +12,7 @@
                         SA
                     </div>
                     <div>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <p class="text-lg font-semibold text-white">PMS Administrator</p>
                         <p class="text-sm text-slate-400">System Admin</p>
                     </div>
@@ -28,6 +29,7 @@
             </div>
 
             <div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <div>
                     <label class="text-xs uppercase text-slate-400">Full Name</label>
                     <input type="text"
@@ -70,6 +72,7 @@
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
                 <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-400">Security</h2>
                 <div class="mt-4 space-y-4 text-sm text-slate-300">
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <div>
                         <label class="text-xs uppercase text-slate-400">Current Password</label>
                         <input type="password"
@@ -146,6 +149,7 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="border-t border-slate-800">
                             <td class="px-4 py-3">Chrome - Windows</td>
                             <td class="px-4 py-3">Manila, PH</td>

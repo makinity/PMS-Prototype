@@ -100,6 +100,7 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="border-t border-slate-800">
                             <td class="px-4 py-3">Today, 10:02 AM</td>
                             <td class="px-4 py-3 text-rose-300">Error</td>

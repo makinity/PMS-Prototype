@@ -7,6 +7,7 @@
                 <h1 class="text-2xl font-semibold text-white">System Dashboard</h1>
                 <p class="text-sm text-slate-400">Overall system status and performance overview</p>
             </div>
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             <div class="text-sm text-slate-400">Last Updated: Today, 10:30 AM</div>
         </div>
 
@@ -15,21 +16,25 @@
 
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
                 <p class="text-xs uppercase tracking-widest text-slate-400">Total Users</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-3xl font-semibold text-white">1,247</p>
             </div>
 
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
                 <p class="text-xs uppercase tracking-widest text-slate-400">Active Employees</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-3xl font-semibold text-white">856</p>
             </div>
 
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
                 <p class="text-xs uppercase tracking-widest text-slate-400">Tasks Logged Today</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-3xl font-semibold text-white">312</p>
             </div>
 
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
                 <p class="text-xs uppercase tracking-widest text-slate-400">System Health</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-3xl font-semibold text-emerald-400">OK</p>
             </div>
 
@@ -94,6 +99,7 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="border-t border-slate-800">
                             <td class="px-4 py-2">Today, 10:15 AM</td>
                             <td class="px-4 py-2">John Smith</td>

@@ -7,13 +7,16 @@
                 <p class="text-gray-300">Surface process slowdowns and document where support is needed without changing workflow.</p>
             </div>
             <div class="flex items-center gap-3">
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <span class="px-3 py-1 rounded-full bg-rose-900/30 border border-rose-700/50 text-rose-200 text-xs font-semibold">Escalation focus</span>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <span class="px-3 py-1 rounded-full bg-slate-800 text-slate-200 text-xs font-semibold">No process edits</span>
             </div>
         </div>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        {{-- DUMMY_DATA: replace with dynamic value --}}
         <div class="p-5 rounded-xl bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 shadow-lg">
             <div class="flex items-center justify-between">
                 <h3 class="text-lg font-semibold text-white">Intake</h3>
@@ -22,6 +25,7 @@
             <p class="text-sm text-slate-300 mt-2">Waiting on requirement clarifications for 2 items.</p>
             <p class="text-xs text-amber-300 mt-1">Supervisor note: keep managers aware of scope churn.</p>
         </div>
+        {{-- DUMMY_DATA: replace with dynamic value --}}
         <div class="p-5 rounded-xl bg-gradient-to-br from-blue-900/20 to-blue-800/10 border border-blue-700/30 shadow-lg">
             <div class="flex items-center justify-between">
                 <h3 class="text-lg font-semibold text-white">Validation</h3>
@@ -30,6 +34,7 @@
             <p class="text-sm text-slate-300 mt-2">Evidence missing on two audits; awaiting attachments.</p>
             <p class="text-xs text-slate-300 mt-1">Supervisor note: ask for temporary reviewer support.</p>
         </div>
+        {{-- DUMMY_DATA: replace with dynamic value --}}
         <div class="p-5 rounded-xl bg-gradient-to-br from-rose-900/20 to-rose-800/10 border border-rose-700/30 shadow-lg">
             <div class="flex items-center justify-between">
                 <h3 class="text-lg font-semibold text-white">External approvals</h3>
@@ -57,6 +62,7 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-800 text-slate-200">
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <tr class="hover:bg-slate-900/60">
                         <td class="px-4 py-3 font-medium text-white">Vendor Access Cleanup</td>
                         <td class="px-4 py-3">External approvals</td>
@@ -66,6 +72,7 @@
                         <td class="px-4 py-3 text-xs text-slate-300">Security lead</td>
                         <td class="px-4 py-3 text-xs text-rose-300">Blocked 5 days</td>
                     </tr>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <tr class="hover:bg-slate-900/60">
                         <td class="px-4 py-3 font-medium text-white">Billing Audit Evidence</td>
                         <td class="px-4 py-3">Validation</td>
@@ -75,6 +82,7 @@
                         <td class="px-4 py-3 text-xs text-slate-300">Finance manager</td>
                         <td class="px-4 py-3 text-xs text-amber-300">Waiting on files</td>
                     </tr>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <tr class="hover:bg-slate-900/60">
                         <td class="px-4 py-3 font-medium text-white">Client Onboarding Scope</td>
                         <td class="px-4 py-3">Intake</td>

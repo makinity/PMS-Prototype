@@ -7,7 +7,9 @@
                 <p class="text-gray-300">Document improvement requests and highlight support needs for management review.</p>
             </div>
             <div class="flex items-center gap-3">
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <span class="px-3 py-1 rounded-full bg-emerald-900/30 border border-emerald-700/50 text-emerald-300 text-xs font-semibold">Advisory</span>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <span class="px-3 py-1 rounded-full bg-slate-800 text-slate-200 text-xs font-semibold">No direct changes</span>
             </div>
         </div>
@@ -20,6 +22,7 @@
                 <span class="text-xs text-slate-400">Static list</span>
             </div>
             <div class="space-y-3 text-sm text-slate-200">
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <div class="p-4 rounded-lg bg-slate-900/60 border border-slate-800">
                     <div class="flex items-center justify-between mb-1">
                         <p class="text-white font-semibold">Add backup reviewer for validation window</p>
@@ -28,6 +31,7 @@
                     <p class="text-slate-300">Reduce midweek backlog by assigning secondary reviewer on Tuesdays and Thursdays.</p>
                     <p class="text-xs text-slate-400 mt-1">Submitted to: Operations Manager • Priority: High</p>
                 </div>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <div class="p-4 rounded-lg bg-slate-900/60 border border-slate-800">
                     <div class="flex items-center justify-between mb-1">
                         <p class="text-white font-semibold">Standardize evidence checklist</p>
@@ -36,6 +40,7 @@
                     <p class="text-slate-300">Provide template for screenshots and logs to speed up validation.</p>
                     <p class="text-xs text-slate-400 mt-1">Submitted to: Quality Lead • Priority: Medium</p>
                 </div>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <div class="p-4 rounded-lg bg-slate-900/60 border border-slate-800">
                     <div class="flex items-center justify-between mb-1">
                         <p class="text-white font-semibold">Rotate on-call for escalations</p>
@@ -53,14 +58,17 @@
                 <span class="px-3 py-1 rounded-full bg-slate-800 text-slate-200 text-xs font-semibold">Guidance</span>
             </div>
             <ul class="space-y-3 text-sm text-slate-200">
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <li class="p-3 rounded-lg bg-slate-900/60 border border-slate-800">
                     <p class="text-white font-medium mb-1">Reduce validation latency</p>
                     <p class="text-slate-400">Evidence checklist can trim 0.5 days per item.</p>
                 </li>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <li class="p-3 rounded-lg bg-slate-900/60 border border-slate-800">
                     <p class="text-white font-medium mb-1">Stabilize support coverage</p>
                     <p class="text-slate-400">On-call rotation mitigates single-point delays.</p>
                 </li>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <li class="p-3 rounded-lg bg-slate-900/60 border border-slate-800">
                     <p class="text-white font-medium mb-1">Protect compliance deadlines</p>
                     <p class="text-slate-400">Escalate overdue evidence to management within 24h.</p>

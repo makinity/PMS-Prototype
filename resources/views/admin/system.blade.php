@@ -23,6 +23,7 @@
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Uptime</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-emerald-400">99.98%</p>
                 <p class="text-xs text-slate-500">Last 30 days</p>
             </div>

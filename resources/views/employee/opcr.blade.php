@@ -12,6 +12,7 @@
                 </p>
             </div>
 
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             <span class="px-3 py-1 text-xs font-medium rounded bg-emerald-900 text-emerald-300 border border-emerald-800">
                 GENERATED
             </span>
@@ -21,6 +22,7 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-gray-800 border border-gray-700 rounded-lg p-5">
             <div>
                 <label class="block mb-2 text-sm font-medium text-white">Office / Division</label>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <input type="text" 
                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
                        value="Provincial Human Resource Management Office" disabled>
@@ -28,6 +30,7 @@
 
             <div>
                 <label class="block mb-2 text-sm font-medium text-white">Period Covered</label>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <input type="text" 
                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
                        value="January - June 2025" disabled>
@@ -35,6 +38,7 @@
 
             <div>
                 <label class="block mb-2 text-sm font-medium text-white">Total Employees</label>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <input type="text" 
                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
                        value="18" disabled>
@@ -42,6 +46,7 @@
 
             <div>
                 <label class="block mb-2 text-sm font-medium text-white">Overall Rating</label>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <input type="text" 
                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
                        value="4.32 (Very Satisfactory)" disabled>
@@ -65,7 +70,7 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-700">
-                        {{-- Generated row --}}
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-gray-750">
                             <td class="border border-gray-700 px-4 py-3 text-gray-300">
                                 HR Records Management
@@ -89,6 +94,7 @@
                             </td>
                         </tr>
 
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-gray-750">
                             <td class="border border-gray-700 px-4 py-3 text-gray-300">
                                 Administrative Support Services
@@ -97,9 +103,11 @@
                                 Reports submitted, compliant
                             </td>
                             <td class="border border-gray-700 px-4 py-3 text-gray-300">
+                                {{-- DUMMY_DATA: replace with dynamic value --}}
                                 100%
                             </td>
                             <td class="border border-gray-700 px-4 py-3 text-gray-300">
+                                {{-- DUMMY_DATA: replace with dynamic value --}}
                                 100% submitted on time
                             </td>
                             <td class="border border-gray-700 px-4 py-3 text-center text-white font-semibold">
@@ -120,22 +128,27 @@
         <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
             <div class="bg-gray-800 border border-gray-700 rounded-lg p-5 text-center hover:bg-gray-750 transition-colors duration-200">
                 <p class="text-sm text-gray-400">Outstanding</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="text-3xl font-bold text-white mt-2">6</p>
             </div>
             <div class="bg-gray-800 border border-gray-700 rounded-lg p-5 text-center hover:bg-gray-750 transition-colors duration-200">
                 <p class="text-sm text-gray-400">Very Satisfactory</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="text-3xl font-bold text-white mt-2">8</p>
             </div>
             <div class="bg-gray-800 border border-gray-700 rounded-lg p-5 text-center hover:bg-gray-750 transition-colors duration-200">
                 <p class="text-sm text-gray-400">Satisfactory</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="text-3xl font-bold text-white mt-2">3</p>
             </div>
             <div class="bg-gray-800 border border-gray-700 rounded-lg p-5 text-center hover:bg-gray-750 transition-colors duration-200">
                 <p class="text-sm text-gray-400">Unsatisfactory</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="text-3xl font-bold text-white mt-2">1</p>
             </div>
             <div class="bg-gray-800 border border-gray-700 rounded-lg p-5 text-center hover:bg-gray-750 transition-colors duration-200">
                 <p class="text-sm text-gray-400">Poor</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="text-3xl font-bold text-white mt-2">0</p>
             </div>
         </div>
@@ -144,6 +157,7 @@
         <div class="bg-gray-800 border border-gray-700 rounded-lg p-5 grid grid-cols-1 md:grid-cols-3 gap-5">
             <div>
                 <label class="block mb-2 text-sm font-medium text-white">Prepared By</label>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <input type="text" 
                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
                        value="System Generated" disabled>
@@ -151,6 +165,7 @@
 
             <div>
                 <label class="block mb-2 text-sm font-medium text-white">Reviewed By</label>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <input type="text" 
                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
                        value="HRMO / PMT" disabled>
@@ -158,6 +173,7 @@
 
             <div>
                 <label class="block mb-2 text-sm font-medium text-white">Approved By</label>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <input type="text" 
                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
                        value="Office Head" disabled>

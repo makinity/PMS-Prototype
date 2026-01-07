@@ -25,6 +25,7 @@
             </div>
         </div>
 
+        {{-- DUMMY_DATA: replace with dynamic value --}}
         <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Connection</p>
@@ -78,6 +79,7 @@
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
                 <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-400">Sync Health</h2>
                 <div class="mt-4 space-y-4 text-sm text-slate-300">
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                         <p class="font-medium text-white">Employee Directory</p>
                         <p class="text-xs text-slate-500">Matched 1,185 of 1,210 records</p>
@@ -116,6 +118,7 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="border-t border-slate-800">
                             <td class="px-4 py-3">employee_id</td>
                             <td class="px-4 py-3">employee_code</td>

@@ -69,21 +69,26 @@
         <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Scheduled Exports</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-white">6</p>
                 <p class="text-xs text-slate-500">Active schedules</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Last Export</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-emerald-400">Success</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="text-xs text-slate-500">Today, 07:30 AM</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Failed Jobs</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-rose-300">1</p>
                 <p class="text-xs text-slate-500">Retry queued</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Retention</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-white">30 days</p>
                 <p class="text-xs text-slate-500">Export archives</p>
             </div>
@@ -95,9 +100,12 @@
                 <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-4">
                     <div class="flex items-center justify-between">
                         <div>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <p class="font-medium text-white">Task Logs</p>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <p class="text-xs text-slate-500">Includes start/end timestamps and status</p>
                         </div>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <span class="rounded-full bg-emerald-500/20 px-2 py-1 text-xs text-emerald-300">CSV</span>
                     </div>
                     <button type="button"
@@ -112,9 +120,12 @@
                 <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-4">
                     <div class="flex items-center justify-between">
                         <div>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <p class="font-medium text-white">Performance Ratings</p>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <p class="text-xs text-slate-500">Scores by employee and period</p>
                         </div>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <span class="rounded-full bg-emerald-500/20 px-2 py-1 text-xs text-emerald-300">Excel</span>
                     </div>
                     <button type="button"
@@ -129,9 +140,12 @@
                 <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-4">
                     <div class="flex items-center justify-between">
                         <div>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <p class="font-medium text-white">User Accounts</p>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <p class="text-xs text-slate-500">Account status and roles</p>
                         </div>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <span class="rounded-full bg-emerald-500/20 px-2 py-1 text-xs text-emerald-300">CSV</span>
                     </div>
                     <button type="button"
@@ -146,9 +160,12 @@
                 <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-4">
                     <div class="flex items-center justify-between">
                         <div>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <p class="font-medium text-white">Audit Trail</p>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <p class="text-xs text-slate-500">Compliance logs and access history</p>
                         </div>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <span class="rounded-full bg-emerald-500/20 px-2 py-1 text-xs text-emerald-300">JSON</span>
                     </div>
                     <button type="button"
@@ -179,10 +196,15 @@
                     </thead>
                     <tbody>
                         <tr class="border-t border-slate-800">
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <td class="px-4 py-3">Today, 07:30 AM</td>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <td class="px-4 py-3">Task Logs</td>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <td class="px-4 py-3">CSV</td>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <td class="px-4 py-3">System Admin</td>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <td class="px-4 py-3 text-emerald-300">Ready</td>
                             <td class="px-4 py-3">
                                 <button type="button"
@@ -195,10 +217,15 @@
                             </td>
                         </tr>
                         <tr class="border-t border-slate-800">
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <td class="px-4 py-3">Yesterday, 5:10 PM</td>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <td class="px-4 py-3">Performance Ratings</td>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <td class="px-4 py-3">Excel</td>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <td class="px-4 py-3">Maria Santos</td>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <td class="px-4 py-3 text-amber-300">Processing</td>
                             <td class="px-4 py-3">
                                 <button type="button"
@@ -212,10 +239,15 @@
                             </td>
                         </tr>
                         <tr class="border-t border-slate-800">
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <td class="px-4 py-3">Aug 12, 2025</td>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <td class="px-4 py-3">Audit Trail</td>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <td class="px-4 py-3">JSON</td>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <td class="px-4 py-3">System Admin</td>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <td class="px-4 py-3 text-rose-300">Failed</td>
                             <td class="px-4 py-3">
                                 <button type="button"

@@ -60,21 +60,25 @@
         <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Events Logged</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-white">12,480</p>
                 <p class="text-xs text-slate-500">Last 30 days</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Privileged Actions</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-amber-300">68</p>
                 <p class="text-xs text-slate-500">Admin level</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Failed Logins</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-rose-300">14</p>
                 <p class="text-xs text-slate-500">Auto locked: 2</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Policy Changes</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-white">5</p>
                 <p class="text-xs text-slate-500">Pending review: 1</p>
             </div>
@@ -96,11 +100,17 @@
                     </thead>
                     <tbody>
                         <tr class="border-t border-slate-800">
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <td class="px-4 py-3">Today, 09:40 AM</td>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <td class="px-4 py-3">PMS Administrator</td>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <td class="px-4 py-3">Updated roles</td>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <td class="px-4 py-3">User Management</td>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <td class="px-4 py-3">192.168.1.45</td>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <td class="px-4 py-3 text-emerald-300">Success</td>
                             <td class="px-4 py-3">
                                 <button type="button"
@@ -114,11 +124,17 @@
                             </td>
                         </tr>
                         <tr class="border-t border-slate-800">
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <td class="px-4 py-3">Today, 08:15 AM</td>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <td class="px-4 py-3">Maria Santos</td>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <td class="px-4 py-3">Generated report</td>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <td class="px-4 py-3">IPCR Reports</td>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <td class="px-4 py-3">192.168.1.20</td>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <td class="px-4 py-3 text-emerald-300">Success</td>
                             <td class="px-4 py-3">
                                 <button type="button"
@@ -132,11 +148,17 @@
                             </td>
                         </tr>
                         <tr class="border-t border-slate-800">
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <td class="px-4 py-3">Yesterday, 6:45 PM</td>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <td class="px-4 py-3">Pedro Reyes</td>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <td class="px-4 py-3">Login attempt</td>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <td class="px-4 py-3">Authentication</td>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <td class="px-4 py-3">192.168.1.77</td>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <td class="px-4 py-3 text-rose-300">Failed</td>
                             <td class="px-4 py-3">
                                 <button type="button"

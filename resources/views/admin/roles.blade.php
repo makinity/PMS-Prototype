@@ -29,21 +29,25 @@
         <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Total Roles</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-white">8</p>
                 <p class="text-xs text-slate-500">3 custom roles</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Privileged Roles</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-amber-300">2</p>
                 <p class="text-xs text-slate-500">Admin level</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Permissions Sets</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-white">14</p>
                 <p class="text-xs text-slate-500">Across 9 modules</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Pending Updates</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-rose-300">1</p>
                 <p class="text-xs text-slate-500">Awaiting approval</p>
             </div>
@@ -52,6 +56,7 @@
         <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
             <div class="flex items-center justify-between">
                 <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-400">Role Directory</h2>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <span class="text-xs text-slate-500">Last updated: Today 9:20 AM</span>
             </div>
             <div class="mt-4 overflow-x-auto">
@@ -66,11 +71,13 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="border-t border-slate-800">
                             <td class="px-4 py-3">
                                 <p class="font-medium text-white">System Admin</p>
                                 <p class="text-xs text-slate-500">Full access, security override</p>
                             </td>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <td class="px-4 py-3">4</td>
                             <td class="px-4 py-3">All modules</td>
                             <td class="px-4 py-3">
@@ -92,6 +99,7 @@
                                 <p class="font-medium text-white">Manager</p>
                                 <p class="text-xs text-slate-500">Analytics, approvals, team oversight</p>
                             </td>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <td class="px-4 py-3">38</td>
                             <td class="px-4 py-3">Manager console</td>
                             <td class="px-4 py-3">
@@ -113,6 +121,7 @@
                                 <p class="font-medium text-white">Employee</p>
                                 <p class="text-xs text-slate-500">Task logging, output submissions</p>
                             </td>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <td class="px-4 py-3">1,102</td>
                             <td class="px-4 py-3">Employee portal</td>
                             <td class="px-4 py-3">
@@ -134,6 +143,7 @@
                                 <p class="font-medium text-white">Audit Reviewer</p>
                                 <p class="text-xs text-slate-500">Read-only audit and reports</p>
                             </td>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <td class="px-4 py-3">6</td>
                             <td class="px-4 py-3">Audit modules</td>
                             <td class="px-4 py-3">

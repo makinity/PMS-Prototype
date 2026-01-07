@@ -17,6 +17,7 @@
                 <label for="objective" class="block mb-2 text-sm font-medium text-white">
                     Development Objective
                 </label>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <input type="text" 
                        id="objective"
                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 placeholder-gray-400"
@@ -28,6 +29,7 @@
                 <label for="activity" class="block mb-2 text-sm font-medium text-white">
                     Planned Activity
                 </label>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <input type="text" 
                        id="activity"
                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 placeholder-gray-400"
@@ -42,6 +44,7 @@
                         Target Date
                     </label>
                     <div class="relative">
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <input type="date" 
                                id="target-date"
                                class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 placeholder-gray-400">
@@ -53,6 +56,7 @@
                     <label for="support" class="block mb-2 text-sm font-medium text-white">
                         Support Needed
                     </label>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <input type="text" 
                            id="support"
                            class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 placeholder-gray-400"

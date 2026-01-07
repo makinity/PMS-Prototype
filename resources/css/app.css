@@ -128,8 +128,8 @@
             background: linear-gradient(135deg, var(--primary-dark) 0%, #111827 50%, #1e1b4b 100%);
             position: relative;
             overflow: hidden;
-            margin-top: -70px; /* Compensate for body padding */
-            padding-top: 70px; /* Add padding to account for fixed nav */
+            margin-top: -70px; /* Keep the gradient tucked under the fixed nav */
+            padding-top: 90px; /* Add breathing room between the nav and hero content */
         }
         
         .hero-gradient::before {

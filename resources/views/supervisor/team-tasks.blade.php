@@ -7,7 +7,9 @@
                 <p class="text-gray-300">Monitor assignments, risk signals, and progress at a glance without changing owners.</p>
             </div>
             <div class="flex items-center gap-3">
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <span class="px-3 py-1 rounded-full bg-emerald-900/30 border border-emerald-700/50 text-emerald-300 text-xs font-semibold">Read-only oversight</span>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <span class="px-3 py-1 rounded-full bg-amber-900/30 border border-amber-700/50 text-amber-200 text-xs font-semibold">Escalate via manager</span>
             </div>
         </div>
@@ -31,6 +33,7 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-800 text-slate-200">
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-slate-900/60">
                             <td class="px-4 py-3 font-medium text-white">Client Onboarding Checklist</td>
                             <td class="px-4 py-3">Maria Santos</td>
@@ -40,6 +43,7 @@
                             </td>
                             <td class="px-4 py-3 text-xs text-emerald-300">Low</td>
                         </tr>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-slate-900/60">
                             <td class="px-4 py-3 font-medium text-white">API Error Review</td>
                             <td class="px-4 py-3">Jacob Lee</td>
@@ -49,6 +53,7 @@
                             </td>
                             <td class="px-4 py-3 text-xs text-amber-300">Watch</td>
                         </tr>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-slate-900/60">
                             <td class="px-4 py-3 font-medium text-white">Billing Audit</td>
                             <td class="px-4 py-3">Ava Cruz</td>
@@ -58,6 +63,7 @@
                             </td>
                             <td class="px-4 py-3 text-xs text-amber-300">Needs update</td>
                         </tr>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-slate-900/60">
                             <td class="px-4 py-3 font-medium text-white">Vendor Access Cleanup</td>
                             <td class="px-4 py-3">Liam Park</td>
@@ -75,9 +81,11 @@
         <div class="p-6 rounded-xl bg-gradient-to-br from-slate-950 to-slate-900 border border-slate-800 shadow-lg space-y-4">
             <div class="flex items-center justify-between">
                 <h3 class="text-lg font-semibold text-white">Oversight Signals</h3>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <span class="px-3 py-1 rounded-full bg-slate-800 text-slate-200 text-xs font-semibold">No edits</span>
             </div>
             <ul class="space-y-3 text-sm text-slate-300">
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <li class="flex items-start gap-3">
                     <span class="mt-1 h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_0_4px_rgba(16,185,129,0.15)]"></span>
                     <div>
@@ -85,6 +93,7 @@
                         <p class="text-slate-400">No owner above 3 concurrent critical tasks.</p>
                     </div>
                 </li>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <li class="flex items-start gap-3">
                     <span class="mt-1 h-2 w-2 rounded-full bg-amber-400 shadow-[0_0_0_4px_rgba(251,191,36,0.15)]"></span>
                     <div>
@@ -92,6 +101,7 @@
                         <p class="text-slate-400">Follow-up recommended before end of week.</p>
                     </div>
                 </li>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <li class="flex items-start gap-3">
                     <span class="mt-1 h-2 w-2 rounded-full bg-rose-400 shadow-[0_0_0_4px_rgba(248,113,113,0.15)]"></span>
                     <div>

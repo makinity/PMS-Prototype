@@ -11,6 +11,7 @@
             </div>
 
             {{-- Status --}}
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             <span class="px-3 py-1 text-xs font-medium rounded bg-yellow-900 text-yellow-300 border border-yellow-800">
                 DRAFT
             </span>
@@ -52,6 +53,7 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-gray-800 border border-gray-700 rounded-lg p-5">
             <div>
                 <label class="block mb-2 text-sm font-medium text-white">Office / Unit</label>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <input type="text" 
                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                        value="Provincial Human Resource Management Office">
@@ -59,6 +61,7 @@
 
             <div>
                 <label class="block mb-2 text-sm font-medium text-white">Period Covered</label>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <input type="text" 
                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                        value="January - June 2025">
@@ -66,6 +69,7 @@
 
             <div>
                 <label class="block mb-2 text-sm font-medium text-white">Prepared By</label>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <input type="text" 
                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                        value="HRMO / Office Head">
@@ -82,6 +86,7 @@
         <div class="bg-gray-800 border border-gray-700 rounded-lg p-5 space-y-4">
             <div class="flex justify-between items-center">
                 <h2 class="font-semibold text-lg text-white">
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     Core Functions <span class="text-sm text-gray-400">(80%)</span>
                 </h2>
             </div>
@@ -98,6 +103,7 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-700">
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-gray-750">
                             <td class="border border-gray-700 px-4 py-3">
                                 <input type="text" 
@@ -107,7 +113,7 @@
                             <td class="border border-gray-700 px-4 py-3">
                                 <input type="text" 
                                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 placeholder-gray-400"
-                                       placeholder="e.g. 100% of records">
+                                      placeholder="e.g. 100% of records">
                             </td>
                             <td class="border border-gray-700 px-4 py-3">
                                 <input type="text" 
@@ -151,6 +157,7 @@
         <div class="bg-gray-800 border border-gray-700 rounded-lg p-5 space-y-4">
             <div class="flex justify-between items-center">
                 <h2 class="font-semibold text-lg text-white">
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     Support Functions <span class="text-sm text-gray-400">(20%)</span>
                 </h2>
             </div>
@@ -167,6 +174,7 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-700">
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-gray-750">
                             <td class="border border-gray-700 px-4 py-3">
                                 <input type="text" 

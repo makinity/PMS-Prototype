@@ -7,6 +7,7 @@
             <h1 class="text-2xl font-semibold text-white">Team Dashboard</h1>
             <p class="text-sm text-slate-400">Real-time overview of team performance</p>
         </div>
+        {{-- DUMMY_DATA: replace with dynamic value --}}
         <div class="text-sm text-slate-400">Team: Development & QA</div>
     </div>
 
@@ -15,25 +16,33 @@
 
         <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
             <p class="text-xs uppercase tracking-widest text-slate-400">Team Members</p>
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             <p class="mt-2 text-3xl font-semibold text-white">12</p>
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             <p class="text-xs text-slate-400 mt-1">Active: 10</p>
         </div>
 
         <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
             <p class="text-xs uppercase tracking-widest text-slate-400">Tasks Completed Today</p>
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             <p class="mt-2 text-3xl font-semibold text-white">47</p>
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             <p class="text-xs text-slate-400 mt-1">Target: 50</p>
         </div>
 
         <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
             <p class="text-xs uppercase tracking-widest text-slate-400">Avg Task Duration</p>
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             <p class="mt-2 text-3xl font-semibold text-white">2.8h</p>
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             <p class="text-xs text-slate-400 mt-1">Down 0.3h from last week</p>
         </div>
 
         <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
             <p class="text-xs uppercase tracking-widest text-slate-400">On-Time Completion</p>
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             <p class="mt-2 text-3xl font-semibold text-emerald-400">94%</p>
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             <p class="text-xs text-slate-400 mt-1">Up 2% from last week</p>
         </div>
 
@@ -85,18 +94,23 @@
             </h2>
 
             <ul class="space-y-3 text-sm text-slate-300">
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <li class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                     <span class="font-medium text-emerald-400">Completed:</span> Redistributed workload among team members
                 </li>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <li class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                     <span class="font-medium text-amber-400">Action Needed:</span> Review tasks with unusually long processing times
                 </li>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <li class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                     <span class="font-medium text-amber-400">Action Needed:</span> Monitor employees with repeated incomplete submissions
                 </li>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <li class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                     <span class="font-medium text-blue-400">Suggestion:</span> Provide training on documentation tasks
                 </li>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <li class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                     <span class="font-medium text-blue-400">Suggestion:</span> Schedule team review session for bottleneck tasks
                 </li>
@@ -123,6 +137,7 @@
                     </tr>
                 </thead>
                 <tbody>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <tr class="border-t border-slate-800 hover:bg-slate-800/50">
                         <td class="px-4 py-3">Alex Johnson</td>
                         <td class="px-4 py-3">Fix login API bug</td>
@@ -130,6 +145,7 @@
                         <td class="px-4 py-3">1.5h</td>
                         <td class="px-4 py-3 text-slate-400">10:30 AM</td>
                     </tr>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <tr class="border-t border-slate-800 hover:bg-slate-800/50">
                         <td class="px-4 py-3">Maria Garcia</td>
                         <td class="px-4 py-3">Write user documentation</td>
@@ -137,6 +153,7 @@
                         <td class="px-4 py-3">3.2h (ongoing)</td>
                         <td class="px-4 py-3 text-slate-400">9:15 AM</td>
                     </tr>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <tr class="border-t border-slate-800 hover:bg-slate-800/50">
                         <td class="px-4 py-3">David Chen</td>
                         <td class="px-4 py-3">Test payment module</td>
@@ -144,6 +161,7 @@
                         <td class="px-4 py-3">2.8h</td>
                         <td class="px-4 py-3 text-slate-400">Yesterday</td>
                     </tr>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <tr class="border-t border-slate-800 hover:bg-slate-800/50">
                         <td class="px-4 py-3">Sarah Williams</td>
                         <td class="px-4 py-3">Design dashboard UI</td>
@@ -151,6 +169,7 @@
                         <td class="px-4 py-3">4.5h</td>
                         <td class="px-4 py-3 text-slate-400">Yesterday</td>
                     </tr>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <tr class="border-t border-slate-800 hover:bg-slate-800/50">
                         <td class="px-4 py-3">James Wilson</td>
                         <td class="px-4 py-3">Code review: Auth module</td>
@@ -158,6 +177,7 @@
                         <td class="px-4 py-3">1.2h (ongoing)</td>
                         <td class="px-4 py-3 text-slate-400">Today, 8:45 AM</td>
                     </tr>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <tr class="border-t border-slate-800 hover:bg-slate-800/50">
                         <td class="px-4 py-3">Lisa Wong</td>
                         <td class="px-4 py-3">Database optimization</td>
@@ -184,9 +204,11 @@ document.addEventListener('DOMContentLoaded', function() {
     new Chart(document.getElementById('managerTaskChart'), {
         type: 'line',
         data: {
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
             datasets: [{
                 label: 'Tasks Assigned',
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 data: [38, 42, 35, 45, 40, 28, 32],
                 borderColor: '#3b82f6',
                 backgroundColor: 'rgba(59, 130, 246, 0.1)',
@@ -195,6 +217,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 tension: 0.4
             }, {
                 label: 'Tasks Completed',
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 data: [35, 40, 32, 42, 38, 25, 30],
                 borderColor: '#10b981',
                 backgroundColor: 'rgba(16, 185, 129, 0.1)',
@@ -242,9 +265,11 @@ document.addEventListener('DOMContentLoaded', function() {
     new Chart(document.getElementById('managerDurationChart'), {
         type: 'bar',
         data: {
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             labels: ['Frontend Dev', 'Backend Dev', 'Testing', 'Documentation', 'Design', 'Code Review'],
             datasets: [{
                 label: 'Average Hours',
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 data: [3.2, 4.1, 2.8, 5.2, 4.5, 1.8],
                 backgroundColor: [
                     'rgba(59, 130, 246, 0.8)',
@@ -305,9 +330,11 @@ document.addEventListener('DOMContentLoaded', function() {
     new Chart(document.getElementById('managerBottleneckChart'), {
         type: 'bar',
         data: {
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             labels: ['Documentation', 'Client Approval', 'Code Review', 'Testing', 'Design Approval'],
             datasets: [{
                 label: 'Average Delay (Hours)',
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 data: [8.5, 6.2, 4.8, 3.5, 7.1],
                 backgroundColor: [
                     'rgba(239, 68, 68, 0.8)',
@@ -367,8 +394,10 @@ document.addEventListener('DOMContentLoaded', function() {
     new Chart(document.getElementById('managerRatingChart'), {
         type: 'doughnut',
         data: {
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             labels: ['Excellent (5)', 'Good (4)', 'Average (3)', 'Below Avg (2)'],
             datasets: [{
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 data: [25, 50, 20, 5],
                 backgroundColor: [
                     'rgba(16, 185, 129, 0.8)',

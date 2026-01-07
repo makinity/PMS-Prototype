@@ -7,7 +7,9 @@
                 <p class="text-gray-300">Observe throughput trends and validation load without altering work assignments.</p>
             </div>
             <div class="flex items-center gap-3">
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <span class="px-3 py-1 rounded-full bg-emerald-900/30 border border-emerald-700/50 text-emerald-300 text-xs font-semibold">Monitoring only</span>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <span class="px-3 py-1 rounded-full bg-slate-800 text-slate-200 text-xs font-semibold">Insights, not actions</span>
             </div>
         </div>
@@ -16,21 +18,26 @@
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
         <div class="p-5 rounded-xl bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 shadow-lg">
             <p class="text-xs uppercase tracking-wide text-slate-400">On-time rate</p>
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             <p class="text-3xl font-bold text-white mt-2">86%</p>
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             <p class="text-xs text-emerald-300 mt-1">+3% vs last week</p>
         </div>
         <div class="p-5 rounded-xl bg-gradient-to-br from-blue-900/20 to-blue-800/10 border border-blue-700/30 shadow-lg">
             <p class="text-xs uppercase tracking-wide text-blue-200">Avg cycle time</p>
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             <p class="text-3xl font-bold text-white mt-2">3.8 days</p>
             <p class="text-xs text-slate-300 mt-1">Story start to validation</p>
         </div>
         <div class="p-5 rounded-xl bg-gradient-to-br from-amber-900/20 to-amber-800/10 border border-amber-700/30 shadow-lg">
             <p class="text-xs uppercase tracking-wide text-amber-200">Validation backlog</p>
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             <p class="text-3xl font-bold text-white mt-2">5</p>
             <p class="text-xs text-amber-300 mt-1">Flag items needing evidence</p>
         </div>
         <div class="p-5 rounded-xl bg-gradient-to-br from-emerald-900/20 to-emerald-800/10 border border-emerald-700/30 shadow-lg">
             <p class="text-xs uppercase tracking-wide text-emerald-200">Outputs this week</p>
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             <p class="text-3xl font-bold text-white mt-2">27</p>
             <p class="text-xs text-slate-300 mt-1">Ahead of forecast</p>
         </div>
@@ -53,6 +60,7 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-800 text-slate-200">
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-slate-900/60">
                             <td class="px-4 py-3 font-medium text-white">Mon</td>
                             <td class="px-4 py-3">6</td>
@@ -61,6 +69,7 @@
                             </td>
                             <td class="px-4 py-3 text-xs text-slate-300">Light validation queue</td>
                         </tr>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-slate-900/60">
                             <td class="px-4 py-3 font-medium text-white">Tue</td>
                             <td class="px-4 py-3">5</td>
@@ -69,6 +78,7 @@
                             </td>
                             <td class="px-4 py-3 text-xs text-slate-300">Two items awaiting evidence</td>
                         </tr>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-slate-900/60">
                             <td class="px-4 py-3 font-medium text-white">Wed</td>
                             <td class="px-4 py-3">7</td>
@@ -77,6 +87,7 @@
                             </td>
                             <td class="px-4 py-3 text-xs text-slate-300">Spike in validation backlog</td>
                         </tr>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-slate-900/60">
                             <td class="px-4 py-3 font-medium text-white">Thu</td>
                             <td class="px-4 py-3">9</td>
@@ -96,14 +107,17 @@
                 <span class="px-3 py-1 rounded-full bg-slate-800 text-slate-200 text-xs font-semibold">Supervisor notes</span>
             </div>
             <ul class="space-y-3 text-sm text-slate-200">
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <li class="p-3 rounded-lg bg-slate-900/60 border border-slate-800">
                     <p class="text-white font-medium mb-1">Throughput stable</p>
                     <p class="text-slate-400">Team holding steady above forecast; maintain cadence.</p>
                 </li>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <li class="p-3 rounded-lg bg-slate-900/60 border border-slate-800">
                     <p class="text-white font-medium mb-1">Validation latency</p>
                     <p class="text-slate-400">Backlog rising midweek; recommend manager adds reviewer capacity.</p>
                 </li>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <li class="p-3 rounded-lg bg-slate-900/60 border border-slate-800">
                     <p class="text-white font-medium mb-1">Quality signal</p>
                     <p class="text-slate-400">On-time rate holding but evidence completeness needs reminders.</p>

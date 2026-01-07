@@ -7,7 +7,9 @@
                 <p class="text-gray-300">Verify report availability and freshness; escalate gaps without regenerating files.</p>
             </div>
             <div class="flex items-center gap-3">
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <span class="px-3 py-1 rounded-full bg-blue-900/40 border border-blue-700/40 text-blue-200 text-xs font-semibold">Read-only</span>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <span class="px-3 py-1 rounded-full bg-slate-800 text-slate-200 text-xs font-semibold">No downloads triggered</span>
             </div>
         </div>
@@ -31,6 +33,7 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-800 text-slate-200">
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-slate-900/60">
                             <td class="px-4 py-3 font-medium text-white">Weekly Productivity Summary</td>
                             <td class="px-4 py-3">Weekly</td>
@@ -40,6 +43,7 @@
                             </td>
                             <td class="px-4 py-3 text-xs text-slate-300">Validated by analytics</td>
                         </tr>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-slate-900/60">
                             <td class="px-4 py-3 font-medium text-white">Overdue &amp; Risk Register</td>
                             <td class="px-4 py-3">Daily</td>
@@ -49,6 +53,7 @@
                             </td>
                             <td class="px-4 py-3 text-xs text-amber-300">Awaiting refresh</td>
                         </tr>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-slate-900/60">
                             <td class="px-4 py-3 font-medium text-white">Compliance Evidence Tracker</td>
                             <td class="px-4 py-3">Weekly</td>
@@ -69,14 +74,17 @@
                 <span class="px-3 py-1 rounded-full bg-slate-800 text-slate-200 text-xs font-semibold">Oversight</span>
             </div>
             <ul class="space-y-3 text-sm text-slate-200">
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <li class="p-3 rounded-lg bg-slate-900/60 border border-slate-800">
                     <p class="text-white font-medium mb-1">Freshness checks</p>
                     <p class="text-slate-400">Flag anything older than cadence; request refresh through analytics.</p>
                 </li>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <li class="p-3 rounded-lg bg-slate-900/60 border border-slate-800">
                     <p class="text-white font-medium mb-1">Access scope</p>
                     <p class="text-slate-400">Ensure reports exclude edit controls; view-only links preferred.</p>
                 </li>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <li class="p-3 rounded-lg bg-slate-900/60 border border-slate-800">
                     <p class="text-white font-medium mb-1">Escalation path</p>
                     <p class="text-slate-400">Coordinate with managers when risk registers go stale.</p>

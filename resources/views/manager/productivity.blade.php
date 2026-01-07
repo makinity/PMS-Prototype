@@ -5,6 +5,7 @@
                 <h1 class="text-2xl font-semibold text-white">Productivity Analytics</h1>
                 <p class="text-sm text-slate-400">Objective productivity trends based on auto-logged task data.</p>
             </div>
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             <div class="text-xs text-slate-400">Last refresh: 3 minutes ago</div>
         </div>
 
@@ -12,6 +13,7 @@
             <div class="flex flex-wrap gap-3">
                 <div>
                     <label class="text-xs uppercase text-slate-400">Time Period</label>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <select class="manager-filter-select mt-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
                         <option>This Week</option>
                         <option selected>This Month</option>
@@ -21,6 +23,7 @@
                 </div>
                 <div>
                     <label class="text-xs uppercase text-slate-400">Client Type</label>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <select class="manager-filter-select mt-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
                         <option>All Clients</option>
                         <option>Government</option>
@@ -30,6 +33,7 @@
                 </div>
                 <div>
                     <label class="text-xs uppercase text-slate-400">Task Category</label>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <select class="manager-filter-select mt-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
                         <option>All Categories</option>
                         <option>Scanning</option>
@@ -40,6 +44,7 @@
                 </div>
                 <div>
                     <label class="text-xs uppercase text-slate-400">Team</label>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <select class="manager-filter-select mt-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
                         <option>All Teams</option>
                         <option>Operations</option>
@@ -53,22 +58,30 @@
         <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Outputs Completed</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-white">318</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="text-xs text-slate-500">Target: 340</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">On-Time Rate</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-emerald-400">91%</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="text-xs text-slate-500">Late: 28 outputs</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Avg Task Duration</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-white">2.6h</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="text-xs text-slate-500">Down 0.2h</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Output Risk</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-amber-300">Medium</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="text-xs text-slate-500">Forecasted delays: 7</p>
             </div>
         </div>
@@ -98,18 +111,21 @@
                             </tr>
                         </thead>
                         <tbody>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <tr class="border-t border-slate-800">
                                 <td class="px-4 py-3">Government</td>
                                 <td class="px-4 py-3">140</td>
                                 <td class="px-4 py-3">93%</td>
                                 <td class="px-4 py-3">2.5h</td>
                             </tr>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <tr class="border-t border-slate-800">
                                 <td class="px-4 py-3">Private</td>
                                 <td class="px-4 py-3">110</td>
                                 <td class="px-4 py-3">89%</td>
                                 <td class="px-4 py-3">2.8h</td>
                             </tr>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <tr class="border-t border-slate-800">
                                 <td class="px-4 py-3">Internal</td>
                                 <td class="px-4 py-3">68</td>
@@ -122,163 +138,164 @@
             </div>
 
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-6">
-    <div class="flex items-center justify-between mb-4">
-        <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-400">Optimization Recommendations</h2>
-        <span class="text-xs text-slate-500">Click to implement</span>
-    </div>
-    <ul class="space-y-3">
-        <li class="rounded-lg border border-slate-800 bg-slate-950/60 p-3 hover:border-slate-700 transition-colors">
-            <div class="flex items-start justify-between">
-                <div>
-                    <div class="flex items-center gap-2">
-                        <div class="w-2 h-2 rounded-full bg-amber-500"></div>
-                        <span class="font-medium text-white">Priority Scanning Tasks</span>
-                    </div>
-                    <p class="mt-1 text-sm text-slate-400">Prioritize scanning tasks for government clients to keep SLA above 95%.</p>
-                    <div class="mt-2 flex items-center gap-4 text-xs text-slate-500">
-                        <span>Impact: High</span>
-                        <span>Effort: Low</span>
-                        <span>Time: 2 hours</span>
-                    </div>
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-400">Optimization Recommendations</h2>
+                    <span class="text-xs text-slate-500">Click to implement</span>
                 </div>
-                <button type="button"
-                        data-optimization-action
-                        data-action-title="Prioritize Government Scanning"
-                        data-action-message="This will prioritize all government client scanning tasks in the queue for the next 7 days. Expected improvement: SLA increase to 95%."
-                        data-action-confirm="Schedule Priority"
-                        data-action-type="priority-scanning"
-                        class="inline-flex w-32 items-center justify-center rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-500 whitespace-nowrap">
-                    Implement
-                </button>
-            </div>
-        </li>
-        
-        <li class="rounded-lg border border-slate-800 bg-slate-950/60 p-3 hover:border-slate-700 transition-colors">
-            <div class="flex items-start justify-between">
-                <div>
-                    <div class="flex items-center gap-2">
-                        <div class="w-2 h-2 rounded-full bg-blue-500"></div>
-                        <span class="font-medium text-white">Task Reassignment</span>
-                    </div>
-                    <p class="mt-1 text-sm text-slate-400">Reassign two tasks from validation queue to reduce average duration by 0.3h.</p>
-                    <div class="mt-2 flex items-center gap-4 text-xs text-slate-500">
-                        <span>Impact: Medium</span>
-                        <span>Effort: Medium</span>
-                        <span>Time: 4 hours</span>
-                    </div>
-                </div>
-                <button type="button"
-                        data-optimization-action
-                        data-action-title="Reassign Validation Tasks"
-                        data-action-message="Move two validation tasks from the overloaded queue to available analysts. This will reduce average duration by 0.3h and improve on-time rate."
-                        data-action-confirm="Reassign Tasks"
-                        data-action-type="task-reassignment"
-                        class="inline-flex w-32 items-center justify-center rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-500 whitespace-nowrap">
-                    Implement
-                </button>
-            </div>
-        </li>
-        
-        <li class="rounded-lg border border-slate-800 bg-slate-950/60 p-3 hover:border-slate-700 transition-colors">
-            <div class="flex items-start justify-between">
-                <div>
-                    <div class="flex items-center gap-2">
-                        <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
-                        <span class="font-medium text-white">Mid-Week Review</span>
-                    </div>
-                    <p class="mt-1 text-sm text-slate-400">Schedule mid-week review to prevent forecasted delays and adjust resource allocation.</p>
-                    <div class="mt-2 flex items-center gap-4 text-xs text-slate-500">
-                        <span>Impact: High</span>
-                        <span>Effort: Low</span>
-                        <span>Time: 1 hour</span>
-                    </div>
-                </div>
-                <button type="button"
-                        data-optimization-action
-                        data-action-title="Schedule Mid-Week Review"
-                        data-action-message="Schedule a review meeting for Wednesday 2 PM to assess progress and adjust resources. Duration: 1 hour. Team leads will be notified automatically."
-                        data-action-confirm="Schedule Meeting"
-                        data-action-type="mid-week-review"
-                        class="inline-flex w-32 items-center justify-center rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-500 whitespace-nowrap">
-                    Schedule
-                </button>
-            </div>
-        </li>
-        
-        <li class="rounded-lg border border-slate-800 bg-slate-950/60 p-3 hover:border-slate-700 transition-colors">
-            <div class="flex items-start justify-between">
-                <div>
-                    <div class="flex items-center gap-2">
-                        <div class="w-2 h-2 rounded-full bg-rose-500"></div>
-                        <span class="font-medium text-white">Private Client Optimization</span>
-                    </div>
-                    <p class="mt-1 text-sm text-slate-400">Private clients have the lowest on-time rate (89%). Optimize workflow and add buffer time.</p>
-                    <div class="mt-2 flex items-center gap-4 text-xs text-slate-500">
-                        <span>Impact: High</span>
-                        <span>Effort: High</span>
-                        <span>Time: 8 hours</span>
-                    </div>
-                </div>
-                <button type="button"
-                        data-optimization-action
-                        data-action-title="Optimize Private Client Workflow"
-                        data-action-message="Create optimization plan for private clients: 1) Add 30-min buffer to all deadlines, 2) Assign senior analysts, 3) Enable early review triggers."
-                        data-action-confirm="Create Plan"
-                        data-action-type="private-optimization"
-                        class="inline-flex w-32 items-center justify-center rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-500 whitespace-nowrap">
-                    Optimize
-                </button>
-            </div>
-        </li>
-    </ul>
-</div>
+                <ul class="space-y-3">
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
+                    <li class="rounded-lg border border-slate-800 bg-slate-950/60 p-3 hover:border-slate-700 transition-colors">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 rounded-full bg-amber-500"></div>
+                                    <span class="font-medium text-white">Priority Scanning Tasks</span>
+                                </div>
+                                <p class="mt-1 text-sm text-slate-400">Prioritize scanning tasks for government clients to keep SLA above 95%.</p>
+                                <div class="mt-2 flex items-center gap-4 text-xs text-slate-500">
+                                    <span>Impact: High</span>
+                                    <span>Effort: Low</span>
+                                    <span>Time: 2 hours</span>
+                                </div>
+                            </div>
+                            <button type="button"
+                                    data-optimization-action
+                                    data-action-title="Prioritize Government Scanning"
+                                    data-action-message="This will prioritize all government client scanning tasks in the queue for the next 7 days. Expected improvement: SLA increase to 95%."
+                                    data-action-confirm="Schedule Priority"
+                                    data-action-type="priority-scanning"
+                                    class="inline-flex w-32 items-center justify-center rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-500 whitespace-nowrap">
+                                Implement
+                            </button>
+                        </div>
+                    </li>
 
-<!-- Optimization Action Modal -->
-<div id="optimization-modal" role="dialog" aria-modal="true" class="fixed inset-0 z-[70] hidden flex items-center justify-center bg-black/60 px-4 py-6">
-    <div class="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
-        <div class="flex items-start justify-between">
-            <div>
-                <h2 id="optimization-title" class="text-lg font-semibold text-white">Optimization Action</h2>
-                <p id="optimization-message" class="mt-1 text-sm text-slate-400">Action details will appear here.</p>
-            </div>
-            <button type="button" data-optimization-modal-close class="text-slate-400 hover:text-white">x</button>
-        </div>
-        
-        <div id="optimization-impact" class="mt-4 hidden">
-            <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-                <h3 class="text-sm font-semibold text-white mb-2">Expected Impact</h3>
-                <ul class="space-y-2 text-xs text-slate-300">
-                    <li id="impact-metric-1" class="flex items-center gap-2">
-                        <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
-                        <span>Metric improvement 1</span>
+                    <li class="rounded-lg border border-slate-800 bg-slate-950/60 p-3 hover:border-slate-700 transition-colors">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                                    <span class="font-medium text-white">Task Reassignment</span>
+                                </div>
+                                <p class="mt-1 text-sm text-slate-400">Reassign two tasks from validation queue to reduce average duration by 0.3h.</p>
+                                <div class="mt-2 flex items-center gap-4 text-xs text-slate-500">
+                                    <span>Impact: Medium</span>
+                                    <span>Effort: Medium</span>
+                                    <span>Time: 4 hours</span>
+                                </div>
+                            </div>
+                            <button type="button"
+                                    data-optimization-action
+                                    data-action-title="Reassign Validation Tasks"
+                                    data-action-message="Move two validation tasks from the overloaded queue to available analysts. This will reduce average duration by 0.3h and improve on-time rate."
+                                    data-action-confirm="Reassign Tasks"
+                                    data-action-type="task-reassignment"
+                                    class="inline-flex w-32 items-center justify-center rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-500 whitespace-nowrap">
+                                Implement
+                            </button>
+                        </div>
                     </li>
-                    <li id="impact-metric-2" class="flex items-center gap-2">
-                        <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
-                        <span>Metric improvement 2</span>
+
+                    <li class="rounded-lg border border-slate-800 bg-slate-950/60 p-3 hover:border-slate-700 transition-colors">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+                                    <span class="font-medium text-white">Mid-Week Review</span>
+                                </div>
+                                <p class="mt-1 text-sm text-slate-400">Schedule mid-week review to prevent forecasted delays and adjust resource allocation.</p>
+                                <div class="mt-2 flex items-center gap-4 text-xs text-slate-500">
+                                    <span>Impact: High</span>
+                                    <span>Effort: Low</span>
+                                    <span>Time: 1 hour</span>
+                                </div>
+                            </div>
+                            <button type="button"
+                                    data-optimization-action
+                                    data-action-title="Schedule Mid-Week Review"
+                                    data-action-message="Schedule a review meeting for Wednesday 2 PM to assess progress and adjust resources. Duration: 1 hour. Team leads will be notified automatically."
+                                    data-action-confirm="Schedule Meeting"
+                                    data-action-type="mid-week-review"
+                                    class="inline-flex w-32 items-center justify-center rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-500 whitespace-nowrap">
+                                Schedule
+                            </button>
+                        </div>
                     </li>
-                    <li id="impact-metric-3" class="flex items-center gap-2">
-                        <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
-                        <span>Metric improvement 3</span>
+
+                    <li class="rounded-lg border border-slate-800 bg-slate-950/60 p-3 hover:border-slate-700 transition-colors">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 rounded-full bg-rose-500"></div>
+                                    <span class="font-medium text-white">Private Client Optimization</span>
+                                </div>
+                                <p class="mt-1 text-sm text-slate-400">Private clients have the lowest on-time rate (89%). Optimize workflow and add buffer time.</p>
+                                <div class="mt-2 flex items-center gap-4 text-xs text-slate-500">
+                                    <span>Impact: High</span>
+                                    <span>Effort: High</span>
+                                    <span>Time: 8 hours</span>
+                                </div>
+                            </div>
+                            <button type="button"
+                                    data-optimization-action
+                                    data-action-title="Optimize Private Client Workflow"
+                                    data-action-message="Create optimization plan for private clients: 1) Add 30-min buffer to all deadlines, 2) Assign senior analysts, 3) Enable early review triggers."
+                                    data-action-confirm="Create Plan"
+                                    data-action-type="private-optimization"
+                                    class="inline-flex w-32 items-center justify-center rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-500 whitespace-nowrap">
+                                Optimize
+                            </button>
+                        </div>
                     </li>
                 </ul>
             </div>
-        </div>
-        
-        <div id="optimization-feedback" class="mt-4 hidden">
-            <div class="rounded-lg bg-emerald-900/30 border border-emerald-800/50 p-3">
-                <p id="feedback-message" class="text-sm text-emerald-300"></p>
+
+            <!-- Optimization Action Modal -->
+            <div id="optimization-modal" role="dialog" aria-modal="true" class="fixed inset-0 z-[70] hidden flex items-center justify-center bg-black/60 px-4 py-6">
+                <div class="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <h2 id="optimization-title" class="text-lg font-semibold text-white">Optimization Action</h2>
+                            <p id="optimization-message" class="mt-1 text-sm text-slate-400">Action details will appear here.</p>
+                        </div>
+                        <button type="button" data-optimization-modal-close class="text-slate-400 hover:text-white">x</button>
+                    </div>
+
+                    <div id="optimization-impact" class="mt-4 hidden">
+                        <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                            <h3 class="text-sm font-semibold text-white mb-2">Expected Impact</h3>
+                            <ul class="space-y-2 text-xs text-slate-300">
+                                <li id="impact-metric-1" class="flex items-center gap-2">
+                                    <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+                                    <span>Metric improvement 1</span>
+                                </li>
+                                <li id="impact-metric-2" class="flex items-center gap-2">
+                                    <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+                                    <span>Metric improvement 2</span>
+                                </li>
+                                <li id="impact-metric-3" class="flex items-center gap-2">
+                                    <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+                                    <span>Metric improvement 3</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div id="optimization-feedback" class="mt-4 hidden">
+                        <div class="rounded-lg bg-emerald-900/30 border border-emerald-800/50 p-3">
+                            <p id="feedback-message" class="text-sm text-emerald-300"></p>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex justify-end gap-2">
+                        <button type="button" data-optimization-modal-close class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800">Cancel</button>
+                        <button type="button" id="optimization-confirm" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500">
+                            <span data-button-label>Proceed</span>
+                            <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                        </button>
+                    </div>
+                </div>
             </div>
-        </div>
-        
-        <div class="mt-6 flex justify-end gap-2">
-            <button type="button" data-optimization-modal-close class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800">Cancel</button>
-            <button type="button" id="optimization-confirm" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500">
-                <span data-button-label>Proceed</span>
-                <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
-            </button>
-        </div>
-    </div>
-</div>
         </div>
     </section>
 
@@ -353,10 +370,10 @@
         const impactSection = document.getElementById('optimization-impact');
         const feedback = document.getElementById('optimization-feedback');
         const feedbackMessage = document.getElementById('feedback-message');
-        
+
         let currentAction = null;
         let currentActionType = null;
-        
+
         // Action impact data
         const actionImpacts = {
             'priority-scanning': {
@@ -388,7 +405,7 @@
                 ]
             }
         };
-        
+
         function setButtonLoading(button, isLoading, loadingText) {
             if (!button) {
                 return;
@@ -429,11 +446,11 @@
             currentAction = null;
             currentActionType = null;
         }
-        
+
         function openModal(trigger) {
             currentAction = trigger.dataset.actionTitle;
             currentActionType = trigger.dataset.actionType;
-            
+
             // Set modal content
             const label = confirmBtn.querySelector('[data-button-label]');
             title.textContent = trigger.dataset.actionTitle || 'Optimization Action';
@@ -444,12 +461,12 @@
             }
             confirmBtn.dataset.loadingText = trigger.dataset.actionLoading || 'Working...';
             setButtonLoading(confirmBtn, false);
-            
+
             // Show impact metrics if available
             if (currentActionType && actionImpacts[currentActionType]) {
                 const impacts = actionImpacts[currentActionType];
                 const impactItems = impactSection.querySelectorAll('[id^="impact-metric-"]');
-                
+
                 impactItems.forEach((item, index) => {
                     if (impacts.metrics[index]) {
                         item.querySelector('span').textContent = impacts.metrics[index];
@@ -458,23 +475,23 @@
                         item.classList.add('hidden');
                     }
                 });
-                
+
                 impactSection.classList.remove('hidden');
             } else {
                 impactSection.classList.add('hidden');
             }
-            
+
             // Show modal
             modal.classList.remove('hidden');
             document.body.classList.add('overflow-hidden');
             feedback.classList.add('hidden');
         }
-        
+
         function showFeedback(message) {
             feedbackMessage.textContent = message;
             feedback.classList.remove('hidden');
         }
-        
+
         // Handle optimization action buttons
         document.querySelectorAll('[data-optimization-action]').forEach(button => {
             button.addEventListener('click', function(e) {
@@ -482,12 +499,12 @@
                 openModal(this);
             });
         });
-        
+
         // Handle confirmation
         confirmBtn.addEventListener('click', function() {
             if (!currentActionType) return;
             setButtonLoading(confirmBtn, true, confirmBtn.dataset.loadingText || 'Working...');
-            
+
             // Action success messages
             const successMessages = {
                 'priority-scanning': '✅ Government scanning tasks prioritized successfully. Tasks will be processed in priority order starting now.',
@@ -495,18 +512,18 @@
                 'mid-week-review': '✅ Mid-week review scheduled for Wednesday 2 PM. Team leads have been notified.',
                 'private-optimization': '✅ Private client optimization plan created. Implementation will begin tomorrow.'
             };
-            
+
             const message = successMessages[currentActionType] || '✅ Action completed successfully.';
             showFeedback(message);
-            
+
             // Update dashboard metrics based on action
             updateMetrics(currentActionType);
-            
+
             // Auto-close after 2 seconds
             setTimeout(() => {
                 setButtonLoading(confirmBtn, false);
                 closeModal();
-                
+
                 // Update the button to show completed state
                 const button = document.querySelector(`[data-action-type="${currentActionType}"]`);
                 if (button) {
@@ -517,7 +534,7 @@
                 }
             }, 2000);
         });
-        
+
         function updateMetrics(actionType) {
             // Update relevant metrics on the page based on action
             const outputsElement = document.querySelector('.text-2xl.font-semibold.text-white:first-of-type');
@@ -525,14 +542,14 @@
             const durationElement = Array.from(document.querySelectorAll('.text-2xl.font-semibold.text-white'))
                 .find((element) => element.textContent.trim() === '2.6h');
             const riskElement = document.querySelector('.text-2xl.font-semibold.text-amber-300');
-            
+
             switch(actionType) {
                 case 'priority-scanning':
                     if (onTimeElement && onTimeElement.textContent === '91%') {
                         onTimeElement.textContent = '92%';
                     }
                     break;
-                    
+
                 case 'task-reassignment':
                     if (durationElement && durationElement.textContent === '2.6h') {
                         durationElement.textContent = '2.4h';
@@ -541,7 +558,7 @@
                         onTimeElement.textContent = '92%';
                     }
                     break;
-                    
+
                 case 'mid-week-review':
                     if (riskElement && riskElement.textContent === 'Medium') {
                         riskElement.textContent = 'Low';
@@ -549,7 +566,7 @@
                         riskElement.classList.add('text-emerald-400');
                     }
                     break;
-                    
+
                 case 'private-optimization':
                     if (onTimeElement && onTimeElement.textContent === '91%') {
                         onTimeElement.textContent = '92%';
@@ -557,16 +574,16 @@
                     break;
             }
         }
-        
+
         // Modal close handlers
         modal.addEventListener('click', function(e) {
             if (e.target === modal) closeModal();
         });
-        
+
         modal.querySelectorAll('[data-optimization-modal-close]').forEach(button => {
             button.addEventListener('click', closeModal);
         });
-        
+
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
                 closeModal();

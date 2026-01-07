@@ -37,6 +37,7 @@
                 </div>
                 <div>
                     <label class="text-xs uppercase text-slate-400">Role</label>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <select class="manager-filter-select mt-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
                         <option>All Roles</option>
                         <option>Employee</option>
@@ -46,6 +47,7 @@
                 </div>
                 <div>
                     <label class="text-xs uppercase text-slate-400">Status</label>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <select class="manager-filter-select mt-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
                         <option>All Status</option>
                         <option>Active</option>
@@ -55,6 +57,7 @@
                 </div>
                 <div>
                     <label class="text-xs uppercase text-slate-400">Department</label>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <select class="manager-filter-select mt-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
                         <option>All Departments</option>
                         <option>Operations</option>
@@ -69,21 +72,25 @@
         <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Total Users</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-white">1,247</p>
                 <p class="text-xs text-slate-500">Across all units</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Active</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-emerald-400">1,096</p>
                 <p class="text-xs text-slate-500">Online in last 7 days</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Pending Invites</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-amber-300">38</p>
                 <p class="text-xs text-slate-500">Awaiting activation</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Suspended</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-rose-300">12</p>
                 <p class="text-xs text-slate-500">Manual review required</p>
             </div>
@@ -103,6 +110,7 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="border-t border-slate-800 hover:bg-slate-800/50">
                             <td class="px-4 py-3">
                                 <p class="font-medium text-white">Juan Dela Cruz</p>
@@ -125,6 +133,7 @@
                                 </button>
                             </td>
                         </tr>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="border-t border-slate-800 hover:bg-slate-800/50">
                             <td class="px-4 py-3">
                                 <p class="font-medium text-white">Maria Santos</p>
@@ -155,6 +164,7 @@
                                 </button>
                             </td>
                         </tr>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="border-t border-slate-800 hover:bg-slate-800/50">
                             <td class="px-4 py-3">
                                 <p class="font-medium text-white">Pedro Reyes</p>

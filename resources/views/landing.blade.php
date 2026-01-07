@@ -328,6 +328,7 @@
                 </div>
                 
                 <div class="text-gray-500 text-sm text-center md:text-right">
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <p>© 2024 Performance Management System. HR Ecosystem v2.0</p>
                     <div class="mt-2 flex flex-wrap justify-center md:justify-end gap-2">
                         <span class="bg-gray-800 px-2 py-1 rounded text-xs">Integrated with HMS</span>
@@ -360,6 +361,7 @@
                     <form class="space-y-4 md:space-y-5">
                         <div>
                             <label for="email" class="block mb-2 text-sm font-medium text-gray-300">Email Address</label>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <input type="email" name="email" id="email" class="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg block w-full p-3" placeholder="employee@company.com">
                         </div>
                         <div>
@@ -421,6 +423,7 @@
                         <div id="activationPhaseVerify">
                             <div>
                                 <label for="employee_id" class="block mb-2 text-sm font-medium text-gray-300">Employee ID</label>
+                                {{-- DUMMY_DATA: replace with dynamic value --}}
                                 <input type="text" name="employee_id" id="employee_id" class="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg block w-full p-3" placeholder="EMP-2024-00123">
                                 <div class="mt-1 text-xs text-gray-500">
                                     <i class="fas fa-info-circle mr-1"></i> Format: EMP-YYYY-XXXXX
@@ -428,8 +431,9 @@
                             </div>
 
                             <div>
-                                <label for="act_email" class="block mb-2 text-sm font-medium text-gray-300">Email Address</label>
-                                <input type="email" name="email" id="act_email" class="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg block w-full p-3" placeholder="employee@company.com">
+                            <label for="act_email" class="block mb-2 text-sm font-medium text-gray-300">Email Address</label>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
+                            <input type="email" name="email" id="act_email" class="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg block w-full p-3" placeholder="employee@company.com">
                             </div>
 
                             <div class="bg-purple-900/30 border border-purple-800/50 p-3 md:p-4 rounded-lg">
@@ -568,6 +572,7 @@
                     <form class="space-y-4 md:space-y-5">
                         <div>
                             <label for="reset_email" class="block mb-2 text-sm font-medium text-gray-300">Email Address</label>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <input type="email" name="email" id="reset_email" class="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg block w-full p-3" placeholder="employee@company.com">
                         </div>
                         <div class="bg-purple-900/30 border border-purple-800/50 p-3 md:p-4 rounded-lg">

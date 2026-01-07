@@ -5,6 +5,7 @@
                 <h1 class="text-2xl font-semibold text-white">Predictive Analytics</h1>
                 <p class="text-sm text-slate-400">Forecast delays and output risks using time-stamped task data.</p>
             </div>
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             <div class="text-xs text-slate-400">Forecast window: next 14 days</div>
         </div>
 
@@ -12,6 +13,7 @@
             <div class="flex flex-wrap gap-3">
                 <div>
                     <label class="text-xs uppercase text-slate-400">Time Period</label>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <select id="timePeriodSelect" class="manager-filter-select mt-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
                         <option>Next 7 Days</option>
                         <option selected>Next 14 Days</option>
@@ -20,6 +22,7 @@
                 </div>
                 <div>
                     <label class="text-xs uppercase text-slate-400">Client Type</label>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <select class="manager-filter-select mt-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
                         <option>All Clients</option>
                         <option>Government</option>
@@ -29,6 +32,7 @@
                 </div>
                 <div>
                     <label class="text-xs uppercase text-slate-400">Task Category</label>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <select class="manager-filter-select mt-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
                         <option>All Categories</option>
                         <option>Scanning</option>
@@ -39,6 +43,7 @@
                 </div>
                 <div>
                     <label class="text-xs uppercase text-slate-400">Target Output</label>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <select class="manager-filter-select mt-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
                         <option>Weekly</option>
                         <option selected>Monthly</option>
@@ -51,21 +56,27 @@
         <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Forecasted Delay Risk</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-amber-300">Medium</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="text-xs text-slate-500">6 tasks at risk</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Projected On-Time</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-white">90%</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="text-xs text-slate-500">Target: 94%</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Output Gap</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-rose-300">-22</p>
                 <p class="text-xs text-slate-500">Against monthly target</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Confidence Score</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-emerald-400">84%</p>
                 <p class="text-xs text-slate-500">Based on last 90 days</p>
             </div>
@@ -79,12 +90,15 @@
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-6">
                 <h2 class="mb-4 text-sm font-semibold uppercase tracking-widest text-slate-400">Risk Drivers</h2>
                 <ul class="space-y-3 text-sm text-slate-300">
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <li class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                         E-Bank Scanning duration trending 15% over baseline.
                     </li>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <li class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                         Two analysts nearing capacity for reporting tasks.
                     </li>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <li class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                         Client approvals lagging on private accounts.
                     </li>
@@ -107,6 +121,7 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="border-t border-slate-800">
                             <td class="px-4 py-3">E-Bank Scanning</td>
                             <td class="px-4 py-3">ABC Corp</td>
@@ -124,6 +139,7 @@
                                 </button>
                             </td>
                         </tr>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="border-t border-slate-800">
                             <td class="px-4 py-3">Client Form Review</td>
                             <td class="px-4 py-3">XYZ Ltd</td>
@@ -141,6 +157,7 @@
                                 </button>
                             </td>
                         </tr>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="border-t border-slate-800">
                             <td class="px-4 py-3">Report Generation</td>
                             <td class="px-4 py-3">Internal</td>
@@ -166,6 +183,7 @@
         <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-6">
             <h2 class="mb-4 text-sm font-semibold uppercase tracking-widest text-slate-400">Optimization Recommendations</h2>
             <ul class="space-y-3 text-sm text-slate-300">
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <li class="rounded-lg border border-slate-800 bg-slate-950/60 p-3 flex items-center justify-between">
                     <div>
                         <span class="font-medium text-white">Add scanning slots</span>
@@ -180,6 +198,7 @@
                         Implement
                     </button>
                 </li>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <li class="rounded-lg border border-slate-800 bg-slate-950/60 p-3 flex items-center justify-between">
                     <div>
                         <span class="font-medium text-white">Early Approval Reminders</span>
@@ -194,6 +213,7 @@
                         Enable
                     </button>
                 </li>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <li class="rounded-lg border border-slate-800 bg-slate-950/60 p-3 flex items-center justify-between">
                     <div>
                         <span class="font-medium text-white">Analyst Rotation</span>
@@ -447,6 +467,7 @@
                     gapElement.classList.add('text-amber-300');
                 }
                 
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 if (onTimeElement && onTimeElement.textContent.includes('90%')) {
                     onTimeElement.textContent = '92%';
                 }
@@ -475,8 +496,11 @@
             timePeriodSelect.addEventListener('change', function() {
                 // Simulate forecast update based on time period
                 const periods = {
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     'Next 7 Days': { delayRisk: 'Low', outputGap: '-8', onTime: '95%' },
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     'Next 14 Days': { delayRisk: 'Medium', outputGap: '-22', onTime: '90%' },
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     'Next 30 Days': { delayRisk: 'High', outputGap: '-35', onTime: '85%' }
                 };
                 

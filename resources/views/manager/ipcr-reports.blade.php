@@ -27,6 +27,7 @@
             <div class="flex flex-wrap gap-3">
                 <div>
                     <label class="text-xs uppercase text-slate-400">Rating Period</label>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <select class="manager-filter-select mt-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
                         <option>This Quarter</option>
                         <option selected>Current Year</option>
@@ -35,6 +36,7 @@
                 </div>
                 <div>
                     <label class="text-xs uppercase text-slate-400">Status</label>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <select class="manager-filter-select mt-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
                         <option>All Status</option>
                         <option>Generated</option>
@@ -44,6 +46,7 @@
                 </div>
                 <div>
                     <label class="text-xs uppercase text-slate-400">Team</label>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <select class="manager-filter-select mt-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
                         <option>All Teams</option>
                         <option>Operations</option>
@@ -57,21 +60,25 @@
         <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Reports Generated</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-white">18</p>
                 <p class="text-xs text-slate-500">Auto-generated</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Pending Review</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-amber-300">4</p>
                 <p class="text-xs text-slate-500">Awaiting supervisor</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Approved</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-emerald-400">12</p>
                 <p class="text-xs text-slate-500">Locked ratings</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Missing Outputs</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-rose-300">2</p>
                 <p class="text-xs text-slate-500">Alerts sent</p>
             </div>
@@ -92,6 +99,7 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="border-t border-slate-800">
                             <td class="px-4 py-3">Juan Dela Cruz</td>
                             <td class="px-4 py-3">Q3 2025</td>
@@ -109,6 +117,7 @@
                                 </button>
                             </td>
                         </tr>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="border-t border-slate-800">
                             <td class="px-4 py-3">Maria Santos</td>
                             <td class="px-4 py-3">Q3 2025</td>
@@ -126,6 +135,7 @@
                                 </button>
                             </td>
                         </tr>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="border-t border-slate-800">
                             <td class="px-4 py-3">Pedro Reyes</td>
                             <td class="px-4 py-3">Q3 2025</td>
@@ -282,4 +292,3 @@
     </script>
     @endpush
 </x-layouts.manager>
-

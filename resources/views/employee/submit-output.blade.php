@@ -39,6 +39,7 @@
                         <h3 class="text-lg font-semibold text-white">Auto-Logging Status</h3>
                         <p class="text-sm text-gray-400">Prototype preview of system-captured task data.</p>
                     </div>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <span class="px-2 py-1 text-xs rounded bg-emerald-900 text-emerald-300 border border-emerald-800">
                         TRACKING ON
                     </span>
@@ -47,14 +48,17 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 text-sm">
                     <div class="bg-gray-700 rounded-lg p-3">
                         <p class="text-gray-400 mb-1">Tracking Source</p>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <p class="font-medium text-white">My Tasks</p>
                     </div>
                     <div class="bg-gray-700 rounded-lg p-3">
                         <p class="text-gray-400 mb-1">Active Session</p>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <p class="font-medium text-white">E-Bank Scanning</p>
                     </div>
                     <div class="bg-gray-700 rounded-lg p-3">
                         <p class="text-gray-400 mb-1">Time Window</p>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <p class="font-medium text-white">09:12 - 10:42</p>
                     </div>
                 </div>
@@ -75,6 +79,7 @@
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {{-- Task Cards --}}
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <div class="border border-gray-600 rounded-lg p-4 hover:border-blue-500 hover:bg-gray-700 transition-all duration-200 cursor-pointer group" data-task-card data-task-name="Report Generation" data-task-client="ABC Corp">
                         <div class="flex justify-between items-start mb-2">
                             <div>
@@ -92,6 +97,7 @@
                         </div>
                     </div>
 
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <div class="border border-gray-600 rounded-lg p-4 hover:border-blue-500 hover:bg-gray-700 transition-all duration-200 cursor-pointer group" data-task-card data-task-name="Client Form Review" data-task-client="XYZ Ltd">
                         <div class="flex justify-between items-start mb-2">
                             <div>
@@ -113,6 +119,7 @@
                 {{-- Manual Selection Fallback --}}
                 <div class="mt-6">
                     <label class="block mb-2 text-sm font-medium text-white">Or select manually:</label>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <select id="submitTaskSelect" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                         <option class="bg-gray-700">Select task from list</option>
                         <option class="bg-gray-700">Report Generation - ABC Corp</option>
@@ -124,25 +131,27 @@
 
                 <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block mb-2 text-sm font-medium text-white">
-                            Client Request ID
-                            <span class="text-xs text-rose-300">Required</span>
-                        </label>
-                        <input id="submitRequestId" type="text"
-                               class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                               placeholder="REQ-2025-01234">
-                        <p class="mt-1 text-xs text-gray-400">Links this output to the exact client request.</p>
-                    </div>
+                            <label class="block mb-2 text-sm font-medium text-white">
+                                Client Request ID
+                                <span class="text-xs text-rose-300">Required</span>
+                            </label>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
+                            <input id="submitRequestId" type="text"
+                                   class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                                   placeholder="REQ-2025-01234">
+                            <p class="mt-1 text-xs text-gray-400">Links this output to the exact client request.</p>
+                        </div>
                     <div>
-                        <label class="block mb-2 text-sm font-medium text-white">
-                            Output Type
-                            <span class="text-xs text-rose-300">Required</span>
-                        </label>
-                        <select id="submitOutputType" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                            <option class="bg-gray-700">Select form or output type</option>
-                            <option class="bg-gray-700">Bank Statement Form (BSF-01)</option>
-                            <option class="bg-gray-700">Expense Report (ER-02)</option>
-                            <option class="bg-gray-700">Financial Statement (FS-03)</option>
+                            <label class="block mb-2 text-sm font-medium text-white">
+                                Output Type
+                                <span class="text-xs text-rose-300">Required</span>
+                            </label>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
+                            <select id="submitOutputType" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                                <option class="bg-gray-700">Select form or output type</option>
+                                <option class="bg-gray-700">Bank Statement Form (BSF-01)</option>
+                                <option class="bg-gray-700">Expense Report (ER-02)</option>
+                                <option class="bg-gray-700">Financial Statement (FS-03)</option>
                             <option class="bg-gray-700">Client Summary Report (CSR-04)</option>
                             <option class="bg-gray-700">Tax Compliance Form (TCF-05)</option>
                             <option class="bg-gray-700">Audit Report (AR-06)</option>
@@ -183,6 +192,7 @@
                 <div class="mb-4">
                     <h4 class="text-sm font-medium text-white mb-3">Recent Uploads</h4>
                     <div class="space-y-2">
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <div class="flex items-center justify-between bg-gray-700 rounded-lg p-3">
                             <div class="flex items-center">
                                 <svg class="w-5 h-5 text-blue-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -209,14 +219,17 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                     <div class="bg-gray-700 rounded-lg p-3">
                         <p class="text-gray-400 mb-1">Maximum File Size</p>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <p class="font-medium text-white">20 MB</p>
                     </div>
                     <div class="bg-gray-700 rounded-lg p-3">
                         <p class="text-gray-400 mb-1">Supported Formats</p>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <p class="font-medium text-white">8 types</p>
                     </div>
                     <div class="bg-gray-700 rounded-lg p-3">
                         <p class="text-gray-400 mb-1">Encryption</p>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <p class="font-medium text-white">256-bit SSL</p>
                     </div>
                 </div>
@@ -260,12 +273,14 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block mb-2 text-sm font-medium text-white">Auto-Logged Start</label>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <input type="text" 
                                    class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
                                    value="09:12 AM" disabled>
                         </div>
                         <div>
                             <label class="block mb-2 text-sm font-medium text-white">Auto-Logged End</label>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <input type="text" 
                                    class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
                                    value="10:42 AM" disabled>

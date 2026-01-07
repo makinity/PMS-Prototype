@@ -31,6 +31,7 @@
             <div class="flex flex-wrap gap-3">
                 <div>
                     <label class="text-xs uppercase text-slate-400">Category</label>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <select class="manager-filter-select mt-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
                         <option>All Categories</option>
                         <option>Scanning</option>
@@ -41,6 +42,7 @@
                 </div>
                 <div>
                     <label class="text-xs uppercase text-slate-400">Client Type</label>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <select class="manager-filter-select mt-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
                         <option>All Clients</option>
                         <option>Government</option>
@@ -50,6 +52,7 @@
                 </div>
                 <div>
                     <label class="text-xs uppercase text-slate-400">Status</label>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <select class="manager-filter-select mt-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
                         <option>All Status</option>
                         <option>Active</option>
@@ -59,6 +62,7 @@
                 </div>
                 <div>
                     <label class="text-xs uppercase text-slate-400">SLA Coverage</label>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <select class="manager-filter-select mt-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
                         <option>All</option>
                         <option>Has SLA</option>
@@ -71,21 +75,25 @@
         <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Total Tasks</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-white">42</p>
                 <p class="text-xs text-slate-500">Active catalog</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Critical Tasks</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-amber-300">6</p>
                 <p class="text-xs text-slate-500">Auto tracked</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">SLA Coverage</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-emerald-400">94%</p>
                 <p class="text-xs text-slate-500">38 tasks with SLA</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Missing Outputs</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-rose-300">2</p>
                 <p class="text-xs text-slate-500">Requires setup</p>
             </div>
@@ -107,6 +115,7 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="border-t border-slate-800">
                             <td class="px-4 py-3 text-white">E-Bank Scanning</td>
                             <td class="px-4 py-3">Scanning</td>
@@ -128,6 +137,7 @@
                                 </button>
                             </td>
                         </tr>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="border-t border-slate-800">
                             <td class="px-4 py-3 text-white">Client Form Review</td>
                             <td class="px-4 py-3">Validation</td>
@@ -149,6 +159,7 @@
                                 </button>
                             </td>
                         </tr>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="border-t border-slate-800">
                             <td class="px-4 py-3 text-white">Report Generation</td>
                             <td class="px-4 py-3">Reporting</td>
@@ -170,6 +181,7 @@
                                 </button>
                             </td>
                         </tr>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="border-t border-slate-800">
                             <td class="px-4 py-3 text-white">Document Upload</td>
                             <td class="px-4 py-3">Client Follow-up</td>
@@ -227,15 +239,21 @@
                 <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-400">Critical Task Tracking</h2>
                 <div class="mt-4 space-y-4 text-sm text-slate-300">
                     <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <p class="font-medium text-white">E-Bank Scanning</p>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <p class="text-xs text-slate-500">Baseline 1.8h, alerts at 2.2h</p>
                     </div>
                     <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <p class="font-medium text-white">Client Form Review</p>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <p class="text-xs text-slate-500">Baseline 2.2h, alerts at 2.7h</p>
                     </div>
                     <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <p class="font-medium text-white">Report Generation</p>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <p class="text-xs text-slate-500">Baseline 3.0h, alerts at 3.8h</p>
                     </div>
                 </div>

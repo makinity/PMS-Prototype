@@ -26,6 +26,7 @@
             <!-- Employee Filter -->
             <div>
                 <label class="text-xs uppercase text-slate-400">Employee</label>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <select id="employeeFilter" 
                         class="manager-filter-select mt-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
                     <option value="all">All Employees</option>
@@ -38,6 +39,7 @@
             <!-- Date Range Filter -->
             <div>
                 <label class="text-xs uppercase text-slate-400">Date Range</label>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <select id="dateRangeFilter" 
                         class="manager-filter-select mt-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
                     <option value="week">This Week</option>
@@ -48,6 +50,7 @@
 
             <div>
                 <label class="text-xs uppercase text-slate-400">Client Type</label>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <select id="clientTypeFilter"
                         class="manager-filter-select mt-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
                     <option value="all">All Clients</option>
@@ -59,6 +62,7 @@
 
             <div>
                 <label class="text-xs uppercase text-slate-400">Task Category</label>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <select id="taskCategoryFilter"
                         class="manager-filter-select mt-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
                     <option value="all">All Categories</option>
@@ -124,6 +128,7 @@
     <!-- Tasks List for Selected Date (Initially Hidden) -->
     <div id="dateTasksList" class="hidden rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
         <div class="mb-4 flex items-center justify-between">
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             <h2 class="text-lg font-semibold text-white" id="selectedDateTitle">Tasks for December 26, 2025</h2>
             <button onclick="document.getElementById('dateTasksList').classList.add('hidden')" 
                     class="text-sm text-slate-400 hover:text-white">

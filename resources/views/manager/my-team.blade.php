@@ -5,27 +5,34 @@
                 <h1 class="text-2xl font-semibold text-white">My Team</h1>
                 <p class="text-sm text-slate-400">Live status, access, and performance setup for monitored employees.</p>
             </div>
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             <div class="text-xs text-slate-400">Last sync: 2 minutes ago</div>
         </div>
 
         <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Team Members</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-white">12</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="text-xs text-slate-500">Active: 10</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Running Tasks</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-white">7</p>
                 <p class="text-xs text-slate-500">Auto-tracked</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Output Compliance</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-emerald-400">92%</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="text-xs text-slate-500">Missing outputs: 2</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Avg Rating</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-white">4.3</p>
                 <p class="text-xs text-slate-500">System calculated</p>
             </div>
@@ -35,6 +42,7 @@
             <div class="flex flex-wrap gap-3">
                 <div>
                     <label class="text-xs uppercase text-slate-400">Team</label>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <select class="manager-filter-select mt-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
                         <option>All Teams</option>
                         <option>Operations</option>
@@ -44,6 +52,7 @@
                 </div>
                 <div>
                     <label class="text-xs uppercase text-slate-400">Role</label>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <select class="manager-filter-select mt-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
                         <option>All Roles</option>
                         <option>Processor</option>
@@ -53,6 +62,7 @@
                 </div>
                 <div>
                     <label class="text-xs uppercase text-slate-400">Status</label>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <select class="manager-filter-select mt-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
                         <option>All Status</option>
                         <option>Active</option>
@@ -79,6 +89,7 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="border-t border-slate-800 hover:bg-slate-800/50">
                             <td class="px-4 py-3">Juan Dela Cruz</td>
                             <td class="px-4 py-3">Processor</td>
@@ -98,6 +109,7 @@
                                 </button>
                             </td>
                         </tr>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="border-t border-slate-800 hover:bg-slate-800/50">
                             <td class="px-4 py-3">Maria Santos</td>
                             <td class="px-4 py-3">Reviewer</td>
@@ -117,6 +129,7 @@
                                 </button>
                             </td>
                         </tr>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="border-t border-slate-800 hover:bg-slate-800/50">
                             <td class="px-4 py-3">Pedro Reyes</td>
                             <td class="px-4 py-3">Analyst</td>
@@ -164,14 +177,17 @@
                     <div class="mt-3 space-y-2 text-sm text-slate-300">
                         <div class="flex items-center justify-between">
                             <span>Output timeliness weight</span>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <span class="text-emerald-300">40%</span>
                         </div>
                         <div class="flex items-center justify-between">
                             <span>Quality compliance weight</span>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <span class="text-emerald-300">35%</span>
                         </div>
                         <div class="flex items-center justify-between">
                             <span>Volume completion weight</span>
+                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <span class="text-emerald-300">25%</span>
                         </div>
                     </div>
@@ -304,4 +320,3 @@
     </script>
     @endpush
 </x-layouts.manager>
-

@@ -7,7 +7,9 @@
                 <p class="text-gray-300">Track aging tasks and alerts requiring attention without acting on them directly.</p>
             </div>
             <div class="flex items-center gap-3">
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <span class="px-3 py-1 rounded-full bg-rose-900/30 border border-rose-700/50 text-rose-200 text-xs font-semibold">Overdue watch</span>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <span class="px-3 py-1 rounded-full bg-slate-800 text-slate-200 text-xs font-semibold">Notify manager only</span>
             </div>
         </div>
@@ -31,6 +33,7 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-800 text-slate-200">
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-slate-900/60">
                             <td class="px-4 py-3 font-medium text-white">Compliance Evidence Pack</td>
                             <td class="px-4 py-3">Rhea Kim</td>
@@ -40,6 +43,7 @@
                             </td>
                             <td class="px-4 py-3 text-xs text-slate-300">Confirm blocker; log note</td>
                         </tr>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-slate-900/60">
                             <td class="px-4 py-3 font-medium text-white">Vendor Access Cleanup</td>
                             <td class="px-4 py-3">Liam Park</td>
@@ -49,6 +53,7 @@
                             </td>
                             <td class="px-4 py-3 text-xs text-rose-300">Escalation recommended</td>
                         </tr>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-slate-900/60">
                             <td class="px-4 py-3 font-medium text-white">Sprint Documentation</td>
                             <td class="px-4 py-3">Noah Cruz</td>
@@ -69,6 +74,7 @@
                 <span class="px-3 py-1 rounded-full bg-slate-800 text-slate-200 text-xs font-semibold">Audit trail</span>
             </div>
             <div class="space-y-3 text-sm text-slate-200">
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <div class="p-3 rounded-lg bg-rose-900/20 border border-rose-800/40">
                     <div class="flex items-center gap-2 mb-1">
                         <span class="px-2 py-0.5 rounded-full bg-rose-800 text-rose-100 text-[11px] font-semibold">Breach Risk</span>
@@ -76,6 +82,7 @@
                     </div>
                     <p class="text-white">Unrevoked vendor credential detected; awaiting admin response.</p>
                 </div>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <div class="p-3 rounded-lg bg-amber-900/20 border border-amber-800/40">
                     <div class="flex items-center gap-2 mb-1">
                         <span class="px-2 py-0.5 rounded-full bg-amber-800 text-amber-100 text-[11px] font-semibold">SLA Drift</span>
@@ -83,6 +90,7 @@
                     </div>
                     <p class="text-white">Compliance evidence overdue; reminder sent to owner.</p>
                 </div>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <div class="p-3 rounded-lg bg-blue-900/20 border border-blue-800/40">
                     <div class="flex items-center gap-2 mb-1">
                         <span class="px-2 py-0.5 rounded-full bg-blue-800 text-blue-100 text-[11px] font-semibold">Info</span>

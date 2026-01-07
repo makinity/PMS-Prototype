@@ -5,6 +5,7 @@
                 <h1 class="text-2xl font-semibold text-white">Bottleneck Analysis</h1>
                 <p class="text-sm text-slate-400">Identify delays using time-stamped task durations.</p>
             </div>
+            {{-- DUMMY_DATA: replace with dynamic value --}}
             <div class="text-xs text-slate-400">Auto-generated from ORS logs</div>
         </div>
 
@@ -12,6 +13,7 @@
             <div class="flex flex-wrap gap-3">
                 <div>
                     <label class="text-xs uppercase text-slate-400">Time Period</label>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <select class="manager-filter-select mt-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
                         <option>This Week</option>
                         <option selected>This Month</option>
@@ -20,6 +22,7 @@
                 </div>
                 <div>
                     <label class="text-xs uppercase text-slate-400">Task Category</label>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <select class="manager-filter-select mt-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
                         <option>All Categories</option>
                         <option>Scanning</option>
@@ -30,6 +33,7 @@
                 </div>
                 <div>
                     <label class="text-xs uppercase text-slate-400">Client Type</label>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <select class="manager-filter-select mt-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
                         <option>All Clients</option>
                         <option>Government</option>
@@ -43,21 +47,28 @@
         <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Top Bottleneck</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-white">E-Bank Scan</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="text-xs text-slate-500">Avg delay: 1.4h</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Avg Delay</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-amber-300">2.1h</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="text-xs text-slate-500">Across 5 tasks</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">At-Risk Tasks</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-white">6</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="text-xs text-slate-500">Forecasted delays</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">On-Time Recovery</p>
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-emerald-400">88%</p>
                 <p class="text-xs text-slate-500">After intervention</p>
             </div>
@@ -103,12 +114,15 @@
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-6">
                 <h2 class="mb-4 text-sm font-semibold uppercase tracking-widest text-slate-400">Top Delay Drivers</h2>
                 <div class="space-y-3 text-sm text-slate-300">
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                         E-Bank Scanning: 1.4h average over target
                     </div>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                         Client Form Review: 1.1h average over target
                     </div>
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                         Document Upload: 0.9h average over target
                     </div>
@@ -131,6 +145,7 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="border-t border-slate-800">
                             <td class="px-4 py-3">E-Bank Scanning</td>
                             <td class="px-4 py-3">ABC Corp</td>
@@ -148,6 +163,7 @@
                                 </button>
                             </td>
                         </tr>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="border-t border-slate-800">
                             <td class="px-4 py-3">Client Form Review</td>
                             <td class="px-4 py-3">XYZ Ltd</td>
@@ -165,6 +181,7 @@
                                 </button>
                             </td>
                         </tr>
+                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="border-t border-slate-800">
                             <td class="px-4 py-3">Document Upload</td>
                             <td class="px-4 py-3">Internal</td>
@@ -193,6 +210,7 @@
                 <span class="text-xs text-slate-500">Click to implement solutions</span>
             </div>
             <ul class="space-y-3">
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <li class="rounded-lg border border-slate-800 bg-slate-950/60 p-3 hover:border-slate-700 transition-colors">
                     <div class="flex items-start justify-between">
                         <div>
@@ -210,6 +228,7 @@
                         <button type="button"
                                 data-bottleneck-action
                                 data-action-title="Assign Backup Scanner for E-Bank Tasks"
+                                {{-- DUMMY_DATA: replace with dynamic value --}}
                                 data-action-message="Assign an additional scanner during peak hours (10 AM - 2 PM) specifically for E-Bank scanning tasks. This will reduce the current 1.4h average delay by 60%."
                                 data-action-confirm="Schedule Backup"
                                 data-action-type="backup-scanner"
@@ -220,6 +239,7 @@
                     </div>
                 </li>
                 
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <li class="rounded-lg border border-slate-800 bg-slate-950/60 p-3 hover:border-slate-700 transition-colors">
                     <div class="flex items-start justify-between">
                         <div>
@@ -231,6 +251,7 @@
                             <div class="mt-2 flex items-center gap-4 text-xs text-slate-500">
                                 <span>Impact: Medium</span>
                                 <span>Effort: Medium</span>
+                                {{-- DUMMY_DATA: replace with dynamic value --}}
                                 <span>Rework Reduction: 40%</span>
                             </div>
                         </div>
@@ -246,7 +267,8 @@
                         </button>
                     </div>
                 </li>
-                
+
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <li class="rounded-lg border border-slate-800 bg-slate-950/60 p-3 hover:border-slate-700 transition-colors">
                     <div class="flex items-start justify-between">
                         <div>
@@ -264,6 +286,7 @@
                         <button type="button"
                                 data-bottleneck-action
                                 data-action-title="Schedule Batch Document Uploads"
+                                {{-- DUMMY_DATA: replace with dynamic value --}}
                                 data-action-message="Schedule automated batch uploads every hour for document processing. This compresses handoff time and reduces individual upload delays by 70%."
                                 data-action-confirm="Schedule Batches"
                                 data-action-type="batch-uploads"
@@ -273,7 +296,8 @@
                         </button>
                     </div>
                 </li>
-                
+
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <li class="rounded-lg border border-slate-800 bg-slate-950/60 p-3 hover:border-slate-700 transition-colors">
                     <div class="flex items-start justify-between">
                         <div>
@@ -285,6 +309,7 @@
                             <div class="mt-2 flex items-center gap-4 text-xs text-slate-500">
                                 <span>Impact: Medium</span>
                                 <span>Effort: High</span>
+                                {{-- DUMMY_DATA: replace with dynamic value --}}
                                 <span>Error Reduction: 65%</span>
                             </div>
                         </div>
@@ -335,10 +360,12 @@
                             </li>
                             <li id="result-2" class="flex items-start gap-2">
                                 <div class="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 flex-shrink-0"></div>
+                                {{-- DUMMY_DATA: replace with dynamic value --}}
                                 <span>On-time rate improvement by 12%</span>
                             </li>
                             <li id="result-3" class="flex items-start gap-2">
                                 <div class="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 flex-shrink-0"></div>
+                                {{-- DUMMY_DATA: replace with dynamic value --}}
                                 <span>Task completion increase by 15%</span>
                             </li>
                         </ul>
@@ -523,43 +550,67 @@
         // Bottleneck action data
         const bottleneckActions = {
             'backup-scanner': {
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 impactedTask: 'E-Bank Scanning',
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 currentDelay: '+1.4h',
                 results: [
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     'Average delay reduces from 1.4h to 0.6h',
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     'On-time rate improves from 82% to 94%',
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     'Peak hour throughput increases by 40%'
                 ],
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 successMessage: 'Done. Backup scanner assigned for E-Bank tasks during peak hours (10 AM - 2 PM). Monitoring performance improvements.'
             },
             'pre-checklist': {
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 impactedTask: 'Client Form Review',
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 currentDelay: '+1.1h',
                 results: [
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     'Rework rate decreases by 40%',
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     'Average duration reduces from 2.6h to 2.0h',
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     'Client satisfaction increases by 25%'
                 ],
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 successMessage: 'Done. Pre-checklist implemented for client form validation. All new tasks will include mandatory validation steps.'
             },
             'batch-uploads': {
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 impactedTask: 'Document Upload',
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 currentDelay: '+0.9h',
                 results: [
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     'Upload processing time reduces by 70%',
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     'Handoff delays decrease from 0.9h to 0.3h',
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     'Batch efficiency improves by 50%'
                 ],
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 successMessage: 'Done. Batch uploads scheduled hourly. Documents will be processed in groups of 10 to optimize handoff time.'
             },
             'quality-checks': {
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 impactedTask: 'E-Bank Scanning',
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 currentDelay: '+1.4h',
                 results: [
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     'Error detection rate increases to 98%',
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     'Re-scan requests decrease by 65%',
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     'First-pass quality improves by 45%'
                 ],
+                {{-- DUMMY_DATA: replace with dynamic value --}}
                 successMessage: 'Done. Automated quality checks activated for all scanning tasks. Real-time validation now active.'
             }
         };
@@ -695,6 +746,7 @@
                     if (atRiskTasksElement && atRiskTasksElement.textContent === '6') {
                         atRiskTasksElement.textContent = '5';
                     }
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     if (recoveryRateElement && recoveryRateElement.textContent === '88%') {
                         recoveryRateElement.textContent = '91%';
                     }
@@ -709,6 +761,7 @@
                     if (avgDelayElement && avgDelayElement.textContent === '2.1h') {
                         avgDelayElement.textContent = '1.9h';
                     }
+                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     if (recoveryRateElement && recoveryRateElement.textContent === '88%') {
                         recoveryRateElement.textContent = '90%';
                     }
@@ -807,4 +860,3 @@
     </script>
     @endpush
 </x-layouts.manager>
-
