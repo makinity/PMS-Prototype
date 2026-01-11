@@ -25,10 +25,12 @@
             $isAdminUsers = request()->routeIs('admin.users');
             $isAdminRoles = request()->routeIs('admin.roles');
             $isAdminTaskConfig = request()->routeIs('admin.task-config');
+            $isAdminUwpMonitoring = request()->routeIs('admin.uwp-monitoring');
             $isAdminPerformance = request()->routeIs('admin.performance-metrics');
             $isAdminSystem = request()->routeIs('admin.system');
             $isAdminHris = request()->routeIs('admin.hris');
             $isAdminData = request()->routeIs('admin.data');
+            $isAdminSemestralPR = request()->routeIs('admin.semestral-pr');
             $isAdminAudit = request()->routeIs('admin.audit-trail');
             $isAdminLogs = request()->routeIs('admin.system-logs');
             $isAdminProfile = request()->routeIs('admin.profile');
@@ -134,8 +136,14 @@
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
                                 <a href="{{ route('admin.task-config') }}" class="sidebar-link" @if($isAdminTaskConfig) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-list-check"></i>
+                                    <i class="sidebar-icon fa-solid fa-screwdriver-wrench"></i>
                                     <span>Task Configuration</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.uwp-monitoring') }}" class="sidebar-link" @if($isAdminUwpMonitoring) aria-current="page" @endif>
+                                    <i class="sidebar-icon fa-solid fa-clipboard-check"></i>
+                                    <span>UWP Monitoring</span>
                                 </a>
                             </li>
                             <li>
@@ -158,7 +166,7 @@
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
                                 <a href="{{ route('admin.hris') }}" class="sidebar-link" @if($isAdminHris) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-link"></i>
+                                    <i class="sidebar-icon fa-solid fa-database"></i>
                                     <span>HRIS Integration</span>
                                 </a>
                             </li>
@@ -166,6 +174,13 @@
                                 <a href="{{ route('admin.data') }}" class="sidebar-link" @if($isAdminData) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-file-export"></i>
                                     <span>Data Export</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.semestral-pr') }}" class="sidebar-link"  @if($isAdminSemestralPR) aria-current="page" @endif>
+                                    <i class="sidebar-icon fa-solid fa-file-pen"></i>
+                                    <span>Semestral PR</span>
+                                    {{--Generated Semestral Performance Report--}}
                                 </a>
                             </li>
                         </ul>

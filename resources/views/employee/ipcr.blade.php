@@ -8,7 +8,7 @@
                     Individual Performance Commitment and Review (IPCR)
                 </h1>
                 <p class="text-sm text-gray-400 mt-1">
-                    Commitment Phase (Generated from Unit Work Plan)
+                    This IPCR is system-generated and presented for employee review.
                 </p>
             </div>
 
@@ -33,7 +33,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 text-sm">
                 <div class="bg-gray-700 rounded-lg p-3">
                     <p class="text-gray-400 mb-1">Data sources</p>
-                    <p class="font-medium text-white">UWP + ORS outputs</p>
+                    <p class="font-medium text-white">MPOR outputs</p>
                 </div>
                 <div class="bg-gray-700 rounded-lg p-3">
                     <p class="text-gray-400 mb-1">Ratings</p>
@@ -55,7 +55,7 @@
             <div>
                 <label class="block mb-2 text-sm font-medium text-white">Employee Name</label>
                 {{-- DUMMY_DATA: replace with dynamic value --}}
-                <input type="text" 
+                <input type="text"
                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
                        value="Juan Dela Cruz" disabled>
             </div>
@@ -63,7 +63,7 @@
             <div>
                 <label class="block mb-2 text-sm font-medium text-white">Position</label>
                 {{-- DUMMY_DATA: replace with dynamic value --}}
-                <input type="text" 
+                <input type="text"
                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
                        value="Administrative Assistant I" disabled>
             </div>
@@ -71,7 +71,7 @@
             <div>
                 <label class="block mb-2 text-sm font-medium text-white">Office / Unit</label>
                 {{-- DUMMY_DATA: replace with dynamic value --}}
-                <input type="text" 
+                <input type="text"
                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
                        value="Provincial Human Resource Management Office" disabled>
             </div>
@@ -79,7 +79,7 @@
             <div>
                 <label class="block mb-2 text-sm font-medium text-white">Rating Period</label>
                 {{-- DUMMY_DATA: replace with dynamic value --}}
-                <input type="text" 
+                <input type="text"
                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
                        value="January - June 2025" disabled>
             </div>
@@ -119,9 +119,9 @@
                                 Within prescribed period
                             </td>
                             <td class="border border-gray-700 px-4 py-3">
-                                <input type="number" 
-                                       class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                       placeholder="e.g. 20">
+                                <input type="number"
+                                       class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2 opacity-80 cursor-not-allowed"
+                                       value="20" disabled>
                             </td>
                         </tr>
                     </tbody>
@@ -163,9 +163,9 @@
                                 On or before deadline
                             </td>
                             <td class="border border-gray-700 px-4 py-3">
-                                <input type="number" 
-                                       class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
-                                       placeholder="e.g. 5">
+                                <input type="number"
+                                       class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2 opacity-80 cursor-not-allowed"
+                                       value="5" disabled>
                             </td>
                         </tr>
                     </tbody>
@@ -175,25 +175,25 @@
 
         {{-- COMMITMENT CONFIRMATION --}}
         <div class="bg-gray-800 border border-gray-700 rounded-lg p-5 grid grid-cols-1 md:grid-cols-3 gap-5">
+            <p class="md:col-span-3 text-sm text-gray-400">Acknowledgement that IPCR has been reviewed and discussed.</p>
             <div>
                 <label class="block mb-2 text-sm font-medium text-white">Immediate Supervisor</label>
-                {{-- DUMMY_DATA: replace with dynamic value --}}
-                <input type="text" 
+                <input type="text"
                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
-                       value="Supervisor Name" disabled>
+                       value="Maria Santos" disabled>
             </div>
 
             <div>
                 <label class="block mb-2 text-sm font-medium text-white">Employee Confirmation</label>
                 {{-- DUMMY_DATA: replace with dynamic value --}}
-                <input type="text" 
+                <input type="text"
                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
                        value="Juan Dela Cruz" disabled>
             </div>
 
             <div>
                 <label class="block mb-2 text-sm font-medium text-white">Date Committed</label>
-                <input type="date" 
+                <input type="date"
                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
             </div>
         </div>
@@ -202,8 +202,8 @@
         <div class="flex justify-end gap-3">
             <button type="button"
                     data-employee-action
-                    data-action-title="Save IPCR draft"
-                    data-action-message="Save this IPCR as a draft before submitting the commitment."
+                    data-action-title="Save acknowledgement draft"
+                    data-action-message="Save this IPCR acknowledgement as a draft."
                     data-action-confirm="Save draft"
                     data-action-loading="Saving..."
                     class="inline-flex items-center gap-2 px-5 py-2.5 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors duration-200">
@@ -212,9 +212,9 @@
             </button>
             <button type="button"
                     data-employee-loading="true"
-                    data-loading-text="Submitting..."
+                    data-loading-text="Acknowledging..."
                     class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg focus:ring-4 focus:ring-blue-800 transition-colors duration-200">
-                <span data-button-label>Confirm Commitment</span>
+                <span data-button-label>Acknowledge IPCR</span>
                 <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
             </button>
         </div>

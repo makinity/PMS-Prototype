@@ -60,26 +60,22 @@
         <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Average Rating</p>
-                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="mt-2 text-2xl font-semibold text-white">4.2</p>
                 <p class="text-xs text-slate-500">Based on ORS logs</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Top Performers</p>
-                {{-- DUMMY_DATA: replace with dynamic value --}}
-                <p class="mt-2 text-2xl font-semibold text-emerald-400">4</p>
+                <p class="mt-2 text-2xl font-semibold text-emerald-400">1</p>
                 <p class="text-xs text-slate-500">4.5 and above</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Needs Support</p>
-                {{-- DUMMY_DATA: replace with dynamic value --}}
-                <p class="mt-2 text-2xl font-semibold text-amber-300">3</p>
+                <p class="mt-2 text-2xl font-semibold text-amber-300">1</p>
                 <p class="text-xs text-slate-500">Below 3.5</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Missing Outputs</p>
-                {{-- DUMMY_DATA: replace with dynamic value --}}
-                <p class="mt-2 text-2xl font-semibold text-rose-300">2</p>
+                <p class="mt-2 text-2xl font-semibold text-rose-300">1</p>
                 <p class="text-xs text-slate-500">Auto-flagged</p>
             </div>
         </div>
@@ -92,15 +88,12 @@
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-6">
                 <h2 class="mb-4 text-sm font-semibold uppercase tracking-widest text-slate-400">Objective Drivers</h2>
                 <ul class="space-y-3 text-sm text-slate-300">
-                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <li class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                         Timeliness: 40% weight based on auto-logged start and end times.
                     </li>
-                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <li class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                         Quality: 35% weight based on validation outcomes.
                     </li>
-                    {{-- DUMMY_DATA: replace with dynamic value --}}
                     <li class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                         Volume: 25% weight based on completed outputs.
                     </li>
@@ -123,29 +116,26 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="border-t border-slate-800">
                             <td class="px-4 py-3">Juan Dela Cruz</td>
                             <td class="px-4 py-3">Operations</td>
-                            <td class="px-4 py-3">42</td>
+                            <td class="px-4 py-3">2</td>
                             <td class="px-4 py-3">96%</td>
-                            <td class="px-4 py-3 text-emerald-300">4.7</td>
+                            <td class="px-4 py-3 text-emerald-300">4.5</td>
                             <td class="px-4 py-3 text-emerald-300">Excellent</td>
                         </tr>
-                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="border-t border-slate-800">
-                            <td class="px-4 py-3">Maria Santos</td>
+                            <td class="px-4 py-3">Maria Garcia</td>
                             <td class="px-4 py-3">Operations</td>
-                            <td class="px-4 py-3">38</td>
+                            <td class="px-4 py-3">1</td>
                             <td class="px-4 py-3">90%</td>
                             <td class="px-4 py-3 text-sky-300">4.1</td>
                             <td class="px-4 py-3 text-sky-300">Good</td>
                         </tr>
-                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="border-t border-slate-800">
                             <td class="px-4 py-3">Pedro Reyes</td>
                             <td class="px-4 py-3">Finance</td>
-                            <td class="px-4 py-3">26</td>
+                            <td class="px-4 py-3">1</td>
                             <td class="px-4 py-3">82%</td>
                             <td class="px-4 py-3 text-amber-300">3.5</td>
                             <td class="px-4 py-3 text-amber-300">Needs Review</td>
@@ -173,7 +163,7 @@
             data: {
                 labels: ['Excellent', 'Good', 'Average', 'Below'],
                 datasets: [{
-                    data: [25, 50, 18, 7],
+                    data: [25, 50, 20, 5],
                     backgroundColor: ['#10b981', '#38bdf8', '#f59e0b', '#ef4444']
                 }]
             },

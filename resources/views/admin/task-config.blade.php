@@ -28,46 +28,36 @@
         </div>
 
         <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-            <div class="flex flex-wrap gap-3">
-                <div>
-                    <label class="text-xs uppercase text-slate-400">Category</label>
-                    {{-- DUMMY_DATA: replace with dynamic value --}}
-                    <select class="manager-filter-select mt-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
-                        <option>All Categories</option>
-                        <option>Scanning</option>
-                        <option>Validation</option>
-                        <option>Reporting</option>
-                        <option>Client Follow-up</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="text-xs uppercase text-slate-400">Client Type</label>
-                    {{-- DUMMY_DATA: replace with dynamic value --}}
-                    <select class="manager-filter-select mt-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
-                        <option>All Clients</option>
-                        <option>Government</option>
-                        <option>Private</option>
-                        <option>Internal</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="text-xs uppercase text-slate-400">Status</label>
-                    {{-- DUMMY_DATA: replace with dynamic value --}}
-                    <select class="manager-filter-select mt-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
-                        <option>All Status</option>
-                        <option>Active</option>
-                        <option>Paused</option>
-                        <option>Draft</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="text-xs uppercase text-slate-400">SLA Coverage</label>
-                    {{-- DUMMY_DATA: replace with dynamic value --}}
-                    <select class="manager-filter-select mt-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
-                        <option>All</option>
-                        <option>Has SLA</option>
-                        <option>Missing SLA</option>
-                    </select>
+            <div class="space-y-2">
+                <label class="text-xs uppercase text-slate-400">Employee</label>
+                <div class="relative w-full md:w-1/2">
+                    {{-- DUMMY_DATA: replace --}}
+                    <input
+                        type="text"
+                        placeholder="Search employee by name or ID"
+                        value="Juan Delacruz"
+                        class="w-full rounded-full border border-slate-700 bg-slate-900 px-4 py-2.5 pr-12 text-sm text-slate-100 placeholder-slate-400 shadow-inner shadow-black/30 focus:border-blue-500 focus:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                        style="background:#0f172a;color:#e5e7eb;border-color:#334155;"
+                    >
+                    <span class="pointer-events-none absolute inset-y-0 right-4 flex items-center text-slate-400">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M11 18a7 7 0 100-14 7 7 0 000 14z"></path>
+                        </svg>
+                    </span>
+                    {{-- DUMMY_DATA: replace --}}
+                    {{-- <div class="absolute left-0 right-0 z-20 mt-2 rounded-xl border border-slate-700 bg-slate-900/90 shadow-2xl shadow-black/50">
+                        <ul class="max-h-64 overflow-y-auto text-sm text-slate-200">
+                            <li class="border-b border-slate-800 px-4 py-2 hover:bg-slate-800/80">
+                                Juan Dela Cruz · Finance
+                            </li>
+                            <li class="border-b border-slate-800 px-4 py-2 hover:bg-slate-800/80">
+                                Maria Santos · IT Services
+                            </li>
+                            <li class="px-4 py-2 hover:bg-slate-800/80">
+                                Ramon Reyes · HR Management
+                            </li>
+                        </ul>
+                    </div> --}}
                 </div>
             </div>
         </div>

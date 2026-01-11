@@ -51,38 +51,33 @@
     <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
         <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
             <p class="text-xs text-slate-400">This Week</p>
-            {{-- DUMMY_DATA: replace with dynamic value --}}
-            <p class="mt-1 text-2xl font-semibold text-white">12</p>
+            <p class="mt-1 text-2xl font-semibold text-white">5</p>
             <p class="text-xs text-slate-400">Tasks logged</p>
         </div>
         <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
             <p class="text-xs text-slate-400">Pending</p>
-            {{-- DUMMY_DATA: replace with dynamic value --}}
-            <p class="mt-1 text-2xl font-semibold text-amber-400">3</p>
+            <p class="mt-1 text-2xl font-semibold text-amber-400">1</p>
             <p class="text-xs text-slate-400">Require action</p>
         </div>
         <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
             <p class="text-xs text-slate-400">Avg Duration</p>
-            {{-- DUMMY_DATA: replace with dynamic value --}}
-            <p class="mt-1 text-2xl font-semibold text-white">2.4h</p>
+            <p class="mt-1 text-2xl font-semibold text-white">2.2h</p>
             <p class="text-xs text-slate-400">Per task</p>
         </div>
         <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
             <p class="text-xs text-slate-400">Rating</p>
-            {{-- DUMMY_DATA: replace with dynamic value --}}
-            <p class="mt-1 text-2xl font-semibold text-emerald-400">4.2</p>
+            <p class="mt-1 text-2xl font-semibold text-emerald-400">4.3</p>
             <p class="text-xs text-slate-400">This month</p>
         </div>
     </div>
 
     <!-- Active Task Timer -->
     <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-        <div class="flex flex-wrap items-start justify-between gap-4">
-            <div>
-                <h2 class="text-lg font-semibold text-white">Active Task Timer</h2>
-                <p class="text-sm text-slate-400">Prototype view of automatic start and end tracking.</p>
-            </div>
-            {{-- DUMMY_DATA: replace with dynamic value --}}
+            <div class="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-semibold text-white">Active Task Timer</h2>
+                    <p class="text-sm text-slate-400">Prototype view of automatic start and end tracking.</p>
+                </div>
             <span class="rounded-full border border-emerald-600/60 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300">
                 AUTO TRACKING
             </span>
@@ -91,22 +86,18 @@
         <div class="mt-4 grid grid-cols-1 gap-4 text-sm md:grid-cols-4">
             <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                 <p class="text-xs text-slate-400">Task</p>
-                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="font-medium text-white">E-Bank Scanning</p>
             </div>
             <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                 <p class="text-xs text-slate-400">Start</p>
-                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="font-medium text-white">09:12</p>
             </div>
             <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                 <p class="text-xs text-slate-400">Elapsed</p>
-                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="font-medium text-white">1h 08m</p>
             </div>
             <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                 <p class="text-xs text-slate-400">Status</p>
-                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <p class="font-medium text-emerald-300">Recording</p>
             </div>
         </div>
@@ -175,39 +166,31 @@
             <!-- Task Type -->
             <div>
                 <label class="text-[11px] uppercase text-slate-400">Task</label>
-                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <select id="orsTaskType" class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
                     <option value="">Select task</option>
-                    <option value="bank_scanning">E-Bank Statement Scanning</option>
+                    <option value="bank_scanning">E-Bank Scanning</option>
                     <option value="form_review">Client Form Review</option>
-                    <option value="data_entry">Financial Data Entry</option>
                     <option value="report_generation">Report Generation</option>
-                    <option value="client_communication">Client Communication</option>
-                    <option value="quality_check">Quality Check</option>
-                    <option value="document_upload">Document Upload</option>
+                    <option value="data_entry">Financial Data Entry</option>
                     <option value="follow_up">Client Follow-up</option>
+                    <option value="tax_review">Tax Compliance Review</option>
                 </select>
             </div>
 
             <!-- Client -->
             <div>
-                <label class="text-[11px] uppercase text-slate-400">Client</label>
-                {{-- DUMMY_DATA: replace with dynamic value --}}
+                <label class="text-[11px] uppercase text-slate-400">Supervisor/label>
                 <select id="orsClient" class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
-                    <option value="">Select client</option>
-                    <option value="abc">ABC Corporation</option>
-                    <option value="xyz">XYZ Limited</option>
-                    <option value="global">Global Enterprises</option>
-                    <option value="tech">Tech Solutions Inc.</option>
-                    <option value="prime">Prime Services Group</option>
-                    <option value="alpha">Alpha Financials</option>
+                    <option value="">Select Supervisor</option>
+                    <option value="abc">Maria Santos/option>
+                    <option value="xyz">Lebron James</option>
+                    <option value="global">Denji Kun</option>
                 </select>
             </div>
 
             <!-- Client Request ID -->
             <div>
                 <label class="text-[11px] uppercase text-slate-400">Client Request ID</label>
-                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <input id="orsRequestId"
                        type="text"
                        placeholder="REQ-2025-01234"
@@ -217,15 +200,13 @@
             <!-- Output -->
             <div>
                 <label class="text-[11px] uppercase text-slate-400">Form / Output Type</label>
-                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <select id="orsOutput" class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
                     <option value="">Select form/output</option>
                     <option value="bank_form">Bank Statement Form (BSF-01)</option>
-                    <option value="expense_report">Expense Report (ER-02)</option>
-                    <option value="financial_statement">Financial Statement (FS-03)</option>
                     <option value="client_summary">Client Summary Report (CSR-04)</option>
+                    <option value="financial_statement">Financial Statement (FS-03)</option>
                     <option value="tax_form">Tax Compliance Form (TCF-05)</option>
-                    <option value="audit_report">Audit Report (AR-06)</option>
+                    <option value="follow_up_notes">Follow-up Notes (FN-07)</option>
                 </select>
             </div>
 
@@ -278,7 +259,7 @@
                 x
             </button>
         </div>
-        
+
         {{-- DUMMY_DATA: replace with dynamic value --}}
         <div class="space-y-3 text-sm">
             <div>
@@ -310,7 +291,7 @@
                 <p class="text-slate-200" id="taskDetailNotes">--</p>
             </div>
         </div>
-        
+
         <div class="mt-6 flex justify-end">
             <button onclick="closeOrsModal('taskDetailsModal')"
                     class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800">
@@ -524,24 +505,23 @@ document.addEventListener('DOMContentLoaded', function () {
         },
 
         events: [
-            // Completed tasks (Green)
             {
                 title: 'E-Bank Scanning',
-                start: new Date().toISOString().split('T')[0], // Today
-                color: '#10b981',
+                start: '2025-12-27',
+                color: '#f59e0b',
                 extendedProps: {
-                    client: 'ABC Corporation',
+                    client: 'ABC Corp',
                     requestId: 'REQ-2025-014',
                     output: 'Bank Statement Form (BSF-01)',
-                    status: 'Completed',
-                    duration: '1.8 hours',
-                    rating: '4.5/5',
-                    notes: 'All statements verified and uploaded'
+                    status: 'In Progress',
+                    duration: '1.7 hours (ongoing)',
+                    rating: '--',
+                    notes: 'Statements being scanned'
                 }
             },
             {
                 title: 'Client Form Review',
-                start: new Date().toISOString().split('T')[0],
+                start: '2025-12-26',
                 color: '#10b981',
                 extendedProps: {
                     client: 'XYZ Limited',
@@ -549,14 +529,27 @@ document.addEventListener('DOMContentLoaded', function () {
                     output: 'Client Summary Report (CSR-04)',
                     status: 'Completed',
                     duration: '2.3 hours',
-                    rating: '4.2/5',
+                    rating: '4.5/5',
                     notes: 'Forms approved for processing'
                 }
             },
-            // In Progress tasks (Amber)
+            {
+                title: 'Report Generation',
+                start: '2025-12-25',
+                color: '#3b82f6',
+                extendedProps: {
+                    client: 'Tech Solutions',
+                    requestId: 'REQ-2025-012',
+                    output: 'Financial Statement (FS-03)',
+                    status: 'Pending Review',
+                    duration: '3.2 hours',
+                    rating: '4.0/5',
+                    notes: 'Awaiting manager approval'
+                }
+            },
             {
                 title: 'Financial Data Entry',
-                start: new Date(Date.now() + 86400000).toISOString().split('T')[0], // Tomorrow
+                start: '2025-12-27',
                 color: '#f59e0b',
                 extendedProps: {
                     client: 'Global Enterprises',
@@ -568,40 +561,23 @@ document.addEventListener('DOMContentLoaded', function () {
                     notes: 'Quarterly financial data entry'
                 }
             },
-            // Pending Review (Blue)
-            {
-                title: 'Report Generation',
-                start: new Date(Date.now() - 86400000).toISOString().split('T')[0], // Yesterday
-                color: '#3b82f6',
-                extendedProps: {
-                    client: 'Tech Solutions Inc.',
-                    requestId: 'REQ-2025-012',
-                    output: 'Financial Statement (FS-03)',
-                    status: 'Pending Review',
-                    duration: '3.2 hours',
-                    rating: '4.0/5',
-                    notes: 'Awaiting manager approval'
-                }
-            },
-            // Missing/Overdue (Red)
             {
                 title: 'Client Follow-up',
-                start: new Date(Date.now() - 2 * 86400000).toISOString().split('T')[0], // 2 days ago
+                start: '2025-12-24',
                 color: '#ef4444',
                 extendedProps: {
                     client: 'Prime Services Group',
                     requestId: 'REQ-2025-018',
-                    output: 'Client Follow-up Notes',
+                    output: 'Follow-up Notes (FN-07)',
                     status: 'Overdue',
                     duration: '--',
                     rating: '--',
                     notes: 'Missed deadline - needs attention'
                 }
             },
-            // Scheduled (Purple)
             {
                 title: 'Tax Compliance Review',
-                start: new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0], // 3 days ahead
+                start: '2025-12-29',
                 color: '#8b5cf6',
                 extendedProps: {
                     client: 'Alpha Financials',
@@ -612,40 +588,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     rating: '--',
                     notes: 'Scheduled for end of week'
                 }
-            },
-            // This week's tasks
-            {
-                title: 'Quality Check',
-                start: new Date(Date.now() + 86400000).toISOString().split('T')[0],
-                color: '#10b981'
-            },
-            {
-                title: 'Document Upload',
-                start: new Date(Date.now() + 2 * 86400000).toISOString().split('T')[0],
-                color: '#3b82f6'
-            },
-            // Last week's tasks
-            {
-                title: 'Bank Reconciliation',
-                start: new Date(Date.now() - 4 * 86400000).toISOString().split('T')[0],
-                color: '#10b981'
-            },
-            {
-                title: 'Audit Preparation',
-                start: new Date(Date.now() - 5 * 86400000).toISOString().split('T')[0],
-                color: '#10b981'
-            },
-            {
-                title: 'Client Meeting',
-                start: new Date(Date.now() - 3 * 86400000).toISOString().split('T')[0],
-                color: '#10b981'
             }
         ],
 
         eventContent: function(arg) {
             const dotsOnly = arg.event.title.length > 15;
             const displayText = dotsOnly ? arg.event.title.substring(0, 12) + '...' : arg.event.title;
-            
+
             const arrayOfDomNodes = [
                 document.createElement('div'),
             ];
@@ -659,7 +608,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 </div>
             `;
             arrayOfDomNodes[0].classList.add('text-xs', 'px-1', 'py-0.5');
-            
+
             return { domNodes: arrayOfDomNodes };
         }
     });
@@ -683,7 +632,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const client = clientSelect ? clientSelect.value : '';
             const outputType = outputSelect ? outputSelect.value : '';
             const requestId = requestInput ? requestInput.value.trim() : '';
-            
+
             if (taskType && client && date && requestId && outputType) {
                 setButtonLoading(submitBtn, true, 'Logging...');
 
@@ -703,12 +652,12 @@ document.addEventListener('DOMContentLoaded', function () {
                             notes: notesInput && notesInput.value ? notesInput.value : 'No notes'
                         }
                     });
-                    
+
                     // Close modal and reset form
                     window.closeOrsModal('orsTaskModal');
                     this.reset();
                     setButtonLoading(submitBtn, false);
-                    
+
                     // Show success message
                     alert('Task logged successfully! Duration and rating will be calculated automatically.');
                 }, 700);

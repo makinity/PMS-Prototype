@@ -37,19 +37,18 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-700">
-                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-gray-750">
-                            <td class="px-4 py-3 text-gray-300">Report Generation</td>
+                            <td class="px-4 py-3 text-gray-300">E-Bank Scanning</td>
                             <td class="px-4 py-3 text-gray-300">ABC Corp</td>
-                            <td class="px-4 py-3 text-gray-300">Aug 12, 2025</td>
+                            <td class="px-4 py-3 text-gray-300">Dec 27, 2025</td>
                             <td class="px-4 py-3">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-900 text-blue-300">
                                     In Progress
                                 </span>
-                                <p class="mt-1 text-xs text-gray-400">Tracking: Active since 11:00</p>
+                                <p class="mt-1 text-xs text-gray-400">Tracking: Active since 09:12</p>
                             </td>
                             <td class="px-4 py-3">
-                                <p class="text-xs text-gray-400">Request: REQ-2025-021</p>
+                                <p class="text-xs text-gray-400">Request: REQ-2025-014</p>
                                 <span class="text-xs font-medium text-amber-300">Output pending</span>
                             </td>
                             <td class="px-4 py-3">
@@ -58,11 +57,10 @@
                                 </button>
                             </td>
                         </tr>
-                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-gray-750">
-                            <td class="px-4 py-3 text-gray-300">Client Feedback Review</td>
-                            <td class="px-4 py-3 text-gray-300">Nova Health</td>
-                            <td class="px-4 py-3 text-gray-300">Aug 14, 2025</td>
+                            <td class="px-4 py-3 text-gray-300">Client Form Review</td>
+                            <td class="px-4 py-3 text-gray-300">XYZ Ltd</td>
+                            <td class="px-4 py-3 text-gray-300">Dec 26, 2025</td>
                             <td class="px-4 py-3">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-900 text-emerald-300">
                                     Completed
@@ -79,16 +77,15 @@
                                 </button>
                             </td>
                         </tr>
-                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-gray-750">
-                            <td class="px-4 py-3 text-gray-300">Weekly Sprint Planning</td>
-                            <td class="px-4 py-3 text-gray-300">Internal</td>
-                            <td class="px-4 py-3 text-gray-300">Aug 15, 2025</td>
+                            <td class="px-4 py-3 text-gray-300">Report Generation</td>
+                            <td class="px-4 py-3 text-gray-300">Tech Solutions</td>
+                            <td class="px-4 py-3 text-gray-300">Dec 25, 2025</td>
                             <td class="px-4 py-3">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-900 text-amber-300">
                                     Pending Review
                                 </span>
-                                <p class="mt-1 text-xs text-gray-400">Tracking: Completed in 1.1h</p>
+                                <p class="mt-1 text-xs text-gray-400">Tracking: Completed in 3.2h</p>
                             </td>
                             <td class="px-4 py-3">
                                 <p class="text-xs text-gray-400">Request: REQ-2025-012</p>
@@ -100,11 +97,30 @@
                                 </button>
                             </td>
                         </tr>
-                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-gray-750">
-                            <td class="px-4 py-3 text-gray-300">Bug Triage</td>
-                            <td class="px-4 py-3 text-gray-300">Brighton Labs</td>
-                            <td class="px-4 py-3 text-gray-300">Aug 16, 2025</td>
+                            <td class="px-4 py-3 text-gray-300">Financial Data Entry</td>
+                            <td class="px-4 py-3 text-gray-300">Global Enterprises</td>
+                            <td class="px-4 py-3 text-gray-300">Dec 27, 2025</td>
+                            <td class="px-4 py-3">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-900 text-blue-300">
+                                    In Progress
+                                </span>
+                                <p class="mt-1 text-xs text-gray-400">Tracking: Active since 10:05</p>
+                            </td>
+                            <td class="px-4 py-3">
+                                <p class="text-xs text-gray-400">Request: REQ-2025-017</p>
+                                <span class="text-xs font-medium text-emerald-400">Output in draft</span>
+                            </td>
+                            <td class="px-4 py-3">
+                                <button type="button" data-modal-target="task-view-modal" data-modal-toggle="task-view-modal" class="text-blue-400 hover:text-blue-300 font-medium text-sm transition-colors duration-200">
+                                    View
+                                </button>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-750">
+                            <td class="px-4 py-3 text-gray-300">Client Follow-up</td>
+                            <td class="px-4 py-3 text-gray-300">Prime Services Group</td>
+                            <td class="px-4 py-3 text-gray-300">Dec 24, 2025</td>
                             <td class="px-4 py-3">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-900 text-rose-300">
                                     Overdue
@@ -116,50 +132,6 @@
                                 <a href="{{ route('employee.submit-output') }}" class="text-xs font-medium text-rose-300 hover:text-rose-200">
                                     Output missing
                                 </a>
-                            </td>
-                            <td class="px-4 py-3">
-                                <button type="button" data-modal-target="task-view-modal" data-modal-toggle="task-view-modal" class="text-blue-400 hover:text-blue-300 font-medium text-sm transition-colors duration-200">
-                                    View
-                                </button>
-                            </td>
-                        </tr>
-                        {{-- DUMMY_DATA: replace with dynamic value --}}
-                        <tr class="hover:bg-gray-750">
-                            <td class="px-4 py-3 text-gray-300">Quarterly Metrics Update</td>
-                            <td class="px-4 py-3 text-gray-300">River City Bank</td>
-                            <td class="px-4 py-3 text-gray-300">Aug 19, 2025</td>
-                            <td class="px-4 py-3">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-900 text-blue-300">
-                                    In Progress
-                                </span>
-                                <p class="mt-1 text-xs text-gray-400">Tracking: Active since 09:10</p>
-                            </td>
-                            <td class="px-4 py-3">
-                                <p class="text-xs text-gray-400">Request: REQ-2025-014</p>
-                                <a href="{{ route('employee.submit-output') }}" class="text-xs font-medium text-blue-400 hover:text-blue-300">
-                                    Submit output
-                                </a>
-                            </td>
-                            <td class="px-4 py-3">
-                                <button type="button" data-modal-target="task-view-modal" data-modal-toggle="task-view-modal" class="text-blue-400 hover:text-blue-300 font-medium text-sm transition-colors duration-200">
-                                    View
-                                </button>
-                            </td>
-                        </tr>
-                        {{-- DUMMY_DATA: replace with dynamic value --}}
-                        <tr class="hover:bg-gray-750">
-                            <td class="px-4 py-3 text-gray-300">Documentation Cleanup</td>
-                            <td class="px-4 py-3 text-gray-300">Internal</td>
-                            <td class="px-4 py-3 text-gray-300">Aug 20, 2025</td>
-                            <td class="px-4 py-3">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-700 text-slate-200">
-                                    Not Started
-                                </span>
-                                <p class="mt-1 text-xs text-gray-400">Tracking: Not started</p>
-                            </td>
-                            <td class="px-4 py-3">
-                                <p class="text-xs text-gray-400">Request: --</p>
-                                <span class="text-xs font-medium text-slate-400">Output not started</span>
                             </td>
                             <td class="px-4 py-3">
                                 <button type="button" data-modal-target="task-view-modal" data-modal-toggle="task-view-modal" class="text-blue-400 hover:text-blue-300 font-medium text-sm transition-colors duration-200">
@@ -185,8 +157,7 @@
                     <div class="flex items-start justify-between border-b border-gray-700 p-4">
                         <div>
                             <h3 id="task-view-modal-title" class="text-lg font-semibold text-white">Task Details</h3>
-                            {{-- DUMMY_DATA: replace with dynamic value --}}
-                            <p class="text-sm text-gray-400">Report Generation</p>
+                            <p class="text-sm text-gray-400">E-Bank Scanning</p>
                         </div>
                         <button type="button" data-modal-hide="task-view-modal" class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-800 hover:text-white">
                             <span class="sr-only">Close modal</span>
@@ -196,7 +167,6 @@
                         </button>
                     </div>
                     <div class="space-y-4 p-4 text-sm text-gray-300">
-                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <div class="grid gap-4 sm:grid-cols-2">
                             <div>
                                 <p class="text-xs uppercase tracking-wide text-gray-500">Client</p>
@@ -204,7 +174,7 @@
                             </div>
                             <div>
                                 <p class="text-xs uppercase tracking-wide text-gray-500">Due Date</p>
-                                <p class="text-sm font-medium text-white">Aug 12, 2025</p>
+                                <p class="text-sm font-medium text-white">Dec 27, 2025</p>
                             </div>
                             <div>
                                 <p class="text-xs uppercase tracking-wide text-gray-500">Status</p>
@@ -218,7 +188,7 @@
                             </div>
                             <div>
                                 <p class="text-xs uppercase tracking-wide text-gray-500">Tracking</p>
-                                <p class="text-sm font-medium text-white">Active since 09:10</p>
+                                <p class="text-sm font-medium text-white">Active since 09:12</p>
                             </div>
                             <div>
                                 <p class="text-xs uppercase tracking-wide text-gray-500">Output Link</p>
@@ -226,15 +196,13 @@
                             </div>
                             <div>
                                 <p class="text-xs uppercase tracking-wide text-gray-500">Time Window</p>
-                                <p class="text-sm font-medium text-white">09:10 - --</p>
+                                <p class="text-sm font-medium text-white">09:12 - --</p>
                             </div>
                         </div>
                         <div>
                             <p class="text-xs uppercase tracking-wide text-gray-500">Details</p>
-                            {{-- DUMMY_DATA: replace with dynamic value --}}
                             <p class="mt-1 text-sm text-gray-300">
-                                Compile weekly analytics, validate against source data, and export the report for review.
-                                Start and end times are recorded automatically during the task session.
+                                Scan and validate bank statements for ABC Corp, attach BSF-01 output, and log duration automatically. Start and end times are recorded automatically during the task session.
                             </p>
                         </div>
                     </div>

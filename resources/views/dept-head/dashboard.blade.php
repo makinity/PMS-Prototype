@@ -1,10 +1,10 @@
-<x-layouts.manager>
+<x-layouts.dept-head>
     <section class="space-y-8">
 
     <!-- Page Header -->
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-2xl font-semibold text-white">Team Dashboard</h1>
+            <h1 class="text-2xl font-semibold text-white">Department Head Dashboard</h1>
             <p class="text-sm text-slate-400">Real-time overview of team performance</p>
         </div>
         <div class="text-sm text-slate-400">Team: HRMO - Digital Operations</div>
@@ -400,4 +400,4 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-</x-layouts.manager>
+</x-layouts.dept-head>

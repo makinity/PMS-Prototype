@@ -272,54 +272,80 @@ document.addEventListener('DOMContentLoaded', function() {
         const allEvents = [
             {
                 title: 'E-Bank Scanning',
-                start: '2025-12-26',
-                color: '#10b981',
+                start: '2025-12-27',
+                color: '#f59e0b',
                 extendedProps: {
                     employee: 'Juan Dela Cruz',
                     employeeId: 'juan',
                     client: 'ABC Corp',
-                    status: 'Completed',
-                    duration: '1h 42m',
+                    status: 'In Progress',
+                    duration: '1.7h (ongoing)',
                     overdue: false
                 }
             },
             {
                 title: 'Client Form Review',
                 start: '2025-12-26',
-                color: '#f59e0b',
+                color: '#10b981',
                 extendedProps: {
-                    employee: 'Maria Santos',
-                    employeeId: 'maria',
+                    employee: 'Juan Dela Cruz',
+                    employeeId: 'juan',
                     client: 'XYZ Ltd',
-                    status: 'In Progress',
-                    duration: '45m',
+                    status: 'Completed',
+                    duration: '2.3h',
                     overdue: false
                 }
             },
             {
-                title: 'Report Submission',
-                start: '2025-12-24', // Past date for overdue example
-                color: '#ef4444',
+                title: 'Report Generation',
+                start: '2025-12-25',
+                color: '#3b82f6',
                 extendedProps: {
-                    employee: 'Pedro Reyes',
-                    employeeId: 'pedro',
-                    client: 'Global Inc',
-                    status: 'Missing',
-                    duration: '2h',
-                    overdue: true
+                    employee: 'Maria Garcia',
+                    employeeId: 'maria',
+                    client: 'Tech Solutions',
+                    status: 'Pending Review',
+                    duration: '3.2h',
+                    overdue: false
                 }
             },
             {
-                title: 'Data Analysis',
-                start: '2025-12-25',
+                title: 'Financial Data Entry',
+                start: '2025-12-27',
+                color: '#f59e0b',
+                extendedProps: {
+                    employee: 'Pedro Reyes',
+                    employeeId: 'pedro',
+                    client: 'Global Enterprises',
+                    status: 'In Progress',
+                    duration: '1.5h (ongoing)',
+                    overdue: false
+                }
+            },
+            {
+                title: 'Client Follow-up',
+                start: '2025-12-24',
                 color: '#ef4444',
                 extendedProps: {
                     employee: 'Juan Dela Cruz',
                     employeeId: 'juan',
-                    client: 'Tech Solutions',
-                    status: 'Delayed',
-                    duration: '3h',
+                    client: 'Prime Services Group',
+                    status: 'Overdue',
+                    duration: '--',
                     overdue: true
+                }
+            },
+            {
+                title: 'Tax Compliance Review',
+                start: '2025-12-29',
+                color: '#8b5cf6',
+                extendedProps: {
+                    employee: 'Alex Johnson',
+                    employeeId: 'alex',
+                    client: 'Alpha Financials',
+                    status: 'Scheduled',
+                    duration: '--',
+                    overdue: false
                 }
             }
         ];

@@ -16,20 +16,17 @@
 
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
                 <p class="text-xs uppercase tracking-widest text-slate-400">Total Users</p>
-                {{-- DUMMY_DATA: replace with dynamic value --}}
-                <p class="mt-2 text-3xl font-semibold text-white">1,247</p>
+                <p class="mt-2 text-3xl font-semibold text-white">8</p>
             </div>
 
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
                 <p class="text-xs uppercase tracking-widest text-slate-400">Active Employees</p>
-                {{-- DUMMY_DATA: replace with dynamic value --}}
-                <p class="mt-2 text-3xl font-semibold text-white">856</p>
+                <p class="mt-2 text-3xl font-semibold text-white">4</p>
             </div>
 
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
                 <p class="text-xs uppercase tracking-widest text-slate-400">Tasks Logged Today</p>
-                {{-- DUMMY_DATA: replace with dynamic value --}}
-                <p class="mt-2 text-3xl font-semibold text-white">312</p>
+                <p class="mt-2 text-3xl font-semibold text-white">5</p>
             </div>
 
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
@@ -101,33 +98,33 @@
                     <tbody>
                         {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="border-t border-slate-800">
-                            <td class="px-4 py-2">Today, 10:15 AM</td>
-                            <td class="px-4 py-2">John Smith</td>
-                            <td class="px-4 py-2">Completed Task #245</td>
+                            <td class="px-4 py-2">Today, 09:15 AM</td>
+                            <td class="px-4 py-2">Maria Santos</td>
+                            <td class="px-4 py-2">Queued validation for Report Generation (REQ-2025-012)</td>
                             <td class="px-4 py-2">Task Management</td>
                         </tr>
                         <tr class="border-t border-slate-800">
                             <td class="px-4 py-2">Today, 09:45 AM</td>
-                            <td class="px-4 py-2">Sarah Johnson</td>
-                            <td class="px-4 py-2">Uploaded Report</td>
-                            <td class="px-4 py-2">Document Management</td>
+                            <td class="px-4 py-2">PMS Administrator</td>
+                            <td class="px-4 py-2">Updated Manager role permissions</td>
+                            <td class="px-4 py-2">User Management</td>
                         </tr>
                         <tr class="border-t border-slate-800">
                             <td class="px-4 py-2">Today, 09:30 AM</td>
                             <td class="px-4 py-2">System Admin</td>
-                            <td class="px-4 py-2">User Permission Updated</td>
-                            <td class="px-4 py-2">User Management</td>
+                            <td class="px-4 py-2">Adjusted rating weights (T40/Q35/V25)</td>
+                            <td class="px-4 py-2">Performance Metrics</td>
                         </tr>
                         <tr class="border-t border-slate-800">
                             <td class="px-4 py-2">Today, 09:15 AM</td>
-                            <td class="px-4 py-2">Mike Chen</td>
-                            <td class="px-4 py-2">Started New Project</td>
-                            <td class="px-4 py-2">Project Management</td>
+                            <td class="px-4 py-2">Juan Dela Cruz</td>
+                            <td class="px-4 py-2">Submitted output for Client Form Review</td>
+                            <td class="px-4 py-2">Document Management</td>
                         </tr>
                         <tr class="border-t border-slate-800">
                             <td class="px-4 py-2">Today, 08:45 AM</td>
-                            <td class="px-4 py-2">Lisa Wong</td>
-                            <td class="px-4 py-2">Created 5 New Tasks</td>
+                            <td class="px-4 py-2">Pedro Reyes</td>
+                            <td class="px-4 py-2">Started Financial Data Entry</td>
                             <td class="px-4 py-2">Task Management</td>
                         </tr>
                     </tbody>
@@ -146,7 +143,7 @@
                 labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
                 datasets: [{
                     label: 'Tasks Completed',
-                    data: [120, 190, 300, 250, 200, 150, 100],
+                    data: [4, 5, 4, 3, 2, 2, 1],
                     borderColor: '#3b82f6',
                     backgroundColor: 'rgba(59, 130, 246, 0.1)',
                     borderWidth: 2,
@@ -154,7 +151,7 @@
                     tension: 0.4
                 }, {
                     label: 'Tasks Created',
-                    data: [150, 220, 280, 230, 280, 180, 130],
+                    data: [5, 6, 5, 4, 3, 2, 2],
                     borderColor: '#10b981',
                     backgroundColor: 'rgba(16, 185, 129, 0.1)',
                     borderWidth: 2,
@@ -199,7 +196,7 @@
                 labels: ['Data Entry', 'Code Review', 'Testing', 'Design', 'Documentation', 'Meeting', 'Research'],
                 datasets: [{
                     label: 'Average Hours',
-                    data: [2.5, 3.2, 4.1, 5.5, 2.8, 1.5, 3.8],
+                    data: [1.7, 2.3, 3.2, 2.0, 1.5, 1.2, 2.5],
                     backgroundColor: [
                         'rgba(59, 130, 246, 0.8)',
                         'rgba(16, 185, 129, 0.8)',
@@ -258,7 +255,7 @@
             data: {
                 labels: ['Excellent (5)', 'Good (4)', 'Average (3)', 'Below Avg (2)', 'Poor (1)'],
                 datasets: [{
-                    data: [35, 40, 15, 7, 3],
+                    data: [25, 50, 20, 5, 0],
                     backgroundColor: [
                         'rgba(16, 185, 129, 0.8)',
                         'rgba(34, 197, 94, 0.8)',
@@ -294,10 +291,10 @@
         new Chart(document.getElementById('bottleneckChart'), {
             type: 'bar',
             data: {
-                labels: ['Approval Process', 'Data Validation', 'System Integration', 'Quality Check', 'Client Review'],
+                labels: ['Approval Process', 'Data Validation', 'Reporting', 'Client Follow-up', 'Integration'],
                 datasets: [{
                     label: 'Average Delay (Hours)',
-                    data: [12.5, 8.3, 6.7, 5.2, 4.8],
+                    data: [6.0, 5.0, 3.5, 4.0, 3.0],
                     backgroundColor: [
                         'rgba(239, 68, 68, 0.8)',
                         'rgba(245, 158, 11, 0.8)',

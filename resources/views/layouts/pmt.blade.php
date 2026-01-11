@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Supervisor Page</title>
+    <title>Performance Management Team</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -143,18 +143,13 @@
     <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-slate-900 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white">Skip to content</a>
     <div class="min-h-screen">
         @php
-            $isSupervisorDashboard = request()->routeIs('supervisor.dashboard');
-            $isSupervisorTeamTasks = request()->routeIs('supervisor.team-tasks');
-            $isSupervisorIPCR = request()->routeIs('supervisor.ipcr');
-            $isSupervisorOPCR = request()->routeIs('supervisor.opcr');
-            $isSupervisorMPOR = request()->routeIs('supervisor.mpor');
-            $isSupervisorOverdueAlerts = request()->routeIs('supervisor.overdue-alerts');
-            $isSupervisorTaskValidation = request()->routeIs('supervisor.task-validation');
-            $isSupervisorTeamProductivity = request()->routeIs('supervisor.team-productivity');
-            $isSupervisorBottleneckReports = request()->routeIs('supervisor.bottleneck-reports');
-            $isSupervisorRecommendations = request()->routeIs('supervisor.recommendations');
-            $isSupervisorReports = request()->routeIs('supervisor.reports');
-            $isSupervisorProfile = request()->routeIs('supervisor.profile');
+            $isPmtDashboard = request()->routeIs('pmt.dashboard');
+            $isPmtUwp = request()->routeIs('pmt.uwp');
+            $isPmtOpcrApproval = request()->routeIs('pmt.opcr');
+            $isSMPOR = request()->routeIs('pmt.smpor');
+            $isIPCR = request()->routeIs('pmt.ipcr');
+            $isPmtReports = request()->routeIs('pmt.pr');
+            $isPmtProfile = request()->routeIs('pmt.profile');
         @endphp
         <!-- Top Navigation -->
         <nav class="fixed top-0 z-50 w-full border-b border-slate-800/80 bg-slate-950/90 text-slate-100 shadow-lg shadow-slate-950/30 backdrop-blur">
@@ -175,7 +170,7 @@
                         </span>
                         <span class="hidden sm:block">
                             <span class="block text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">PMS</span>
-                            <span class="block text-lg font-semibold leading-tight text-white">Supervisor Console</span>
+                            <span class="block text-lg font-semibold leading-tight text-white">PMT Console</span>
                         </span>
                     </a>
                 </div>
@@ -192,18 +187,18 @@
                     @endif
                     <div class="relative">
                         <button type="button" id="manager-user-menu-button" data-dropdown-toggle="manager-user-menu" class="flex items-center gap-3 rounded-full border border-slate-800 bg-slate-900/70 px-2 py-1.5 text-left text-slate-100 shadow-sm transition hover:bg-slate-800">
-                            <span class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 via-blue-600 to-emerald-500 text-xs font-semibold text-white shadow-sm">SVR</span>
+                            <span class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 via-blue-600 to-emerald-500 text-xs font-semibold text-white shadow-sm">MG</span>
                             <span class="hidden sm:block">
-                                <span class="block text-sm font-semibold text-white">Department Supervisor</span>
-                                <span class="block text-xs text-slate-400">Supervisor</span>
+                                <span class="block text-sm font-semibold text-white">Performance Management Team</span>
+                                <span class="block text-xs text-slate-400">PMT</span>
                             </span>
                             <i class="fa-solid fa-chevron-down hidden text-xs text-slate-500 sm:block"></i>
                         </button>
                         <div id="manager-user-menu" class="z-50 hidden w-56 divide-y divide-slate-800 rounded-2xl bg-slate-900 shadow-lg ring-1 ring-slate-800">
                             <div class="px-4 py-3">
                                 <p class="text-xs font-semibold uppercase tracking-widest text-slate-400">Signed in as</p>
-                                <p class="mt-1 text-sm font-semibold text-white">Department Supervisor</p>
-                                <p class="text-xs text-slate-400">Supervisor</p>
+                                <p class="mt-1 text-sm font-semibold text-white">Performance Management Team</p>
+                                <p class="text-xs text-slate-400">PMT</p>
                             </div>
                             <ul class="py-2 text-sm text-slate-200" aria-labelledby="manager-user-menu-button">
                                 <li><a href="#" class="block px-4 py-2 transition hover:bg-slate-800">Profile</a></li>
@@ -234,7 +229,7 @@
                         <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Overview</p>
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
-                                <a href="{{ route('supervisor.dashboard') }}" class="sidebar-link" @if($isSupervisorDashboard) aria-current="page" @endif>
+                                <a href="{{ route('pmt.dashboard') }}" class="sidebar-link" @if($isPmtDashboard) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-house"></i>
                                     <span>Dashboard</span>
                                 </a>
@@ -243,72 +238,30 @@
                     </div>
 
                     <div>
-                        <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Team Management</p>
+                        <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Approvals</p>
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
-                                <a href="{{ route('supervisor.team-tasks') }}" class="sidebar-link" @if($isSupervisorTeamTasks) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-users"></i>
-                                    <span>Team Tasks</span>
+                                <a href="{{ route('pmt.uwp') }}" class="sidebar-link" @if($isPmtUwp) aria-current="page" @endif>
+                                    <i class="sidebar-icon fa-solid fa-clipboard-check"></i>
+                                    <span>Unit Work Plans</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('supervisor.ipcr') }}" class="sidebar-link" @if($isSupervisorIPCR) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-users"></i>
+                                <a href="{{ route('pmt.opcr') }}" class="sidebar-link" @if($isPmtOpcrApproval) aria-current="page" @endif>
+                                    <i class="sidebar-icon fa-solid fa-calendar-check"></i>
+                                    <span>OPCR Validation</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('pmt.ipcr') }}" class="sidebar-link" @if($isIPCR) aria-current="page" @endif>
+                                    <i class="sidebar-icon fa-solid fa-calendar-check"></i>
                                     <span>IPCR</span>
                                 </a>
                             </li>
-                            <li>
-                                <a href="{{ route('supervisor.opcr') }}" class="sidebar-link" @if($isSupervisorOPCR) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-users"></i>
-                                    <span>OPCR</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('supervisor.mpor') }}" class="sidebar-link" @if($isSupervisorMPOR) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-users"></i>
-                                    <span>MPOR</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('supervisor.overdue-alerts') }}" class="sidebar-link" @if($isSupervisorOverdueAlerts) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-list-check"></i>
-                                    <span>Overdue &amp; alerts</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="" class="sidebar-link">
-                                    <i class="sidebar-icon fa-solid fa-list-check"></i>
-                                    <span>IDP</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div>
-                        <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Performance</p>
-                        <ul class="mt-2 space-y-1 menu-stagger">
-                            <li>
-                                <a href="{{ route('supervisor.task-validation') }}" class="sidebar-link" @if($isSupervisorTaskValidation) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-clipboard-check"></i>
-                                    <span>Task Validation</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('supervisor.team-productivity') }}" class="sidebar-link" @if($isSupervisorTeamProductivity) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-chart-line"></i>
-                                    <span>Team Productivity</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('supervisor.bottleneck-reports') }}" class="sidebar-link" @if($isSupervisorBottleneckReports) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-stopwatch"></i>
-                                    <span>Bottleneck Reports</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('supervisor.recommendations') }}" class="sidebar-link" @if($isSupervisorRecommendations) aria-current="page" @endif>
-                                     <i class="sidebar-icon fa-solid fa-lightbulb"></i>
-                                    <span>Recommendations</span>
+                             <li>
+                                <a href="{{ route('pmt.smpor') }}" class="sidebar-link" @if($isSMPOR) aria-current="page" @endif>
+                                    <i class="sidebar-icon fa-solid fa-calendar-check"></i>
+                                    <span>SMPOR</span>
                                 </a>
                             </li>
                         </ul>
@@ -318,9 +271,9 @@
                         <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Reports</p>
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
-                                <a href="{{ route('supervisor.reports') }}" class="sidebar-link" @if($isSupervisorReports) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-file-lines"></i>
-                                    <span>Reports</span>
+                                <a href="{{ route('pmt.pr') }}" class="sidebar-link" @if($isPmtReports) aria-current="page" @endif>
+                                    <i class="sidebar-icon fa-solid fa-chart-line"></i>
+                                    <span>Performance Reports</span>
                                 </a>
                             </li>
                         </ul>
@@ -330,7 +283,7 @@
                         <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Account</p>
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
-                                <a href="{{ route('supervisor.profile') }}" class="sidebar-link" @if($isSupervisorProfile) aria-current="page" @endif>
+                                <a href="{{ route('pmt.profile') }}" class="sidebar-link" @if($isPmtProfile) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-user-gear"></i>
                                     <span>Profile &amp; Security</span>
                                 </a>

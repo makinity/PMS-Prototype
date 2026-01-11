@@ -10,9 +10,9 @@ Route::get('/employee-dashboard', function () {
     return view('employee.dashboard');
 })->name('employee.dashboard');
 
-Route::get('/employee-UWP', function () {
-    return view('employee.uwp');
-})->name('employee.uwp');
+// Route::get('/employee-UWP', function () {
+//     return view('employee.uwp');
+// })->name('employee.uwp');
 
 Route::get('/employee-task', function () {
     return view('employee.my-task');
@@ -26,9 +26,17 @@ Route::get('/employee-ORS', function () {
     return view('employee.ors');
 })->name('employee.ors');
 
-Route::get('/employee-OPCR', function () {
-    return view('employee.opcr');
-})->name('employee.opcr');
+Route::get('/employee-MPOR', function () {
+    return view('employee.mpor');
+})->name('employee.mpor');
+
+Route::get('/employee-SMPOR', function () {
+    return view('employee.smpor');
+})->name('employee.smpor');
+
+// Route::get('/employee-OPCR', function () {
+//     return view('employee.opcr');
+// })->name('employee.opcr');
 
 Route::get('/employee-IPCR', function () {
     return view('employee.ipcr');
@@ -45,6 +53,37 @@ Route::get('/employee-Profile', function () {
 
 
 
+Route::get('/dept-head/dashboard', function(){
+    return view('dept-head.dashboard');
+})->name('dept-head.dashboard');
+
+Route::get('/dept-head/uwp', function () {
+    return view('dept-head.uwp');
+})->name('dept-head.uwp');
+
+Route::get('/dept-head/opcr', function () {
+    return view('dept-head.opcr');
+})->name('dept-head.opcr');
+
+Route::get('/dept-head/smpor', function () {
+    return view('dept-head.smpor');
+})->name('dept-head.smpor');
+
+Route::get('/dept-head/IPCR', function () {
+    return view('dept-head.ipcr');
+})->name('dept-head.ipcr');
+
+Route::get('/dept-head/idp', function () {
+    return view('dept-head.idp');
+})->name('dept-head.idp');
+
+Route::get('/dept-head/profile', function () {
+    return view('dept-head.profile');
+})->name('dept-head.profile');
+
+
+
+
 Route::get('/supervisor-dashboard', function () {
     return view('supervisor.dashboard');
 })->name('supervisor.dashboard');
@@ -52,6 +91,18 @@ Route::get('/supervisor-dashboard', function () {
 Route::get('/supervisor/team-tasks', function () {
     return view('supervisor.team-tasks');
 })->name('supervisor.team-tasks');
+
+Route::get('/supervisor/ipcr', function () {
+    return view('supervisor.ipcr');
+})->name('supervisor.ipcr');
+
+Route::get('/supervisor/opcr', function () {
+    return view('supervisor.opcr');
+})->name('supervisor.opcr');
+
+Route::get('/supervisor/mpor', function () {
+    return view('supervisor.mpor');
+})->name('supervisor.mpor');
 
 Route::get('/supervisor/overdue-alerts', function () {
     return view('supervisor.overdue-alerts');
@@ -85,6 +136,36 @@ Route::get('/supervisor/profile', function () {
 
 
 
+Route::get('/pmt-dashboard', function () {
+    return view('pmt.dashboard');
+})->name('pmt.dashboard');
+
+Route::get('/pmt/UWP', function () {
+    return view('pmt.uwp');
+})->name('pmt.uwp');
+
+Route::get('/pmt/OPCR', function () {
+    return view('pmt.opcr');
+})->name('pmt.opcr');
+
+Route::get('/pmt/ipcr', function () {
+    return view('pmt.ipcr');
+})->name('pmt.ipcr');
+
+Route::get('/pmt/smpor', function () {
+    return view('pmt.smpor');
+})->name('pmt.smpor');
+
+Route::get('/pmt/performance-reports', function () {
+    return view('pmt.pr');
+})->name('pmt.pr');
+
+Route::get('/pmt/profile', function () {
+    return view('pmt.profile');
+})->name('pmt.profile');
+
+
+
 Route::get('/administrator-dashboard', function () {
     return view('admin.dashboard');
 })->name('admin.dashboard');
@@ -101,6 +182,10 @@ Route::get('/administrator/task-configuration', function () {
     return view('admin.task-config');
 })->name('admin.task-config');
 
+Route::get('/administrator/uwp-monitoring', function () {
+    return view('admin.uwp-monitoring');
+})->name('admin.uwp-monitoring');
+
 Route::get('/administrator/performance-metrics', function () {
     return view('admin.performance-metrics');
 })->name('admin.performance-metrics');
@@ -116,6 +201,10 @@ Route::get('/administrator/HRIS-integration', function () {
 Route::get('/administrator/data-export', function () {
     return view('admin.data');
 })->name('admin.data');
+
+Route::get('/administrator/semestral-pr', function () {
+    return view('admin.semestral-pr');
+})->name('admin.semestral-pr');
 
 Route::get('/administrator/audit-trails', function () {
     return view('admin.audit-trail');

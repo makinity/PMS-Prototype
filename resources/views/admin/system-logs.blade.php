@@ -66,17 +66,17 @@
         <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Errors</p>
-                <p class="mt-2 text-2xl font-semibold text-rose-300">12</p>
+                <p class="mt-2 text-2xl font-semibold text-rose-300">1</p>
                 <p class="text-xs text-slate-500">Last 7 days</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Warnings</p>
-                <p class="mt-2 text-2xl font-semibold text-amber-300">34</p>
+                <p class="mt-2 text-2xl font-semibold text-amber-300">3</p>
                 <p class="text-xs text-slate-500">Last 7 days</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Info Events</p>
-                <p class="mt-2 text-2xl font-semibold text-white">219</p>
+                <p class="mt-2 text-2xl font-semibold text-white">22</p>
                 <p class="text-xs text-slate-500">Last 7 days</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">

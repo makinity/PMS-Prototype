@@ -24,19 +24,19 @@
                         <span class="bg-purple-900 text-purple-200 text-xs font-medium px-2 py-0.5 rounded mt-1">HR Ecosystem</span>
                     </div>
                 </div>
-                
+
                 <!-- Mobile menu button -->
                 <button id="mobileMenuBtn" class="mobile-menu-btn md:hidden">
                     <i class="fas fa-bars"></i>
                 </button>
-                
+
                 <!-- Desktop Menu -->
                 <div class="hidden md:flex items-center space-x-8">
                     <a href="#overview" class="text-gray-300 hover:text-white transition-colors">Overview</a>
                     <a href="#systems" class="text-gray-300 hover:text-white transition-colors">HR Systems</a>
                     <a href="#features" class="text-gray-300 hover:text-white transition-colors">Features</a>
                 </div>
-                
+
                 <div class="hidden md:flex items-center space-x-4">
                     <button id="loginModalBtn" class="border border-gray-600 text-gray-300 hover:border-purple-500 hover:text-purple-300 px-4 py-2 rounded-lg font-medium transition-all">
                         <i class="fas fa-sign-in-alt mr-2"></i>Login
@@ -46,7 +46,7 @@
                     </button>
                 </div>
             </div>
-            
+
             <!-- Mobile Menu -->
             <div id="mobileMenu" class="mobile-menu">
                 <a href="#overview" class="mobile-menu-link">Overview</a>
@@ -72,18 +72,18 @@
                     <span class="bg-purple-600 text-white text-xs font-bold px-2 py-1 rounded mr-2">Core HR System</span>
                     <span class="text-sm">Part of the Integrated HR Ecosystem</span>
                 </div>
-                
+
                 <h1 class="text-3xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6">
                     Centralize Employee <span class="highlight-pms">Performance</span> Tracking
                 </h1>
-                
+
                 <p class="text-lg md:text-xl text-gray-300 mb-6 md:mb-8 max-w-3xl mx-auto leading-relaxed">
-                    The <span class="font-semibold text-purple-300">Performance Management System (PMS)</span> is the heart of your HR ecosystem, 
-                    receiving data from Hiring Management, evaluating employee performance, and intelligently routing 
+                    The <span class="font-semibold text-purple-300">Performance Management System (PMS)</span> is the heart of your HR ecosystem,
+                    receiving data from Hiring Management, evaluating employee performance, and intelligently routing
                     employees to development or recognition programs.
                 </p>
             </div>
-            
+
             <div class="text-center fade-in-up">
                 <button id="accountActivationModalBtn2" class="btn-gradient px-6 py-3 md:px-8 md:py-4 rounded-xl font-bold text-base md:text-lg w-full md:w-auto">
                     <i class="fas fa-user-check mr-2 md:mr-3"></i> Activate Your PMS Account
@@ -97,7 +97,7 @@
     <section id="overview" class="py-12 md:py-16 bg-gray-900/50">
         <div class="max-w-screen-xl mx-auto px-4">
             <h2 class="text-2xl md:text-3xl font-bold text-center mb-8 md:mb-12 fade-in-up">Why <span class="highlight-pms">PMS</span> is Essential</h2>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
                 <div class="text-center fade-in-up">
                     <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-purple-600/20 to-blue-600/20 flex items-center justify-center mx-auto mb-4 md:mb-6">
@@ -106,7 +106,7 @@
                     <h3 class="text-lg md:text-xl font-bold mb-2 md:mb-3">Seamless HR Integration</h3>
                     <p class="text-gray-400 text-sm md:text-base">Direct integration with Hiring Management, L&D, and R&R systems creates a cohesive employee lifecycle management.</p>
                 </div>
-                
+
                 <div class="text-center fade-in-up">
                     <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-purple-600/20 to-blue-600/20 flex items-center justify-center mx-auto mb-4 md:mb-6">
                         <i class="fas fa-brain text-2xl md:text-3xl text-blue-400"></i>
@@ -114,7 +114,7 @@
                     <h3 class="text-lg md:text-xl font-bold mb-2 md:mb-3">Intelligent Routing</h3>
                     <p class="text-gray-400 text-sm md:text-base">Automatically directs employees to appropriate development or recognition programs based on performance analysis.</p>
                 </div>
-                
+
                 <div class="text-center fade-in-up">
                     <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-purple-600/20 to-blue-600/20 flex items-center justify-center mx-auto mb-4 md:mb-6">
                         <i class="fas fa-chart-network text-2xl md:text-3xl text-indigo-400"></i>
@@ -133,7 +133,7 @@
             <p class="text-lg md:text-xl text-gray-400 text-center mb-8 md:mb-12 max-w-3xl mx-auto fade-in-up">
                 Performance Management System works seamlessly with other HR systems to provide complete employee lifecycle management.
             </p>
-            
+
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- HMS Card -->
                 <div class="system-card hms-card fade-in-up">
@@ -152,7 +152,7 @@
                         <span>Sends employee data to PMS</span>
                     </div>
                 </div>
-                
+
                 <!-- PMS Card (Highlighted) -->
                 <div class="system-card pms-card fade-in-up relative">
                     <div class="pms-card-badge absolute -top-2 -right-2 md:-top-3 md:-right-3">
@@ -183,7 +183,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- LND & RNR Combined -->
                 <div class="space-y-4 md:space-y-6 fade-in-up">
                     <div class="system-card lnd-card">
@@ -202,7 +202,7 @@
                             <span>Receives from PMS</span>
                         </div>
                     </div>
-                    
+
                     <div class="system-card rnr-card">
                         <div class="flex items-center mb-4">
                             <div class="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-red-500/20 flex items-center justify-center mr-3 md:mr-4">
@@ -231,7 +231,7 @@
                 <h2 class="text-2xl md:text-3xl font-bold mb-3 md:mb-4"><span class="highlight-pms">PMS</span> Core Features</h2>
                 <p class="text-lg md:text-xl text-gray-400 max-w-3xl mx-auto">Comprehensive tools to evaluate, track, and enhance employee performance within the HR ecosystem.</p>
             </div>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
                 <div class="system-card fade-in-up">
                     <div class="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-gradient-to-br from-purple-600/20 to-blue-600/20 flex items-center justify-center mb-4 md:mb-6">
@@ -240,7 +240,7 @@
                     <h3 class="text-lg md:text-xl font-bold mb-2 md:mb-3">Employee Performance Tracking</h3>
                     <p class="text-gray-400 text-sm md:text-base">Monitor performance metrics for employees received from Hiring Management System.</p>
                 </div>
-                
+
                 <div class="system-card fade-in-up">
                     <div class="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-gradient-to-br from-purple-600/20 to-blue-600/20 flex items-center justify-center mb-4 md:mb-6">
                         <i class="fas fa-route text-xl md:text-2xl text-blue-400"></i>
@@ -248,7 +248,7 @@
                     <h3 class="text-lg md:text-xl font-bold mb-2 md:mb-3">Intelligent Employee Routing</h3>
                     <p class="text-gray-400 text-sm md:text-base">Automatically route employees to LND for development or RNR for recognition based on performance.</p>
                 </div>
-                
+
                 <div class="system-card fade-in-up">
                     <div class="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-gradient-to-br from-purple-600/20 to-blue-600/20 flex items-center justify-center mb-4 md:mb-6">
                         <i class="fas fa-chart-bar text-xl md:text-2xl text-indigo-400"></i>
@@ -256,7 +256,7 @@
                     <h3 class="text-lg md:text-xl font-bold mb-2 md:mb-3">Performance Analytics</h3>
                     <p class="text-gray-400 text-sm md:text-base">Generate detailed reports and analytics to support data-driven HR decisions.</p>
                 </div>
-                
+
                 <div class="system-card fade-in-up">
                     <div class="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-gradient-to-br from-purple-600/20 to-blue-600/20 flex items-center justify-center mb-4 md:mb-6">
                         <i class="fas fa-bullseye text-xl md:text-2xl text-cyan-400"></i>
@@ -264,7 +264,7 @@
                     <h3 class="text-lg md:text-xl font-bold mb-2 md:mb-3">Goal Management</h3>
                     <p class="text-gray-400 text-sm md:text-base">Set and track individual and team goals aligned with organizational objectives.</p>
                 </div>
-                
+
                 <div class="system-card fade-in-up">
                     <div class="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-gradient-to-br from-purple-600/20 to-blue-600/20 flex items-center justify-center mb-4 md:mb-6">
                         <i class="fas fa-exchange-alt text-xl md:text-2xl text-violet-400"></i>
@@ -272,7 +272,7 @@
                     <h3 class="text-lg md:text-xl font-bold mb-2 md:mb-3">360° Feedback Integration</h3>
                     <p class="text-gray-400 text-sm md:text-base">Collect comprehensive feedback from peers, supervisors, and subordinates.</p>
                 </div>
-                
+
                 <div class="system-card fade-in-up">
                     <div class="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-gradient-to-br from-purple-600/20 to-blue-600/20 flex items-center justify-center mb-4 md:mb-6">
                         <i class="fas fa-sync-alt text-xl md:text-2xl text-purple-300"></i>
@@ -293,7 +293,7 @@
                 <p class="text-lg md:text-xl text-gray-400 mb-6 md:mb-10 max-w-3xl mx-auto">
                     Access the Performance Management System to track, evaluate, and enhance employee performance within the integrated HR ecosystem.
                 </p>
-                
+
                 <div class="flex flex-col md:flex-row justify-center gap-4 md:gap-6">
                     <button id="accountActivationModalBtn3" class="btn-gradient px-6 py-3 md:px-8 md:py-4 rounded-xl font-bold text-base md:text-lg">
                         <i class="fas fa-user-check mr-2 md:mr-3"></i> Activate PMS Account
@@ -302,7 +302,7 @@
                         <i class="fas fa-sign-in-alt mr-2 md:mr-3"></i> Login to PMS
                     </button>
                 </div>
-                
+
                 <div class="mt-6 md:mt-10 text-gray-500 text-sm">
                     <i class="fas fa-info-circle mr-2"></i> Accounts are created by HR after hiring process completion
                 </div>
@@ -326,7 +326,7 @@
                     </div>
                     <p class="text-gray-500 text-sm max-w-md">Central hub for employee performance tracking, integrated with Hiring Management, Learning & Development, and Rewards & Recognition systems.</p>
                 </div>
-                
+
                 <div class="text-gray-500 text-sm text-center md:text-right">
                     {{-- DUMMY_DATA: replace with dynamic value --}}
                     <p>© 2024 Performance Management System. HR Ecosystem v2.0</p>
@@ -375,7 +375,12 @@
                             </div>
                             <a href="#" id="openPasswordReset" class="text-sm text-purple-400 hover:text-purple-300">Forgot Password?</a>
                         </div>
-                        <a href="{{ route('employee.dashboard') }}" class="btn-gradient w-full py-3 rounded-lg font-medium">Login to PMS Dashboard</a>
+                        <a href="{{ route('employee.dashboard') }}" id="loginToDashboardBtn" class="btn-gradient w-full py-3 rounded-lg font-medium relative">
+                            <span id="loginText">Login to PMS Dashboard</span>
+                            <div id="loginSpinner" class="hidden absolute inset-0 flex items-center justify-center">
+                                <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                            </div>
+                        </a>
                         <div class="text-sm font-medium text-gray-400 text-center">
                             Need to activate your account? <a href="#" id="openAccountActivationFromLogin" class="text-purple-400 hover:text-purple-300">Activate here</a>
                         </div>
@@ -431,9 +436,9 @@
                             </div>
 
                             <div>
-                            <label for="act_email" class="block mb-2 text-sm font-medium text-gray-300">Email Address</label>
+                            <label for="name" class="block mb-2 text-sm font-medium text-gray-300">Employee Name</label>
                             {{-- DUMMY_DATA: replace with dynamic value --}}
-                            <input type="email" name="email" id="act_email" class="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg block w-full p-3" placeholder="employee@company.com">
+                            <input type="text" name="name" id="name" class="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg block w-full p-3" placeholder="Juan Delacruz">
                             </div>
 
                             <div class="bg-purple-900/30 border border-purple-800/50 p-3 md:p-4 rounded-lg">
@@ -595,5 +600,18 @@
     <!-- Font Awesome -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <!-- Custom Script -->
+    <script>
+        document.getElementById('loginToDashboardBtn').addEventListener('click', function(e) {
+            const loginText = document.getElementById('loginText');
+            const loginSpinner = document.getElementById('loginSpinner');
+
+            // Show spinner and hide text
+            loginText.classList.add('hidden');
+            loginSpinner.classList.remove('hidden');
+
+            // Disable the button to prevent multiple clicks
+            this.style.pointerEvents = 'none';
+        });
+    </script>
 </body>
 </html>

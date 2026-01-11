@@ -1,19 +1,19 @@
-<x-layouts.employee>
+<x-layouts.supervisor>
     <div class="space-y-6">
 
         {{-- PAGE HEADER --}}
         <div class="flex justify-between items-start">
             <div>
-                <h1 class="text-2xl font-bold text-white">Unit Work Plan (UWP)</h1>
+                <h1 class="text-2xl font-bold text-white">Individual Performance Commitment and Review (IPCR)</h1>
                 <p class="text-sm text-gray-400 mt-1">
-                    Basis for IPCR and OPCR generation
+                    Supervisor Rating &amp; Review Phase (Derived from SMPOR)
                 </p>
             </div>
 
             {{-- Status --}}
             {{-- DUMMY_DATA: replace with dynamic value --}}
             <span class="px-3 py-1 text-xs font-medium rounded bg-yellow-900 text-yellow-300 border border-yellow-800">
-                DRAFT
+                FOR APPROVAL
             </span>
         </div>
 
@@ -22,7 +22,7 @@
             <div class="flex items-start justify-between gap-4">
                 <div>
                     <h2 class="text-lg font-semibold text-white">Prototype Notes</h2>
-                    <p class="text-sm text-gray-400">UWP entries become tracked task categories.</p>
+                    <p class="text-sm text-gray-400">SMPOR provides expected outputs; supervisor encodes ratings and remarks.</p>
                 </div>
                 <span class="px-2 py-1 text-xs rounded bg-blue-900 text-blue-300 border border-blue-800">
                     PROTOTYPE
@@ -31,54 +31,99 @@
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 text-sm">
                 <div class="bg-gray-700 rounded-lg p-3">
-                    <p class="text-gray-400 mb-1">Generated into</p>
-                    <p class="font-medium text-white">IPCR and OPCR</p>
+                    <p class="text-gray-400 mb-1">Sourced from</p>
+                    <p class="font-medium text-white">Locked SMPOR outputs</p>
                 </div>
                 <div class="bg-gray-700 rounded-lg p-3">
-                    <p class="text-gray-400 mb-1">ORS linking</p>
-                    <p class="font-medium text-white">Task-to-output mapping</p>
+                    <p class="text-gray-400 mb-1">Ratings</p>
+                    <p class="font-medium text-white">Supervisor-authored Q/E/T</p>
                 </div>
                 <div class="bg-gray-700 rounded-lg p-3">
-                    <p class="text-gray-400 mb-1">Data checks</p>
-                    <p class="font-medium text-white">Missing output alerts</p>
+                    <p class="text-gray-400 mb-1">Acknowledgement</p>
+                    <p class="font-medium text-white">Employee signs after approval</p>
                 </div>
             </div>
 
             <p class="mt-3 text-xs text-gray-400">
-                Each output will link to client requests and drive objective performance metrics.
+                Ratings exist only in IPCR; outputs and evidence remain read-only.
             </p>
         </div>
+
+        <style>
+            .uwp-select,
+            .uwp-input {
+                background-color: #0f172a;
+                border: 1px solid #1f2937;
+                color: #e5e7eb;
+                height: 44px;
+                border-radius: 12px;
+                font-weight: 600;
+                padding: 10px 14px;
+                width: 100%;
+                transition: all 0.15s ease;
+            }
+
+            .uwp-select:focus,
+            .uwp-input:focus {
+                border-color: #22c55e;
+                box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+                outline: none;
+            }
+
+            .support .uwp-select:focus,
+            .support .uwp-input:focus {
+                border-color: #2563eb;
+                box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+            }
+
+            .uwp-select option {
+                background-color: #0f172a;
+                color: #e5e7eb;
+            }
+        </style>
 
         {{-- BASIC INFORMATION --}}
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-gray-800 border border-gray-700 rounded-lg p-5">
             <div>
+                <label class="block mb-2 text-sm font-medium text-white">Employee Name</label>
+                <input type="text"
+                       class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
+                       value="Juan Dela Cruz" disabled>
+            </div>
+
+            <div>
+                <label class="block mb-2 text-sm font-medium text-white">Employee ID</label>
+                <input type="text"
+                       class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
+                       value="EMP-0078" disabled>
+            </div>
+
+            <div>
+                <label class="block mb-2 text-sm font-medium text-white">Position</label>
+                <input type="text"
+                       class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
+                       value="Administrative Assistant I" disabled>
+            </div>
+
+            <div>
                 <label class="block mb-2 text-sm font-medium text-white">Office / Unit</label>
-                {{-- DUMMY_DATA: replace with dynamic value --}}
-                <input type="text" 
-                       class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                       value="Provincial Human Resource Management Office">
+                <input type="text"
+                       class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
+                       value="Provincial Human Resource Management Office" disabled>
             </div>
 
             <div>
-                <label class="block mb-2 text-sm font-medium text-white">Period Covered</label>
-                {{-- DUMMY_DATA: replace with dynamic value --}}
-                <input type="text" 
-                       class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                       value="January - June 2025">
+                <label class="block mb-2 text-sm font-medium text-white">Rating Period</label>
+                <input type="text"
+                       class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
+                       value="January - June 2025" disabled>
             </div>
 
             <div>
-                <label class="block mb-2 text-sm font-medium text-white">Prepared By</label>
-                {{-- DUMMY_DATA: replace with dynamic value --}}
-                <input type="text" 
-                       class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                       value="HRMO / Office Head">
-            </div>
-
-            <div>
-                <label class="block mb-2 text-sm font-medium text-white">Date Prepared</label>
-                <input type="date" 
-                       class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                <label class="block mb-2 text-sm font-medium text-white">Immediate Supervisor</label>
+                <input type="text"
+                       class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
+                       value="Maria Santos" disabled>
             </div>
         </div>
 
@@ -95,62 +140,60 @@
                 <table class="min-w-full border border-gray-700 text-sm">
                     <thead class="bg-gray-900">
                         <tr>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-1/4">Expected Outputs</th>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white">Efficiency / Quantity</th>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white">Quality / Effectiveness</th>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white">Timeliness</th>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-20">Action</th>
+                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-1/4">Expected Output</th>
+                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white">Actual Accomplishments / Evidence</th>
+                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-20">Q</th>
+                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-20">E</th>
+                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-20">T</th>
+                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-24">Average</th>
+                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-48">Remarks</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-700">
-                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-gray-750">
-                            <td class="border border-gray-700 px-4 py-3">
-                                <input type="text" 
-                                       class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 placeholder-gray-400"
-                                       placeholder="e.g. HRIS records updated">
+                            <td class="border border-gray-700 px-4 py-3 text-gray-300">
+                                HRIS records updated
+                            </td>
+                            <td class="border border-gray-700 px-4 py-3 text-gray-300">
+                                100% of records updated; audit trail complete.
                             </td>
                             <td class="border border-gray-700 px-4 py-3">
-                                <input type="text" 
-                                       class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 placeholder-gray-400"
-                                      placeholder="e.g. 100% of records">
+                                <select class="uwp-select">
+                                    <option>5</option>
+                                    <option>4</option>
+                                    <option>3</option>
+                                    <option>2</option>
+                                    <option>1</option>
+                                </select>
                             </td>
                             <td class="border border-gray-700 px-4 py-3">
-                                <input type="text" 
-                                       class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 placeholder-gray-400"
-                                       placeholder="e.g. Accurate, complete, error-free">
+                                <select class="uwp-select">
+                                    <option>5</option>
+                                    <option>4</option>
+                                    <option>3</option>
+                                    <option>2</option>
+                                    <option>1</option>
+                                </select>
                             </td>
                             <td class="border border-gray-700 px-4 py-3">
-                                <input type="text" 
-                                       class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 placeholder-gray-400"
-                                       placeholder="e.g. Within prescribed period">
+                                <select class="uwp-select">
+                                    <option>5</option>
+                                    <option>4</option>
+                                    <option>3</option>
+                                    <option>2</option>
+                                    <option>1</option>
+                                </select>
                             </td>
-                            <td class="border border-gray-700 px-4 py-3 text-center">
-                                <button type="button"
-                                        data-employee-action
-                                        data-action-title="Remove output row"
-                                        data-action-message="Remove this output row from the draft UWP."
-                                        data-action-confirm="Remove"
-                                        class="text-red-400 hover:text-red-300 text-sm font-medium transition-colors duration-200">
-                                    Remove
-                                </button>
+                            <td class="border border-gray-700 px-4 py-3 text-white font-semibold">
+                                4.67
+                            </td>
+                            <td class="border border-gray-700 px-4 py-3">
+                                <textarea class="uwp-input h-20" placeholder="Supervisor remarks"></textarea>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-
-            <button type="button"
-                    data-employee-action
-                    data-action-title="Add core output"
-                    data-action-message="Add a new blank row to the Core Functions section."
-                    data-action-confirm="Add row"
-                    class="flex items-center text-sm text-blue-400 hover:text-blue-300 font-medium transition-colors duration-200">
-                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                </svg>
-                Add Core Output
-            </button>
         </div>
 
         {{-- SUPPORT FUNCTIONS --}}
@@ -166,59 +209,60 @@
                 <table class="min-w-full border border-gray-700 text-sm">
                     <thead class="bg-gray-900">
                         <tr>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-1/4">Expected Outputs</th>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white">Efficiency / Quantity</th>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white">Quality / Effectiveness</th>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white">Timeliness</th>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-20">Action</th>
+                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-1/4">Expected Output</th>
+                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white">Actual Accomplishments / Evidence</th>
+                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-20">Q</th>
+                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-20">E</th>
+                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-20">T</th>
+                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-24">Average</th>
+                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-48">Remarks</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-700">
-                        {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-gray-750">
-                            <td class="border border-gray-700 px-4 py-3">
-                                <input type="text" 
-                                       class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 placeholder-gray-400"
-                                       placeholder="e.g. Reports prepared">
+                            <td class="border border-gray-700 px-4 py-3 text-gray-300">
+                                Reports prepared
+                            </td>
+                            <td class="border border-gray-700 px-4 py-3 text-gray-300">
+                                Monthly reports submitted with supporting documents.
                             </td>
                             <td class="border border-gray-700 px-4 py-3">
-                                <input type="text" 
-                                       class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 placeholder-gray-400">
+                                <select class="uwp-select">
+                                    <option>5</option>
+                                    <option>4</option>
+                                    <option>3</option>
+                                    <option>2</option>
+                                    <option>1</option>
+                                </select>
                             </td>
                             <td class="border border-gray-700 px-4 py-3">
-                                <input type="text" 
-                                       class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 placeholder-gray-400">
+                                <select class="uwp-select">
+                                    <option>5</option>
+                                    <option>4</option>
+                                    <option>3</option>
+                                    <option>2</option>
+                                    <option>1</option>
+                                </select>
                             </td>
                             <td class="border border-gray-700 px-4 py-3">
-                                <input type="text" 
-                                       class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 placeholder-gray-400">
+                                <select class="uwp-select">
+                                    <option>5</option>
+                                    <option>4</option>
+                                    <option>3</option>
+                                    <option>2</option>
+                                    <option>1</option>
+                                </select>
                             </td>
-                            <td class="border border-gray-700 px-4 py-3 text-center">
-                                <button type="button"
-                                        data-employee-action
-                                        data-action-title="Remove output row"
-                                        data-action-message="Remove this output row from the draft UWP."
-                                        data-action-confirm="Remove"
-                                        class="text-red-400 hover:text-red-300 text-sm font-medium transition-colors duration-200">
-                                    Remove
-                                </button>
+                            <td class="border border-gray-700 px-4 py-3 text-white font-semibold">
+                                4.33
+                            </td>
+                            <td class="border border-gray-700 px-4 py-3">
+                                <textarea class="uwp-input h-20" placeholder="Supervisor remarks"></textarea>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-
-            <button type="button"
-                    data-employee-action
-                    data-action-title="Add support output"
-                    data-action-message="Add a new blank row to the Support Functions section."
-                    data-action-confirm="Add row"
-                    class="flex items-center text-sm text-blue-400 hover:text-blue-300 font-medium transition-colors duration-200">
-                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                </svg>
-                Add Support Output
-            </button>
         </div>
 
         {{-- ACTION BUTTONS --}}
@@ -227,25 +271,25 @@
                 <svg class="w-4 h-4 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
-                Once approved, this UWP will be locked and used to generate IPCRs.
+                IPCR is authored by the supervisor and routed to Department Head for approval.
             </div>
 
             <div class="flex gap-3">
                 <button type="button"
                         data-employee-action
-                        data-action-title="Save UWP draft"
-                        data-action-message="Save this Unit Work Plan as a draft before submitting for approval."
+                        data-action-title="Save IPCR Draft"
+                        data-action-message="Save this IPCR draft with current ratings and remarks."
                         data-action-confirm="Save draft"
                         data-action-loading="Saving..."
                         class="inline-flex items-center gap-2 px-5 py-2.5 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors duration-200">
-                    <span data-button-label>Save as Draft</span>
+                    <span data-button-label>Save Draft</span>
                     <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
                 </button>
                 <button type="button"
                         data-employee-loading="true"
-                        data-loading-text="Submitting..."
+                        data-loading-text="Submitting to Department Head..."
                         class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg focus:ring-4 focus:ring-blue-800 transition-colors duration-200">
-                    <span data-button-label>Submit for Approval</span>
+                    <span data-button-label>Submit to Department Head</span>
                     <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
                 </button>
             </div>
@@ -265,7 +309,7 @@
             <div class="mt-6 flex justify-end gap-2">
                 <button type="button" data-employee-modal-close class="rounded-lg border border-gray-600 px-4 py-2 text-xs text-gray-300 hover:bg-gray-800">Close</button>
                 <button type="button" id="employee-action-confirm" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500">
-                    <span data-button-label>Proceed</span>
+                    <span data-button-label>Save IPCR Draft</span>
                     <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
                 </button>
             </div>
@@ -395,4 +439,4 @@
     });
     </script>
     @endpush
-</x-layouts.employee>
+</x-layouts.supervisor>
