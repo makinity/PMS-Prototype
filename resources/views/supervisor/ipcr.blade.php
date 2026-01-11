@@ -54,13 +54,17 @@
             .uwp-input {
                 background-color: #0f172a;
                 border: 1px solid #1f2937;
-                color: #e5e7eb;
+                color: #e5e7eb !important;
                 height: 44px;
                 border-radius: 12px;
                 font-weight: 600;
                 padding: 10px 14px;
                 width: 100%;
                 transition: all 0.15s ease;
+            }
+            .uwp-select option {
+                color: #0f172a !important;
+                background-color: #e5e7eb;
             }
 
             .uwp-select:focus,
@@ -140,17 +144,17 @@
                 <table class="min-w-full border border-gray-700 text-sm">
                     <thead class="bg-gray-900">
                         <tr>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-1/4">Expected Output</th>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white">Actual Accomplishments / Evidence</th>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-20">Q</th>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-20">E</th>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-20">T</th>
+                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-1/5">Expected Output</th>
+                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-1/3">Actual Accomplishments / Evidence</th>
+                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-24">Q</th>
+                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-24">E</th>
+                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-24">T</th>
                             <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-24">Average</th>
                             <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-48">Remarks</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-700">
-                        <tr class="hover:bg-gray-750">
+                        <tr class="hover:bg-gray-750" data-rating-row="core-1">
                             <td class="border border-gray-700 px-4 py-3 text-gray-300">
                                 HRIS records updated
                             </td>
@@ -158,34 +162,34 @@
                                 100% of records updated; audit trail complete.
                             </td>
                             <td class="border border-gray-700 px-4 py-3">
-                                <select class="uwp-select">
-                                    <option>5</option>
-                                    <option>4</option>
-                                    <option>3</option>
-                                    <option>2</option>
-                                    <option>1</option>
+                                <select class="uwp-select text-white font-semibold text-center" style="min-width:72px;" data-rating-select="core-1">
+                                    <option value="5">5</option>
+                                    <option value="4">4</option>
+                                    <option value="3">3</option>
+                                    <option value="2">2</option>
+                                    <option value="1">1</option>
                                 </select>
                             </td>
                             <td class="border border-gray-700 px-4 py-3">
-                                <select class="uwp-select">
-                                    <option>5</option>
-                                    <option>4</option>
-                                    <option>3</option>
-                                    <option>2</option>
-                                    <option>1</option>
+                                <select class="uwp-select text-white font-semibold text-center" style="min-width:72px;" data-rating-select="core-1">
+                                    <option value="5">5</option>
+                                    <option value="4">4</option>
+                                    <option value="3">3</option>
+                                    <option value="2">2</option>
+                                    <option value="1">1</option>
                                 </select>
                             </td>
                             <td class="border border-gray-700 px-4 py-3">
-                                <select class="uwp-select">
-                                    <option>5</option>
-                                    <option>4</option>
-                                    <option>3</option>
-                                    <option>2</option>
-                                    <option>1</option>
+                                <select class="uwp-select text-white font-semibold text-center" style="min-width:72px;" data-rating-select="core-1">
+                                    <option value="5">5</option>
+                                    <option value="4">4</option>
+                                    <option value="3">3</option>
+                                    <option value="2">2</option>
+                                    <option value="1">1</option>
                                 </select>
                             </td>
                             <td class="border border-gray-700 px-4 py-3 text-white font-semibold">
-                                4.67
+                                <span data-average-target="core-1">4.67</span>
                             </td>
                             <td class="border border-gray-700 px-4 py-3">
                                 <textarea class="uwp-input h-20" placeholder="Supervisor remarks"></textarea>
@@ -209,17 +213,17 @@
                 <table class="min-w-full border border-gray-700 text-sm">
                     <thead class="bg-gray-900">
                         <tr>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-1/4">Expected Output</th>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white">Actual Accomplishments / Evidence</th>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-20">Q</th>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-20">E</th>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-20">T</th>
+                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-1/5">Expected Output</th>
+                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-1/3">Actual Accomplishments / Evidence</th>
+                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-24">Q</th>
+                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-24">E</th>
+                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-24">T</th>
                             <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-24">Average</th>
                             <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-48">Remarks</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-700">
-                        <tr class="hover:bg-gray-750">
+                        <tr class="hover:bg-gray-750" data-rating-row="support-1">
                             <td class="border border-gray-700 px-4 py-3 text-gray-300">
                                 Reports prepared
                             </td>
@@ -227,34 +231,34 @@
                                 Monthly reports submitted with supporting documents.
                             </td>
                             <td class="border border-gray-700 px-4 py-3">
-                                <select class="uwp-select">
-                                    <option>5</option>
-                                    <option>4</option>
-                                    <option>3</option>
-                                    <option>2</option>
-                                    <option>1</option>
+                                <select class="uwp-select text-white font-semibold text-center" style="min-width:72px;" data-rating-select="support-1">
+                                    <option value="5">5</option>
+                                    <option value="4">4</option>
+                                    <option value="3">3</option>
+                                    <option value="2">2</option>
+                                    <option value="1">1</option>
                                 </select>
                             </td>
                             <td class="border border-gray-700 px-4 py-3">
-                                <select class="uwp-select">
-                                    <option>5</option>
-                                    <option>4</option>
-                                    <option>3</option>
-                                    <option>2</option>
-                                    <option>1</option>
+                                <select class="uwp-select text-white font-semibold text-center" style="min-width:72px;" data-rating-select="support-1">
+                                    <option value="5">5</option>
+                                    <option value="4">4</option>
+                                    <option value="3">3</option>
+                                    <option value="2">2</option>
+                                    <option value="1">1</option>
                                 </select>
                             </td>
                             <td class="border border-gray-700 px-4 py-3">
-                                <select class="uwp-select">
-                                    <option>5</option>
-                                    <option>4</option>
-                                    <option>3</option>
-                                    <option>2</option>
-                                    <option>1</option>
+                                <select class="uwp-select text-white font-semibold text-center" style="min-width:72px;" data-rating-select="support-1">
+                                    <option value="5">5</option>
+                                    <option value="4">4</option>
+                                    <option value="3">3</option>
+                                    <option value="2">2</option>
+                                    <option value="1">1</option>
                                 </select>
                             </td>
                             <td class="border border-gray-700 px-4 py-3 text-white font-semibold">
-                                4.33
+                                <span data-average-target="support-1">4.33</span>
                             </td>
                             <td class="border border-gray-700 px-4 py-3">
                                 <textarea class="uwp-input h-20" placeholder="Supervisor remarks"></textarea>
@@ -434,6 +438,25 @@
                         button.dataset.loadingActive = 'false';
                     }, duration);
                 }
+            });
+        });
+
+        // Live average calculation for Q/E/T dropdowns
+        function updateRowAverage(rowId) {
+            const selects = document.querySelectorAll(`[data-rating-select="${rowId}"]`);
+            const target = document.querySelector(`[data-average-target="${rowId}"]`);
+            if (!selects.length || !target) return;
+
+            const values = Array.from(selects).map((sel) => Number(sel.value) || 0);
+            const avg = values.reduce((a, b) => a + b, 0) / values.length;
+            target.textContent = avg.toFixed(2);
+        }
+
+        document.querySelectorAll('[data-rating-row]').forEach((row) => {
+            const rowId = row.dataset.ratingRow;
+            updateRowAverage(rowId);
+            row.querySelectorAll('[data-rating-select]').forEach((sel) => {
+                sel.addEventListener('change', () => updateRowAverage(rowId));
             });
         });
     });

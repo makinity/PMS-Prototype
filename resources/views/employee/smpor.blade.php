@@ -7,15 +7,15 @@
                 <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Summary MPOR</p>
                 <h1 class="mt-1 text-2xl font-bold text-white">SMPOR - Q4 2025</h1>
                 <p class="text-sm text-slate-400 mt-1">
-                    Consolidated view of all MPOR submissions for the quarter. Data is pulled directly from validated ORS logs.
+                    System-generated snapshot of validated MPOR submissions for the quarter. Data is pulled directly from locked MPOR and ORS logs.
                 </p>
             </div>
             <div class="flex items-center gap-2">
-                <span class="rounded-full border border-purple-600/50 bg-purple-500/10 px-3 py-1 text-xs font-semibold text-purple-200">
-                    Draft
-                </span>
                 <span class="rounded-full border border-emerald-600/50 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-200">
-                    Auto-calculated
+                    System-generated
+                </span>
+                <span class="rounded-full border border-blue-600/50 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-200">
+                    Locked view
                 </span>
             </div>
         </div>
@@ -154,12 +154,12 @@
                     </div>
                     <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                         <p class="font-semibold text-white">Next step</p>
-                        <p class="text-xs text-slate-400">Resolve missing links in MPOR, then re-run consolidation.</p>
+                        <p class="text-xs text-slate-400">Resolve missing links in MPOR. Consolidation runs automatically once MPORs are locked.</p>
                     </div>
                 </div>
                 <div class="space-y-2">
-                    <button type="button" data-modal-trigger="generate-smpor-modal" class="w-full rounded-lg bg-emerald-500 px-3 py-2 text-sm font-semibold text-slate-900 transition hover:bg-emerald-600">
-                        Request SMPOR Consolidation
+                    <button type="button" disabled class="w-full rounded-lg bg-emerald-500 px-3 py-2 text-sm font-semibold text-slate-900 opacity-60 cursor-not-allowed">
+                        SMPOR is system-generated
                     </button>
                     <button type="button" data-direct-action data-auto-reset="true" class="w-full rounded-lg border border-slate-700 px-3 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-800">
                         View MPOR sources
@@ -169,35 +169,9 @@
         </div>
 
         <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-4 text-xs text-slate-400">
-            SMPOR is system-generated from MPOR and ORS logs. Manual edits, ratings, and time overrides remain disabled to keep the audit trail clean.
+            SMPOR is system-generated from locked MPOR and ORS logs. Manual edits, ratings, and time overrides remain disabled to keep the audit trail clean.
         </div>
     </section>
-
-    <div id="generate-smpor-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/75 backdrop-blur-sm p-4">
-        <div class="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900/95 shadow-2xl shadow-black/40">
-            <div class="flex items-start justify-between gap-3 border-b border-slate-800 px-4 py-3">
-                <div>
-                    <h3 class="text-lg font-semibold text-white">Request SMPOR Consolidation</h3>
-                    <p class="mt-1 text-sm text-slate-400">Submit a request to consolidate validated MPOR entries into the SMPOR for this quarter.</p>
-                </div>
-                <button type="button" data-modal-close="generate-smpor-modal" class="rounded-full p-1 text-slate-400 transition hover:bg-slate-800 hover:text-slate-200">
-                    <span class="sr-only">Close</span>
-                    &times;
-                </button>
-            </div>
-            <div class="space-y-3 px-4 py-4 text-sm text-slate-300">
-                <p>Ensure MPOR links and validations are complete before submitting this request. The system will consolidate based on current validated data.</p>
-            </div>
-            <div class="flex items-center justify-end gap-2 border-t border-slate-800 px-4 py-3">
-                <button type="button" data-modal-close="generate-smpor-modal" class="rounded-lg border border-slate-700 bg-slate-800/80 px-3 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-800">
-                    Close
-                </button>
-                <button type="button" data-modal-confirm="generate-smpor-modal" data-auto-reset="true" class="rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-blue-700">
-                    Submit Request
-                </button>
-            </div>
-        </div>
-    </div>
 
     @push('scripts')
         <script>

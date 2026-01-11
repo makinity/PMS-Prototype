@@ -8,7 +8,7 @@
                     Individual Performance Commitment and Review (IPCR)
                 </h1>
                 <p class="text-sm text-gray-400 mt-1">
-                    This IPCR is system-generated and presented for employee review.
+                    System-generated from the approved UWP; employee review is commitment/acknowledgment only (no target edits or ratings).
                 </p>
             </div>
 
@@ -23,7 +23,7 @@
             <div class="flex items-start justify-between gap-4">
                 <div>
                     <h2 class="text-lg font-semibold text-white">Prototype Notes</h2>
-                    <p class="text-sm text-gray-400">IPCR is auto-filled from UWP and ORS logs.</p>
+                    <p class="text-sm text-gray-400">IPCR is auto-filled from approved UWP and MPOR/ORS logs; employee action is acknowledgment only.</p>
                 </div>
                 <span class="px-2 py-1 text-xs rounded bg-blue-900 text-blue-300 border border-blue-800">
                     PROTOTYPE
@@ -33,20 +33,20 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 text-sm">
                 <div class="bg-gray-700 rounded-lg p-3">
                     <p class="text-gray-400 mb-1">Data sources</p>
-                    <p class="font-medium text-white">MPOR outputs</p>
+                    <p class="font-medium text-white">Approved UWP + MPOR</p>
                 </div>
                 <div class="bg-gray-700 rounded-lg p-3">
                     <p class="text-gray-400 mb-1">Ratings</p>
-                    <p class="font-medium text-white">System calculated</p>
+                    <p class="font-medium text-white">System-calculated (locked)</p>
                 </div>
                 <div class="bg-gray-700 rounded-lg p-3">
                     <p class="text-gray-400 mb-1">Alerts</p>
-                    <p class="font-medium text-white">Missing submissions flagged</p>
+                    <p class="font-medium text-white">ORS/MPOR gaps flagged</p>
                 </div>
             </div>
 
             <p class="mt-3 text-xs text-gray-400">
-                Supervisor review locks final ratings and notes.
+                Commitments and weights are read-only; acknowledgement routes to supervisor for visibility.
             </p>
         </div>
 
@@ -91,6 +91,7 @@
                 {{-- DUMMY_DATA: replace with dynamic value --}}
                 Core Functions <span class="text-sm text-gray-400">(80%)</span>
             </h2>
+            <p class="text-xs text-gray-400">System-generated targets from the approved UWP. Employee cannot edit targets or ratings.</p>
 
             <div class="overflow-x-auto">
                 <table class="min-w-full border border-gray-700 text-sm">
@@ -110,18 +111,18 @@
                                 HRIS records updated
                             </td>
                             <td class="border border-gray-700 px-4 py-3 text-gray-300">
-                                100% of records updated
+                                5
                             </td>
                             <td class="border border-gray-700 px-4 py-3 text-gray-300">
-                                Accurate and error-free
+                                5
                             </td>
                             <td class="border border-gray-700 px-4 py-3 text-gray-300">
-                                Within prescribed period
+                                5
                             </td>
                             <td class="border border-gray-700 px-4 py-3">
                                 <input type="number"
                                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2 opacity-80 cursor-not-allowed"
-                                       value="20" disabled>
+                                       value="15" disabled>
                             </td>
                         </tr>
                     </tbody>
@@ -135,6 +136,7 @@
                 {{-- DUMMY_DATA: replace with dynamic value --}}
                 Support Functions <span class="text-sm text-gray-400">(20%)</span>
             </h2>
+            <p class="text-xs text-gray-400">Read-only commitments carried from the approved UWP; no employee-authored ratings.</p>
 
             <div class="overflow-x-auto">
                 <table class="min-w-full border border-gray-700 text-sm">
@@ -154,18 +156,18 @@
                                 Reports prepared
                             </td>
                             <td class="border border-gray-700 px-4 py-3 text-gray-300">
-                                Reports submitted
+                                5
                             </td>
                             <td class="border border-gray-700 px-4 py-3 text-gray-300">
-                                Complete and compliant
+                                5
                             </td>
                             <td class="border border-gray-700 px-4 py-3 text-gray-300">
-                                On or before deadline
+                                5
                             </td>
                             <td class="border border-gray-700 px-4 py-3">
                                 <input type="number"
                                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2 opacity-80 cursor-not-allowed"
-                                       value="5" disabled>
+                                       value="15" disabled>
                             </td>
                         </tr>
                     </tbody>
@@ -175,7 +177,7 @@
 
         {{-- COMMITMENT CONFIRMATION --}}
         <div class="bg-gray-800 border border-gray-700 rounded-lg p-5 grid grid-cols-1 md:grid-cols-3 gap-5">
-            <p class="md:col-span-3 text-sm text-gray-400">Acknowledgement that IPCR has been reviewed and discussed.</p>
+            <p class="md:col-span-3 text-sm text-gray-400">Acknowledgment that this system-generated IPCR (from approved UWP and MPOR) has been reviewed for commitment.</p>
             <div>
                 <label class="block mb-2 text-sm font-medium text-white">Immediate Supervisor</label>
                 <input type="text"
@@ -203,18 +205,18 @@
             <button type="button"
                     data-employee-action
                     data-action-title="Save acknowledgement draft"
-                    data-action-message="Save this IPCR acknowledgement as a draft."
-                    data-action-confirm="Save draft"
+                    data-action-message="Save this IPCR acknowledgement draft. Targets and ratings remain system-generated and locked."
+                    data-action-confirm="Save acknowledgment draft"
                     data-action-loading="Saving..."
                     class="inline-flex items-center gap-2 px-5 py-2.5 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors duration-200">
-                <span data-button-label>Save Draft</span>
+                <span data-button-label>Save Acknowledgment Draft</span>
                 <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
             </button>
             <button type="button"
                     data-employee-loading="true"
                     data-loading-text="Acknowledging..."
                     class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg focus:ring-4 focus:ring-blue-800 transition-colors duration-200">
-                <span data-button-label>Acknowledge IPCR</span>
+                <span data-button-label>Acknowledge Commitment</span>
                 <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
             </button>
         </div>

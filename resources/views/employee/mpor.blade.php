@@ -147,12 +147,12 @@
 
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 space-y-3">
                 <h2 class="text-lg font-semibold text-white">Actions</h2>
-                <p class="text-xs text-slate-400">Exports lock in the captured timestamps and validations.</p>
+                <p class="text-xs text-slate-400">Exports lock in the captured timestamps and validations. Final consolidation is system-generated after supervisor validation.</p>
                 <button type="button" data-direct-action data-auto-reset="true" class="w-full rounded-lg bg-emerald-500 px-3 py-2 text-sm font-semibold text-slate-900 transition hover:bg-emerald-600">
                     Export MPOR
                 </button>
                 <button type="button" data-modal-trigger="send-to-smpor-modal" class="w-full rounded-lg border border-slate-700 px-3 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-800">
-                    Submit for SMPOR Consolidation
+                    Mark MPOR Complete (Supervisor Validation)
                 </button>
                 <button type="button" data-direct-action data-auto-reset="true" class="w-full rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-900">
                     View ORS log source
@@ -169,8 +169,8 @@
         <div class="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900/95 shadow-2xl shadow-black/40">
             <div class="flex items-start justify-between gap-3 border-b border-slate-800 px-4 py-3">
                 <div>
-                    <h3 class="text-lg font-semibold text-white">Submit MPOR for SMPOR Consolidation</h3>
-                    <p class="mt-1 text-sm text-slate-400">Request supervisor validation and flag this MPOR as ready for SMPOR consolidation.</p>
+                    <h3 class="text-lg font-semibold text-white">Mark MPOR Complete</h3>
+                    <p class="mt-1 text-sm text-slate-400">Flag this MPOR as ready for supervisor validation. SMPOR consolidation is system-generated after validation.</p>
                 </div>
                 <button type="button" data-modal-close="send-to-smpor-modal" class="rounded-full p-1 text-slate-400 transition hover:bg-slate-800 hover:text-slate-200">
                     <span class="sr-only">Close</span>
@@ -178,7 +178,7 @@
                 </button>
             </div>
             <div class="space-y-3 px-4 py-4 text-sm text-slate-300">
-                <p>Submitting will use current validated outputs and timestamps. Confirm missing links are resolved and supervisor checks are underway before you proceed.</p>
+                <p>Submitting will share current entries for supervisor validation. Final SMPOR consolidation occurs automatically after validation and lock.</p>
             </div>
             <div class="flex items-center justify-end gap-2 border-t border-slate-800 px-4 py-3">
                 <button type="button" data-modal-close="send-to-smpor-modal" class="rounded-lg border border-slate-700 bg-slate-800/80 px-3 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-800">

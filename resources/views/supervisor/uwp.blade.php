@@ -9,8 +9,8 @@
             <div class="space-y-2">
                 <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">Unit Work Plan</p>
                 <h1 class="text-2xl font-bold text-white">Supervisor Unit Work Plan (UWP)</h1>
-                <p class="text-sm text-slate-400">Plan the unit’s deliverables for the period. This sets commitments for OPCR/IPCR; no performance scoring occurs here.</p>
-                <p class="text-xs text-slate-500">Outputs are planned deliverables. Actual ratings are calculated later from MPOR/IPCR.</p>
+                <p class="text-sm text-slate-400">Plan the unit's deliverables for the period. This is the commitment basis for OPCR/IPCR; no performance scoring occurs here.</p>
+                <p class="text-xs text-slate-500">Outputs are planned deliverables. Actual ratings are system-generated later from MPOR/IPCR.</p>
             </div>
             <div class="flex flex-col items-end gap-2 text-right">
                 <span class="inline-flex items-center gap-2 rounded-full border border-blue-500/40 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-200">
@@ -39,7 +39,7 @@
                 </label>
                 <label class="space-y-1 text-sm text-slate-300">
                     <span class="text-xs uppercase tracking-wide text-slate-400">Performance Period</span>
-                    <input type="text" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none {{ $isDraft ? '' : 'opacity-60 pointer-events-none' }}" style="background:#0f172a;color:#e5e7eb;" placeholder="e.g., Jan – Dec 2026" {{ $isDraft ? '' : 'disabled' }}>
+                    <input type="text" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none {{ $isDraft ? '' : 'opacity-60 pointer-events-none' }}" style="background:#0f172a;color:#e5e7eb;" placeholder="e.g., Jan - Dec 2026" {{ $isDraft ? '' : 'disabled' }}>
                 </label>
             </div>
 
@@ -59,7 +59,7 @@
                                     <tr>
                                         <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">Major Output / Activity</th>
                                         <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">Planned Deliverable</th>
-                                        <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Target Level (5–1)</th>
+                                        <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Target Level (5-1)</th>
                                         <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Performance Standard Reference</th>
                                         <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Timeline / Target</th>
                                         <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">Notes</th>
@@ -154,7 +154,7 @@
                                     <tr>
                                         <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">Support Output</th>
                                         <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">Planned Deliverable</th>
-                                        <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Target Level (5–1)</th>
+                                        <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Target Level (5-1)</th>
                                         <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Performance Standard Reference</th>
                                         <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Timeline / Target</th>
                                         <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">Notes</th>
@@ -217,7 +217,7 @@
                     </button>
                     <button type="button"
                             data-employee-loading="true"
-                            data-loading-text="Submitting…"
+                            data-loading-text="Submitting..."
                             class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-900/40 transition hover:bg-blue-500 {{ $isDraft ? '' : 'opacity-60 pointer-events-none' }}" {{ $isDraft ? '' : 'disabled' }}>
                         <span data-button-label>Submit for Approval</span>
                         <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
