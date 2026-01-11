@@ -248,43 +248,43 @@
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
                                 <a href="{{ route('supervisor.team-tasks') }}" class="sidebar-link" @if($isSupervisorTeamTasks) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-users"></i>
+                                    <i class="sidebar-icon fa-solid fa-people-group"></i>
                                     <span>Team Tasks</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ route('supervisor.uwp') }}" class="sidebar-link" @if($isSupervisorUWP) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-users"></i>
+                                    <i class="sidebar-icon fa-solid fa-clipboard-list"></i>
                                     <span>Unit Work Plan</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ route('supervisor.ipcr') }}" class="sidebar-link" @if($isSupervisorIPCR) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-users"></i>
+                                    <i class="sidebar-icon fa-solid fa-file-pen"></i>
                                     <span>IPCR</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ route('supervisor.opcr') }}" class="sidebar-link" @if($isSupervisorOPCR) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-users"></i>
+                                    <i class="sidebar-icon fa-solid fa-file-contract"></i>
                                     <span>OPCR</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ route('supervisor.mpor') }}" class="sidebar-link" @if($isSupervisorMPOR) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-users"></i>
+                                    <i class="sidebar-icon fa-solid fa-clipboard-check"></i>
                                     <span>MPOR</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ route('supervisor.overdue-alerts') }}" class="sidebar-link" @if($isSupervisorOverdueAlerts) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-list-check"></i>
+                                    <i class="sidebar-icon fa-solid fa-bell-exclamation"></i>
                                     <span>Overdue &amp; alerts</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="" class="sidebar-link">
-                                    <i class="sidebar-icon fa-solid fa-list-check"></i>
+                                    <i class="sidebar-icon fa-solid fa-bullseye"></i>
                                     <span>IDP</span>
                                 </a>
                             </li>

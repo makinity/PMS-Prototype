@@ -59,7 +59,7 @@
                                     <tr>
                                         <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">Major Output / Activity</th>
                                         <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">Planned Deliverable</th>
-                                        <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Target Level (5-1)</th>
+                                        <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Target Difficulty (Planning Reference)</th>
                                         <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Performance Standard Reference</th>
                                         <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Timeline / Target</th>
                                         <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">Notes</th>
@@ -154,7 +154,7 @@
                                     <tr>
                                         <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">Support Output</th>
                                         <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">Planned Deliverable</th>
-                                        <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Target Level (5-1)</th>
+                                        <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Target Difficulty (Planning Reference)</th>
                                         <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Performance Standard Reference</th>
                                         <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Timeline / Target</th>
                                         <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">Notes</th>

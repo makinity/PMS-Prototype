@@ -115,7 +115,7 @@
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
                                 <a href="{{ route('dept-head.uwp') }}" class="sidebar-link" @if($isUnitWorkPlan) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-regular fa-clipboard"></i>
+                                    <i class="sidebar-icon fa-solid fa-clipboard-list"></i>
                                     <span>Unit Work Plan</span>
                                 </a>
                             </li>
@@ -127,21 +127,21 @@
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
                                 <a href="{{ route('dept-head.opcr') }}" class="sidebar-link" @if($isOpcr) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-regular fa-calendar"></i>
+                                    <i class="sidebar-icon fa-solid fa-file-contract"></i>
                                     <span>OPCR</span>
                                 </a>
                             </li>
 
                             <li>
                                 <a href="{{ route('dept-head.smpor') }}" class="sidebar-link" @if($isSMPOR) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-regular fa-calendar"></i>
+                                    <i class="sidebar-icon fa-solid fa-chart-simple"></i>
                                     <span>SMPOR</span>
                                 </a>
                             </li>
 
                             <li>
                                 <a href="{{ route('dept-head.ipcr') }}" class="sidebar-link" @if($isIPCR) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-calendar-check"></i>
+                                    <i class="sidebar-icon fa-solid fa-file-pen"></i>
                                     <span>IPCR</span>
                                 </a>
                             </li>
