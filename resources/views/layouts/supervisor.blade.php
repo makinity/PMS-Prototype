@@ -145,6 +145,7 @@
         @php
             $isSupervisorDashboard = request()->routeIs('supervisor.dashboard');
             $isSupervisorTeamTasks = request()->routeIs('supervisor.team-tasks');
+            $isSupervisorUWP = request()->routeIs('supervisor.uwp');
             $isSupervisorIPCR = request()->routeIs('supervisor.ipcr');
             $isSupervisorOPCR = request()->routeIs('supervisor.opcr');
             $isSupervisorMPOR = request()->routeIs('supervisor.mpor');
@@ -249,6 +250,12 @@
                                 <a href="{{ route('supervisor.team-tasks') }}" class="sidebar-link" @if($isSupervisorTeamTasks) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-users"></i>
                                     <span>Team Tasks</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('supervisor.uwp') }}" class="sidebar-link" @if($isSupervisorUWP) aria-current="page" @endif>
+                                    <i class="sidebar-icon fa-solid fa-users"></i>
+                                    <span>Unit Work Plan</span>
                                 </a>
                             </li>
                             <li>

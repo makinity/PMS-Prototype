@@ -28,10 +28,10 @@
             $isMyTasks = request()->routeIs('employee.my-task');
             $isSubmitOutput = request()->routeIs('employee.submit-output');
             $isOutputRating = request()->routeIs('employee.ors');
-            $isOpcr = request()->routeIs('employee.opcr');
+            $isOpcr = request()->routeIs('employee.opcr');$isOpcr = request()->routeIs('employee.opcr');
             $isMpor = request()->routeIs('employee.mpor');
             $isSmpor = request()->routeIs('employee.smpor');
-            $isIpcr = request()->routeIs('employee.ipcr');
+            $isIPCR = request()->routeIs('employee.ipcr');
             $isIdp = request()->routeIs('employee.idp');
             $isProfile = request()->routeIs('employee.profile');
         @endphp
@@ -160,7 +160,7 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('employee.ipcr') }}" class="sidebar-link">
+                                <a href="{{ route('employee.ipcr') }}" class="sidebar-link" @if($isIPCR) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-file-signature"></i>
                                     <span>IPCR</span>
                                 </a>

@@ -88,6 +88,10 @@ Route::get('/supervisor-dashboard', function () {
     return view('supervisor.dashboard');
 })->name('supervisor.dashboard');
 
+Route::get('/supervisor/uwp', function () {
+    return view('supervisor.uwp');
+})->name('supervisor.uwp');
+
 Route::get('/supervisor/team-tasks', function () {
     return view('supervisor.team-tasks');
 })->name('supervisor.team-tasks');
