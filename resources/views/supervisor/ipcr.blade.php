@@ -4,303 +4,292 @@
         {{-- PAGE HEADER --}}
         <div class="flex justify-between items-start">
             <div>
-                <h1 class="text-2xl font-bold text-white">Individual Performance Commitment and Review (IPCR)</h1>
+                <h1 class="text-2xl font-bold text-white">IPCR Reviews</h1>
                 <p class="text-sm text-gray-400 mt-1">
-                    Supervisor Rating &amp; Review Phase (Derived from SMPOR)
+                    Review and rate employee IPCRs derived from locked SMPOR outputs. Ratings live only inside the review modal.
                 </p>
             </div>
-
-            {{-- Status --}}
-            {{-- DUMMY_DATA: replace with dynamic value --}}
-            <span class="px-3 py-1 text-xs font-medium rounded bg-yellow-900 text-yellow-300 border border-yellow-800">
-                FOR APPROVAL
+            <span class="px-3 py-1 text-xs font-medium rounded bg-blue-900 text-blue-300 border border-blue-800">
+                Supervisor Review
             </span>
         </div>
 
-        {{-- Prototype Clarity --}}
-        <div class="bg-gray-800 border border-gray-700 rounded-lg p-5">
-            <div class="flex items-start justify-between gap-4">
+        {{-- IPCR LIST --}}
+        <div class="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
+            <div class="p-4 border-b border-gray-700 flex items-center justify-between">
                 <div>
-                    <h2 class="text-lg font-semibold text-white">Prototype Notes</h2>
-                    <p class="text-sm text-gray-400">SMPOR provides expected outputs; supervisor encodes ratings and remarks.</p>
+                    <h2 class="text-lg font-semibold text-white">Submitted IPCRs</h2>
+                    <p class="text-xs text-gray-400">Select an IPCR to view details and encode ratings in the modal.</p>
                 </div>
-                <span class="px-2 py-1 text-xs rounded bg-blue-900 text-blue-300 border border-blue-800">
-                    PROTOTYPE
-                </span>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 text-sm">
-                <div class="bg-gray-700 rounded-lg p-3">
-                    <p class="text-gray-400 mb-1">Sourced from</p>
-                    <p class="font-medium text-white">Locked SMPOR outputs</p>
-                </div>
-                <div class="bg-gray-700 rounded-lg p-3">
-                    <p class="text-gray-400 mb-1">Ratings</p>
-                    <p class="font-medium text-white">Supervisor-authored Q/E/T</p>
-                </div>
-                <div class="bg-gray-700 rounded-lg p-3">
-                    <p class="text-gray-400 mb-1">Acknowledgement</p>
-                    <p class="font-medium text-white">Employee signs after approval</p>
-                </div>
-            </div>
-
-            <p class="mt-3 text-xs text-gray-400">
-                Ratings exist only in IPCR; outputs and evidence remain read-only.
-            </p>
-        </div>
-
-        <style>
-            .uwp-select,
-            .uwp-input {
-                background-color: #0f172a;
-                border: 1px solid #1f2937;
-                color: #e5e7eb !important;
-                height: 44px;
-                border-radius: 12px;
-                font-weight: 600;
-                padding: 10px 14px;
-                width: 100%;
-                transition: all 0.15s ease;
-            }
-            .uwp-select option {
-                color: #0f172a !important;
-                background-color: #e5e7eb;
-            }
-
-            .uwp-select:focus,
-            .uwp-input:focus {
-                border-color: #22c55e;
-                box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
-                outline: none;
-            }
-
-            .support .uwp-select:focus,
-            .support .uwp-input:focus {
-                border-color: #2563eb;
-                box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
-            }
-
-            .uwp-select option {
-                background-color: #0f172a;
-                color: #e5e7eb;
-            }
-        </style>
-
-        {{-- BASIC INFORMATION --}}
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-gray-800 border border-gray-700 rounded-lg p-5">
-            <div>
-                <label class="block mb-2 text-sm font-medium text-white">Employee Name</label>
-                <input type="text"
-                       class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
-                       value="Juan Dela Cruz" disabled>
-            </div>
-
-            <div>
-                <label class="block mb-2 text-sm font-medium text-white">Employee ID</label>
-                <input type="text"
-                       class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
-                       value="EMP-0078" disabled>
-            </div>
-
-            <div>
-                <label class="block mb-2 text-sm font-medium text-white">Position</label>
-                <input type="text"
-                       class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
-                       value="Administrative Assistant I" disabled>
-            </div>
-
-            <div>
-                <label class="block mb-2 text-sm font-medium text-white">Office / Unit</label>
-                <input type="text"
-                       class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
-                       value="Provincial Human Resource Management Office" disabled>
-            </div>
-
-            <div>
-                <label class="block mb-2 text-sm font-medium text-white">Rating Period</label>
-                <input type="text"
-                       class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
-                       value="January - June 2025" disabled>
-            </div>
-
-            <div>
-                <label class="block mb-2 text-sm font-medium text-white">Immediate Supervisor</label>
-                <input type="text"
-                       class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
-                       value="Maria Santos" disabled>
-            </div>
-        </div>
-
-        {{-- CORE FUNCTIONS --}}
-        <div class="bg-gray-800 border border-gray-700 rounded-lg p-5 space-y-4">
-            <div class="flex justify-between items-center">
-                <h2 class="font-semibold text-lg text-white">
-                    {{-- DUMMY_DATA: replace with dynamic value --}}
-                    Core Functions <span class="text-sm text-gray-400">(80%)</span>
-                </h2>
+                <span class="text-[11px] text-gray-500">Statuses: For Review / Returned / Approved</span>
             </div>
 
             <div class="overflow-x-auto">
-                <table class="min-w-full border border-gray-700 text-sm">
-                    <thead class="bg-gray-900">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-gray-900 text-gray-200">
                         <tr>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-1/5">Expected Output</th>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-1/3">Actual Accomplishments / Evidence</th>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-24">Q</th>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-24">E</th>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-24">T</th>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-24">Average</th>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-48">Remarks</th>
+                            <th class="px-4 py-3 text-left font-semibold border-b border-gray-700">Employee Name</th>
+                            <th class="px-4 py-3 text-left font-semibold border-b border-gray-700">Position</th>
+                            <th class="px-4 py-3 text-left font-semibold border-b border-gray-700">Rating Period</th>
+                            <th class="px-4 py-3 text-left font-semibold border-b border-gray-700">IPCR Status</th>
+                            <th class="px-4 py-3 text-left font-semibold border-b border-gray-700 w-32">Action</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-700">
-                        <tr class="hover:bg-gray-750" data-rating-row="core-1">
-                            <td class="border border-gray-700 px-4 py-3 text-gray-300">
-                                HRIS records updated
+                    <tbody class="divide-y divide-gray-800 text-gray-100">
+                        <tr class="hover:bg-gray-800/60">
+                            <td class="px-4 py-3 font-semibold">Juan Dela Cruz</td>
+                            <td class="px-4 py-3 text-gray-300">Administrative Assistant I</td>
+                            <td class="px-4 py-3 text-gray-300">Jan - Jun 2025</td>
+                            <td class="px-4 py-3">
+                                <span class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full bg-blue-500/10 text-blue-200 border border-blue-500/30">
+                                    For Review
+                                </span>
                             </td>
-                            <td class="border border-gray-700 px-4 py-3 text-gray-300">
-                                100% of records updated; audit trail complete.
+                            <td class="px-4 py-3">
+                                <button type="button"
+                                        data-view-ipcr
+                                        data-employee="Juan Dela Cruz"
+                                        data-position="Administrative Assistant I"
+                                        data-period="Jan - Jun 2025"
+                                        data-status="For Review"
+                                        class="inline-flex items-center gap-2 rounded-lg border border-gray-700 px-3 py-2 text-xs font-semibold text-gray-200 hover:bg-gray-700/70">
+                                    <span class="fa-solid fa-eye text-gray-300"></span>
+                                    View IPCR
+                                </button>
                             </td>
-                            <td class="border border-gray-700 px-4 py-3">
-                                <select class="uwp-select text-white font-semibold text-center" style="min-width:72px;" data-rating-select="core-1">
-                                    <option value="5">5</option>
-                                    <option value="4">4</option>
-                                    <option value="3">3</option>
-                                    <option value="2">2</option>
-                                    <option value="1">1</option>
-                                </select>
+                        </tr>
+                        <tr class="hover:bg-gray-800/60">
+                            <td class="px-4 py-3 font-semibold">Maria Santos</td>
+                            <td class="px-4 py-3 text-gray-300">HR Officer II</td>
+                            <td class="px-4 py-3 text-gray-300">Jul - Dec 2024</td>
+                            <td class="px-4 py-3">
+                                <span class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full bg-emerald-500/10 text-emerald-200 border border-emerald-500/30">
+                                    Approved
+                                </span>
                             </td>
-                            <td class="border border-gray-700 px-4 py-3">
-                                <select class="uwp-select text-white font-semibold text-center" style="min-width:72px;" data-rating-select="core-1">
-                                    <option value="5">5</option>
-                                    <option value="4">4</option>
-                                    <option value="3">3</option>
-                                    <option value="2">2</option>
-                                    <option value="1">1</option>
-                                </select>
-                            </td>
-                            <td class="border border-gray-700 px-4 py-3">
-                                <select class="uwp-select text-white font-semibold text-center" style="min-width:72px;" data-rating-select="core-1">
-                                    <option value="5">5</option>
-                                    <option value="4">4</option>
-                                    <option value="3">3</option>
-                                    <option value="2">2</option>
-                                    <option value="1">1</option>
-                                </select>
-                            </td>
-                            <td class="border border-gray-700 px-4 py-3 text-white font-semibold">
-                                <span data-average-target="core-1">4.67</span>
-                            </td>
-                            <td class="border border-gray-700 px-4 py-3">
-                                <textarea class="uwp-input h-20" placeholder="Supervisor remarks"></textarea>
+                            <td class="px-4 py-3">
+                                <button type="button"
+                                        data-view-ipcr
+                                        data-employee="Maria Santos"
+                                        data-position="HR Officer II"
+                                        data-period="Jul - Dec 2024"
+                                        data-status="Approved"
+                                        class="inline-flex items-center gap-2 rounded-lg border border-gray-700 px-3 py-2 text-xs font-semibold text-gray-200 hover:bg-gray-700/70">
+                                    <span class="fa-solid fa-eye text-gray-300"></span>
+                                    View IPCR
+                                </button>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
-
-        {{-- SUPPORT FUNCTIONS --}}
-        <div class="bg-gray-800 border border-gray-700 rounded-lg p-5 space-y-4">
-            <div class="flex justify-between items-center">
-                <h2 class="font-semibold text-lg text-white">
-                    {{-- DUMMY_DATA: replace with dynamic value --}}
-                    Support Functions <span class="text-sm text-gray-400">(20%)</span>
-                </h2>
-            </div>
-
-            <div class="overflow-x-auto">
-                <table class="min-w-full border border-gray-700 text-sm">
-                    <thead class="bg-gray-900">
-                        <tr>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-1/5">Expected Output</th>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-1/3">Actual Accomplishments / Evidence</th>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-24">Q</th>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-24">E</th>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-24">T</th>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-24">Average</th>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-48">Remarks</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-700">
-                        <tr class="hover:bg-gray-750" data-rating-row="support-1">
-                            <td class="border border-gray-700 px-4 py-3 text-gray-300">
-                                Reports prepared
-                            </td>
-                            <td class="border border-gray-700 px-4 py-3 text-gray-300">
-                                Monthly reports submitted with supporting documents.
-                            </td>
-                            <td class="border border-gray-700 px-4 py-3">
-                                <select class="uwp-select text-white font-semibold text-center" style="min-width:72px;" data-rating-select="support-1">
-                                    <option value="5">5</option>
-                                    <option value="4">4</option>
-                                    <option value="3">3</option>
-                                    <option value="2">2</option>
-                                    <option value="1">1</option>
-                                </select>
-                            </td>
-                            <td class="border border-gray-700 px-4 py-3">
-                                <select class="uwp-select text-white font-semibold text-center" style="min-width:72px;" data-rating-select="support-1">
-                                    <option value="5">5</option>
-                                    <option value="4">4</option>
-                                    <option value="3">3</option>
-                                    <option value="2">2</option>
-                                    <option value="1">1</option>
-                                </select>
-                            </td>
-                            <td class="border border-gray-700 px-4 py-3">
-                                <select class="uwp-select text-white font-semibold text-center" style="min-width:72px;" data-rating-select="support-1">
-                                    <option value="5">5</option>
-                                    <option value="4">4</option>
-                                    <option value="3">3</option>
-                                    <option value="2">2</option>
-                                    <option value="1">1</option>
-                                </select>
-                            </td>
-                            <td class="border border-gray-700 px-4 py-3 text-white font-semibold">
-                                <span data-average-target="support-1">4.33</span>
-                            </td>
-                            <td class="border border-gray-700 px-4 py-3">
-                                <textarea class="uwp-input h-20" placeholder="Supervisor remarks"></textarea>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        {{-- ACTION BUTTONS --}}
-        <div class="flex flex-col sm:flex-row justify-between items-center gap-4 p-4 bg-gray-800 border border-gray-700 rounded-lg">
-            <div class="flex items-center text-sm text-gray-400">
-                <svg class="w-4 h-4 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                IPCR is authored by the supervisor and routed to Department Head for approval.
-            </div>
-
-            <div class="flex gap-3">
-                <button type="button"
-                        data-employee-action
-                        data-action-title="Save IPCR Draft"
-                        data-action-message="Save this IPCR draft with current ratings and remarks."
-                        data-action-confirm="Save draft"
-                        data-action-loading="Saving..."
-                        class="inline-flex items-center gap-2 px-5 py-2.5 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors duration-200">
-                    <span data-button-label>Save Draft</span>
-                    <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
-                </button>
-                <button type="button"
-                        data-employee-loading="true"
-                        data-loading-text="Submitting to Department Head..."
-                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg focus:ring-4 focus:ring-blue-800 transition-colors duration-200">
-                    <span data-button-label>Submit to Department Head</span>
-                    <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
-                </button>
-            </div>
-        </div>
-
     </div>
 
+    {{-- VIEW & RATE IPCR MODAL --}}
+    <div id="view-ipcr-modal" class="fixed inset-0 z-50 hidden items-start justify-center bg-black/70 backdrop-blur-sm px-4 py-8">
+        <div class="w-full max-w-5xl rounded-2xl border border-gray-800 bg-gray-900 shadow-2xl">
+            <div class="flex items-start justify-between gap-3 border-b border-gray-800 px-6 py-4">
+                <div class="space-y-1">
+                    <p class="text-xs uppercase tracking-[0.2em] text-blue-300">IPCR Review</p>
+                    <h3 class="text-lg font-semibold text-white">View &amp; Rate IPCR</h3>
+                    <div class="flex flex-wrap items-center gap-2 text-xs text-gray-400">
+                        <span id="ipcr-employee" class="font-semibold text-gray-200">--</span>
+                        <span class="text-gray-500">|</span>
+                        <span id="ipcr-position">--</span>
+                        <span class="text-gray-500">|</span>
+                        <span id="ipcr-period">--</span>
+                    </div>
+                </div>
+                <div class="flex flex-col items-end gap-2">
+                    <span id="ipcr-status-badge" class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full border border-blue-500/40 bg-blue-500/10 text-blue-200">
+                        For Review
+                    </span>
+                    <button type="button" data-close-ipcr class="text-gray-400 hover:text-white">
+                        <span class="sr-only">Close</span>
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="px-6 py-5 space-y-5 max-h-[70vh] overflow-y-auto">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+                    <div class="rounded-lg border border-gray-800 bg-gray-950/60 p-3">
+                        <p class="text-xs uppercase tracking-wide text-gray-500">Employee</p>
+                        <p id="ipcr-employee-detail" class="font-semibold text-gray-100">--</p>
+                    </div>
+                    <div class="rounded-lg border border-gray-800 bg-gray-950/60 p-3">
+                        <p class="text-xs uppercase tracking-wide text-gray-500">Position</p>
+                        <p id="ipcr-position-detail" class="font-semibold text-gray-100">--</p>
+                    </div>
+                    <div class="rounded-lg border border-gray-800 bg-gray-950/60 p-3">
+                        <p class="text-xs uppercase tracking-wide text-gray-500">Rating Period</p>
+                        <p id="ipcr-period-detail" class="font-semibold text-gray-100">--</p>
+                    </div>
+                </div>
+
+                {{-- Core Functions --}}
+                <div class="rounded-xl border border-gray-800 bg-gray-900/70">
+                    <div class="flex items-center justify-between border-b border-gray-800 px-4 py-3">
+                        <div>
+                            <h4 class="text-sm font-semibold text-white">Core Functions (80%)</h4>
+                            <p class="text-xs text-gray-400">Expected outputs and evidence are read-only; rate Q/E/T only.</p>
+                        </div>
+                        <span class="text-[11px] text-gray-500">System-generated from SMPOR</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-sm border border-gray-800">
+                            <thead class="bg-gray-900 text-gray-200">
+                                <tr>
+                                    <th class="px-4 py-3 text-left font-semibold border-b border-gray-800">Expected Output</th>
+                                    <th class="px-4 py-3 text-left font-semibold border-b border-gray-800">Actual Accomplishments / Evidence</th>
+                                    <th class="px-4 py-3 text-center font-semibold border-b border-gray-800 w-24">Q</th>
+                                    <th class="px-4 py-3 text-center font-semibold border-b border-gray-800 w-24">E</th>
+                                    <th class="px-4 py-3 text-center font-semibold border-b border-gray-800 w-24">T</th>
+                                    <th class="px-4 py-3 text-center font-semibold border-b border-gray-800 w-24">Average</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-800 text-gray-100">
+                                <tr data-rating-row="core-1" class="hover:bg-gray-800/50">
+                                    <td class="px-4 py-3">HRIS records updated</td>
+                                    <td class="px-4 py-3 text-gray-300">100% of records updated; audit trail complete.</td>
+                                    <td class="px-4 py-3 text-center">
+                                        <select class="uwp-select text-white font-semibold text-center" style="min-width:72px; background:#0f172a;color:#e5e7eb;" data-rating-select="core-1">
+                                            <option value="5" selected>5</option>
+                                            <option value="4">4</option>
+                                            <option value="3">3</option>
+                                            <option value="2">2</option>
+                                            <option value="1">1</option>
+                                        </select>
+                                    </td>
+                                    <td class="px-4 py-3 text-center">
+                                        <select class="uwp-select text-white font-semibold text-center" style="min-width:72px; background:#0f172a;color:#e5e7eb;" data-rating-select="core-1">
+                                            <option value="5" selected>5</option>
+                                            <option value="4">4</option>
+                                            <option value="3">3</option>
+                                            <option value="2">2</option>
+                                            <option value="1">1</option>
+                                        </select>
+                                    </td>
+                                    <td class="px-4 py-3 text-center">
+                                        <select class="uwp-select text-white font-semibold text-center" style="min-width:72px; background:#0f172a;color:#e5e7eb;" data-rating-select="core-1">
+                                            <option value="5" selected>5</option>
+                                            <option value="4">4</option>
+                                            <option value="3">3</option>
+                                            <option value="2">2</option>
+                                            <option value="1">1</option>
+                                        </select>
+                                    </td>
+                                    <td class="px-4 py-3 text-center font-semibold text-white">
+                                        <span data-average-target="core-1">5.00</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                {{-- Support Functions --}}
+                <div class="rounded-xl border border-gray-800 bg-gray-900/70">
+                    <div class="flex items-center justify-between border-b border-gray-800 px-4 py-3">
+                        <div>
+                            <h4 class="text-sm font-semibold text-white">Support Functions (20%)</h4>
+                            <p class="text-xs text-gray-400">Rate Q/E/T; commitments and evidence remain read-only.</p>
+                        </div>
+                        <span class="text-[11px] text-gray-500">System-generated from SMPOR</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-sm border border-gray-800">
+                            <thead class="bg-gray-900 text-gray-200">
+                                <tr>
+                                    <th class="px-4 py-3 text-left font-semibold border-b border-gray-800">Expected Output</th>
+                                    <th class="px-4 py-3 text-left font-semibold border-b border-gray-800">Actual Accomplishments / Evidence</th>
+                                    <th class="px-4 py-3 text-center font-semibold border-b border-gray-800 w-24">Q</th>
+                                    <th class="px-4 py-3 text-center font-semibold border-b border-gray-800 w-24">E</th>
+                                    <th class="px-4 py-3 text-center font-semibold border-b border-gray-800 w-24">T</th>
+                                    <th class="px-4 py-3 text-center font-semibold border-b border-gray-800 w-24">Average</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-800 text-gray-100">
+                                <tr data-rating-row="support-1" class="hover:bg-gray-800/50">
+                                    <td class="px-4 py-3">Reports prepared</td>
+                                    <td class="px-4 py-3 text-gray-300">Monthly reports submitted with supporting documents.</td>
+                                    <td class="px-4 py-3 text-center">
+                                        <select class="uwp-select text-white font-semibold text-center" style="min-width:72px; background:#0f172a;color:#e5e7eb;" data-rating-select="support-1">
+                                            <option value="5" selected>5</option>
+                                            <option value="4">4</option>
+                                            <option value="3">3</option>
+                                            <option value="2">2</option>
+                                            <option value="1">1</option>
+                                        </select>
+                                    </td>
+                                    <td class="px-4 py-3 text-center">
+                                        <select class="uwp-select text-white font-semibold text-center" style="min-width:72px; background:#0f172a;color:#e5e7eb;" data-rating-select="support-1">
+                                            <option value="5" selected>5</option>
+                                            <option value="4">4</option>
+                                            <option value="3">3</option>
+                                            <option value="2">2</option>
+                                            <option value="1">1</option>
+                                        </select>
+                                    </td>
+                                    <td class="px-4 py-3 text-center">
+                                        <select class="uwp-select text-white font-semibold text-center" style="min-width:72px; background:#0f172a;color:#e5e7eb;" data-rating-select="support-1">
+                                            <option value="5" selected>5</option>
+                                            <option value="4">4</option>
+                                            <option value="3">3</option>
+                                            <option value="2">2</option>
+                                            <option value="1">1</option>
+                                        </select>
+                                    </td>
+                                    <td class="px-4 py-3 text-center font-semibold text-white">
+                                        <span data-average-target="support-1">5.00</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-sm font-semibold text-white" for="ipcr-remarks">Supervisor Remarks</label>
+                    <textarea id="ipcr-remarks" style="background:#0f172a;color:#e5e7eb;" class="w-full rounded-lg border border-gray-800 bg-gray-950 px-3 py-2 text-sm text-gray-100 placeholder:text-gray-500 focus:ring-2 focus:ring-blue-500 focus:outline-none" rows="3" placeholder="Add remarks or justification..."></textarea>
+                    <p class="text-[11px] text-gray-500">Submitting to Department Head locks ratings and remarks.</p>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-t border-gray-800 px-6 py-4">
+                <div class="text-xs text-gray-500">This action will be recorded in the audit log.</div>
+                <div class="flex flex-wrap items-center gap-3">
+                    <button type="button"
+                            data-employee-loading="true"
+                            data-loading-text="Saving draft..."
+                            class="inline-flex items-center gap-2 rounded-lg border border-gray-700 px-4 py-2 text-sm font-semibold text-gray-200 hover:bg-gray-800/80">
+                        <span data-button-label>Save Draft</span>
+                        <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                    </button>
+                    <button type="button"
+                            data-employee-action
+                            data-action-title="Submit IPCR to Department Head"
+                            data-action-message="Submit this IPCR with current ratings and remarks. Further edits will be locked."
+                            data-action-confirm="Submit"
+                            data-action-loading="Submitting..."
+                            class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-900/40 hover:bg-blue-500">
+                        <span data-button-label>Submit to Department Head</span>
+                        <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                    </button>
+                    <button type="button"
+                            data-employee-loading="true"
+                            data-loading-text="Returning..."
+                            class="inline-flex items-center gap-2 rounded-lg border border-rose-500/40 bg-rose-600/10 px-4 py-2 text-sm font-semibold text-rose-200 hover:bg-rose-600/20">
+                        <span data-button-label>Return to Employee</span>
+                        <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-rose-200/40 border-t-rose-200"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Confirmation Modal --}}
     <div id="employee-action-modal" role="dialog" aria-modal="true" class="fixed inset-0 z-[70] hidden flex items-center justify-center bg-black/60 px-4 py-6">
         <div class="w-full max-w-md rounded-2xl border border-gray-700 bg-gray-900 p-5 shadow-xl">
             <div class="flex items-start justify-between">
@@ -313,7 +302,7 @@
             <div class="mt-6 flex justify-end gap-2">
                 <button type="button" data-employee-modal-close class="rounded-lg border border-gray-600 px-4 py-2 text-xs text-gray-300 hover:bg-gray-800">Close</button>
                 <button type="button" id="employee-action-confirm" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500">
-                    <span data-button-label>Save IPCR Draft</span>
+                    <span data-button-label>Proceed</span>
                     <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
                 </button>
             </div>
@@ -321,145 +310,189 @@
     </div>
 
     @push('scripts')
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const modal = document.getElementById('employee-action-modal');
-        const title = document.getElementById('employee-action-title');
-        const body = document.getElementById('employee-action-body');
-        const confirmBtn = document.getElementById('employee-action-confirm');
-        let activeTrigger = null;
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const overlay = document.getElementById('view-ipcr-modal');
+                const actionModal = document.getElementById('employee-action-modal');
+                const actionTitle = document.getElementById('employee-action-title');
+                const actionBody = document.getElementById('employee-action-body');
+                const actionConfirm = document.getElementById('employee-action-confirm');
+                let activeTrigger = null;
 
-        if (!modal || !title || !body || !confirmBtn) {
-            return;
-        }
-
-        function setButtonLoading(button, isLoading, loadingText) {
-            if (!button) {
-                return;
-            }
-            const label = button.querySelector('[data-button-label]');
-            const spinner = button.querySelector('[data-button-spinner]');
-            if (label && !button.dataset.originalLabel) {
-                button.dataset.originalLabel = label.textContent.trim();
-            }
-
-            if (isLoading) {
-                button.disabled = true;
-                button.classList.add('opacity-70', 'cursor-wait');
-                if (spinner) {
-                    spinner.classList.remove('hidden');
-                }
-                if (label && loadingText) {
-                    label.textContent = loadingText;
-                }
-            } else {
-                button.disabled = false;
-                button.classList.remove('opacity-70', 'cursor-wait');
-                if (spinner) {
-                    spinner.classList.add('hidden');
-                }
-                if (label && button.dataset.originalLabel) {
-                    label.textContent = button.dataset.originalLabel;
-                }
-            }
-        }
-
-        function closeModal() {
-            modal.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
-            activeTrigger = null;
-            setButtonLoading(confirmBtn, false);
-        }
-
-        function openModal(trigger) {
-            activeTrigger = trigger;
-            title.textContent = trigger.dataset.actionTitle || 'Action';
-            body.textContent = trigger.dataset.actionMessage || 'Prototype action preview.';
-            confirmBtn.dataset.actionLoading = trigger.dataset.actionLoading || 'Working...';
-            modal.classList.remove('hidden');
-            document.body.classList.add('overflow-hidden');
-        }
-
-        window.openEmployeeActionModal = openModal;
-
-        document.querySelectorAll('[data-employee-action]').forEach((button) => {
-            if (button.dataset.actionRequiresValidation === 'true') {
-                return;
-            }
-            button.addEventListener('click', function (event) {
-                event.preventDefault();
-                openModal(button);
-            });
-        });
-
-        confirmBtn.addEventListener('click', function () {
-            setButtonLoading(confirmBtn, true, confirmBtn.dataset.actionLoading);
-            if (activeTrigger) {
-                setButtonLoading(activeTrigger, true, activeTrigger.dataset.actionLoading || confirmBtn.dataset.actionLoading);
-            }
-
-            setTimeout(() => {
-                setButtonLoading(confirmBtn, false);
-                if (activeTrigger) {
-                    setButtonLoading(activeTrigger, false);
-                }
-                closeModal();
-            }, 1200);
-        });
-
-        modal.addEventListener('click', function (event) {
-            if (event.target === modal) {
-                closeModal();
-            }
-        });
-
-        modal.querySelectorAll('[data-employee-modal-close]').forEach((button) => {
-            button.addEventListener('click', closeModal);
-        });
-
-        document.addEventListener('keydown', function (event) {
-            if (event.key === 'Escape') {
-                closeModal();
-            }
-        });
-
-        document.querySelectorAll('[data-employee-loading="true"]').forEach((button) => {
-            button.addEventListener('click', function () {
-                if (button.dataset.loadingActive === 'true') {
+                if (!overlay || !actionModal || !actionTitle || !actionBody || !actionConfirm) {
                     return;
                 }
-                button.dataset.loadingActive = 'true';
-                setButtonLoading(button, true, button.dataset.loadingText || 'Loading...');
 
-                const duration = Number.parseInt(button.dataset.loadingDuration || '1200', 10);
-                if (!Number.isNaN(duration)) {
-                    setTimeout(() => {
-                        setButtonLoading(button, false);
-                        button.dataset.loadingActive = 'false';
-                    }, duration);
+                const employeeEls = {
+                    nameTop: document.getElementById('ipcr-employee'),
+                    positionTop: document.getElementById('ipcr-position'),
+                    periodTop: document.getElementById('ipcr-period'),
+                    badge: document.getElementById('ipcr-status-badge'),
+                    nameDetail: document.getElementById('ipcr-employee-detail'),
+                    positionDetail: document.getElementById('ipcr-position-detail'),
+                    periodDetail: document.getElementById('ipcr-period-detail'),
+                };
+
+                function setButtonLoading(button, isLoading, loadingText) {
+                    if (!button) return;
+                    const label = button.querySelector('[data-button-label]');
+                    const spinner = button.querySelector('[data-button-spinner]');
+                    if (label && !button.dataset.originalLabel) {
+                        button.dataset.originalLabel = label.textContent.trim();
+                    }
+                    if (isLoading) {
+                        button.disabled = true;
+                        button.classList.add('opacity-70', 'cursor-wait');
+                        spinner && spinner.classList.remove('hidden');
+                        if (label && loadingText) label.textContent = loadingText;
+                    } else {
+                        button.disabled = false;
+                        button.classList.remove('opacity-70', 'cursor-wait');
+                        spinner && spinner.classList.add('hidden');
+                        if (label && button.dataset.originalLabel) label.textContent = button.dataset.originalLabel;
+                    }
                 }
+
+                function updateRowAverage(rowId) {
+                    const selects = overlay.querySelectorAll(`[data-rating-select="${rowId}"]`);
+                    const target = overlay.querySelector(`[data-average-target="${rowId}"]`);
+                    if (!selects.length || !target) return;
+                    const values = Array.from(selects).map(sel => Number(sel.value) || 0);
+                    const avg = values.reduce((a, b) => a + b, 0) / values.length;
+                    target.textContent = avg.toFixed(2);
+                }
+
+                function bindAverages() {
+                    overlay.querySelectorAll('[data-rating-row]').forEach(row => {
+                        const rowId = row.dataset.ratingRow;
+                        row.querySelectorAll('[data-rating-select]').forEach(sel => {
+                            sel.addEventListener('change', () => updateRowAverage(rowId));
+                        });
+                        updateRowAverage(rowId);
+                    });
+                }
+
+                function openIpcrModal(trigger) {
+                    const name = trigger.dataset.employee || '--';
+                    const position = trigger.dataset.position || '--';
+                    const period = trigger.dataset.period || '--';
+                    const status = trigger.dataset.status || 'For Review';
+
+                    employeeEls.nameTop.textContent = name;
+                    employeeEls.positionTop.textContent = position;
+                    employeeEls.periodTop.textContent = period;
+                    employeeEls.nameDetail.textContent = name;
+                    employeeEls.positionDetail.textContent = position;
+                    employeeEls.periodDetail.textContent = period;
+                    employeeEls.badge.textContent = status;
+
+                    employeeEls.badge.className = 'inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full';
+                    if (status === 'Approved') {
+                        employeeEls.badge.classList.add('border', 'border-emerald-500/50', 'bg-emerald-500/10', 'text-emerald-200');
+                    } else if (status === 'Returned') {
+                        employeeEls.badge.classList.add('border', 'border-amber-500/50', 'bg-amber-500/10', 'text-amber-200');
+                    } else {
+                        employeeEls.badge.classList.add('border', 'border-blue-500/50', 'bg-blue-500/10', 'text-blue-200');
+                    }
+
+                    overlay.classList.remove('hidden');
+                    overlay.classList.add('flex');
+                    document.body.classList.add('overflow-hidden');
+                    bindAverages();
+                }
+
+                function closeIpcrModal() {
+                    overlay.classList.add('hidden');
+                    overlay.classList.remove('flex');
+                    document.body.classList.remove('overflow-hidden');
+                }
+
+                document.querySelectorAll('[data-view-ipcr]').forEach(btn => {
+                    btn.addEventListener('click', () => openIpcrModal(btn));
+                });
+                overlay.addEventListener('click', (event) => {
+                    if (event.target === overlay) closeIpcrModal();
+                });
+                overlay.querySelectorAll('[data-close-ipcr]').forEach(btn => {
+                    btn.addEventListener('click', closeIpcrModal);
+                });
+
+                function closeActionModal() {
+                    actionModal.classList.add('hidden');
+                    document.body.classList.remove('overflow-hidden');
+                    setButtonLoading(actionConfirm, false);
+                    activeTrigger = null;
+                }
+
+                function openActionModal(trigger) {
+                    activeTrigger = trigger;
+                    actionTitle.textContent = trigger.dataset.actionTitle || 'Action';
+                    actionBody.textContent = trigger.dataset.actionMessage || 'Prototype action preview.';
+                    actionConfirm.dataset.actionLoading = trigger.dataset.actionLoading || 'Working...';
+                    actionConfirm.querySelector('[data-button-label]').textContent = trigger.dataset.actionConfirm || 'Proceed';
+                    actionModal.classList.remove('hidden');
+                    document.body.classList.add('overflow-hidden');
+                }
+
+                window.openEmployeeActionModal = openActionModal;
+
+                document.querySelectorAll('[data-employee-action]').forEach((button) => {
+                    button.addEventListener('click', function (event) {
+                        event.preventDefault();
+                        openActionModal(button);
+                    });
+                });
+
+                actionConfirm.addEventListener('click', function () {
+                    setButtonLoading(actionConfirm, true, actionConfirm.dataset.actionLoading);
+                    if (activeTrigger) {
+                        setButtonLoading(activeTrigger, true, activeTrigger.dataset.actionLoading || actionConfirm.dataset.actionLoading);
+                    }
+
+                    setTimeout(() => {
+                        setButtonLoading(actionConfirm, false);
+                        if (activeTrigger) {
+                            setButtonLoading(activeTrigger, false);
+                        }
+                        closeActionModal();
+                    }, 1200);
+                });
+
+                actionModal.addEventListener('click', function (event) {
+                    if (event.target === actionModal) {
+                        closeActionModal();
+                    }
+                });
+
+                actionModal.querySelectorAll('[data-employee-modal-close]').forEach((button) => {
+                    button.addEventListener('click', closeActionModal);
+                });
+
+                document.addEventListener('keydown', function (event) {
+                    if (event.key === 'Escape') {
+                        closeActionModal();
+                        closeIpcrModal();
+                    }
+                });
+
+                document.querySelectorAll('[data-employee-loading="true"]').forEach((button) => {
+                    button.addEventListener('click', function () {
+                        if (button.dataset.loadingActive === 'true') {
+                            return;
+                        }
+                        button.dataset.loadingActive = 'true';
+                        setButtonLoading(button, true, button.dataset.loadingText || 'Loading...');
+
+                        const duration = Number.parseInt(button.dataset.loadingDuration || '1200', 10);
+                        if (!Number.isNaN(duration)) {
+                            setTimeout(() => {
+                                setButtonLoading(button, false);
+                                button.dataset.loadingActive = 'false';
+                            }, duration);
+                        }
+                    });
+                });
             });
-        });
-
-        // Live average calculation for Q/E/T dropdowns
-        function updateRowAverage(rowId) {
-            const selects = document.querySelectorAll(`[data-rating-select="${rowId}"]`);
-            const target = document.querySelector(`[data-average-target="${rowId}"]`);
-            if (!selects.length || !target) return;
-
-            const values = Array.from(selects).map((sel) => Number(sel.value) || 0);
-            const avg = values.reduce((a, b) => a + b, 0) / values.length;
-            target.textContent = avg.toFixed(2);
-        }
-
-        document.querySelectorAll('[data-rating-row]').forEach((row) => {
-            const rowId = row.dataset.ratingRow;
-            updateRowAverage(rowId);
-            row.querySelectorAll('[data-rating-select]').forEach((sel) => {
-                sel.addEventListener('change', () => updateRowAverage(rowId));
-            });
-        });
-    });
-    </script>
+        </script>
     @endpush
 </x-layouts.supervisor>
