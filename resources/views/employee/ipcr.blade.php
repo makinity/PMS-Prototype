@@ -8,13 +8,13 @@
                     Individual Performance Commitment and Review (IPCR)
                 </h1>
                 <p class="text-sm text-gray-400 mt-1">
-                    System-generated from the approved UWP; employee review is commitment/acknowledgment only (no target edits or ratings).
+                    Final, approved IPCR based on locked SMPOR and Supervisor ratings; employee action is acknowledgment only.
                 </p>
             </div>
 
             {{-- DUMMY_DATA: replace with dynamic value --}}
-            <span class="px-3 py-1 text-xs font-medium rounded bg-blue-900 text-blue-300 border border-blue-800">
-                COMMITMENT
+            <span class="px-3 py-1 text-xs font-medium rounded bg-emerald-900 text-emerald-300 border border-emerald-800">
+                APPROVED · READ-ONLY
             </span>
         </div>
 
@@ -23,7 +23,7 @@
             <div class="flex items-start justify-between gap-4">
                 <div>
                     <h2 class="text-lg font-semibold text-white">Prototype Notes</h2>
-                    <p class="text-sm text-gray-400">IPCR is auto-filled from approved UWP and MPOR/ORS logs; employee action is acknowledgment only.</p>
+                    <p class="text-sm text-gray-400">IPCR is auto-filled from approved UWP, locked SMPOR, and supervisor-encoded ratings; employee action is acknowledgment only.</p>
                 </div>
                 <span class="px-2 py-1 text-xs rounded bg-blue-900 text-blue-300 border border-blue-800">
                     PROTOTYPE
@@ -33,20 +33,20 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 text-sm">
                 <div class="bg-gray-700 rounded-lg p-3">
                     <p class="text-gray-400 mb-1">Data sources</p>
-                    <p class="font-medium text-white">Approved UWP + MPOR</p>
+                    <p class="font-medium text-white">Approved UWP + Locked SMPOR</p>
                 </div>
                 <div class="bg-gray-700 rounded-lg p-3">
                     <p class="text-gray-400 mb-1">Ratings</p>
-                    <p class="font-medium text-white">System-calculated (locked)</p>
+                    <p class="font-medium text-white">Supervisor-encoded (locked)</p>
                 </div>
                 <div class="bg-gray-700 rounded-lg p-3">
                     <p class="text-gray-400 mb-1">Alerts</p>
-                    <p class="font-medium text-white">ORS/MPOR gaps flagged</p>
+                    <p class="font-medium text-white">ORS/MPOR gaps resolved</p>
                 </div>
             </div>
 
             <p class="mt-3 text-xs text-gray-400">
-                Commitments and weights are read-only; acknowledgement routes to supervisor for visibility.
+                IPCR status: Approved. Targets, ratings, and outputs are read-only; acknowledgment is required for audit trail.
             </p>
         </div>
 
@@ -57,7 +57,7 @@
                 {{-- DUMMY_DATA: replace with dynamic value --}}
                 <input type="text"
                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
-                       value="Juan Dela Cruz" disabled>
+                       value="Ramon Reyes" disabled>
             </div>
 
             <div>
@@ -65,7 +65,7 @@
                 {{-- DUMMY_DATA: replace with dynamic value --}}
                 <input type="text"
                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
-                       value="Administrative Assistant I" disabled>
+                       value="Records Management Officer" disabled>
             </div>
 
             <div>
@@ -73,7 +73,7 @@
                 {{-- DUMMY_DATA: replace with dynamic value --}}
                 <input type="text"
                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
-                       value="Provincial Human Resource Management Office" disabled>
+                       value="Records Management Unit" disabled>
             </div>
 
             <div>
@@ -81,7 +81,7 @@
                 {{-- DUMMY_DATA: replace with dynamic value --}}
                 <input type="text"
                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
-                       value="January - June 2025" disabled>
+                       value="Q4 2025" disabled>
             </div>
         </div>
 
@@ -108,7 +108,8 @@
                         {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-gray-750">
                             <td class="border border-gray-700 px-4 py-3 text-gray-300">
-                                HRIS records updated
+                                Scan and digitize e-bank transaction records
+                                <span class="block text-[11px] text-gray-500 mt-1">Target: 100 records · Actual: 120 records (exceeded target) · System-generated from SMPOR</span>
                             </td>
                             <td class="border border-gray-700 px-4 py-3 text-gray-300">
                                 5
@@ -122,7 +123,7 @@
                             <td class="border border-gray-700 px-4 py-3">
                                 <input type="number"
                                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2 opacity-80 cursor-not-allowed"
-                                       value="15" disabled>
+                                       value="80" disabled>
                             </td>
                         </tr>
                     </tbody>
@@ -153,7 +154,8 @@
                         {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-gray-750">
                             <td class="border border-gray-700 px-4 py-3 text-gray-300">
-                                Reports prepared
+                                Reference and archival support
+                                <span class="block text-[11px] text-gray-500 mt-1">Target: Fulfill reference pulls within 1 business day · System-generated from SMPOR</span>
                             </td>
                             <td class="border border-gray-700 px-4 py-3 text-gray-300">
                                 5
@@ -167,7 +169,7 @@
                             <td class="border border-gray-700 px-4 py-3">
                                 <input type="number"
                                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2 opacity-80 cursor-not-allowed"
-                                       value="15" disabled>
+                                       value="20" disabled>
                             </td>
                         </tr>
                     </tbody>
@@ -182,7 +184,7 @@
                 <label class="block mb-2 text-sm font-medium text-white">Immediate Supervisor</label>
                 <input type="text"
                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
-                       value="Maria Santos" disabled>
+                       value="Carlo D. Beray" disabled>
             </div>
 
             <div>
@@ -190,7 +192,7 @@
                 {{-- DUMMY_DATA: replace with dynamic value --}}
                 <input type="text"
                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
-                       value="Juan Dela Cruz" disabled>
+                       value="Ramon Reyes" disabled>
             </div>
 
             <div>

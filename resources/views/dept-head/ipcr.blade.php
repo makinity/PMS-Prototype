@@ -14,7 +14,7 @@
             <div class="flex items-start justify-between gap-4">
                 <div>
                     <h2 class="text-lg font-semibold text-white">Prototype Notes</h2>
-                    <p class="text-sm text-gray-400">Supervisor submits IPCR with final ratings. Department Head reviews and either approves or returns.</p>
+                    <p class="text-sm text-gray-400">Supervisor submits IPCR with final ratings encoded from locked SMPOR data. Department Head reviews and either approves or returns.</p>
                 </div>
                 <span class="px-2 py-1 text-xs rounded bg-blue-900 text-blue-300 border border-blue-800">
                     PROTOTYPE
@@ -28,7 +28,7 @@
                     <h2 class="text-lg font-semibold text-white">Submitted IPCRs</h2>
                     <p class="text-xs text-gray-400">Read-only list for review and approval.</p>
                 </div>
-                <span class="text-xs text-gray-400">Period: January - June 2025</span>
+                <span class="text-xs text-gray-400">Period: Q4 2025</span>
             </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
@@ -45,11 +45,11 @@
                     </thead>
                     <tbody class="divide-y divide-gray-700 text-gray-200">
                         <tr class="hover:bg-gray-750">
-                            <td class="px-4 py-3">Juan Dela Cruz</td>
-                            <td class="px-4 py-3 text-gray-300">EMP-0078</td>
-                            <td class="px-4 py-3 text-gray-300">Administrative Services Unit</td>
-                            <td class="px-4 py-3 text-gray-300">Jan - Jun 2025</td>
-                            <td class="px-4 py-3 text-white font-semibold">4.50</td>
+                            <td class="px-4 py-3">Ramon Reyes</td>
+                            <td class="px-4 py-3 text-gray-300">EMP-0215</td>
+                            <td class="px-4 py-3 text-gray-300">Records Management Unit</td>
+                            <td class="px-4 py-3 text-gray-300">Q4 2025</td>
+                            <td class="px-4 py-3 text-white font-semibold">5.00</td>
                             <td class="px-4 py-3">
                                 <span data-status-badge="row-1" class="rounded-full bg-yellow-900 px-3 py-1 text-xs font-semibold text-yellow-200 border border-yellow-800">FOR APPROVAL</span>
                             </td>
@@ -85,27 +85,27 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-800 border border-gray-700 rounded-lg p-5">
                     <div>
                         <label class="block mb-2 text-sm font-medium text-white">Employee Name</label>
-                        <input type="text" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5" value="Juan Dela Cruz" disabled>
+                        <input type="text" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5" value="Ramon Reyes" disabled>
                     </div>
                     <div>
                         <label class="block mb-2 text-sm font-medium text-white">Employee ID</label>
-                        <input type="text" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5" value="EMP-0078" disabled>
+                        <input type="text" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5" value="EMP-0215" disabled>
                     </div>
                     <div>
                         <label class="block mb-2 text-sm font-medium text-white">Position</label>
-                        <input type="text" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5" value="Administrative Assistant I" disabled>
+                        <input type="text" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5" value="Records Management Officer" disabled>
                     </div>
                     <div>
                         <label class="block mb-2 text-sm font-medium text-white">Office / Unit</label>
-                        <input type="text" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5" value="Administrative Services Unit" disabled>
+                        <input type="text" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5" value="Records Management Unit" disabled>
                     </div>
                     <div>
                         <label class="block mb-2 text-sm font-medium text-white">Rating Period</label>
-                        <input type="text" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5" value="January - June 2025" disabled>
+                        <input type="text" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5" value="Q4 2025" disabled>
                     </div>
                     <div>
                         <label class="block mb-2 text-sm font-medium text-white">Immediate Supervisor</label>
-                        <input type="text" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5" value="Maria Santos" disabled>
+                        <input type="text" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5" value="Carlo D. Beray" disabled>
                     </div>
                 </div>
 
@@ -143,14 +143,19 @@
                             </thead>
                             <tbody class="divide-y divide-gray-700">
                                 <tr class="hover:bg-gray-750">
-                                    <td class="border border-gray-700 px-4 py-3 text-gray-300">HRIS records updated</td>
-                                    <td class="border border-gray-700 px-4 py-3 text-gray-300">100% of records updated; audit trail complete.</td>
+                                    <td class="border border-gray-700 px-4 py-3 text-gray-300">
+                                        Scan and digitize e-bank transaction records
+                                        <span class="block text-[11px] text-gray-500 mt-1">Target: 100 records per quarter</span>
+                                    </td>
+                                    <td class="border border-gray-700 px-4 py-3 text-gray-300">
+                                        Scanned and uploaded 120 transaction records (3 hours total). System-generated from SMPOR; validated and locked before IPCR.
+                                    </td>
                                     <td class="border border-gray-700 px-4 py-3 text-white font-semibold">5</td>
                                     <td class="border border-gray-700 px-4 py-3 text-white font-semibold">5</td>
-                                    <td class="border border-gray-700 px-4 py-3 text-white font-semibold">4</td>
-                                    <td class="border border-gray-700 px-4 py-3 text-white font-semibold">4.67</td>
-                                    <td class="border border-gray-700 px-4 py-3 text-gray-200">Strong data hygiene; continue monthly audits.</td>
-                                    <td class="border border-gray-700 px-4 py-3 text-gray-200">Noted and acknowledged.</td>
+                                    <td class="border border-gray-700 px-4 py-3 text-white font-semibold">5</td>
+                                    <td class="border border-gray-700 px-4 py-3 text-white font-semibold">5.00</td>
+                                    <td class="border border-gray-700 px-4 py-3 text-gray-200">Supervisor rating encoded; aligns with locked SMPOR output.</td>
+                                    <td class="border border-gray-700 px-4 py-3 text-gray-200">Acknowledged.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -177,14 +182,19 @@
                             </thead>
                             <tbody class="divide-y divide-gray-700">
                                 <tr class="hover:bg-gray-750">
-                                    <td class="border border-gray-700 px-4 py-3 text-gray-300">Reports prepared</td>
-                                    <td class="border border-gray-700 px-4 py-3 text-gray-300">Monthly reports submitted with supporting documents.</td>
-                                    <td class="border border-gray-700 px-4 py-3 text-white font-semibold">4</td>
-                                    <td class="border border-gray-700 px-4 py-3 text-white font-semibold">4</td>
+                                    <td class="border border-gray-700 px-4 py-3 text-gray-300">
+                                        Reference and archival support
+                                        <span class="block text-[11px] text-gray-500 mt-1">Target: Fulfill reference pulls within 1 business day</span>
+                                    </td>
+                                    <td class="border border-gray-700 px-4 py-3 text-gray-300">
+                                        Serviced internal reference requests and archival pulls within agreed timelines. System-generated from SMPOR; no additional outputs recorded here.
+                                    </td>
                                     <td class="border border-gray-700 px-4 py-3 text-white font-semibold">5</td>
-                                    <td class="border border-gray-700 px-4 py-3 text-white font-semibold">4.33</td>
-                                    <td class="border border-gray-700 px-4 py-3 text-gray-200">Quality improving; maintain template use.</td>
-                                    <td class="border border-gray-700 px-4 py-3 text-gray-200">Will continue current process.</td>
+                                    <td class="border border-gray-700 px-4 py-3 text-white font-semibold">5</td>
+                                    <td class="border border-gray-700 px-4 py-3 text-white font-semibold">5</td>
+                                    <td class="border border-gray-700 px-4 py-3 text-white font-semibold">5.00</td>
+                                    <td class="border border-gray-700 px-4 py-3 text-gray-200">Supervisor rating encoded; support functions align with SMPOR.</td>
+                                    <td class="border border-gray-700 px-4 py-3 text-gray-200">Acknowledged.</td>
                                 </tr>
                             </tbody>
                         </table>

@@ -63,11 +63,11 @@
                         <tr class="hover:bg-slate-900/60">
                             <td class="px-4 py-3">Records Management Unit</td>
                             <td class="px-4 py-3 text-slate-300">Carlo D. Beray</td>
-                            <td class="px-4 py-3 text-emerald-300 font-semibold">90%</td>
-                            <td class="px-4 py-3 text-slate-300">1</td>
+                            <td class="px-4 py-3 text-emerald-300 font-semibold">100%</td>
+                            <td class="px-4 py-3 text-slate-300">0</td>
                             <td class="px-4 py-3">
-                                <span class="rounded-full bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-200 border border-blue-500/30">
-                                    In consolidation
+                                <span class="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300 border border-emerald-500/30">
+                                    Locked
                                 </span>
                             </td>
                             <td class="px-4 py-3 text-center">
@@ -76,10 +76,10 @@
                                     data-smpor-view
                                     data-unit="Records Management Unit"
                                     data-supervisor="Carlo D. Beray"
-                                    data-completion="90%"
-                                    data-missing="1"
-                                    data-status="In consolidation"
-                                    data-monthly='[{"month":"October 2025","total":12,"core":7,"support":5},{"month":"November 2025","total":11,"core":6,"support":5},{"month":"December 2025","total":11,"core":7,"support":4}]'
+                                    data-completion="100%"
+                                    data-missing="0"
+                                    data-status="Locked"
+                                    data-monthly='[{"month":"October 2025","total":50,"core":40,"support":10},{"month":"November 2025","total":50,"core":35,"support":15},{"month":"December 2025","total":65,"core":45,"support":20}]'
                                     class="text-blue-400 hover:text-blue-300 text-xs font-semibold">
                                     View
                                 </button>

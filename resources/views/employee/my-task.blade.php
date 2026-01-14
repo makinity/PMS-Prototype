@@ -18,7 +18,7 @@
                 <option class="bg-gray-700">Overdue</option>
             </select>
 
-            <input type="date" 
+            <input type="date"
                    class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 px-3 py-2.5">
         </div>
 

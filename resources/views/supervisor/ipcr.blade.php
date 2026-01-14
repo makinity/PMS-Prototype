@@ -37,9 +37,9 @@
                     </thead>
                     <tbody class="divide-y divide-gray-800 text-gray-100">
                         <tr class="hover:bg-gray-800/60">
-                            <td class="px-4 py-3 font-semibold">Juan Dela Cruz</td>
-                            <td class="px-4 py-3 text-gray-300">Administrative Assistant I</td>
-                            <td class="px-4 py-3 text-gray-300">Jan - Jun 2025</td>
+                            <td class="px-4 py-3 font-semibold">Ramon Reyes</td>
+                            <td class="px-4 py-3 text-gray-300">Records Management Officer</td>
+                            <td class="px-4 py-3 text-gray-300">Q4 2025</td>
                             <td class="px-4 py-3">
                                 <span class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full bg-blue-500/10 text-blue-200 border border-blue-500/30">
                                     For Review
@@ -48,9 +48,9 @@
                             <td class="px-4 py-3">
                                 <button type="button"
                                         data-view-ipcr
-                                        data-employee="Juan Dela Cruz"
-                                        data-position="Administrative Assistant I"
-                                        data-period="Jan - Jun 2025"
+                                        data-employee="Ramon Reyes"
+                                        data-position="Records Management Officer"
+                                        data-period="Q4 2025"
                                         data-status="For Review"
                                         class="inline-flex items-center gap-2 rounded-lg border border-gray-700 px-3 py-2 text-xs font-semibold text-gray-200 hover:bg-gray-700/70">
                                     <span class="fa-solid fa-eye text-gray-300"></span>
@@ -59,9 +59,9 @@
                             </td>
                         </tr>
                         <tr class="hover:bg-gray-800/60">
-                            <td class="px-4 py-3 font-semibold">Maria Santos</td>
-                            <td class="px-4 py-3 text-gray-300">HR Officer II</td>
-                            <td class="px-4 py-3 text-gray-300">Jul - Dec 2024</td>
+                            <td class="px-4 py-3 font-semibold">Ramon Reyes</td>
+                            <td class="px-4 py-3 text-gray-300">Records Management Officer</td>
+                            <td class="px-4 py-3 text-gray-300">Q3 2025</td>
                             <td class="px-4 py-3">
                                 <span class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full bg-emerald-500/10 text-emerald-200 border border-emerald-500/30">
                                     Approved
@@ -70,9 +70,9 @@
                             <td class="px-4 py-3">
                                 <button type="button"
                                         data-view-ipcr
-                                        data-employee="Maria Santos"
-                                        data-position="HR Officer II"
-                                        data-period="Jul - Dec 2024"
+                                        data-employee="Ramon Reyes"
+                                        data-position="Records Management Officer"
+                                        data-period="Q3 2025"
                                         data-status="Approved"
                                         class="inline-flex items-center gap-2 rounded-lg border border-gray-700 px-3 py-2 text-xs font-semibold text-gray-200 hover:bg-gray-700/70">
                                     <span class="fa-solid fa-eye text-gray-300"></span>
@@ -151,8 +151,15 @@
                             </thead>
                             <tbody class="divide-y divide-gray-800 text-gray-100">
                                 <tr data-rating-row="core-1" class="hover:bg-gray-800/50">
-                                    <td class="px-4 py-3">HRIS records updated</td>
-                                    <td class="px-4 py-3 text-gray-300">100% of records updated; audit trail complete.</td>
+                                    <td class="px-4 py-3">
+                                        Scan and digitize e-bank transaction records
+                                        <span class="block text-[11px] text-gray-500 mt-1">Target: 100 records per rating period</span>
+                                    </td>
+                                    <td class="px-4 py-3 text-gray-300">
+                                        Scanned and uploaded 120 e-bank transaction records (3 hours total).
+                                        Derived from validated and locked SMPOR entries; read-only.
+                                        <span class="block text-[11px] text-gray-500 mt-1">System-generated from SMPOR</span>
+                                    </td>
                                     <td class="px-4 py-3 text-center">
                                         <select class="uwp-select text-white font-semibold text-center" style="min-width:72px; background:#0f172a;color:#e5e7eb;" data-rating-select="core-1">
                                             <option value="5" selected>5</option>
@@ -212,8 +219,15 @@
                             </thead>
                             <tbody class="divide-y divide-gray-800 text-gray-100">
                                 <tr data-rating-row="support-1" class="hover:bg-gray-800/50">
-                                    <td class="px-4 py-3">Reports prepared</td>
-                                    <td class="px-4 py-3 text-gray-300">Monthly reports submitted with supporting documents.</td>
+                                    <td class="px-4 py-3">
+                                        Reference and archival support
+                                        <span class="block text-[11px] text-gray-500 mt-1">Target: Fulfill reference pulls within 1 business day</span>
+                                    </td>
+                                    <td class="px-4 py-3 text-gray-300">
+                                        Serviced internal reference requests and archival pulls within agreed timelines.
+                                        Data linked to locked SMPOR logs; no additional outputs recorded here.
+                                        <span class="block text-[11px] text-gray-500 mt-1">System-generated from SMPOR</span>
+                                    </td>
                                     <td class="px-4 py-3 text-center">
                                         <select class="uwp-select text-white font-semibold text-center" style="min-width:72px; background:#0f172a;color:#e5e7eb;" data-rating-select="support-1">
                                             <option value="5" selected>5</option>

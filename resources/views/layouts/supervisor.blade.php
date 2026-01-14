@@ -193,18 +193,18 @@
                     @endif
                     <div class="relative">
                         <button type="button" id="manager-user-menu-button" data-dropdown-toggle="manager-user-menu" class="flex items-center gap-3 rounded-full border border-slate-800 bg-slate-900/70 px-2 py-1.5 text-left text-slate-100 shadow-sm transition hover:bg-slate-800">
-                            <span class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 via-blue-600 to-emerald-500 text-xs font-semibold text-white shadow-sm">SVR</span>
+                            <span class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 via-blue-600 to-emerald-500 text-xs font-semibold text-white shadow-sm">CB</span>
                             <span class="hidden sm:block">
-                                <span class="block text-sm font-semibold text-white">Department Supervisor</span>
-                                <span class="block text-xs text-slate-400">Supervisor</span>
+                                <span class="block text-sm font-semibold text-white">Carlo D. Beray</span>
+                                <span class="block text-xs text-slate-400">Unit Supervisor · Records Management Unit</span>
                             </span>
                             <i class="fa-solid fa-chevron-down hidden text-xs text-slate-500 sm:block"></i>
                         </button>
                         <div id="manager-user-menu" class="z-50 hidden w-56 divide-y divide-slate-800 rounded-2xl bg-slate-900 shadow-lg ring-1 ring-slate-800">
                             <div class="px-4 py-3">
                                 <p class="text-xs font-semibold uppercase tracking-widest text-slate-400">Signed in as</p>
-                                <p class="mt-1 text-sm font-semibold text-white">Department Supervisor</p>
-                                <p class="text-xs text-slate-400">Supervisor</p>
+                                <p class="mt-1 text-sm font-semibold text-white">Carlo D. Beray</p>
+                                <p class="text-xs text-slate-400">Unit Supervisor · Records Management Unit</p>
                             </div>
                             <ul class="py-2 text-sm text-slate-200" aria-labelledby="manager-user-menu-button">
                                 <li><a href="#" class="block px-4 py-2 transition hover:bg-slate-800">Profile</a></li>

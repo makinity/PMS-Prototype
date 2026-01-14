@@ -44,19 +44,19 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">ORS logs</p>
-                <p class="mt-1 text-2xl font-semibold text-white">18</p>
+                <p class="mt-1 text-2xl font-semibold text-white">1</p>
             </div>
             <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Outputs linked</p>
-                <p class="mt-1 text-2xl font-semibold text-emerald-300">16</p>
+                <p class="mt-1 text-2xl font-semibold text-emerald-300">1</p>
             </div>
             <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Pending validation</p>
-                <p class="mt-1 text-2xl font-semibold text-amber-300">2</p>
+                <p class="mt-1 text-2xl font-semibold text-amber-300">1</p>
             </div>
             <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Missing links</p>
-                <p class="mt-1 text-2xl font-semibold text-rose-300">1</p>
+                <p class="mt-1 text-2xl font-semibold text-rose-300">0</p>
             </div>
         </div>
 
@@ -79,9 +79,9 @@
                     </thead>
                     <tbody class="divide-y divide-slate-800">
                         <tr class="hover:bg-slate-900">
-                            <td class="px-4 py-3">Client Form Review</td>
-                            <td class="px-4 py-3 text-slate-300">REQ-2025-021</td>
-                            <td class="px-4 py-3 text-slate-300">Dec 20, 2025</td>
+                            <td class="px-4 py-3">E-Bank Scanning</td>
+                            <td class="px-4 py-3 text-slate-300">REQ-2025-014</td>
+                            <td class="px-4 py-3 text-slate-300">Dec 27, 2025</td>
                             <td class="px-4 py-3">
                                 <span class="rounded-full bg-blue-500/10 px-2 py-1 text-xs
                                     font-semibold text-blue-200 border border-blue-600/50">
@@ -92,9 +92,9 @@
                                 <button
                                     type="button"
                                     data-view-entry
-                                    data-output="Client Form Review"
-                                    data-ors="REQ-2025-021"
-                                    data-date="Dec 20, 2025"
+                                    data-output="E-Bank Scanning"
+                                    data-ors="REQ-2025-014"
+                                    data-date="Dec 27, 2025"
                                     data-status="For review"
                                     data-unit="Administrative Services"
                                     data-employee="Ramon Reyes"

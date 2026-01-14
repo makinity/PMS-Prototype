@@ -7,7 +7,7 @@
             <div class="flex items-center space-x-2 text-sm text-gray-400">
                 <span class="flex items-center">
                     <span class="flex h-2.5 w-2.5 rounded-full bg-blue-500 mr-2"></span>
-                    <span class="font-medium text-white">1. Select Task</span>
+                    <span class="font-medium text-white">1. Review Selected Task</span>
                 </span>
                 <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -27,17 +27,52 @@
         </div>
 
         <p class="text-sm text-gray-400 mb-6">
-            Upload completed outputs for validation and review. All submissions are logged for IPCR tracking.
+            You are submitting an output for the selected task. Task selection is locked for audit integrity. This submission will be reviewed by your supervisor before inclusion in MPOR.
         </p>
 
         <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 space-y-6">
+
+            {{-- Selected Task Context --}}
+            <div class="bg-gray-750 border border-gray-600 rounded-lg p-5">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-white">Selected Task</h3>
+                        <p class="text-sm text-gray-400">Task selection is locked for audit integrity.</p>
+                    </div>
+                    <span class="px-2 py-1 text-xs rounded bg-emerald-900 text-emerald-300 border border-emerald-800">
+                        Tracking Active
+                    </span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 text-sm">
+                    <div class="bg-gray-700 rounded-lg p-3">
+                        <p class="text-gray-400 mb-1">Task Name</p>
+                        <p class="font-medium text-white">E-Bank Scanning</p>
+                    </div>
+                    <div class="bg-gray-700 rounded-lg p-3">
+                        <p class="text-gray-400 mb-1">Client Name</p>
+                        <p class="font-medium text-white">ABC Corp</p>
+                    </div>
+                    <div class="bg-gray-700 rounded-lg p-3">
+                        <p class="text-gray-400 mb-1">Task Date</p>
+                        <p class="font-medium text-white">Aug 15, 2025</p>
+                    </div>
+                    <div class="bg-gray-700 rounded-lg p-3">
+                        <p class="text-gray-400 mb-1">Tracking Status</p>
+                        <p class="font-medium text-white">Active since 09:12</p>
+                    </div>
+                    <div class="bg-gray-700 rounded-lg p-3">
+                        <p class="text-gray-400 mb-1">Auto-logged Window</p>
+                        <p class="font-medium text-white">09:12 - 10:42</p>
+                    </div>
+                </div>
+            </div>
 
             {{-- Auto-Logging Status --}}
             <div class="bg-gray-750 border border-gray-600 rounded-lg p-5">
                 <div class="flex items-start justify-between gap-4">
                     <div>
                         <h3 class="text-lg font-semibold text-white">Auto-Logging Status</h3>
-                        <p class="text-sm text-gray-400">Prototype preview of system-captured task data.</p>
+                        <p class="text-sm text-gray-400">Prototype preview of system-captured task data for this selected task.</p>
                     </div>
                     {{-- DUMMY_DATA: replace with dynamic value --}}
                     <span class="px-2 py-1 text-xs rounded bg-emerald-900 text-emerald-300 border border-emerald-800">
@@ -68,68 +103,8 @@
                 </div>
             </div>
 
-            {{-- Task Selection Card --}}
             <div class="bg-gray-750 border border-gray-600 rounded-lg p-5">
-                <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
-                    <svg class="w-5 h-5 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                    Select Related Task
-                </h3>
-                
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {{-- Task Cards --}}
-                    {{-- DUMMY_DATA: replace with dynamic value --}}
-                    <div class="border border-gray-600 rounded-lg p-4 hover:border-blue-500 hover:bg-gray-700 transition-all duration-200 cursor-pointer group" data-task-card data-task-name="Report Generation" data-task-client="ABC Corp">
-                        <div class="flex justify-between items-start mb-2">
-                            <div>
-                                <h4 class="font-medium text-white group-hover:text-blue-300">Report Generation</h4>
-                                <p class="text-sm text-gray-400">ABC Corp</p>
-                            </div>
-                            <span class="px-2 py-1 text-xs rounded bg-blue-900 text-blue-300">Due: Aug 15</span>
-                        </div>
-                        <p class="text-sm text-gray-400 mb-3">Complete monthly financial report for Q3 2025</p>
-                        <div class="flex items-center text-xs text-gray-500">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                            </svg>
-                            <span>Started: Aug 10, 2025</span>
-                        </div>
-                    </div>
-
-                    {{-- DUMMY_DATA: replace with dynamic value --}}
-                    <div class="border border-gray-600 rounded-lg p-4 hover:border-blue-500 hover:bg-gray-700 transition-all duration-200 cursor-pointer group" data-task-card data-task-name="Client Form Review" data-task-client="XYZ Ltd">
-                        <div class="flex justify-between items-start mb-2">
-                            <div>
-                                <h4 class="font-medium text-white group-hover:text-blue-300">Client Form Review</h4>
-                                <p class="text-sm text-gray-400">XYZ Ltd</p>
-                            </div>
-                            <span class="px-2 py-1 text-xs rounded bg-emerald-900 text-emerald-300">Completed</span>
-                        </div>
-                        <p class="text-sm text-gray-400 mb-3">Review and validate client registration forms</p>
-                        <div class="flex items-center text-xs text-gray-500">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                            </svg>
-                            <span>Completed: Aug 8, 2025</span>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Manual Selection Fallback --}}
-                <div class="mt-6">
-                    <label class="block mb-2 text-sm font-medium text-white">Or select manually:</label>
-                    {{-- DUMMY_DATA: replace with dynamic value --}}
-                    <select id="submitTaskSelect" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                        <option class="bg-gray-700">Select task from list</option>
-                        <option class="bg-gray-700">Report Generation - ABC Corp</option>
-                        <option class="bg-gray-700">Client Form Review - XYZ Ltd</option>
-                        <option class="bg-gray-700">Data Analysis - DEF Inc</option>
-                        <option class="bg-gray-700">Presentation Preparation - GHI Co</option>
-                    </select>
-                </div>
-
-                <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                             <label class="block mb-2 text-sm font-medium text-white">
                                 Client Request ID
@@ -256,7 +231,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block mb-2 text-sm font-medium text-white">Completion Date</label>
-                            <input id="submitCompletionDate" type="date" 
+                            <input id="submitCompletionDate" type="date"
                                    class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                         </div>
                         <div>
@@ -274,14 +249,14 @@
                         <div>
                             <label class="block mb-2 text-sm font-medium text-white">Auto-Logged Start</label>
                             {{-- DUMMY_DATA: replace with dynamic value --}}
-                            <input type="text" 
+                            <input type="text"
                                    class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
                                    value="09:12 AM" disabled>
                         </div>
                         <div>
                             <label class="block mb-2 text-sm font-medium text-white">Auto-Logged End</label>
                             {{-- DUMMY_DATA: replace with dynamic value --}}
-                            <input type="text" 
+                            <input type="text"
                                    class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
                                    value="10:42 AM" disabled>
                         </div>
@@ -292,7 +267,7 @@
             <div id="submit-output-alert" class="hidden rounded-lg border border-rose-800 bg-rose-900/20 p-4 text-sm text-rose-200">
                 <p class="font-semibold text-rose-100">Missing required fields</p>
                 <p class="mt-1 text-xs text-rose-300">
-                    Complete: <span id="submit-output-missing">task, request ID, output type, output file, completion date</span>
+                    Complete: <span id="submit-output-missing">request ID, output type, output file, completion date</span>
                 </p>
             </div>
 
@@ -465,7 +440,6 @@
         }
 
         const submitBtn = document.getElementById('submitOutputBtn');
-        const taskSelect = document.getElementById('submitTaskSelect');
         const requestInput = document.getElementById('submitRequestId');
         const outputSelect = document.getElementById('submitOutputType');
         const fileInput = document.getElementById('file-upload');
@@ -473,8 +447,6 @@
         const completionDate = document.getElementById('submitCompletionDate');
         const alertBox = document.getElementById('submit-output-alert');
         const missingText = document.getElementById('submit-output-missing');
-        const taskCards = document.querySelectorAll('[data-task-card]');
-        let selectedTask = '';
 
         function clearFieldState(element) {
             if (!element) {
@@ -504,32 +476,17 @@
             element.classList.add('ring-2', 'ring-rose-500');
         }
 
-        taskCards.forEach((card) => {
-            card.addEventListener('click', function () {
-                selectedTask = this.dataset.taskName || '';
-                taskCards.forEach((item) => item.classList.remove('ring-2', 'ring-blue-500'));
-                this.classList.add('ring-2', 'ring-blue-500');
-            });
-        });
-
         if (!submitBtn) {
             return;
         }
 
         submitBtn.addEventListener('click', function () {
-            clearFieldState(taskSelect);
             clearFieldState(requestInput);
             clearFieldState(outputSelect);
             clearFieldState(completionDate);
             clearLabelState(fileLabel);
 
             const missing = [];
-            const taskSelected = (taskSelect && taskSelect.selectedIndex > 0) || selectedTask;
-
-            if (!taskSelected) {
-                missing.push('task');
-                markFieldInvalid(taskSelect);
-            }
 
             if (!requestInput || !requestInput.value.trim()) {
                 missing.push('request ID');

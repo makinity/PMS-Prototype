@@ -35,8 +35,8 @@
                     <tbody class="divide-y divide-gray-800 text-slate-200">
                         {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-slate-900/60">
-                            <td class="px-4 py-3 font-medium text-white">Client Onboarding Checklist</td>
-                            <td class="px-4 py-3">Maria Santos</td>
+                            <td class="px-4 py-3 font-medium text-white">E-Bank Scanning</td>
+                            <td class="px-4 py-3">Ramon Reyes</td>
                             <td class="px-4 py-3">Today</td>
                             <td class="px-4 py-3">
                                 <span class="px-3 py-1 rounded-full bg-emerald-900/40 border border-emerald-700/40 text-emerald-300 text-xs font-semibold">On Track</span>
@@ -45,8 +45,8 @@
                         </tr>
                         {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-slate-900/60">
-                            <td class="px-4 py-3 font-medium text-white">API Error Review</td>
-                            <td class="px-4 py-3">Jacob Lee</td>
+                            <td class="px-4 py-3 font-medium text-white">Document Indexing Review</td>
+                            <td class="px-4 py-3">Paula Dizon</td>
                             <td class="px-4 py-3">Tomorrow</td>
                             <td class="px-4 py-3">
                                 <span class="px-3 py-1 rounded-full bg-blue-900/40 border border-blue-700/40 text-blue-200 text-xs font-semibold">In Progress</span>
@@ -55,8 +55,8 @@
                         </tr>
                         {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-slate-900/60">
-                            <td class="px-4 py-3 font-medium text-white">Billing Audit</td>
-                            <td class="px-4 py-3">Ava Cruz</td>
+                            <td class="px-4 py-3 font-medium text-white">Physical Records Audit</td>
+                            <td class="px-4 py-3">Liza Mendoza</td>
                             <td class="px-4 py-3">Fri</td>
                             <td class="px-4 py-3">
                                 <span class="px-3 py-1 rounded-full bg-amber-900/40 border border-amber-700/40 text-amber-200 text-xs font-semibold">At Risk</span>
@@ -65,8 +65,8 @@
                         </tr>
                         {{-- DUMMY_DATA: replace with dynamic value --}}
                         <tr class="hover:bg-slate-900/60">
-                            <td class="px-4 py-3 font-medium text-white">Vendor Access Cleanup</td>
-                            <td class="px-4 py-3">Liam Park</td>
+                            <td class="px-4 py-3 font-medium text-white">Records Access Permission Cleanup</td>
+                            <td class="px-4 py-3">Marco Villanueva</td>
                             <td class="px-4 py-3">Mon</td>
                             <td class="px-4 py-3">
                                 <span class="px-3 py-1 rounded-full bg-rose-900/40 border border-rose-700/40 text-rose-200 text-xs font-semibold">Delayed</span>
@@ -90,7 +90,7 @@
                     <span class="mt-1 h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_0_4px_rgba(16,185,129,0.15)]"></span>
                     <div>
                         <p class="text-white font-medium">Workload balanced</p>
-                        <p class="text-slate-400">No owner above 3 concurrent critical tasks.</p>
+                        <p class="text-slate-400">Records team owners within 3 concurrent critical tasks.</p>
                     </div>
                 </li>
                 {{-- DUMMY_DATA: replace with dynamic value --}}
@@ -98,7 +98,7 @@
                     <span class="mt-1 h-2 w-2 rounded-full bg-amber-400 shadow-[0_0_0_4px_rgba(251,191,36,0.15)]"></span>
                     <div>
                         <p class="text-white font-medium">Two items aging</p>
-                        <p class="text-slate-400">Follow-up recommended before end of week.</p>
+                        <p class="text-slate-400">Follow-up recommended on indexing and audit before end of week.</p>
                     </div>
                 </li>
                 {{-- DUMMY_DATA: replace with dynamic value --}}
@@ -106,7 +106,7 @@
                     <span class="mt-1 h-2 w-2 rounded-full bg-rose-400 shadow-[0_0_0_4px_rgba(248,113,113,0.15)]"></span>
                     <div>
                         <p class="text-white font-medium">Escalation candidate</p>
-                        <p class="text-slate-400">Vendor access cleanup blocked; notify manager if unchanged.</p>
+                        <p class="text-slate-400">Records access permission cleanup blocked; notify manager if unchanged.</p>
                     </div>
                 </li>
             </ul>
