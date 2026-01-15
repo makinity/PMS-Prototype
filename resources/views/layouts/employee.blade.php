@@ -32,6 +32,7 @@
             $isMpor = request()->routeIs('employee.mpor');
             $isSmpor = request()->routeIs('employee.smpor');
             $isIPCR = request()->routeIs('employee.ipcr');
+            $isIPCRTARGET = request()->routeIs('employee.ipcr-target');
             $isIdp = request()->routeIs('employee.idp');
             $isProfile = request()->routeIs('employee.profile');
         @endphp
@@ -160,9 +161,15 @@
                                 </a>
                             </li>
                             <li>
+                                <a href="{{ route('employee.ipcr-target') }}" class="sidebar-link" @if($isIPCRTARGET) aria-current="page" @endif>
+                                    <i class="sidebar-icon fa-solid fa-file-signature"></i>
+                                    <span>IPCR Target</span>
+                                </a>
+                            </li>
+                            <li>
                                 <a href="{{ route('employee.ipcr') }}" class="sidebar-link" @if($isIPCR) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-file-signature"></i>
-                                    <span>IPCR</span>
+                                    <span>IPCR Final</span>
                                 </a>
                             </li>
                         </ul>

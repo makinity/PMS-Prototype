@@ -1,250 +1,314 @@
 <x-layouts.dept-head>
     <section class="space-y-6">
+
+        <!-- PAGE HEADER -->
         <div class="flex flex-wrap items-start justify-between gap-4">
             <div>
-                <h1 class="text-2xl font-bold text-white">Office Performance Commitment and Review (OPCR)</h1>
-                <p class="text-sm text-slate-400">Aggregated from Approved IPCRs</p>
-            </div>
-            <span data-opcr-status class="rounded-full border border-amber-600/60 bg-amber-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-amber-200">FOR APPROVAL</span>
-        </div>
-
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-                <p class="text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">Office / Unit</p>
-                <p class="mt-2 text-lg font-semibold text-white">Provincial Human Resource Management Office</p>
-            </div>
-            <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-                <p class="text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">Rating Period</p>
-                <p class="mt-2 text-lg font-semibold text-white">January - June 2025</p>
-            </div>
-            <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-                <p class="text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">Total IPCRs Included</p>
-                <p class="mt-2 text-lg font-semibold text-white">18</p>
-            </div>
-            <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-                <p class="text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">Overall Office Rating</p>
-                <p class="mt-2 text-lg font-semibold text-emerald-200">4.32 (Very Satisfactory)</p>
+                <h1 class="text-2xl font-bold text-white">
+                    Office Performance Commitment and Review (OPCR)
+                </h1>
+                <p class="text-sm text-slate-400">
+                    Stage I – Performance Planning and Commitment
+                </p>
+                <p class="text-xs text-slate-500">
+                    Review OPCRs submitted by Admin based on PMT-approved Unit Work Plans.
+                </p>
             </div>
         </div>
 
-        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
-            <div class="flex flex-wrap items-center justify-between gap-3">
-                <h2 class="text-lg font-semibold text-white">Performance Summary</h2>
-                <p class="text-xs text-slate-500">Read-only snapshot; derived from approved IPCRs</p>
-            </div>
-            <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-                    <p class="text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">Core Functions Avg</p>
-                    <p class="mt-2 text-2xl font-bold text-white">4.35</p>
-                    <p class="text-xs text-slate-500">Weighted at 80%</p>
-                </div>
-                <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-                    <p class="text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">Support Functions Avg</p>
-                    <p class="mt-2 text-2xl font-bold text-white">4.12</p>
-                    <p class="text-xs text-slate-500">Weighted at 20%</p>
-                </div>
-                <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-                    <p class="text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">Overall Rating</p>
-                    <p class="mt-2 text-2xl font-bold text-emerald-200">4.28</p>
-                    <p class="text-xs text-slate-500">System-generated</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
-            <div class="flex flex-wrap items-center justify-between gap-3">
-                <h2 class="text-lg font-semibold text-white">IPCR Contribution</h2>
-                <span class="rounded-full border border-slate-700 bg-slate-800/80 px-3 py-1 text-[11px] font-semibold text-slate-300">Approved IPCRs only</span>
-            </div>
-            <div class="mt-4 overflow-x-auto">
-                <table class="min-w-full overflow-hidden rounded-xl border border-slate-800 text-sm">
-                    <thead class="bg-slate-950/80 text-slate-200">
+        <!-- OPCR LIST -->
+        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-slate-300">
+                    <thead class="text-xs uppercase text-slate-500">
                         <tr>
-                            <th class="px-4 py-3 text-left font-semibold border-b border-slate-800">Employee Name</th>
-                            <th class="px-4 py-3 text-left font-semibold border-b border-slate-800">Position</th>
-                            <th class="px-4 py-3 text-left font-semibold border-b border-slate-800">Core Avg</th>
-                            <th class="px-4 py-3 text-left font-semibold border-b border-slate-800">Support Avg</th>
-                            <th class="px-4 py-3 text-left font-semibold border-b border-slate-800">Overall IPCR Rating</th>
-                            <th class="px-4 py-3 text-left font-semibold border-b border-slate-800">Status</th>
+                            <th class="px-4 py-2 text-left">Office / Unit</th>
+                            <th class="px-4 py-2 text-left">Period</th>
+                            <th class="px-4 py-2 text-left">Referenced UWP</th>
+                            <th class="px-4 py-2 text-left">Status</th>
+                            <th class="px-4 py-2 text-left">Action</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-800 text-slate-100">
-                        <tr class="hover:bg-slate-900/70">
-                            <td class="px-4 py-3">Ramon Reyes</td>
-                            <td class="px-4 py-3 text-slate-300">Administrative Officer IV</td>
-                            <td class="px-4 py-3">4.40</td>
-                            <td class="px-4 py-3">4.20</td>
-                            <td class="px-4 py-3 font-semibold text-white">4.30</td>
+                    <tbody>
+
+                        <!-- FOR REVIEW -->
+                        <tr class="border-t border-slate-800">
+                            <td class="px-4 py-3 text-white">Records Management Unit</td>
+                            <td class="px-4 py-3">Jan–Dec 2026</td>
+                            <td class="px-4 py-3">Approved UWP</td>
                             <td class="px-4 py-3">
-                                <span class="rounded-full border border-emerald-600/50 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-200">APPROVED</span>
+                                <span class="rounded-full bg-amber-500/20 px-2 py-1 text-xs text-amber-300">
+                                    For Review
+                                </span>
+                            </td>
+                            <td class="px-4 py-3">
+                                <button type="button"
+                                        data-open-review-opcr
+                                        class="text-blue-400 hover:text-blue-300">
+                                    Review
+                                </button>
                             </td>
                         </tr>
-                        <tr class="hover:bg-slate-900/70">
-                            <td class="px-4 py-3">Mara dela Cruz</td>
-                            <td class="px-4 py-3 text-slate-300">HR Specialist</td>
-                            <td class="px-4 py-3">4.28</td>
-                            <td class="px-4 py-3">4.05</td>
-                            <td class="px-4 py-3 font-semibold text-white">4.22</td>
+
+                        <!-- APPROVED -->
+                        <tr class="border-t border-slate-800">
+                            <td class="px-4 py-3 text-white">Human Resource Unit</td>
+                            <td class="px-4 py-3">Jan–Dec 2026</td>
+                            <td class="px-4 py-3">Approved UWP</td>
                             <td class="px-4 py-3">
-                                <span class="rounded-full border border-emerald-600/50 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-200">APPROVED</span>
+                                <span class="rounded-full bg-emerald-500/20 px-2 py-1 text-xs text-emerald-300">
+                                    Approved
+                                </span>
+                            </td>
+                            <td class="px-4 py-3">
+                                <button type="button"
+                                        data-open-view-opcr
+                                        class="text-blue-400 hover:text-blue-300">
+                                    View
+                                </button>
                             </td>
                         </tr>
-                        <tr class="hover:bg-slate-900/70">
-                            <td class="px-4 py-3">Leo Santos</td>
-                            <td class="px-4 py-3 text-slate-300">Records Officer</td>
-                            <td class="px-4 py-3">4.10</td>
-                            <td class="px-4 py-3">3.95</td>
-                            <td class="px-4 py-3 font-semibold text-white">4.02</td>
-                            <td class="px-4 py-3">
-                                <span class="rounded-full border border-emerald-600/50 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-200">APPROVED</span>
-                            </td>
-                        </tr>
+
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <div class="space-y-4 rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
-            <div>
-                <label class="text-sm font-semibold text-white">Department Head Remarks</label>
-                <textarea data-opcr-remarks class="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40" rows="3" placeholder="Optional when approving."></textarea>
-            </div>
-            <div class="flex flex-wrap items-center justify-between gap-3">
-                <p data-opcr-locked-note class="hidden text-sm text-emerald-200">This OPCR is locked and finalized.</p>
-                <div class="flex gap-3">
-                    <button type="button" data-close-back class="inline-flex items-center gap-2 rounded-xl border border-slate-700 px-5 py-2.5 text-sm font-semibold text-slate-200 transition-colors duration-200 hover:bg-slate-800">
-                        Close / Back
+        <!-- REVIEW OPCR MODAL -->
+        <div id="review-opcr-modal"
+            data-modal-container
+             class="fixed inset-0 z-[80] hidden flex items-center justify-center bg-black/60 px-4 py-6">
+            <div class="w-full max-w-2xl rounded-2xl border border-slate-800 bg-slate-900 p-6">
+
+                <div class="flex items-start justify-between">
+                    <div>
+                        <h2 class="text-lg font-semibold text-white">
+                            Review OPCR – Records Management Unit
+                        </h2>
+                        <p class="text-sm text-slate-400">
+                            Derived from PMT-approved Unit Work Plan
+                        </p>
+                    </div>
+                    <button data-close-modal class="text-slate-400 hover:text-white">✕</button>
+                </div>
+
+                <!-- CONTEXT -->
+                <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3 text-sm">
+                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                        <p class="text-xs text-slate-400">Office</p>
+                        <p class="text-white">Records Management Unit</p>
+                    </div>
+                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                        <p class="text-xs text-slate-400">Period</p>
+                        <p class="text-white">Jan–Dec 2026</p>
+                    </div>
+                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                        <p class="text-xs text-slate-400">Referenced UWP</p>
+                        <p class="text-white">Approved</p>
+                    </div>
+                </div>
+
+                <!-- OPCR TARGETS -->
+                <div class="mt-6 overflow-x-auto">
+                    <table class="w-full text-sm border border-slate-800">
+                        <thead class="bg-slate-950 text-slate-300">
+                            <tr>
+                                <th class="px-4 py-3 text-left">Success Indicator</th>
+                                <th class="px-4 py-3 text-left">Performance Measure</th>
+                                <th class="px-4 py-3 text-left">Weight</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-slate-100">
+                            <tr class="border-t border-slate-800">
+                                <td class="px-4 py-3">
+                                    1,200 records scanned and digitized
+                                </td>
+                                <td class="px-4 py-3">
+                                    Timeliness and accuracy
+                                </td>
+                                <td class="px-4 py-3">
+                                    Core Function – 80%
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- REMARKS -->
+                <div class="mt-6">
+                    <label class="block mb-1 text-sm text-slate-300">
+                        Remarks (required if returning)
+                    </label>
+                    <textarea rows="3"
+                            style="min-width:72px; background:#0f172a;color:#e5e7eb;"
+                              class="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-4 py-2 text-sm text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40"></textarea>
+                </div>
+
+                <!-- ACTIONS -->
+                <div class="mt-6 flex justify-end gap-3">
+                    <button type="button"
+                            data-close-modal
+                            class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">
+                        Close
                     </button>
-                    <button type="button" data-opcr-approve data-modal-target="opcr-approve-modal" data-modal-toggle="opcr-approve-modal" class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors duration-200 hover:bg-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-700/50">
+
+                    <button type="button"
+                            data-opcr-return
+                            class="inline-flex items-center gap-2 rounded-lg border border-amber-600 px-4 py-2 text-sm font-semibold text-amber-300 hover:bg-amber-600/10">
+                        <span data-button-label>Return to Admin</span>
+                        <span data-button-spinner
+                              class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                    </button>
+
+                    <button type="button"
+                            data-opcr-approve
+                            class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500">
                         <span data-button-label>Approve OPCR</span>
-                        <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                        <span data-button-spinner
+                              class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
                     </button>
                 </div>
             </div>
         </div>
+
+        <!-- VIEW OPCR MODAL -->
+        <div id="view-opcr-modal"
+            data-modal-container
+             class="fixed inset-0 z-[80] hidden flex items-center justify-center bg-black/60 px-4 py-6">
+            <div class="w-full max-w-xl rounded-2xl border border-slate-800 bg-slate-900 p-6">
+
+                <div class="flex items-start justify-between">
+                    <div>
+                        <h2 class="text-lg font-semibold text-white">
+                            View OPCR – Human Resource Unit
+                        </h2>
+                        <p class="text-sm text-slate-400">Read-only OPCR details</p>
+                    </div>
+                    <button data-close-modal class="text-slate-400 hover:text-white">✕</button>
+                </div>
+
+                <div class="mt-6 space-y-2 text-sm text-slate-300">
+                    <p><strong>Office:</strong> Human Resource Unit</p>
+                    <p><strong>Period:</strong> Jan–Dec 2026</p>
+                    <p><strong>Referenced UWP:</strong> Approved</p>
+                    <p><strong>Success Indicator:</strong> 1,200 records scanned and digitized</p>
+                    <p><strong>Performance Measure:</strong> Timeliness and accuracy</p>
+                    <p><strong>Weight:</strong> Core Function – 80%</p>
+                    <p><strong>Status:</strong> Approved</p>
+                </div>
+
+                <div class="mt-6 flex justify-end">
+                    <button data-close-modal
+                            class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+
     </section>
 
-    <div id="opcr-approve-modal" aria-hidden="true" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 px-4 py-6" data-modal-container>
-        <div class="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
-            <div class="flex items-start justify-between">
-                <div>
-                    <h3 class="text-lg font-semibold text-white">Approve OPCR</h3>
-                    <p class="mt-1 text-sm text-slate-400">Approving this OPCR finalizes office performance for the period.</p>
-                </div>
-                <button type="button" data-modal-hide="opcr-approve-modal" class="text-slate-400 transition hover:text-white">x</button>
-            </div>
-            <div class="mt-6 flex justify-end gap-2">
-                <button type="button" data-modal-hide="opcr-approve-modal" class="rounded-lg border border-slate-700 px-4 py-2 text-xs font-semibold text-slate-200 transition hover:bg-slate-800">Cancel</button>
-                <button type="button" data-opcr-approve-confirm class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-emerald-500">
-                    <span data-button-label>Confirm Approval</span>
-                    <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
-                </button>
-            </div>
-        </div>
-    </div>
+   @push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
 
-    @push('scripts')
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                const modal = document.getElementById('opcr-approve-modal');
-                const approveBtn = document.querySelector('[data-opcr-approve]');
-                const confirmBtn = document.querySelector('[data-opcr-approve-confirm]');
-                const statusBadge = document.querySelector('[data-opcr-status]');
-                const remarks = document.querySelector('[data-opcr-remarks]');
-                const closeBackBtn = document.querySelector('[data-close-back]');
-                const lockedNote = document.querySelector('[data-opcr-locked-note]');
+    const modalIds = ['review-opcr-modal', 'view-opcr-modal'];
 
-                const cleanupBackdrops = () => {
-                    document.querySelectorAll('[modal-backdrop]').forEach((el) => el.remove());
-                };
+    function getModalEl(id) {
+        return document.getElementById(id);
+    }
 
-                const toggleModal = (show) => {
-                    if (!modal) return;
-                    modal.classList.toggle('hidden', !show);
-                    document.body.classList.toggle('overflow-hidden', show);
-                    if (!show) {
-                        cleanupBackdrops();
-                    }
-                };
+    function openModal(id) {
+        const modal = getModalEl(id);
+        if (!modal) return;
 
-                const setButtonLoading = (button, isLoading, loadingText) => {
-                    if (!button) return;
-                    const label = button.querySelector('[data-button-label]');
-                    const spinner = button.querySelector('[data-button-spinner]');
-                    if (label && !button.dataset.originalLabel) {
-                        button.dataset.originalLabel = label.textContent.trim();
-                    }
-                    if (isLoading) {
-                        button.disabled = true;
-                        button.classList.add('opacity-70', 'cursor-not-allowed');
-                        if (spinner) spinner.classList.remove('hidden');
-                        if (label && loadingText) label.textContent = loadingText;
-                    } else {
-                        button.disabled = false;
-                        button.classList.remove('opacity-70', 'cursor-not-allowed');
-                        if (spinner) spinner.classList.add('hidden');
-                        if (label && button.dataset.originalLabel) {
-                            label.textContent = button.dataset.originalLabel;
-                        }
-                    }
-                };
+        modal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+    }
 
-                const markApproved = () => {
-                    if (statusBadge) {
-                        statusBadge.textContent = 'APPROVED';
-                        statusBadge.classList.remove('bg-amber-500/10', 'border-amber-600/60', 'text-amber-200');
-                        statusBadge.classList.add('bg-emerald-500/10', 'border-emerald-600/60', 'text-emerald-200');
-                    }
-                    if (remarks) {
-                        remarks.disabled = true;
-                        remarks.classList.add('opacity-70', 'cursor-not-allowed');
-                    }
-                    if (approveBtn) {
-                        setButtonLoading(approveBtn, false);
-                        approveBtn.disabled = true;
-                        approveBtn.classList.add('opacity-70', 'cursor-not-allowed');
-                    }
-                    if (closeBackBtn) {
-                        closeBackBtn.disabled = true;
-                        closeBackBtn.classList.add('opacity-60', 'cursor-not-allowed');
-                    }
-                    if (lockedNote) {
-                        lockedNote.classList.remove('hidden');
-                    }
-                };
+    function closeModal(modal) {
+        if (!modal) return;
 
-                approveBtn?.addEventListener('click', () => {
-                    toggleModal(true);
-                });
+        modal.classList.add('hidden');
 
-                confirmBtn?.addEventListener('click', () => {
-                    setButtonLoading(confirmBtn, true, 'Approving...');
-                    setButtonLoading(approveBtn, true, 'Approving...');
-                    const modalButtons = modal ? modal.querySelectorAll('button') : [];
-                    modalButtons.forEach((btn) => btn.disabled = true);
-                    setTimeout(() => {
-                        markApproved();
-                        setButtonLoading(confirmBtn, false);
-                        modalButtons.forEach((btn) => btn.disabled = false);
-                        toggleModal(false);
-                        cleanupBackdrops();
-                    }, 1100);
-                });
+        // If no other modal is open, restore scrolling
+        const anyOpen = document.querySelector('[data-modal-container]:not(.hidden)');
+        if (!anyOpen) {
+            document.body.classList.remove('overflow-hidden');
+        }
+    }
 
-                modal?.addEventListener('click', (event) => {
-                    if (event.target === modal) {
-                        toggleModal(false);
-                    }
-                });
+    function closeAllModals() {
+        document.querySelectorAll('[data-modal-container]').forEach(m => m.classList.add('hidden'));
+        document.body.classList.remove('overflow-hidden');
+    }
 
-                modal?.querySelectorAll('[data-modal-hide="opcr-approve-modal"]').forEach((button) => {
-                    button.addEventListener('click', () => toggleModal(false));
-                });
+    function setButtonLoading(button, isLoading, loadingText) {
+        if (!button) return;
+        const label = button.querySelector('[data-button-label]');
+        const spinner = button.querySelector('[data-button-spinner]');
 
-                closeBackBtn?.addEventListener('click', () => {
-                    window.history.back();
-                });
-            });
-        </script>
-    @endpush
+        if (label && !button.dataset.originalLabel) {
+            button.dataset.originalLabel = label.textContent.trim();
+        }
+
+        if (isLoading) {
+            button.disabled = true;
+            button.classList.add('opacity-70', 'cursor-not-allowed');
+            spinner?.classList.remove('hidden');
+            if (label && loadingText) label.textContent = loadingText;
+        } else {
+            button.disabled = false;
+            button.classList.remove('opacity-70', 'cursor-not-allowed');
+            spinner?.classList.add('hidden');
+            if (label && button.dataset.originalLabel) label.textContent = button.dataset.originalLabel;
+        }
+    }
+
+    // Open buttons
+    document.querySelectorAll('[data-open-review-opcr]').forEach(btn => {
+        btn.addEventListener('click', () => openModal('review-opcr-modal'));
+    });
+
+    document.querySelectorAll('[data-open-view-opcr]').forEach(btn => {
+        btn.addEventListener('click', () => openModal('view-opcr-modal'));
+    });
+
+    // Close buttons (closes nearest modal only)
+    document.querySelectorAll('[data-close-modal]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const modal = btn.closest('[data-modal-container]');
+            closeModal(modal);
+        });
+    });
+
+    // Click outside to close
+    document.querySelectorAll('[data-modal-container]').forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal(modal);
+        });
+    });
+
+    // Esc to close all
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeAllModals();
+    });
+
+    // Approve/Return loading demo
+    document.querySelectorAll('[data-opcr-approve],[data-opcr-return]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const isReturn = btn.hasAttribute('data-opcr-return');
+            setButtonLoading(btn, true, isReturn ? 'Returning...' : 'Approving...');
+
+            setTimeout(() => {
+                setButtonLoading(btn, false);
+                closeAllModals();
+            }, 1000);
+        });
+    });
+
+});
+</script>
+@endpush
+
 </x-layouts.dept-head>

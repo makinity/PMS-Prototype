@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\UwpExportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -34,9 +35,9 @@ Route::get('/employee-SMPOR', function () {
     return view('employee.smpor');
 })->name('employee.smpor');
 
-// Route::get('/employee-OPCR', function () {
-//     return view('employee.opcr');
-// })->name('employee.opcr');
+Route::get('/employee/IPCR-Target', function () {
+    return view('employee.ipcr-target');
+})->name('employee.ipcr-target');
 
 Route::get('/employee-IPCR', function () {
     return view('employee.ipcr');
@@ -73,6 +74,10 @@ Route::get('/dept-head/IPCR', function () {
     return view('dept-head.ipcr');
 })->name('dept-head.ipcr');
 
+Route::get('/dept-head/IPCRTARGET', function () {
+    return view('dept-head.ipcr-target');
+})->name('dept-head.ipcr-target');
+
 Route::get('/dept-head/idp', function () {
     return view('dept-head.idp');
 })->name('dept-head.idp');
@@ -99,6 +104,10 @@ Route::get('/supervisor/team-tasks', function () {
 Route::get('/supervisor/ipcr', function () {
     return view('supervisor.ipcr');
 })->name('supervisor.ipcr');
+
+Route::get('/supervisor/ipcr-target', function () {
+    return view('supervisor.ipcr-target');
+})->name('supervisor.ipcr-target');
 
 Route::get('/supervisor/opcr', function () {
     return view('supervisor.opcr');
@@ -168,6 +177,10 @@ Route::get('/pmt/profile', function () {
     return view('pmt.profile');
 })->name('pmt.profile');
 
+Route::get('/pmt/uwp/export/pdf', [UwpExportController::class, 'exportPdf'])
+    ->name('pmt.uwp.export.pdf');
+
+
 
 
 Route::get('/administrator-dashboard', function () {
@@ -181,6 +194,10 @@ Route::get('/administrator/users', function () {
 Route::get('/administrator/roles', function () {
     return view('admin.roles');
 })->name('admin.roles');
+
+Route::get('/administrat/opcr', function () {
+    return view('admin.opcr');
+})->name('admin.opcr');
 
 Route::get('/administrator/task-configuration', function () {
     return view('admin.task-config');

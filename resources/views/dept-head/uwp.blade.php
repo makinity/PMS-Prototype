@@ -7,7 +7,7 @@
         </p>
     </div>
 
-    {{-- View Approved UWP Modal --}}
+    {{-- View Endorsed UWP Modal --}}
     <div id="view-uwp-modal" data-modal-container tabindex="-1" aria-hidden="true"
          class="fixed inset-0 z-50 hidden flex items-center justify-center">
         <div class="absolute inset-0 bg-slate-950/80 backdrop-blur" data-modal-hide="view-uwp-modal"></div>
@@ -15,7 +15,7 @@
             <div class="w-full overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl">
                 <div class="flex items-start justify-between gap-4 border-b border-slate-800 px-6 py-4">
                     <div class="space-y-2">
-                        <p class="text-xs uppercase tracking-[0.2em] text-emerald-300">Approved UWP</p>
+                        <p class="text-xs uppercase tracking-[0.2em] text-emerald-300">Endorsed UWP</p>
                         <h3 class="text-lg font-semibold text-white">View UWP</h3>
                         <div class="grid grid-cols-1 gap-3 text-sm text-slate-300 sm:grid-cols-2">
                             <div>
@@ -36,7 +36,7 @@
                             </div>
                         </div>
                         <span class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
-                            Approved (Locked)
+                            Endorsed by Dept Head
                         </span>
                     </div>
                     <button type="button" data-modal-hide="view-uwp-modal"
@@ -49,7 +49,7 @@
                     <div class="rounded-xl border border-slate-800 bg-slate-900/70">
                         <div class="border-b border-slate-800 px-4 py-3">
                             <h4 class="text-sm font-medium text-slate-100">Planned Outputs</h4>
-                            <p class="text-xs text-slate-400 mt-1">Read-only. Approved UWPs are locked.</p>
+                            <p class="text-xs text-slate-400 mt-1">Read-only. Endorsed UWPs are locked.</p>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="min-w-full">
@@ -127,7 +127,7 @@
                 <option>All Status</option>
                 <option>Submitted</option>
                 <option>Draft</option>
-                <option>Approved</option>
+                <option>Endorsed</option>
                 <option>Returned</option>
             </select>
         </div>
@@ -184,7 +184,7 @@
                         </td>
                     </tr>
 
-                    {{-- SAMPLE ROW: Approved --}}
+                    {{-- SAMPLE ROW: Endorsed --}}
                     <tr class="hover:bg-slate-800/40 transition">
                         <td class="px-4 py-3 text-sm text-slate-100 font-medium">
                             Records Management Unit
@@ -198,7 +198,7 @@
                         <td class="px-4 py-3 text-sm text-center">
                             <span class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full
                                 bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
-                                Approved
+                                Endorsed
                             </span>
                         </td>
                         <td class="px-4 py-3 text-sm text-center">
@@ -317,7 +317,7 @@
                     <button
                         class="px-4 py-2 text-sm font-medium rounded-lg
                         bg-emerald-600 hover:bg-emerald-500 text-white transition">
-                        Approve
+                        Endorse & Forward to PMT
                     </button>
 
                     <button
@@ -332,7 +332,7 @@
     </div>
 
     {{-- ========================= --}}
-    {{-- MODAL 2: View Approved UWP --}}
+    {{-- MODAL 2: View Endorsed UWP --}}
     {{-- ========================= --}}
     <div id="uwp-unit-2" class="fixed inset-0 z-50 hidden target:block">
         <a href="#" class="absolute inset-0 bg-black/60"></a>
@@ -346,7 +346,7 @@
                     <div class="mt-2">
                         <span class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full
                             bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
-                            Approved (Locked)
+                            Endorsed
                         </span>
                     </div>
                 </div>
@@ -361,7 +361,7 @@
                 <div class="bg-slate-900/60 border border-slate-800 rounded-xl overflow-hidden">
                     <div class="p-4 border-b border-slate-800">
                         <h4 class="text-sm font-medium text-slate-100">Planned Outputs</h4>
-                        <p class="text-xs text-slate-400 mt-1">Read-only. Approved UWPs cannot be modified.</p>
+                        <p class="text-xs text-slate-400 mt-1">Read-only. Endorsed UWPs cannot be modified.</p>
                     </div>
                     <div class="p-4 text-sm text-slate-300">
                         (Put the same planned outputs table here.)
@@ -478,10 +478,10 @@
                         </button>
                         <button type="button"
                                 data-admin-loading="true"
-                                data-loading-text="Approving..."
+                                data-loading-text="Processing..."
                                 class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-emerald-900/40 transition hover:bg-emerald-500">
                             <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"></span>
-                            <span data-button-label>Approve</span>
+                            <span data-button-label>Endorse & Forward to PMT</span>
                         </button>
                         <button type="button"
                                 data-admin-loading="true"

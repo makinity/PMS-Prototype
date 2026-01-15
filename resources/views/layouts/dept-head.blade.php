@@ -28,6 +28,7 @@
             $isOpcr = request()->routeIs('dept-head.opcr');
             $isSMPOR = request()->routeIs('dept-head.smpor');
             $isIPCR = request()->routeIs('pmt.ipcr');
+            $isIPCRTARGET = request()->routeIs('pmt.ipcr-target');
             $isIdp = request()->routeIs('dept-head.idp');
             $isProfile = request()->routeIs('dept-head.profile');
         @endphp
@@ -143,6 +144,13 @@
                                 <a href="{{ route('dept-head.ipcr') }}" class="sidebar-link" @if($isIPCR) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-file-pen"></i>
                                     <span>IPCR</span>
+                                </a>
+                            </li>
+
+                            <li>
+                                <a href="{{ route('dept-head.ipcr-target') }}" class="sidebar-link" @if($isIPCRTARGET) aria-current="page" @endif>
+                                    <i class="sidebar-icon fa-solid fa-file-pen"></i>
+                                    <span> Target Approval</span>
                                 </a>
                             </li>
                         </ul>

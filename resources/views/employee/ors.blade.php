@@ -210,13 +210,14 @@
         <div class="mb-4">
             <h2 class="text-lg font-semibold text-white">Log ORS Task</h2>
             <p class="text-xs text-slate-400">
-                New entries start as Draft (stopped). Start timing and submit from the task details inside ORS only.
+                Log actual work performed based on approved Unit Work Plan outputs.
+                Entries start as Draft (stopped).
             </p>
         </div>
 
         <form class="space-y-3">
 
-            <!-- Date -->
+            <!-- DATE -->
             <div>
                 <label class="text-[11px] uppercase text-slate-400">Date</label>
                 <input id="orsSelectedDate"
@@ -225,85 +226,104 @@
                        class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-400">
             </div>
 
-            <!-- Task Type -->
+            <!-- UWP OUTPUT -->
             <div>
-                <label class="text-[11px] uppercase text-slate-400">Task</label>
-                <select id="orsTaskType" class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
+                <label class="text-[11px] uppercase text-slate-400">
+                    UWP Output / Major Final Output
+                </label>
+                <select id="orsUwpOutput"
+                        class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200"
+                        required>
+                    <option value="">Select approved UWP output</option>
+                    <option value="records_mgmt">Records Management</option>
+                    <option value="client_support">Client Support</option>
+                </select>
+            </div>
+
+            <!-- TASK / ACTIVITY -->
+            <div>
+                <label class="text-[11px] uppercase text-slate-400">
+                    Task / Activity
+                </label>
+                <select id="orsTaskType"
+                        class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200"
+                        required>
                     <option value="">Select task</option>
                     <option value="bank_scanning">E-Bank Scanning</option>
-                    <option value="form_review">Client Form Review</option>
-                    <option value="report_generation">Report Generation</option>
-                    <option value="data_entry">Financial Data Entry</option>
-                    <option value="follow_up">Client Follow-up</option>
-                    <option value="tax_review">Tax Compliance Review</option>
+                    <option value="document_indexing">Document Indexing</option>
+                    <option value="file_archiving">File Archiving</option>
                 </select>
             </div>
 
-            <!-- Supervisor -->
+            <!-- CLIENT REQUEST ID -->
             <div>
-                <label class="text-[11px] uppercase text-slate-400">Supervisor</label>
-                <select id="orsClient" class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
-                    <option value="">Select supervisor</option>
-                    <option value="abc">Maria Santos</option>
-                    <option value="xyz">Lebron James</option>
-                    <option value="global">Denji Kun</option>
-                </select>
-            </div>
-
-            <!-- Client Request ID -->
-            <div>
-                <label class="text-[11px] uppercase text-slate-400">Client Request ID</label>
+                <label class="text-[11px] uppercase text-slate-400">
+                    Client Request ID (optional)
+                </label>
                 <input id="orsRequestId"
                        type="text"
-                       placeholder="REQ-2025-01234"
+                       placeholder="REQ-2026-00123"
                        class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
             </div>
 
-            <!-- Output -->
+            <!-- FORM / OUTPUT -->
             <div>
-                <label class="text-[11px] uppercase text-slate-400">Form / Output Type</label>
-                <select id="orsOutput" class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
+                <label class="text-[11px] uppercase text-slate-400">
+                    Form / Output Type
+                </label>
+                <select id="orsOutput"
+                        class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200"
+                        required>
                     <option value="">Select form/output</option>
                     <option value="bank_form">Bank Statement Form (BSF-01)</option>
-                    <option value="client_summary">Client Summary Report (CSR-04)</option>
-                    <option value="financial_statement">Financial Statement (FS-03)</option>
-                    <option value="tax_form">Tax Compliance Form (TCF-05)</option>
-                    <option value="follow_up_notes">Follow-up Notes (FN-07)</option>
+                    <option value="scanned_doc">Scanned Document</option>
                 </select>
             </div>
 
-            <!-- Notes -->
+            <!-- NOTES -->
             <div>
                 <label class="text-[11px] uppercase text-slate-400">Notes (optional)</label>
-                <textarea id="orsNotes" rows="2"
+                <textarea id="orsNotes"
+                          rows="2"
                           class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200"
-                          placeholder="Additional details, special instructions, etc."></textarea>
+                          placeholder="Exceptions, clarifications, or additional context"></textarea>
             </div>
 
-            <!-- System Rule -->
+            <!-- SYSTEM RULE -->
             <div class="rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-[11px] text-slate-400">
-                - Duration is tracked automatically when recording.<br>
-                - Stop saves Draft; Submit locks once in ORS only.<br>
-                - No manual duration entry or second submission.
+                • Tasks must align with approved UWP outputs<br>
+                • Duration is tracked automatically<br>
+                • Draft until submitted inside ORS
             </div>
 
-            <!-- Actions -->
+            <!-- ACTIONS (RESTORED – LOADING SAFE) -->
             <div class="flex justify-end gap-2 pt-2">
                 <button type="button"
                         onclick="closeOrsModal('orsTaskModal')"
                         class="rounded-lg border border-slate-700 px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-800">
                     Cancel
                 </button>
-                <button type="submit"
-                        class="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-1.5 text-xs font-semibold text-slate-900 hover:bg-emerald-600">
+
+                <button
+                    type="submit"
+                    data-admin-loading="true"
+                    data-loading-text="Logging..."
+                    class="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-1.5
+                        text-xs font-semibold text-slate-900 hover:bg-emerald-600">
+
+                    <span data-button-spinner
+                        class="hidden h-3 w-3 animate-spin rounded-full
+                                border-2 border-emerald-900/30 border-t-emerald-900"></span>
+
                     <span data-button-label>Log Task</span>
-                    <span data-button-spinner class="hidden h-3 w-3 animate-spin rounded-full border-2 border-emerald-900/30 border-t-emerald-900"></span>
                 </button>
+
             </div>
 
         </form>
     </div>
 </div>
+
 
 <!-- Task Details Modal -->
 <div id="taskDetailsModal"

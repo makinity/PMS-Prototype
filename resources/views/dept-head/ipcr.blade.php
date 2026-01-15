@@ -6,7 +6,7 @@
                 <p class="text-sm text-gray-400 mt-1">Final DH review of supervisor-rated IPCR derived from locked SMPOR (Q4 2025). Read-only; approve or return only.</p>
             </div>
             <span class="px-3 py-1 text-xs font-medium rounded bg-yellow-900 text-yellow-300 border border-yellow-800">
-                For Department Head Review (locked SMPOR)
+                Submitted by Supervisor (locked SMPOR)
             </span>
         </div>
 
@@ -14,7 +14,7 @@
             <div class="flex items-start justify-between gap-4">
                 <div>
                     <h2 class="text-lg font-semibold text-white">Prototype Notes</h2>
-                <p class="text-sm text-gray-400">Supervisor submits IPCR with ratings encoded from locked SMPOR data. Department Head reviews and either approves or returns; no edits to ratings or outputs. Employee acknowledgment occurs after Department Head approval.</p>
+                    <p class="text-sm text-gray-400">Supervisor submits IPCR with ratings encoded from locked SMPOR data. Department Head reviews and either approves or returns; no edits to ratings or outputs.</p>
                 </div>
                 <span class="px-2 py-1 text-xs rounded bg-blue-900 text-blue-300 border border-blue-800">
                     PROTOTYPE
@@ -51,7 +51,7 @@
                             <td class="px-4 py-3 text-gray-300">Q4 2025</td>
                             <td class="px-4 py-3 text-white font-semibold">5.00</td>
                             <td class="px-4 py-3">
-                                <span data-status-badge="row-1" class="rounded-full bg-yellow-900 px-3 py-1 text-xs font-semibold text-yellow-200 border border-yellow-800">For Department Head Review (locked SMPOR)</span>
+                                <span data-status-badge="row-1" class="rounded-full bg-yellow-900 px-3 py-1 text-xs font-semibold text-yellow-200 border border-yellow-800">Submitted by Supervisor (locked SMPOR)</span>
                             </td>
                             <td class="px-4 py-3 text-center">
                                 <button
@@ -76,7 +76,7 @@
             <div class="flex items-start justify-between">
                 <div>
                     <h2 class="text-lg font-semibold text-white">IPCR Details</h2>
-                    <p class="text-sm text-gray-400">Derived from locked SMPOR (Q4 2025). Supervisor-encoded ratings are read-only. Approve or return with remarks. Employee acknowledgment occurs after Department Head approval.</p>
+                    <p class="text-sm text-gray-400">Derived from locked SMPOR (Q4 2025). Supervisor-encoded ratings are read-only. Approve or return with remarks.</p>
                 </div>
                 <button type="button" data-modal-hide="ipcr-view-modal" class="text-gray-400 hover:text-white">x</button>
             </div>
@@ -209,7 +209,7 @@
                     <svg class="w-4 h-4 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
-                    Actions limited to Approve or Return to Supervisor; SMPOR data and ratings are read-only and final. Employee acknowledgment occurs after Department Head approval.
+                    Actions limited to Approve or Return to Supervisor; SMPOR data and ratings are read-only and final.
                 </div>
                 <div class="flex gap-3">
                     <button type="button"
@@ -440,4 +440,3 @@
     </script>
     @endpush
 </x-layouts.dept-head>
-

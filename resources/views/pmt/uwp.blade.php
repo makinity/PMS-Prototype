@@ -1,12 +1,8 @@
 <x-layouts.pmt>
     {{-- Page Header --}}
     <div class="mb-6">
-        <h1 class="text-2xl font-semibold text-white">
-            Unit Work Plan Monitoring
-        </h1>
-        <p class="text-sm text-slate-400 mt-1">
-            View and validate Unit Work Plans for standards compliance and alignment.
-        </p>
+        <h1>Unit Work Plan Approval</h1>
+        <p>Final review and approval of Unit Work Plans for standards compliance and alignment.</p>
     </div>
 
     {{-- Performance Period --}}
@@ -46,7 +42,7 @@
                         <td class="px-4 py-3 text-sm text-center">
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
                                 bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
-                                Approved
+                                For PMT Approval
                             </span>
                         </td>
                         <td class="px-4 py-3 text-sm text-center">
@@ -91,14 +87,27 @@
                             Jan – Dec 2026 • Supervisor: Maria Santos
                         </p>
                     </div>
-                    <button
-                        type="button"
-                        data-modal-close
-                        data-modal-hide="pmt-view-uwp-modal"
-                        class="text-slate-400 hover:text-white"
-                    >
-                        <i class="fa-solid fa-xmark text-lg"></i>
-                    </button>
+
+                    <div class="flex items-center gap-2">
+                        {{-- Export (enabled only if Approved Final) --}}
+                        <a href="{{ route('pmt.uwp.export.pdf') }}"
+                        class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800">
+                            Export PDF
+                        </a>
+
+                        <button class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800">
+                            Export Excel
+                        </button>
+
+                        <button
+                            type="button"
+                            data-modal-close
+                            data-modal-hide="pmt-view-uwp-modal"
+                            class="text-slate-400 hover:text-white"
+                        >
+                            <i class="fa-solid fa-xmark text-lg"></i>
+                        </button>
+                    </div>
                 </div>
 
                 {{-- Modal Body --}}
@@ -116,7 +125,7 @@
                         </div>
                         <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
                             <p class="text-xs uppercase text-slate-500">Status</p>
-                            <p class="mt-1 text-sm font-semibold text-emerald-300">Approved (Locked)</p>
+                            <p class="mt-1 text-sm font-semibold text-emerald-300">For PMT Approval</p>
                         </div>
                     </div>
 
@@ -129,7 +138,7 @@
                         <table class="min-w-full">
                             <thead class="bg-slate-800/60">
                                 <tr>
-                                    <th class="px-4 py-3 text-left text-xs uppercase text-slate-400">MFO</th>
+                                    <th class="px-4 py-3 text-left text-xs uppercase text-slate-400">Major Final Output</th>
                                     <th class="px-4 py-3 text-left text-xs uppercase text-slate-400">Expected Output</th>
                                     <th class="px-4 py-3 text-center text-xs uppercase text-slate-400">Target</th>
                                     <th class="px-4 py-3 text-center text-xs uppercase text-slate-400">Timeframe</th>
@@ -153,46 +162,75 @@
                         </table>
                     </div>
 
-                    {{-- PMT Comments --}}
-                    <div class="space-y-2">
-                        <label class="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                            PMT Observations (Advisory)
+                    <div class="rounded-xl border border-slate-800 bg-slate-900 p-4 space-y-3">
+                        <label class="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                            PMT Decision Remarks
+                            <span class="text-slate-500">(required if returning)</span>
                         </label>
+
                         <textarea
                             rows="3"
-                            placeholder="Optional notes on alignment, clarity, or standardization"
-                            class="w-full rounded-lg border border-slate-700 bg-slate-900
-                            px-3 py-2 text-sm text-slate-100 placeholder-slate-400
-                            focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
                             style="background:#0f172a;color:#e5e7eb;"
-                        ></textarea>
-                        <p class="text-xs text-slate-400">
-                            Notes here do not block approval and are for governance reference only.
+                            placeholder="Provide justification or revision instructions if returning the UWP."
+                            class="w-full rounded-lg border border-slate-700 bg-slate-900
+                                px-3 py-2 text-sm text-slate-100 placeholder-slate-400">
+                        </textarea>
+                    </div>
+
+                    <div class="rounded-xl border border-slate-800 bg-slate-900 p-4 space-y-3">
+                        <p class="text-sm font-semibold text-white">
+                            PMT Review Basis (Governance Reference)
                         </p>
-                        <div class="flex justify-end">
-                            <button
-                                type="button"
-                                data-admin-loading="true"
-                                data-loading-text="Sending..."
-                                class="mt-2 inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-900/40 transition hover:bg-indigo-500">
-                                <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"></span>
-                                <span data-button-label>Send</span>
-                            </button>
-                        </div>
+
+                        <ul class="space-y-2 text-sm text-slate-300">
+                            <li>✓ Aligned with approved OPCR and organizational targets</li>
+                            <li>✓ Outputs are specific, measurable, and time-bound</li>
+                            <li>✓ Core and support functions are properly classified</li>
+                            <li>✓ Targets comply with SPMS performance standards</li>
+                        </ul>
+
+                        <p class="text-xs text-slate-400">
+                            This checklist guides PMT decision-making. It does not modify targets or outputs.
+                        </p>
                     </div>
 
                 </div>
 
-                {{-- Modal Footer --}}
-                <div class="flex justify-end border-t border-slate-800 px-6 py-4">
-                    <button
-                        type="button"
-                        data-modal-hide="pmt-view-uwp-modal"
-                        class="rounded-lg border border-slate-700 px-4 py-2
-                        text-sm font-semibold text-slate-200 hover:bg-slate-800 transition"
-                    >
-                        Close
-                    </button>
+                <div class="flex flex-wrap items-center justify-between border-t border-slate-800 px-6 py-4">
+                    <p class="text-xs text-slate-500">
+                        PMT decision is final and will lock the Unit Work Plan.
+                    </p>
+
+                    <div class="flex items-center gap-3">
+                        <button
+                            type="button"
+                            data-admin-loading="true"
+                            data-loading-text="Returning..."
+                            class="inline-flex items-center gap-2
+                                rounded-lg border border-rose-500/30 bg-rose-600/10 px-4 py-2
+                                text-sm font-semibold text-rose-300
+                                hover:bg-rose-600/20 transition">
+                            <span data-button-spinner
+                                class="hidden h-4 w-4 animate-spin rounded-full
+                                        border-2 border-rose-300/40 border-t-rose-300"></span>
+                            <span data-button-label>Return to Dept Head</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            data-admin-loading="true"
+                            data-loading-text="Approving..."
+                            class="inline-flex items-center gap-2
+                                rounded-lg bg-emerald-600 px-4 py-2
+                                text-sm font-semibold text-white
+                                hover:bg-emerald-500 transition">
+                            <span data-button-spinner
+                                class="hidden h-4 w-4 animate-spin rounded-full
+                                        border-2 border-white/40 border-t-white"></span>
+                            <span data-button-label>Approve (Final)</span>
+                        </button>
+                    </div>
+
                 </div>
 
             </div>

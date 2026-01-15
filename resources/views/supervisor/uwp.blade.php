@@ -8,7 +8,7 @@
         <div class="flex flex-wrap items-start justify-between gap-4">
             <div class="space-y-2">
                 <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">Unit Work Plan</p>
-                <h1 class="text-2xl font-bold text-white">Supervisor Unit Work Plan (UWP)</h1>
+                <h1 class="text-2xl font-bold text-white">Unit Work Plan (UWP) – Planning & Commitment</h1>
                 <p class="text-sm text-slate-400">Plan the unit's deliverables for the period. This is the commitment basis for OPCR/IPCR; no performance scoring occurs here.</p>
                 <p class="text-xs text-slate-500">Outputs are planned deliverables. Actual ratings are system-generated later from MPOR/IPCR.</p>
             </div>
