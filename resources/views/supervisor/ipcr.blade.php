@@ -6,7 +6,7 @@
             <div>
                 <h1 class="text-2xl font-bold text-white">IPCR Reviews</h1>
                 <p class="text-sm text-gray-400 mt-1">
-                    Review and rate employee IPCRs derived from locked SMPOR outputs. Ratings live only inside the review modal.
+                    Review and rate employee IPCRs derived from locked SMPOR (Q4 2025). Supervisor encodes ratings; no edits to outputs or SMPOR data.
                 </p>
             </div>
             <span class="px-3 py-1 text-xs font-medium rounded bg-blue-900 text-blue-300 border border-blue-800">
@@ -19,7 +19,7 @@
             <div class="p-4 border-b border-gray-700 flex items-center justify-between">
                 <div>
                     <h2 class="text-lg font-semibold text-white">Submitted IPCRs</h2>
-                    <p class="text-xs text-gray-400">Select an IPCR to view details and encode ratings in the modal.</p>
+                    <p class="text-xs text-gray-400">Select an IPCR to view locked SMPOR accomplishments and encode supervisor ratings in the modal.</p>
                 </div>
                 <span class="text-[11px] text-gray-500">Statuses: For Review / Returned / Approved</span>
             </div>
@@ -133,7 +133,7 @@
                     <div class="flex items-center justify-between border-b border-gray-800 px-4 py-3">
                         <div>
                             <h4 class="text-sm font-semibold text-white">Core Functions (80%)</h4>
-                            <p class="text-xs text-gray-400">Expected outputs and evidence are read-only; rate Q/E/T only.</p>
+                            <p class="text-xs text-gray-400">Expected outputs and evidence are read-only; rate Q/E/T only. Derived from locked SMPOR.</p>
                         </div>
                         <span class="text-[11px] text-gray-500">System-generated from SMPOR</span>
                     </div>
@@ -143,9 +143,9 @@
                                 <tr>
                                     <th class="px-4 py-3 text-left font-semibold border-b border-gray-800">Expected Output</th>
                                     <th class="px-4 py-3 text-left font-semibold border-b border-gray-800">Actual Accomplishments / Evidence</th>
-                                    <th class="px-4 py-3 text-center font-semibold border-b border-gray-800 w-24">Q</th>
-                                    <th class="px-4 py-3 text-center font-semibold border-b border-gray-800 w-24">E</th>
-                                    <th class="px-4 py-3 text-center font-semibold border-b border-gray-800 w-24">T</th>
+                                    <th class="px-4 py-3 text-center font-semibold border-b border-gray-800 w-24">Q (Sup)</th>
+                                    <th class="px-4 py-3 text-center font-semibold border-b border-gray-800 w-24">E (Sup)</th>
+                                    <th class="px-4 py-3 text-center font-semibold border-b border-gray-800 w-24">T (Sup)</th>
                                     <th class="px-4 py-3 text-center font-semibold border-b border-gray-800 w-24">Average</th>
                                 </tr>
                             </thead>
@@ -158,7 +158,7 @@
                                     <td class="px-4 py-3 text-gray-300">
                                         Scanned and uploaded 120 e-bank transaction records (3 hours total).
                                         Derived from validated and locked SMPOR entries; read-only.
-                                        <span class="block text-[11px] text-gray-500 mt-1">System-generated from SMPOR</span>
+                                        <span class="block text-[11px] text-gray-500 mt-1">System-generated from locked SMPOR</span>
                                     </td>
                                     <td class="px-4 py-3 text-center">
                                         <select class="uwp-select text-white font-semibold text-center" style="min-width:72px; background:#0f172a;color:#e5e7eb;" data-rating-select="core-1">
@@ -201,7 +201,7 @@
                     <div class="flex items-center justify-between border-b border-gray-800 px-4 py-3">
                         <div>
                             <h4 class="text-sm font-semibold text-white">Support Functions (20%)</h4>
-                            <p class="text-xs text-gray-400">Rate Q/E/T; commitments and evidence remain read-only.</p>
+                            <p class="text-xs text-gray-400">Rate Q/E/T; commitments and evidence remain read-only. Derived from locked SMPOR.</p>
                         </div>
                         <span class="text-[11px] text-gray-500">System-generated from SMPOR</span>
                     </div>
@@ -226,7 +226,7 @@
                                     <td class="px-4 py-3 text-gray-300">
                                         Serviced internal reference requests and archival pulls within agreed timelines.
                                         Data linked to locked SMPOR logs; no additional outputs recorded here.
-                                        <span class="block text-[11px] text-gray-500 mt-1">System-generated from SMPOR</span>
+                                        <span class="block text-[11px] text-gray-500 mt-1">System-generated from locked SMPOR</span>
                                     </td>
                                     <td class="px-4 py-3 text-center">
                                         <select class="uwp-select text-white font-semibold text-center" style="min-width:72px; background:#0f172a;color:#e5e7eb;" data-rating-select="support-1">
@@ -272,7 +272,7 @@
             </div>
 
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-t border-gray-800 px-6 py-4">
-                <div class="text-xs text-gray-500">This action will be recorded in the audit log.</div>
+                <div class="text-xs text-gray-500">Submitting sends ratings to Department Head; accomplishments remain locked from SMPOR.</div>
                 <div class="flex flex-wrap items-center gap-3">
                     <button type="button"
                             data-employee-loading="true"
@@ -290,13 +290,6 @@
                             class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-900/40 hover:bg-blue-500">
                         <span data-button-label>Submit to Department Head</span>
                         <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
-                    </button>
-                    <button type="button"
-                            data-employee-loading="true"
-                            data-loading-text="Returning..."
-                            class="inline-flex items-center gap-2 rounded-lg border border-rose-500/40 bg-rose-600/10 px-4 py-2 text-sm font-semibold text-rose-200 hover:bg-rose-600/20">
-                        <span data-button-label>Return to Employee</span>
-                        <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-rose-200/40 border-t-rose-200"></span>
                     </button>
                 </div>
             </div>
@@ -391,6 +384,7 @@
                     const position = trigger.dataset.position || '--';
                     const period = trigger.dataset.period || '--';
                     const status = trigger.dataset.status || 'For Review';
+                    const editable = status === 'For Review';
 
                     employeeEls.nameTop.textContent = name;
                     employeeEls.positionTop.textContent = position;
@@ -408,6 +402,27 @@
                     } else {
                         employeeEls.badge.classList.add('border', 'border-blue-500/50', 'bg-blue-500/10', 'text-blue-200');
                     }
+
+                    overlay.querySelectorAll('[data-rating-select], #ipcr-remarks').forEach((el) => {
+                        el.disabled = !editable;
+                        if (!editable) {
+                            el.classList.add('opacity-70', 'cursor-not-allowed');
+                        } else {
+                            el.classList.remove('opacity-70', 'cursor-not-allowed');
+                        }
+                    });
+                    overlay.querySelectorAll('[data-employee-action],[data-employee-loading]').forEach((btn) => {
+                        if (btn.textContent.includes('Submit')) {
+                            btn.disabled = !editable && !btn.dataset.allowSubmitted;
+                            btn.classList.toggle('opacity-70', !editable && !btn.dataset.allowSubmitted);
+                            btn.classList.toggle('cursor-not-allowed', !editable && !btn.dataset.allowSubmitted);
+                        }
+                        if (btn.textContent.includes('Save Draft')) {
+                            btn.disabled = !editable;
+                            btn.classList.toggle('opacity-70', !editable);
+                            btn.classList.toggle('cursor-not-allowed', !editable);
+                        }
+                    });
 
                     overlay.classList.remove('hidden');
                     overlay.classList.add('flex');

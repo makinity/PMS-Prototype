@@ -3,10 +3,10 @@
         <div class="flex justify-between items-start">
             <div>
                 <h1 class="text-2xl font-bold text-white">Individual Performance Commitment and Review (IPCR)</h1>
-                <p class="text-sm text-gray-400 mt-1">Department Head Review &amp; Approval</p>
+                <p class="text-sm text-gray-400 mt-1">Final DH review of supervisor-rated IPCR derived from locked SMPOR (Q4 2025). Read-only; approve or return only.</p>
             </div>
             <span class="px-3 py-1 text-xs font-medium rounded bg-yellow-900 text-yellow-300 border border-yellow-800">
-                FOR APPROVAL
+                For Department Head Review (locked SMPOR)
             </span>
         </div>
 
@@ -14,7 +14,7 @@
             <div class="flex items-start justify-between gap-4">
                 <div>
                     <h2 class="text-lg font-semibold text-white">Prototype Notes</h2>
-                    <p class="text-sm text-gray-400">Supervisor submits IPCR with final ratings encoded from locked SMPOR data. Department Head reviews and either approves or returns.</p>
+                <p class="text-sm text-gray-400">Supervisor submits IPCR with ratings encoded from locked SMPOR data. Department Head reviews and either approves or returns; no edits to ratings or outputs. Employee acknowledgment occurs after Department Head approval.</p>
                 </div>
                 <span class="px-2 py-1 text-xs rounded bg-blue-900 text-blue-300 border border-blue-800">
                     PROTOTYPE
@@ -26,7 +26,7 @@
             <div class="flex items-center justify-between p-4 border-b border-gray-700">
                 <div>
                     <h2 class="text-lg font-semibold text-white">Submitted IPCRs</h2>
-                    <p class="text-xs text-gray-400">Read-only list for review and approval.</p>
+                    <p class="text-xs text-gray-400">Read-only list for review and approval. System-generated from locked SMPOR.</p>
                 </div>
                 <span class="text-xs text-gray-400">Period: Q4 2025</span>
             </div>
@@ -51,7 +51,7 @@
                             <td class="px-4 py-3 text-gray-300">Q4 2025</td>
                             <td class="px-4 py-3 text-white font-semibold">5.00</td>
                             <td class="px-4 py-3">
-                                <span data-status-badge="row-1" class="rounded-full bg-yellow-900 px-3 py-1 text-xs font-semibold text-yellow-200 border border-yellow-800">FOR APPROVAL</span>
+                                <span data-status-badge="row-1" class="rounded-full bg-yellow-900 px-3 py-1 text-xs font-semibold text-yellow-200 border border-yellow-800">For Department Head Review (locked SMPOR)</span>
                             </td>
                             <td class="px-4 py-3 text-center">
                                 <button
@@ -76,7 +76,7 @@
             <div class="flex items-start justify-between">
                 <div>
                     <h2 class="text-lg font-semibold text-white">IPCR Details</h2>
-                    <p class="text-sm text-gray-400">Read-only. Approve or return with remarks.</p>
+                    <p class="text-sm text-gray-400">Derived from locked SMPOR (Q4 2025). Supervisor-encoded ratings are read-only. Approve or return with remarks. Employee acknowledgment occurs after Department Head approval.</p>
                 </div>
                 <button type="button" data-modal-hide="ipcr-view-modal" class="text-gray-400 hover:text-white">x</button>
             </div>
@@ -138,7 +138,6 @@
                                     <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-20">T</th>
                                     <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-24">Average</th>
                                     <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-48">Supervisor Remarks</th>
-                                    <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-48">Employee Comment</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-700">
@@ -148,14 +147,13 @@
                                         <span class="block text-[11px] text-gray-500 mt-1">Target: 100 records per quarter</span>
                                     </td>
                                     <td class="border border-gray-700 px-4 py-3 text-gray-300">
-                                        Scanned and uploaded 120 transaction records (3 hours total). System-generated from SMPOR; validated and locked before IPCR.
+                                        Scanned and uploaded 120 transaction records (3 hours total). System-generated from locked SMPOR; validated and locked before IPCR.
                                     </td>
-                                    <td class="border border-gray-700 px-4 py-3 text-white font-semibold">5</td>
-                                    <td class="border border-gray-700 px-4 py-3 text-white font-semibold">5</td>
-                                    <td class="border border-gray-700 px-4 py-3 text-white font-semibold">5</td>
+                                    <td class="border border-gray-700 px-4 py-3 text-white font-semibold">5 <span class="block text-[11px] text-gray-500">Supervisor-encoded</span></td>
+                                    <td class="border border-gray-700 px-4 py-3 text-white font-semibold">5 <span class="block text-[11px] text-gray-500">Supervisor-encoded</span></td>
+                                    <td class="border border-gray-700 px-4 py-3 text-white font-semibold">5 <span class="block text-[11px] text-gray-500">Supervisor-encoded</span></td>
                                     <td class="border border-gray-700 px-4 py-3 text-white font-semibold">5.00</td>
                                     <td class="border border-gray-700 px-4 py-3 text-gray-200">Supervisor rating encoded; aligns with locked SMPOR output.</td>
-                                    <td class="border border-gray-700 px-4 py-3 text-gray-200">Acknowledged.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -177,7 +175,6 @@
                                     <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-20">T</th>
                                     <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-24">Average</th>
                                     <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-48">Supervisor Remarks</th>
-                                    <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white w-48">Employee Comment</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-700">
@@ -187,14 +184,13 @@
                                         <span class="block text-[11px] text-gray-500 mt-1">Target: Fulfill reference pulls within 1 business day</span>
                                     </td>
                                     <td class="border border-gray-700 px-4 py-3 text-gray-300">
-                                        Serviced internal reference requests and archival pulls within agreed timelines. System-generated from SMPOR; no additional outputs recorded here.
+                                        Serviced internal reference requests and archival pulls within agreed timelines. System-generated from locked SMPOR; no additional outputs recorded here.
                                     </td>
-                                    <td class="border border-gray-700 px-4 py-3 text-white font-semibold">5</td>
-                                    <td class="border border-gray-700 px-4 py-3 text-white font-semibold">5</td>
-                                    <td class="border border-gray-700 px-4 py-3 text-white font-semibold">5</td>
+                                    <td class="border border-gray-700 px-4 py-3 text-white font-semibold">5 <span class="block text-[11px] text-gray-500">Supervisor-encoded</span></td>
+                                    <td class="border border-gray-700 px-4 py-3 text-white font-semibold">5 <span class="block text-[11px] text-gray-500">Supervisor-encoded</span></td>
+                                    <td class="border border-gray-700 px-4 py-3 text-white font-semibold">5 <span class="block text-[11px] text-gray-500">Supervisor-encoded</span></td>
                                     <td class="border border-gray-700 px-4 py-3 text-white font-semibold">5.00</td>
                                     <td class="border border-gray-700 px-4 py-3 text-gray-200">Supervisor rating encoded; support functions align with SMPOR.</td>
-                                    <td class="border border-gray-700 px-4 py-3 text-gray-200">Acknowledged.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -213,13 +209,13 @@
                     <svg class="w-4 h-4 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
-                    Actions are limited to approval or return; ratings are final.
+                    Actions limited to Approve or Return to Supervisor; SMPOR data and ratings are read-only and final. Employee acknowledgment occurs after Department Head approval.
                 </div>
                 <div class="flex gap-3">
                     <button type="button"
                             data-employee-action
                             data-action-title="Approve IPCR"
-                            data-action-message="Approving this IPCR will lock ratings and complete the review cycle."
+                            data-action-message="Approving this IPCR will lock ratings and complete the review cycle. SMPOR data remains unchanged."
                             data-action-confirm="Approve"
                             data-action-loading="Approving..."
                             class="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-lg focus:ring-4 focus:ring-emerald-800 transition-colors duration-200">
@@ -229,7 +225,7 @@
                     <button type="button"
                             data-employee-action
                             data-action-title="Return to Supervisor"
-                            data-action-message="Returning this IPCR will require supervisor revisions."
+                            data-action-message="Returning this IPCR will require supervisor revisions. DH does not edit ratings or SMPOR data."
                             data-action-confirm="Return"
                             data-action-loading="Returning..."
                             class="inline-flex items-center gap-2 px-5 py-2.5 border border-red-500 text-red-300 rounded-lg hover:bg-red-500/10 transition-colors duration-200">
@@ -444,3 +440,4 @@
     </script>
     @endpush
 </x-layouts.dept-head>
+

@@ -4,10 +4,13 @@
         <!-- Page Header -->
         <div class="flex flex-wrap items-start justify-between gap-4">
             <div>
-                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Summary MPOR — Ramon Reyes</p>
+                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Summary MPOR - Ramon Reyes</p>
                 <h1 class="mt-1 text-2xl font-bold text-white">SMPOR - Q4 2025</h1>
                 <p class="text-sm text-slate-400 mt-1">
                     System-generated, locked view derived from supervisor-validated MPOR entries. This summary aggregates monthly MPOR submissions. Task-level breakdowns remain available in MPOR.
+                </p>
+                <p class="text-[11px] text-slate-500 mt-2">
+                    Derived from validated MPOR. Locked snapshot; no edits allowed. SMPOR feeds directly into IPCR.
                 </p>
             </div>
             <div class="flex items-center gap-2">
@@ -25,7 +28,7 @@
             <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Completion (locked)</p>
                 <p class="mt-1 text-2xl font-semibold text-emerald-300">100%</p>
-                <p class="text-xs text-slate-500">All validated outputs included</p>
+                <p class="text-xs text-slate-500">All submitted ORS entries validated and locked</p>
             </div>
             <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Total outputs (locked)</p>
@@ -34,25 +37,25 @@
             </div>
             <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Core outputs (locked)</p>
-                <p class="mt-1 text-2xl font-semibold text-white">120</p>
+                <p class="mt-1 text-2xl font-semibold text-white">80</p>
                 <p class="text-xs text-slate-500">Validated core functions</p>
             </div>
             <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Support outputs (locked)</p>
-                <p class="mt-1 text-2xl font-semibold text-white">45</p>
+                <p class="mt-1 text-2xl font-semibold text-white">20</p>
                 <p class="text-xs text-slate-500">Validated support functions</p>
             </div>
         </div>
 
         <!-- Consolidated Table -->
-        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-            <div class="flex flex-wrap items-start justify-between gap-2">
-                <div>
-                    <h2 class="text-lg font-semibold text-white">SMPOR rollup (locked)</h2>
-                    <p class="text-xs text-slate-400">All supervisor-validated MPOR entries included.</p>
+            <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
+                <div class="flex flex-wrap items-start justify-between gap-2">
+                    <div>
+                        <h2 class="text-lg font-semibold text-white">SMPOR rollup (locked)</h2>
+                        <p class="text-xs text-slate-400">All supervisor-validated MPOR entries included. Locked snapshot; no edits allowed.</p>
+                    </div>
+                    <span class="text-xs text-slate-400">Lock date: Jan 7, 2026</span>
                 </div>
-                <span class="text-xs text-slate-400">Lock date: Jan 7, 2026</span>
-            </div>
 
             <div class="mt-4 overflow-x-auto">
                 <table class="min-w-full text-sm border border-slate-800">
@@ -68,8 +71,8 @@
                     <tbody class="divide-y divide-slate-800 text-slate-200">
                         <tr class="hover:bg-slate-900">
                             <td class="px-4 py-3">October 2025</td>
-                            <td class="px-4 py-3 text-slate-300">50</td>
-                            <td class="px-4 py-3 text-emerald-300 font-semibold">40</td>
+                            <td class="px-4 py-3 text-slate-300">40</td>
+                            <td class="px-4 py-3 text-emerald-300 font-semibold">30</td>
                             <td class="px-4 py-3 text-blue-200 font-semibold">10</td>
                             <td class="px-4 py-3">
                                 <span class="rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-300 border border-emerald-600/50">Locked</span>
@@ -77,18 +80,18 @@
                         </tr>
                         <tr class="hover:bg-slate-900">
                             <td class="px-4 py-3">November 2025</td>
-                            <td class="px-4 py-3 text-slate-300">40</td>
-                            <td class="px-4 py-3 text-emerald-300 font-semibold">35</td>
-                            <td class="px-4 py-3 text-blue-200 font-semibold">15</td>
+                            <td class="px-4 py-3 text-slate-300">35</td>
+                            <td class="px-4 py-3 text-emerald-300 font-semibold">28</td>
+                            <td class="px-4 py-3 text-blue-200 font-semibold">7</td>
                             <td class="px-4 py-3">
                                 <span class="rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-300 border border-emerald-600/50">Locked</span>
                             </td>
                         </tr>
                         <tr class="hover:bg-slate-900">
                             <td class="px-4 py-3">December 2025</td>
-                            <td class="px-4 py-3 text-slate-300">10</td>
-                            <td class="px-4 py-3 text-emerald-300 font-semibold">45</td>
-                            <td class="px-4 py-3 text-blue-200 font-semibold">20</td>
+                            <td class="px-4 py-3 text-slate-300">25</td>
+                            <td class="px-4 py-3 text-emerald-300 font-semibold">22</td>
+                            <td class="px-4 py-3 text-blue-200 font-semibold">3</td>
                             <td class="px-4 py-3">
                                 <span class="rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-300 border border-emerald-600/50">Locked</span>
                             </td>
@@ -104,7 +107,7 @@
                 <div class="flex items-start justify-between gap-2">
                     <div>
                         <h2 class="text-lg font-semibold text-white">Audit guarantees</h2>
-                        <p class="text-xs text-slate-400">Locked SMPOR passed all integrity rules.</p>
+                    <p class="text-xs text-slate-400">Locked SMPOR passed all integrity rules; no recalculation or edits occur here.</p>
                     </div>
                     <span class="text-xs text-slate-400">Final state</span>
                 </div>

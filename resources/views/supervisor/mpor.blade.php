@@ -8,10 +8,13 @@
                     Monthly Performance Output Report
                 </p>
                 <h1 class="mt-1 text-2xl font-bold text-white">
-                    MPOR Validation – December 2025
+                    MPOR Validation - December 2025
                 </h1>
                 <p class="text-sm text-slate-400 mt-1">
-                    Review and validate employee MPOR entries before consolidation to SMPOR.
+                    Review and validate employee MPOR entries derived from submitted ORS logs.
+                </p>
+                <p class="text-[11px] text-slate-500 mt-2">
+                    Durations and outputs are auto-generated from ORS. Supervisor validation does not modify employee logs.
                 </p>
             </div>
             <span class="rounded-full border border-amber-600/50 bg-amber-500/10 px-3 py-1
@@ -74,6 +77,8 @@
                             <th class="px-4 py-3 text-left">ORS Ref</th>
                             <th class="px-4 py-3 text-left">Date</th>
                             <th class="px-4 py-3 text-left">Status</th>
+                            <th class="px-4 py-3 text-left">Duration</th>
+                            <th class="px-4 py-3 text-left">Output Evidence</th>
                             <th class="px-4 py-3 text-center">Action</th>
                         </tr>
                     </thead>
@@ -88,6 +93,14 @@
                                     For review
                                 </span>
                             </td>
+                            <td class="px-4 py-3 text-slate-200">
+                                <div class="text-sm font-semibold">1h 30m</div>
+                                <div class="text-[11px] text-slate-500">Auto-tracked via ORS</div>
+                            </td>
+                            <td class="px-4 py-3 text-slate-300">
+                                <div class="text-sm font-semibold">E-bank scan upload.pdf</div>
+                                <div class="text-[11px] text-slate-500">Submitted in ORS (read-only)</div>
+                            </td>
                             <td class="px-4 py-3 text-center space-x-2">
                                 <button
                                     type="button"
@@ -98,6 +111,10 @@
                                     data-status="For review"
                                     data-unit="Administrative Services"
                                     data-employee="Ramon Reyes"
+                                    data-duration="1h 30m"
+                                    data-start="09:12 AM"
+                                    data-end="10:42 AM"
+                                    data-output="E-bank scan upload.pdf"
                                     class="text-blue-400 hover:text-blue-300 text-xs font-semibold">
                                     View
                                 </button>
@@ -161,6 +178,20 @@
                     <div class="rounded-lg border border-slate-800 bg-slate-950/70 p-3">
                         <p class="text-[11px] uppercase tracking-wide text-slate-500">Employee</p>
                         <p id="modal-employee" class="mt-1 text-sm font-semibold text-white">--</p>
+                    </div>
+                    <div class="rounded-lg border border-slate-800 bg-slate-950/70 p-3">
+                        <p class="text-[11px] uppercase tracking-wide text-slate-500">Tracked duration</p>
+                        <p id="modal-duration" class="mt-1 text-sm font-semibold text-white">--</p>
+                        <p class="text-[11px] text-slate-500 mt-1">Captured automatically from ORS</p>
+                        <div class="text-[11px] text-slate-500 mt-1 flex flex-col gap-0.5">
+                            <span>Start: <span id="modal-start">--</span></span>
+                            <span>End: <span id="modal-end">--</span></span>
+                        </div>
+                    </div>
+                    <div class="rounded-lg border border-slate-800 bg-slate-950/70 p-3">
+                        <p class="text-[11px] uppercase tracking-wide text-slate-500">Output evidence</p>
+                        <p id="modal-output" class="mt-1 text-sm font-semibold text-white">--</p>
+                        <p class="text-[11px] text-slate-500 mt-1">Submitted in ORS (read-only)</p>
                     </div>
                 </div>
             </div>
@@ -226,6 +257,9 @@
                 const modalStatus = document.getElementById('modal-status');
                 const modalUnit = document.getElementById('modal-unit');
                 const modalEmployee = document.getElementById('modal-employee');
+                const modalDuration = document.getElementById('modal-duration');
+                const modalStart = document.getElementById('modal-start');
+                const modalEnd = document.getElementById('modal-end');
                 const viewModalId = 'view-mpor-modal';
 
                 document.querySelectorAll('[data-view-entry]').forEach((button) => {
@@ -236,6 +270,9 @@
                         if (modalStatus) modalStatus.textContent = button.dataset.status || '--';
                         if (modalUnit) modalUnit.textContent = button.dataset.unit || '--';
                         if (modalEmployee) modalEmployee.textContent = button.dataset.employee || '--';
+                        if (modalDuration) modalDuration.textContent = button.dataset.duration || '--';
+                        if (modalStart) modalStart.textContent = button.dataset.start || '--';
+                        if (modalEnd) modalEnd.textContent = button.dataset.end || '--';
                         toggleModal(viewModalId, true);
                     });
                 });

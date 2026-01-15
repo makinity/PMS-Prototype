@@ -4,7 +4,9 @@
         <div>
             <h1 class="text-2xl font-bold text-white">My Tasks</h1>
             <p class="text-sm text-gray-400 mt-1">
-                View and manage your assigned and logged tasks.
+                Read-only mirror of ORS entries.
+                <span class="block">Tasks are created and submitted in ORS.</span>
+                <span class="block">This page mirrors ORS status only.</span>
             </p>
         </div>
 
@@ -12,10 +14,11 @@
         <div class="flex flex-wrap gap-3">
             <select class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 px-3 py-2.5">
                 <option class="bg-gray-700">Status: All</option>
-                <option class="bg-gray-700">In Progress</option>
-                <option class="bg-gray-700">Completed</option>
-                <option class="bg-gray-700">Pending Review</option>
-                <option class="bg-gray-700">Overdue</option>
+                <option class="bg-gray-700">Draft</option>
+                <option class="bg-gray-700">Recording</option>
+                <option class="bg-gray-700">Submitted</option>
+                <option class="bg-gray-700">Locked / In MPOR</option>
+                <option class="bg-gray-700">Returned</option>
             </select>
 
             <input type="date"
@@ -24,6 +27,9 @@
 
         {{-- Task Table --}}
         <div class="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden">
+            <div class="px-4 py-3 text-xs text-gray-400 border-b border-gray-700">
+                Status reflects ORS state only; no submissions, uploads, or task creation here.
+            </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead class="bg-gray-900">
@@ -42,8 +48,8 @@
                             <td class="px-4 py-3 text-gray-300">ABC Corp</td>
                             <td class="px-4 py-3 text-gray-300">Dec 27, 2025</td>
                             <td class="px-4 py-3">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-900 text-blue-300">
-                                    In Progress
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-900 text-amber-200">
+                                    Recording
                                 </span>
                                 <p class="mt-1 text-xs text-gray-400">Tracking: Active since 09:12</p>
                             </td>
@@ -53,7 +59,7 @@
                             </td>
                             <td class="px-4 py-3">
                                 <button type="button" data-modal-target="task-view-modal" data-modal-toggle="task-view-modal" class="text-blue-400 hover:text-blue-300 font-medium text-sm transition-colors duration-200">
-                                    View
+                                    View ORS Entry
                                 </button>
                             </td>
                         </tr>
@@ -63,7 +69,7 @@
                             <td class="px-4 py-3 text-gray-300">Dec 26, 2025</td>
                             <td class="px-4 py-3">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-900 text-emerald-300">
-                                    Completed
+                                    Locked / In MPOR
                                 </span>
                                 <p class="mt-1 text-xs text-gray-400">Tracking: Completed in 2.3h</p>
                             </td>
@@ -73,7 +79,7 @@
                             </td>
                             <td class="px-4 py-3">
                                 <button type="button" data-modal-target="task-view-modal" data-modal-toggle="task-view-modal" class="text-blue-400 hover:text-blue-300 font-medium text-sm transition-colors duration-200">
-                                    View
+                                    View ORS Entry
                                 </button>
                             </td>
                         </tr>
@@ -82,8 +88,8 @@
                             <td class="px-4 py-3 text-gray-300">Tech Solutions</td>
                             <td class="px-4 py-3 text-gray-300">Dec 25, 2025</td>
                             <td class="px-4 py-3">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-900 text-amber-300">
-                                    Pending Review
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-900 text-blue-300">
+                                    Submitted
                                 </span>
                                 <p class="mt-1 text-xs text-gray-400">Tracking: Completed in 3.2h</p>
                             </td>
@@ -93,7 +99,7 @@
                             </td>
                             <td class="px-4 py-3">
                                 <button type="button" data-modal-target="task-view-modal" data-modal-toggle="task-view-modal" class="text-blue-400 hover:text-blue-300 font-medium text-sm transition-colors duration-200">
-                                    View
+                                    View ORS Entry
                                 </button>
                             </td>
                         </tr>
@@ -102,10 +108,10 @@
                             <td class="px-4 py-3 text-gray-300">Global Enterprises</td>
                             <td class="px-4 py-3 text-gray-300">Dec 27, 2025</td>
                             <td class="px-4 py-3">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-900 text-blue-300">
-                                    In Progress
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-800 text-amber-100">
+                                    Draft
                                 </span>
-                                <p class="mt-1 text-xs text-gray-400">Tracking: Active since 10:05</p>
+                                <p class="mt-1 text-xs text-gray-400">Tracking: Stopped at 10:05 (draft)</p>
                             </td>
                             <td class="px-4 py-3">
                                 <p class="text-xs text-gray-400">Request: REQ-2025-017</p>
@@ -113,7 +119,7 @@
                             </td>
                             <td class="px-4 py-3">
                                 <button type="button" data-modal-target="task-view-modal" data-modal-toggle="task-view-modal" class="text-blue-400 hover:text-blue-300 font-medium text-sm transition-colors duration-200">
-                                    View
+                                    View ORS Entry
                                 </button>
                             </td>
                         </tr>
@@ -123,19 +129,17 @@
                             <td class="px-4 py-3 text-gray-300">Dec 24, 2025</td>
                             <td class="px-4 py-3">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-900 text-rose-300">
-                                    Overdue
+                                    Returned
                                 </span>
                                 <p class="mt-1 text-xs text-gray-400">Tracking: Paused at 3.0h</p>
                             </td>
                             <td class="px-4 py-3">
                                 <p class="text-xs text-gray-400">Request: REQ-2025-018</p>
-                                <a href="{{ route('employee.submit-output') }}" class="text-xs font-medium text-rose-300 hover:text-rose-200">
-                                    Output missing
-                                </a>
+                                <span class="text-xs font-medium text-rose-300">Output missing (revise in ORS)</span>
                             </td>
                             <td class="px-4 py-3">
                                 <button type="button" data-modal-target="task-view-modal" data-modal-toggle="task-view-modal" class="text-blue-400 hover:text-blue-300 font-medium text-sm transition-colors duration-200">
-                                    View
+                                    View ORS Entry
                                 </button>
                             </td>
                         </tr>
@@ -148,7 +152,7 @@
             <svg class="flex-shrink-0 inline w-4 h-4 mr-3 text-blue-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
             </svg>
-            <span>Tasks are linked to ORS entries, client requests, and IPCR actual accomplishments.</span>
+            <span>My Tasks mirrors ORS activity. Tasks are created and submitted in ORS. This page mirrors ORS status only.</span>
         </div>
 
         <div id="task-view-modal" tabindex="-1" aria-hidden="true" class="fixed left-0 right-0 top-0 z-50 hidden h-[calc(100%-1rem)] max-h-full w-full items-center justify-center overflow-y-auto overflow-x-hidden md:inset-0">
@@ -178,8 +182,8 @@
                             </div>
                             <div>
                                 <p class="text-xs uppercase tracking-wide text-gray-500">Status</p>
-                                <span class="inline-flex items-center rounded-full bg-blue-900 px-2.5 py-0.5 text-xs font-medium text-blue-300">
-                                    In Progress
+                                <span class="inline-flex items-center rounded-full bg-amber-900 px-2.5 py-0.5 text-xs font-medium text-amber-200">
+                                    Recording
                                 </span>
                             </div>
                             <div>
@@ -210,11 +214,9 @@
                         <button type="button" data-modal-hide="task-view-modal" class="rounded-lg border border-gray-600 px-4 py-2 text-sm font-medium text-gray-200 transition hover:bg-gray-800">
                             Close
                         </button>
-                        <a href="{{ route('employee.submit-output') }}" class="rounded-lg border border-blue-600 px-4 py-2 text-sm font-medium text-blue-200 transition hover:bg-blue-900/40">
-                            Submit Output
-                        </a>
+                        <span class="text-xs text-gray-400 mr-auto">Submission is performed inside ORS.</span>
                         <a href="{{ route('employee.ors') }}" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-500">
-                            Open ORS
+                            View in ORS
                         </a>
                     </div>
                 </div>

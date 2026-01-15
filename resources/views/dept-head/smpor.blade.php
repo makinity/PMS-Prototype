@@ -3,24 +3,30 @@
 
         <div class="flex items-start justify-between gap-4">
             <div>
-                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Summary MPOR</p>
+                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Locked SMPOR</p>
                 <h1 class="mt-1 text-2xl font-bold text-white">SMPOR Overview</h1>
                 <p class="text-sm text-slate-400 mt-1">
-                    Read-only summary of validated and locked MPOR data per unit.
+                    System-generated, read-only snapshot of validated MPOR entries by unit. Feeds directly into IPCR/OPCR; no edits or validation here.
                 </p>
+                <p class="text-[11px] text-slate-500 mt-2">Derived from validated MPOR. Locked snapshot; no edits allowed.</p>
             </div>
-            <span class="rounded-full border border-blue-600/50 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-200">
-                System-generated
-            </span>
+            <div class="flex items-center gap-2">
+                <span class="rounded-full border border-blue-600/50 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-200">
+                    System-generated
+                </span>
+                <span class="rounded-full border border-emerald-600/50 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-200">
+                    Locked SMPOR
+                </span>
+            </div>
         </div>
 
         <div class="rounded-2xl border border-slate-800 bg-slate-900/70 overflow-hidden">
             <div class="flex items-center justify-between p-4 border-b border-slate-800">
                 <div>
                     <h2 class="text-lg font-semibold text-white">Units</h2>
-                    <p class="text-xs text-slate-400">Locked MPOR data only. Read-only.</p>
+                    <p class="text-xs text-slate-400">Locked MPOR data only. Read-only; no validation or recomputation.</p>
                 </div>
-                <span class="text-xs text-slate-400">Last sync: Jan 10, 2026</span>
+                <span class="text-xs text-slate-400">Lock date: Jan 7, 2026</span>
             </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
@@ -30,6 +36,7 @@
                             <th class="px-4 py-3 text-left font-semibold border-b border-slate-800">Supervisor</th>
                             <th class="px-4 py-3 text-left font-semibold border-b border-slate-800">Completion</th>
                             <th class="px-4 py-3 text-left font-semibold border-b border-slate-800">Missing outputs</th>
+                            <th class="px-4 py-3 text-left font-semibold border-b border-slate-800">Total / Core / Support</th>
                             <th class="px-4 py-3 text-left font-semibold border-b border-slate-800">Status</th>
                             <th class="px-4 py-3 text-center font-semibold border-b border-slate-800">Action</th>
                         </tr>
@@ -38,8 +45,12 @@
                         <tr class="hover:bg-slate-900/60">
                             <td class="px-4 py-3">Administrative Services Unit</td>
                             <td class="px-4 py-3 text-slate-300">Maria Santos</td>
-                            <td class="px-4 py-3 text-emerald-300 font-semibold">96%</td>
+                            <td class="px-4 py-3 text-emerald-300 font-semibold">100%</td>
                             <td class="px-4 py-3 text-slate-300">0</td>
+                            <td class="px-4 py-3 text-slate-100">
+                                <div class="text-sm font-semibold">100</div>
+                                <div class="text-[11px] text-slate-400">80 core / 20 support</div>
+                            </td>
                             <td class="px-4 py-3">
                                 <span class="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300 border border-emerald-500/30">
                                     Locked
@@ -51,10 +62,10 @@
                                     data-smpor-view
                                     data-unit="Administrative Services Unit"
                                     data-supervisor="Maria Santos"
-                                    data-completion="96%"
+                                    data-completion="100%"
                                     data-missing="0"
                                     data-status="Locked"
-                                    data-monthly='[{"month":"October 2025","total":14,"core":9,"support":5},{"month":"November 2025","total":13,"core":8,"support":5},{"month":"December 2025","total":15,"core":10,"support":5}]'
+                                    data-monthly='[{"month":"October 2025","total":40,"core":30,"support":10},{"month":"November 2025","total":35,"core":28,"support":7},{"month":"December 2025","total":25,"core":22,"support":3}]'
                                     class="text-blue-400 hover:text-blue-300 text-xs font-semibold">
                                     View
                                 </button>
@@ -65,6 +76,10 @@
                             <td class="px-4 py-3 text-slate-300">Carlo D. Beray</td>
                             <td class="px-4 py-3 text-emerald-300 font-semibold">100%</td>
                             <td class="px-4 py-3 text-slate-300">0</td>
+                            <td class="px-4 py-3 text-slate-100">
+                                <div class="text-sm font-semibold">100</div>
+                                <div class="text-[11px] text-slate-400">80 core / 20 support</div>
+                            </td>
                             <td class="px-4 py-3">
                                 <span class="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300 border border-emerald-500/30">
                                     Locked
@@ -79,7 +94,7 @@
                                     data-completion="100%"
                                     data-missing="0"
                                     data-status="Locked"
-                                    data-monthly='[{"month":"October 2025","total":50,"core":40,"support":10},{"month":"November 2025","total":50,"core":35,"support":15},{"month":"December 2025","total":65,"core":45,"support":20}]'
+                                    data-monthly='[{"month":"October 2025","total":40,"core":30,"support":10},{"month":"November 2025","total":35,"core":28,"support":7},{"month":"December 2025","total":25,"core":22,"support":3}]'
                                     class="text-blue-400 hover:text-blue-300 text-xs font-semibold">
                                     View
                                 </button>

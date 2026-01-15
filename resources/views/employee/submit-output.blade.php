@@ -1,46 +1,51 @@
 <x-layouts.employee>
     <section class="space-y-6">
 
-        {{-- Progress Indicator --}}
-        <div class="flex items-center justify-between mb-2">
-            <h1 class="text-2xl font-bold text-white">Submit Output</h1>
-            <div class="flex items-center space-x-2 text-sm text-gray-400">
-                <span class="flex items-center">
-                    <span class="flex h-2.5 w-2.5 rounded-full bg-blue-500 mr-2"></span>
-                    <span class="font-medium text-white">1. Review Selected Task</span>
+        {{-- Header / Status --}}
+        <div class="flex flex-wrap items-start justify-between gap-3">
+            <div>
+                <h1 class="text-2xl font-bold text-white">Output Details (Read-only)</h1>
+                <p class="text-sm text-gray-400 mt-1">
+                    My Tasks viewer only. All edits, uploads, and submissions are performed inside ORS.
+                </p>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="inline-flex items-center rounded-full bg-blue-900 px-3 py-1 text-xs font-semibold text-blue-200 border border-blue-700">
+                    Submitted (Locked)
                 </span>
-                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                </svg>
-                <span class="flex items-center">
-                    <span class="flex h-2.5 w-2.5 rounded-full bg-gray-600 mr-2"></span>
-                    <span>2. Upload File</span>
-                </span>
-                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                </svg>
-                <span class="flex items-center">
-                    <span class="flex h-2.5 w-2.5 rounded-full bg-gray-600 mr-2"></span>
-                    <span>3. Confirm</span>
+                <span class="inline-flex items-center rounded-full bg-blue-900/40 px-3 py-1 text-[11px] font-semibold text-blue-200 border border-blue-800">
+                    <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c1.306 0 2.417-.835 2.83-2H21a1 1 0 011 1v8a2 2 0 01-2 2H4a2 2 0 01-2-2v-8a1 1 0 011-1h6.17A3.001 3.001 0 0112 11z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5a3 3 0 00-6 0v4h6V5z"/>
+                    </svg>
+                    Locked / In MPOR
                 </span>
             </div>
         </div>
 
-        <p class="text-sm text-gray-400 mb-6">
-            You are submitting an output for the selected task. Task selection is locked for audit integrity. This submission will be reviewed by your supervisor before inclusion in MPOR.
-        </p>
-
         <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 space-y-6">
+
+            {{-- Lock awareness --}}
+            <div class="rounded-lg border border-blue-800 bg-blue-900/30 p-4 text-sm text-blue-100 flex items-start gap-3">
+                <svg class="w-5 h-5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c1.306 0 2.417-.835 2.83-2H21a1 1 0 011 1v8a2 2 0 01-2 2H4a2 2 0 01-2-2v-8a1 1 0 011-1h6.17A3.001 3.001 0 0112 11z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5a3 3 0 00-6 0v4h6V5z"/>
+                </svg>
+                <div>
+                    <p class="font-semibold text-blue-100">This output is locked and cannot be modified here.</p>
+                    <p class="text-xs text-blue-200 mt-1">Submission and edits are handled inside ORS. My Tasks/Submit Output are read-only mirrors.</p>
+                </div>
+            </div>
 
             {{-- Selected Task Context --}}
             <div class="bg-gray-750 border border-gray-600 rounded-lg p-5">
                 <div class="flex items-start justify-between gap-4">
                     <div>
                         <h3 class="text-lg font-semibold text-white">Selected Task</h3>
-                        <p class="text-sm text-gray-400">Task selection is locked for audit integrity.</p>
+                        <p class="text-sm text-gray-400">Context pulled from ORS. Task selection is locked.</p>
                     </div>
-                    <span class="px-2 py-1 text-xs rounded bg-emerald-900 text-emerald-300 border border-emerald-800">
-                        Tracking Active
+                    <span class="px-2 py-1 text-xs rounded bg-blue-900 text-blue-200 border border-blue-800">
+                        Submitted
                     </span>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 text-sm">
@@ -58,7 +63,7 @@
                     </div>
                     <div class="bg-gray-700 rounded-lg p-3">
                         <p class="text-gray-400 mb-1">Tracking Status</p>
-                        <p class="font-medium text-white">Active since 09:12</p>
+                        <p class="font-medium text-white">Stopped at 10:42 (submitted)</p>
                     </div>
                     <div class="bg-gray-700 rounded-lg p-3">
                         <p class="text-gray-400 mb-1">Auto-logged Window</p>
@@ -67,150 +72,64 @@
                 </div>
             </div>
 
-            {{-- Auto-Logging Status --}}
-            <div class="bg-gray-750 border border-gray-600 rounded-lg p-5">
-                <div class="flex items-start justify-between gap-4">
-                    <div>
-                        <h3 class="text-lg font-semibold text-white">Auto-Logging Status</h3>
-                        <p class="text-sm text-gray-400">Prototype preview of system-captured task data for this selected task.</p>
-                    </div>
-                    {{-- DUMMY_DATA: replace with dynamic value --}}
-                    <span class="px-2 py-1 text-xs rounded bg-emerald-900 text-emerald-300 border border-emerald-800">
-                        TRACKING ON
-                    </span>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 text-sm">
-                    <div class="bg-gray-700 rounded-lg p-3">
-                        <p class="text-gray-400 mb-1">Tracking Source</p>
-                        {{-- DUMMY_DATA: replace with dynamic value --}}
-                        <p class="font-medium text-white">My Tasks</p>
-                    </div>
-                    <div class="bg-gray-700 rounded-lg p-3">
-                        <p class="text-gray-400 mb-1">Active Session</p>
-                        {{-- DUMMY_DATA: replace with dynamic value --}}
-                        <p class="font-medium text-white">E-Bank Scanning</p>
-                    </div>
-                    <div class="bg-gray-700 rounded-lg p-3">
-                        <p class="text-gray-400 mb-1">Time Window</p>
-                        {{-- DUMMY_DATA: replace with dynamic value --}}
-                        <p class="font-medium text-white">09:12 - 10:42</p>
-                    </div>
-                </div>
-
-                <div class="mt-4 rounded-lg border border-amber-800 bg-amber-900/20 p-3 text-xs text-amber-300">
-                    Incomplete submissions trigger alerts. Missing: output file, completion date, request ID.
-                </div>
-            </div>
-
-            <div class="bg-gray-750 border border-gray-600 rounded-lg p-5">
+            {{-- Output Details (read-only) --}}
+            <div class="bg-gray-750 border border-gray-600 rounded-lg p-5 space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                            <label class="block mb-2 text-sm font-medium text-white">
-                                Client Request ID
-                                <span class="text-xs text-rose-300">Required</span>
-                            </label>
-                            {{-- DUMMY_DATA: replace with dynamic value --}}
-                            <input id="submitRequestId" type="text"
-                                   class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                                   placeholder="REQ-2025-01234">
-                            <p class="mt-1 text-xs text-gray-400">Links this output to the exact client request.</p>
-                        </div>
+                        <label class="block mb-2 text-sm font-medium text-white">Client Request ID</label>
+                        <input type="text" value="REQ-2025-01234" disabled class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5">
+                    </div>
                     <div>
-                            <label class="block mb-2 text-sm font-medium text-white">
-                                Output Type
-                                <span class="text-xs text-rose-300">Required</span>
-                            </label>
-                            {{-- DUMMY_DATA: replace with dynamic value --}}
-                            <select id="submitOutputType" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                                <option class="bg-gray-700">Select form or output type</option>
-                                <option class="bg-gray-700">Bank Statement Form (BSF-01)</option>
-                                <option class="bg-gray-700">Expense Report (ER-02)</option>
-                                <option class="bg-gray-700">Financial Statement (FS-03)</option>
-                            <option class="bg-gray-700">Client Summary Report (CSR-04)</option>
-                            <option class="bg-gray-700">Tax Compliance Form (TCF-05)</option>
-                            <option class="bg-gray-700">Audit Report (AR-06)</option>
-                        </select>
-                        <p class="mt-1 text-xs text-gray-400">Matches the form required in the client request.</p>
+                        <label class="block mb-2 text-sm font-medium text-white">Output Type</label>
+                        <input type="text" value="Bank Statement Form (BSF-01)" disabled class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block mb-2 text-sm font-medium text-white">Completion Date</label>
+                        <input type="text" value="Aug 15, 2025" disabled class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5">
+                    </div>
+                    <div>
+                        <label class="block mb-2 text-sm font-medium text-white">Confidentiality Level</label>
+                        <input type="text" value="Standard" disabled class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block mb-2 text-sm font-medium text-white">Auto-Logged Start</label>
+                        <input type="text" value="09:12 AM" disabled class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5">
+                    </div>
+                    <div>
+                        <label class="block mb-2 text-sm font-medium text-white">Auto-Logged End</label>
+                        <input type="text" value="10:42 AM" disabled class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5">
                     </div>
                 </div>
             </div>
 
-            {{-- File Upload Card --}}
+            {{-- Uploaded Files (read-only) --}}
             <div class="bg-gray-750 border border-gray-600 rounded-lg p-5">
-                <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
-                    <svg class="w-5 h-5 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-                    </svg>
-                    Upload Output File
-                </h3>
-
-                {{-- Upload Area --}}
-                <div class="mb-6">
-                    <div class="flex items-center justify-center w-full">
-                        <label id="submitFileLabel" for="file-upload" class="flex flex-col items-center justify-center w-full h-40 border-2 border-gray-600 border-dashed rounded-xl cursor-pointer bg-gray-700 hover:bg-gray-750 hover:border-blue-500 transition-all duration-200 group">
-                            <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                                <svg class="w-10 h-10 mb-3 text-gray-400 group-hover:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-                                </svg>
-                                <p class="mb-1 text-sm text-gray-400 group-hover:text-white">
-                                    <span class="font-semibold">Click to upload</span> or drag and drop
-                                </p>
-                                <p class="text-xs text-gray-500">PDF, DOC, DOCX, XLS, XLSX, PPT, JPG, PNG (MAX. 20MB)</p>
-                            </div>
-                            <input id="file-upload" type="file" class="hidden" />
-                        </label>
-                    </div>
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-white">Uploaded Output</h3>
+                    <span class="text-xs text-gray-400">Uploads managed in ORS.</span>
                 </div>
-
-                {{-- Recent Uploads --}}
-                <div class="mb-4">
-                    <h4 class="text-sm font-medium text-white mb-3">Recent Uploads</h4>
-                    <div class="space-y-2">
-                        {{-- DUMMY_DATA: replace with dynamic value --}}
-                        <div class="flex items-center justify-between bg-gray-700 rounded-lg p-3">
-                            <div class="flex items-center">
-                                <svg class="w-5 h-5 text-blue-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                </svg>
-                                <div>
-                                    <p class="text-sm font-medium text-white">report_q3_2025.pdf</p>
-                                    <p class="text-xs text-gray-400">Uploaded: Aug 12, 2025 - 2.4 MB</p>
-                                </div>
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between bg-gray-700 rounded-lg p-3 text-sm">
+                        <div class="flex items-center gap-3">
+                            <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            <div>
+                                <p class="font-medium text-white">report_q3_2025.pdf</p>
+                                <p class="text-xs text-gray-400">Uploaded: Aug 12, 2025 | 2.4 MB</p>
                             </div>
-                            <button type="button"
-                                    data-employee-action
-                                    data-action-title="Remove uploaded file"
-                                    data-action-message="Remove this file from the draft submission list."
-                                    data-action-confirm="Remove file"
-                                    class="text-red-400 hover:text-red-300 text-sm">
-                                Remove
-                            </button>
                         </div>
+                        <span class="text-xs text-gray-400">Locked</span>
                     </div>
                 </div>
-
-                {{-- File Info --}}
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                    <div class="bg-gray-700 rounded-lg p-3">
-                        <p class="text-gray-400 mb-1">Maximum File Size</p>
-                        {{-- DUMMY_DATA: replace with dynamic value --}}
-                        <p class="font-medium text-white">20 MB</p>
-                    </div>
-                    <div class="bg-gray-700 rounded-lg p-3">
-                        <p class="text-gray-400 mb-1">Supported Formats</p>
-                        {{-- DUMMY_DATA: replace with dynamic value --}}
-                        <p class="font-medium text-white">8 types</p>
-                    </div>
-                    <div class="bg-gray-700 rounded-lg p-3">
-                        <p class="text-gray-400 mb-1">Encryption</p>
-                        {{-- DUMMY_DATA: replace with dynamic value --}}
-                        <p class="font-medium text-white">256-bit SSL</p>
-                    </div>
-                </div>
+                <p class="mt-3 text-xs text-gray-400">Upload changes and removals are performed in ORS.</p>
             </div>
 
-            {{-- Remarks & Details --}}
+            {{-- Remarks & Details (read-only) --}}
             <div class="bg-gray-750 border border-gray-600 rounded-lg p-5">
                 <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
                     <svg class="w-5 h-5 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -218,315 +137,56 @@
                     </svg>
                     Additional Details
                 </h3>
-
                 <div class="space-y-4">
                     <div>
                         <label class="block mb-2 text-sm font-medium text-white">Remarks / Notes</label>
-                        <textarea rows="3"
-                                class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3 placeholder-gray-400"
-                                placeholder="Provide additional context, special instructions, or notes about this output..."></textarea>
-                        <p class="mt-1 text-xs text-gray-400">Maximum 500 characters</p>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block mb-2 text-sm font-medium text-white">Completion Date</label>
-                            <input id="submitCompletionDate" type="date"
-                                   class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                        </div>
-                        <div>
-                            <label class="block mb-2 text-sm font-medium text-white">Confidentiality Level</label>
-                            <select class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                                <option class="bg-gray-700">Standard</option>
-                                <option class="bg-gray-700">Confidential</option>
-                                <option class="bg-gray-700">Internal Use Only</option>
-                                <option class="bg-gray-700">Public</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block mb-2 text-sm font-medium text-white">Auto-Logged Start</label>
-                            {{-- DUMMY_DATA: replace with dynamic value --}}
-                            <input type="text"
-                                   class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
-                                   value="09:12 AM" disabled>
-                        </div>
-                        <div>
-                            <label class="block mb-2 text-sm font-medium text-white">Auto-Logged End</label>
-                            {{-- DUMMY_DATA: replace with dynamic value --}}
-                            <input type="text"
-                                   class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
-                                   value="10:42 AM" disabled>
-                        </div>
+                        <textarea rows="3" disabled class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-3 placeholder-gray-400">Provide additional context, special instructions, or notes about this output...</textarea>
+                        <p class="mt-1 text-xs text-gray-500">Submission handled in ORS.</p>
                     </div>
                 </div>
             </div>
 
-            <div id="submit-output-alert" class="hidden rounded-lg border border-rose-800 bg-rose-900/20 p-4 text-sm text-rose-200">
-                <p class="font-semibold text-rose-100">Missing required fields</p>
-                <p class="mt-1 text-xs text-rose-300">
-                    Complete: <span id="submit-output-missing">request ID, output type, output file, completion date</span>
-                </p>
+            {{-- Audit / Timeline --}}
+            <div class="bg-gray-750 border border-gray-600 rounded-lg p-5">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-lg font-semibold text-white">Audit / Timeline</h3>
+                    <span class="text-xs text-gray-400">Read-only</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <div class="bg-gray-700 rounded-lg p-3">
+                        <p class="text-gray-400 mb-1">ORS Logged</p>
+                        <p class="font-medium text-white">Aug 15, 2025 | 09:12 AM</p>
+                    </div>
+                    <div class="bg-gray-700 rounded-lg p-3">
+                        <p class="text-gray-400 mb-1">Submitted</p>
+                        <p class="font-medium text-white">Aug 15, 2025 | 10:45 AM</p>
+                    </div>
+                    <div class="bg-gray-700 rounded-lg p-3">
+                        <p class="text-gray-400 mb-1">Supervisor Validation</p>
+                        <p class="font-medium text-white">Pending review</p>
+                    </div>
+                </div>
             </div>
 
-            {{-- Action Buttons --}}
+            {{-- Actions --}}
             <div class="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t border-gray-700">
                 <div class="flex items-center text-sm text-gray-400">
                     <svg class="w-4 h-4 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    Submitted outputs are auto-linked to tracked tasks and contribute to IPCR ratings.
+                    All edits and submissions are performed inside ORS.
                 </div>
-
                 <div class="flex gap-3">
-                    <button type="button"
-                            data-employee-action
-                            data-action-title="Save output draft"
-                            data-action-message="Save this submission as a draft before sending for review."
-                            data-action-confirm="Save draft"
-                            data-action-loading="Saving..."
-                            class="inline-flex items-center gap-2 px-5 py-2.5 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors duration-200">
-                        <span data-button-label>Save as Draft</span>
-                        <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                    <button type="button" disabled class="cursor-not-allowed inline-flex items-center gap-2 px-5 py-2.5 border border-gray-700 text-gray-500 rounded-lg bg-gray-800">
+                        Submission handled in ORS
                     </button>
-                    <button id="submitOutputBtn"
-                            type="button"
-                            data-employee-action
-                            data-action-requires-validation="true"
-                            data-action-title="Submit output for review"
-                            data-action-message="Submit the output and auto-logged data for supervisor review."
-                            data-action-confirm="Submit output"
-                            data-action-loading="Submitting..."
-                            class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg focus:ring-4 focus:ring-blue-800 transition-colors duration-200 flex items-center">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        <span data-button-label>Submit for Review</span>
-                        <span data-button-spinner class="ml-2 hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
-                    </button>
+                    <a href="{{ route('employee.ors') }}" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg focus:ring-4 focus:ring-blue-800 transition-colors duration-200 flex items-center">
+                        Open in ORS
+                    </a>
                 </div>
             </div>
 
         </div>
 
     </section>
-
-    <div id="employee-action-modal" role="dialog" aria-modal="true" class="fixed inset-0 z-[70] hidden flex items-center justify-center bg-black/60 px-4 py-6">
-        <div class="w-full max-w-md rounded-2xl border border-gray-700 bg-gray-900 p-5 shadow-xl">
-            <div class="flex items-start justify-between">
-                <div>
-                    <h2 id="employee-action-title" class="text-lg font-semibold text-white">Action</h2>
-                    <p id="employee-action-body" class="mt-1 text-sm text-gray-400">Prototype action preview.</p>
-                </div>
-                <button type="button" data-employee-modal-close class="text-gray-400 hover:text-white">x</button>
-            </div>
-            <div class="mt-6 flex justify-end gap-2">
-                <button type="button" data-employee-modal-close class="rounded-lg border border-gray-600 px-4 py-2 text-xs text-gray-300 hover:bg-gray-800">Close</button>
-                <button type="button" id="employee-action-confirm" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500">
-                    <span data-button-label>Proceed</span>
-                    <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    @push('scripts')
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const modal = document.getElementById('employee-action-modal');
-        const title = document.getElementById('employee-action-title');
-        const body = document.getElementById('employee-action-body');
-        const confirmBtn = document.getElementById('employee-action-confirm');
-        let activeTrigger = null;
-
-        function setButtonLoading(button, isLoading, loadingText) {
-            if (!button) {
-                return;
-            }
-            const label = button.querySelector('[data-button-label]');
-            const spinner = button.querySelector('[data-button-spinner]');
-            if (label && !button.dataset.originalLabel) {
-                button.dataset.originalLabel = label.textContent.trim();
-            }
-
-            if (isLoading) {
-                button.disabled = true;
-                button.classList.add('opacity-70', 'cursor-wait');
-                if (spinner) {
-                    spinner.classList.remove('hidden');
-                }
-                if (label && loadingText) {
-                    label.textContent = loadingText;
-                }
-            } else {
-                button.disabled = false;
-                button.classList.remove('opacity-70', 'cursor-wait');
-                if (spinner) {
-                    spinner.classList.add('hidden');
-                }
-                if (label && button.dataset.originalLabel) {
-                    label.textContent = button.dataset.originalLabel;
-                }
-            }
-        }
-
-        function closeModal() {
-            if (!modal) {
-                return;
-            }
-            modal.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
-            activeTrigger = null;
-            setButtonLoading(confirmBtn, false);
-        }
-
-        function openModal(trigger) {
-            if (!modal || !title || !body || !confirmBtn) {
-                return;
-            }
-            activeTrigger = trigger;
-            title.textContent = trigger.dataset.actionTitle || 'Action';
-            body.textContent = trigger.dataset.actionMessage || 'Prototype action preview.';
-            confirmBtn.dataset.actionLoading = trigger.dataset.actionLoading || 'Working...';
-            modal.classList.remove('hidden');
-            document.body.classList.add('overflow-hidden');
-        }
-
-        window.openEmployeeActionModal = openModal;
-
-        if (modal && title && body && confirmBtn) {
-            document.querySelectorAll('[data-employee-action]').forEach((button) => {
-                if (button.dataset.actionRequiresValidation === 'true') {
-                    return;
-                }
-                button.addEventListener('click', function (event) {
-                    event.preventDefault();
-                    openModal(button);
-                });
-            });
-
-            confirmBtn.addEventListener('click', function () {
-                setButtonLoading(confirmBtn, true, confirmBtn.dataset.actionLoading);
-                if (activeTrigger) {
-                    setButtonLoading(activeTrigger, true, activeTrigger.dataset.actionLoading || confirmBtn.dataset.actionLoading);
-                }
-
-                setTimeout(() => {
-                    setButtonLoading(confirmBtn, false);
-                    if (activeTrigger) {
-                        setButtonLoading(activeTrigger, false);
-                    }
-                    closeModal();
-                }, 1200);
-            });
-
-            modal.addEventListener('click', function (event) {
-                if (event.target === modal) {
-                    closeModal();
-                }
-            });
-
-            modal.querySelectorAll('[data-employee-modal-close]').forEach((button) => {
-                button.addEventListener('click', closeModal);
-            });
-
-            document.addEventListener('keydown', function (event) {
-                if (event.key === 'Escape') {
-                    closeModal();
-                }
-            });
-        }
-
-        const submitBtn = document.getElementById('submitOutputBtn');
-        const requestInput = document.getElementById('submitRequestId');
-        const outputSelect = document.getElementById('submitOutputType');
-        const fileInput = document.getElementById('file-upload');
-        const fileLabel = document.getElementById('submitFileLabel');
-        const completionDate = document.getElementById('submitCompletionDate');
-        const alertBox = document.getElementById('submit-output-alert');
-        const missingText = document.getElementById('submit-output-missing');
-
-        function clearFieldState(element) {
-            if (!element) {
-                return;
-            }
-            element.classList.remove('border-rose-500');
-        }
-
-        function markFieldInvalid(element) {
-            if (!element) {
-                return;
-            }
-            element.classList.add('border-rose-500');
-        }
-
-        function clearLabelState(element) {
-            if (!element) {
-                return;
-            }
-            element.classList.remove('ring-2', 'ring-rose-500');
-        }
-
-        function markLabelInvalid(element) {
-            if (!element) {
-                return;
-            }
-            element.classList.add('ring-2', 'ring-rose-500');
-        }
-
-        if (!submitBtn) {
-            return;
-        }
-
-        submitBtn.addEventListener('click', function () {
-            clearFieldState(requestInput);
-            clearFieldState(outputSelect);
-            clearFieldState(completionDate);
-            clearLabelState(fileLabel);
-
-            const missing = [];
-
-            if (!requestInput || !requestInput.value.trim()) {
-                missing.push('request ID');
-                markFieldInvalid(requestInput);
-            }
-
-            if (!outputSelect || !outputSelect.value) {
-                missing.push('output type');
-                markFieldInvalid(outputSelect);
-            }
-
-            if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
-                missing.push('output file');
-                markLabelInvalid(fileLabel);
-            }
-
-            if (!completionDate || !completionDate.value) {
-                missing.push('completion date');
-                markFieldInvalid(completionDate);
-            }
-
-            if (missing.length > 0) {
-                if (missingText) {
-                    missingText.textContent = missing.join(', ');
-                }
-                if (alertBox) {
-                    alertBox.classList.remove('hidden');
-                }
-                return;
-            }
-
-            if (alertBox) {
-                alertBox.classList.add('hidden');
-            }
-
-            if (typeof window.openEmployeeActionModal === 'function') {
-                window.openEmployeeActionModal(submitBtn);
-            }
-        });
-    });
-    </script>
-    @endpush
 </x-layouts.employee>

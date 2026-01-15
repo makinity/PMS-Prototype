@@ -8,13 +8,14 @@
                     Individual Performance Commitment and Review (IPCR)
                 </h1>
                 <p class="text-sm text-gray-400 mt-1">
-                    Final, approved IPCR based on locked SMPOR and Supervisor ratings; employee action is acknowledgment only.
+                    Final, approved IPCR computed from locked SMPOR (Q4 2025) and supervisor-encoded ratings; employee action is acknowledgment only. Acknowledgment does not change ratings or outputs.
                 </p>
+                <p class="text-[11px] text-gray-500 mt-2">Read-only | No edits, validation, or scoring by employee.</p>
             </div>
 
             {{-- DUMMY_DATA: replace with dynamic value --}}
             <span class="px-3 py-1 text-xs font-medium rounded bg-emerald-900 text-emerald-300 border border-emerald-800">
-                APPROVED · READ-ONLY
+                APPROVED - LOCKED SMPOR
             </span>
         </div>
 
@@ -23,7 +24,7 @@
             <div class="flex items-start justify-between gap-4">
                 <div>
                     <h2 class="text-lg font-semibold text-white">Prototype Notes</h2>
-                    <p class="text-sm text-gray-400">IPCR is auto-filled from approved UWP, locked SMPOR, and supervisor-encoded ratings; employee action is acknowledgment only.</p>
+                    <p class="text-sm text-gray-400">IPCR is auto-filled from approved UWP, locked SMPOR (Q4 2025), and supervisor-encoded ratings; employee action is acknowledgment only. Employee acknowledgment occurs after Department Head approval. Acknowledgment does not change ratings or outputs.</p>
                 </div>
                 <span class="px-2 py-1 text-xs rounded bg-blue-900 text-blue-300 border border-blue-800">
                     PROTOTYPE
@@ -33,7 +34,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 text-sm">
                 <div class="bg-gray-700 rounded-lg p-3">
                     <p class="text-gray-400 mb-1">Data sources</p>
-                    <p class="font-medium text-white">Approved UWP + Locked SMPOR</p>
+                    <p class="font-medium text-white">Approved UWP + Locked SMPOR (Q4 2025)</p>
                 </div>
                 <div class="bg-gray-700 rounded-lg p-3">
                     <p class="text-gray-400 mb-1">Ratings</p>
@@ -48,6 +49,7 @@
             <p class="mt-3 text-xs text-gray-400">
                 IPCR status: Approved. Targets, ratings, and outputs are read-only; acknowledgment is required for audit trail.
             </p>
+            <p class="mt-1 text-[11px] text-gray-500">Efficiency, Quality, and Timeliness scores are supervisor-evaluated from locked SMPOR output performance.</p>
         </div>
 
         {{-- EMPLOYEE INFO --}}
@@ -91,7 +93,7 @@
                 {{-- DUMMY_DATA: replace with dynamic value --}}
                 Core Functions <span class="text-sm text-gray-400">(80%)</span>
             </h2>
-            <p class="text-xs text-gray-400">System-generated targets from the approved UWP. Employee cannot edit targets or ratings.</p>
+            <p class="text-xs text-gray-400">Computed from locked SMPOR (Q4 2025) and the approved UWP. Efficiency/Quality/Timeliness scores are supervisor-encoded from SMPOR performance; employee cannot edit targets or ratings.</p>
 
             <div class="overflow-x-auto">
                 <table class="min-w-full border border-gray-700 text-sm">
@@ -109,7 +111,7 @@
                         <tr class="hover:bg-gray-750">
                             <td class="border border-gray-700 px-4 py-3 text-gray-300">
                                 Scan and digitize e-bank transaction records
-                                <span class="block text-[11px] text-gray-500 mt-1">Target: 100 records · Actual: 120 records (exceeded target) · System-generated from SMPOR</span>
+                                <span class="block text-[11px] text-gray-500 mt-1">Target: 100 records | Actual: 120 records (exceeded target) | System-generated from locked SMPOR</span>
                             </td>
                             <td class="border border-gray-700 px-4 py-3 text-gray-300">
                                 5
@@ -137,7 +139,7 @@
                 {{-- DUMMY_DATA: replace with dynamic value --}}
                 Support Functions <span class="text-sm text-gray-400">(20%)</span>
             </h2>
-            <p class="text-xs text-gray-400">Read-only commitments carried from the approved UWP; no employee-authored ratings.</p>
+            <p class="text-xs text-gray-400">Computed from locked SMPOR and approved UWP; supervisor-encoded ratings only.</p>
 
             <div class="overflow-x-auto">
                 <table class="min-w-full border border-gray-700 text-sm">
@@ -155,7 +157,7 @@
                         <tr class="hover:bg-gray-750">
                             <td class="border border-gray-700 px-4 py-3 text-gray-300">
                                 Reference and archival support
-                                <span class="block text-[11px] text-gray-500 mt-1">Target: Fulfill reference pulls within 1 business day · System-generated from SMPOR</span>
+                                <span class="block text-[11px] text-gray-500 mt-1">Target: Fulfill reference pulls within 1 business day | System-generated from locked SMPOR</span>
                             </td>
                             <td class="border border-gray-700 px-4 py-3 text-gray-300">
                                 5
@@ -179,7 +181,7 @@
 
         {{-- COMMITMENT CONFIRMATION --}}
         <div class="bg-gray-800 border border-gray-700 rounded-lg p-5 grid grid-cols-1 md:grid-cols-3 gap-5">
-            <p class="md:col-span-3 text-sm text-gray-400">Acknowledgment that this system-generated IPCR (from approved UWP and MPOR) has been reviewed for commitment.</p>
+            <p class="md:col-span-3 text-sm text-gray-400">Acknowledgment that this system-generated IPCR (from approved UWP and locked SMPOR) has been reviewed for commitment.</p>
             <div>
                 <label class="block mb-2 text-sm font-medium text-white">Immediate Supervisor</label>
                 <input type="text"
@@ -198,12 +200,15 @@
             <div>
                 <label class="block mb-2 text-sm font-medium text-white">Date Committed</label>
                 <input type="date"
-                       class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                       class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5 opacity-80 cursor-not-allowed"
+                       value="2026-01-15" disabled>
             </div>
         </div>
 
         {{-- ACTIONS --}}
-        <div class="flex justify-end gap-3">
+        <div class="flex flex-col gap-2 items-end">
+            <p class="text-[11px] text-gray-500">Acknowledgment updates status only; locked SMPOR data remains unchanged. Approved and locked before acknowledgment.</p>
+            <div class="flex justify-end gap-3 w-full">
             <button type="button"
                     data-employee-action
                     data-action-title="Save acknowledgement draft"
@@ -221,6 +226,7 @@
                 <span data-button-label>Acknowledge Commitment</span>
                 <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
             </button>
+            </div>
         </div>
 
     </div>
@@ -368,3 +374,26 @@
     </script>
     @endpush
 </x-layouts.employee>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

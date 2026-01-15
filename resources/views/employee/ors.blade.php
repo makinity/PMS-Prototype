@@ -9,134 +9,197 @@
     #ors-calendar .fc-daygrid-day-number {
         color: #e2e8f0;
     }
+
+    .status-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.2rem 0.55rem;
+        border-radius: 9999px;
+        border-width: 1px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-dot {
+        width: 0.55rem;
+        height: 0.55rem;
+        border-radius: 9999px;
+    }
 </style>
 
 <section class="space-y-6">
 
     <!-- Page Header -->
-    <div>
-        <h1 class="text-2xl font-semibold text-white">Task Calendar (ORS)</h1>
+    <div class="space-y-1">
+        <h1 class="text-2xl font-semibold text-white">Output Rating Sheet (ORS)</h1>
         <p class="text-sm text-slate-400">
-            Log and view your tasks by date. Link each task to a client request and output. All durations and performance ratings are system-generated.
+            ORS is the single source of truth for task creation, timing, output submission, and the only trigger for MPOR.
+            My Tasks, Submit Output, MPOR, and SMPOR are read-only mirrors.
         </p>
     </div>
 
     <!-- Color Legend -->
     <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-        <div class="flex flex-wrap items-center gap-4 text-xs">
+        <div class="grid grid-cols-1 gap-3 text-xs sm:grid-cols-2 lg:grid-cols-3">
             <div class="flex items-center gap-2">
-                <div class="h-3 w-3 rounded-full bg-emerald-500"></div>
-                <span class="text-slate-300">Completed</span>
+                <span class="status-chip border-amber-500/60 bg-amber-500/10 text-amber-200">
+                    <span class="status-dot bg-amber-500"></span>
+                    Recording (auto-timer)
+                </span>
+                <span class="text-slate-400">Not editable</span>
             </div>
             <div class="flex items-center gap-2">
-                <div class="h-3 w-3 rounded-full bg-amber-500"></div>
-                <span class="text-slate-300">In Progress</span>
+                <span class="status-chip border-amber-300/60 bg-amber-300/10 text-amber-100">
+                    <span class="status-dot bg-amber-300"></span>
+                    Draft (stopped)
+                </span>
+                <span class="text-slate-400">Editable</span>
             </div>
             <div class="flex items-center gap-2">
-                <div class="h-3 w-3 rounded-full bg-blue-500"></div>
-                <span class="text-slate-300">Pending Review</span>
+                <span class="status-chip border-blue-500/60 bg-blue-500/10 text-blue-100">
+                    <span class="status-dot bg-blue-500"></span>
+                    Submitted (locked)
+                </span>
+                <span class="text-slate-400">Not editable</span>
             </div>
             <div class="flex items-center gap-2">
-                <div class="h-3 w-3 rounded-full bg-red-500"></div>
-                <span class="text-slate-300">Missing/Overdue</span>
+                <span class="status-chip border-emerald-500/60 bg-emerald-500/10 text-emerald-100">
+                    <span class="status-dot bg-emerald-500"></span>
+                    Locked / In MPOR
+                </span>
+                <span class="text-slate-400">Not editable</span>
             </div>
             <div class="flex items-center gap-2">
-                <div class="h-3 w-3 rounded-full bg-purple-500"></div>
-                <span class="text-slate-300">Scheduled</span>
+                <span class="status-chip border-red-500/60 bg-red-500/10 text-red-100">
+                    <span class="status-dot bg-red-500"></span>
+                    Missing / Overdue
+                </span>
+                <span class="text-slate-400">Not editable</span>
             </div>
         </div>
+        <p class="mt-3 text-[11px] text-slate-400">
+            Stopped entries remain drafts until submitted. Submitting happens once, inside ORS, and locks the entry (sent to supervisor/MPOR).
+            Downstream pages mirror state only; no secondary submission exists.
+        </p>
     </div>
 
     <!-- Stats Overview -->
     <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
         <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
             <p class="text-xs text-slate-400">This Week</p>
-            <p class="mt-1 text-2xl font-semibold text-white">5</p>
-            <p class="text-xs text-slate-400">Tasks logged</p>
+            <p class="mt-1 text-2xl font-semibold text-white">6</p>
+            <p class="text-xs text-slate-400">Tasks logged (ORS)</p>
         </div>
         <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-            <p class="text-xs text-slate-400">Pending</p>
-            <p class="mt-1 text-2xl font-semibold text-amber-400">1</p>
-            <p class="text-xs text-slate-400">Require action</p>
+            <p class="text-xs text-slate-400">Drafts</p>
+            <p class="mt-1 text-2xl font-semibold text-amber-300">2</p>
+            <p class="text-xs text-slate-400">Need submission</p>
         </div>
         <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-            <p class="text-xs text-slate-400">Avg Duration</p>
-            <p class="mt-1 text-2xl font-semibold text-white">2.2h</p>
-            <p class="text-xs text-slate-400">Per task</p>
+            <p class="text-xs text-slate-400">Submitted</p>
+            <p class="mt-1 text-2xl font-semibold text-blue-300">1</p>
+            <p class="text-xs text-slate-400">Locked -> MPOR</p>
         </div>
         <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-            <p class="text-xs text-slate-400">Rating</p>
-            <p class="mt-1 text-2xl font-semibold text-emerald-400">4.3</p>
-            <p class="text-xs text-slate-400">This month</p>
+            <p class="text-xs text-slate-400">Validated</p>
+            <p class="mt-1 text-2xl font-semibold text-emerald-300">1</p>
+            <p class="text-xs text-slate-400">In SMPOR</p>
         </div>
     </div>
 
     <!-- Active Task Timer -->
     <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-            <div class="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                    <h2 class="text-lg font-semibold text-white">Active Task Timer</h2>
-                    <p class="text-sm text-slate-400">Prototype view of automatic start and end tracking.</p>
-                </div>
+        <div class="flex flex-wrap items-start justify-between gap-4">
+            <div>
+                <h2 class="text-lg font-semibold text-white">Task Tracking (single source)</h2>
+                <p class="text-sm text-slate-400">
+                    ORS is the only place to start, stop, and submit. Only one entry can be recording at a time; paused entries still block new starts.
+                </p>
+            </div>
             <span class="rounded-full border border-emerald-600/60 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300">
-                AUTO TRACKING
+                ONE ACTIVE TIMER
             </span>
         </div>
 
-        <div class="mt-4 grid grid-cols-1 gap-4 text-sm md:grid-cols-4">
-            <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-                <p class="text-xs text-slate-400">Task</p>
-                <p class="font-medium text-white">E-Bank Scanning</p>
-            </div>
-            <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-                <p class="text-xs text-slate-400">Start</p>
-                <p class="font-medium text-white">09:12</p>
-            </div>
-            <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-                <p class="text-xs text-slate-400">Elapsed</p>
-                <p class="font-medium text-white">1h 08m</p>
-            </div>
-            <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-                <p class="text-xs text-slate-400">Status</p>
-                <p class="font-medium text-emerald-300">Recording</p>
-            </div>
+        <div id="active-task-empty" class="mt-4 rounded-lg border border-slate-800 bg-slate-950/60 p-4 text-sm text-slate-300">
+            No task is recording. Open a Draft from the calendar task details to start timing.
+            Starting a second task is blocked until the current one is stopped or submitted.
         </div>
 
-        <div class="mt-4 flex flex-wrap gap-2">
-            <button type="button"
-                    data-employee-action
-                    data-action-title="Pause tracking"
-                    data-action-message="Pause the current timer and mark this task as on hold."
-                    data-action-confirm="Pause"
-                    data-action-loading="Pausing..."
-                    class="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-slate-800">
-                <span data-button-label>Pause Tracking</span>
-                <span data-button-spinner class="hidden h-3 w-3 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
-            </button>
-            <a href="{{ route('employee.submit-output') }}" class="rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-slate-900 hover:bg-emerald-600">
-                Stop and Submit
-            </a>
-        </div>
+        <div id="active-task-card" class="mt-4 hidden rounded-lg border border-slate-800 bg-slate-950/60 p-4 text-sm">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
+                <div>
+                    <p class="text-[11px] uppercase text-slate-500">Task</p>
+                    <p id="activeTaskName" class="font-semibold text-white">--</p>
+                </div>
+                <div>
+                    <p class="text-[11px] uppercase text-slate-500">Start</p>
+                    <p id="activeTaskStart" class="text-slate-200">--</p>
+                </div>
+                <div>
+                    <p class="text-[11px] uppercase text-slate-500">Elapsed</p>
+                    <p id="activeTaskElapsed" class="text-slate-200">--</p>
+                </div>
+                <div>
+                    <p class="text-[11px] uppercase text-slate-500">Status</p>
+                    <p id="activeTaskStatus" class="font-semibold text-amber-300">Recording</p>
+                </div>
+            </div>
 
-        <p class="mt-3 text-xs text-slate-500">
-            Timing data is captured in real time and attached to the linked output.
-        </p>
+            <div class="mt-4 flex flex-wrap gap-2">
+                <button id="activePauseBtn"
+                        type="button"
+                        class="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-slate-800">
+                    Pause
+                </button>
+                <button id="activeStopBtn"
+                        type="button"
+                        class="inline-flex items-center gap-2 rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-100 hover:border-amber-500 hover:bg-amber-500/20">
+                    Stop (Draft)
+                </button>
+                <button id="activeSubmitBtn"
+                        type="button"
+                        class="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-slate-900 hover:bg-emerald-600">
+                    <span data-button-label>Submit for Review</span>
+                    <span data-button-spinner class="hidden h-3 w-3 animate-spin rounded-full border-2 border-emerald-900/30 border-t-emerald-900"></span>
+                </button>
+            </div>
+
+            <p class="mt-3 text-[11px] text-slate-500">
+                Stop ends timing and saves Draft (editable). Submit for Review locks the entry and creates MPOR visibility.
+                My Tasks and Submit Output remain display-only mirrors.
+            </p>
+        </div>
     </div>
 
     <!-- Calendar -->
     <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
+        <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+            <div>
+                <h2 class="text-lg font-semibold text-white">ORS Calendar</h2>
+                <p class="text-sm text-slate-400">
+                    Supports multiple tasks per day. Click an entry to start, pause, stop, or submit. Locked entries open read-only.
+                </p>
+            </div>
+            <button id="openLogTaskBtn"
+                    type="button"
+                    class="inline-flex items-center gap-2 rounded-lg bg-blue-500 px-3 py-1.5 text-xs font-semibold text-slate-900 hover:bg-blue-600">
+                Log Task
+            </button>
+        </div>
         <div id="ors-calendar"></div>
     </div>
 
     <!-- System Notice -->
     <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-4 text-xs text-slate-400">
-        Note: Task start/end times and performance ratings are recorded automatically.
-        Manual duration entry or rating is not allowed. Missing fields generate alerts.
+        ORS captures timing and submissions once. Manual duration entry is disabled. After submission, entries are locked and visible in MPOR -> SMPOR.
+        My Tasks and Submit Output remain read-only displays of ORS state.
     </div>
 
 </section>
 
-<!-- ORS Task Modal (Compact) -->
+<!-- ORS Task Modal (Log Task) -->
 <div id="orsTaskModal"
      role="dialog"
      aria-modal="true"
@@ -144,11 +207,10 @@
 
     <div class="w-full max-w-md max-h-[calc(100vh-3rem)] overflow-y-auto rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
 
-        <!-- Header -->
         <div class="mb-4">
-            <h2 class="text-lg font-semibold text-white">Log Task</h2>
+            <h2 class="text-lg font-semibold text-white">Log ORS Task</h2>
             <p class="text-xs text-slate-400">
-                Task details only. Performance is system-generated.
+                New entries start as Draft (stopped). Start timing and submit from the task details inside ORS only.
             </p>
         </div>
 
@@ -177,12 +239,12 @@
                 </select>
             </div>
 
-            <!-- Client -->
+            <!-- Supervisor -->
             <div>
-                <label class="text-[11px] uppercase text-slate-400">Supervisor/label>
+                <label class="text-[11px] uppercase text-slate-400">Supervisor</label>
                 <select id="orsClient" class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
-                    <option value="">Select Supervisor</option>
-                    <option value="abc">Maria Santos/option>
+                    <option value="">Select supervisor</option>
+                    <option value="abc">Maria Santos</option>
                     <option value="xyz">Lebron James</option>
                     <option value="global">Denji Kun</option>
                 </select>
@@ -220,9 +282,9 @@
 
             <!-- System Rule -->
             <div class="rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-[11px] text-slate-400">
-                - Duration is tracked automatically.<br>
-                - Performance rating calculated by system.<br>
-                - Missing fields trigger alerts and follow-ups.
+                - Duration is tracked automatically when recording.<br>
+                - Stop saves Draft; Submit locks once in ORS only.<br>
+                - No manual duration entry or second submission.
             </div>
 
             <!-- Actions -->
@@ -249,7 +311,7 @@
      aria-modal="true"
      class="ors-modal fixed inset-0 z-[60] hidden flex items-start justify-center overflow-y-auto bg-black/60 px-4 py-6 sm:px-6">
     <div class="w-full max-w-md max-h-[calc(100vh-3rem)] overflow-y-auto rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
-        <div class="mb-4 flex items-start justify-between">
+        <div class="mb-3 flex items-start justify-between">
             <div>
                 <h2 class="text-lg font-semibold text-white" id="taskDetailTitle">Task Details</h2>
                 <p class="text-xs text-slate-400" id="taskDetailDate">Date: --</p>
@@ -260,10 +322,16 @@
             </button>
         </div>
 
-        {{-- DUMMY_DATA: replace with dynamic value --}}
-        <div class="space-y-3 text-sm">
+        <div class="flex flex-wrap gap-2 text-xs">
+            <span id="taskDetailStatusBadge" class="status-chip border-slate-700 bg-slate-800 text-slate-200">--</span>
+            <span id="taskDetailLockBadge" class="hidden status-chip border-emerald-500/60 bg-emerald-500/10 text-emerald-100">
+                Locked -> In MPOR
+            </span>
+        </div>
+
+        <div class="mt-4 grid grid-cols-1 gap-3 text-sm">
             <div>
-                <p class="text-xs text-slate-400">Client</p>
+                <p class="text-xs text-slate-400">Supervisor</p>
                 <p class="text-slate-200" id="taskDetailClient">--</p>
             </div>
             <div>
@@ -271,12 +339,12 @@
                 <p class="text-slate-200" id="taskDetailRequest">--</p>
             </div>
             <div>
-                <p class="text-xs text-slate-400">Status</p>
-                <p class="text-slate-200" id="taskDetailStatus">--</p>
-            </div>
-            <div>
                 <p class="text-xs text-slate-400">Output Type</p>
                 <p class="text-slate-200" id="taskDetailOutput">--</p>
+            </div>
+            <div>
+                <p class="text-xs text-slate-400">Status</p>
+                <p class="text-slate-200" id="taskDetailStatusText">--</p>
             </div>
             <div>
                 <p class="text-xs text-slate-400">Duration</p>
@@ -292,6 +360,57 @@
             </div>
         </div>
 
+        <div class="mt-4 rounded-xl border border-slate-800 bg-slate-950/60 p-3 text-sm">
+            <p class="text-[11px] uppercase text-slate-400">Submission & Output</p>
+
+            <div class="mt-2 space-y-2">
+                <label class="text-xs text-slate-300">Output Upload (part of ORS submission)</label>
+                <input id="taskDetailUpload"
+                       type="file"
+                       class="block w-full rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-xs text-slate-200 file:mr-3 file:rounded-md file:border-0 file:bg-slate-800 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-slate-200">
+                <p class="text-[11px] text-slate-400">
+                    Submission occurs once inside ORS. After submit, the entry is locked and visible in My Tasks (read-only) and MPOR/SMPOR.
+                </p>
+            </div>
+
+            <div class="mt-3 flex flex-wrap gap-2" id="taskDetailActions">
+                <button id="taskDetailStartBtn"
+                        type="button"
+                        class="inline-flex items-center gap-2 rounded-lg border border-blue-500/60 bg-blue-500/10 px-3 py-1.5 text-xs font-semibold text-blue-100 hover:bg-blue-500/20">
+                    <span data-button-label>Start Task</span>
+                    <span data-button-spinner class="hidden h-3 w-3 animate-spin rounded-full border-2 border-blue-200/40 border-t-blue-200"></span>
+                </button>
+                <button id="taskDetailPauseBtn"
+                        type="button"
+                        class="hidden rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-slate-800">
+                    Pause
+                </button>
+                <button id="taskDetailResumeBtn"
+                        type="button"
+                        class="hidden rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-100 hover:bg-amber-500/20">
+                    Resume
+                </button>
+                <button id="taskDetailStopBtn"
+                        type="button"
+                        class="hidden rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-100 hover:bg-amber-500/20">
+                    Stop (Draft)
+                </button>
+                <button id="taskDetailSubmitBtn"
+                        type="button"
+                        class="hidden inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-slate-900 hover:bg-emerald-600">
+                    <span data-button-label>Submit for Review</span>
+                    <span data-button-spinner class="hidden h-3 w-3 animate-spin rounded-full border-2 border-emerald-900/30 border-t-emerald-900"></span>
+                </button>
+            </div>
+
+            <p id="taskDetailLockMessage" class="mt-2 hidden text-[11px] text-emerald-300">
+                Submitted/Locked -> In MPOR (read-only). SMPOR is system-generated from validated MPOR entries.
+            </p>
+            <p id="taskDetailDraftMessage" class="mt-2 text-[11px] text-slate-400">
+                Stop ends timing and keeps Draft editable. Submit for Review locks the entry and prevents duplicate submissions.
+            </p>
+        </div>
+
         <div class="mt-6 flex justify-end">
             <button onclick="closeOrsModal('taskDetailsModal')"
                     class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800">
@@ -301,134 +420,143 @@
     </div>
 </div>
 
-<div id="employee-action-modal" role="dialog" aria-modal="true" class="fixed inset-0 z-[70] hidden flex items-center justify-center bg-black/60 px-4 py-6">
-    <div class="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
-        <div class="flex items-start justify-between">
-            <div>
-                <h2 id="employee-action-title" class="text-lg font-semibold text-white">Action</h2>
-                <p id="employee-action-body" class="mt-1 text-sm text-slate-400">Prototype action preview.</p>
-            </div>
-            <button type="button" data-employee-modal-close class="text-slate-400 hover:text-white">x</button>
-        </div>
-        <div class="mt-6 flex justify-end gap-2">
-            <button type="button" data-employee-modal-close class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800">Close</button>
-            <button type="button" id="employee-action-confirm" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500">
-                <span data-button-label>Proceed</span>
-                <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
-            </button>
-        </div>
-    </div>
-</div>
-
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const actionModal = document.getElementById('employee-action-modal');
-    const actionTitle = document.getElementById('employee-action-title');
-    const actionBody = document.getElementById('employee-action-body');
-    const actionConfirm = document.getElementById('employee-action-confirm');
-    let activeTrigger = null;
+    const STATE_META = {
+        recording: { label: 'Recording', color: '#f59e0b', badge: 'border-amber-500/60 bg-amber-500/10 text-amber-200', editable: false },
+        paused: { label: 'Paused', color: '#f59e0b', badge: 'border-amber-500/60 bg-amber-500/10 text-amber-200', editable: false },
+        draft: { label: 'Draft (Stopped)', color: '#fbbf24', badge: 'border-amber-300/60 bg-amber-300/10 text-amber-100', editable: true },
+        submitted: { label: 'Submitted (Locked)', color: '#3b82f6', badge: 'border-blue-500/60 bg-blue-500/10 text-blue-100', editable: false },
+        locked: { label: 'Locked / In MPOR', color: '#10b981', badge: 'border-emerald-500/60 bg-emerald-500/10 text-emerald-100', editable: false },
+        missing: { label: 'Missing / Overdue', color: '#ef4444', badge: 'border-red-500/60 bg-red-500/10 text-red-100', editable: false },
+    };
 
-    function setButtonLoading(button, isLoading, loadingText) {
-        if (!button) {
-            return;
+    let tasks = [
+        {
+            id: 'task-1',
+            title: 'E-Bank Scanning',
+            date: '2025-12-27',
+            client: 'ABC Corp',
+            requestId: 'REQ-2025-014',
+            output: 'Bank Statement Form (BSF-01)',
+            notes: 'Statements being scanned',
+            rating: '--',
+            state: 'recording',
+            startTime: new Date(new Date().getTime() - (68 * 60 * 1000)),
+            durationMs: 0
+        },
+        {
+            id: 'task-2',
+            title: 'Financial Data Entry',
+            date: '2025-12-27',
+            client: 'Global Enterprises',
+            requestId: 'REQ-2025-017',
+            output: 'Financial Statement (FS-03)',
+            notes: 'Quarterly financial data entry',
+            rating: '--',
+            state: 'draft',
+            startTime: null,
+            durationMs: 90 * 60 * 1000
+        },
+        {
+            id: 'task-3',
+            title: 'Client Form Review',
+            date: '2025-12-26',
+            client: 'XYZ Limited',
+            requestId: 'REQ-2025-009',
+            output: 'Client Summary Report (CSR-04)',
+            notes: 'Awaiting MPOR validation',
+            rating: '4.5/5',
+            state: 'submitted',
+            startTime: null,
+            durationMs: 2.3 * 60 * 60 * 1000
+        },
+        {
+            id: 'task-4',
+            title: 'Report Generation',
+            date: '2025-12-25',
+            client: 'Tech Solutions',
+            requestId: 'REQ-2025-012',
+            output: 'Financial Statement (FS-03)',
+            notes: 'Validated by supervisor',
+            rating: '4.0/5',
+            state: 'locked',
+            startTime: null,
+            durationMs: 3.2 * 60 * 60 * 1000
+        },
+        {
+            id: 'task-5',
+            title: 'Client Follow-up',
+            date: '2025-12-24',
+            client: 'Prime Services Group',
+            requestId: 'REQ-2025-018',
+            output: 'Follow-up Notes (FN-07)',
+            notes: 'Missed deadline - needs attention',
+            rating: '--',
+            state: 'missing',
+            startTime: null,
+            durationMs: 0
+        },
+        {
+            id: 'task-6',
+            title: 'Tax Compliance Review',
+            date: '2025-12-29',
+            client: 'Alpha Financials',
+            requestId: 'REQ-2025-023',
+            output: 'Tax Compliance Form (TCF-05)',
+            notes: 'Scheduled for end of week',
+            rating: '--',
+            state: 'draft',
+            startTime: null,
+            durationMs: 0
         }
-        const label = button.querySelector('[data-button-label]');
-        const spinner = button.querySelector('[data-button-spinner]');
-        if (label && !button.dataset.originalLabel) {
-            button.dataset.originalLabel = label.textContent.trim();
-        }
+    ];
 
-        if (isLoading) {
-            button.disabled = true;
-            button.classList.add('opacity-70', 'cursor-wait');
-            if (spinner) {
-                spinner.classList.remove('hidden');
-            }
-            if (label && loadingText) {
-                label.textContent = loadingText;
-            }
-        } else {
-            button.disabled = false;
-            button.classList.remove('opacity-70', 'cursor-wait');
-            if (spinner) {
-                spinner.classList.add('hidden');
-            }
-            if (label && button.dataset.originalLabel) {
-                label.textContent = button.dataset.originalLabel;
-            }
-        }
-    }
-
-    function closeActionModal() {
-        if (!actionModal) {
-            return;
-        }
-        actionModal.classList.add('hidden');
-        document.body.classList.remove('overflow-hidden');
-        activeTrigger = null;
-        setButtonLoading(actionConfirm, false);
-    }
-
-    function openActionModal(trigger) {
-        if (!actionModal || !actionTitle || !actionBody || !actionConfirm) {
-            return;
-        }
-        activeTrigger = trigger;
-        actionTitle.textContent = trigger.dataset.actionTitle || 'Action';
-        actionBody.textContent = trigger.dataset.actionMessage || 'Prototype action preview.';
-        actionConfirm.dataset.actionLoading = trigger.dataset.actionLoading || 'Working...';
-        actionModal.classList.remove('hidden');
-        document.body.classList.add('overflow-hidden');
-    }
-
-    window.openEmployeeActionModal = openActionModal;
-
-    if (actionModal && actionTitle && actionBody && actionConfirm) {
-        document.querySelectorAll('[data-employee-action]').forEach((button) => {
-            if (button.dataset.actionRequiresValidation === 'true') {
-                return;
-            }
-            button.addEventListener('click', function (event) {
-                event.preventDefault();
-                openActionModal(button);
-            });
-        });
-
-        actionConfirm.addEventListener('click', function () {
-            setButtonLoading(actionConfirm, true, actionConfirm.dataset.actionLoading);
-            if (activeTrigger) {
-                setButtonLoading(activeTrigger, true, activeTrigger.dataset.actionLoading || actionConfirm.dataset.actionLoading);
-            }
-
-            setTimeout(() => {
-                setButtonLoading(actionConfirm, false);
-                if (activeTrigger) {
-                    setButtonLoading(activeTrigger, false);
-                }
-                closeActionModal();
-            }, 1200);
-        });
-
-        actionModal.addEventListener('click', function (event) {
-            if (event.target === actionModal) {
-                closeActionModal();
-            }
-        });
-
-        actionModal.querySelectorAll('[data-employee-modal-close]').forEach((button) => {
-            button.addEventListener('click', closeActionModal);
-        });
-
-        document.addEventListener('keydown', function (event) {
-            if (event.key === 'Escape') {
-                closeActionModal();
-            }
-        });
-    }
+    let activeTaskId = tasks.find(t => t.state === 'recording' || t.state === 'paused')?.id || null;
+    let detailTaskId = null;
 
     const calendarEl = document.getElementById('ors-calendar');
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        height: 'auto',
+        contentHeight: 600,
+        dayMaxEventRows: 3,
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: ''
+        },
+        selectable: true,
+        editable: false,
+        dayHeaderClassNames: 'text-slate-300',
+        dayCellClassNames: 'hover:bg-slate-800/30',
+        dateClick(info) {
+            document.getElementById('orsSelectedDate').value = info.dateStr;
+            openOrsModal('orsTaskModal');
+        },
+        eventClick(info) {
+            openTaskDetails(info.event.id);
+        },
+        events: [],
+        eventContent(arg) {
+            const meta = STATE_META[arg.event.extendedProps.state] || STATE_META.draft;
+            const label = meta.label.length > 16 ? meta.label.substring(0, 13) + '...' : meta.label;
+            const title = arg.event.title.length > 18 ? arg.event.title.substring(0, 15) + '...' : arg.event.title;
+            const wrapper = document.createElement('div');
+            wrapper.classList.add('text-[11px]', 'leading-tight', 'px-1', 'py-[2px]');
+            wrapper.innerHTML = `
+                <div class="flex items-center justify-between gap-1">
+                    <span class="text-slate-100">${title}</span>
+                    <span class="rounded-full border px-2 py-[1px]" style="color:${meta.color}; border-color:${meta.color};">${label}</span>
+                </div>
+            `;
+            return { domNodes: [wrapper] };
+        }
+    });
+    calendar.render();
+
     const orsModals = Array.from(document.querySelectorAll('.ors-modal'));
 
     function updateModalState() {
@@ -468,157 +596,262 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    const calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
-        height: 'auto',
-        contentHeight: 600,
-        dayMaxEventRows: 3,
-
-        headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: ''
-        },
-
-        selectable: true,
-        editable: false,
-        dayHeaderClassNames: 'text-slate-300',
-        dayCellClassNames: 'hover:bg-slate-800/30',
-
-        dateClick(info) {
-            document.getElementById('orsSelectedDate').value = info.dateStr;
-            window.openOrsModal('orsTaskModal');
-        },
-
-        eventClick(info) {
-            const task = info.event;
-            document.getElementById('taskDetailTitle').textContent = task.title;
-            document.getElementById('taskDetailDate').textContent = `Date: ${task.start.toLocaleDateString()}`;
-            document.getElementById('taskDetailClient').textContent = task.extendedProps.client || '--';
-            document.getElementById('taskDetailRequest').textContent = task.extendedProps.requestId || '--';
-            document.getElementById('taskDetailStatus').textContent = task.extendedProps.status || '--';
-            document.getElementById('taskDetailOutput').textContent = task.extendedProps.output || '--';
-            document.getElementById('taskDetailDuration').textContent = task.extendedProps.duration || '--';
-            document.getElementById('taskDetailRating').textContent = task.extendedProps.rating || '--';
-            document.getElementById('taskDetailNotes').textContent = task.extendedProps.notes || '--';
-            window.openOrsModal('taskDetailsModal');
-        },
-
-        events: [
-            {
-                title: 'E-Bank Scanning',
-                start: '2025-12-27',
-                color: '#f59e0b',
-                extendedProps: {
-                    client: 'ABC Corp',
-                    requestId: 'REQ-2025-014',
-                    output: 'Bank Statement Form (BSF-01)',
-                    status: 'In Progress',
-                    duration: '1.7 hours (ongoing)',
-                    rating: '--',
-                    notes: 'Statements being scanned'
-                }
-            },
-            {
-                title: 'Client Form Review',
-                start: '2025-12-26',
-                color: '#10b981',
-                extendedProps: {
-                    client: 'XYZ Limited',
-                    requestId: 'REQ-2025-009',
-                    output: 'Client Summary Report (CSR-04)',
-                    status: 'Completed',
-                    duration: '2.3 hours',
-                    rating: '4.5/5',
-                    notes: 'Forms approved for processing'
-                }
-            },
-            {
-                title: 'Report Generation',
-                start: '2025-12-25',
-                color: '#3b82f6',
-                extendedProps: {
-                    client: 'Tech Solutions',
-                    requestId: 'REQ-2025-012',
-                    output: 'Financial Statement (FS-03)',
-                    status: 'Pending Review',
-                    duration: '3.2 hours',
-                    rating: '4.0/5',
-                    notes: 'Awaiting manager approval'
-                }
-            },
-            {
-                title: 'Financial Data Entry',
-                start: '2025-12-27',
-                color: '#f59e0b',
-                extendedProps: {
-                    client: 'Global Enterprises',
-                    requestId: 'REQ-2025-017',
-                    output: 'Financial Statement (FS-03)',
-                    status: 'In Progress',
-                    duration: '1.5 hours (ongoing)',
-                    rating: '--',
-                    notes: 'Quarterly financial data entry'
-                }
-            },
-            {
-                title: 'Client Follow-up',
-                start: '2025-12-24',
-                color: '#ef4444',
-                extendedProps: {
-                    client: 'Prime Services Group',
-                    requestId: 'REQ-2025-018',
-                    output: 'Follow-up Notes (FN-07)',
-                    status: 'Overdue',
-                    duration: '--',
-                    rating: '--',
-                    notes: 'Missed deadline - needs attention'
-                }
-            },
-            {
-                title: 'Tax Compliance Review',
-                start: '2025-12-29',
-                color: '#8b5cf6',
-                extendedProps: {
-                    client: 'Alpha Financials',
-                    requestId: 'REQ-2025-023',
-                    output: 'Tax Compliance Form (TCF-05)',
-                    status: 'Scheduled',
-                    duration: '--',
-                    rating: '--',
-                    notes: 'Scheduled for end of week'
-                }
-            }
-        ],
-
-        eventContent: function(arg) {
-            const dotsOnly = arg.event.title.length > 15;
-            const displayText = dotsOnly ? arg.event.title.substring(0, 12) + '...' : arg.event.title;
-
-            const arrayOfDomNodes = [
-                document.createElement('div'),
-            ];
-            arrayOfDomNodes[0].innerHTML = `
-                <div class="fc-event-main-frame">
-                    <div class="fc-event-title-container">
-                        <div class="fc-event-title fc-sticky">
-                            ${displayText}
-                        </div>
-                    </div>
-                </div>
-            `;
-            arrayOfDomNodes[0].classList.add('text-xs', 'px-1', 'py-0.5');
-
-            return { domNodes: arrayOfDomNodes };
+    function setButtonLoading(button, isLoading, loadingText) {
+        if (!button) return;
+        const label = button.querySelector('[data-button-label]');
+        const spinner = button.querySelector('[data-button-spinner]');
+        if (label && !button.dataset.originalLabel) {
+            button.dataset.originalLabel = label.textContent.trim();
         }
-    });
+        if (isLoading) {
+            button.disabled = true;
+            button.classList.add('opacity-70', 'cursor-wait');
+            if (spinner) spinner.classList.remove('hidden');
+            if (label && loadingText) label.textContent = loadingText;
+        } else {
+            button.disabled = false;
+            button.classList.remove('opacity-70', 'cursor-wait');
+            if (spinner) spinner.classList.add('hidden');
+            if (label && button.dataset.originalLabel) label.textContent = button.dataset.originalLabel;
+        }
+    }
 
-    calendar.render();
+    function getTaskById(id) {
+        return tasks.find((t) => t.id === id);
+    }
 
-    // Handle form submission
-    const taskForm = document.querySelector('#orsTaskModal form');
-    if (taskForm) {
-        taskForm.addEventListener('submit', function(e) {
+    function isLockedState(state) {
+        return state === 'submitted' || state === 'locked' || state === 'missing';
+    }
+
+    function formatDuration(ms) {
+        const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        if (hours === 0) {
+            return `${minutes}m`;
+        }
+        return `${hours}h ${minutes}m`;
+    }
+
+    function formatTime(dateObj) {
+        if (!dateObj) return '--';
+        return dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function computeElapsed(task) {
+        const base = task.durationMs || 0;
+        if (task.state === 'recording' && task.startTime) {
+            return base + (Date.now() - task.startTime.getTime());
+        }
+        return base;
+    }
+
+    function refreshCalendar() {
+        calendar.removeAllEvents();
+        tasks.forEach((task) => {
+            const meta = STATE_META[task.state] || STATE_META.draft;
+            calendar.addEvent({
+                id: task.id,
+                title: task.title,
+                start: task.date,
+                color: meta.color,
+                extendedProps: {
+                    state: task.state,
+                    client: task.client,
+                    requestId: task.requestId,
+                    output: task.output,
+                    notes: task.notes,
+                    duration: formatDuration(computeElapsed(task)),
+                    rating: task.rating || '--'
+                }
+            });
+        });
+    }
+
+    function setStatusBadge(element, state) {
+        if (!element) return;
+        const meta = STATE_META[state] || STATE_META.draft;
+        element.textContent = meta.label;
+        element.className = `status-chip ${meta.badge}`;
+    }
+
+    function toggleAction(button, shouldShow, disabled = false) {
+        if (!button) return;
+        button.classList.toggle('hidden', !shouldShow);
+        button.disabled = disabled;
+    }
+
+    function openTaskDetails(taskId) {
+        const task = getTaskById(taskId);
+        if (!task) return;
+        detailTaskId = taskId;
+
+        document.getElementById('taskDetailTitle').textContent = task.title || '--';
+        document.getElementById('taskDetailDate').textContent = `Date: ${task.date || '--'}`;
+        document.getElementById('taskDetailClient').textContent = task.client || '--';
+        document.getElementById('taskDetailRequest').textContent = task.requestId || '--';
+        document.getElementById('taskDetailOutput').textContent = task.output || '--';
+        document.getElementById('taskDetailStatusText').textContent = (STATE_META[task.state] || STATE_META.draft).label;
+        document.getElementById('taskDetailDuration').textContent = formatDuration(computeElapsed(task));
+        document.getElementById('taskDetailRating').textContent = task.rating || '--';
+        document.getElementById('taskDetailNotes').textContent = task.notes || '--';
+        document.getElementById('taskDetailUpload').disabled = isLockedState(task.state);
+
+        setStatusBadge(document.getElementById('taskDetailStatusBadge'), task.state);
+
+        const lockBadge = document.getElementById('taskDetailLockBadge');
+        const lockMsg = document.getElementById('taskDetailLockMessage');
+        const draftMsg = document.getElementById('taskDetailDraftMessage');
+
+        const locked = isLockedState(task.state);
+        lockBadge.classList.toggle('hidden', !locked);
+        lockMsg.classList.toggle('hidden', !locked);
+        draftMsg.classList.toggle('hidden', locked);
+
+        toggleAction(document.getElementById('taskDetailStartBtn'), !locked && task.state === 'draft' && (!activeTaskId || activeTaskId === task.id));
+        toggleAction(document.getElementById('taskDetailPauseBtn'), task.state === 'recording');
+        toggleAction(document.getElementById('taskDetailResumeBtn'), task.state === 'paused');
+        toggleAction(document.getElementById('taskDetailStopBtn'), task.state === 'recording' || task.state === 'paused');
+        toggleAction(document.getElementById('taskDetailSubmitBtn'), !locked && task.state === 'draft');
+
+        openOrsModal('taskDetailsModal');
+    }
+
+    function startTask(taskId) {
+        const task = getTaskById(taskId);
+        if (!task) return false;
+        if (activeTaskId && activeTaskId !== taskId) {
+            return false;
+        }
+        if (isLockedState(task.state)) {
+            return false;
+        }
+        task.state = 'recording';
+        task.startTime = new Date();
+        activeTaskId = taskId;
+        refreshCalendar();
+        updateActivePanel();
+        if (detailTaskId === taskId) {
+            openTaskDetails(taskId);
+        }
+        return true;
+    }
+
+    function pauseTask(taskId) {
+        const task = getTaskById(taskId);
+        if (!task || task.state !== 'recording') return;
+        if (task.startTime) {
+            task.durationMs = (task.durationMs || 0) + (Date.now() - task.startTime.getTime());
+        }
+        task.startTime = null;
+        task.state = 'paused';
+        activeTaskId = taskId;
+        refreshCalendar();
+        updateActivePanel();
+        if (detailTaskId === taskId) openTaskDetails(taskId);
+    }
+
+    function resumeTask(taskId) {
+        const task = getTaskById(taskId);
+        if (!task || task.state !== 'paused') return;
+        if (activeTaskId && activeTaskId !== taskId) {
+            return;
+        }
+        task.startTime = new Date();
+        task.state = 'recording';
+        activeTaskId = taskId;
+        refreshCalendar();
+        updateActivePanel();
+        if (detailTaskId === taskId) openTaskDetails(taskId);
+    }
+
+    function stopTask(taskId) {
+        const task = getTaskById(taskId);
+        if (!task) return;
+        if (task.state === 'recording' && task.startTime) {
+            task.durationMs = (task.durationMs || 0) + (Date.now() - task.startTime.getTime());
+        }
+        task.startTime = null;
+        task.state = 'draft';
+        if (activeTaskId === taskId) {
+            activeTaskId = null;
+        }
+        refreshCalendar();
+        updateActivePanel();
+        if (detailTaskId === taskId) openTaskDetails(taskId);
+    }
+
+    function submitTask(taskId) {
+        const task = getTaskById(taskId);
+        if (!task) return false;
+        if (task.state === 'recording') {
+            return false;
+        }
+        if (isLockedState(task.state)) {
+            return false;
+        }
+        task.state = 'submitted';
+        task.startTime = null;
+        if (activeTaskId === taskId) {
+            activeTaskId = null;
+        }
+        refreshCalendar();
+        updateActivePanel();
+        if (detailTaskId === taskId) openTaskDetails(taskId);
+        return true;
+    }
+
+    function updateActivePanel() {
+        const activeCard = document.getElementById('active-task-card');
+        const emptyState = document.getElementById('active-task-empty');
+        const nameEl = document.getElementById('activeTaskName');
+        const startEl = document.getElementById('activeTaskStart');
+        const elapsedEl = document.getElementById('activeTaskElapsed');
+        const statusEl = document.getElementById('activeTaskStatus');
+
+        const task = activeTaskId ? getTaskById(activeTaskId) : null;
+        if (!task || isLockedState(task.state) || task.state === 'draft') {
+            activeTaskId = null;
+            activeCard.classList.add('hidden');
+            emptyState.classList.remove('hidden');
+            return;
+        }
+
+        emptyState.classList.add('hidden');
+        activeCard.classList.remove('hidden');
+
+        nameEl.textContent = task.title || '--';
+        startEl.textContent = formatTime(task.startTime);
+        elapsedEl.textContent = formatDuration(computeElapsed(task));
+        statusEl.textContent = task.state === 'paused' ? 'Paused' : 'Recording';
+        statusEl.className = 'font-semibold ' + (task.state === 'paused' ? 'text-amber-200' : 'text-amber-300');
+
+        const pauseBtn = document.getElementById('activePauseBtn');
+        const stopBtn = document.getElementById('activeStopBtn');
+        const submitBtn = document.getElementById('activeSubmitBtn');
+
+        pauseBtn.textContent = task.state === 'paused' ? 'Resume' : 'Pause';
+        pauseBtn.onclick = () => task.state === 'paused' ? resumeTask(task.id) : pauseTask(task.id);
+        stopBtn.onclick = () => stopTask(task.id);
+        submitBtn.onclick = () => runWithLoading(submitBtn, 'Submitting...', () => submitTask(task.id));
+    }
+
+    function updateDetailElapsed() {
+        if (!detailTaskId) return;
+        const task = getTaskById(detailTaskId);
+        if (!task) return;
+        const durationEl = document.getElementById('taskDetailDuration');
+        if (durationEl) {
+            durationEl.textContent = formatDuration(computeElapsed(task));
+        }
+    }
+
+    function wireTaskForm() {
+        const taskForm = document.querySelector('#orsTaskModal form');
+        if (!taskForm) return;
+
+        taskForm.addEventListener('submit', function (e) {
             e.preventDefault();
             const date = document.getElementById('orsSelectedDate').value;
             const taskTypeSelect = document.getElementById('orsTaskType');
@@ -633,39 +866,80 @@ document.addEventListener('DOMContentLoaded', function () {
             const outputType = outputSelect ? outputSelect.value : '';
             const requestId = requestInput ? requestInput.value.trim() : '';
 
-            if (taskType && client && date && requestId && outputType) {
-                setButtonLoading(submitBtn, true, 'Logging...');
-
-                setTimeout(() => {
-                    // Add new event to calendar
-                    calendar.addEvent({
-                        title: taskTypeSelect.options[taskTypeSelect.selectedIndex].text,
-                        start: date,
-                        color: '#f59e0b', // Default to "In Progress" color
-                        extendedProps: {
-                            client: clientSelect.options[clientSelect.selectedIndex].text,
-                            requestId: requestId,
-                            output: outputSelect.options[outputSelect.selectedIndex].text,
-                            status: 'In Progress',
-                            duration: 'Tracking...',
-                            rating: 'Pending',
-                            notes: notesInput && notesInput.value ? notesInput.value : 'No notes'
-                        }
-                    });
-
-                    // Close modal and reset form
-                    window.closeOrsModal('orsTaskModal');
-                    this.reset();
-                    setButtonLoading(submitBtn, false);
-
-                    // Show success message
-                    alert('Task logged successfully! Duration and rating will be calculated automatically.');
-                }, 700);
-            } else {
-                alert('Please complete required fields: task, client, request ID, and output type.');
+            if (!taskType || !client || !date || !requestId || !outputType) {
+                return;
             }
+
+            setButtonLoading(submitBtn, true, 'Logging...');
+
+            setTimeout(() => {
+                const newTask = {
+                    id: `task-${Date.now()}`,
+                    title: taskTypeSelect.options[taskTypeSelect.selectedIndex].text,
+                    date: date,
+                    client: clientSelect.options[clientSelect.selectedIndex].text,
+                    requestId: requestId,
+                    output: outputSelect.options[outputSelect.selectedIndex].text,
+                    notes: notesInput && notesInput.value ? notesInput.value : 'No notes',
+                    rating: '--',
+                    state: 'draft',
+                    startTime: null,
+                    durationMs: 0
+                };
+                tasks.push(newTask);
+                refreshCalendar();
+                closeOrsModal('orsTaskModal');
+                taskForm.reset();
+                document.getElementById('orsSelectedDate').value = '';
+                setButtonLoading(submitBtn, false);
+                // Task logged; proceed without additional prompts.
+                openTaskDetails(newTask.id);
+            }, 400);
         });
     }
+
+    function wireLogButton() {
+        const btn = document.getElementById('openLogTaskBtn');
+        if (!btn) return;
+        btn.addEventListener('click', () => {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('orsSelectedDate').value = today;
+            openOrsModal('orsTaskModal');
+        });
+    }
+
+    wireTaskForm();
+    wireLogButton();
+    refreshCalendar();
+    updateActivePanel();
+
+    setInterval(() => {
+        if (activeTaskId) {
+            updateActivePanel();
+        }
+        if (detailTaskId) {
+            updateDetailElapsed();
+        }
+    }, 1000);
+
+    function runWithLoading(button, loadingText, actionFn) {
+        if (!button || typeof actionFn !== 'function') return;
+        setButtonLoading(button, true, loadingText);
+        setTimeout(() => {
+            actionFn();
+            setButtonLoading(button, false);
+        }, 150);
+    }
+
+    document.getElementById('taskDetailStartBtn')?.addEventListener('click', (e) => {
+        runWithLoading(e.currentTarget, 'Starting...', () => startTask(detailTaskId));
+    });
+    document.getElementById('taskDetailPauseBtn')?.addEventListener('click', () => pauseTask(detailTaskId));
+    document.getElementById('taskDetailResumeBtn')?.addEventListener('click', () => resumeTask(detailTaskId));
+    document.getElementById('taskDetailStopBtn')?.addEventListener('click', () => stopTask(detailTaskId));
+    document.getElementById('taskDetailSubmitBtn')?.addEventListener('click', (e) => {
+        runWithLoading(e.currentTarget, 'Submitting...', () => submitTask(detailTaskId));
+    });
 });
 </script>
 @endpush
