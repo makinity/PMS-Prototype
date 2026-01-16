@@ -35,114 +35,83 @@
                     <thead class="bg-gray-900">
                         <tr>
                             <th class="px-4 py-3 text-left font-medium text-white">Task</th>
-                            <th class="px-4 py-3 text-left font-medium text-white">Client</th>
                             <th class="px-4 py-3 text-left font-medium text-white">Date</th>
-                            <th class="px-4 py-3 text-left font-medium text-white">Status / Tracking</th>
-                            <th class="px-4 py-3 text-left font-medium text-white">Link</th>
-                            <th class="px-4 py-3 text-left font-medium text-white">Action</th>
+                            <th class="px-4 py-3 text-left font-medium text-white">Status</th>
+                            <th class="px-4 py-3 text-left font-medium text-white">Output State</th>
+                            <th class="px-4 py-3 text-left font-medium text-white">Notes</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-700">
                         <tr class="hover:bg-gray-750">
                             <td class="px-4 py-3 text-gray-300">E-Bank Scanning</td>
-                            <td class="px-4 py-3 text-gray-300">ABC Corp</td>
-                            <td class="px-4 py-3 text-gray-300">Dec 27, 2025</td>
-                            <td class="px-4 py-3">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-900 text-amber-200">
-                                    Recording
-                                </span>
-                                <p class="mt-1 text-xs text-gray-400">Tracking: Active since 09:12</p>
-                            </td>
-                            <td class="px-4 py-3">
-                                <p class="text-xs text-gray-400">Request: REQ-2025-014</p>
-                                <span class="text-xs font-medium text-amber-300">Output pending</span>
-                            </td>
-                            <td class="px-4 py-3">
-                                <button type="button" data-modal-target="task-view-modal" data-modal-toggle="task-view-modal" class="text-blue-400 hover:text-blue-300 font-medium text-sm transition-colors duration-200">
-                                    View ORS Entry
-                                </button>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-750">
-                            <td class="px-4 py-3 text-gray-300">Client Form Review</td>
-                            <td class="px-4 py-3 text-gray-300">XYZ Ltd</td>
-                            <td class="px-4 py-3 text-gray-300">Dec 26, 2025</td>
-                            <td class="px-4 py-3">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-900 text-emerald-300">
-                                    Locked / In MPOR
-                                </span>
-                                <p class="mt-1 text-xs text-gray-400">Tracking: Completed in 2.3h</p>
-                            </td>
-                            <td class="px-4 py-3">
-                                <p class="text-xs text-gray-400">Request: REQ-2025-009</p>
-                                <span class="text-xs font-medium text-emerald-400">Output linked</span>
-                            </td>
-                            <td class="px-4 py-3">
-                                <button type="button" data-modal-target="task-view-modal" data-modal-toggle="task-view-modal" class="text-blue-400 hover:text-blue-300 font-medium text-sm transition-colors duration-200">
-                                    View ORS Entry
-                                </button>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-750">
-                            <td class="px-4 py-3 text-gray-300">Report Generation</td>
-                            <td class="px-4 py-3 text-gray-300">Tech Solutions</td>
-                            <td class="px-4 py-3 text-gray-300">Dec 25, 2025</td>
+                            <td class="px-4 py-3 text-gray-300">Jan 4, 2026</td>
                             <td class="px-4 py-3">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-900 text-blue-300">
-                                    Submitted
+                                    Draft (Stopped)
                                 </span>
-                                <p class="mt-1 text-xs text-gray-400">Tracking: Completed in 3.2h</p>
                             </td>
                             <td class="px-4 py-3">
-                                <p class="text-xs text-gray-400">Request: REQ-2025-012</p>
-                                <span class="text-xs font-medium text-emerald-400">Output submitted</span>
+                                <span class="text-xs font-medium text-blue-300">Output in draft</span>
                             </td>
-                            <td class="px-4 py-3">
-                                <button type="button" data-modal-target="task-view-modal" data-modal-toggle="task-view-modal" class="text-blue-400 hover:text-blue-300 font-medium text-sm transition-colors duration-200">
-                                    View ORS Entry
-                                </button>
-                            </td>
+                            <td class="px-4 py-3 text-gray-300">Needs submission</td>
                         </tr>
+
                         <tr class="hover:bg-gray-750">
-                            <td class="px-4 py-3 text-gray-300">Financial Data Entry</td>
-                            <td class="px-4 py-3 text-gray-300">Global Enterprises</td>
-                            <td class="px-4 py-3 text-gray-300">Dec 27, 2025</td>
+                            <td class="px-4 py-3 text-gray-300">E-Bank Scanning</td>
+                            <td class="px-4 py-3 text-gray-300">Jan 5, 2026</td>
                             <td class="px-4 py-3">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-800 text-amber-100">
-                                    Draft
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-900 text-amber-300">
+                                    Recording
                                 </span>
-                                <p class="mt-1 text-xs text-gray-400">Tracking: Stopped at 10:05 (draft)</p>
                             </td>
                             <td class="px-4 py-3">
-                                <p class="text-xs text-gray-400">Request: REQ-2025-017</p>
-                                <span class="text-xs font-medium text-emerald-400">Output in draft</span>
+                                <span class="text-xs font-medium text-amber-300">Output pending</span>
                             </td>
-                            <td class="px-4 py-3">
-                                <button type="button" data-modal-target="task-view-modal" data-modal-toggle="task-view-modal" class="text-blue-400 hover:text-blue-300 font-medium text-sm transition-colors duration-200">
-                                    View ORS Entry
-                                </button>
-                            </td>
+                            <td class="px-4 py-3 text-gray-300">Active timer</td>
                         </tr>
+
                         <tr class="hover:bg-gray-750">
-                            <td class="px-4 py-3 text-gray-300">Client Follow-up</td>
-                            <td class="px-4 py-3 text-gray-300">Prime Services Group</td>
-                            <td class="px-4 py-3 text-gray-300">Dec 24, 2025</td>
+                            <td class="px-4 py-3 text-gray-300">OTC Revenue Processing</td>
+                            <td class="px-4 py-3 text-gray-300">Jan 3, 2026</td>
                             <td class="px-4 py-3">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-900 text-rose-300">
-                                    Returned
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-violet-900 text-violet-300">
+                                    Submitted (Locked)
                                 </span>
-                                <p class="mt-1 text-xs text-gray-400">Tracking: Paused at 3.0h</p>
                             </td>
                             <td class="px-4 py-3">
-                                <p class="text-xs text-gray-400">Request: REQ-2025-018</p>
-                                <span class="text-xs font-medium text-rose-300">Output missing (revise in ORS)</span>
+                                <span class="text-xs font-medium text-emerald-300">Output submitted</span>
                             </td>
-                            <td class="px-4 py-3">
-                                <button type="button" data-modal-target="task-view-modal" data-modal-toggle="task-view-modal" class="text-blue-400 hover:text-blue-300 font-medium text-sm transition-colors duration-200">
-                                    View ORS Entry
-                                </button>
-                            </td>
+                            <td class="px-4 py-3 text-gray-300">For validation</td>
                         </tr>
+
+                        <tr class="hover:bg-gray-750">
+                            <td class="px-4 py-3 text-gray-300">Maintenance of Revenue Records Filing System</td>
+                            <td class="px-4 py-3 text-gray-300">Jan 6, 2026</td>
+                            <td class="px-4 py-3">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-900 text-red-300">
+                                    Locked / In MPOR
+                                </span>
+                            </td>
+                            <td class="px-4 py-3">
+                                <span class="text-xs font-medium text-red-300">Output Missing</span>
+                            </td>
+                            <td class="px-4 py-3 text-gray-300">Unfinished Output</td>
+                        </tr>
+
+                        <tr class="hover:bg-gray-750">
+                            <td class="px-4 py-3 text-gray-300">OTC Revenue Transaction Processing</td>
+                            <td class="px-4 py-3 text-gray-300">Jan 2, 2026</td>
+                            <td class="px-4 py-3">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-violet-900 text-violet-300">
+                                    Submitted (Locked)
+                                </span>
+                            </td>
+                            <td class="px-4 py-3">
+                                <span class="text-xs font-medium text-emerald-300">	Output submitted</span>
+                            </td>
+                            <td class="px-4 py-3 text-gray-300">For validation</td>
+                        </tr>
+
                     </tbody>
                 </table>
             </div>

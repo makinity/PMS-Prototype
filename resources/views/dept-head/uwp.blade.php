@@ -105,7 +105,7 @@
     <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-5 mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
             <p class="text-xs uppercase tracking-wide text-slate-400">Performance Period</p>
-            <p class="font-medium text-slate-100">January – December 2026</p>
+            <p class="font-medium text-slate-100">January – June 2026</p>
         </div>
 
         <div class="flex items-center gap-3">
@@ -158,10 +158,10 @@
                     {{-- SAMPLE ROW: Submitted --}}
                     <tr class="hover:bg-slate-800/40 transition">
                         <td class="px-4 py-3 text-sm text-slate-100 font-medium">
-                            Administrative Services Unit
+                            Revenue Collection Unit
                         </td>
                         <td class="px-4 py-3 text-sm text-slate-300">
-                            Maria Santos
+                            Carlo D. Beray
                         </td>
                         <td class="px-4 py-3 text-sm text-center text-slate-300">
                             Unit-Level Plan
@@ -232,7 +232,7 @@
                 <div>
                     <h3 class="text-lg font-semibold text-slate-100">Unit Work Plan (UWP)</h3>
                     <p class="text-sm text-slate-400 mt-1">
-                        Administrative Services Unit • January – December 2026
+                        Revenue Collection Unit • January – June 2026
                     </p>
 
                     <div class="mt-2 flex flex-wrap items-center gap-2">
@@ -241,7 +241,7 @@
                             Submitted for Approval
                         </span>
                         <span class="text-xs text-slate-500">
-                            Supervisor: <span class="text-slate-300">Maria Santos</span> •
+                            Supervisor: <span class="text-slate-300">Carlo D. Beray</span> •
                             Dept Head: <span class="text-slate-300">Engr. Roberto Reyes</span>
                         </span>
                     </div>
@@ -341,7 +341,7 @@
             <div class="p-5 border-b border-slate-800 flex items-start justify-between gap-4">
                 <div>
                     <h3 class="text-lg font-semibold text-slate-100">Unit Work Plan (UWP)</h3>
-                    <p class="text-sm text-slate-400 mt-1">Records Management Unit • January – December 2026</p>
+                    <p class="text-sm text-slate-400 mt-1">Records Management Unit • January –  2026</p>
 
                     <div class="mt-2">
                         <span class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full
@@ -391,15 +391,15 @@
                         <div class="grid grid-cols-1 gap-3 text-sm text-slate-300 sm:grid-cols-2">
                             <div>
                                 <p class="text-xs uppercase tracking-wide text-slate-500">Office / Unit</p>
-                                <p class="font-medium text-slate-100">Administrative Services Unit</p>
+                                <p class="font-medium text-slate-100">Revenue Collection Unit</p>
                             </div>
                             <div>
                                 <p class="text-xs uppercase tracking-wide text-slate-500">Supervisor</p>
-                                <p class="font-medium text-slate-100">Maria Santos</p>
+                                <p class="font-medium text-slate-100">Carlo D. Beray                                </p>
                             </div>
                             <div>
                                 <p class="text-xs uppercase tracking-wide text-slate-500">Performance Period</p>
-                                <p class="font-medium text-slate-100">January ƒ?" December 2026</p>
+                                <p class="font-medium text-slate-100">January - June 2026</p>
                             </div>
                             <div>
                                 <p class="text-xs uppercase tracking-wide text-slate-500">UWP Type</p>
@@ -432,10 +432,10 @@
                                 </thead>
                                 <tbody class="divide-y divide-slate-800">
                                     <tr class="hover:bg-slate-800/40 transition">
-                                        <td class="px-4 py-3 text-sm text-slate-100">Records Management</td>
-                                        <td class="px-4 py-3 text-sm text-slate-300">Process and file incoming documents</td>
-                                        <td class="px-4 py-3 text-sm text-center text-slate-100">1,200 documents</td>
-                                        <td class="px-4 py-3 text-sm text-center text-slate-300">Jan ƒ?" Dec</td>
+                                        <td class="px-4 py-3 text-sm text-slate-100">E-Bank Scanning and Encoding of Revenue Transactions</td>
+                                        <td class="px-4 py-3 text-sm text-slate-300">All e-bank transaction documents are scanned, encoded, and uploaded to the system with complete details and proper indexing.</td>
+                                        <td class="px-4 py-3 text-sm text-center text-slate-100">Verified and accurately recorded over-the-counter revenue transactions.</td>
+                                        <td class="px-4 py-3 text-sm text-center text-slate-300">Daily (January – December 2025)</td>
                                         <td class="px-4 py-3 text-sm text-center">
                                             <span class="px-2 py-1 rounded-md text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                                                 Core
@@ -443,9 +443,20 @@
                                         </td>
                                     </tr>
                                     <tr class="hover:bg-slate-800/40 transition">
-                                        <td class="px-4 py-3 text-sm text-slate-100">Client Support</td>
-                                        <td class="px-4 py-3 text-sm text-slate-300">Coordinate and resolve service tickets</td>
-                                        <td class="px-4 py-3 text-sm text-center text-slate-100">95% resolved on time</td>
+                                        <td class="px-4 py-3 text-sm text-slate-100">Processing of over-the-counter revenue transactions</td>
+                                        <td class="px-4 py-3 text-sm text-slate-300">All over-the-counter revenue transactions are verified, recorded, and encoded accurately within the prescribed processing time.</td>
+                                        <td class="px-4 py-3 text-sm text-center text-slate-100">Daily; 95% processed within the same working day   </td>
+                                        <td class="px-4 py-3 text-sm text-center text-slate-300">Daily (January – December 2025)</td>
+                                        <td class="px-4 py-3 text-sm text-center">
+                                            <span class="px-2 py-1 rounded-md text-xs font-medium bg-blue-500/10 text-blue-300 border border-blue-400/30">
+                                                Core
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr class="hover:bg-slate-800/40 transition">
+                                        <td class="px-4 py-3 text-sm text-slate-100">Maintenance of Revenue Records Filing System</td>
+                                        <td class="px-4 py-3 text-sm text-slate-300">Organized and updated physical and digital filing of revenue transaction records.</td>
+                                        <td class="px-4 py-3 text-sm text-center text-slate-100">Quarterly validation and update</td>
                                         <td class="px-4 py-3 text-sm text-center text-slate-300">Quarterly</td>
                                         <td class="px-4 py-3 text-sm text-center">
                                             <span class="px-2 py-1 rounded-md text-xs font-medium bg-blue-500/10 text-blue-300 border border-blue-400/30">

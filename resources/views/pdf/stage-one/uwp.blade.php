@@ -94,27 +94,63 @@
     </thead>
 
     <tbody>
-        @foreach ($uwp['outputs'] as $row)
+
+    <!-- CORE FUNCTIONS HEADER -->
+    <tr>
+        <td colspan="16" style="font-weight:bold; text-align:left;">
+            A. CORE FUNCTIONS (80%)
+        </td>
+    </tr>
+
+    @foreach ($uwp['outputs'] as $row)
+        @if(str_contains($row['function'], 'Core'))
         <tr>
-            <!-- Planning data -->
             <td>{{ $row['mfo'] }}</td>
             <td>{{ $row['expected_output'] }}</td>
             <td class="center">{{ $row['budget'] ?? '' }}</td>
             <td class="center">{{ $row['accountable'] ?? '' }}</td>
 
-            <!-- Future stages (INTENTIONALLY BLANK) -->
+            <!-- Stage 1: intentionally blank -->
             <td></td>
 
             <td></td><td></td><td></td><td></td>
             <td></td><td></td><td></td><td></td><td></td>
 
             <td></td>
-
-            <!-- Planning standard -->
             <td>{{ $row['standard'] ?? '' }}</td>
         </tr>
-        @endforeach
-    </tbody>
+        @endif
+    @endforeach
+
+    <!-- SUPPORT FUNCTIONS HEADER -->
+    <tr>
+        <td colspan="16" style="font-weight:bold; text-align:left;">
+            C. SUPPORT FUNCTIONS (20%)
+        </td>
+    </tr>
+
+    @foreach ($uwp['outputs'] as $row)
+        @if(str_contains($row['function'], 'Support'))
+        <tr>
+            <td>{{ $row['mfo'] }}</td>
+            <td>{{ $row['expected_output'] }}</td>
+            <td class="center">{{ $row['budget'] ?? '' }}</td>
+            <td class="center">{{ $row['accountable'] ?? '' }}</td>
+
+            <!-- Stage 1: intentionally blank -->
+            <td></td>
+
+            <td></td><td></td><td></td><td></td>
+            <td></td><td></td><td></td><td></td><td></td>
+
+            <t  d></t>
+            <td>{{ $row['standard'] ?? '' }}</td>
+        </tr>
+        @endif
+    @endforeach
+
+</tbody>
+
 </table>
 
 <br><br>

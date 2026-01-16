@@ -243,7 +243,7 @@
                             <li>
                                 <a href="{{ route('pmt.uwp') }}" class="sidebar-link" @if($isPmtUwp) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-clipboard-check"></i>
-                                    <span>Unit Work Plans</span>
+                                    <span>Unit Work Plan Approval</span>
                                 </a>
                             </li>
                             <li>

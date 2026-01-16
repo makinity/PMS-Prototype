@@ -33,8 +33,8 @@
 
                         <!-- FOR REVIEW -->
                         <tr class="border-t border-slate-800">
-                            <td class="px-4 py-3 text-white">Records Management Unit</td>
-                            <td class="px-4 py-3">Jan–Dec 2026</td>
+                            <td class="px-4 py-3 text-white">Revenue Collection Unit</td>
+                            <td class="px-4 py-3">January – June 2026</td>
                             <td class="px-4 py-3">Approved UWP</td>
                             <td class="px-4 py-3">
                                 <span class="rounded-full bg-amber-500/20 px-2 py-1 text-xs text-amber-300">
@@ -83,7 +83,7 @@
                 <div class="flex items-start justify-between">
                     <div>
                         <h2 class="text-lg font-semibold text-white">
-                            Review OPCR – Records Management Unit
+                            Review OPCR – Revenue Collection Unit
                         </h2>
                         <p class="text-sm text-slate-400">
                             Derived from PMT-approved Unit Work Plan
@@ -96,11 +96,11 @@
                 <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3 text-sm">
                     <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                         <p class="text-xs text-slate-400">Office</p>
-                        <p class="text-white">Records Management Unit</p>
+                        <p class="text-white">Revenue Collection Unit</p>
                     </div>
                     <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                         <p class="text-xs text-slate-400">Period</p>
-                        <p class="text-white">Jan–Dec 2026</p>
+                        <p class="text-white">January - June 2026</p>
                     </div>
                     <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                         <p class="text-xs text-slate-400">Referenced UWP</p>
@@ -115,21 +115,56 @@
                             <tr>
                                 <th class="px-4 py-3 text-left">Success Indicator</th>
                                 <th class="px-4 py-3 text-left">Performance Measure</th>
+                                <th class="px-4 py-3 text-left">Target</th>
                                 <th class="px-4 py-3 text-left">Weight</th>
                             </tr>
                         </thead>
                         <tbody class="text-slate-100">
                             <tr class="border-t border-slate-800">
                                 <td class="px-4 py-3">
-                                    1,200 records scanned and digitized
+                                    E-Bank Scanning and Encoding of Revenue Transactions
                                 </td>
                                 <td class="px-4 py-3">
                                     Timeliness and accuracy
                                 </td>
                                 <td class="px-4 py-3">
-                                    Core Function – 80%
+                                    95% same-day processing
+                                </td>
+                                <td class="px-4 py-3">
+                                    50%
                                 </td>
                             </tr>
+
+                            <tr class="border-t border-slate-800">
+                                <td class="px-4 py-3">
+                                    Processing of Over-the-Counter Revenue Transactions
+                                </td>
+                                <td class="px-4 py-3">
+                                    Timeliness and accuracy
+                                </td>
+                                <td class="px-4 py-3">
+                                    95% same-day processing
+                                </td>
+                                <td class="px-4 py-3">
+                                    30%
+                                </td>
+                            </tr>
+
+                            <tr class="border-t border-slate-800">
+                                <td class="px-4 py-3">
+                                    Maintenance of Revenue Records Filing System
+                                </td>
+                                <td class="px-4 py-3">
+                                    Records completeness
+                                </td>
+                                <td class="px-4 py-3">
+                                    Quarterly validation
+                                </td>
+                                <td class="px-4 py-3">
+                                    20%
+                                </td>
+                            </tr>
+
                         </tbody>
                     </table>
                 </div>

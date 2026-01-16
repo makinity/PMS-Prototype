@@ -35,12 +35,29 @@
             <div class="grid gap-4 sm:grid-cols-2">
                 <label class="space-y-1 text-sm text-slate-300">
                     <span class="text-xs uppercase tracking-wide text-slate-400">Office / Unit</span>
-                    <input type="text" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none {{ $isDraft ? '' : 'opacity-60 pointer-events-none' }}" style="background:#0f172a;color:#e5e7eb;" placeholder="e.g., Administrative Services Unit" {{ $isDraft ? '' : 'disabled' }}>
+                    <input type="text" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none {{ $isDraft ? '' : 'opacity-60 pointer-events-none' }}" style="background:#0f172a;color:#e5e7eb;" value="Revenue Collection Unit" placeholder="e.g., Administrative Services Unit" {{ $isDraft ? '' : 'disabled' }}>
                 </label>
+
                 <label class="space-y-1 text-sm text-slate-300">
-                    <span class="text-xs uppercase tracking-wide text-slate-400">Performance Period</span>
-                    <input type="text" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none {{ $isDraft ? '' : 'opacity-60 pointer-events-none' }}" style="background:#0f172a;color:#e5e7eb;" placeholder="e.g., Jan - Dec 2026" {{ $isDraft ? '' : 'disabled' }}>
+                    <span class="text-xs uppercase tracking-wide text-slate-400">
+                        Performance Period
+                    </span>
+
+                    <select
+                        class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none
+                               {{ $isDraft ? '' : 'opacity-60 pointer-events-none' }}"
+                        style="background:#0f172a;color:#e5e7eb;"
+                        {{ $isDraft ? '' : 'disabled' }}
+                    >
+                        <option value="January - June 2026" selected>
+                            January – June 2026
+                        </option>
+                        <option value="July - December 2026">
+                            July – December 2026
+                        </option>
+                    </select>
                 </label>
+
             </div>
 
             <div class="space-y-4">
@@ -68,10 +85,10 @@
                                 <tbody class="divide-y divide-slate-800 text-slate-100">
                                     <tr class="hover:bg-slate-900/50">
                                         <td class="px-4 py-3">
-                                            <input type="text" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="e.g., Records management and archiving" {{ $isDraft ? '' : 'disabled' }}>
+                                            <input type="text" value="E-Bank Scanning and Encoding of Revenue Transactions" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="e.g., Records management and archiving" {{ $isDraft ? '' : 'disabled' }}>
                                         </td>
                                         <td class="px-4 py-3">
-                                            <textarea rows="2" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="Describe the planned deliverable/output" {{ $isDraft ? '' : 'disabled' }}></textarea>
+                                            <textarea rows="2" val class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="Describe the planned deliverable/output" {{ $isDraft ? '' : 'disabled' }}>All e-bank transaction documents are scanned, encoded, and uploaded to the system with complete details and proper indexing.</textarea>
                                         </td>
                                         <td class="px-4 py-3 text-center">
                                             <select class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" {{ $isDraft ? '' : 'disabled' }}>
@@ -91,18 +108,19 @@
                                             </select>
                                         </td>
                                         <td class="px-4 py-3 text-center">
-                                            <input type="text" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="e.g., Monthly; 1,200 files" {{ $isDraft ? '' : 'disabled' }}>
+                                            <input type="text" value="Daily; 95% processed within the same working day" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="e.g., Monthly; 1,200 files" {{ $isDraft ? '' : 'disabled' }}>
                                         </td>
                                         <td class="px-4 py-3">
-                                            <input type="text" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="Context, dependencies, or scope" {{ $isDraft ? '' : 'disabled' }}>
+                                            <input type="text" value="Subject to transaction volume and system availability" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="Context, dependencies, or scope" {{ $isDraft ? '' : 'disabled' }}>
                                         </td>
                                     </tr>
+
                                     <tr class="hover:bg-slate-900/50">
                                         <td class="px-4 py-3">
-                                            <input type="text" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="e.g., Client support and ticket resolution" {{ $isDraft ? '' : 'disabled' }}>
+                                            <input type="text" value="Processing of Over-the-Counter Revenue Transactions" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="e.g., Records management and archiving" {{ $isDraft ? '' : 'disabled' }}>
                                         </td>
                                         <td class="px-4 py-3">
-                                            <textarea rows="2" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="Describe the planned deliverable/output" {{ $isDraft ? '' : 'disabled' }}></textarea>
+                                            <textarea rows="2" val class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="Describe the planned deliverable/output" {{ $isDraft ? '' : 'disabled' }}>All over-the-counter revenue transactions are verified, recorded, and encoded accurately within the same working day.   </textarea>
                                         </td>
                                         <td class="px-4 py-3 text-center">
                                             <select class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" {{ $isDraft ? '' : 'disabled' }}>
@@ -122,10 +140,10 @@
                                             </select>
                                         </td>
                                         <td class="px-4 py-3 text-center">
-                                            <input type="text" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="e.g., Quarterly; 95% resolved" {{ $isDraft ? '' : 'disabled' }}>
+                                            <input type="text" value="Daily; 95% processed within the same working day" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="e.g., Monthly; 1,200 files" {{ $isDraft ? '' : 'disabled' }}>
                                         </td>
                                         <td class="px-4 py-3">
-                                            <input type="text" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="Dependencies, service hours, tools" {{ $isDraft ? '' : 'disabled' }}>
+                                            <input type="text" value="Subject to transaction volume and system availability" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="Context, dependencies, or scope" {{ $isDraft ? '' : 'disabled' }}>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -163,10 +181,10 @@
                                 <tbody class="divide-y divide-slate-800 text-slate-100">
                                     <tr class="hover:bg-slate-900/50">
                                         <td class="px-4 py-3">
-                                            <input type="text" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="e.g., Staff training sessions" {{ $isDraft ? '' : 'disabled' }}>
+                                            <input type="text" value="Maintenance of revenue records and filing system" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="e.g., Staff training sessions" {{ $isDraft ? '' : 'disabled' }}>
                                         </td>
                                         <td class="px-4 py-3">
-                                            <textarea rows="2" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="Describe the planned deliverable/output" {{ $isDraft ? '' : 'disabled' }}></textarea>
+                                            <textarea rows="2" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="Describe the planned deliverable/output" {{ $isDraft ? '' : 'disabled' }}>Updated and organized physical and digital filing system for all revenue transaction records.</textarea>
                                         </td>
                                         <td class="px-4 py-3 text-center">
                                             <select class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" {{ $isDraft ? '' : 'disabled' }}>
@@ -186,10 +204,10 @@
                                             </select>
                                         </td>
                                         <td class="px-4 py-3 text-center">
-                                            <input type="text" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="e.g., Quarterly; 4 sessions" {{ $isDraft ? '' : 'disabled' }}>
+                                            <input value="Quarterly; records validated and properly filed" type="text" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="e.g., Quarterly; 4 sessions" {{ $isDraft ? '' : 'disabled' }}>
                                         </td>
                                         <td class="px-4 py-3">
-                                            <input type="text" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="Stakeholders, coverage, notes" {{ $isDraft ? '' : 'disabled' }}>
+                                            <input value="Supports audit, verification, and reporting requirements" type="text" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="Stakeholders, coverage, notes" {{ $isDraft ? '' : 'disabled' }}>
                                         </td>
                                     </tr>
                                 </tbody>

@@ -1,6 +1,7 @@
 <?php
 
-use App\Http\Controllers\UwpExportController;
+use App\Http\Controllers\StageOne\Forms\OpcrExportController;
+use App\Http\Controllers\StageOne\Forms\UwpExportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -178,7 +179,7 @@ Route::get('/pmt/profile', function () {
 })->name('pmt.profile');
 
 Route::get('/pmt/uwp/export/pdf', [UwpExportController::class, 'exportPdf'])
-    ->name('pmt.uwp.export.pdf');
+    ->name('stage1.uwp.export.pdf');
 
 
 
@@ -238,6 +239,9 @@ Route::get('/administrator/system-logs', function () {
 Route::get('/administrator/profile', function () {
     return view('admin.profile');
 })->name('admin.profile');
+
+Route::get('/administrator/opcr/export/pdf', [OpcrExportController::class, 'exportPdf'])
+    ->name('stage1.opcr.export.pdf');
 
 
 

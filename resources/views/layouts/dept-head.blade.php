@@ -117,7 +117,7 @@
                             <li>
                                 <a href="{{ route('dept-head.uwp') }}" class="sidebar-link" @if($isUnitWorkPlan) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-clipboard-list"></i>
-                                    <span>Unit Work Plan</span>
+                                    <span>Unit Work Plan Review</span>
                                 </a>
                             </li>
                         </ul>
@@ -129,7 +129,7 @@
                             <li>
                                 <a href="{{ route('dept-head.opcr') }}" class="sidebar-link" @if($isOpcr) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-file-contract"></i>
-                                    <span>OPCR</span>
+                                    <span>OPCR Review</span>
                                 </a>
                             </li>
 
@@ -143,7 +143,7 @@
                             <li>
                                 <a href="{{ route('dept-head.ipcr') }}" class="sidebar-link" @if($isIPCR) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-file-pen"></i>
-                                    <span>IPCR</span>
+                                    <span>IPCR Approval</span>
                                 </a>
                             </li>
 

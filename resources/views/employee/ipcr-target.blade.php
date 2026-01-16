@@ -63,13 +63,13 @@
                     <label class="block mb-2 text-sm font-medium text-white">Office / Unit</label>
                     <input type="text"
                            class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
-                           value="Records Management Unit" disabled>
+                           value="Revenue Collection Unit" disabled>
                 </div>
                 <div>
                     <label class="block mb-2 text-sm font-medium text-white">Rating Period</label>
                     <input type="text"
                            class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
-                           value="January – December 2026" disabled>
+                           value="January – June 2026" disabled>
                 </div>
                 <div>
                     <label class="block mb-2 text-sm font-medium text-white">Immediate Supervisor</label>
@@ -105,24 +105,46 @@
                     <tbody>
                         <tr class="hover:bg-gray-750">
                             <td class="border border-gray-700 px-4 py-3 text-gray-300">
-                                Records Management
+                                E-Bank Scanning and Encoding of Revenue Transactions
                             </td>
                             <td class="border border-gray-700 px-4 py-3 text-gray-300">
-                                Scan and digitize e-bank transaction records
+                                Timeliness and accuracy of scanned and encoded e-bank transactions
                                 <span class="block text-[11px] text-gray-500 mt-1">System-generated from approved UWP and OPCR</span>
                             </td>
                             <td class="border border-gray-700 px-4 py-3 text-gray-300">
-                                1,200 records
+                                95% same-day processing
                             </td>
                             <td class="border border-gray-700 px-4 py-3 text-gray-300">
-                                Jan – Dec
+                                January – June 2026
                             </td>
                             <td class="border border-gray-700 px-4 py-3">
                                 <input type="number"
                                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2 opacity-80 cursor-not-allowed"
-                                       value="80" disabled>
+                                       value="50" disabled>
                             </td>
                         </tr>
+
+                        <tr class="hover:bg-gray-750">
+                            <td class="border border-gray-700 px-4 py-3 text-gray-300">
+                                Processing of Over-the-Counter Revenue Transactions
+                            </td>
+                            <td class="border border-gray-700 px-4 py-3 text-gray-300">
+                                Timeliness and accuracy of OTC revenue transaction processing
+                                <span class="block text-[11px] text-gray-500 mt-1">System-generated from approved UWP and OPCR</span>
+                            </td>
+                            <td class="border border-gray-700 px-4 py-3 text-gray-300">
+                                95% same-day processing
+                            </td>
+                            <td class="border border-gray-700 px-4 py-3 text-gray-300">
+                                January – June 2026
+                            </td>
+                            <td class="border border-gray-700 px-4 py-3">
+                                <input type="number"
+                                       class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2 opacity-80 cursor-not-allowed"
+                                       value="30" disabled>
+                            </td>
+                        </tr>
+
                     </tbody>
                 </table>
             </div>
@@ -153,17 +175,17 @@
                     <tbody>
                         <tr class="hover:bg-gray-750">
                             <td class="border border-gray-700 px-4 py-3 text-gray-300">
-                                Reference Support
+                                Maintenance of Revenue Records Filing System
                             </td>
                             <td class="border border-gray-700 px-4 py-3 text-gray-300">
-                                Provide document retrieval support
+                                Records completeness and retrievability
                                 <span class="block text-[11px] text-gray-500 mt-1">System-generated from approved UWP and OPCR</span>
                             </td>
                             <td class="border border-gray-700 px-4 py-3 text-gray-300">
-                                Within 1 business day
+                                Quarterly validation
                             </td>
                             <td class="border border-gray-700 px-4 py-3 text-gray-300">
-                                Jan – Dec
+                                January – June 2026
                             </td>
                             <td class="border border-gray-700 px-4 py-3">
                                 <input type="number"

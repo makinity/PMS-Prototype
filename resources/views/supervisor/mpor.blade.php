@@ -8,7 +8,7 @@
                     Monthly Performance Output Report
                 </p>
                 <h1 class="mt-1 text-2xl font-bold text-white">
-                    MPOR Validation - December 2025
+                    MPOR Validation - January 2026
                 </h1>
                 <p class="text-sm text-slate-400 mt-1">
                     Review and validate employee MPOR entries derived from submitted ORS logs.
@@ -21,46 +21,6 @@
                 text-xs font-semibold text-amber-200">
                 Pending validation
             </span>
-        </div>
-
-        <!-- Employee Info -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-                <p class="text-xs text-slate-400">Employee</p>
-                <p class="mt-1 text-sm font-semibold text-white">Ramon Reyes</p>
-            </div>
-            <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-                <p class="text-xs text-slate-400">Employee ID</p>
-                <p class="mt-1 text-sm font-semibold text-white">EMP-0078</p>
-            </div>
-            <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-                <p class="text-xs text-slate-400">Unit</p>
-                <p class="mt-1 text-sm font-semibold text-white">Administrative Services</p>
-            </div>
-            <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-                <p class="text-xs text-slate-400">MPOR Status</p>
-                <p class="mt-1 text-sm font-semibold text-amber-300">For review</p>
-            </div>
-        </div>
-
-        <!-- Validation Metrics -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-                <p class="text-xs text-slate-400">ORS logs</p>
-                <p class="mt-1 text-2xl font-semibold text-white">1</p>
-            </div>
-            <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-                <p class="text-xs text-slate-400">Outputs linked</p>
-                <p class="mt-1 text-2xl font-semibold text-emerald-300">1</p>
-            </div>
-            <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-                <p class="text-xs text-slate-400">Pending validation</p>
-                <p class="mt-1 text-2xl font-semibold text-amber-300">1</p>
-            </div>
-            <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-                <p class="text-xs text-slate-400">Missing links</p>
-                <p class="mt-1 text-2xl font-semibold text-rose-300">0</p>
-            </div>
         </div>
 
         <!-- MPOR Outputs -->
@@ -85,8 +45,8 @@
                     <tbody class="divide-y divide-slate-800">
                         <tr class="hover:bg-slate-900">
                             <td class="px-4 py-3">E-Bank Scanning</td>
-                            <td class="px-4 py-3 text-slate-300">REQ-2025-014</td>
-                            <td class="px-4 py-3 text-slate-300">Dec 27, 2025</td>
+                            <td class="px-4 py-3 text-slate-300">REQ-2026-002</td>
+                            <td class="px-4 py-3 text-slate-300">Jan 4, 2026</td>
                             <td class="px-4 py-3">
                                 <span class="rounded-full bg-blue-500/10 px-2 py-1 text-xs
                                     font-semibold text-blue-200 border border-blue-600/50">
@@ -98,7 +58,7 @@
                                 <div class="text-[11px] text-slate-500">Auto-tracked via ORS</div>
                             </td>
                             <td class="px-4 py-3 text-slate-300">
-                                <div class="text-sm font-semibold">E-bank scan upload.pdf</div>
+                                <div class="text-sm font-semibold">e-bank_scan.pdf</div>
                                 <div class="text-[11px] text-slate-500">Submitted in ORS (read-only)</div>
                             </td>
                             <td class="px-4 py-3 text-center space-x-2">
@@ -106,20 +66,60 @@
                                     type="button"
                                     data-view-entry
                                     data-output="E-Bank Scanning"
-                                    data-ors="REQ-2025-014"
-                                    data-date="Dec 27, 2025"
+                                    data-ors="REQ-2026-002"
+                                    data-date="Jan 4, 2026"
                                     data-status="For review"
-                                    data-unit="Administrative Services"
+                                    data-unit="Revenue Collection Unit"
                                     data-employee="Ramon Reyes"
                                     data-duration="1h 30m"
                                     data-start="09:12 AM"
                                     data-end="10:42 AM"
-                                    data-output="E-bank scan upload.pdf"
+                                    data-evidence="e-bank_scan.pdf"
+                                    class="text-blue-400 hover:text-blue-300 text-xs font-semibold">
+                                    View
+                                </button>
+
+                            </td>
+                        </tr>
+
+                        <tr class="hover:bg-slate-900">
+                            <td class="px-4 py-3">OTC Revenue Processing</td>
+                            <td class="px-4 py-3 text-slate-300">REQ-2026-001</td>
+                            <td class="px-4 py-3 text-slate-300">Jan 3, 2026</td>
+                            <td class="px-4 py-3">
+                                <span class="rounded-full bg-blue-500/10 px-2 py-1 text-xs
+                                    font-semibold text-blue-200 border border-blue-600/50">
+                                    For review
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-slate-200">
+                                <div class="text-sm font-semibold">2h 10m</div>
+                                <div class="text-[11px] text-slate-500">Auto-tracked via ORS</div>
+                            </td>
+                            <td class="px-4 py-3 text-slate-300">
+                                <div class="text-sm font-semibold">otc_receipt.pdf</div>
+                                <div class="text-[11px] text-slate-500">Submitted in ORS (read-only)</div>
+                            </td>
+                            <td class="px-4 py-3 text-center">
+                                <button
+                                    type="button"
+                                    data-view-entry
+                                    data-output="Processing of Over-the-Counter Revenue Transactions"
+                                    data-ors="REQ-2026-001"
+                                    data-date="Jan 3, 2026"
+                                    data-status="For review"
+                                    data-unit="Revenue Collection Unit"
+                                    data-employee="Ramon Reyes"
+                                    data-duration="2h 10m"
+                                    data-start="08:20 AM"
+                                    data-end="10:30 AM"
+                                    data-evidence="otc_receipt.pdf"
                                     class="text-blue-400 hover:text-blue-300 text-xs font-semibold">
                                     View
                                 </button>
                             </td>
                         </tr>
+
                     </tbody>
                 </table>
             </div>
@@ -190,7 +190,7 @@
                     </div>
                     <div class="rounded-lg border border-slate-800 bg-slate-950/70 p-3">
                         <p class="text-[11px] uppercase tracking-wide text-slate-500">Output evidence</p>
-                        <p id="modal-output" class="mt-1 text-sm font-semibold text-white">--</p>
+                        <p id="modal-evidence" class="mt-1 text-sm font-semibold text-white">--</p>
                         <p class="text-[11px] text-slate-500 mt-1">Submitted in ORS (read-only)</p>
                     </div>
                 </div>
@@ -256,6 +256,7 @@
                 const modalDate = document.getElementById('modal-date');
                 const modalStatus = document.getElementById('modal-status');
                 const modalUnit = document.getElementById('modal-unit');
+                const modalEvidence = document.getElementById('modal-evidence');
                 const modalEmployee = document.getElementById('modal-employee');
                 const modalDuration = document.getElementById('modal-duration');
                 const modalStart = document.getElementById('modal-start');
@@ -269,6 +270,7 @@
                         if (modalDate) modalDate.textContent = button.dataset.date || '--';
                         if (modalStatus) modalStatus.textContent = button.dataset.status || '--';
                         if (modalUnit) modalUnit.textContent = button.dataset.unit || '--';
+                        if (modalEvidence) modalEvidence.textContent = button.dataset.evidence || '--';
                         if (modalEmployee) modalEmployee.textContent = button.dataset.employee || '--';
                         if (modalDuration) modalDuration.textContent = button.dataset.duration || '--';
                         if (modalStart) modalStart.textContent = button.dataset.start || '--';

@@ -8,7 +8,7 @@
     {{-- Performance Period --}}
     <div class="mb-6 rounded-2xl border border-slate-800 bg-slate-950 p-5">
         <p class="text-xs uppercase tracking-wide text-slate-400">Performance Period</p>
-        <p class="font-medium text-slate-100">January – December 2026</p>
+        <p class="font-medium text-slate-100">January – June 2026</p>
     </div>
 
     {{-- UWP List --}}
@@ -31,13 +31,13 @@
                 <tbody class="divide-y divide-slate-800">
                     <tr class="hover:bg-slate-900/60 transition">
                         <td class="px-4 py-3 text-sm font-semibold text-slate-100">
-                            Administrative Services Unit
+                            Revenue Collection Unit
                         </td>
                         <td class="px-4 py-3 text-sm text-slate-300">
-                            Maria Santos
+                            Carlo D. Beray
                         </td>
                         <td class="px-4 py-3 text-sm text-slate-300">
-                            Engr. Roberto Reyes
+                            Dept-head
                         </td>
                         <td class="px-4 py-3 text-sm text-center">
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
@@ -81,16 +81,16 @@
                             Unit Work Plan
                         </p>
                         <h3 class="text-lg font-semibold text-white">
-                            Administrative Services Unit
+                            Revenue Collection Unit
                         </h3>
                         <p class="mt-1 text-sm text-slate-400">
-                            Jan – Dec 2026 • Supervisor: Maria Santos
+                            Jan – June 2026 • Supervisor: Carlo D. Beray
                         </p>
                     </div>
 
                     <div class="flex items-center gap-2">
                         {{-- Export (enabled only if Approved Final) --}}
-                        <a href="{{ route('pmt.uwp.export.pdf') }}"
+                        <a href="{{ route('stage1.uwp.export.pdf') }}"
                         class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800">
                             Export PDF
                         </a>
@@ -117,11 +117,11 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
                             <p class="text-xs uppercase text-slate-500">Office / Unit</p>
-                            <p class="mt-1 text-sm font-semibold text-white">Administrative Services Unit</p>
+                            <p class="mt-1 text-sm font-semibold text-white">Revenue Collection Unit</p>
                         </div>
                         <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
                             <p class="text-xs uppercase text-slate-500">Department Head</p>
-                            <p class="mt-1 text-sm font-semibold text-white">Engr. Roberto Reyes</p>
+                            <p class="mt-1 text-sm font-semibold text-white">Dept-head</p>
                         </div>
                         <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
                             <p class="text-xs uppercase text-slate-500">Status</p>
@@ -147,14 +147,36 @@
                             </thead>
                             <tbody class="divide-y divide-slate-800">
                                 <tr>
-                                    <td class="px-4 py-3 text-sm text-white">Records Management</td>
-                                    <td class="px-4 py-3 text-sm text-slate-300">Process and file incoming documents</td>
-                                    <td class="px-4 py-3 text-sm text-center text-white">1,200</td>
-                                    <td class="px-4 py-3 text-sm text-center text-slate-300">Jan – Dec</td>
+                                    <td class="px-4 py-3 text-sm text-white">E-Bank Scanning and Encoding of Revenue Transactions</td>
+                                    <td class="px-4 py-3 text-sm text-slate-300">Scanned, encoded, and properly indexed e-bank transaction documents uploaded to the system.</td>
+                                    <td class="px-4 py-3 text-sm text-center text-white">95% of daily e-bank transactions processed within the same day</td>
+                                    <td class="px-4 py-3 text-sm text-center text-slate-300">Daily (January – December 2026)</td>
                                     <td class="px-4 py-3 text-sm text-center">
                                         <span class="rounded-md bg-emerald-500/10 px-2 py-1 text-xs font-medium
                                             text-emerald-400 border border-emerald-500/20">
                                             Core
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-slate-800/40 transition">
+                                    <td class="px-4 py-3 text-sm text-slate-100">Processing of over-the-counter revenue transactions</td>
+                                    <td class="px-4 py-3 text-sm text-slate-300">All over-the-counter revenue transactions are verified, recorded, and encoded accurately within the prescribed processing time.</td>
+                                    <td class="px-4 py-3 text-sm text-center text-slate-100">Daily; 95% processed within the same working day   </td>
+                                    <td class="px-4 py-3 text-sm text-center text-slate-300">Daily (January – December 2025)</td>
+                                    <td class="px-4 py-3 text-sm text-center">
+                                        <span class="px-2 py-1 rounded-md text-xs font-medium bg-blue-500/10 text-blue-300 border border-blue-400/30">
+                                            Core
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-slate-800/40 transition">
+                                    <td class="px-4 py-3 text-sm text-slate-100">Maintenance of Revenue Records Filing System</td>
+                                    <td class="px-4 py-3 text-sm text-slate-300">Organized and updated physical and digital filing of revenue transaction records.</td>
+                                    <td class="px-4 py-3 text-sm text-center text-slate-100">Quarterly validation and update</td>
+                                    <td class="px-4 py-3 text-sm text-center text-slate-300">Quarterly</td>
+                                    <td class="px-4 py-3 text-sm text-center">
+                                        <span class="px-2 py-1 rounded-md text-xs font-medium bg-blue-500/10 text-blue-300 border border-blue-400/30">
+                                            Support
                                         </span>
                                     </td>
                                 </tr>
