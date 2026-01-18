@@ -66,7 +66,7 @@
                 <div class="flex items-center gap-2">
                     <span class="status-chip border-emerald-500/60 bg-emerald-500/10 text-emerald-100">
                         <span class="status-dot bg-emerald-500"></span>
-                        Locked / In MPOR
+                        Submitted (Locked) – mirrored in MPOR
                     </span>
                     <span class="text-slate-400">Not editable</span>
                 </div>
@@ -98,8 +98,8 @@
             </div>
             <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Submitted</p>
-                <p class="mt-1 text-2xl font-semibold text-blue-300">1</p>
-                <p class="text-xs text-slate-400">Locked -> MPOR</p>
+                <p class="mt-1 text-2xl font-semibold text-blue-300">3</p>
+                <p class="text-xs text-slate-400">Eligible for MPOR summary</p>
             </div>
             <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Validated</p>
@@ -372,7 +372,7 @@
             <div class="flex flex-wrap gap-2 text-xs">
                 <span id="taskDetailStatusBadge" class="status-chip border-slate-700 bg-slate-800 text-slate-200">--</span>
                 <span id="taskDetailLockBadge" class="hidden status-chip border-emerald-500/60 bg-emerald-500/10 text-emerald-100">
-                    Locked -> In MPOR
+                    Submitted (Locked)
                 </span>
             </div>
 
@@ -451,7 +451,7 @@
                 </div>
 
                 <p id="taskDetailLockMessage" class="mt-2 hidden text-[11px] text-emerald-300">
-                    Submitted/Locked -> In MPOR (read-only). SMPOR is system-generated from validated MPOR entries.
+                    Submitted (Locked) — visible in MPOR monthly summary. SMPOR is system-generated after validation.
                 </p>
                 <p id="taskDetailDraftMessage" class="mt-2 text-[11px] text-slate-400">
                     Stop ends timing and keeps Draft editable. Submit for Review locks the entry and prevents duplicate submissions.
@@ -476,8 +476,8 @@
                 paused: { label: 'Paused', color: '#f59e0b', badge: 'border-amber-500/60 bg-amber-500/10 text-amber-200', editable: false },
                 draft: { label: 'Draft (Stopped)', color: '#fbbf24', badge: 'border-amber-300/60 bg-amber-300/10 text-amber-100', editable: true },
                 submitted: { label: 'Submitted (Locked)', color: '#3b82f6', badge: 'border-blue-500/60 bg-blue-500/10 text-blue-100', editable: false },
-                locked: { label: 'Locked / In MPOR', color: '#10b981', badge: 'border-emerald-500/60 bg-emerald-500/10 text-emerald-100', editable: false },
-                missing: { label: 'Missing / Overdue', color: '#ef4444', badge: 'border-red-500/60 bg-red-500/10 text-red-100', editable: false },
+                locked: { label: 'Submitted (Locked)', color: '#10b981', badge: 'border-emerald-500/60 bg-emerald-500/10 text-emerald-100', editable: false },
+                missing: { label: 'Missing / Overdue', color: '#ef4444', badge: 'border-red-500/60 bg-red-500/10 text-red-100', editable: true },
             };
 
             let tasks = [
@@ -500,10 +500,10 @@
                         date: '2026-01-04',
                         client: 'Revenue Collection Unit',
                         requestId: 'REQ-2026-002',
-                        output: 'Scanned Supprting Document',
-                        notes: 'Late uploads included',
+                        output: 'Scanned Supporting Document',
+                        notes: 'Submitted with late uploads',
                         rating: '--',
-                        state: 'draft',
+                        state: 'submitted',
                         startTime: null,
                         durationMs: 90 * 60 * 1000
                     },
@@ -527,9 +527,9 @@
                         client: 'Revenue Collection Unit',
                         requestId: 'REQ-2026-004',
                         output: 'Official Receipt (OR)',
-                        notes: 'Validated by supervisor',
+                        notes: 'Submitted by employee',
                         rating: '--',
-                        state: 'locked',
+                        state: 'submitted',
                         startTime: null,
                         durationMs: 3 * 60 * 60 * 1000
                     },
@@ -655,7 +655,7 @@
             }
 
             function isLockedState(state) {
-                return state === 'submitted' || state === 'locked' || state === 'missing';
+                return state === 'submitted' || state === 'locked';
             }
 
             function formatDuration(ms) {
@@ -730,7 +730,8 @@
                 document.getElementById('taskDetailDuration').textContent = formatDuration(computeElapsed(task));
                 document.getElementById('taskDetailRating').textContent = task.rating || '--';
                 document.getElementById('taskDetailNotes').textContent = task.notes || '--';
-                document.getElementById('taskDetailUpload').disabled = isLockedState(task.state);
+                const isMissing = task.state === 'missing';
+                document.getElementById('taskDetailUpload').disabled = isLockedState(task.state) && !isMissing;
 
                 setStatusBadge(document.getElementById('taskDetailStatusBadge'), task.state);
 
@@ -738,16 +739,39 @@
                 const lockMsg = document.getElementById('taskDetailLockMessage');
                 const draftMsg = document.getElementById('taskDetailDraftMessage');
 
-                const locked = isLockedState(task.state);
-                lockBadge.classList.toggle('hidden', !locked);
-                lockMsg.classList.toggle('hidden', !locked);
-                draftMsg.classList.toggle('hidden', locked);
+                const locked = !isMissing && isLockedState(task.state);
+                if (isMissing) {
+                    if (lockBadge) {
+                        lockBadge.classList.add('hidden');
+                        lockBadge.style.display = 'none';
+                        lockBadge.setAttribute('aria-hidden', 'true');
+                        lockBadge.textContent = '';
+                    }
+                    if (lockMsg) {
+                        lockMsg.classList.add('hidden');
+                        lockMsg.style.display = 'none';
+                        lockMsg.setAttribute('aria-hidden', 'true');
+                    }
+                } else {
+                    if (lockBadge) {
+                        lockBadge.textContent = 'Submitted (Locked)';
+                        lockBadge.classList.toggle('hidden', !locked);
+                        lockBadge.style.display = locked ? '' : 'none';
+                        lockBadge.removeAttribute('aria-hidden');
+                    }
+                    if (lockMsg) {
+                        lockMsg.classList.toggle('hidden', !locked);
+                        lockMsg.style.display = locked ? '' : 'none';
+                        lockMsg.removeAttribute('aria-hidden');
+                    }
+                }
+                draftMsg?.classList.toggle('hidden', locked);
 
                 toggleAction(document.getElementById('taskDetailStartBtn'), !locked && task.state === 'draft' && (!activeTaskId || activeTaskId === task.id));
                 toggleAction(document.getElementById('taskDetailPauseBtn'), task.state === 'recording');
                 toggleAction(document.getElementById('taskDetailResumeBtn'), task.state === 'paused');
                 toggleAction(document.getElementById('taskDetailStopBtn'), task.state === 'recording' || task.state === 'paused');
-                toggleAction(document.getElementById('taskDetailSubmitBtn'), !locked && task.state === 'draft');
+                toggleAction(document.getElementById('taskDetailSubmitBtn'), !locked && (task.state === 'draft' || isMissing));
 
                 openOrsModal('taskDetailsModal');
             }

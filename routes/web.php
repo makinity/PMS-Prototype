@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\StageOne\Forms\IpcrExportController;
 use App\Http\Controllers\StageOne\Forms\OpcrExportController;
 use App\Http\Controllers\StageOne\Forms\UwpExportController;
+use App\Http\Controllers\StageOne\Forms\OrsExportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -79,6 +81,9 @@ Route::get('/dept-head/IPCRTARGET', function () {
     return view('dept-head.ipcr-target');
 })->name('dept-head.ipcr-target');
 
+Route::get('/dept-head/ipcr/export/pdf', [IpcrExportController::class, 'exportPdf'])
+    ->name('stage1.ipcr.export.pdf');
+
 Route::get('/dept-head/idp', function () {
     return view('dept-head.idp');
 })->name('dept-head.idp');
@@ -117,6 +122,17 @@ Route::get('/supervisor/opcr', function () {
 Route::get('/supervisor/mpor', function () {
     return view('supervisor.mpor');
 })->name('supervisor.mpor');
+
+Route::get('/supervisor/mpor-validation', function () {
+    return view('supervisor.mpor-validation');
+})->name('supervisor.mpor-validation');
+
+Route::get('/supervisor/ors-monitoring', function () {
+    return view('supervisor.ors-monitoring');
+})->name('supervisor.ors-monitoring');
+
+Route::get('/supervisor/ors/export/pdf', [OrsExportController::class, 'exportPdf'])
+    ->name('supervisor.ors.export.pdf');
 
 Route::get('/supervisor/overdue-alerts', function () {
     return view('supervisor.overdue-alerts');

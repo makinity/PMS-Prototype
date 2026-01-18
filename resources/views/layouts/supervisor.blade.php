@@ -150,6 +150,8 @@
             $isSupervisorIPCRTARGET = request()->routeIs('supervisor.ipcr-target');
             $isSupervisorOPCR = request()->routeIs('supervisor.opcr');
             $isSupervisorMPOR = request()->routeIs('supervisor.mpor');
+            $isSupervisorMPORValidation = request()->routeIs('supervisor.mpor-validation');
+            $isSupervisorORS = request()->routeIs('supervisor.ors-monitoring');
             $isSupervisorOverdueAlerts = request()->routeIs('supervisor.overdue-alerts');
             $isSupervisorTaskValidation = request()->routeIs('supervisor.task-validation');
             $isSupervisorTeamProductivity = request()->routeIs('supervisor.team-productivity');
@@ -281,6 +283,18 @@
                                 <a href="{{ route('supervisor.mpor') }}" class="sidebar-link" @if($isSupervisorMPOR) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-clipboard-check"></i>
                                     <span>MPOR</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('supervisor.mpor-validation') }}" class="sidebar-link" @if($isSupervisorMPORValidation) aria-current="page" @endif>
+                                    <i class="sidebar-icon fa-solid fa-clipboard-check"></i>
+                                    <span>MPOR Validation</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('supervisor.ors-monitoring') }}" class="sidebar-link" @if($isSupervisorORS) aria-current="page" @endif>
+                                    <i class="sidebar-icon fa-solid fa-clipboard-check"></i>
+                                    <span>ORS Monitoring</span>
                                 </a>
                             </li>
                             <li>

@@ -17,7 +17,7 @@
                 <option class="bg-gray-700">Draft</option>
                 <option class="bg-gray-700">Recording</option>
                 <option class="bg-gray-700">Submitted</option>
-                <option class="bg-gray-700">Locked / In MPOR</option>
+                <option class="bg-gray-700">Missing / Overdue</option>
                 <option class="bg-gray-700">Returned</option>
             </select>
 
@@ -46,14 +46,14 @@
                             <td class="px-4 py-3 text-gray-300">E-Bank Scanning</td>
                             <td class="px-4 py-3 text-gray-300">Jan 4, 2026</td>
                             <td class="px-4 py-3">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-900 text-blue-300">
-                                    Draft (Stopped)
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-violet-900 text-violet-300">
+                                    Submitted (Locked)
                                 </span>
                             </td>
                             <td class="px-4 py-3">
-                                <span class="text-xs font-medium text-blue-300">Output in draft</span>
+                                <span class="text-xs font-medium text-emerald-300">Output submitted</span>
                             </td>
-                            <td class="px-4 py-3 text-gray-300">Needs submission</td>
+                            <td class="px-4 py-3 text-gray-300">Visible to supervisor</td>
                         </tr>
 
                         <tr class="hover:bg-gray-750">
@@ -81,7 +81,7 @@
                             <td class="px-4 py-3">
                                 <span class="text-xs font-medium text-emerald-300">Output submitted</span>
                             </td>
-                            <td class="px-4 py-3 text-gray-300">For validation</td>
+                            <td class="px-4 py-3 text-gray-300">Visible to supervisor</td>
                         </tr>
 
                         <tr class="hover:bg-gray-750">
@@ -89,7 +89,7 @@
                             <td class="px-4 py-3 text-gray-300">Jan 6, 2026</td>
                             <td class="px-4 py-3">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-900 text-red-300">
-                                    Locked / In MPOR
+                                    Missing / Overdue
                                 </span>
                             </td>
                             <td class="px-4 py-3">
@@ -109,7 +109,7 @@
                             <td class="px-4 py-3">
                                 <span class="text-xs font-medium text-emerald-300">	Output submitted</span>
                             </td>
-                            <td class="px-4 py-3 text-gray-300">For validation</td>
+                            <td class="px-4 py-3 text-gray-300">Visible to supervisor</td>
                         </tr>
 
                     </tbody>

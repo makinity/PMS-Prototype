@@ -1,4 +1,55 @@
 <x-layouts.supervisor>
+    @php
+        $isValidationPhase = $isValidationPhase ?? false;
+        $modeTitle = $isValidationPhase
+            ? 'Stage III – MPOR Validation'
+            : 'Stage II – Monthly Performance Monitoring (MPOR Review)';
+        $modeHelper = $isValidationPhase
+            ? 'In this stage, the supervisor formally validates monthly accomplishments and prepares records for SMPOR generation.'
+            : 'This view summarizes submitted ORS accomplishments for monthly monitoring. No validation or rating is performed at this stage.';
+        $statusBadge = $isValidationPhase ? 'Pending validation' : 'Summary';
+        $detailsBadge = $isValidationPhase ? 'For review' : 'Included in monthly summary';
+        $finalNote = $isValidationPhase
+            ? 'MPOR can be locked only when all entries are validated and linked.'
+            : 'SMPOR generation occurs after MPOR validation.';
+        $showLockButton = $isValidationPhase;
+
+        $entries = [
+            [
+                'output' => 'E-Bank Scanning',
+                'ors' => 'REQ-2026-002',
+                'date' => 'Jan 4, 2026',
+                'duration' => '1h 30m',
+                'durationCopy' => 'Auto-tracked via ORS',
+                'evidence' => 'e-bank_scan.pdf',
+                'status' => $detailsBadge,
+                'badgeClass' => $isValidationPhase
+                    ? 'border-blue-600/50 bg-blue-500/10 text-blue-200'
+                    : 'border-emerald-600/50 bg-emerald-500/10 text-emerald-200',
+                'unit' => 'Revenue Collection Unit',
+                'employee' => 'Ramon Reyes',
+                'start' => '09:12 AM',
+                'end' => '10:42 AM',
+            ],
+            [
+                'output' => 'OTC Revenue Processing',
+                'ors' => 'REQ-2026-001',
+                'date' => 'Jan 3, 2026',
+                'duration' => '2h 10m',
+                'durationCopy' => 'Auto-tracked via ORS',
+                'evidence' => 'otc_receipt.pdf',
+                'status' => $detailsBadge,
+                'badgeClass' => $isValidationPhase
+                    ? 'border-blue-600/50 bg-blue-500/10 text-blue-200'
+                    : 'border-emerald-600/50 bg-emerald-500/10 text-emerald-200',
+                'unit' => 'Revenue Collection Unit',
+                'employee' => 'Ramon Reyes',
+                'start' => '08:20 AM',
+                'end' => '10:30 AM',
+            ],
+        ];
+    @endphp
+
     <section class="space-y-6">
 
         <!-- Header -->
@@ -8,26 +59,36 @@
                     Monthly Performance Output Report
                 </p>
                 <h1 class="mt-1 text-2xl font-bold text-white">
-                    MPOR Validation - January 2026
+                    MPOR - January 2026
                 </h1>
                 <p class="text-sm text-slate-400 mt-1">
-                    Review and validate employee MPOR entries derived from submitted ORS logs.
+                    {{ $modeHelper }}
                 </p>
                 <p class="text-[11px] text-slate-500 mt-2">
-                    Durations and outputs are auto-generated from ORS. Supervisor validation does not modify employee logs.
+                    Durations and outputs are auto-generated from ORS. Supervisor actions do not modify employee logs.
                 </p>
             </div>
-            <span class="rounded-full border border-amber-600/50 bg-amber-500/10 px-3 py-1
-                text-xs font-semibold text-amber-200">
-                Pending validation
-            </span>
+            <div class="flex flex-col items-end gap-2 text-right">
+                <span class="rounded-full border border-blue-500/40 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-200">
+                    {{ $modeTitle }}
+                </span>
+                <span class="rounded-full border border-slate-500/40 bg-slate-900/60 px-3 py-1 text-[11px] font-semibold text-slate-300">
+                    {{ $statusBadge }}
+                </span>
+            </div>
         </div>
 
         <!-- MPOR Outputs -->
-        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-            <h2 class="text-lg font-semibold text-white mb-3">
-                MPOR entries
-            </h2>
+        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 space-y-4">
+            <div class="flex flex-wrap items-start justify-between gap-2">
+                <div>
+                    <h2 class="text-lg font-semibold text-white">MPOR entries</h2>
+                    <p class="text-xs text-slate-400">
+                        Only submitted ORS accomplishments are summarized here. Status chips describe monitoring or validation context depending on the stage.
+                    </p>
+                </div>
+                <span class="text-xs text-slate-400">{{ $isValidationPhase ? 'Pending supervisor validation' : 'Monitoring summary' }}</span>
+            </div>
 
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm border border-slate-800">
@@ -38,116 +99,90 @@
                             <th class="px-4 py-3 text-left">Date</th>
                             <th class="px-4 py-3 text-left">Status</th>
                             <th class="px-4 py-3 text-left">Duration</th>
-                            <th class="px-4 py-3 text-left">Output Evidence</th>
+                            <th class="px-4 py-3 text-left">Evidence</th>
                             <th class="px-4 py-3 text-center">Action</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-800">
-                        <tr class="hover:bg-slate-900">
-                            <td class="px-4 py-3">E-Bank Scanning</td>
-                            <td class="px-4 py-3 text-slate-300">REQ-2026-002</td>
-                            <td class="px-4 py-3 text-slate-300">Jan 4, 2026</td>
-                            <td class="px-4 py-3">
-                                <span class="rounded-full bg-blue-500/10 px-2 py-1 text-xs
-                                    font-semibold text-blue-200 border border-blue-600/50">
-                                    For review
-                                </span>
-                            </td>
-                            <td class="px-4 py-3 text-slate-200">
-                                <div class="text-sm font-semibold">1h 30m</div>
-                                <div class="text-[11px] text-slate-500">Auto-tracked via ORS</div>
-                            </td>
-                            <td class="px-4 py-3 text-slate-300">
-                                <div class="text-sm font-semibold">e-bank_scan.pdf</div>
-                                <div class="text-[11px] text-slate-500">Submitted in ORS (read-only)</div>
-                            </td>
-                            <td class="px-4 py-3 text-center space-x-2">
-                                <button
-                                    type="button"
-                                    data-view-entry
-                                    data-output="E-Bank Scanning"
-                                    data-ors="REQ-2026-002"
-                                    data-date="Jan 4, 2026"
-                                    data-status="For review"
-                                    data-unit="Revenue Collection Unit"
-                                    data-employee="Ramon Reyes"
-                                    data-duration="1h 30m"
-                                    data-start="09:12 AM"
-                                    data-end="10:42 AM"
-                                    data-evidence="e-bank_scan.pdf"
-                                    class="text-blue-400 hover:text-blue-300 text-xs font-semibold">
-                                    View
-                                </button>
-
-                            </td>
-                        </tr>
-
-                        <tr class="hover:bg-slate-900">
-                            <td class="px-4 py-3">OTC Revenue Processing</td>
-                            <td class="px-4 py-3 text-slate-300">REQ-2026-001</td>
-                            <td class="px-4 py-3 text-slate-300">Jan 3, 2026</td>
-                            <td class="px-4 py-3">
-                                <span class="rounded-full bg-blue-500/10 px-2 py-1 text-xs
-                                    font-semibold text-blue-200 border border-blue-600/50">
-                                    For review
-                                </span>
-                            </td>
-                            <td class="px-4 py-3 text-slate-200">
-                                <div class="text-sm font-semibold">2h 10m</div>
-                                <div class="text-[11px] text-slate-500">Auto-tracked via ORS</div>
-                            </td>
-                            <td class="px-4 py-3 text-slate-300">
-                                <div class="text-sm font-semibold">otc_receipt.pdf</div>
-                                <div class="text-[11px] text-slate-500">Submitted in ORS (read-only)</div>
-                            </td>
-                            <td class="px-4 py-3 text-center">
-                                <button
-                                    type="button"
-                                    data-view-entry
-                                    data-output="Processing of Over-the-Counter Revenue Transactions"
-                                    data-ors="REQ-2026-001"
-                                    data-date="Jan 3, 2026"
-                                    data-status="For review"
-                                    data-unit="Revenue Collection Unit"
-                                    data-employee="Ramon Reyes"
-                                    data-duration="2h 10m"
-                                    data-start="08:20 AM"
-                                    data-end="10:30 AM"
-                                    data-evidence="otc_receipt.pdf"
-                                    class="text-blue-400 hover:text-blue-300 text-xs font-semibold">
-                                    View
-                                </button>
-                            </td>
-                        </tr>
-
+                        @foreach ($entries as $entry)
+                            <tr class="hover:bg-slate-900">
+                                <td class="px-4 py-3">{{ $entry['output'] }}</td>
+                                <td class="px-4 py-3 text-slate-300">{{ $entry['ors'] }}</td>
+                                <td class="px-4 py-3 text-slate-300">{{ $entry['date'] }}</td>
+                                <td class="px-4 py-3">
+                                    <span class="rounded-full {{ $entry['badgeClass'] }} px-2 py-1 text-xs font-semibold border">
+                                        {{ $entry['status'] }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 text-slate-200">
+                                    <div class="text-sm font-semibold">{{ $entry['duration'] }}</div>
+                                    <div class="text-[11px] text-slate-500">{{ $entry['durationCopy'] }}</div>
+                                </td>
+                                <td class="px-4 py-3 text-slate-300">
+                                    <div class="text-sm font-semibold">{{ $entry['evidence'] }}</div>
+                                    <div class="text-[11px] text-slate-500">Submitted in ORS (read-only)</div>
+                                </td>
+                                <td class="px-4 py-3 text-center">
+                                    <button
+                                        type="button"
+                                        data-view-entry
+                                        data-output="{{ $entry['output'] }}"
+                                        data-ors="{{ $entry['ors'] }}"
+                                        data-date="{{ $entry['date'] }}"
+                                        data-status="{{ $entry['status'] }}"
+                                        data-unit="{{ $entry['unit'] }}"
+                                        data-employee="{{ $entry['employee'] }}"
+                                        data-duration="{{ $entry['duration'] }}"
+                                        data-start="{{ $entry['start'] }}"
+                                        data-end="{{ $entry['end'] }}"
+                                        data-evidence="{{ $entry['evidence'] }}"
+                                        class="text-blue-400 hover:text-blue-300 text-xs font-semibold"
+                                    >
+                                        View
+                                    </button>
+                                </td>
+                            </tr>
+                        @endforeach
                     </tbody>
                 </table>
             </div>
         </div>
 
         <!-- Final Action -->
-        <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-4 flex items-center justify-between">
-            <p class="text-xs text-slate-400">
-                MPOR can be locked only when all entries are validated and linked.
+        <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
+            <p class="flex-1">
+                {{ $finalNote }}
             </p>
-            <button disabled
-                class="rounded-lg bg-slate-700 px-4 py-2 text-sm font-semibold text-slate-300 cursor-not-allowed">
-                Lock MPOR (Ready for SMPOR)
-            </button>
+            @if ($showLockButton)
+                <button class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-900 shadow-lg shadow-black/30">
+                    Lock MPOR (Ready for SMPOR)
+                </button>
+            @else
+                <span class="rounded-full border border-slate-700 px-3 py-1 text-xs font-semibold text-slate-400">
+                    Monitoring-only mode
+                </span>
+            @endif
         </div>
 
     </section>
 
-    <div id="view-mpor-modal" data-modal-container tabindex="-1" aria-hidden="true"
-         class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-950/75 backdrop-blur-sm p-4">
+    <div id="view-mpor-modal"
+         data-modal-container
+         tabindex="-1"
+         aria-hidden="true"
+         class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-950/75 backdrop-blur-sm p-4"
+    >
         <div class="w-full max-w-lg rounded-2xl border border-slate-800 bg-slate-900/95 shadow-2xl shadow-black/40">
             <div class="flex items-start justify-between gap-3 border-b border-slate-800 px-4 py-3">
                 <div>
                     <p class="text-xs uppercase tracking-[0.2em] text-emerald-300">MPOR Entry</p>
                     <h3 class="text-lg font-semibold text-white">View MPOR Entry</h3>
-                    <p class="mt-1 text-sm text-slate-400">Review details and choose an action below.</p>
+                    <p class="mt-1 text-sm text-slate-400">
+                        {{ $isValidationPhase ? 'Review details and choose an action below.' : 'Read-only detail of the submitted ORS entry.' }}
+                    </p>
                 </div>
-                <button type="button" data-modal-hide="view-mpor-modal"
+                <button type="button"
+                        data-modal-hide="view-mpor-modal"
                         class="rounded-full p-1 text-slate-400 transition hover:bg-slate-800 hover:text-slate-200">
                     <span class="sr-only">Close</span>
                     &times;
@@ -196,21 +231,34 @@
                 </div>
             </div>
             <div class="flex items-center justify-end gap-2 border-t border-slate-800 px-4 py-3">
-                <button type="button" data-modal-hide="view-mpor-modal"
+                <button type="button"
+                        data-modal-hide="view-mpor-modal"
                         class="rounded-lg border border-slate-700 bg-slate-800/80 px-3 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-800">
                     Close
                 </button>
-                <button type="button"
-                        data-modal-return="view-mpor-modal"
-                        class="inline-flex items-center gap-2 rounded-lg border border-rose-500/40 bg-rose-600/10 px-3 py-2 text-sm font-semibold text-rose-200 transition hover:bg-rose-600/20">
-                    Return
-                </button>
-                <button type="button"
-                        data-modal-validate="view-mpor-modal"
-                        data-auto-reset="true"
-                        class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500">
-                    Validate
-                </button>
+                @if ($isValidationPhase)
+
+                    <button type="button"
+                            data-modal-return="view-mpor-modal"
+                            class="inline-flex items-center gap-2 rounded-lg border border-rose-500/40 bg-rose-600/10 px-3 py-2 text-sm font-semibold text-rose-200 transition hover:bg-rose-600/20">
+                        Return
+                    </button>
+                    <button type="button"
+                            data-modal-validate="view-mpor-modal"
+                            data-auto-reset="true"
+                            class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500">
+                        Validate
+                    </button>
+                @else
+                    <a href="{{ route('supervisor.ors.export.pdf') }}"
+                        class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800">
+                            Export PDF
+                    </a>
+                    <button type="button"
+                            class="rounded-lg border border-slate-700 bg-slate-800/80 px-3 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-800">
+                        View Evidence
+                    </button>
+                @endif
             </div>
         </div>
     </div>
@@ -251,71 +299,47 @@
                     }
                 };
 
-                const modalOutput = document.getElementById('modal-output');
-                const modalOrs = document.getElementById('modal-ors');
-                const modalDate = document.getElementById('modal-date');
-                const modalStatus = document.getElementById('modal-status');
-                const modalUnit = document.getElementById('modal-unit');
-                const modalEvidence = document.getElementById('modal-evidence');
-                const modalEmployee = document.getElementById('modal-employee');
-                const modalDuration = document.getElementById('modal-duration');
-                const modalStart = document.getElementById('modal-start');
-                const modalEnd = document.getElementById('modal-end');
-                const viewModalId = 'view-mpor-modal';
-
+                const modalId = 'view-mpor-modal';
                 document.querySelectorAll('[data-view-entry]').forEach((button) => {
                     button.addEventListener('click', () => {
-                        if (modalOutput) modalOutput.textContent = button.dataset.output || '--';
-                        if (modalOrs) modalOrs.textContent = button.dataset.ors || '--';
-                        if (modalDate) modalDate.textContent = button.dataset.date || '--';
-                        if (modalStatus) modalStatus.textContent = button.dataset.status || '--';
-                        if (modalUnit) modalUnit.textContent = button.dataset.unit || '--';
-                        if (modalEvidence) modalEvidence.textContent = button.dataset.evidence || '--';
-                        if (modalEmployee) modalEmployee.textContent = button.dataset.employee || '--';
-                        if (modalDuration) modalDuration.textContent = button.dataset.duration || '--';
-                        if (modalStart) modalStart.textContent = button.dataset.start || '--';
-                        if (modalEnd) modalEnd.textContent = button.dataset.end || '--';
-                        toggleModal(viewModalId, true);
+                        const detailIds = ['output', 'ors', 'date', 'status', 'unit', 'employee', 'duration', 'start', 'end', 'evidence'];
+                        detailIds.forEach((id) => {
+                            const el = document.getElementById(`modal-${id}`);
+                            if (el) {
+                                el.textContent = button.dataset[id] || '--';
+                            }
+                        });
+                        toggleModal(modalId, true);
                     });
                 });
 
-                document.getElementById(viewModalId)?.addEventListener('click', (event) => {
-                    if (event.target.id === viewModalId) {
-                        toggleModal(viewModalId, false);
-                    }
+                document.querySelectorAll('[data-modal-hide="view-mpor-modal"]').forEach((button) => {
+                    button.addEventListener('click', () => toggleModal(modalId, false));
                 });
 
-                document.querySelectorAll('[data-modal-hide="view-mpor-modal"]').forEach((button) => {
-                    button.addEventListener('click', () => toggleModal(viewModalId, false));
+                document.getElementById(modalId)?.addEventListener('click', (event) => {
+                    if (event.target.id === modalId) {
+                        toggleModal(modalId, false);
+                    }
                 });
 
                 document.querySelectorAll('[data-modal-return="view-mpor-modal"]').forEach((button) => {
                     button.addEventListener('click', () => {
-                        const modal = document.getElementById(viewModalId);
-                        const actionButtons = modal?.querySelectorAll('[data-modal-return], [data-modal-validate], [data-modal-hide]');
                         setLoadingState(button, 'Returning...');
-                        actionButtons?.forEach((btn) => btn.setAttribute('disabled', 'true'));
-                        const delay = Number(button.dataset.resetDelay || 1400);
                         setTimeout(() => {
-                            actionButtons?.forEach((btn) => btn.removeAttribute('disabled'));
                             resetLoadingState(button);
-                            toggleModal(viewModalId, false);
-                        }, delay);
+                            toggleModal(modalId, false);
+                        }, 1400);
                     });
                 });
 
                 document.querySelectorAll('[data-modal-validate="view-mpor-modal"]').forEach((button) => {
                     button.addEventListener('click', () => {
-                        const modal = document.getElementById(viewModalId);
-                        const actionButtons = modal?.querySelectorAll('[data-modal-return], [data-modal-validate], [data-modal-hide]');
                         setLoadingState(button, 'Validating...');
-                        actionButtons?.forEach((btn) => btn.setAttribute('disabled', 'true'));
-                        const delay = Number(button.dataset.resetDelay || 1400);
                         setTimeout(() => {
-                            actionButtons?.forEach((btn) => btn.removeAttribute('disabled'));
                             resetLoadingState(button);
-                            toggleModal(viewModalId, false);
-                        }, delay);
+                            toggleModal(modalId, false);
+                        }, 1400);
                     });
                 });
             });
