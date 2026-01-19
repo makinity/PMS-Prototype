@@ -10,7 +10,7 @@
                 <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">Unit Work Plan</p>
                 <h1 class="text-2xl font-bold text-white">Unit Work Plan (UWP) – Planning & Commitment</h1>
                 <p class="text-sm text-slate-400">Plan the unit's deliverables for the period. This is the commitment basis for OPCR/IPCR; no performance scoring occurs here.</p>
-                <p class="text-xs text-slate-500">Outputs are Success Indicators. Actual ratings are system-generated later from MPOR/IPCR.</p>
+                <p class="text-xs text-slate-500">One output may have multiple success indicators (measurement criteria). Actual ratings are system-generated later from MPOR/IPCR.</p>
             </div>
             <div class="flex flex-col items-end gap-2 text-right">
                 <span class="inline-flex items-center gap-2 rounded-full border border-blue-500/40 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-200">
@@ -69,17 +69,17 @@
                     <span class="text-[11px] text-slate-500">Actual ratings are calculated later from MPOR/IPCR.</span>
                 </div>
                 <div class="relative rounded-xl border border-slate-800 bg-slate-950/60">
-                    <div class="{{ $isDraft ? '' : 'pointer-events-none opacity-60' }}">
+                    <div class="{{ $isDraft ? '' : 'opacity-60' }}">
                         <div class="overflow-x-auto">
                             <table class="min-w-full text-sm">
                                 <thead class="bg-slate-900/70 text-slate-300">
                                     <tr>
                                         <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">PPA/MFO</th>
                                         <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">Success Indicators</th>
-                                        <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Target Difficulty (Planning Reference)</th>
+                                        <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Target Difficulty (Planning Only)</th>
                                         <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Performance Standard Reference</th>
                                         <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Timeline / Target</th>
-                                        <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">Notes</th>
+                                        <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">Notes / Assumptions</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-800 text-slate-100">
@@ -88,7 +88,31 @@
                                             <input type="text" value="E-Bank Scanning and Encoding of Revenue Transactions" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="e.g., Records management and archiving" {{ $isDraft ? '' : 'disabled' }}>
                                         </td>
                                         <td class="px-4 py-3">
-                                            <textarea rows="2" val class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="Describe the Success Indicators/output" {{ $isDraft ? '' : 'disabled' }}>All e-bank transaction documents are scanned, encoded, and uploaded to the system with complete details and proper indexing.</textarea>
+                                            <button
+                                                type="button"
+                                                class="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 transition"
+                                                data-uwp-indicators
+                                                data-title="E-Bank Scanning and Encoding of Revenue Transactions"
+                                                data-indicators='["All e-bank transactions scanned and encoded daily","Indexing complete with no missing pages","Audit trail maintained within 24 hours"]'
+                                                aria-label="View success indicators"
+                                            >
+                                                <!-- Flowbite / Heroicons eye -->
+                                                <svg class="w-4 h-4"
+                                                    aria-hidden="true"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    fill="none"
+                                                    viewBox="0 0 20 14">
+                                                    <g stroke="currentColor"
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="1.5">
+                                                        <path d="M10 3c-3.5 0-6.5 2.3-8 5 1.5 2.7 4.5 5 8 5s6.5-2.3 8-5c-1.5-2.7-4.5-5-8-5Z"/>
+                                                        <path d="M10 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
+                                                    </g>
+                                                </svg>
+
+                                                <span class="text-xs">(3)</span>
+                                            </button>
                                         </td>
                                         <td class="px-4 py-3 text-center">
                                             <select class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" {{ $isDraft ? '' : 'disabled' }}>
@@ -108,7 +132,7 @@
                                             </select>
                                         </td>
                                         <td class="px-4 py-3 text-center">
-                                            <input type="text" value="Verified and accurately recorded over-the-counter revenue transactions." class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="e.g., Monthly; 1,200 files" {{ $isDraft ? '' : 'disabled' }}>
+                                            <input type="text" value="Daily; all e-bank transactions processed within the same working day" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="e.g., Monthly; 1,200 files" {{ $isDraft ? '' : 'disabled' }}>
                                         </td>
                                         <td class="px-4 py-3">
                                             <input type="text" value="Subject to transaction volume and system availability" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="Context, dependencies, or scope" {{ $isDraft ? '' : 'disabled' }}>
@@ -120,7 +144,31 @@
                                             <input type="text" value="Processing of Over-the-Counter Revenue Transactions" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="e.g., Records management and archiving" {{ $isDraft ? '' : 'disabled' }}>
                                         </td>
                                         <td class="px-4 py-3">
-                                            <textarea rows="2" val class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="Describe the Success Indicators/output" {{ $isDraft ? '' : 'disabled' }}>All over-the-counter revenue transactions are verified, recorded, and encoded accurately within the same working day.   </textarea>
+                                            <button
+                                                type="button"
+                                                class="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 transition"
+                                                data-uwp-indicators
+                                                data-title="Processing of Over-the-Counter Revenue Transactions"
+                                                data-indicators='["Same-day verification of OTC transactions","95% encoded within the business day","OR validation completed daily"]'
+                                                aria-label="View success indicators"
+                                            >
+                                                <!-- Flowbite / Heroicons eye -->
+                                                <svg class="w-4 h-4"
+                                                    aria-hidden="true"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    fill="none"
+                                                    viewBox="0 0 20 14">
+                                                    <g stroke="currentColor"
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="1.5">
+                                                        <path d="M10 3c-3.5 0-6.5 2.3-8 5 1.5 2.7 4.5 5 8 5s6.5-2.3 8-5c-1.5-2.7-4.5-5-8-5Z"/>
+                                                        <path d="M10 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
+                                                    </g>
+                                                </svg>
+
+                                                <span class="text-xs">(3)</span>
+                                            </button>
                                         </td>
                                         <td class="px-4 py-3 text-center">
                                             <select class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" {{ $isDraft ? '' : 'disabled' }}>
@@ -165,17 +213,17 @@
                     <span class="text-[11px] text-slate-500">No scoring fields here; only planned targets.</span>
                 </div>
                 <div class="relative rounded-xl border border-slate-800 bg-slate-950/60">
-                    <div class="{{ $isDraft ? '' : 'pointer-events-none opacity-60' }}">
+                    <div class="{{ $isDraft ? '' : 'opacity-60' }}">
                         <div class="overflow-x-auto">
                             <table class="min-w-full text-sm">
                                 <thead class="bg-slate-900/70 text-slate-300">
                                     <tr>
                                         <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">Support Output</th>
                                         <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">Success Indicators</th>
-                                        <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Target Difficulty (Planning Reference)</th>
+                                        <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Target Difficulty (Planning Only)</th>
                                         <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Performance Standard Reference</th>
-                                        <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Timeline / Target</th>
-                                        <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">Notes</th>
+                                        <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Target / Timeline</th>
+                                        <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">Notes / Assumptions</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-800 text-slate-100">
@@ -184,7 +232,32 @@
                                             <input type="text" value="Maintenance of revenue records and filing system" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="e.g., Staff training sessions" {{ $isDraft ? '' : 'disabled' }}>
                                         </td>
                                         <td class="px-4 py-3">
-                                            <textarea rows="2" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="Describe the Success Indicators/output" {{ $isDraft ? '' : 'disabled' }}>Organized and updated physical and digital filing of revenue transaction records.</textarea>
+                                            <button
+                                                type="button"
+                                                class="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 transition"
+                                                data-uwp-indicators
+                                                data-title="Maintenance of revenue records and filing system"
+                                                data-indicators='["Weekly filing updated and retrievable","Digital backups synced monthly","Retrieval logs maintained for audits"]'
+                                                aria-label="View success indicators"
+                                            >
+                                                <!-- Flowbite / Heroicons eye -->
+                                                <svg class="w-4 h-4"
+                                                    aria-hidden="true"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    fill="none"
+                                                    viewBox="0 0 20 14">
+                                                    <g stroke="currentColor"
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="1.5">
+                                                        <path d="M10 3c-3.5 0-6.5 2.3-8 5 1.5 2.7 4.5 5 8 5s6.5-2.3 8-5c-1.5-2.7-4.5-5-8-5Z"/>
+                                                        <path d="M10 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
+                                                    </g>
+                                                </svg>
+
+                                                <span class="text-xs">(3)</span>
+                                            </button>
+
                                         </td>
                                         <td class="px-4 py-3 text-center">
                                             <select class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" {{ $isDraft ? '' : 'disabled' }}>
@@ -245,6 +318,48 @@
             </div>
         </div>
     </section>
+
+    <div id="uwp-indicators-modal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 px-4 py-6">
+        <div class="w-full max-w-2xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
+            <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
+                <div>
+                    <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Success Indicators</p>
+                    <h3 id="uwp-indicators-title" class="text-lg font-semibold text-white">--</h3>
+                    <p class="text-xs text-slate-400 mt-1">One output may have multiple success indicators. Indicators describe measurement criteria.</p>
+                </div>
+                <button type="button" onclick="closeUwpIndicatorsModal()" class="text-slate-400 hover:text-white">
+                    <span class="sr-only">Close</span>
+                    &times;
+                </button>
+            </div>
+
+            <div class="mt-4 space-y-3">
+                @if ($isDraft)
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-slate-400">Manage success indicators (one per line, scalable list).</span>
+                        <button type="button" id="uwp-add-indicator" class="inline-flex items-center gap-1 rounded-lg border border-blue-500/50 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-200 hover:bg-blue-500/20">
+                            <span class="fa-solid fa-plus text-[10px]"></span>
+                            <span>Add Indicator</span>
+                        </button>
+                    </div>
+                @endif
+                <div class="max-h-64 space-y-2 overflow-y-auto rounded-lg border border-slate-800 bg-slate-950/70 p-3">
+                    <ol id="uwp-indicators-list" class="list-decimal space-y-2 pl-5 text-sm text-slate-100"></ol>
+                </div>
+                @unless ($isDraft)
+                    <p class="text-[11px] text-slate-500">Read-only view. Indicators were finalized at submission.</p>
+                @endunless
+            </div>
+
+            <div class="mt-5 flex justify-end">
+                <button type="button"
+                        class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800"
+                        onclick="closeUwpIndicatorsModal()">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
 
     <div id="employee-action-modal" role="dialog" aria-modal="true" class="fixed inset-0 z-[70] hidden flex items-center justify-center bg-black/60 px-4 py-6">
         <div class="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
@@ -385,6 +500,133 @@
                         }
                     });
                 });
+
+                const indicatorsModal = document.getElementById('uwp-indicators-modal');
+                const indicatorsTitle = document.getElementById('uwp-indicators-title');
+                const indicatorsList = document.getElementById('uwp-indicators-list');
+                const addIndicatorBtn = document.getElementById('uwp-add-indicator');
+                let activeIndicators = [];
+                const isDraft = {{ $isDraft ? 'true' : 'false' }};
+
+                function renderIndicators(list) {
+                    if (!indicatorsList) return;
+                    indicatorsList.innerHTML = '';
+                    list.forEach((item, idx) => {
+                        const value = (item || '').trim();
+                        if (!value) return;
+                        const li = document.createElement('li');
+                        li.className = 'flex items-start gap-2';
+
+                        const textWrap = document.createElement('div');
+                        textWrap.className = 'flex-1 space-y-1';
+                        const textSpan = document.createElement('span');
+                        textSpan.className = 'text-slate-100';
+                        textSpan.textContent = value;
+                        textWrap.appendChild(textSpan);
+
+                        if (isDraft) {
+                            const actions = document.createElement('div');
+                            actions.className = 'flex items-center gap-2 text-[11px] text-blue-200';
+
+                            const editBtn = document.createElement('button');
+                            editBtn.type = 'button';
+                            editBtn.textContent = 'Edit';
+                            editBtn.className = 'hover:text-blue-100 underline';
+                            editBtn.addEventListener('click', () => startEditIndicator(idx, value));
+
+                            const delBtn = document.createElement('button');
+                            delBtn.type = 'button';
+                            delBtn.textContent = 'Delete';
+                            delBtn.className = 'hover:text-blue-100 underline';
+                            delBtn.addEventListener('click', () => deleteIndicator(idx));
+
+                            actions.appendChild(editBtn);
+                            actions.appendChild(delBtn);
+                            li.appendChild(actions);
+                        }
+
+                        li.prepend(textWrap);
+                        indicatorsList.appendChild(li);
+                    });
+                }
+
+                function startEditIndicator(idx, currentValue) {
+                    if (!indicatorsList) return;
+                    const items = Array.from(indicatorsList.children);
+                    const target = items[idx];
+                    if (!target) return;
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.placeholder = 'Enter Success Indicator...'
+                    input.className ='w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm ' +
+                                    'text-slate-100 placeholder:text-slate-500 focus:border-blue-500 ' +
+                                    'focus:ring-2 focus:ring-blue-500/40 focus:outline-none';
+                    input.style.background = '#0f172a';
+                    input.style.color = '#e5e7eb';
+                    const textWrap = target.querySelector('div.flex-1');
+                    if (!textWrap) return;
+                    textWrap.innerHTML = '';
+                    textWrap.appendChild(input);
+                    input.focus();
+                    input.select();
+                    const commit = () => {
+                        activeIndicators[idx] = input.value.trim();
+                        renderIndicators(activeIndicators);
+                    };
+                    input.addEventListener('blur', commit);
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            commit();
+                        }
+                    });
+                }
+
+                function deleteIndicator(idx) {
+                    activeIndicators.splice(idx, 1);
+                    renderIndicators(activeIndicators);
+                }
+
+                function addIndicator() {
+                    activeIndicators.push('New success indicator');
+                    renderIndicators(activeIndicators);
+                    startEditIndicator(activeIndicators.length - 1, 'New success indicator');
+                }
+
+                function openUwpIndicatorsModal(title, indicators) {
+                    if (indicatorsTitle) indicatorsTitle.textContent = title || '--';
+                    activeIndicators = Array.isArray(indicators) ? [...indicators] : [];
+                    renderIndicators(activeIndicators);
+                    if (indicatorsModal) {
+                        indicatorsModal.classList.remove('hidden');
+                        indicatorsModal.classList.add('flex');
+                        document.body.classList.add('overflow-hidden');
+                    }
+                }
+
+                window.closeUwpIndicatorsModal = function () {
+                    if (indicatorsModal) {
+                        indicatorsModal.classList.add('hidden');
+                        indicatorsModal.classList.remove('flex');
+                    }
+                    document.body.classList.remove('overflow-hidden');
+                };
+
+                document.querySelectorAll('[data-uwp-indicators]').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        let indicators = [];
+                        try {
+                            indicators = JSON.parse(btn.dataset.indicators || '[]');
+                        } catch (e) {
+                            indicators = [];
+                        }
+                        openUwpIndicatorsModal(btn.dataset.title || '--', indicators);
+                    });
+                });
+
+                if (addIndicatorBtn && isDraft) {
+                    addIndicatorBtn.addEventListener('click', addIndicator);
+                }
             });
         </script>
     @endpush

@@ -8,7 +8,7 @@
     </div>
 
     {{-- View Endorsed UWP Modal --}}
-    <div id="view-uwp-modal" data-modal-container tabindex="-1" aria-hidden="true"
+    {{-- <div id="view-uwp-modal" data-modal-container tabindex="-1" aria-hidden="true"
          class="fixed inset-0 z-50 hidden flex items-center justify-center">
         <div class="absolute inset-0 bg-slate-950/80 backdrop-blur" data-modal-hide="view-uwp-modal"></div>
         <div class="relative z-10 w-full max-w-5xl px-4">
@@ -99,7 +99,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
 
     {{-- Filters / Meta (Optional but useful) --}}
     <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-5 mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -185,7 +185,7 @@
                     </tr>
 
                     {{-- SAMPLE ROW: Endorsed --}}
-                    <tr class="hover:bg-slate-800/40 transition">
+                    {{-- <tr class="hover:bg-slate-800/40 transition">
                         <td class="px-4 py-3 text-sm text-slate-100 font-medium">
                             Records Management Unit
                         </td>
@@ -210,7 +210,7 @@
                                 View
                             </a>
                         </td>
-                    </tr>
+                    </tr> --}}
 
                     {{-- Add more rows here --}}
                 </tbody>
@@ -423,19 +423,29 @@
                             <table class="min-w-full">
                                 <thead class="bg-slate-800/50">
                                     <tr>
-                                        <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-400">Major Final Output</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-400">Expected Output</th>
-                                        <th class="px-4 py-3 text-center text-xs font-medium uppercase text-slate-400">Target</th>
-                                        <th class="px-4 py-3 text-center text-xs font-medium uppercase text-slate-400">Timeframe</th>
-                                        <th class="px-4 py-3 text-center text-xs font-medium uppercase text-slate-400">Function</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-800">
-                                    <tr class="hover:bg-slate-800/40 transition">
-                                        <td class="px-4 py-3 text-sm text-slate-100">E-Bank Scanning and Encoding of Revenue Transactions</td>
-                                        <td class="px-4 py-3 text-sm text-slate-300">All e-bank transaction documents are scanned, encoded, and uploaded to the system with complete details and proper indexing.</td>
-                                        <td class="px-4 py-3 text-sm text-center text-slate-100">Verified and accurately recorded over-the-counter revenue transactions.</td>
-                                        <td class="px-4 py-3 text-sm text-center text-slate-300">Daily (January – June 2026)</td>
+                                    <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-400">PPA / MFO</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-400">Success Indicators</th>
+                                    <th class="px-4 py-3 text-center text-xs font-medium uppercase text-slate-400">Timeline / Target</th>
+                                    <th class="px-4 py-3 text-center text-xs font-medium uppercase text-slate-400">Function</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800">
+                                <tr class="hover:bg-slate-800/40 transition">
+                                    <td class="px-4 py-3 text-sm text-slate-100">E-Bank Scanning and Encoding of Revenue Transactions</td>
+                                        <td class="px-4 py-3 text-sm text-slate-300">
+                                            <button type="button"
+                                                    class="inline-flex items-center gap-2 text-blue-300 hover:text-blue-200"
+                                                    data-uwp-view-indicators
+                                                    data-title="E-Bank Scanning and Encoding of Revenue Transactions"
+                                                    data-indicators='["All e-bank transactions scanned and encoded daily","Indexing complete with no missing pages","Audit trail maintained within 24 hours"]'>
+                                                <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12Z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                                </svg>
+                                                <span>(3)</span>
+                                            </button>
+                                        </td>
+                                        <td class="px-4 py-3 text-sm text-center text-slate-100">Daily; all e-bank transactions processed within the same working day</td>
                                         <td class="px-4 py-3 text-sm text-center">
                                             <span class="px-2 py-1 rounded-md text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                                                 Core
@@ -444,9 +454,20 @@
                                     </tr>
                                     <tr class="hover:bg-slate-800/40 transition">
                                         <td class="px-4 py-3 text-sm text-slate-100">Processing of over-the-counter revenue transactions</td>
-                                        <td class="px-4 py-3 text-sm text-slate-300">All over-the-counter revenue transactions are verified, recorded, and encoded accurately within the same working day.</td>
+                                        <td class="px-4 py-3 text-sm text-slate-300">
+                                            <button type="button"
+                                                    class="inline-flex items-center gap-2 text-blue-300 hover:text-blue-200"
+                                                    data-uwp-view-indicators
+                                                    data-title="Processing of over-the-counter revenue transactions"
+                                                    data-indicators='["Same-day verification of OTC transactions","95% encoded within the business day","OR validation completed daily"]'>
+                                                <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12Z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                                </svg>
+                                                <span>(3)</span>
+                                            </button>
+                                        </td>
                                         <td class="px-4 py-3 text-sm text-center text-slate-100">Daily; 95% processed within the same working day   </td>
-                                        <td class="px-4 py-3 text-sm text-center text-slate-300">Daily (January – June 2026)</td>
                                         <td class="px-4 py-3 text-sm text-center">
                                             <span class="px-2 py-1 rounded-md text-xs font-medium bg-blue-500/10 text-blue-300 border border-blue-400/30">
                                                 Core
@@ -455,9 +476,20 @@
                                     </tr>
                                     <tr class="hover:bg-slate-800/40 transition">
                                         <td class="px-4 py-3 text-sm text-slate-100">Maintenance of Revenue Records Filing System</td>
-                                        <td class="px-4 py-3 text-sm text-slate-300">Organized and updated physical and digital filing of revenue transaction records.</td>
+                                        <td class="px-4 py-3 text-sm text-slate-300">
+                                            <button type="button"
+                                                    class="inline-flex items-center gap-2 text-blue-300 hover:text-blue-200"
+                                                    data-uwp-view-indicators
+                                                    data-title="Maintenance of Revenue Records Filing System"
+                                                    data-indicators='["Weekly filing updated and retrievable","Digital backups synced monthly","Retrieval logs maintained for audits"]'>
+                                                <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12Z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                                </svg>
+                                                <span>(3)</span>
+                                            </button>
+                                        </td>
                                         <td class="px-4 py-3 text-sm text-center text-slate-100">Quarterly validation and update</td>
-                                        <td class="px-4 py-3 text-sm text-center text-slate-300">Quarterly</td>
                                         <td class="px-4 py-3 text-sm text-center">
                                             <span class="px-2 py-1 rounded-md text-xs font-medium bg-blue-500/10 text-blue-300 border border-blue-400/30">
                                                 Support
@@ -503,6 +535,34 @@
                         </button>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="uwp-indicators-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 px-4 py-6">
+        <div class="w-full max-w-2xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
+            <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
+                <div>
+                    <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Success Indicators</p>
+                    <h3 id="uwp-indicators-title" class="text-lg font-semibold text-white">--</h3>
+                    <p class="text-xs text-slate-400 mt-1">Read-only list of success indicators for this output.</p>
+                </div>
+                <button type="button" onclick="closeUwpIndicatorsModal()" class="text-slate-400 hover:text-white">
+                    <span class="sr-only">Close</span>
+                    &times;
+                </button>
+            </div>
+
+            <div class="mt-4 max-h-64 overflow-y-auto rounded-lg border border-slate-800 bg-slate-950/70 p-3">
+                <ol id="uwp-indicators-list" class="list-decimal space-y-2 pl-5 text-sm text-slate-100"></ol>
+            </div>
+
+            <div class="mt-5 flex justify-end">
+                <button type="button"
+                        class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800"
+                        onclick="closeUwpIndicatorsModal()">
+                    Close
+                </button>
             </div>
         </div>
     </div>
@@ -562,6 +622,47 @@
                 } else {
                     run();
                 }
+            })();
+
+            (function initIndicatorsModal() {
+                const modal = document.getElementById('uwp-indicators-modal');
+                const titleEl = document.getElementById('uwp-indicators-title');
+                const listEl = document.getElementById('uwp-indicators-list');
+
+                window.closeUwpIndicatorsModal = function () {
+                    if (!modal) return;
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                    document.body.classList.remove('overflow-hidden');
+                };
+
+                function openIndicatorsModal(title, indicators) {
+                    if (!modal || !titleEl || !listEl) return;
+                    titleEl.textContent = title || '--';
+                    listEl.innerHTML = '';
+                    (indicators || []).forEach((text) => {
+                        const value = (text || '').trim();
+                        if (!value) return;
+                        const li = document.createElement('li');
+                        li.textContent = value;
+                        listEl.appendChild(li);
+                    });
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                    document.body.classList.add('overflow-hidden');
+                }
+
+                document.querySelectorAll('[data-uwp-view-indicators]').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        let indicators = [];
+                        try {
+                            indicators = JSON.parse(btn.dataset.indicators || '[]');
+                        } catch (e) {
+                            indicators = [];
+                        }
+                        openIndicatorsModal(btn.dataset.title || '--', indicators);
+                    });
+                });
             })();
         </script>
     @endpush
