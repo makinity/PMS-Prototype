@@ -35,7 +35,27 @@
             <div class="grid gap-4 sm:grid-cols-2">
                 <label class="space-y-1 text-sm text-slate-300">
                     <span class="text-xs uppercase tracking-wide text-slate-400">Office / Unit</span>
-                    <input type="text" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none {{ $isDraft ? '' : 'opacity-60 pointer-events-none' }}" style="background:#0f172a;color:#e5e7eb;" value="Revenue Collection Unit" placeholder="e.g., Administrative Services Unit" {{ $isDraft ? '' : 'disabled' }}>
+
+                    <select
+                        class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2
+                            text-sm text-slate-100 focus:border-blue-500
+                            focus:ring-2 focus:ring-blue-500/40 focus:outline-none
+                            {{ $isDraft ? '' : 'opacity-60 pointer-events-none' }}"
+                        style="background:#0f172a;color:#e5e7eb;"
+                        {{ $isDraft ? '' : 'disabled' }}
+                    >
+                        {{-- Selected office --}}
+                        <option selected>
+                            Revenue Collection Unit
+                        </option>
+
+                        {{-- Other dummy offices --}}
+                        <option>Records Management Unit</option>
+                        <option>Administrative Services Unit</option>
+                        <option>Human Resource Management Unit</option>
+                        <option>General Services Unit</option>
+                        <option>Planning and Development Unit</option>
+                    </select>
                 </label>
 
                 <label class="space-y-1 text-sm text-slate-300">

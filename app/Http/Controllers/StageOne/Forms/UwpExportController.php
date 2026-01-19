@@ -19,10 +19,12 @@ class UwpExportController extends Controller
                 // CORE OUTPUT 1 – 50%
                 [
                     'mfo' => 'E-Bank Scanning and Encoding of Revenue Transactions',
-                    'expected_output' =>
-                        'All e-bank transaction documents are scanned, encoded, and uploaded to the system with complete details and proper indexing.',
-                    'target' => 'Verified and accurately recorded over-the-counter revenue transactions.',
-                    'timeframe' => 'January – June 2026',
+                    'success_indicators' => [
+                        'All e-bank transactions scanned and encoded daily',
+                        'Indexing complete with no missing pages',
+                        'Audit trail maintained within 24 hours',
+                    ],
+                    'target' => 'Daily; all e-bank transactions processed within the same working day',
                     'function' => 'Core (50%)',
                     'function_type' => 'core',
                 ],
@@ -30,10 +32,12 @@ class UwpExportController extends Controller
                 // CORE OUTPUT 2 – 30%
                 [
                     'mfo' => 'Processing of Over-the-Counter Revenue Transactions',
-                    'expected_output' =>
-                        'All over-the-counter revenue transactions are verified, recorded, and encoded accurately within the same working day.',
+                    'success_indicators' => [
+                        'Same-day verification of OTC transactions',
+                        '95% encoded within the business day',
+                        'OR validation completed daily',
+                    ],
                     'target' => 'Daily; 95% processed within the same working day',
-                    'timeframe' => 'January – June 2026',
                     'function' => 'Core (30%)',
                     'function_type' => 'core',
                 ],
@@ -41,10 +45,12 @@ class UwpExportController extends Controller
                 // SUPPORT OUTPUT – 20%
                 [
                     'mfo' => 'Maintenance of Revenue Records Filing System',
-                    'expected_output' =>
-                        'Organized and updated physical and digital filing of revenue transaction records.',
+                    'success_indicators' => [
+                        'Weekly filing updated and retrievable',
+                        'Digital backups synced monthly',
+                        'Retrieval logs maintained for audits',
+                    ],
                     'target' => 'Quarterly validation and update',
-                    'timeframe' => 'Quarterly',
                     'function' => 'Support (20%)',
                     'function_type' => 'support',
                 ],

@@ -1,0 +1,80 @@
+                            <h4 class="text-sm font-semibold text-white">Planned Outputs</h4>
+                        </div>
+
+                        <table class="min-w-full">
+                            <thead class="bg-slate-800/60">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs uppercase text-slate-400">Major Final Output</th>
+                                    <th class="px-4 py-3 text-left text-xs uppercase text-slate-400">Expected Output</th>
+                                    <th class="px-4 py-3 text-center text-xs uppercase text-slate-400">Target</th>
+                                    <th class="px-4 py-3 text-center text-xs uppercase text-slate-400">Timeframe</th>
+                                    <th class="px-4 py-3 text-center text-xs uppercase text-slate-400">Function</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800">
+                                <tr>
+                                    <td class="px-4 py-3 text-sm text-white">E-Bank Scanning and Encoding of Revenue Transactions</td>
+                                    <td class="px-4 py-3 text-sm text-slate-300">All e-bank transaction documents are scanned, encoded, and uploaded to the system with complete details and proper indexing.</td>
+                                    <td class="px-4 py-3 text-sm text-center text-white">Verified and accurately recorded over-the-counter revenue transactions.</td>
+                                    <td class="px-4 py-3 text-sm text-center text-slate-300">Daily (January – June 2026)</td>
+                                    <td class="px-4 py-3 text-sm text-center">
+                                        <span class="rounded-md bg-emerald-500/10 px-2 py-1 text-xs font-medium
+                                            text-emerald-400 border border-emerald-500/20">
+                                            Core
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-slate-800/40 transition">
+                                    <td class="px-4 py-3 text-sm text-slate-100">Processing of over-the-counter revenue transactions</td>
+                                    <td class="px-4 py-3 text-sm text-slate-300">All over-the-counter revenue transactions are verified, recorded, and encoded accurately within the same working day.</td>
+                                    <td class="px-4 py-3 text-sm text-center text-slate-100">Daily; 95% processed within the same working day   </td>
+                                    <td class="px-4 py-3 text-sm text-center text-slate-300">Daily (January – June 2026)</td>
+                                    <td class="px-4 py-3 text-sm text-center">
+                                        <span class="px-2 py-1 rounded-md text-xs font-medium bg-blue-500/10 text-blue-300 border border-blue-400/30">
+                                            Core
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-slate-800/40 transition">
+                                    <td class="px-4 py-3 text-sm text-slate-100">Maintenance of Revenue Records Filing System</td>
+                                    <td class="px-4 py-3 text-sm text-slate-300">Organized and updated physical and digital filing of revenue transaction records.</td>
+                                    <td class="px-4 py-3 text-sm text-center text-slate-100">Quarterly validation and update</td>
+                                    <td class="px-4 py-3 text-sm text-center text-slate-300">Quarterly</td>
+                                    <td class="px-4 py-3 text-sm text-center">
+                                        <span class="px-2 py-1 rounded-md text-xs font-medium bg-blue-500/10 text-blue-300 border border-blue-400/30">
+                                            Support
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="rounded-xl border border-slate-800 bg-slate-900 p-4 space-y-3">
+                        <label class="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                            PMT Decision Remarks
+                            <span class="text-slate-500">(required if returning)</span>
+                        </label>
+
+                        <textarea
+                            rows="3"
+                            style="background:#0f172a;color:#e5e7eb;"
+                            placeholder="Provide justification or revision instructions if returning the UWP."
+                            class="w-full rounded-lg border border-slate-700 bg-slate-900
+                                px-3 py-2 text-sm text-slate-100 placeholder-slate-400">
+                        </textarea>
+                    </div>
+
+                    <div class="rounded-xl border border-slate-800 bg-slate-900 p-4 space-y-3">
+                        <p class="text-sm font-semibold text-white">
+                            PMT Review Basis (Governance Reference)
+                        </p>
+
+                        <ul class="space-y-2 text-sm text-slate-300">
+                            <li>✓ Aligned with approved OPCR and organizational targets</li>
+                            <li>✓ Outputs are specific, measurable, and time-bound</li>
+                            <li>✓ Core and support functions are properly classified</li>
+                            <li>✓ Targets comply with SPMS performance standards</li>
+                        </ul>
+
+                        <p class="text-xs text-slate-400">

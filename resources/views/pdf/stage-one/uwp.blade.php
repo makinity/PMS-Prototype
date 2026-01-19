@@ -106,7 +106,13 @@
         @if(str_contains($row['function'], 'Core'))
         <tr>
             <td>{{ $row['mfo'] }}</td>
-            <td>{{ $row['expected_output'] }}</td>
+            <td>
+                <ul style="margin:0; padding-left:14px;">
+                    @foreach ($row['success_indicators'] as $indicator)
+                        <li>{{ $indicator }}</li>
+                    @endforeach
+                </ul>
+            </td>
             <td class="center">{{ $row['budget'] ?? '' }}</td>
             <td class="center">{{ $row['accountable'] ?? '' }}</td>
 
@@ -133,7 +139,13 @@
         @if(str_contains($row['function'], 'Support'))
         <tr>
             <td>{{ $row['mfo'] }}</td>
-            <td>{{ $row['expected_output'] }}</td>
+            <td>
+                <ul style="margin:0; padding-left:14px;">
+                    @foreach ($row['success_indicators'] as $indicator)
+                        <li>{{ $indicator }}</li>
+                    @endforeach
+                </ul>
+            </td>
             <td class="center">{{ $row['budget'] ?? '' }}</td>
             <td class="center">{{ $row['accountable'] ?? '' }}</td>
 
@@ -143,7 +155,7 @@
             <td></td><td></td><td></td><td></td>
             <td></td><td></td><td></td><td></td><td></td>
 
-            <t  d></t>
+            <td></td>
             <td>{{ $row['standard'] ?? '' }}</td>
         </tr>
         @endif
