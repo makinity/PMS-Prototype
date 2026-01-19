@@ -97,6 +97,10 @@
                         <p id="monitoringEmployee">--</p>
                     </div>
                     <div>
+                        <p class="text-xs text-slate-400">Office / Unit</p>
+                        <p id="monitoringOffice">--</p>
+                    </div>
+                    <div>
                         <p class="text-xs text-slate-400">Output</p>
                         <p id="monitoringOutput">--</p>
                     </div>
@@ -134,6 +138,7 @@
             document.addEventListener('DOMContentLoaded', () => {
                 const modal = document.getElementById('ors-monitoring-modal');
                 const employeeEl = document.getElementById('monitoringEmployee');
+                const officeEl = document.getElementById('monitoringOffice');
                 const outputEl = document.getElementById('monitoringOutput');
                 const accomplishmentEl = document.getElementById('monitoringAccomplishment');
                 const durationEl = document.getElementById('monitoringDuration');
@@ -142,12 +147,14 @@
 
                 const STATUS_META = {
                     submitted: {
-                        label: 'Accomplishment logged',
+                        label: 'Submitted (Locked)',
+                        detail: 'Accomplishment logged',
                         color: '#10b981',
                         badge: 'border-emerald-500/60 bg-emerald-500/10 text-emerald-100'
                     },
                     locked: {
                         label: 'Ready for monthly consolidation',
+                        detail: 'Submitted entry',
                         color: '#3b82f6',
                         badge: 'border-blue-500/60 bg-blue-500/10 text-blue-100'
                     },
@@ -160,10 +167,27 @@
 
                 const tasks = [
                     {
+                        id: 'task-jan19',
+                        date: '2026-01-19',
+                        title: 'Bank Statement Form (BSF-01)',
+                        employee: 'Ramon Reyes',
+                        office: 'Revenue Collection Unit',
+                        output: 'Bank Statement Form (BSF-01)',
+                        uwpOutput: 'E-Bank Scanning and Encoding of Revenue Transactions',
+                        accomplishment: 'All e-bank transactions scanned and encoded daily',
+                        duration: '0m',
+                        evidence: false,
+                        requestId: 'REQ-2026-019',
+                        notes: 'Demo: logged task for January 19',
+                        dateLabel: 'January 19, 2026',
+                        status: 'submitted'
+                    },
+                    {
                         id: 'task-3',
                         date: '2026-01-03',
                         title: 'E-Bank Scanning',
                         employee: 'Ramon Reyes',
+                        office: 'Revenue Collection Unit',
                         output: 'Bank Statement Form (BSF-01)',
                         accomplishment: 'Morning batch of e-bank transactions scanned and submitted for consolidation.',
                         duration: '2h 00m',
@@ -175,6 +199,7 @@
                         date: '2026-01-02',
                         title: 'OTC Revenue Transaction Processing',
                         employee: 'Ramon Reyes',
+                        office: 'Revenue Collection Unit',
                         output: 'Official Receipt (OR)',
                         accomplishment: 'Supervisor validated; ready for consolidation.',
                         duration: '3h 00m',
@@ -197,6 +222,7 @@
                     selectable: true,
                     events: tasks.map((task) => {
                         const meta = STATUS_META[task.status] || STATUS_META.missing;
+                        const detail = meta.detail || meta.label;
                         return {
                             id: task.id,
                             title: task.output,
@@ -205,6 +231,7 @@
                             extendedProps: {
                                 ...task,
                                 label: meta.label,
+                                detail: detail,
                                 badge: meta.badge,
                                 muted: meta.muted || false
                             }
@@ -220,7 +247,7 @@
                         }
                         wrapper.innerHTML = `
                             <div class="flex flex-col gap-1">
-                                <span class="text-slate-100 font-semibold">${arg.event.title} â€” ${meta.label}</span>
+                                <span class="text-slate-100 font-semibold">${arg.event.title} - ${meta.detail || meta.label}</span>
                                 <span class="rounded-full border px-2 py-[1px] text-[10px]" style="color:${meta.color}; border-color:${meta.color};">${meta.label}</span>
                             </div>
                         `;
@@ -249,14 +276,27 @@
 
                 function openMonitoringModal(data) {
                     if (!modal) return;
-                    employeeEl.textContent = data.employee || '--';
-                    outputEl.textContent = data.output || '--';
-                    accomplishmentEl.textContent = data.accomplishment || '--';
+                    employeeEl.textContent = data.employee || 'Ramon Reyes';
+                    officeEl.textContent = data.office || 'Revenue Collection Unit';
+
+                    const outputParts = [];
+                    if (data.uwpOutput) outputParts.push(data.uwpOutput);
+                    if (data.output) outputParts.push(`Output Type: ${data.output}`);
+                    outputEl.textContent = outputParts.length ? outputParts.join(' • ') : (data.output || '--');
+
+                    const accomplishmentParts = [
+                        data.accomplishment || null,
+                        data.requestId ? `Request ID: ${data.requestId}` : null,
+                        data.notes ? `Notes: ${data.notes}` : null,
+                        data.dateLabel ? `Date Logged: ${data.dateLabel}` : (data.date ? `Date Logged: ${data.date}` : null)
+                    ].filter(Boolean);
+                    accomplishmentEl.textContent = accomplishmentParts.length ? accomplishmentParts.join(' • ') : '--';
+
                     durationEl.textContent = data.duration || '--';
-                    evidenceEl.textContent = data.evidence ? 'Evidence attached' : 'No evidence';
+                    evidenceEl.textContent = data.evidence ? 'Evidence attached' : 'No evidence (read-only)';
 
                     const meta = STATUS_META[data.status] || STATUS_META.missing;
-                    statusEl.textContent = meta.label;
+                    statusEl.textContent = meta.detail ? `${meta.label} • ${meta.detail}` : meta.label;
                     statusEl.className = `status-chip ${meta.badge}`;
 
                     modal.classList.remove('hidden');
