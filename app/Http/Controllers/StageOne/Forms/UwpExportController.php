@@ -20,8 +20,8 @@ class UwpExportController extends Controller
                 [
                     'mfo' => 'E-Bank Scanning and Encoding of Revenue Transactions',
                     'expected_output' =>
-                        'All e-bank revenue transaction documents are scanned, encoded, and uploaded with complete and accurate details.',
-                    'target' => '95% same-day processing',
+                        'All e-bank transaction documents are scanned, encoded, and uploaded to the system with complete details and proper indexing.',
+                    'target' => 'Verified and accurately recorded over-the-counter revenue transactions.',
                     'timeframe' => 'January – June 2026',
                     'function' => 'Core (50%)',
                     'function_type' => 'core',
@@ -32,7 +32,7 @@ class UwpExportController extends Controller
                     'mfo' => 'Processing of Over-the-Counter Revenue Transactions',
                     'expected_output' =>
                         'All over-the-counter revenue transactions are verified, recorded, and encoded accurately within the same working day.',
-                    'target' => '95% same-day processing',
+                    'target' => 'Daily; 95% processed within the same working day',
                     'timeframe' => 'January – June 2026',
                     'function' => 'Core (30%)',
                     'function_type' => 'core',
@@ -42,9 +42,9 @@ class UwpExportController extends Controller
                 [
                     'mfo' => 'Maintenance of Revenue Records Filing System',
                     'expected_output' =>
-                        'Organized, updated, and easily retrievable physical and digital revenue records.',
-                    'target' => 'Quarterly validation',
-                    'timeframe' => 'January – June 2026',
+                        'Organized and updated physical and digital filing of revenue transaction records.',
+                    'target' => 'Quarterly validation and update',
+                    'timeframe' => 'Quarterly',
                     'function' => 'Support (20%)',
                     'function_type' => 'support',
                 ],

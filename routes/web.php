@@ -57,6 +57,7 @@ Route::get('/employee-Profile', function () {
 
 
 
+
 Route::get('/dept-head/dashboard', function(){
     return view('dept-head.dashboard');
 })->name('dept-head.dashboard');
@@ -91,6 +92,7 @@ Route::get('/dept-head/idp', function () {
 Route::get('/dept-head/profile', function () {
     return view('dept-head.profile');
 })->name('dept-head.profile');
+
 
 
 
@@ -258,6 +260,7 @@ Route::get('/administrator/profile', function () {
 
 Route::get('/administrator/opcr/export/pdf', [OpcrExportController::class, 'exportPdf'])
     ->name('stage1.opcr.export.pdf');
+
 
 
 

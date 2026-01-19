@@ -148,9 +148,9 @@
                             <tbody class="divide-y divide-slate-800">
                                 <tr>
                                     <td class="px-4 py-3 text-sm text-white">E-Bank Scanning and Encoding of Revenue Transactions</td>
-                                    <td class="px-4 py-3 text-sm text-slate-300">Scanned, encoded, and properly indexed e-bank transaction documents uploaded to the system.</td>
-                                    <td class="px-4 py-3 text-sm text-center text-white">95% of daily e-bank transactions processed within the same day</td>
-                                    <td class="px-4 py-3 text-sm text-center text-slate-300">Daily (January – December 2026)</td>
+                                    <td class="px-4 py-3 text-sm text-slate-300">All e-bank transaction documents are scanned, encoded, and uploaded to the system with complete details and proper indexing.</td>
+                                    <td class="px-4 py-3 text-sm text-center text-white">Verified and accurately recorded over-the-counter revenue transactions.</td>
+                                    <td class="px-4 py-3 text-sm text-center text-slate-300">Daily (January – June 2026)</td>
                                     <td class="px-4 py-3 text-sm text-center">
                                         <span class="rounded-md bg-emerald-500/10 px-2 py-1 text-xs font-medium
                                             text-emerald-400 border border-emerald-500/20">
@@ -160,9 +160,9 @@
                                 </tr>
                                 <tr class="hover:bg-slate-800/40 transition">
                                     <td class="px-4 py-3 text-sm text-slate-100">Processing of over-the-counter revenue transactions</td>
-                                    <td class="px-4 py-3 text-sm text-slate-300">All over-the-counter revenue transactions are verified, recorded, and encoded accurately within the prescribed processing time.</td>
+                                    <td class="px-4 py-3 text-sm text-slate-300">All over-the-counter revenue transactions are verified, recorded, and encoded accurately within the same working day.</td>
                                     <td class="px-4 py-3 text-sm text-center text-slate-100">Daily; 95% processed within the same working day   </td>
-                                    <td class="px-4 py-3 text-sm text-center text-slate-300">Daily (January – December 2025)</td>
+                                    <td class="px-4 py-3 text-sm text-center text-slate-300">Daily (January – June 2026)</td>
                                     <td class="px-4 py-3 text-sm text-center">
                                         <span class="px-2 py-1 rounded-md text-xs font-medium bg-blue-500/10 text-blue-300 border border-blue-400/30">
                                             Core

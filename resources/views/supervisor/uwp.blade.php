@@ -10,7 +10,7 @@
                 <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">Unit Work Plan</p>
                 <h1 class="text-2xl font-bold text-white">Unit Work Plan (UWP) – Planning & Commitment</h1>
                 <p class="text-sm text-slate-400">Plan the unit's deliverables for the period. This is the commitment basis for OPCR/IPCR; no performance scoring occurs here.</p>
-                <p class="text-xs text-slate-500">Outputs are planned deliverables. Actual ratings are system-generated later from MPOR/IPCR.</p>
+                <p class="text-xs text-slate-500">Outputs are Success Indicators. Actual ratings are system-generated later from MPOR/IPCR.</p>
             </div>
             <div class="flex flex-col items-end gap-2 text-right">
                 <span class="inline-flex items-center gap-2 rounded-full border border-blue-500/40 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-200">
@@ -74,8 +74,8 @@
                             <table class="min-w-full text-sm">
                                 <thead class="bg-slate-900/70 text-slate-300">
                                     <tr>
-                                        <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">Major Output / Activity</th>
-                                        <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">Planned Deliverable</th>
+                                        <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">PPA/MFO</th>
+                                        <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">Success Indicators</th>
                                         <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Target Difficulty (Planning Reference)</th>
                                         <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Performance Standard Reference</th>
                                         <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Timeline / Target</th>
@@ -88,7 +88,7 @@
                                             <input type="text" value="E-Bank Scanning and Encoding of Revenue Transactions" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="e.g., Records management and archiving" {{ $isDraft ? '' : 'disabled' }}>
                                         </td>
                                         <td class="px-4 py-3">
-                                            <textarea rows="2" val class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="Describe the planned deliverable/output" {{ $isDraft ? '' : 'disabled' }}>All e-bank transaction documents are scanned, encoded, and uploaded to the system with complete details and proper indexing.</textarea>
+                                            <textarea rows="2" val class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="Describe the Success Indicators/output" {{ $isDraft ? '' : 'disabled' }}>All e-bank transaction documents are scanned, encoded, and uploaded to the system with complete details and proper indexing.</textarea>
                                         </td>
                                         <td class="px-4 py-3 text-center">
                                             <select class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" {{ $isDraft ? '' : 'disabled' }}>
@@ -108,7 +108,7 @@
                                             </select>
                                         </td>
                                         <td class="px-4 py-3 text-center">
-                                            <input type="text" value="Daily; 95% processed within the same working day" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="e.g., Monthly; 1,200 files" {{ $isDraft ? '' : 'disabled' }}>
+                                            <input type="text" value="Verified and accurately recorded over-the-counter revenue transactions." class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="e.g., Monthly; 1,200 files" {{ $isDraft ? '' : 'disabled' }}>
                                         </td>
                                         <td class="px-4 py-3">
                                             <input type="text" value="Subject to transaction volume and system availability" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="Context, dependencies, or scope" {{ $isDraft ? '' : 'disabled' }}>
@@ -120,7 +120,7 @@
                                             <input type="text" value="Processing of Over-the-Counter Revenue Transactions" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="e.g., Records management and archiving" {{ $isDraft ? '' : 'disabled' }}>
                                         </td>
                                         <td class="px-4 py-3">
-                                            <textarea rows="2" val class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="Describe the planned deliverable/output" {{ $isDraft ? '' : 'disabled' }}>All over-the-counter revenue transactions are verified, recorded, and encoded accurately within the same working day.   </textarea>
+                                            <textarea rows="2" val class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="Describe the Success Indicators/output" {{ $isDraft ? '' : 'disabled' }}>All over-the-counter revenue transactions are verified, recorded, and encoded accurately within the same working day.   </textarea>
                                         </td>
                                         <td class="px-4 py-3 text-center">
                                             <select class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" {{ $isDraft ? '' : 'disabled' }}>
@@ -171,7 +171,7 @@
                                 <thead class="bg-slate-900/70 text-slate-300">
                                     <tr>
                                         <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">Support Output</th>
-                                        <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">Planned Deliverable</th>
+                                        <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">Success Indicators</th>
                                         <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Target Difficulty (Planning Reference)</th>
                                         <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Performance Standard Reference</th>
                                         <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Timeline / Target</th>
@@ -184,7 +184,7 @@
                                             <input type="text" value="Maintenance of revenue records and filing system" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="e.g., Staff training sessions" {{ $isDraft ? '' : 'disabled' }}>
                                         </td>
                                         <td class="px-4 py-3">
-                                            <textarea rows="2" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="Describe the planned deliverable/output" {{ $isDraft ? '' : 'disabled' }}>Updated and organized physical and digital filing system for all revenue transaction records.</textarea>
+                                            <textarea rows="2" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="Describe the Success Indicators/output" {{ $isDraft ? '' : 'disabled' }}>Organized and updated physical and digital filing of revenue transaction records.</textarea>
                                         </td>
                                         <td class="px-4 py-3 text-center">
                                             <select class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" {{ $isDraft ? '' : 'disabled' }}>

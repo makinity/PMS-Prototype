@@ -70,7 +70,7 @@
 <table>
     <thead>
         <tr>
-            <th rowspan="2" style="width:14%;">MFOs / PPAs</th>
+            <th rowspan="2" style="width:14%;">PPA / MFO</th>
             <th rowspan="2" style="width:18%;">Success Indicators</th>
             <th rowspan="2" style="width:7%;">Allotted Budget</th>
             <th rowspan="2" style="width:10%;">Division / Individual Accountable</th>

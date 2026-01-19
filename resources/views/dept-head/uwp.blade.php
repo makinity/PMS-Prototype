@@ -28,7 +28,7 @@
                             </div>
                             <div>
                                 <p class="text-xs uppercase tracking-wide text-slate-500">Performance Period</p>
-                                <p class="font-medium text-slate-100">January ƒ?\" December 2026</p>
+                                <p class="font-medium text-slate-100">January - June 2026</p>
                             </div>
                             <div>
                                 <p class="text-xs uppercase tracking-wide text-slate-500">UWP Type</p>
@@ -341,7 +341,7 @@
             <div class="p-5 border-b border-slate-800 flex items-start justify-between gap-4">
                 <div>
                     <h3 class="text-lg font-semibold text-slate-100">Unit Work Plan (UWP)</h3>
-                    <p class="text-sm text-slate-400 mt-1">Records Management Unit • January –  2026</p>
+                    <p class="text-sm text-slate-400 mt-1">Records Management Unit • January – June 2026</p>
 
                     <div class="mt-2">
                         <span class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full
@@ -435,7 +435,7 @@
                                         <td class="px-4 py-3 text-sm text-slate-100">E-Bank Scanning and Encoding of Revenue Transactions</td>
                                         <td class="px-4 py-3 text-sm text-slate-300">All e-bank transaction documents are scanned, encoded, and uploaded to the system with complete details and proper indexing.</td>
                                         <td class="px-4 py-3 text-sm text-center text-slate-100">Verified and accurately recorded over-the-counter revenue transactions.</td>
-                                        <td class="px-4 py-3 text-sm text-center text-slate-300">Daily (January – December 2025)</td>
+                                        <td class="px-4 py-3 text-sm text-center text-slate-300">Daily (January – June 2026)</td>
                                         <td class="px-4 py-3 text-sm text-center">
                                             <span class="px-2 py-1 rounded-md text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                                                 Core
@@ -444,9 +444,9 @@
                                     </tr>
                                     <tr class="hover:bg-slate-800/40 transition">
                                         <td class="px-4 py-3 text-sm text-slate-100">Processing of over-the-counter revenue transactions</td>
-                                        <td class="px-4 py-3 text-sm text-slate-300">All over-the-counter revenue transactions are verified, recorded, and encoded accurately within the prescribed processing time.</td>
+                                        <td class="px-4 py-3 text-sm text-slate-300">All over-the-counter revenue transactions are verified, recorded, and encoded accurately within the same working day.</td>
                                         <td class="px-4 py-3 text-sm text-center text-slate-100">Daily; 95% processed within the same working day   </td>
-                                        <td class="px-4 py-3 text-sm text-center text-slate-300">Daily (January – December 2025)</td>
+                                        <td class="px-4 py-3 text-sm text-center text-slate-300">Daily (January – June 2026)</td>
                                         <td class="px-4 py-3 text-sm text-center">
                                             <span class="px-2 py-1 rounded-md text-xs font-medium bg-blue-500/10 text-blue-300 border border-blue-400/30">
                                                 Core
