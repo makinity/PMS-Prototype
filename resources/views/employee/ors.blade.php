@@ -234,17 +234,17 @@
                     <select id="orsUwpOutput"
                         class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200"
                         required>
-                    <option value="">Select approved UWP output</option>
-                    <option value="ebank_scanning">
-                        E-Bank Scanning and Encoding of Revenue Transactions
-                    </option>
-                    <option value="otc_processing">
-                        Processing of Over-the-Counter Revenue Transactions
-                    </option>
-                    <option value="records_maintenance">
-                        Maintenance of Revenue Records Filing System
-                    </option>
-                </select>
+                        <option value="">Select approved UWP output</option>
+                        <option value="ebank_scanning">
+                            E-Bank Scanning and Encoding of Revenue Transactions
+                        </option>
+                        <option value="otc_processing">
+                            Processing of Over-the-Counter Revenue Transactions
+                        </option>
+                        <option value="records_maintenance">
+                            Maintenance of revenue records and filing system
+                        </option>
+                    </select>
 
                 </div>
 
@@ -256,25 +256,8 @@
                     <select id="orsTaskType"
                         class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200"
                         required>
-                    <option value="">Select task (based on selected UWP output)</option>
-
-                    <optgroup label="E-Bank Scanning and Encoding">
-                        <option value="ebank_scanning">E-Bank Scanning</option>
-                        <option value="ebank_encoding">E-Bank Encoding</option>
-                        <option value="ebank_upload">Uploading Scanned E-Bank Documents</option>
-                    </optgroup>
-
-                    <optgroup label="OTC Revenue Transaction Processing">
-                        <option value="otc_encoding">OTC Transaction Encoding</option>
-                        <option value="or_validation">Official Receipt Validation</option>
-                    </optgroup>
-
-                    <optgroup label="Records Filing System Maintenance">
-                        <option value="document_indexing">Document Indexing</option>
-                        <option value="file_archiving">File Archiving</option>
-                        <option value="records_validation">Records Validation</option>
-                    </optgroup>
-                </select>
+                        <option value="">Select task / activity</option>
+                    </select>
 
                 </div>
 
@@ -480,6 +463,24 @@
                 missing: { label: 'Missing / Overdue', color: '#ef4444', badge: 'border-red-500/60 bg-red-500/10 text-red-100', editable: true },
             };
 
+            const UWP_INDICATORS = {
+                ebank_scanning: [
+                    'All e-bank transactions scanned and encoded daily',
+                    'Indexing complete with no missing pages',
+                    'Audit trail maintained within 24 hours',
+                ],
+                otc_processing: [
+                    'Same-day verification of OTC transactions',
+                    '95% encoded within the business day',
+                    'OR validation completed daily',
+                ],
+                records_maintenance: [
+                    'Weekly filing updated and retrievable',
+                    'Digital backups synced monthly',
+                    'Retrieval logs maintained for audits',
+                ],
+            };
+
             let tasks = [
                     {
                         id: 'task-1',
@@ -545,8 +546,49 @@
                         state: 'missing',
                         startTime: null,
                         durationMs: 0
+                    },
+
+                    {
+                        id: 'task-6',
+                        title: 'All e-bank transactions scanned and encoded daily',
+                        date: '2026-01-19',
+                        client: 'Revenue Collection Unit',
+                        requestId: 'REQ-2026-019',
+                        output: 'Bank Statement Form (BSF-01)',
+                        notes: 'Demo: logged task for January 19',
+                        rating: '--',
+                        state: 'recording',
+                        startTime: new Date(), // timer starts now
+                        durationMs: 0
                     }
+
                 ];
+
+            const uwpSelect = document.getElementById('orsUwpOutput');
+            const taskSelect = document.getElementById('orsTaskType');
+
+            function resetTaskOptions() {
+                if (!taskSelect) return;
+                taskSelect.innerHTML = '<option value="">Select task / activity</option>';
+            }
+
+            function populateTaskOptions(outputKey) {
+                resetTaskOptions();
+                const indicators = UWP_INDICATORS[outputKey] || [];
+                indicators.forEach((indicator) => {
+                    const opt = document.createElement('option');
+                    opt.value = indicator;
+                    opt.textContent = indicator;
+                    taskSelect.appendChild(opt);
+                });
+            }
+
+            if (uwpSelect && taskSelect) {
+                resetTaskOptions();
+                uwpSelect.addEventListener('change', () => {
+                    populateTaskOptions(uwpSelect.value);
+                });
+            }
 
             let activeTaskId = tasks.find(t => t.state === 'recording' || t.state === 'paused')?.id || null;
             let detailTaskId = null;
@@ -554,6 +596,7 @@
             const calendarEl = document.getElementById('ors-calendar');
             const calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
+                initialDate: '2026-01-01',
                 height: 'auto',
                 contentHeight: 600,
                 dayMaxEventRows: 3,
@@ -911,46 +954,71 @@
 
                 taskForm.addEventListener('submit', function (e) {
                     e.preventDefault();
-                    const date = document.getElementById('orsSelectedDate').value;
+                    const selectedDate = document.getElementById('orsSelectedDate').value;
+                    const uwpOutputSelect = document.getElementById('orsUwpOutput');
                     const taskTypeSelect = document.getElementById('orsTaskType');
-                    const clientSelect = document.getElementById('orsClient');
                     const outputSelect = document.getElementById('orsOutput');
                     const requestInput = document.getElementById('orsRequestId');
                     const notesInput = document.getElementById('orsNotes');
                     const submitBtn = taskForm.querySelector('button[type="submit"]');
 
+                    const uwpOutputKey = uwpOutputSelect ? uwpOutputSelect.value : '';
+                    const uwpOutputLabel = (uwpOutputSelect && uwpOutputSelect.selectedIndex > -1)
+                        ? uwpOutputSelect.options[uwpOutputSelect.selectedIndex].text
+                        : '';
                     const taskType = taskTypeSelect ? taskTypeSelect.value : '';
-                    const client = clientSelect ? clientSelect.value : '';
                     const outputType = outputSelect ? outputSelect.value : '';
                     const requestId = requestInput ? requestInput.value.trim() : '';
+                    const validIndicators = UWP_INDICATORS[uwpOutputKey] || [];
 
-                    if (!taskType || !client || !date || !requestId || !outputType) {
+                    if (!uwpOutputKey || !taskType || !selectedDate || !outputType) {
+                        alert('Select a valid UWP output and task / activity.');
+                        return;
+                    }
+                    if (!validIndicators.includes(taskType)) {
+                        alert('Task / activity must match the selected UWP output.');
                         return;
                     }
 
                     setButtonLoading(submitBtn, true, 'Logging...');
 
                     setTimeout(() => {
+                        const currentActive = activeTaskId ? getTaskById(activeTaskId) : null;
+                        if (currentActive && currentActive.state === 'recording') {
+                            if (currentActive.startTime) {
+                                currentActive.durationMs = (currentActive.durationMs || 0) + (Date.now() - currentActive.startTime.getTime());
+                            }
+                            currentActive.startTime = null;
+                            currentActive.state = 'draft';
+                            activeTaskId = null;
+                        }
                         const newTask = {
                             id: `task-${Date.now()}`,
                             title: taskTypeSelect.options[taskTypeSelect.selectedIndex].text,
-                            date: date,
-                            client: clientSelect.options[clientSelect.selectedIndex].text,
+                            date: selectedDate,
+                            client: 'Revenue Collection Unit',
                             requestId: requestId,
                             output: outputSelect.options[outputSelect.selectedIndex].text,
+                            uwpOutputId: uwpOutputKey,
+                            uwpOutput: uwpOutputLabel,
                             notes: notesInput && notesInput.value ? notesInput.value : 'No notes',
                             rating: '--',
-                            state: 'draft',
-                            startTime: null,
+                            state: 'recording',
+                            startTime: new Date(),
                             durationMs: 0
                         };
                         tasks.push(newTask);
+                        activeTaskId = newTask.id;
                         refreshCalendar();
+                        if (calendar && selectedDate) {
+                            calendar.gotoDate(selectedDate);
+                        }
+                        updateActivePanel();
                         closeOrsModal('orsTaskModal');
                         taskForm.reset();
                         document.getElementById('orsSelectedDate').value = '';
                         setButtonLoading(submitBtn, false);
-                        // Task logged; proceed without additional prompts.
+                        // Task logged and recording; proceed without additional prompts.
                         openTaskDetails(newTask.id);
                     }, 400);
                 });

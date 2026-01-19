@@ -113,8 +113,7 @@
                     <table class="w-full text-sm border border-slate-800">
                         <thead class="bg-slate-950 text-slate-300">
                             <tr>
-                                <th class="px-4 py-3 text-left">Success Indicator</th>
-                                <th class="px-4 py-3 text-left">Performance Measure</th>
+                                <th class="px-4 py-3 text-left">Major Final Output</th>
                                 <th class="px-4 py-3 text-left">Target</th>
                                 <th class="px-4 py-3 text-left">Weight</th>
                             </tr>
@@ -125,10 +124,7 @@
                                     E-Bank Scanning and Encoding of Revenue Transactions
                                 </td>
                                 <td class="px-4 py-3">
-                                    Timeliness and accuracy
-                                </td>
-                                <td class="px-4 py-3">
-                                    95% same-day processing
+                                    Daily; all e-bank transactions processed within same working day
                                 </td>
                                 <td class="px-4 py-3">
                                     50%
@@ -140,10 +136,7 @@
                                     Processing of Over-the-Counter Revenue Transactions
                                 </td>
                                 <td class="px-4 py-3">
-                                    Timeliness and accuracy
-                                </td>
-                                <td class="px-4 py-3">
-                                    95% same-day processing
+                                    Daily; 95% processed within same working day
                                 </td>
                                 <td class="px-4 py-3">
                                     30%
@@ -155,10 +148,7 @@
                                     Maintenance of Revenue Records Filing System
                                 </td>
                                 <td class="px-4 py-3">
-                                    Records completeness
-                                </td>
-                                <td class="px-4 py-3">
-                                    Quarterly validation
+                                    Quarterly validation and update
                                 </td>
                                 <td class="px-4 py-3">
                                     20%
@@ -226,9 +216,9 @@
                     <p><strong>Office:</strong> Human Resource Unit</p>
                     <p><strong>Period:</strong> Jan–Dec 2026</p>
                     <p><strong>Referenced UWP:</strong> Approved</p>
-                    <p><strong>Success Indicator:</strong> 1,200 records scanned and digitized</p>
-                    <p><strong>Performance Measure:</strong> Timeliness and accuracy</p>
-                    <p><strong>Weight:</strong> Core Function – 80%</p>
+                    <p><strong>Major Final Output:</strong> E-Bank Scanning and Encoding of Revenue Transactions</p>
+                    <p><strong>Target:</strong> Daily; all e-bank transactions processed within same working day</p>
+                    <p><strong>Weight:</strong> 50%</p>
                     <p><strong>Status:</strong> Approved</p>
                 </div>
 

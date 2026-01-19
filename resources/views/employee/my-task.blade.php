@@ -43,6 +43,29 @@
                     </thead>
                     <tbody class="divide-y divide-gray-700">
                         <tr class="hover:bg-gray-750">
+                            <td class="px-4 py-3 text-gray-300">
+                                All e-bank transactions scanned and encoded daily
+                            </td>
+                            <td class="px-4 py-3 text-gray-300">
+                                Jan 19, 2026
+                            </td>
+                            <td class="px-4 py-3">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full
+                                            text-xs font-medium bg-amber-900 text-amber-300">
+                                    Recording
+                                </span>
+                            </td>
+                            <td class="px-4 py-3">
+                                <span class="text-xs font-medium text-amber-300">
+                                    Output pending
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-gray-300">
+                                Active timer
+                            </td>
+                        </tr>
+
+                        <tr class="hover:bg-gray-750">
                             <td class="px-4 py-3 text-gray-300">E-Bank Scanning</td>
                             <td class="px-4 py-3 text-gray-300">Jan 4, 2026</td>
                             <td class="px-4 py-3">

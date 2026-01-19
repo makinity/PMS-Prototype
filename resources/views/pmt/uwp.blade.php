@@ -217,30 +217,17 @@
                     </div>
 
                     <div class="rounded-xl border border-slate-800 bg-slate-900 p-4 space-y-3">
-                        <label class="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                            PMT Decision Remarks
-                            <span class="text-slate-500">(required if returning)</span>
-                        </label>
-
-                        <textarea
-                            rows="3"
-                            style="background:#0f172a;color:#e5e7eb;"
-                            placeholder="Provide justification or revision instructions if returning the UWP."
-                            class="w-full rounded-lg border border-slate-700 bg-slate-900
-                                px-3 py-2 text-sm text-slate-100 placeholder-slate-400">
-                        </textarea>
-                    </div>
-
-                    <div class="rounded-xl border border-slate-800 bg-slate-900 p-4 space-y-3">
                         <p class="text-sm font-semibold text-white">
                             PMT Review Basis (Governance Reference)
                         </p>
 
                         <ul class="space-y-2 text-sm text-slate-300">
-                            <li>✓ Aligned with approved OPCR and organizational targets</li>
-                            <li>✓ Outputs are specific, measurable, and time-bound</li>
-                            <li>✓ Core and support functions are properly classified</li>
-                            <li>✓ Targets comply with SPMS performance standards</li>
+                            <li>✓ Outputs are aligned with organizational mandate and core functions</li>
+                            <li>✓ PPAs / MFOs are clearly defined, specific, and measurable</li>
+                            <li>✓ Success indicators are objective, verifiable, and time-bound</li>
+                            <li>✓ Targets are planning-appropriate and feasible within the performance periods</li>
+                            <li>✓ Core and support functions are properly classified per SPMS rules</li>
+                            <li>✓ Outputs are suitable for aggregation into OPCR</li>
                         </ul>
 
                         <p class="text-xs text-slate-400">
@@ -258,16 +245,12 @@
                     <div class="flex items-center gap-3">
                         <button
                             type="button"
-                            data-admin-loading="true"
-                            data-loading-text="Returning..."
+                            onclick="openPmtReturnModal()"
                             class="inline-flex items-center gap-2
                                 rounded-lg border border-rose-500/30 bg-rose-600/10 px-4 py-2
                                 text-sm font-semibold text-rose-300
                                 hover:bg-rose-600/20 transition">
-                            <span data-button-spinner
-                                class="hidden h-4 w-4 animate-spin rounded-full
-                                        border-2 border-rose-300/40 border-t-rose-300"></span>
-                            <span data-button-label>Return to Dept Head</span>
+                            <span>Return to Dept Head</span>
                         </button>
 
                         <button
@@ -319,6 +302,51 @@
         </div>
     </div>
 
+    <div id="pmt-return-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 px-4 py-6">
+        <div class="w-full max-w-lg rounded-2xl border border-slate-800 bg-slate-950 p-5 shadow-2xl">
+            <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
+                <div>
+                    <p class="text-xs uppercase tracking-[0.2em] text-rose-300">Return to Dept Head</p>
+                    <h3 class="text-lg font-semibold text-white">Provide Return Remarks</h3>
+                    <p class="text-xs text-slate-400 mt-1">This will send the UWP back to the Department Head for revision.</p>
+                </div>
+                <button type="button" onclick="closePmtReturnModal()" class="text-slate-400 hover:text-white">
+                    <span class="sr-only">Close</span>
+                    &times;
+                </button>
+            </div>
+
+            <div class="mt-4 space-y-3">
+                <label class="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                    Remarks <span class="text-rose-300">*</span>
+                </label>
+                <textarea
+                    id="pmt-return-remarks"
+                    rows="4"
+                    style="background:#0f172a;color:#e5e7eb;"
+                    required
+                    class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:ring-2 focus:ring-rose-500 focus:outline-none"
+                    placeholder="State the reason for return and required revisions."></textarea>
+            </div>
+
+            <div class="mt-5 flex items-center justify-end gap-3">
+                <button type="button"
+                        class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800"
+                        onclick="closePmtReturnModal()">
+                    Cancel
+                </button>
+                <button type="button"
+                        data-admin-loading="true"
+                        data-loading-text="Returning..."
+                        class="inline-flex items-center gap-2 rounded-lg border border-rose-500/30 bg-rose-600/10 px-4 py-2 text-sm font-semibold text-rose-200 transition hover:bg-rose-600/20"
+                        onclick="submitPmtReturn()">
+                    <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-rose-200/40 border-t-rose-200"></span>
+                    <span data-button-label>Confirm Return</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     @push('scripts')
         <script>
             (function initPmtIndicatorsModal() {
@@ -360,6 +388,55 @@
                         openIndicatorsModal(btn.dataset.title || '--', indicators);
                     });
                 });
+            })();
+
+            (function initPmtReturnModal() {
+                const modal = document.getElementById('pmt-return-modal');
+                const remarks = document.getElementById('pmt-return-remarks');
+
+                window.openPmtReturnModal = function () {
+                    if (!modal) return;
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                    document.body.classList.add('overflow-hidden');
+                    if (remarks) {
+                        remarks.value = '';
+                        setTimeout(() => remarks.focus(), 50);
+                    }
+                };
+
+                window.closePmtReturnModal = function () {
+                    if (!modal) return;
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                    document.body.classList.remove('overflow-hidden');
+                };
+
+                window.submitPmtReturn = function () {
+                    if (!modal || !remarks) return;
+                    if (!remarks.value.trim()) {
+                        remarks.focus();
+                        return;
+                    }
+                    const confirmBtn = modal.querySelector('[onclick=\"submitPmtReturn()\"]');
+                    if (confirmBtn && confirmBtn.dataset.adminLoading) {
+                        const label = confirmBtn.querySelector('[data-button-label]');
+                        const spinner = confirmBtn.querySelector('[data-button-spinner]');
+                        confirmBtn.disabled = true;
+                        confirmBtn.classList.add('opacity-70', 'cursor-wait');
+                        if (spinner) spinner.classList.remove('hidden');
+                        if (label && confirmBtn.dataset.loadingText) label.textContent = confirmBtn.dataset.loadingText;
+                        setTimeout(() => {
+                            if (spinner) spinner.classList.add('hidden');
+                            if (label && confirmBtn.dataset.loadingText) label.textContent = 'Confirm Return';
+                            confirmBtn.disabled = false;
+                            confirmBtn.classList.remove('opacity-70', 'cursor-wait');
+                            closePmtReturnModal();
+                        }, 900);
+                    } else {
+                        closePmtReturnModal();
+                    }
+                };
             })();
         </script>
     @endpush

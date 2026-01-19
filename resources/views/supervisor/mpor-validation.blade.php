@@ -44,6 +44,59 @@
                     </thead>
                     <tbody class="divide-y divide-slate-800">
                         <tr class="hover:bg-slate-900">
+                            <td class="px-4 py-3">
+                                All e-bank transactions scanned and encoded daily
+                            </td>
+
+                            <td class="px-4 py-3 text-slate-300">
+                                REQ-2026-019
+                            </td>
+
+                            <td class="px-4 py-3 text-slate-300">
+                                Jan 19, 2026
+                            </td>
+
+                            <td class="px-4 py-3">
+                                <span class="rounded-full bg-blue-500/10 px-2 py-1 text-xs
+                                    font-semibold text-blue-200 border border-blue-600/50">
+                                    For review
+                                </span>
+                            </td>
+
+                            <td class="px-4 py-3 text-slate-200">
+                                <div class="text-sm font-semibold">0m</div>
+                                <div class="text-[11px] text-slate-500">Auto-tracked via ORS</div>
+                            </td>
+
+                            <td class="px-4 py-3 text-slate-300">
+                                <div class="text-sm font-semibold">
+                                    Quarterly.pdf
+                                </div>
+                                <div class="text-[11px] text-slate-500">
+                                    Submitted in ORS (read-only)
+                                </div>
+                            </td>
+
+                            <td class="px-4 py-3 text-center space-x-2">
+                                <button
+                                    type="button"
+                                    data-view-entry
+                                    data-output="All e-bank transactions scanned and encoded daily"
+                                    data-ors="REQ-2026-019"
+                                    data-date="Jan 19, 2026"
+                                    data-status="For review"
+                                    data-unit="Revenue Collection Unit"
+                                    data-employee="Ramon Reyes"
+                                    data-duration="0m"
+                                    data-start="--"
+                                    data-end="--"
+                                    data-evidence="Quarterly.pdf"
+                                    class="text-blue-400 hover:text-blue-300 text-xs font-semibold">
+                                    View
+                                </button>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-slate-900">
                             <td class="px-4 py-3">E-Bank Scanning</td>
                             <td class="px-4 py-3 text-slate-300">REQ-2026-002</td>
                             <td class="px-4 py-3 text-slate-300">Jan 4, 2026</td>
