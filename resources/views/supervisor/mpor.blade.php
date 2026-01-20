@@ -1,24 +1,18 @@
 <x-layouts.supervisor>
     @php
-        $isValidationPhase = $isValidationPhase ?? false;
-        $modeTitle = $isValidationPhase
-            ? 'Stage III – MPOR Validation'
-            : 'Stage II – Monthly Performance Monitoring (MPOR Review)';
-        $modeHelper = $isValidationPhase
-            ? 'In this stage, the supervisor formally validates monthly accomplishments and prepares records for SMPOR generation.'
-            : 'This view summarizes submitted ORS accomplishments for monthly monitoring. No validation or rating is performed at this stage.';
-        $statusBadge = $isValidationPhase ? 'Pending validation' : 'Summary';
-        $detailsBadge = $isValidationPhase ? 'For review' : 'Included in monthly summary';
-        $finalNote = $isValidationPhase
-            ? 'MPOR can be locked only when all entries are validated and linked.'
-            : 'SMPOR generation occurs after MPOR validation.';
-        $showLockButton = $isValidationPhase;
+        $isValidationPhase = false;
+        $modeTitle = 'Stage II - Monthly Performance Monitoring (MPOR Review)';
+        $modeHelper = 'This view summarizes submitted ORS accomplishments for monthly monitoring. No validation or rating is performed at this stage.';
+        $statusBadge = 'Captured for monitoring';
+        $detailsBadge = 'Monitored';
+        $finalNote = 'This report supports monthly performance monitoring only. Validation, SMPOR generation, and performance rating occur in Stage III.';
+        $showLockButton = false;
 
         $entries = [
             [
-                'output' => 'E-Bank Scanning',
-                'ors' => 'REQ-2026-002',
-                'date' => 'Jan 4, 2026',
+                'output' => 'E-Bank Scanning and Encoding of Revenue Transactions',
+                'ors' => 'REQ-2026-019',
+                'date' => 'Jan 19, 2026',
                 'duration' => '1h 30m',
                 'durationCopy' => 'Auto-tracked via ORS',
                 'evidence' => 'e-bank_scan.pdf',
@@ -32,7 +26,7 @@
                 'end' => '10:42 AM',
             ],
             [
-                'output' => 'OTC Revenue Processing',
+                'output' => 'Processing of Over-the-Counter Revenue Transactions',
                 'ors' => 'REQ-2026-001',
                 'date' => 'Jan 3, 2026',
                 'duration' => '2h 10m',
@@ -84,10 +78,10 @@
                 <div>
                     <h2 class="text-lg font-semibold text-white">MPOR entries</h2>
                     <p class="text-xs text-slate-400">
-                        Only submitted ORS accomplishments are summarized here. Status chips describe monitoring or validation context depending on the stage.
+                        Only submitted ORS accomplishments are summarized here for monitoring. Status chips reflect monitoring state only.
                     </p>
                 </div>
-                <span class="text-xs text-slate-400">{{ $isValidationPhase ? 'Pending supervisor validation' : 'Monitoring summary' }}</span>
+                <span class="text-xs text-slate-400">Captured from submitted ORS entries (read-only)</span>
             </div>
 
             <div class="overflow-x-auto">
@@ -96,8 +90,8 @@
                         <tr>
                             <th class="px-4 py-3 text-left">Output</th>
                             <th class="px-4 py-3 text-left">ORS Ref</th>
-                            <th class="px-4 py-3 text-left">Date</th>
-                            <th class="px-4 py-3 text-left">Status</th>
+                            <th class="px-4 py-3 text-left">Date Logged</th>
+                            <th class="px-4 py-3 text-left">Monitoring Status</th>
                             <th class="px-4 py-3 text-left">Duration</th>
                             <th class="px-4 py-3 text-left">Evidence</th>
                             <th class="px-4 py-3 text-center">Action</th>
@@ -236,29 +230,14 @@
                         class="rounded-lg border border-slate-700 bg-slate-800/80 px-3 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-800">
                     Close
                 </button>
-                @if ($isValidationPhase)
-
-                    <button type="button"
-                            data-modal-return="view-mpor-modal"
-                            class="inline-flex items-center gap-2 rounded-lg border border-rose-500/40 bg-rose-600/10 px-3 py-2 text-sm font-semibold text-rose-200 transition hover:bg-rose-600/20">
-                        Return
-                    </button>
-                    <button type="button"
-                            data-modal-validate="view-mpor-modal"
-                            data-auto-reset="true"
-                            class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500">
-                        Validate
-                    </button>
-                @else
-                    <a href="{{ route('supervisor.ors.export.pdf') }}"
-                        class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800">
-                            Export PDF
-                    </a>
-                    <button type="button"
-                            class="rounded-lg border border-slate-700 bg-slate-800/80 px-3 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-800">
-                        View Evidence
-                    </button>
-                @endif
+                <a href="{{ route('supervisor.mpor.export.pdf') }}"
+                    class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800">
+                        Export PDF
+                </a>
+                <button type="button"
+                        class="rounded-lg border border-slate-700 bg-slate-800/80 px-3 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-800">
+                    View Evidence
+                </button>
             </div>
         </div>
     </div>
@@ -323,26 +302,8 @@
                     }
                 });
 
-                document.querySelectorAll('[data-modal-return="view-mpor-modal"]').forEach((button) => {
-                    button.addEventListener('click', () => {
-                        setLoadingState(button, 'Returning...');
-                        setTimeout(() => {
-                            resetLoadingState(button);
-                            toggleModal(modalId, false);
-                        }, 1400);
-                    });
-                });
-
-                document.querySelectorAll('[data-modal-validate="view-mpor-modal"]').forEach((button) => {
-                    button.addEventListener('click', () => {
-                        setLoadingState(button, 'Validating...');
-                        setTimeout(() => {
-                            resetLoadingState(button);
-                            toggleModal(modalId, false);
-                        }, 1400);
-                    });
-                });
             });
         </script>
     @endpush
 </x-layouts.supervisor>
+

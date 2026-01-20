@@ -26,6 +26,7 @@
             $isDashboard = request()->routeIs('dept-head.dashboard');
             $isUnitWorkPlan = request()->routeIs('dept-head.uwp');
             $isOpcr = request()->routeIs('dept-head.opcr');
+            $isQar = request()->routeIs('dept-head.qar');
             $isSMPOR = request()->routeIs('dept-head.smpor');
             $isIPCR = request()->routeIs('pmt.ipcr');
             $isIPCRTARGET = request()->routeIs('pmt.ipcr-target');
@@ -130,6 +131,13 @@
                                 <a href="{{ route('dept-head.opcr') }}" class="sidebar-link" @if($isOpcr) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-file-contract"></i>
                                     <span>OPCR Review</span>
+                                </a>
+                            </li>
+
+                            <li>
+                                <a href="{{ route('dept-head.qar') }}" class="sidebar-link" @if($isQar) aria-current="page" @endif>
+                                    <i class="sidebar-icon fa-solid fa-file-contract"></i>
+                                    <span>QAR (Quarterly Accomplishment)</span>
                                 </a>
                             </li>
 

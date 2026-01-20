@@ -108,8 +108,18 @@
                                 E-Bank Scanning and Encoding of Revenue Transactions
                             </td>
                             <td class="border border-gray-700 px-4 py-3 text-gray-300">
-                                Timeliness and accuracy of scanned and encoded e-bank transactions
-                                <span class="block text-[11px] text-gray-500 mt-1">System-generated from approved UWP and OPCR</span>
+                                <button type="button"
+                                        data-employee-action
+                                        data-action-title="Success Indicators"
+                                        data-action-message="E-Bank Scanning and Encoding of Revenue Transactions&#10;1) All e-bank transactions scanned and encoded daily&#10;2) Indexing complete with no missing pages&#10;3) Audit trail maintained within 24 hours"
+                                        class="inline-flex items-center gap-2 text-blue-300 hover:text-blue-200">
+                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12Z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                    </svg>
+                                    <span>3 indicators</span>
+                                </button>
+                                <span class="block text-[11px] text-gray-500 mt-1">Derived from approved UWP</span>
                             </td>
                             <td class="border border-gray-700 px-4 py-3 text-gray-300">
                                 95% same-day processing
@@ -129,8 +139,18 @@
                                 Processing of Over-the-Counter Revenue Transactions
                             </td>
                             <td class="border border-gray-700 px-4 py-3 text-gray-300">
-                                Timeliness and accuracy of OTC revenue transaction processing
-                                <span class="block text-[11px] text-gray-500 mt-1">System-generated from approved UWP and OPCR</span>
+                                <button type="button"
+                                        data-employee-action
+                                        data-action-title="Success Indicators"
+                                        data-action-message="Processing of Over-the-Counter Revenue Transactions&#10;1) Same-day verification of OTC transactions&#10;2) 95% encoded within the business day&#10;3) OR validation completed daily"
+                                        class="inline-flex items-center gap-2 text-blue-300 hover:text-blue-200">
+                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12Z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                    </svg>
+                                    <span>3 indicators</span>
+                                </button>
+                                <span class="block text-[11px] text-gray-500 mt-1">Derived from approved UWP</span>
                             </td>
                             <td class="border border-gray-700 px-4 py-3 text-gray-300">
                                 95% same-day processing
@@ -178,8 +198,18 @@
                                 Maintenance of Revenue Records Filing System
                             </td>
                             <td class="border border-gray-700 px-4 py-3 text-gray-300">
-                                Records completeness and retrievability
-                                <span class="block text-[11px] text-gray-500 mt-1">System-generated from approved UWP and OPCR</span>
+                                <button type="button"
+                                        data-employee-action
+                                        data-action-title="Success Indicators"
+                                        data-action-message="Maintenance of Revenue Records Filing System&#10;1) Weekly filing updated and retrievable&#10;2) Digital backups synced monthly&#10;3) Retrieval logs maintained for audits"
+                                        class="inline-flex items-center gap-2 text-blue-300 hover:text-blue-200">
+                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12Z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                    </svg>
+                                    <span>3 indicators</span>
+                                </button>
+                                <span class="block text-[11px] text-gray-500 mt-1">Derived from approved UWP</span>
                             </td>
                             <td class="border border-gray-700 px-4 py-3 text-gray-300">
                                 Quarterly validation
@@ -322,10 +352,26 @@
             setButtonLoading(confirmBtn, false);
         }
 
+        function buildIndicatorsHtml(message) {
+            const raw = message || '';
+            const lines = raw.split('\n').map((l) => l.trim()).filter(Boolean);
+            if (!lines.length) return '<p class="text-sm text-gray-300">Prototype action preview.</p>';
+            const [header, ...items] = lines;
+            const listItems = items.map((item) => `<li>${item}</li>`).join('');
+            return `
+                <p class="text-xs text-gray-400 mb-2">${header}</p>
+                <div class="max-h-64 overflow-y-auto pr-1">
+                    <ol class="list-decimal list-inside space-y-2 text-sm text-gray-300">
+                        ${listItems || '<li>No indicators provided.</li>'}
+                    </ol>
+                </div>
+            `;
+        }
+
         function openModal(trigger) {
             activeTrigger = trigger;
             title.textContent = trigger.dataset.actionTitle || 'Action';
-            body.textContent = trigger.dataset.actionMessage || 'Prototype action preview.';
+            body.innerHTML = buildIndicatorsHtml(trigger.dataset.actionMessage);
             confirmBtn.dataset.actionLoading = trigger.dataset.actionLoading || 'Working...';
             modal.classList.remove('hidden');
             document.body.classList.add('overflow-hidden');

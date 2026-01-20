@@ -153,6 +153,10 @@
                 </div>
 
                 <div class="mt-6 flex justify-end">
+                    <a href="{{ route('supervisor.ors.export.pdf') }}"
+                        class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800">
+                            Export PDF
+                    </a>
                     <button type="button"
                             onclick="closeOrsModal('ors-monitoring-modal')"
                             class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800">

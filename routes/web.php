@@ -3,7 +3,9 @@
 use App\Http\Controllers\StageOne\Forms\IpcrExportController;
 use App\Http\Controllers\StageOne\Forms\OpcrExportController;
 use App\Http\Controllers\StageOne\Forms\UwpExportController;
-use App\Http\Controllers\StageOne\Forms\OrsExportController;
+use App\Http\Controllers\StageTwo\Forms\MporExportController;
+use App\Http\Controllers\StageTwo\Forms\OrsExportController;
+use App\Http\Controllers\StageTwo\Forms\QarExportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -70,6 +72,13 @@ Route::get('/dept-head/opcr', function () {
     return view('dept-head.opcr');
 })->name('dept-head.opcr');
 
+Route::get('/dept-head/qar/export/pdf', [QarExportController::class, 'exportPdf'])
+    ->name('stage2.qar.export.pdf');
+
+Route::get('/dept-head/qar', function () {
+    return view('dept-head.qar');
+})->name('dept-head.qar');
+
 Route::get('/dept-head/smpor', function () {
     return view('dept-head.smpor');
 })->name('dept-head.smpor');
@@ -124,6 +133,9 @@ Route::get('/supervisor/opcr', function () {
 Route::get('/supervisor/mpor', function () {
     return view('supervisor.mpor');
 })->name('supervisor.mpor');
+
+Route::get('/supervisor/mpor/export/pdf', [MporExportController::class, 'exportPdf'])
+    ->name('supervisor.mpor.export.pdf');
 
 Route::get('/supervisor/mpor-validation', function () {
     return view('supervisor.mpor-validation');

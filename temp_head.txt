@@ -1,0 +1,5 @@
+<x-layouts.supervisor>
+    @php
+        $isValidationPhase = false;
+        $modeTitle = 'Stage II – Monthly Performance Monitoring (MPOR Review)';
+        $modeHelper = 'This view summarizes submit
