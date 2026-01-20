@@ -3,6 +3,7 @@
 use App\Http\Controllers\StageOne\Forms\IpcrExportController;
 use App\Http\Controllers\StageOne\Forms\OpcrExportController;
 use App\Http\Controllers\StageOne\Forms\UwpExportController;
+use App\Http\Controllers\StageThree\Forms\IpcrExportController as StageThreeFormsIpcrExportController;
 use App\Http\Controllers\StageTwo\Forms\IpcrExportController as FormsIpcrExportController;
 use App\Http\Controllers\StageTwo\Forms\MporExportController;
 use App\Http\Controllers\StageTwo\Forms\OrsExportController;
@@ -206,6 +207,14 @@ Route::get('/pmt/ipcr', function () {
     return view('pmt.ipcr');
 })->name('pmt.ipcr');
 
+Route::get('/pmt/ipcr-overview', function () {
+    return view('pmt.ipcr-calib-overview');
+})->name('pmt.ipcr-calib-overview');
+
+Route::get('/pmt/ipcr-calibration', function () {
+    return view('pmt.ipcr-calib');
+})->name('pmt.ipcr-calib');
+
 Route::get('/pmt/smpor', function () {
     return view('pmt.smpor');
 })->name('pmt.smpor');
@@ -220,6 +229,9 @@ Route::get('/pmt/profile', function () {
 
 Route::get('/pmt/uwp/export/pdf', [UwpExportController::class, 'exportPdf'])
     ->name('stage1.uwp.export.pdf');
+
+Route::get('/pmt/ipcr/export/pdf', [StageThreeFormsIpcrExportController::class, 'exportPdf'])
+->name('stage3.ipcr.export.pdf');
 
 
 

@@ -2,65 +2,51 @@
     <section class="space-y-6">
         <div class="flex items-start justify-between gap-4">
             <div>
-                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">IPCR Monitoring</p>
-                <h1 class="mt-1 text-2xl font-bold text-white">Approved IPCRs</h1>
-                <p class="text-sm text-slate-400 mt-1">Read-only oversight. PMT cannot edit or approve.</p>
+                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Stage III – PMT IPCR Review</p>
+                <h1 class="mt-1 text-2xl font-bold text-white">PMT Review & Recommendation</h1>
+                <p class="text-sm text-slate-400 mt-1">Data derived from locked SMPOR, Supervisor IPCR Rating, and Department Head Endorsement. PMT may adjust for calibration.</p>
             </div>
-            <span class="rounded-full border border-blue-600/50 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-200">
-                Read-only
+            <span class="rounded-full border border-emerald-600/50 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-200">
+                Endorsed
             </span>
         </div>
 
         <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 space-y-4">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-white">IPCRs For PMT Review</h2>
+                <span class="text-[11px] text-slate-400">Showing Endorsed IPCRs only</span>
+            </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm border border-slate-800">
                     <thead class="bg-slate-950/60 text-slate-200">
                         <tr>
-                            <th class="px-4 py-3 text-left font-semibold border-b border-slate-800">Employee</th>
-                            <th class="px-4 py-3 text-left font-semibold border-b border-slate-800">Employee ID</th>
+                            <th class="px-4 py-3 text-left font-semibold border-b border-slate-800">Employee Name</th>
+                            <th class="px-4 py-3 text-left font-semibold border-b border-slate-800">Position</th>
                             <th class="px-4 py-3 text-left font-semibold border-b border-slate-800">Office / Unit</th>
                             <th class="px-4 py-3 text-left font-semibold border-b border-slate-800">Rating Period</th>
                             <th class="px-4 py-3 text-left font-semibold border-b border-slate-800">Overall Rating</th>
-                            <th class="px-4 py-3 text-left font-semibold border-b border-slate-800">Status</th>
+                            <th class="px-4 py-3 text-left font-semibold border-b border-slate-800">IPCR Status</th>
                             <th class="px-4 py-3 text-center font-semibold border-b border-slate-800">Action</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-800 text-slate-200">
                         <tr class="hover:bg-slate-900/60">
-                            <td class="px-4 py-3">Juan Dela Cruz</td>
-                            <td class="px-4 py-3 text-slate-300">EMP-0078</td>
-                            <td class="px-4 py-3 text-slate-300">Administrative Services Unit</td>
-                            <td class="px-4 py-3 text-slate-300">Jan - Jun 2025</td>
-                            <td class="px-4 py-3 text-emerald-300 font-semibold">4.50</td>
+                            <td class="px-4 py-3">Ramon Reyes</td>
+                            <td class="px-4 py-3 text-slate-300">Records Management Officer</td>
+                            <td class="px-4 py-3 text-slate-300">Revenue Collection Unit</td>
+                            <td class="px-4 py-3 text-slate-300">January – June 2026</td>
+                            <td class="px-4 py-3 text-emerald-300 font-semibold">5.00</td>
                             <td class="px-4 py-3">
-                                <span class="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300 border border-emerald-500/30">
-                                    APPROVED
-                                </span>
+                                <span data-status-badge="row-1" class="rounded-full bg-emerald-900 px-3 py-1 text-xs font-semibold text-emerald-200 border border-emerald-800">Endorsed</span>
                             </td>
-                            <td class="px-4 py-3 text-center space-x-2">
+                            <td class="px-4 py-3 text-center">
                                 <button
                                     type="button"
                                     data-ipcr-view
-                                    data-unit="Administrative Services Unit"
-                                    data-employee="Juan Dela Cruz"
-                                    data-employee-id="EMP-0078"
-                                    data-position="Administrative Assistant I"
-                                    data-period="January - June 2025"
-                                    data-supervisor="Maria Santos"
-                                    data-overall="4.50"
-                                    data-core='[{"output":"HRIS records updated","evidence":"100% of records updated; audit trail complete.","q":5,"e":5,"t":4,"avg":"4.67","sup":"Strong data hygiene; continue monthly audits.","emp":"Noted and acknowledged."}]'
-                                    data-support='[{"output":"Reports prepared","evidence":"Monthly reports submitted with supporting documents.","q":4,"e":4,"t":5,"avg":"4.33","sup":"Quality improving; maintain template use.","emp":"Will continue current process."}]'
-                                    data-dh="Approved; no further action."
+                                    data-row-id="row-1"
                                     class="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 font-semibold text-xs">
                                     <i class="fa-regular fa-eye text-sm"></i>
-                                    <span>View</span>
-                                </button>
-                                <button
-                                    type="button"
-                                    data-ipcr-analyze
-                                    class="inline-flex items-center gap-1 text-indigo-400 hover:text-indigo-300 font-semibold text-xs">
-                                    <i class="fa-solid fa-chart-line text-sm"></i>
-                                    <span>Analyze</span>
+                                    <span>View IPCR</span>
                                 </button>
                             </td>
                         </tr>
@@ -70,72 +56,113 @@
         </div>
     </section>
 
-    {{-- VIEW MODAL --}}
     <div id="ipcr-view-modal" data-modal-container tabindex="-1" aria-hidden="true"
          class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-950/75 backdrop-blur-sm p-4">
         <div class="w-full max-w-6xl rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl">
             <div class="flex items-start justify-between gap-3 border-b border-slate-800 px-6 py-4">
                 <div>
-                    <p class="text-xs uppercase tracking-[0.2em] text-blue-300">View IPCR (Read-only)</p>
-                    <h3 class="text-lg font-semibold text-white" id="modal-employee-name">--</h3>
-                    <p class="mt-1 text-sm text-slate-400" id="modal-employee-id">--</p>
+                    <p class="text-xs uppercase tracking-[0.2em] text-blue-300">IPCR Review</p>
+                    <h3 class="text-lg font-semibold text-white">PMT Review Detail</h3>
+                    <div class="flex flex-wrap items-center gap-2 text-xs text-slate-400 mt-1">
+                        <span id="modal-employee" class="font-semibold text-slate-100">Ramon Reyes</span>
+                        <span class="text-slate-600">|</span>
+                        <span id="modal-position">Records Management Officer</span>
+                        <span class="text-slate-600">|</span>
+                        <span id="modal-period">January – June 2026</span>
+                    </div>
                 </div>
-                <button type="button" data-modal-hide="ipcr-view-modal"
-                        class="rounded-full p-1 text-slate-400 transition hover:bg-slate-800 hover:text-slate-200">
-                    <span class="sr-only">Close</span>
-                    &times;
-                </button>
+                <div class="flex flex-col items-end gap-2">
+                    <span data-modal-status class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full bg-emerald-900 text-emerald-200 border border-emerald-800">
+                        Endorsed
+                    </span>
+                    <button type="button" data-modal-hide="ipcr-view-modal" class="text-slate-400 hover:text-white">&times;</button>
+                </div>
             </div>
 
             <div class="px-6 py-5 space-y-5 max-h-[70vh] overflow-y-auto">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-800 border border-slate-800 rounded-lg p-5">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-800 border border-slate-800 rounded-lg p-5 text-sm text-slate-200">
                     <div>
-                        <label class="text-xs text-slate-400">Employee</label>
-                        <p class="text-sm font-semibold text-white" id="modal-employee">--</p>
+                        <p class="text-xs text-slate-500">Employee</p>
+                        <p class="font-semibold">Ramon Reyes</p>
                     </div>
                     <div>
-                        <label class="text-xs text-slate-400">Position</label>
-                        <p class="text-sm font-semibold text-white" id="modal-position">--</p>
+                        <p class="text-xs text-slate-500">Office / Unit</p>
+                        <p class="font-semibold">Revenue Collection Unit</p>
                     </div>
                     <div>
-                        <label class="text-xs text-slate-400">Office / Unit</label>
-                        <p class="text-sm font-semibold text-white" id="modal-unit">--</p>
+                        <p class="text-xs text-slate-500">Immediate Supervisor</p>
+                        <p class="font-semibold">Carlo D. Beray</p>
                     </div>
                     <div>
-                        <label class="text-xs text-slate-400">Rating Period</label>
-                        <p class="text-sm font-semibold text-white" id="modal-period">--</p>
+                        <p class="text-xs text-slate-500">Rating Period</p>
+                        <p class="font-semibold">January – June 2026</p>
                     </div>
                     <div>
-                        <label class="text-xs text-slate-400">Supervisor</label>
-                        <p class="text-sm font-semibold text-white" id="modal-supervisor">--</p>
+                        <p class="text-xs text-slate-500">Overall Rating</p>
+                        <p id="modal-overall" class="font-semibold text-emerald-300">5.00</p>
                     </div>
                     <div>
-                        <label class="text-xs text-slate-400">Overall Rating</label>
-                        <p class="text-sm font-semibold text-emerald-300" id="modal-overall">--</p>
+                        <p class="text-xs text-slate-500">Department Head Remarks</p>
+                        <p id="modal-dh-remarks" class="font-semibold text-slate-200">Endorsed; no adjustments from DH.</p>
                     </div>
+                </div>
+
+                <div class="bg-slate-800 border border-slate-800 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div class="text-sm text-slate-200">
+                        <div class="font-semibold text-white">Supervisor-encoded (read-only)</div>
+                        <p class="text-xs text-slate-400">Q - Quality | E - Efficiency | T - Timeliness (1-5)</p>
+                    </div>
+                    <span class="text-[11px] text-slate-400">PMT may adjust with justification (calibration only).</span>
                 </div>
 
                 <div class="rounded-xl border border-slate-800 bg-slate-900/70">
                     <div class="flex items-center justify-between border-b border-slate-800 px-4 py-3">
                         <div>
-                            <h4 class="text-sm font-semibold text-white">Core Functions <span class="text-xs text-slate-400">(80%)</span></h4>
+                            <h4 class="text-sm font-semibold text-white">Core Functions (80%)</h4>
                         </div>
+                        <span class="text-[11px] text-slate-400">System-generated</span>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="min-w-full text-sm">
                             <thead class="bg-slate-800/60 text-slate-200">
                                 <tr>
-                                    <th class="px-4 py-3 text-left font-semibold">Expected Output</th>
+                                    <th class="px-4 py-3 text-left font-semibold">MFO</th>
                                     <th class="px-4 py-3 text-left font-semibold">Actual Accomplishments / Evidence</th>
-                                    <th class="px-4 py-3 text-left font-semibold">Q</th>
-                                    <th class="px-4 py-3 text-left font-semibold">E</th>
-                                    <th class="px-4 py-3 text-left font-semibold">T</th>
-                                    <th class="px-4 py-3 text-left font-semibold">Average</th>
-                                    <th class="px-4 py-3 text-left font-semibold">Supervisor Remarks</th>
-                                    <th class="px-4 py-3 text-left font-semibold">Employee Comment</th>
+                                    <th class="px-4 py-3 text-center font-semibold">Q</th>
+                                    <th class="px-4 py-3 text-center font-semibold">E</th>
+                                    <th class="px-4 py-3 text-center font-semibold">T</th>
+                                    <th class="px-4 py-3 text-center font-semibold">Average</th>
+                                    <th class="px-4 py-3 text-center font-semibold">PMT Q</th>
+                                    <th class="px-4 py-3 text-center font-semibold">PMT E</th>
+                                    <th class="px-4 py-3 text-center font-semibold">PMT T</th>
+                                    <th class="px-4 py-3 text-center font-semibold">PMT Avg</th>
                                 </tr>
                             </thead>
-                            <tbody id="modal-core-rows" class="divide-y divide-slate-800 text-slate-200"></tbody>
+                            <tbody class="divide-y divide-slate-800 text-slate-200">
+                                <tr class="hover:bg-slate-800/40">
+                                    <td class="px-4 py-3">
+                                        E-Bank Scanning and Encoding of Revenue Transactions
+                                        <span class="block text-[11px] text-slate-500 mt-1">Target: Daily; same working day</span>
+                                    </td>
+                                    <td class="px-4 py-3 text-slate-300">
+                                        Completed daily scanning and encoding of e-bank transactions based on submitted ORS entries.
+                                    </td>
+                                    <td class="px-4 py-3 text-center font-semibold text-white">5</td>
+                                    <td class="px-4 py-3 text-center font-semibold text-white">5</td>
+                                    <td class="px-4 py-3 text-center font-semibold text-white">5</td>
+                                    <td class="px-4 py-3 text-center font-semibold text-white">5.00</td>
+                                    <td class="px-4 py-3 text-center">
+                                        <input style="background:#0f172a;color:#e5e7eb;" data-pmt-input type="number" min="1" max="5" step="0.25" value="5" class="w-16 rounded border border-slate-700 bg-slate-800 text-center text-white text-xs">
+                                    </td>
+                                    <td class="px-4 py-3 text-center">
+                                        <input style="background:#0f172a;color:#e5e7eb;" data-pmt-input type="number" min="1" max="5" step="0.25" value="5" class="w-16 rounded border border-slate-700 bg-slate-800 text-center text-white text-xs">
+                                    </td>
+                                    <td class="px-4 py-3 text-center">
+                                        <input style="background:#0f172a;color:#e5e7eb;" data-pmt-input type="number" min="1" max="5" step="0.25" value="5" class="w-16 rounded border border-slate-700 bg-slate-800 text-center text-white text-xs">
+                                    </td>
+                                    <td class="px-4 py-3 text-center font-semibold text-emerald-300" data-pmt-avg>5.00</td>
+                                </tr>
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -143,210 +170,301 @@
                 <div class="rounded-xl border border-slate-800 bg-slate-900/70">
                     <div class="flex items-center justify-between border-b border-slate-800 px-4 py-3">
                         <div>
-                            <h4 class="text-sm font-semibold text-white">Support Functions <span class="text-xs text-slate-400">(20%)</span></h4>
+                            <h4 class="text-sm font-semibold text-white">Support Functions (20%)</h4>
                         </div>
+                        <span class="text-[11px] text-slate-400">System-generated</span>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="min-w-full text-sm">
                             <thead class="bg-slate-800/60 text-slate-200">
                                 <tr>
-                                    <th class="px-4 py-3 text-left font-semibold">Expected Output</th>
+                                    <th class="px-4 py-3 text-left font-semibold">MFO</th>
                                     <th class="px-4 py-3 text-left font-semibold">Actual Accomplishments / Evidence</th>
-                                    <th class="px-4 py-3 text-left font-semibold">Q</th>
-                                    <th class="px-4 py-3 text-left font-semibold">E</th>
-                                    <th class="px-4 py-3 text-left font-semibold">T</th>
-                                    <th class="px-4 py-3 text-left font-semibold">Average</th>
-                                    <th class="px-4 py-3 text-left font-semibold">Supervisor Remarks</th>
-                                    <th class="px-4 py-3 text-left font-semibold">Employee Comment</th>
+                                    <th class="px-4 py-3 text-center font-semibold">Q</th>
+                                    <th class="px-4 py-3 text-center font-semibold">E</th>
+                                    <th class="px-4 py-3 text-center font-semibold">T</th>
+                                    <th class="px-4 py-3 text-center font-semibold">Average</th>
+                                    <th class="px-4 py-3 text-center font-semibold">PMT Q</th>
+                                    <th class="px-4 py-3 text-center font-semibold">PMT E</th>
+                                    <th class="px-4 py-3 text-center font-semibold">PMT T</th>
+                                    <th class="px-4 py-3 text-center font-semibold">PMT Avg</th>
                                 </tr>
                             </thead>
-                            <tbody id="modal-support-rows" class="divide-y divide-slate-800 text-slate-200"></tbody>
+                            <tbody class="divide-y divide-slate-800 text-slate-200">
+                                <tr class="hover:bg-slate-800/40">
+                                    <td class="px-4 py-3">
+                                        Maintenance of Revenue Records Filing System
+                                        <span class="block text-[11px] text-slate-500 mt-1">Target: Quarterly validation and update</span>
+                                    </td>
+                                    <td class="px-4 py-3 text-slate-300">
+                                        0
+                                        <span class="block text-[11px] text-slate-500 mt-1">No output logged for the period</span>
+                                    </td>
+                                    <td class="px-4 py-3 text-center font-semibold text-white">5</td>
+                                    <td class="px-4 py-3 text-center font-semibold text-white">5</td>
+                                    <td class="px-4 py-3 text-center font-semibold text-white">5</td>
+                                    <td class="px-4 py-3 text-center font-semibold text-white">5.00</td>
+                                    <td class="px-4 py-3 text-center">
+                                        <input style="background:#0f172a;color:#e5e7eb;" data-pmt-input type="number" min="1" max="5" step="0.25" value="5" class="w-16 rounded border border-slate-700 bg-slate-800 text-center text-white text-xs">
+                                    </td>
+                                    <td class="px-4 py-3 text-center">
+                                        <input style="background:#0f172a;color:#e5e7eb;" data-pmt-input type="number" min="1" max="5" step="0.25" value="5" class="w-16 rounded border border-slate-700 bg-slate-800 text-center text-white text-xs">
+                                    </td>
+                                    <td class="px-4 py-3 text-center">
+                                        <input style="background:#0f172a;color:#e5e7eb;" data-pmt-input type="number" min="1" max="5" step="0.25" value="5" class="w-16 rounded border border-slate-700 bg-slate-800 text-center text-white text-xs">
+                                    </td>
+                                    <td class="px-4 py-3 text-center font-semibold text-emerald-300" data-pmt-avg>5.00</td>
+                                </tr>
+                            </tbody>
                         </table>
                     </div>
                 </div>
 
-                <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-                    <p class="text-xs text-slate-400 mb-1">Department Head Remarks</p>
-                    <p class="text-sm text-slate-200" id="modal-dh-remarks">--</p>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h4 class="text-sm font-semibold text-white">PMT Cross-Office Comparison</h4>
+                            <span class="text-[11px] text-slate-400">Same position, same period</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full text-xs text-slate-200">
+                                <thead class="bg-slate-800/60">
+                                    <tr>
+                                        <th class="px-3 py-2 text-left font-semibold">Office / Unit</th>
+                                        <th class="px-3 py-2 text-left font-semibold">Overall Rating</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-800">
+                                    <tr><td class="px-3 py-2">Revenue Collection Unit</td><td class="px-3 py-2">5.00</td></tr>
+                                    <tr><td class="px-3 py-2">Treasury Unit</td><td class="px-3 py-2">4.25</td></tr>
+                                    <tr><td class="px-3 py-2">Budget Unit</td><td class="px-3 py-2">4.50</td></tr>
+                                    <tr><td class="px-3 py-2">Accounting Unit</td><td class="px-3 py-2">4.75</td></tr>
+                                    <tr class="bg-slate-800/40 font-semibold"><td class="px-3 py-2">Average</td><td class="px-3 py-2">4.63</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h4 class="text-sm font-semibold text-white">Audit Log</h4>
+                            <span class="text-[11px] text-slate-400">All changes are logged for calibration and audit.</span>
+                        </div>
+                        <ul class="space-y-2 text-xs text-slate-300">
+                            <li>Supervisor ratings submitted – Q/E/T all 5.00 (Jan 15, 2026 10:15)</li>
+                            <li>Department Head endorsed without changes (Jan 20, 2026 14:30)</li>
+                            <li>PMT review opened – no adjustments yet (Jan 22, 2026 09:10)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4 space-y-3">
+                    <div class="flex flex-wrap items-center gap-3 text-sm">
+                        <span class="text-slate-200 font-semibold">PMT Overall Rating</span>
+                        <input style="background:#0f172a;color:#e5e7eb;" id="pmt-overall" data-pmt-input type="number" min="1" max="5" step="0.25" value="5.00" class="w-24 rounded border border-slate-700 bg-slate-800 text-white text-center text-sm">
+                        <span class="text-xs text-slate-400">Adjust only for calibration.</span>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-semibold text-white">PMT Justification</label>
+                        <textarea style="background:#0f172a;color:#e5e7eb;" id="pmt-justification" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 h-24" placeholder="Required if any PMT adjustment is entered."></textarea>
+                        <p class="text-xs text-slate-400">Adjustments optional; justification required when any Q/E/T, average, or overall rating is changed.</p>
+                    </div>
                 </div>
             </div>
 
-            <div class="flex items-center justify-end gap-2 border-t border-slate-800 px-6 py-4">
-                <button type="button" data-modal-hide="ipcr-view-modal"
-                        class="rounded-lg border border-slate-700 bg-slate-800/80 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-800">
-                    Close
-                </button>
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-t border-slate-800 px-6 py-4">
+                <div class="text-xs text-slate-400">No re-entry of SMPOR data. Adjustments are for calibration only.</div>
+                <div class="flex flex-wrap items-center gap-3">
+                    <button type="button"
+                            data-pmt-action
+                            data-action-title="Recommend for Approval"
+                            data-action-message="Recommending this IPCR will forward it for calibration and final approval."
+                            data-action-confirm="Recommend"
+                            data-action-loading="Recommending..."
+                            class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-emerald-900/40 hover:bg-emerald-500">
+                        <span data-button-label>Recommend for Approval</span>
+                        <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                    </button>
+                    <button type="button"
+                            data-pmt-action
+                            data-action-title="Return for Review"
+                            data-action-message="Return this IPCR for further review. PMT adjustments will not be saved."
+                            data-action-confirm="Return"
+                            data-action-loading="Returning..."
+                            class="inline-flex items-center gap-2 rounded-lg border border-amber-500 px-4 py-2 text-sm font-semibold text-amber-200 hover:bg-amber-500/10">
+                        <span data-button-label>Return for Review</span>
+                        <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-amber-200/40 border-t-amber-200"></span>
+                    </button>
+                    <a href="{{ route('stage3.ipcr.export.pdf') }}"
+                        class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800">
+                            Export PDF
+                    </a>
+                </div>
             </div>
         </div>
     </div>
 
-    {{-- ANALYZE MODAL --}}
-    <div id="ipcr-analyze-modal" data-modal-container tabindex="-1" aria-hidden="true"
-         class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-950/75 backdrop-blur-sm p-4">
-        <div class="w-full max-w-4xl rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl">
-            <div class="flex items-start justify-between gap-3 border-b border-slate-800 px-6 py-4">
+    <div id="pmt-action-modal" role="dialog" aria-modal="true" class="fixed inset-0 z-[70] hidden flex items-center justify-center bg-black/60 px-4 py-6">
+        <div class="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
+            <div class="flex items-start justify-between">
                 <div>
-                    <p class="text-xs uppercase tracking-[0.2em] text-indigo-300">Analyze IPCR (Oversight)</p>
-                    <h3 class="text-lg font-semibold text-white">Trend Snapshot</h3>
-                    <p class="mt-1 text-sm text-slate-400">Advisory only. No impact on IPCR state.</p>
+                    <h2 id="pmt-action-title" class="text-lg font-semibold text-white">Action</h2>
+                    <p id="pmt-action-body" class="mt-1 text-sm text-slate-400">Prototype action preview.</p>
                 </div>
-                <button type="button" data-modal-hide="ipcr-analyze-modal"
-                        class="rounded-full p-1 text-slate-400 transition hover:bg-slate-800 hover:text-slate-200">
-                    <span class="sr-only">Close</span>
-                    &times;
-                </button>
+                <button type="button" data-pmt-modal-close class="text-slate-400 hover:text-white">x</button>
             </div>
-
-            <div class="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="rounded-xl border border-slate-800 bg-slate-950/70 p-4">
-                        <p class="text-xs text-slate-500">Rating distribution</p>
-                        <p class="mt-1 text-sm font-semibold text-emerald-300">Q: 5, E: 4.5, T: 4.8</p>
-                    </div>
-                    <div class="rounded-xl border border-slate-800 bg-slate-950/70 p-4">
-                        <p class="text-xs text-slate-500">Core vs Support</p>
-                        <p class="mt-1 text-sm font-semibold text-slate-200">Core 80% / Support 20%</p>
-                    </div>
-                    <div class="rounded-xl border border-slate-800 bg-slate-950/70 p-4">
-                        <p class="text-xs text-slate-500">Period comparison</p>
-                        <p class="mt-1 text-sm font-semibold text-slate-200">Stable vs previous cycle</p>
-                    </div>
-                </div>
-
-                <div class="space-y-2">
-                    <label class="text-xs font-semibold uppercase tracking-wide text-slate-500">Advisory Comment (optional)</label>
-                    <textarea
-                        id="analyze-comment"
-                        rows="3"
-                        placeholder="Add non-blocking PMT guidance here."
-                        class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
-                        style="background:#0f172a;color:#e5e7eb;"
-                    ></textarea>
-                    <p class="text-xs text-slate-500">Comments do not affect IPCR state or ratings.</p>
-                    <button
-                        type="button"
-                        id="send-comment-btn"
-                        class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-900/40 transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-70">
-                        Send Comment
-                    </button>
-                </div>
-            </div>
-
-            <div class="flex items-center justify-end gap-2 border-t border-slate-800 px-6 py-4">
-                <button type="button" data-modal-hide="ipcr-analyze-modal"
-                        class="rounded-lg border border-slate-700 bg-slate-800/80 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-800">
-                    Close
+            <div class="mt-6 flex justify-end gap-2">
+                <button type="button" data-pmt-modal-close class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800">Close</button>
+                <button type="button" id="pmt-action-confirm" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500">
+                    <span data-button-label>Proceed</span>
+                    <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
                 </button>
             </div>
         </div>
     </div>
 
     @push('scripts')
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                const viewModal = document.getElementById('ipcr-view-modal');
-                const analyzeModal = document.getElementById('ipcr-analyze-modal');
-                const coreRows = document.getElementById('modal-core-rows');
-                const supportRows = document.getElementById('modal-support-rows');
-                const sendCommentBtn = document.getElementById('send-comment-btn');
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const viewModal = document.getElementById('ipcr-view-modal');
+        const actionModal = document.getElementById('pmt-action-modal');
+        const actionTitle = document.getElementById('pmt-action-title');
+        const actionBody = document.getElementById('pmt-action-body');
+        const actionConfirm = document.getElementById('pmt-action-confirm');
+        const statusBadges = document.querySelectorAll('[data-status-badge]');
+        const modalStatus = document.querySelector('[data-modal-status]');
+        const rowStatusField = document.querySelector('[data-modal-status-field]');
+        const overallInput = document.getElementById('pmt-overall');
+        const justification = document.getElementById('pmt-justification');
+        let activeAction = null;
 
-                const fields = {
-                    employeeName: document.getElementById('modal-employee-name'),
-                    employeeId: document.getElementById('modal-employee-id'),
-                    employee: document.getElementById('modal-employee'),
-                    position: document.getElementById('modal-position'),
-                    unit: document.getElementById('modal-unit'),
-                    period: document.getElementById('modal-period'),
-                    supervisor: document.getElementById('modal-supervisor'),
-                    overall: document.getElementById('modal-overall'),
-                    dh: document.getElementById('modal-dh-remarks'),
-                };
+        const setButtonLoading = (button, isLoading, loadingText) => {
+            if (!button) return;
+            const label = button.querySelector('[data-button-label]');
+            const spinner = button.querySelector('[data-button-spinner]');
+            if (label && !button.dataset.originalLabel) {
+                button.dataset.originalLabel = label.textContent.trim();
+            }
+            if (isLoading) {
+                button.disabled = true;
+                button.classList.add('opacity-70', 'cursor-wait');
+                spinner?.classList.remove('hidden');
+                if (label && loadingText) label.textContent = loadingText;
+            } else {
+                button.disabled = false;
+                button.classList.remove('opacity-70', 'cursor-wait');
+                spinner?.classList.add('hidden');
+                if (label && button.dataset.originalLabel) label.textContent = button.dataset.originalLabel;
+            }
+        };
 
-                const toggleModal = (modalEl, show) => {
-                    if (!modalEl) return;
-                    if (show) {
-                        modalEl.classList.remove('hidden');
-                        modalEl.classList.add('flex');
-                        modalEl.setAttribute('aria-hidden', 'false');
-                    } else {
-                        modalEl.classList.add('hidden');
-                        modalEl.classList.remove('flex');
-                        modalEl.setAttribute('aria-hidden', 'true');
-                    }
-                };
+        const toggleModal = (modalEl, show) => {
+            if (!modalEl) return;
+            modalEl.classList.toggle('hidden', !show);
+            modalEl.classList.toggle('flex', show);
+            modalEl.setAttribute('aria-hidden', show ? 'false' : 'true');
+        };
 
-                const renderRows = (rows, target) => {
-                    if (!target) return;
-                    target.innerHTML = '';
-                    (rows || []).forEach((row) => {
-                        const tr = document.createElement('tr');
-                        tr.className = 'hover:bg-slate-800/40';
-                        tr.innerHTML = `
-                            <td class="px-4 py-3 text-slate-100">${row.output || '--'}</td>
-                            <td class="px-4 py-3 text-slate-300">${row.evidence || '--'}</td>
-                            <td class="px-4 py-3 text-slate-100 font-semibold">${row.q ?? '--'}</td>
-                            <td class="px-4 py-3 text-slate-100 font-semibold">${row.e ?? '--'}</td>
-                            <td class="px-4 py-3 text-slate-100 font-semibold">${row.t ?? '--'}</td>
-                            <td class="px-4 py-3 text-slate-100 font-semibold">${row.avg || '--'}</td>
-                            <td class="px-4 py-3 text-slate-200">${row.sup || '--'}</td>
-                            <td class="px-4 py-3 text-slate-200">${row.emp || '--'}</td>
-                        `;
-                        target.appendChild(tr);
-                    });
-                };
+        document.querySelectorAll('[data-ipcr-view]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                viewModal.dataset.rowId = btn.dataset.rowId || '';
+                toggleModal(viewModal, true);
+            });
+        });
 
-                document.querySelectorAll('[data-ipcr-view]').forEach((btn) => {
-                    btn.addEventListener('click', () => {
-                        const coreData = btn.dataset.core ? JSON.parse(btn.dataset.core) : [];
-                        const supportData = btn.dataset.support ? JSON.parse(btn.dataset.support) : [];
+        document.querySelectorAll('[data-pmt-action]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                activeAction = btn;
+                actionTitle.textContent = btn.dataset.actionTitle || 'Action';
+                actionBody.textContent = btn.dataset.actionMessage || 'Prototype action preview.';
+                actionConfirm.dataset.actionLoading = btn.dataset.actionLoading || 'Working...';
+                actionConfirm.querySelector('[data-button-label]').textContent = btn.dataset.actionConfirm || 'Proceed';
+                toggleModal(actionModal, true);
+            });
+        });
 
-                        if (fields.employeeName) fields.employeeName.textContent = btn.dataset.employee || '--';
-                        if (fields.employeeId) fields.employeeId.textContent = btn.dataset.employeeId || '--';
-                        if (fields.employee) fields.employee.textContent = btn.dataset.employee || '--';
-                        if (fields.position) fields.position.textContent = btn.dataset.position || '--';
-                        if (fields.unit) fields.unit.textContent = btn.dataset.unit || '--';
-                        if (fields.period) fields.period.textContent = btn.dataset.period || '--';
-                        if (fields.supervisor) fields.supervisor.textContent = btn.dataset.supervisor || '--';
-                        if (fields.overall) fields.overall.textContent = btn.dataset.overall || '--';
-                        if (fields.dh) fields.dh.textContent = btn.dataset.dh || '--';
+        actionConfirm.addEventListener('click', () => {
+            setButtonLoading(actionConfirm, true, actionConfirm.dataset.actionLoading);
+            if (activeAction) setButtonLoading(activeAction, true, activeAction.dataset.actionLoading || actionConfirm.dataset.actionLoading);
 
-                        renderRows(coreData, coreRows);
-                        renderRows(supportData, supportRows);
-
-                        toggleModal(viewModal, true);
-                    });
-                });
-
-                document.querySelectorAll('[data-ipcr-analyze]').forEach((btn) => {
-                    btn.addEventListener('click', () => toggleModal(analyzeModal, true));
-                });
-
-                [viewModal, analyzeModal].forEach((modalEl) => {
-                    modalEl?.addEventListener('click', (event) => {
-                        if (event.target === modalEl) {
-                            toggleModal(modalEl, false);
+            setTimeout(() => {
+                const targetId = viewModal?.dataset.rowId || '';
+                if (activeAction?.dataset.actionConfirm === 'Recommend') {
+                    statusBadges.forEach((badge) => {
+                        if (badge.dataset.statusBadge === targetId) {
+                            badge.textContent = 'Recommended';
+                            badge.classList.remove('bg-emerald-900','text-emerald-200','border-emerald-800');
+                            badge.classList.add('bg-blue-900','text-blue-200','border-blue-800');
                         }
                     });
-                });
+                    if (modalStatus) {
+                        modalStatus.textContent = 'Recommended';
+                        modalStatus.classList.remove('bg-emerald-900','text-emerald-200','border-emerald-800');
+                        modalStatus.classList.add('bg-blue-900','text-blue-200','border-blue-800');
+                    }
+                    viewModal.querySelectorAll('input[data-pmt-input], textarea').forEach((el) => {
+                        el.disabled = true;
+                        el.classList.add('opacity-70','cursor-not-allowed');
+                    });
+                    document.querySelectorAll('[data-pmt-action]').forEach((btn) => {
+                        btn.disabled = true;
+                        btn.classList.add('opacity-70','cursor-not-allowed');
+                    });
+                }
+                if (activeAction?.dataset.actionConfirm === 'Return') {
+                    statusBadges.forEach((badge) => {
+                        if (badge.dataset.statusBadge === targetId) {
+                            badge.textContent = 'Returned for Review';
+                            badge.classList.remove('bg-emerald-900','text-emerald-200','border-emerald-800');
+                            badge.classList.add('bg-amber-900','text-amber-200','border-amber-800');
+                        }
+                    });
+                    if (modalStatus) {
+                        modalStatus.textContent = 'Returned for Review';
+                        modalStatus.classList.remove('bg-emerald-900','text-emerald-200','border-emerald-800');
+                        modalStatus.classList.add('bg-amber-900','text-amber-200','border-amber-800');
+                    }
+                }
+                setButtonLoading(actionConfirm, false);
+                if (activeAction) setButtonLoading(activeAction, false);
+                toggleModal(actionModal, false);
+                toggleModal(viewModal, false);
+            }, 1200);
+        });
 
-                document.querySelectorAll('[data-modal-hide="ipcr-view-modal"]').forEach((btn) => {
-                    btn.addEventListener('click', () => toggleModal(viewModal, false));
-                });
-                document.querySelectorAll('[data-modal-hide="ipcr-analyze-modal"]').forEach((btn) => {
-                    btn.addEventListener('click', () => toggleModal(analyzeModal, false));
-                });
+        actionModal.addEventListener('click', (event) => {
+            if (event.target === actionModal) toggleModal(actionModal, false);
+        });
+        actionModal.querySelectorAll('[data-pmt-modal-close]').forEach((btn) => btn.addEventListener('click', () => toggleModal(actionModal, false)));
 
-                sendCommentBtn?.addEventListener('click', () => {
-                    if (sendCommentBtn.disabled) return;
-                    const spinner = '<svg class="h-4 w-4 animate-spin text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>';
-                    sendCommentBtn.disabled = true;
-                    sendCommentBtn.innerHTML = `${spinner}<span>Sending...</span>`;
-                    setTimeout(() => {
-                        sendCommentBtn.disabled = false;
-                        sendCommentBtn.innerHTML = 'Send Comment';
-                    }, 1400);
-                });
+        document.querySelectorAll('[data-modal-hide="ipcr-view-modal"]').forEach((btn) => {
+            btn.addEventListener('click', () => toggleModal(viewModal, false));
+        });
+        viewModal?.addEventListener('click', (event) => {
+            if (event.target === viewModal) toggleModal(viewModal, false);
+        });
+
+        const recomputeAverages = () => {
+            document.querySelectorAll('[data-pmt-avg]').forEach((cell) => {
+                const row = cell.closest('tr');
+                const inputs = row ? row.querySelectorAll('input[data-pmt-input]') : [];
+                if (!inputs.length) return;
+                const vals = Array.from(inputs).map((i) => Number(i.value) || 0);
+                const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+                cell.textContent = avg.toFixed(2);
             });
-        </script>
+        };
+        document.querySelectorAll('input[data-pmt-input]').forEach((input) => {
+            input.addEventListener('input', recomputeAverages);
+        });
+        recomputeAverages();
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                toggleModal(viewModal, false);
+                toggleModal(actionModal, false);
+            }
+        });
+    });
+    </script>
     @endpush
 </x-layouts.pmt>

@@ -1,20 +1,17 @@
 <?php
-
-namespace App\Http\Controllers\StageTwo\Forms;
+namespace App\Http\Controllers\StageThree\Forms;
 
 use App\Http\Controllers\Controller;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class IpcrExportController extends Controller
 {
-    /**
-     * Demo-only PDF export for Stage II IPCR (monitoring copy).
-     */
     public function exportPdf()
     {
-        $employeeName = 'Juan Dela Cruz';
+        $employeeName = 'Ramon Reyes';
         $officeDivision = 'Revenue Collection Unit';
-        $performancePeriod = 'January–June 2026';
+        $position = 'Records Management Officer';
+        $performancePeriod = 'January - June 2026';
 
         $coreFunctions = [
             [
@@ -26,7 +23,11 @@ class IpcrExportController extends Controller
                 ],
                 'standard' => '5 - Stretch target',
                 'accomplishment' => 'Completed daily scanning and encoding of e-bank transactions based on submitted ORS entries.',
-                'remarks' => '',
+                'q' => '5',
+                'e' => '5',
+                't' => '5',
+                'a' => '5.00',
+                'remarks' => 'Supervisor-encoded rating based on locked SMPOR and ORS accomplishments.',
             ],
             [
                 'output' => 'Processing of Over-the-Counter Revenue Transactions',
@@ -37,7 +38,11 @@ class IpcrExportController extends Controller
                 ],
                 'standard' => '5 - Stretch target',
                 'accomplishment' => 'Same-day verification of over-the-counter revenue transactions completed based on submitted ORS entry.',
-                'remarks' => '',
+                'q' => '5',
+                'e' => '5',
+                't' => '5',
+                'a' => '5.00',
+                'remarks' => 'Supervisor-encoded rating based on locked SMPOR and ORS accomplishments.',
             ],
         ];
 
@@ -51,19 +56,32 @@ class IpcrExportController extends Controller
                 ],
                 'standard' => '5 - Stretch target',
                 'accomplishment' => '0',
+                'q' => '',
+                'e' => '',
+                't' => '',
+                'a' => '',
                 'remarks' => 'No output logged for the period',
             ],
         ];
 
-        $pdf = Pdf::loadView('pdf.stage-two.ipcr', [
-                'employeeName' => $employeeName,
-                'officeDivision' => $officeDivision,
-                'performancePeriod' => $performancePeriod,
-                'coreFunctions' => $coreFunctions,
-                'supportFunctions' => $supportFunctions,
-            ])
-            ->setPaper('legal', 'landscape');
+        $weightedCore = '5.00';
+        $weightedSupport = '';
+        $overallRating = '5.00';
+        $adjectival = 'Outstanding';
 
-        return $pdf->download('Employee_IPCR_Jan_2026.pdf');
+        $pdf = Pdf::loadView('pdf.stage-three.ipcr', [
+            'employeeName'      => $employeeName,
+            'officeDivision'    => $officeDivision,
+            'position'          => $position,
+            'performancePeriod' => $performancePeriod,
+            'coreFunctions'     => $coreFunctions,
+            'supportFunctions'  => $supportFunctions,
+            'weightedCore'      => $weightedCore,
+            'weightedSupport'   => $weightedSupport,
+            'overallRating'     => $overallRating,
+            'adjectival'        => $adjectival,
+        ])->setPaper('legal', 'landscape');
+
+        return $pdf->download('Ramon_Reyes_IPCR_Jan-Jun_2026.pdf');
     }
 }
