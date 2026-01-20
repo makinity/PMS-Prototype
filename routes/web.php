@@ -3,9 +3,11 @@
 use App\Http\Controllers\StageOne\Forms\IpcrExportController;
 use App\Http\Controllers\StageOne\Forms\OpcrExportController;
 use App\Http\Controllers\StageOne\Forms\UwpExportController;
+use App\Http\Controllers\StageTwo\Forms\IpcrExportController as FormsIpcrExportController;
 use App\Http\Controllers\StageTwo\Forms\MporExportController;
 use App\Http\Controllers\StageTwo\Forms\OrsExportController;
 use App\Http\Controllers\StageTwo\Forms\QarExportController;
+use App\Http\Controllers\StageTwo\Forms\SmporExportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -23,6 +25,10 @@ Route::get('/employee-dashboard', function () {
 Route::get('/employee-task', function () {
     return view('employee.my-task');
 })->name('employee.my-task');
+
+Route::get('/employee/accomplishment-submission', function () {
+    return view('employee.accomplishment-submission');
+})->name('employee.accomplishment-submission');
 
 Route::get('/employee-submit-output', function () {
     return view('employee.submit-output');
@@ -56,7 +62,11 @@ Route::get('/employee-Profile', function () {
     return view('employee.profile');
 })->name('employee.profile');
 
+Route::get('/employee/smpor/export/pdf', [SmporExportController::class, 'exportPdf'])
+    ->name('stage2.smpor.export.pdf');
 
+Route::get('/employee/ipcr/export/pdf', [FormsIpcrExportController::class, 'exportPdf'])
+    ->name('stage2.ipcr.export.pdf');
 
 
 

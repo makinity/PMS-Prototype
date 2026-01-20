@@ -4,13 +4,13 @@
         {{-- PAGE HEADER --}}
         <div class="flex justify-between items-start">
             <div>
-                <h1 class="text-2xl font-bold text-white">IPCR Reviews</h1>
+                <h1 class="text-2xl font-bold text-white">IPCR Accomplishment Rating (Stage III)</h1>
                 <p class="text-sm text-gray-400 mt-1">
-                    Review and rate employee IPCRs derived from locked SMPOR (Q4 2025). Supervisor encodes ratings; no edits to outputs or SMPOR data.
+                    Supervisor encodes Q/E/T ratings against locked SMPOR & IPCR Accomplishment (January - June 2026). Outputs and accomplishments are read-only.
                 </p>
             </div>
             <span class="px-3 py-1 text-xs font-medium rounded bg-blue-900 text-blue-300 border border-blue-800">
-                Supervisor Review
+                Supervisor Rating
             </span>
         </div>
 
@@ -21,7 +21,7 @@
                     <h2 class="text-lg font-semibold text-white">Submitted IPCRs</h2>
                     <p class="text-xs text-gray-400">Select an IPCR to view locked SMPOR accomplishments and encode supervisor ratings in the modal.</p>
                 </div>
-                <span class="text-[11px] text-gray-500">Statuses: For Review / Returned / Approved</span>
+                <span class="text-[11px] text-gray-500">Statuses: For Supervisor Rating / Returned by Department Head / Final (Released)</span>
             </div>
 
             <div class="overflow-x-auto">
@@ -39,10 +39,10 @@
                         <tr class="hover:bg-gray-800/60">
                             <td class="px-4 py-3 font-semibold">Ramon Reyes</td>
                             <td class="px-4 py-3 text-gray-300">Records Management Officer</td>
-                            <td class="px-4 py-3 text-gray-300">Q4 2025</td>
+                            <td class="px-4 py-3 text-gray-300">January - June 2026</td>
                             <td class="px-4 py-3">
                                 <span class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full bg-blue-500/10 text-blue-200 border border-blue-500/30">
-                                    For Review
+                                    For Supervisor Rating
                                 </span>
                             </td>
                             <td class="px-4 py-3">
@@ -50,8 +50,8 @@
                                         data-view-ipcr
                                         data-employee="Ramon Reyes"
                                         data-position="Records Management Officer"
-                                        data-period="Q4 2025"
-                                        data-status="For Review"
+                                        data-period="January - June 2026"
+                                        data-status="For Supervisor Rating"
                                         class="inline-flex items-center gap-2 rounded-lg border border-gray-700 px-3 py-2 text-xs font-semibold text-gray-200 hover:bg-gray-700/70">
                                     <span class="fa-solid fa-eye text-gray-300"></span>
                                     View IPCR
@@ -61,10 +61,10 @@
                         <tr class="hover:bg-gray-800/60">
                             <td class="px-4 py-3 font-semibold">Ramon Reyes</td>
                             <td class="px-4 py-3 text-gray-300">Records Management Officer</td>
-                            <td class="px-4 py-3 text-gray-300">Q3 2025</td>
+                            <td class="px-4 py-3 text-gray-300">January - June 2026</td>
                             <td class="px-4 py-3">
                                 <span class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full bg-emerald-500/10 text-emerald-200 border border-emerald-500/30">
-                                    Approved
+                                    Final (Released)
                                 </span>
                             </td>
                             <td class="px-4 py-3">
@@ -72,8 +72,8 @@
                                         data-view-ipcr
                                         data-employee="Ramon Reyes"
                                         data-position="Records Management Officer"
-                                        data-period="Q3 2025"
-                                        data-status="Approved"
+                                        data-period="January - June 2026"
+                                        data-status="Final (Released)"
                                         class="inline-flex items-center gap-2 rounded-lg border border-gray-700 px-3 py-2 text-xs font-semibold text-gray-200 hover:bg-gray-700/70">
                                     <span class="fa-solid fa-eye text-gray-300"></span>
                                     View IPCR
@@ -103,7 +103,7 @@
                 </div>
                 <div class="flex flex-col items-end gap-2">
                     <span id="ipcr-status-badge" class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full border border-blue-500/40 bg-blue-500/10 text-blue-200">
-                        For Review
+                        For Supervisor Rating
                     </span>
                     <button type="button" data-close-ipcr class="text-gray-400 hover:text-white">
                         <span class="sr-only">Close</span>
@@ -133,9 +133,9 @@
                     <div class="flex items-center justify-between border-b border-gray-800 px-4 py-3">
                         <div>
                             <h4 class="text-sm font-semibold text-white">Core Functions (80%)</h4>
-                            <p class="text-xs text-gray-400">Expected outputs and evidence are read-only; rate Q/E/T only. Derived from locked SMPOR.</p>
+                            <p class="text-xs text-gray-400">Expected outputs and evidence are read-only; rate Q/E/T only. Derived from locked SMPOR &amp; IPCR Accomplishment.</p>
                         </div>
-                        <span class="text-[11px] text-gray-500">System-generated from SMPOR</span>
+                        <span class="text-[11px] text-gray-500">System-generated</span>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="min-w-full text-sm border border-gray-800">
@@ -143,22 +143,31 @@
                                 <tr>
                                     <th class="px-4 py-3 text-left font-semibold border-b border-gray-800">Expected Output</th>
                                     <th class="px-4 py-3 text-left font-semibold border-b border-gray-800">Actual Accomplishments / Evidence</th>
-                                    <th class="px-4 py-3 text-center font-semibold border-b border-gray-800 w-24">Q (Sup)</th>
-                                    <th class="px-4 py-3 text-center font-semibold border-b border-gray-800 w-24">E (Sup)</th>
-                                    <th class="px-4 py-3 text-center font-semibold border-b border-gray-800 w-24">T (Sup)</th>
+                                    <th class="px-4 py-3 text-center font-semibold border-b border-gray-800 w-24">Q</th>
+                                    <th class="px-4 py-3 text-center font-semibold border-b border-gray-800 w-24">E</th>
+                                    <th class="px-4 py-3 text-center font-semibold border-b border-gray-800 w-24">T</th>
                                     <th class="px-4 py-3 text-center font-semibold border-b border-gray-800 w-24">Average</th>
+                                </tr>
+                                <tr class="text-[11px] text-gray-400">
+                                    <th class="px-4 py-1 text-left border-b border-gray-800" colspan="6">Q - Quality | E - Efficiency | T - Timeliness (1 - 5)</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-800 text-gray-100">
                                 <tr data-rating-row="core-1" class="hover:bg-gray-800/50">
                                     <td class="px-4 py-3">
-                                        Scan and digitize e-bank transaction records
-                                        <span class="block text-[11px] text-gray-500 mt-1">Target: 100 records per rating period</span>
+                                        E-Bank Scanning and Encoding of Revenue Transactions
+                                        <span class="block text-[11px] text-gray-500 mt-1">Target: Daily; same working day</span>
+                                        <button type="button"
+                                                data-view-indicators
+                                                data-output="E-Bank Scanning and Encoding of Revenue Transactions"
+                                                data-indicators='["All e-bank transactions scanned and encoded daily","Indexing complete with no missing pages","Audit trail maintained within 24 hours"]'
+                                                class="mt-2 text-xs font-semibold text-blue-300 hover:text-blue-200">
+                                            View Success Indicators
+                                        </button>
                                     </td>
                                     <td class="px-4 py-3 text-gray-300">
-                                        Scanned and uploaded 120 e-bank transaction records (3 hours total).
-                                        Derived from validated and locked SMPOR entries; read-only.
-                                        <span class="block text-[11px] text-gray-500 mt-1">System-generated from locked SMPOR</span>
+                                        Completed daily scanning and encoding of e-bank transactions based on submitted ORS entries.
+                                        <span class="block text-[11px] text-gray-500 mt-1">System-generated IPCR Accomplishment (read-only)</span>
                                     </td>
                                     <td class="px-4 py-3 text-center">
                                         <select class="uwp-select text-white font-semibold text-center" style="min-width:72px; background:#0f172a;color:#e5e7eb;" data-rating-select="core-1">
@@ -191,11 +200,57 @@
                                         <span data-average-target="core-1">5.00</span>
                                     </td>
                                 </tr>
+                                <tr data-rating-row="core-2" class="hover:bg-gray-800/50">
+                                    <td class="px-4 py-3">
+                                        Processing of Over-the-Counter Revenue Transactions
+                                        <span class="block text-[11px] text-gray-500 mt-1">Target: Daily; 95% processed within same working day</span>
+                                        <button type="button"
+                                                data-view-indicators
+                                                data-output="Processing of Over-the-Counter Revenue Transactions"
+                                                data-indicators='["Same-day verification of OTC transactions","95% encoded within the business day","OR validation completed daily"]'
+                                                class="mt-2 text-xs font-semibold text-blue-300 hover:text-blue-200">
+                                            View Success Indicators
+                                        </button>
+                                    </td>
+                                    <td class="px-4 py-3 text-gray-300">
+                                        Same-day verification of over-the-counter revenue transactions completed based on submitted ORS entry.
+                                        <span class="block text-[11px] text-gray-500 mt-1">System-generated IPCR Accomplishment (read-only)</span>
+                                    </td>
+                                    <td class="px-4 py-3 text-center">
+                                        <select class="uwp-select text-white font-semibold text-center" style="min-width:72px; background:#0f172a;color:#e5e7eb;" data-rating-select="core-2">
+                                            <option value="5" selected>5</option>
+                                            <option value="4">4</option>
+                                            <option value="3">3</option>
+                                            <option value="2">2</option>
+                                            <option value="1">1</option>
+                                        </select>
+                                    </td>
+                                    <td class="px-4 py-3 text-center">
+                                        <select class="uwp-select text-white font-semibold text-center" style="min-width:72px; background:#0f172a;color:#e5e7eb;" data-rating-select="core-2">
+                                            <option value="5" selected>5</option>
+                                            <option value="4">4</option>
+                                            <option value="3">3</option>
+                                            <option value="2">2</option>
+                                            <option value="1">1</option>
+                                        </select>
+                                    </td>
+                                    <td class="px-4 py-3 text-center">
+                                        <select class="uwp-select text-white font-semibold text-center" style="min-width:72px; background:#0f172a;color:#e5e7eb;" data-rating-select="core-2">
+                                            <option value="5" selected>5</option>
+                                            <option value="4">4</option>
+                                            <option value="3">3</option>
+                                            <option value="2">2</option>
+                                            <option value="1">1</option>
+                                        </select>
+                                    </td>
+                                    <td class="px-4 py-3 text-center font-semibold text-white">
+                                        <span data-average-target="core-2">5.00</span>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
-
                 {{-- Support Functions --}}
                 <div class="rounded-xl border border-gray-800 bg-gray-900/70">
                     <div class="flex items-center justify-between border-b border-gray-800 px-4 py-3">
@@ -203,7 +258,7 @@
                             <h4 class="text-sm font-semibold text-white">Support Functions (20%)</h4>
                             <p class="text-xs text-gray-400">Rate Q/E/T; commitments and evidence remain read-only. Derived from locked SMPOR.</p>
                         </div>
-                        <span class="text-[11px] text-gray-500">System-generated from SMPOR</span>
+                        <span class="text-[11px] text-gray-500">System-generated</span>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="min-w-full text-sm border border-gray-800">
@@ -216,16 +271,26 @@
                                     <th class="px-4 py-3 text-center font-semibold border-b border-gray-800 w-24">T</th>
                                     <th class="px-4 py-3 text-center font-semibold border-b border-gray-800 w-24">Average</th>
                                 </tr>
+                                <tr class="text-[11px] text-gray-400">
+                                    <th class="px-4 py-1 text-left border-b border-gray-800" colspan="6">Q - Quality | E - Efficiency | T - Timeliness (1-5)</th>
+                                </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-800 text-gray-100">
                                 <tr data-rating-row="support-1" class="hover:bg-gray-800/50">
                                     <td class="px-4 py-3">
-                                        Reference and archival support
-                                        <span class="block text-[11px] text-gray-500 mt-1">Target: Fulfill reference pulls within 1 business day</span>
+                                        Maintenance of Revenue Records Filing System
+                                        <span class="block text-[11px] text-gray-500 mt-1">Target: Quarterly validation and update</span>
+                                        <button type="button"
+                                                data-view-indicators
+                                                data-output="Maintenance of Revenue Records Filing System"
+                                                data-indicators='["Weekly filing updated and retrievable","Digital backups synced monthly","Retrieval logs maintained for audits"]'
+                                                class="mt-2 text-xs font-semibold text-blue-300 hover:text-blue-200">
+                                            View Success Indicators
+                                        </button>
                                     </td>
                                     <td class="px-4 py-3 text-gray-300">
-                                        Serviced internal reference requests and archival pulls within agreed timelines.
-                                        Data linked to locked SMPOR logs; no additional outputs recorded here.
+                                        0
+                                        <span class="block text-[11px] text-gray-500 mt-1">No output logged for the period</span>
                                         <span class="block text-[11px] text-gray-500 mt-1">System-generated from locked SMPOR</span>
                                     </td>
                                     <td class="px-4 py-3 text-center">
@@ -276,22 +341,43 @@
                 <div class="flex flex-wrap items-center gap-3">
                     <button type="button"
                             data-employee-loading="true"
-                            data-loading-text="Saving draft..."
+                            data-loading-text="Saving rating draft..."
                             class="inline-flex items-center gap-2 rounded-lg border border-gray-700 px-4 py-2 text-sm font-semibold text-gray-200 hover:bg-gray-800/80">
-                        <span data-button-label>Save Draft</span>
+                        <span data-button-label>Save Rating Draft</span>
                         <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
                     </button>
                     <button type="button"
                             data-employee-action
-                            data-action-title="Submit IPCR to Department Head"
-                            data-action-message="Submit this IPCR with current ratings and remarks. Further edits will be locked."
-                            data-action-confirm="Submit"
-                            data-action-loading="Submitting..."
+                            data-action-title="Submit Ratings to Department Head"
+                            data-action-message="Submit these Q/E/T ratings and supervisor remarks to the Department Head. Further edits will be locked."
+                            data-action-confirm="Submit Ratings"
+                            data-action-loading="Submitting ratings..."
                             class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-900/40 hover:bg-blue-500">
-                        <span data-button-label>Submit to Department Head</span>
+                        <span data-button-label>Submit Ratings to Department Head</span>
                         <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+    {{-- Success Indicators Modal --}}
+    <div id="indicators-modal" class="fixed inset-0 z-[75] hidden items-center justify-center bg-black/70 px-4 py-6">
+        <div class="w-full max-w-xl rounded-2xl border border-gray-700 bg-gray-900 p-5 shadow-2xl">
+            <div class="flex items-start justify-between gap-3 border-b border-gray-800 pb-3">
+                <div>
+                    <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Success Indicators</p>
+                    <h3 id="indicators-output" class="text-lg font-semibold text-white">--</h3>
+                    <p class="text-[11px] text-gray-400 mt-1">Indicators are derived from approved Unit Work Plan (Stage I). Read-only.</p>
+                </div>
+                <button type="button" id="indicators-close" class="text-gray-400 hover:text-white">&times;</button>
+            </div>
+            <div class="mt-4 max-h-64 overflow-y-auto">
+                <ul id="indicators-list" class="list-disc list-inside space-y-2 text-sm text-gray-100"></ul>
+            </div>
+            <div class="mt-4 flex justify-end">
+                <button type="button" id="indicators-close-bottom" class="rounded-lg border border-gray-700 px-4 py-2 text-sm font-semibold text-gray-200 hover:bg-gray-800 transition">
+                    Close
+                </button>
             </div>
         </div>
     </div>
@@ -324,6 +410,10 @@
                 const actionTitle = document.getElementById('employee-action-title');
                 const actionBody = document.getElementById('employee-action-body');
                 const actionConfirm = document.getElementById('employee-action-confirm');
+                const indModal = document.getElementById('indicators-modal');
+                const indOutput = document.getElementById('indicators-output');
+                const indList = document.getElementById('indicators-list');
+                const indCloseButtons = [document.getElementById('indicators-close'), document.getElementById('indicators-close-bottom')];
                 let activeTrigger = null;
 
                 if (!overlay || !actionModal || !actionTitle || !actionBody || !actionConfirm) {
@@ -383,8 +473,8 @@
                     const name = trigger.dataset.employee || '--';
                     const position = trigger.dataset.position || '--';
                     const period = trigger.dataset.period || '--';
-                    const status = trigger.dataset.status || 'For Review';
-                    const editable = status === 'For Review';
+                    const status = trigger.dataset.status || 'For Supervisor Rating';
+                    const editable = status === 'For Supervisor Rating';
 
                     employeeEls.nameTop.textContent = name;
                     employeeEls.positionTop.textContent = position;
@@ -395,9 +485,9 @@
                     employeeEls.badge.textContent = status;
 
                     employeeEls.badge.className = 'inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full';
-                    if (status === 'Approved') {
+                    if (status === 'Final (Released)') {
                         employeeEls.badge.classList.add('border', 'border-emerald-500/50', 'bg-emerald-500/10', 'text-emerald-200');
-                    } else if (status === 'Returned') {
+                    } else if (status === 'Returned by Department Head') {
                         employeeEls.badge.classList.add('border', 'border-amber-500/50', 'bg-amber-500/10', 'text-amber-200');
                     } else {
                         employeeEls.badge.classList.add('border', 'border-blue-500/50', 'bg-blue-500/10', 'text-blue-200');
@@ -412,12 +502,14 @@
                         }
                     });
                     overlay.querySelectorAll('[data-employee-action],[data-employee-loading]').forEach((btn) => {
-                        if (btn.textContent.includes('Submit')) {
-                            btn.disabled = !editable && !btn.dataset.allowSubmitted;
-                            btn.classList.toggle('opacity-70', !editable && !btn.dataset.allowSubmitted);
-                            btn.classList.toggle('cursor-not-allowed', !editable && !btn.dataset.allowSubmitted);
+                        const isSubmit = btn.textContent.includes('Submit Ratings');
+                        const isDraft = btn.textContent.includes('Save Rating Draft');
+                        if (isSubmit) {
+                            btn.disabled = !editable;
+                            btn.classList.toggle('opacity-70', !editable);
+                            btn.classList.toggle('cursor-not-allowed', !editable);
                         }
-                        if (btn.textContent.includes('Save Draft')) {
+                        if (isDraft) {
                             btn.disabled = !editable;
                             btn.classList.toggle('opacity-70', !editable);
                             btn.classList.toggle('cursor-not-allowed', !editable);
@@ -436,8 +528,37 @@
                     document.body.classList.remove('overflow-hidden');
                 }
 
+                function openIndicatorsModal(output, indicators) {
+                    if (!indModal || !indOutput || !indList) return;
+                    indOutput.textContent = output || '--';
+                    indList.innerHTML = '';
+                    (indicators || []).forEach((text) => {
+                        if (!text) return;
+                        const li = document.createElement('li');
+                        li.textContent = text;
+                        indList.appendChild(li);
+                    });
+                    indModal.classList.remove('hidden');
+                    indModal.classList.add('flex');
+                    document.body.classList.add('overflow-hidden');
+                }
+
+                function closeIndicatorsModal() {
+                    if (!indModal) return;
+                    indModal.classList.add('hidden');
+                    indModal.classList.remove('flex');
+                    document.body.classList.remove('overflow-hidden');
+                }
+
                 document.querySelectorAll('[data-view-ipcr]').forEach(btn => {
                     btn.addEventListener('click', () => openIpcrModal(btn));
+                });
+                document.querySelectorAll('[data-view-indicators]').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        let indicators = [];
+                        try { indicators = JSON.parse(btn.dataset.indicators || '[]'); } catch (e) { indicators = []; }
+                        openIndicatorsModal(btn.dataset.output || '--', indicators);
+                    });
                 });
                 overlay.addEventListener('click', (event) => {
                     if (event.target === overlay) closeIpcrModal();
@@ -445,6 +566,10 @@
                 overlay.querySelectorAll('[data-close-ipcr]').forEach(btn => {
                     btn.addEventListener('click', closeIpcrModal);
                 });
+                indModal?.addEventListener('click', (event) => {
+                    if (event.target === indModal) closeIndicatorsModal();
+                });
+                indCloseButtons.forEach((btn) => btn?.addEventListener('click', closeIndicatorsModal));
 
                 function closeActionModal() {
                     actionModal.classList.add('hidden');
@@ -501,6 +626,7 @@
                     if (event.key === 'Escape') {
                         closeActionModal();
                         closeIpcrModal();
+                        closeIndicatorsModal();
                     }
                 });
 

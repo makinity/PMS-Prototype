@@ -26,6 +26,7 @@
             $isDashboard = request()->routeIs('employee.dashboard');
             $isUnitWorkPlan = request()->routeIs('employee.uwp');
             $isMyTasks = request()->routeIs('employee.my-task');
+            $isAccomplishmentSubmission = request()->routeIs('employee.accomplishment-submission');
             $isSubmitOutput = request()->routeIs('employee.submit-output');
             $isOutputRating = request()->routeIs('employee.ors');
             $isOpcr = request()->routeIs('employee.opcr');$isOpcr = request()->routeIs('employee.opcr');
@@ -128,6 +129,12 @@
                                 <a href="{{ route('employee.my-task') }}" class="sidebar-link" @if($isMyTasks) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-list-check"></i>
                                     <span>My Tasks</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('employee.accomplishment-submission') }}" class="sidebar-link" @if($isAccomplishmentSubmission) aria-current="page" @endif>
+                                    <i class="sidebar-icon fa-solid fa-list-check"></i>
+                                    <span>SMPOR & IPCR Accomplishment Submission</span>
                                 </a>
                             </li>
                             <li>
