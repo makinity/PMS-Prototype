@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>INDIVIDUAL PERFORMANCE COMMITMENT AND REVIEW (IPCR)</title>
     <style>
-        @page { size: A4 landscape; margin: 7mm; }
+        @page { size: Legal landscape; margin: 7mm; }
         * { -webkit-print-color-adjust: exact; }
         body { font-family: DejaVu Sans, sans-serif; font-size: 10px; color: #000; }
         table { width: 100%; border-collapse: collapse; border-spacing: 0; table-layout: fixed; }

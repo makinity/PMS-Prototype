@@ -23,7 +23,7 @@
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">Office / Unit</p>
-                <p class="mt-2 text-lg font-semibold text-white">Provincial HR Management Office</p>
+                <p class="mt-2 text-lg font-semibold text-white">Revenue Collection Unit</p>
             </div>
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">Rating Period</p>

@@ -75,7 +75,7 @@
                 {{-- DUMMY_DATA: replace with dynamic value --}}
                 <input type="text"
                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
-                       value="Records Management Unit" disabled>
+                       value="Revenue Collection Unit" disabled>
             </div>
 
             <div>

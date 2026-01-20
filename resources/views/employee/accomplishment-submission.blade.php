@@ -23,11 +23,13 @@
                     <p class="text-sm text-slate-400">System-generated summary based on validated MPOR. Read-only.</p>
                 </div>
                 <div class="flex gap-2">
+                    <!-- kani na button -->
                     <button type="button"
                             data-action="view-smpor"
                             class="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-800 transition">
                         View SMPOR
                     </button>
+                    <!-------------------->
 
                     <a href="{{ route('stage2.smpor.export.pdf') }}"
                         class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800">
@@ -59,11 +61,13 @@
                     <p class="text-sm text-slate-400">System-generated accomplishments derived from SMPOR. Read-only.</p>
                 </div>
                 <div class="flex gap-2">
+                    <!-- kani na button -->
                     <button type="button"
                             data-action="view-ipcr-accomplishment"
                             class="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-800 transition">
                         View IPCR Accomplishment
                     </button>
+                    <!-------------------->
 
                     <a href="{{ route('stage2.ipcr.export.pdf') }}"
                         class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800">

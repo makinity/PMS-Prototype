@@ -133,7 +133,7 @@
                     <div class="flex items-center justify-between border-b border-gray-800 px-4 py-3">
                         <div>
                             <h4 class="text-sm font-semibold text-white">Core Functions (80%)</h4>
-                            <p class="text-xs text-gray-400">Expected outputs and evidence are read-only; rate Q/E/T only. Derived from locked SMPOR &amp; IPCR Accomplishment.</p>
+                            <p class="text-xs text-gray-400">MFO outputs and evidence are read-only; rate Q/E/T only. Derived from locked SMPOR &amp; IPCR Accomplishment.</p>
                         </div>
                         <span class="text-[11px] text-gray-500">System-generated</span>
                     </div>
@@ -141,7 +141,7 @@
                         <table class="min-w-full text-sm border border-gray-800">
                             <thead class="bg-gray-900 text-gray-200">
                                 <tr>
-                                    <th class="px-4 py-3 text-left font-semibold border-b border-gray-800">Expected Output</th>
+                                    <th class="px-4 py-3 text-left font-semibold border-b border-gray-800">MFO</th>
                                     <th class="px-4 py-3 text-left font-semibold border-b border-gray-800">Actual Accomplishments / Evidence</th>
                                     <th class="px-4 py-3 text-center font-semibold border-b border-gray-800 w-24">Q</th>
                                     <th class="px-4 py-3 text-center font-semibold border-b border-gray-800 w-24">E</th>
@@ -264,7 +264,7 @@
                         <table class="min-w-full text-sm border border-gray-800">
                             <thead class="bg-gray-900 text-gray-200">
                                 <tr>
-                                    <th class="px-4 py-3 text-left font-semibold border-b border-gray-800">Expected Output</th>
+                                    <th class="px-4 py-3 text-left font-semibold border-b border-gray-800">MFO</th>
                                     <th class="px-4 py-3 text-left font-semibold border-b border-gray-800">Actual Accomplishments / Evidence</th>
                                     <th class="px-4 py-3 text-center font-semibold border-b border-gray-800 w-24">Q</th>
                                     <th class="px-4 py-3 text-center font-semibold border-b border-gray-800 w-24">E</th>
