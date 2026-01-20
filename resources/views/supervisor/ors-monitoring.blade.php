@@ -91,36 +91,67 @@
                     </div>
                     <button type="button" onclick="closeOrsModal('ors-monitoring-modal')" class="text-slate-400 hover:text-white">x</button>
                 </div>
-                <div class="mt-5 space-y-3 text-sm text-slate-200">
-                    <div>
-                        <p class="text-xs text-slate-400">Employee</p>
-                        <p id="monitoringEmployee">--</p>
+                <div class="mt-5 space-y-5 text-sm text-slate-200">
+                    <!-- Header Summary -->
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                        <div>
+                            <p class="text-xs text-slate-400">Employee</p>
+                            <p id="monitoringEmployee" class="font-semibold text-white">--</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400">Office / Unit</p>
+                            <p id="monitoringOffice" class="text-white">--</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400">Date Logged</p>
+                            <p id="monitoringDate" class="text-white">--</p>
+                        </div>
                     </div>
-                    <div>
-                        <p class="text-xs text-slate-400">Office / Unit</p>
-                        <p id="monitoringOffice">--</p>
+
+                    <!-- Output & Accomplishment -->
+                    <div class="space-y-3">
+                        <div>
+                            <p class="text-xs text-slate-400">Major Output</p>
+                            <p id="monitoringMajorOutput" class="text-white">--</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400">Output Type</p>
+                            <p id="monitoringOutput">--</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400">Actual accomplishment</p>
+                            <p id="monitoringAccomplishment" class="text-slate-100">--</p>
+                        </div>
                     </div>
-                    <div>
-                        <p class="text-xs text-slate-400">Output</p>
-                        <p id="monitoringOutput">--</p>
+
+                    <!-- ORS Reference & Time -->
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <div>
+                            <p class="text-xs text-slate-400">Request ID</p>
+                            <p id="monitoringRequestId">--</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400">Time spent</p>
+                            <p id="monitoringDuration">--</p>
+                        </div>
                     </div>
-                    <div>
-                        <p class="text-xs text-slate-400">Actual accomplishment</p>
-                        <p id="monitoringAccomplishment" class="text-slate-100">--</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-slate-400">Time spent</p>
-                        <p id="monitoringDuration">--</p>
-                    </div>
+
+                    <!-- Evidence -->
                     <div>
                         <p class="text-xs text-slate-400">Evidence attached</p>
                         <p id="monitoringEvidence" class="text-emerald-300 font-semibold">--</p>
                     </div>
-                    <div>
+
+                    <!-- Status -->
+                    <div class="space-y-2">
                         <p class="text-xs text-slate-400">Status</p>
-                        <span id="monitoringStatus" class="status-chip border border-emerald-500/30 bg-emerald-500/10 text-emerald-200"></span>
+                        <div class="inline-flex flex-col gap-1">
+                            <span id="monitoringStatus" class="status-chip border border-emerald-500/30 bg-emerald-500/10 text-emerald-200"></span>
+                            <span id="monitoringStatusDetail" class="text-xs text-slate-300"></span>
+                        </div>
                     </div>
                 </div>
+
                 <div class="mt-6 flex justify-end">
                     <button type="button"
                             onclick="closeOrsModal('ors-monitoring-modal')"
@@ -139,11 +170,15 @@
                 const modal = document.getElementById('ors-monitoring-modal');
                 const employeeEl = document.getElementById('monitoringEmployee');
                 const officeEl = document.getElementById('monitoringOffice');
+                const dateEl = document.getElementById('monitoringDate');
+                const majorOutputEl = document.getElementById('monitoringMajorOutput');
                 const outputEl = document.getElementById('monitoringOutput');
                 const accomplishmentEl = document.getElementById('monitoringAccomplishment');
+                const requestIdEl = document.getElementById('monitoringRequestId');
                 const durationEl = document.getElementById('monitoringDuration');
                 const evidenceEl = document.getElementById('monitoringEvidence');
                 const statusEl = document.getElementById('monitoringStatus');
+                const statusDetailEl = document.getElementById('monitoringStatusDetail');
 
                 const STATUS_META = {
                     submitted: {
@@ -278,26 +313,20 @@
                     if (!modal) return;
                     employeeEl.textContent = data.employee || 'Ramon Reyes';
                     officeEl.textContent = data.office || 'Revenue Collection Unit';
+                    dateEl.textContent = data.dateLabel || data.date || '--';
 
-                    const outputParts = [];
-                    if (data.uwpOutput) outputParts.push(data.uwpOutput);
-                    if (data.output) outputParts.push(`Output Type: ${data.output}`);
-                    outputEl.textContent = outputParts.length ? outputParts.join(' • ') : (data.output || '--');
+                    majorOutputEl.textContent = data.uwpOutput || '--';
+                    outputEl.textContent = data.output || '--';
+                    accomplishmentEl.textContent = data.accomplishment || '--';
 
-                    const accomplishmentParts = [
-                        data.accomplishment || null,
-                        data.requestId ? `Request ID: ${data.requestId}` : null,
-                        data.notes ? `Notes: ${data.notes}` : null,
-                        data.dateLabel ? `Date Logged: ${data.dateLabel}` : (data.date ? `Date Logged: ${data.date}` : null)
-                    ].filter(Boolean);
-                    accomplishmentEl.textContent = accomplishmentParts.length ? accomplishmentParts.join(' • ') : '--';
-
+                    requestIdEl.textContent = data.requestId || '--';
                     durationEl.textContent = data.duration || '--';
                     evidenceEl.textContent = data.evidence ? 'Evidence attached' : 'No evidence (read-only)';
 
                     const meta = STATUS_META[data.status] || STATUS_META.missing;
-                    statusEl.textContent = meta.detail ? `${meta.label} • ${meta.detail}` : meta.label;
+                    statusEl.textContent = meta.label;
                     statusEl.className = `status-chip ${meta.badge}`;
+                    statusDetailEl.textContent = meta.detail || '';
 
                     modal.classList.remove('hidden');
                     modal.classList.add('flex');

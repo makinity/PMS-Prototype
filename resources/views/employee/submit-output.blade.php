@@ -51,23 +51,23 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 text-sm">
                     <div class="bg-gray-700 rounded-lg p-3">
                         <p class="text-gray-400 mb-1">Task Name</p>
-                        <p class="font-medium text-white">E-Bank Scanning</p>
+                        <p class="font-medium text-white">E-Bank Scanning and Encoding of Revenue Transactions</p>
                     </div>
                     <div class="bg-gray-700 rounded-lg p-3">
                         <p class="text-gray-400 mb-1">Client Name</p>
-                        <p class="font-medium text-white">ABC Corp</p>
+                        <p class="font-medium text-white">Internal revenue transactions</p>
                     </div>
                     <div class="bg-gray-700 rounded-lg p-3">
                         <p class="text-gray-400 mb-1">Task Date</p>
-                        <p class="font-medium text-white">Aug 15, 2025</p>
+                        <p class="font-medium text-white">January 19, 2026</p>
                     </div>
                     <div class="bg-gray-700 rounded-lg p-3">
                         <p class="text-gray-400 mb-1">Tracking Status</p>
-                        <p class="font-medium text-white">Stopped at 10:42 (submitted)</p>
+                        <p class="font-medium text-white">Stopped at 11:30 AM (submitted)</p>
                     </div>
                     <div class="bg-gray-700 rounded-lg p-3">
                         <p class="text-gray-400 mb-1">Auto-logged Window</p>
-                        <p class="font-medium text-white">09:12 - 10:42</p>
+                        <p class="font-medium text-white">09:00 AM – 11:30 AM</p>
                     </div>
                 </div>
             </div>
@@ -77,17 +77,17 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block mb-2 text-sm font-medium text-white">Client Request ID</label>
-                        <input type="text" value="REQ-2025-01234" disabled class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5">
+                        <input type="text" value="REQ-2026-01573" disabled class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5">
                     </div>
                     <div>
                         <label class="block mb-2 text-sm font-medium text-white">Output Type</label>
-                        <input type="text" value="Bank Statement Form (BSF-01)" disabled class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5">
+                        <input type="text" value="Scanned E-Bank Transaction Batch" disabled class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5">
                     </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block mb-2 text-sm font-medium text-white">Completion Date</label>
-                        <input type="text" value="Aug 15, 2025" disabled class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5">
+                        <input type="text" value="January 19, 2026" disabled class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5">
                     </div>
                     <div>
                         <label class="block mb-2 text-sm font-medium text-white">Confidentiality Level</label>
@@ -97,11 +97,11 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block mb-2 text-sm font-medium text-white">Auto-Logged Start</label>
-                        <input type="text" value="09:12 AM" disabled class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5">
+                        <input type="text" value="09:00 AM" disabled class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5">
                     </div>
                     <div>
                         <label class="block mb-2 text-sm font-medium text-white">Auto-Logged End</label>
-                        <input type="text" value="10:42 AM" disabled class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5">
+                        <input type="text" value="11:30 AM" disabled class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5">
                     </div>
                 </div>
             </div>
@@ -119,8 +119,8 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                             </svg>
                             <div>
-                                <p class="font-medium text-white">report_q3_2025.pdf</p>
-                                <p class="text-xs text-gray-400">Uploaded: Aug 12, 2025 | 2.4 MB</p>
+                                <p class="font-medium text-white">e_bank_transactions_jan19_2026.pdf</p>
+                                <p class="text-xs text-gray-400">Uploaded: January 19, 2026 | 2.4 MB</p>
                             </div>
                         </div>
                         <span class="text-xs text-gray-400">Locked</span>
@@ -155,11 +155,11 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                     <div class="bg-gray-700 rounded-lg p-3">
                         <p class="text-gray-400 mb-1">ORS Logged</p>
-                        <p class="font-medium text-white">Aug 15, 2025 | 09:12 AM</p>
+                        <p class="font-medium text-white">January 19, 2026 | 09:00 AM</p>
                     </div>
                     <div class="bg-gray-700 rounded-lg p-3">
                         <p class="text-gray-400 mb-1">Submitted</p>
-                        <p class="font-medium text-white">Aug 15, 2025 | 10:45 AM</p>
+                        <p class="font-medium text-white">January 19, 2026 | 11:35 AM</p>
                     </div>
                     <div class="bg-gray-700 rounded-lg p-3">
                         <p class="text-gray-400 mb-1">Supervisor Validation</p>
