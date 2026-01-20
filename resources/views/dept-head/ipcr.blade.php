@@ -49,7 +49,7 @@
                             <td class="px-4 py-3">Ramon Reyes</td>
                             <td class="px-4 py-3 text-gray-300">Records Management Officer</td>
                             <td class="px-4 py-3 text-gray-300">Revenue Collection Unit</td>
-                            <td class="px-4 py-3 text-gray-300">Jan-Jun 2025</td>
+                            <td class="px-4 py-3 text-gray-300">January – June 2026</td>
                             <td class="px-4 py-3 text-gray-300">Carlo D. Beray</td>
                             <td class="px-4 py-3 text-white font-semibold">5.00</td>
                             <td class="px-4 py-3">
@@ -115,7 +115,7 @@
                     </div>
                     <div>
                         <label class="block mb-2 text-sm font-medium text-white">Rating Period</label>
-                        <input type="text" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5" value="Jan - Jun 2026" disabled>
+                        <input type="text" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5" value="January - June 2026" disabled>
                     </div>
                     <div>
                         <label class="block mb-2 text-sm font-medium text-white">Immediate Supervisor</label>
