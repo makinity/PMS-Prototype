@@ -29,10 +29,11 @@
             $isAccomplishmentSubmission = request()->routeIs('employee.accomplishment-submission');
             $isSubmitOutput = request()->routeIs('employee.submit-output');
             $isOutputRating = request()->routeIs('employee.ors');
-            $isOpcr = request()->routeIs('employee.opcr');$isOpcr = request()->routeIs('employee.opcr');
+            $isOpcr = request()->routeIs('employee.opcr');
             $isMpor = request()->routeIs('employee.mpor');
             $isSmpor = request()->routeIs('employee.smpor');
             $isIPCR = request()->routeIs('employee.ipcr');
+            $isFinal = request()->routeIs('employee.final-ratings');
             $isIPCRTARGET = request()->routeIs('employee.ipcr-target');
             $isIdp = request()->routeIs('employee.idp');
             $isProfile = request()->routeIs('employee.profile');
@@ -177,6 +178,12 @@
                                 <a href="{{ route('employee.ipcr') }}" class="sidebar-link" @if($isIPCR) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-file-signature"></i>
                                     <span>IPCR Final</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('employee.final-ratings') }}" class="sidebar-link" @if($isFinal) aria-current="page" @endif>
+                                    <i class="sidebar-icon fa-solid fa-file-signature"></i>
+                                    <span>My Final Ratings</span>
                                 </a>
                             </li>
                         </ul>

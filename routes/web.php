@@ -55,6 +55,10 @@ Route::get('/employee-IPCR', function () {
     return view('employee.ipcr');
 })->name('employee.ipcr');
 
+Route::get('/employee/final-ratings', function () {
+    return view('employee.final-ratings');
+})->name('employee.final-ratings');
+
 Route::get('/employee-IDP', function () {
     return view('employee.idp');
 })->name('employee.idp');
@@ -203,6 +207,10 @@ Route::get('/pmt/OPCR', function () {
     return view('pmt.opcr');
 })->name('pmt.opcr');
 
+Route::get('/pmt/OPCR/approval', function () {
+    return view('pmt.opcr-app-view');
+})->name('pmt.opcr-app-view');
+
 Route::get('/pmt/ipcr', function () {
     return view('pmt.ipcr');
 })->name('pmt.ipcr');
@@ -214,6 +222,18 @@ Route::get('/pmt/ipcr-overview', function () {
 Route::get('/pmt/ipcr-calibration', function () {
     return view('pmt.ipcr-calib');
 })->name('pmt.ipcr-calib');
+
+Route::get('/pmt/final-calibration', function () {
+    return view('pmt.final-calibration');
+})->name('pmt.final-calib');
+
+Route::get('/pmt/final-calibration/office', function () {
+    return view('pmt.final-calibration-office');
+})->name('pmt.final-calibration-office');
+
+Route::get('/pmt/rewards-development', function () {
+    return view('pmt.rewards');
+})->name('pmt.rewards');
 
 Route::get('/pmt/smpor', function () {
     return view('pmt.smpor');
@@ -251,6 +271,14 @@ Route::get('/administrator/roles', function () {
 Route::get('/administrat/opcr', function () {
     return view('admin.opcr');
 })->name('admin.opcr');
+
+Route::get('/administrat/opcr-accomplishment', function () {
+    return view('admin.opcr-acc');
+})->name('admin.opcr-acc');
+
+Route::get('/administrat/opcr-accomplishment/show', function () {
+    return view('admin.opcr-acc-view');
+})->name('admin.opcr-acc-view');
 
 Route::get('/administrator/task-configuration', function () {
     return view('admin.task-config');

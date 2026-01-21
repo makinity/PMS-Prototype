@@ -148,7 +148,9 @@
             $isPmtOpcrApproval = request()->routeIs('pmt.opcr');
             $isSMPOR = request()->routeIs('pmt.smpor');
             $isIPCR = request()->routeIs('pmt.ipcr');
+            $isRD = request()->routeIs('pmt.rewards');
             $isIPCRCalibOVR = request()->routeIs('pmt.ipcr-calib-overview');
+            $isFinalCalib = request()->routeIs('pmt.final-calib');
             $isPmtReports = request()->routeIs('pmt.pr');
             $isPmtProfile = request()->routeIs('pmt.profile');
         @endphp
@@ -265,7 +267,19 @@
                                     <span>IPCR Calibration</span>
                                 </a>
                             </li>
-                             <li>
+                            <li>
+                                <a href="{{ route('pmt.final-calib') }}" class="sidebar-link" @if($isFinalCalib) aria-current="page" @endif>
+                                    <i class="sidebar-icon fa-solid fa-calendar-check"></i>
+                                    <span>Final Calibration</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('pmt.rewards') }}" class="sidebar-link" @if($isRD) aria-current="page" @endif>
+                                    <i class="sidebar-icon fa-solid fa-calendar-check"></i>
+                                    <span>Rewards & Development</span>
+                                </a>
+                            </li>
+                            <li>
                                 <a href="{{ route('pmt.smpor') }}" class="sidebar-link" @if($isSMPOR) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-calendar-check"></i>
                                     <span>SMPOR</span>

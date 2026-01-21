@@ -25,6 +25,7 @@
             $isAdminUsers = request()->routeIs('admin.users');
             $isAdminRoles = request()->routeIs('admin.roles');
             $isAdminOPCR = request()->routeIs('admin.opcr');
+            $isAdminOPCRACC = request()->routeIs('admin.opcr-acc');
             $isAdminTaskConfig = request()->routeIs('admin.task-config');
             $isAdminUwpMonitoring = request()->routeIs('admin.uwp-monitoring');
             $isAdminPerformance = request()->routeIs('admin.performance-metrics');
@@ -145,6 +146,12 @@
                                 <a href="{{ route('admin.opcr') }}" class="sidebar-link" @if($isAdminOPCR) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-user-shield"></i>
                                     <span>OPCR's</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.opcr-acc') }}" class="sidebar-link" @if($isAdminOPCRACC) aria-current="page" @endif>
+                                    <i class="sidebar-icon fa-solid fa-user-shield"></i>
+                                    <span>OPCR Accomplishments</span>
                                 </a>
                             </li>
                             <li>
