@@ -163,17 +163,22 @@ class SmporExportController extends Controller
         $manDaysLost = '0';
         $manHoursLost = '0';
 
-        return view('pdf.stage-two.smpor', compact(
-            'employeeName',
-            'officeDivision',
-            'semestralPeriod',
-            'provinceCity',
-            'coreFunctions',
-            'strategicObjectives',
-            'supportFunctions',
-            'timeliness',
-            'manDaysLost',
-            'manHoursLost'
-        ));
+       $pdf = Pdf::loadView(
+            'pdf.stage-two.smpor',
+            compact(
+                'employeeName',
+                'officeDivision',
+                'semestralPeriod',
+                'provinceCity',
+                'coreFunctions',
+                'strategicObjectives',
+                'supportFunctions',
+                'timeliness',
+                'manDaysLost',
+                'manHoursLost'
+            )
+        )->setPaper('a4', 'portrait');
+
+        return $pdf->stream('SMPOR.pdf');
     }
 }
