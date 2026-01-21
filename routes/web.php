@@ -125,6 +125,10 @@ Route::get('/supervisor-dashboard', function () {
     return view('supervisor.dashboard');
 })->name('supervisor.dashboard');
 
+Route::get('/supervisor/uwp-page', function () {
+    return view('supervisor.uwp-list');
+})->name('supervisor.uwp-page');
+
 Route::get('/supervisor/uwp', function () {
     return view('supervisor.uwp');
 })->name('supervisor.uwp');

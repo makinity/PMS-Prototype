@@ -5,6 +5,12 @@
     @endphp
 
     <section class="space-y-6">
+        <div>
+            <a href="{{ route('supervisor.uwp-page') }}"
+               class="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-300">
+                ← Back to Unit Work Plans
+            </a>
+        </div>
         <div class="flex flex-wrap items-start justify-between gap-4">
             <div class="space-y-2">
                 <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">Unit Work Plan</p>

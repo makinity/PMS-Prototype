@@ -145,7 +145,7 @@
         @php
             $isSupervisorDashboard = request()->routeIs('supervisor.dashboard');
             $isSupervisorTeamTasks = request()->routeIs('supervisor.team-tasks');
-            $isSupervisorUWP = request()->routeIs('supervisor.uwp');
+            $isSupervisorUWP = request()->routeIs('supervisor.uwp-page');
             $isSupervisorIPCR = request()->routeIs('supervisor.ipcr');
             $isSupervisorIPCRTARGET = request()->routeIs('supervisor.ipcr-target');
             $isSupervisorOPCR = request()->routeIs('supervisor.opcr');
@@ -256,7 +256,7 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('supervisor.uwp') }}" class="sidebar-link" @if($isSupervisorUWP) aria-current="page" @endif>
+                                <a href="{{ route('supervisor.uwp-page') }}" class="sidebar-link" @if($isSupervisorUWP) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-clipboard-list"></i>
                                     <span>Unit Work Plan</span>
                                 </a>
