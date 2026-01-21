@@ -16,62 +16,79 @@
         </div>
 
         <!-- UWP List -->
-        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-            <label class="space-y-1 text-sm text-slate-300">
-                    <span class="text-xs uppercase tracking-wide text-slate-400">Office / Unit</span>
+        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5 space-y-4">
+
+            <!-- Filter / Context Bar -->
+            <div class="flex flex-wrap items-end justify-between gap-4">
+                <div class="space-y-1">
+                    <span class="block text-xs uppercase tracking-widest text-slate-400">
+                        Office / Unit
+                    </span>
 
                     <select
                         class="w-[280px] rounded-lg border border-slate-800 bg-slate-950 px-3 py-2
-                        text-sm text-slate-100 focus:border-blue-500
-                        focus:ring-2 focus:ring-blue-500/40 focus:outline-none"
+                            text-sm text-slate-100 focus:border-blue-500
+                            focus:ring-2 focus:ring-blue-500/40 focus:outline-none"
                         style="background:#0f172a;color:#e5e7eb;"
                     >
-                        {{-- Selected office --}}
-                        <option selected>
-                            Revenue Collection Unit
-                        </option>
-
-                        {{-- Other dummy offices --}}
+                        <option selected>Revenue Collection Unit</option>
                         <option>Records Management Unit</option>
                         <option>Administrative Services Unit</option>
                         <option>Human Resource Management Unit</option>
                         <option>General Services Unit</option>
                         <option>Planning and Development Unit</option>
                     </select>
-                </label>
-            <div class="overflow-x-auto">
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="overflow-x-auto rounded-xl border border-slate-800">
                 <table class="min-w-full text-sm text-slate-200">
-                    <thead class="bg-slate-950/60 text-slate-200">
+                    <thead class="bg-slate-950/60">
                         <tr>
-                            <th class="px-4 py-3 text-left">Unit</th>
-                            <th class="px-4 py-3 text-left">Performance Period</th>
-                            <th class="px-4 py-3 text-left">Status</th>
-                            <th class="px-4 py-3 text-center">Actions</th>
+                            <th class="px-4 py-3 text-left font-semibold">Unit</th>
+                            <th class="px-4 py-3 text-left font-semibold">Performance Period</th>
+                            <th class="px-4 py-3 text-left font-semibold">Status</th>
+                            <th class="px-4 py-3 text-center font-semibold">Actions</th>
                         </tr>
                     </thead>
+
                     <tbody class="divide-y divide-slate-800">
-                        <tr class="hover:bg-slate-900/50">
-                            <td class="px-4 py-3">Revenue Collection Unit</td>
-                            <td class="px-4 py-3">January–June 2026</td>
+                        <tr class="hover:bg-slate-900/50 transition">
                             <td class="px-4 py-3">
-                                <span class="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-200 border border-emerald-500/30">
+                                Revenue Collection Unit
+                            </td>
+                            <td class="px-4 py-3">
+                                January–June 2026
+                            </td>
+                            <td class="px-4 py-3">
+                                <span
+                                    class="inline-flex items-center rounded-full
+                                        border border-emerald-500/30
+                                        bg-emerald-500/10
+                                        px-3 py-1 text-xs font-semibold text-emerald-300">
                                     PMT Approved
                                 </span>
                             </td>
                             <td class="px-4 py-3 text-center">
                                 <button type="button"
-                                        class="text-blue-400 hover:text-blue-300 text-xs font-semibold"
+                                        aria-label="View Unit Work Plan"
+                                        title="View Unit Work Plan"
                                         data-modal-target="uwpPreviewModal"
                                         data-modal-toggle="uwpPreviewModal"
-                                        data-status="PMT Approved">
-                                    View
+                                        class="inline-flex items-center justify-center rounded-lg
+                                            p-2 text-slate-400 hover:text-white
+                                            hover:bg-slate-800 transition">
+                                    <i class="fa-regular fa-eye text-sm"></i>
                                 </button>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
+
         </div>
+
 
     </section>
 

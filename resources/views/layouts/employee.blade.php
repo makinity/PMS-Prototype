@@ -134,16 +134,16 @@
                             </li>
                             <li>
                                 <a href="{{ route('employee.accomplishment-submission') }}" class="sidebar-link" @if($isAccomplishmentSubmission) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-list-check"></i>
+                                    <i class="sidebar-icon fa-solid fa-file-arrow-up"></i>
                                     <span>SMPOR & IPCR Accomplishment Submission</span>
                                 </a>
                             </li>
-                            <li>
+                            {{-- <li>
                                 <a href="{{ route('employee.submit-output') }}" class="sidebar-link" @if($isSubmitOutput) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-arrow-up-from-bracket"></i>
+                                    <i class="sidebar-icon fa-solid fa-upload"></i>
                                     <span>Submit Output</span>
                                 </a>
-                            </li>
+                            </li> --}}
                         </ul>
                     </div>
 
@@ -152,13 +152,13 @@
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
                                 <a href="{{ route('employee.ors') }}" class="sidebar-link" @if($isOutputRating) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-regular fa-chart-bar"></i>
+                                    <i class="sidebar-icon fa-regular fa-clock-rotate-left"></i>
                                     <span>Output Rating Sheet</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ route('employee.mpor') }}" class="sidebar-link" @if($isMpor) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-chart-line"></i>
+                                    <i class="sidebar-icon fa-solid fa-calendar"></i>
                                     <span>MPOR</span>
                                 </a>
                             </li>
@@ -170,19 +170,19 @@
                             </li>
                             <li>
                                 <a href="{{ route('employee.ipcr-target') }}" class="sidebar-link" @if($isIPCRTARGET) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-file-signature"></i>
+                                    <i class="sidebar-icon fa-solid fa-bullseye"></i>
                                     <span>IPCR Target</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ route('employee.ipcr') }}" class="sidebar-link" @if($isIPCR) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-file-signature"></i>
+                                    <i class="sidebar-icon fa-solid fa-file-circle-check"></i>
                                     <span>IPCR Final</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ route('employee.final-ratings') }}" class="sidebar-link" @if($isFinal) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-file-signature"></i>
+                                    <i class="sidebar-icon fa-solid fa-award"></i>
                                     <span>My Final Ratings</span>
                                 </a>
                             </li>

@@ -117,7 +117,7 @@
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
                                 <a href="{{ route('dept-head.uwp') }}" class="sidebar-link" @if($isUnitWorkPlan) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-clipboard-list"></i>
+                                    <i class="sidebar-icon fa-solid fa-diagram-project"></i>
                                     <span>Unit Work Plan Review</span>
                                 </a>
                             </li>
@@ -129,35 +129,35 @@
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
                                 <a href="{{ route('dept-head.opcr') }}" class="sidebar-link" @if($isOpcr) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-file-contract"></i>
+                                    <i class="sidebar-icon fa-solid fa-building-circle-check"></i>
                                     <span>OPCR Review</span>
                                 </a>
                             </li>
 
                             <li>
                                 <a href="{{ route('dept-head.qar') }}" class="sidebar-link" @if($isQar) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-file-contract"></i>
+                                    <i class="sidebar-icon fa-solid fa-calendar-check"></i>
                                     <span>QAR (Quarterly Accomplishment)</span>
                                 </a>
                             </li>
 
                             <li>
                                 <a href="{{ route('dept-head.smpor') }}" class="sidebar-link" @if($isSMPOR) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-chart-simple"></i>
+                                    <i class="sidebar-icon fa-solid fa-layer-group"></i>
                                     <span>SMPOR</span>
                                 </a>
                             </li>
 
                             <li>
                                 <a href="{{ route('dept-head.ipcr') }}" class="sidebar-link" @if($isIPCR) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-file-pen"></i>
+                                    <i class="sidebar-icon fa-solid fa-user-check"></i>
                                     <span>IPCR Approval</span>
                                 </a>
                             </li>
 
                             <li>
                                 <a href="{{ route('dept-head.ipcr-target') }}" class="sidebar-link" @if($isIPCRTARGET) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-file-pen"></i>
+                                    <i class="sidebar-icon fa-solid fa-bullseye-arrow"></i>
                                     <span> Target Approval</span>
                                 </a>
                             </li>
@@ -169,7 +169,7 @@
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
                                 <a href="{{ route('dept-head.idp') }}" class="sidebar-link" @if($isIdp) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-bullseye"></i>
+                                    <i class="sidebar-icon fa-solid fa-road"></i>
                                     <span>Individual Development Plan</span>
                                 </a>
                             </li>

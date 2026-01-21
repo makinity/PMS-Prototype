@@ -126,7 +126,7 @@
                             </li>
                             <li>
                                 <a href="{{ route('admin.roles') }}" class="sidebar-link" @if($isAdminRoles) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-user-shield"></i>
+                                    <i class="sidebar-icon fa-solid fa-key"></i>
                                     <span>Roles &amp; Permissions</span>
                                 </a>
                             </li>
@@ -138,31 +138,31 @@
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
                                 <a href="{{ route('admin.task-config') }}" class="sidebar-link" @if($isAdminTaskConfig) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-screwdriver-wrench"></i>
+                                    <i class="sidebar-icon fa-solid fa-sliders"></i>
                                     <span>Task Configuration</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ route('admin.opcr') }}" class="sidebar-link" @if($isAdminOPCR) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-user-shield"></i>
+                                    <i class="sidebar-icon fa-solid fa-building"></i>
                                     <span>OPCR's</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ route('admin.opcr-acc') }}" class="sidebar-link" @if($isAdminOPCRACC) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-user-shield"></i>
+                                    <i class="sidebar-icon fa-solid fa-building-circle-check"></i>
                                     <span>OPCR Accomplishments</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ route('admin.uwp-monitoring') }}" class="sidebar-link" @if($isAdminUwpMonitoring) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-clipboard-check"></i>
+                                    <i class="sidebar-icon fa-solid fa-eye"></i>
                                     <span>UWP Monitoring</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ route('admin.performance-metrics') }}" class="sidebar-link" @if($isAdminPerformance) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-chart-line"></i>
+                                    <i class="sidebar-icon fa-solid fa-gauge-high"></i>
                                     <span>Performance Metrics</span>
                                 </a>
                             </li>
@@ -180,19 +180,19 @@
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
                                 <a href="{{ route('admin.hris') }}" class="sidebar-link" @if($isAdminHris) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-database"></i>
+                                    <i class="sidebar-icon fa-solid fa-plug"></i>
                                     <span>HRIS Integration</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ route('admin.data') }}" class="sidebar-link" @if($isAdminData) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-file-export"></i>
+                                    <i class="sidebar-icon fa-solid fa-file-arrow-down"></i>
                                     <span>Data Export</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ route('admin.semestral-pr') }}" class="sidebar-link"  @if($isAdminSemestralPR) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-file-pen"></i>
+                                    <i class="sidebar-icon fa-solid fa-file-lines"></i>
                                     <span>Semestral PR</span>
                                     {{--Generated Semestral Performance Report--}}
                                 </a>
@@ -205,13 +205,13 @@
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
                                 <a href="{{ route('admin.audit-trail') }}" class="sidebar-link" @if($isAdminAudit) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-clipboard-list"></i>
+                                    <i class="sidebar-icon fa-solid fa-shield-halved"></i>
                                     <span>Audit Trail</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ route('admin.system-logs') }}" class="sidebar-link" @if($isAdminLogs) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-file-lines"></i>
+                                    <i class="sidebar-icon fa-solid fa-terminal"></i>
                                     <span>System Logs</span>
                                 </a>
                             </li>

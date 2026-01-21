@@ -245,43 +245,43 @@
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
                                 <a href="{{ route('pmt.uwp') }}" class="sidebar-link" @if($isPmtUwp) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-clipboard-check"></i>
+                                    <i class="sidebar-icon fa-solid fa-diagram-project"></i>
                                     <span>Unit Work Plan Approval</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ route('pmt.opcr') }}" class="sidebar-link" @if($isPmtOpcrApproval) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-calendar-check"></i>
+                                    <i class="sidebar-icon fa-solid fa-building-circle-check"></i>
                                     <span>OPCR Validation</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ route('pmt.ipcr') }}" class="sidebar-link" @if($isIPCR) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-calendar-check"></i>
+                                    <i class="sidebar-icon fa-solid fa-user-check"></i>
                                     <span>IPCR Review</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ route('pmt.ipcr-calib-overview') }}" class="sidebar-link" @if($isIPCRCalibOVR) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-calendar-check"></i>
+                                    <i class="sidebar-icon fa-solid fa-scale-balanced"></i>
                                     <span>IPCR Calibration</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ route('pmt.final-calib') }}" class="sidebar-link" @if($isFinalCalib) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-calendar-check"></i>
+                                    <i class="sidebar-icon fa-solid fa-gavel"></i>
                                     <span>Final Calibration</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ route('pmt.rewards') }}" class="sidebar-link" @if($isRD) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-calendar-check"></i>
+                                    <i class="sidebar-icon fa-solid fa-award"></i>
                                     <span>Rewards & Development</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ route('pmt.smpor') }}" class="sidebar-link" @if($isSMPOR) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-calendar-check"></i>
+                                    <i class="sidebar-icon fa-solid fa-layer-group"></i>
                                     <span>SMPOR</span>
                                 </a>
                             </li>
@@ -293,7 +293,7 @@
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
                                 <a href="{{ route('pmt.pr') }}" class="sidebar-link" @if($isPmtReports) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-chart-line"></i>
+                                    <i class="sidebar-icon fa-solid fa-chart-column"></i>
                                     <span>Performance Reports</span>
                                 </a>
                             </li>
