@@ -89,15 +89,15 @@
                     </div>
 
                     <div class="flex items-center gap-2">
+                        <a href="{{ route('stage1.uwp.preview.pdf') }}"
+                        class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800">
+                            Preview
+                        </a>
                         {{-- Export (enabled only if Approved Final) --}}
                         <a href="{{ route('stage1.uwp.export.pdf') }}"
                         class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800">
                             Export PDF
                         </a>
-
-                        <button class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800">
-                            Export Excel
-                        </button>
 
                         <button
                             type="button"

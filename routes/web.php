@@ -254,6 +254,9 @@ Route::get('/pmt/profile', function () {
 Route::get('/pmt/uwp/export/pdf', [UwpExportController::class, 'exportPdf'])
     ->name('stage1.uwp.export.pdf');
 
+Route::get('/pmt/uwp/preview/pdf', [UwpExportController::class, 'preview'])
+    ->name('stage1.uwp.preview.pdf');
+
 Route::get('/pmt/ipcr/export/pdf', [StageThreeFormsIpcrExportController::class, 'exportPdf'])
 ->name('stage3.ipcr.export.pdf');
 

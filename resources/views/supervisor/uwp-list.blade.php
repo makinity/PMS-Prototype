@@ -88,215 +88,279 @@
             </div>
 
         </div>
-
-
     </section>
 
-    <!-- ===================== -->
-    <!-- UWP PREVIEW MODAL -->
-    <!-- ===================== -->
-    <div id="uwpPreviewModal" tabindex="-1" aria-hidden="true"
-        class="fixed inset-0 z-50 hidden overflow-y-auto overflow-x-hidden">
-        <div class="relative mx-auto my-8 w-full max-w-3xl px-4">
-            <div class="rounded-2xl border border-slate-800 bg-slate-950 text-slate-100 shadow-xl">
+    <div id="uwpPreviewModal" class="fixed inset-0 z-50 hidden bg-black/70 backdrop-blur-sm">
 
-                <!-- Modal Header -->
-                <div class="flex items-center justify-between border-b border-slate-800 px-6 py-4">
-                    <h3 class="text-lg font-semibold">
-                        Unit Work Plan – Preview
-                    </h3>
-                    <button type="button"
-                            data-modal-hide="uwpPreviewModal"
-                            class="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-slate-200">
-                        <span class="sr-only">Close</span>
-                        &times;
-                    </button>
+        <div class="mx-auto my-10 w-full max-w-5xl px-6">
+            <div class="rounded-2xl border border-slate-800 bg-slate-950 text-slate-100">
+
+            <!-- HEADER -->
+            <div class="border-b border-slate-800 px-8 py-6">
+                <h2 class="text-xl font-semibold">Unit Work Plan</h2>
+                <p class="mt-1 text-sm text-slate-400">
+                Revenue Collection Unit • Jan – June 2026
+                </p>
+            </div>
+
+            <!-- SUMMARY -->
+            <div class="flex items-stretch gap-10 border-b border-slate-800 px-8 py-6">
+
+                <div class="w-1/4">
+                    <p class="text-xs uppercase tracking-widest text-slate-500">Office / Unit</p>
+                    <p class="mt-1 font-medium">Revenue Collection Unit</p>
                 </div>
 
-                <!-- Modal Body -->
-                <div class="space-y-6 px-6 py-5">
+                <div class="w-1/4">
+                    <p class="text-xs uppercase tracking-widest text-slate-500">Supervisor</p>
+                    <p class="mt-1 font-medium">Carlo D. Beray</p>
+                </div>
 
-                    <!-- Header Summary -->
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                        <div>
-                            <p class="text-xs uppercase tracking-widest text-slate-400">Unit</p>
-                            <p class="mt-1 font-medium">Revenue Collection Unit</p>
-                        </div>
-                        <div>
-                            <p class="text-xs uppercase tracking-widest text-slate-400">Performance Period</p>
-                            <p class="mt-1 font-medium">January–June 2026</p>
-                        </div>
-                        <div>
-                            <p class="text-xs uppercase tracking-widest text-slate-400">Status</p>
-                            <span class="mt-1 inline-flex rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-400">
-                                PMT Approved
-                            </span>
-                        </div>
-                    </div>
+                <div class="w-1/4">
+                    <p class="text-xs uppercase tracking-widest text-slate-500">Department Head</p>
+                    <p class="mt-1 font-medium">Dept-head</p>
+                </div>
 
-                    <!-- Core Functions -->
-                    <div>
-                        <h4 class="mb-3 text-sm font-semibold uppercase tracking-widest text-slate-400">
-                            Core Functions
-                        </h4>
+                <div class="w-1/4">
+                    <p class="text-xs uppercase tracking-widest text-slate-500">Status</p>
+                    <span class="mt-2 inline-flex rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-400">
+                        PMT Approved
+                    </span>
+                </div>
 
-                        <div class="space-y-4">
-                            <!-- CORE MFO 1 -->
-                            <div class="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
-                                <p class="font-semibold">
+            </div>
+
+
+            <!-- PLANNED OUTPUTS -->
+            <div class="px-8 py-6">
+                <h3 class="mb-4 text-sm font-semibold uppercase tracking-widest text-slate-400">
+                    Planned Outputs
+                </h3>
+
+                <div class="overflow-hidden rounded-xl border border-slate-800">
+                    <table class="w-full border-collapse text-left text-sm text-slate-200">
+
+                        <!-- TABLE HEADER -->
+                        <thead class="bg-slate-900/60 text-xs uppercase tracking-widest text-slate-400">
+                            <tr>
+                                <th class="px-5 py-4">PPA / MFO</th>
+                                <th class="px-5 py-4 text-center">Success Indicators</th>
+                                <th class="px-5 py-4">Target / Timeline</th>
+                                <th class="px-5 py-4 text-center">Function</th>
+                            </tr>
+                        </thead>
+
+                        <!-- TABLE BODY -->
+                        <tbody class="divide-y divide-slate-800 bg-slate-950">
+
+                            <!-- ROW 1 -->
+                            <tr>
+                                <td class="px-5 py-5 font-medium">
                                     E-Bank Scanning and Encoding of Revenue Transactions
-                                </p>
-                                <p class="mt-1 text-sm text-slate-400">
-                                    Target / Timeline: Daily; same working day
-                                </p>
-                                <button type="button"
+                                </td>
+
+                                <td class="px-5 py-5 text-center">
+                                    <button
                                         data-modal-target="mfo1IndicatorsModal"
                                         data-modal-toggle="mfo1IndicatorsModal"
-                                        class="mt-3 inline-flex text-sm font-medium text-slate-300 hover:text-white underline underline-offset-4">
-                                    View Success Indicators
-                                </button>
-                            </div>
+                                        class="inline-flex items-center gap-2 text-slate-300 hover:text-white">
+                                        <i class="fa-regular fa-eye text-sm"></i><span>(3)</span>
+                                    </button>
+                                </td>
 
-                            <!-- CORE MFO 2 -->
-                            <div class="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
-                                <p class="font-semibold">
-                                    Processing of Over-the-Counter Revenue Transactions
-                                </p>
-                                <p class="mt-1 text-sm text-slate-400">
-                                    Target / Timeline: Daily; 95% processed within same working day
-                                </p>
-                                <button type="button"
+                                <td class="px-5 py-5 text-slate-300">
+                                    Daily; all e-bank transactions processed within the same working day
+                                </td>
+
+                                <td class="px-5 py-5 text-center">
+                                    <span class="rounded-full border border-emerald-500/40 px-3 py-1 text-xs font-semibold text-emerald-400">
+                                        Core
+                                    </span>
+                                </td>
+                            </tr>
+
+                            <!-- ROW 2 -->
+                            <tr>
+                                <td class="px-5 py-5 font-medium">
+                                    Processing of over-the-counter revenue transactions
+                                </td>
+
+                                <td class="px-5 py-5 text-center">
+                                    <button
                                         data-modal-target="mfo2IndicatorsModal"
                                         data-modal-toggle="mfo2IndicatorsModal"
-                                        class="mt-3 inline-flex text-sm font-medium text-slate-300 hover:text-white underline underline-offset-4">
-                                    View Success Indicators
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                                        class="inline-flex items-center gap-2 text-slate-300 hover:text-white">
+                                        <i class="fa-regular fa-eye text-sm"></i><span>(3)</span>
+                                    </button>
+                                </td>
 
-                    <!-- Support Functions -->
-                    <div>
-                        <h4 class="mb-3 text-sm font-semibold uppercase tracking-widest text-slate-400">
-                            Support Functions
-                        </h4>
+                                <td class="px-5 py-5 text-slate-300">
+                                    Daily; 95% processed within the same working day
+                                </td>
 
-                        <div class="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
-                            <p class="font-semibold">
-                                Maintenance of Revenue Records Filing System
-                            </p>
-                            <p class="mt-1 text-sm text-slate-400">
-                                Target / Timeline: Quarterly validation and update
-                            </p>
-                            <button type="button"
-                                    data-modal-target="mfo3IndicatorsModal"
-                                    data-modal-toggle="mfo3IndicatorsModal"
-                                    class="mt-3 inline-flex text-sm font-medium text-slate-300 hover:text-white underline underline-offset-4">
-                                View Success Indicators
-                            </button>
-                        </div>
-                    </div>
+                                <td class="px-5 py-5 text-center">
+                                    <span class="rounded-full border border-sky-500/40 px-3 py-1 text-xs font-semibold text-sky-400">
+                                        Core
+                                    </span>
+                                </td>
+                            </tr>
 
+                            <!-- ROW 3 -->
+                            <tr>
+                                <td class="px-5 py-5 font-medium">
+                                    Maintenance of Revenue Records Filing System
+                                </td>
+
+                                <td class="px-5 py-5 text-center">
+                                    <button
+                                        data-modal-target="mfo3IndicatorsModal"
+                                        data-modal-toggle="mfo3IndicatorsModal"
+                                        class="inline-flex items-center gap-2 text-slate-300 hover:text-white">
+                                        <i class="fa-regular fa-eye text-sm"></i><span>(3)</span>
+                                    </button>
+                                </td>
+
+                                <td class="px-5 py-5 text-slate-300">
+                                    Quarterly validation and update
+                                </td>
+
+                                <td class="px-5 py-5 text-center">
+                                    <span class="rounded-full border border-indigo-500/40 px-3 py-1 text-xs font-semibold text-indigo-400">
+                                        Support
+                                    </span>
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
                 </div>
+            </div>
 
-                <!-- Modal Footer -->
-                <div class="flex justify-end border-t border-slate-800 px-6 py-4">
-                    <button type="button"
-                            data-modal-hide="uwpPreviewModal"
-                            class="rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-slate-800">
-                        Close
-                    </button>
-                </div>
+            <!-- FOOTER -->
+            <div class="flex justify-end border-t border-slate-800 px-8 py-5">
+                <button data-modal-hide="uwpPreviewModal"
+                        class="rounded-lg border border-slate-700 bg-slate-900 px-5 py-2 text-sm hover:bg-slate-800">
+                Close
+                </button>
+            </div>
 
             </div>
         </div>
     </div>
 
-    <!-- ===================== -->
-    <!-- SUCCESS INDICATOR SUB-MODALS -->
-    <!-- ===================== -->
+    <div id="mfo1IndicatorsModal" class="fixed inset-0 z-50 hidden bg-black/70 backdrop-blur-sm">
 
-    <!-- MFO 1 Indicators -->
-    <div id="mfo1IndicatorsModal" tabindex="-1" aria-hidden="true"
-        class="fixed inset-0 z-50 hidden overflow-y-auto">
-        <div class="relative mx-auto my-10 w-full max-w-md px-4">
-            <div class="rounded-2xl border border-slate-800 bg-slate-950 text-slate-100 shadow-xl">
-                <div class="flex items-center justify-between border-b border-slate-800 px-5 py-4">
-                    <h3 class="text-sm font-semibold">Success Indicators</h3>
-                    <button type="button" data-modal-hide="mfo1IndicatorsModal"
-                            class="rounded-lg p-2 text-slate-400 hover:bg-slate-800">&times;</button>
+        <div class="mx-auto my-16 w-full max-w-lg px-6">
+            <div class="rounded-2xl border border-slate-800 bg-slate-950 text-slate-100">
+
+            <!-- HEADER -->
+            <div class="border-b border-slate-800 px-6 py-5">
+                <h3 class="text-lg font-semibold">
+                E-Bank Scanning and Encoding of Revenue Transactions
+                </h3>
+                <p class="mt-1 text-sm text-slate-400">
+                Read-only list of indicators for this output.
+                </p>
+            </div>
+
+            <!-- BODY -->
+            <div class="px-6 py-6">
+                <div class="rounded-xl border border-slate-800 bg-slate-900/40 p-5">
+                <ol class="list-decimal space-y-3 pl-5 text-sm text-slate-300">
+                    <li>All e-bank transactions scanned and encoded daily</li>
+                    <li>Indexing complete with no missing pages</li>
+                    <li>Audit trail maintained within 24 hours</li>
+                </ol>
                 </div>
-                <div class="px-5 py-4">
-                    <ul class="list-disc space-y-2 pl-5 text-sm text-slate-300">
-                        <li>All e-bank transactions scanned and encoded daily</li>
-                        <li>Indexing complete with no missing pages</li>
-                        <li>Audit trail maintained within 24 hours</li>
-                    </ul>
-                </div>
-                <div class="flex justify-end border-t border-slate-800 px-5 py-3">
-                    <button type="button" data-modal-hide="mfo1IndicatorsModal"
-                            class="rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-sm">
-                        Close
-                    </button>
-                </div>
+            </div>
+
+            <!-- FOOTER -->
+            <div class="flex justify-end border-t border-slate-800 px-6 py-4">
+                <button data-modal-hide="mfo1IndicatorsModal"
+                        class="rounded-lg border border-slate-700 bg-slate-900 px-5 py-2 text-sm hover:bg-slate-800">
+                Close
+                </button>
+            </div>
+
             </div>
         </div>
     </div>
 
-    <!-- MFO 2 Indicators -->
-    <div id="mfo2IndicatorsModal" tabindex="-1" aria-hidden="true"
-        class="fixed inset-0 z-50 hidden overflow-y-auto">
-        <div class="relative mx-auto my-10 w-full max-w-md px-4">
-            <div class="rounded-2xl border border-slate-800 bg-slate-950 text-slate-100 shadow-xl">
-                <div class="flex items-center justify-between border-b border-slate-800 px-5 py-4">
-                    <h3 class="text-sm font-semibold">Success Indicators</h3>
-                    <button type="button" data-modal-hide="mfo2IndicatorsModal"
-                            class="rounded-lg p-2 text-slate-400 hover:bg-slate-800">&times;</button>
+    <div id="mfo2IndicatorsModal" class="fixed inset-0 z-50 hidden bg-black/70 backdrop-blur-sm">
+
+        <div class="mx-auto my-16 w-full max-w-lg px-6">
+            <div class="rounded-2xl border border-slate-800 bg-slate-950 text-slate-100">
+
+            <!-- HEADER -->
+            <div class="border-b border-slate-800 px-6 py-5">
+                <h3 class="text-lg font-semibold">
+                Processing of over-the-counter revenue transactions
+                </h3>
+                <p class="mt-1 text-sm text-slate-400">
+                Read-only list of indicators for this output.
+                </p>
+            </div>
+
+            <!-- BODY -->
+            <div class="px-6 py-6">
+                <div class="rounded-xl border border-slate-800 bg-slate-900/40 p-5">
+                <ol class="list-decimal space-y-3 pl-5 text-sm text-slate-300">
+                    <li>Same-day verification of OTC transactions</li>
+                    <li>95% encoded within the business day</li>
+                    <li>OR validation completed daily</li>
+                </ol>
                 </div>
-                <div class="px-5 py-4">
-                    <ul class="list-disc space-y-2 pl-5 text-sm text-slate-300">
-                        <li>Same-day verification of OTC transactions</li>
-                        <li>95% encoded within the business day</li>
-                        <li>OR validation completed daily</li>
-                    </ul>
-                </div>
-                <div class="flex justify-end border-t border-slate-800 px-5 py-3">
-                    <button type="button" data-modal-hide="mfo2IndicatorsModal"
-                            class="rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-sm">
-                        Close
-                    </button>
-                </div>
+            </div>
+
+            <!-- FOOTER -->
+            <div class="flex justify-end border-t border-slate-800 px-6 py-4">
+                <button data-modal-hide="mfo2IndicatorsModal"
+                        class="rounded-lg border border-slate-700 bg-slate-900 px-5 py-2 text-sm hover:bg-slate-800">
+                Close
+                </button>
+            </div>
+
             </div>
         </div>
     </div>
 
-    <!-- MFO 3 Indicators -->
-    <div id="mfo3IndicatorsModal" tabindex="-1" aria-hidden="true"
-        class="fixed inset-0 z-50 hidden overflow-y-auto">
-        <div class="relative mx-auto my-10 w-full max-w-md px-4">
-            <div class="rounded-2xl border border-slate-800 bg-slate-950 text-slate-100 shadow-xl">
-                <div class="flex items-center justify-between border-b border-slate-800 px-5 py-4">
-                    <h3 class="text-sm font-semibold">Success Indicators</h3>
-                    <button type="button" data-modal-hide="mfo3IndicatorsModal"
-                            class="rounded-lg p-2 text-slate-400 hover:bg-slate-800">&times;</button>
+    <div id="mfo3IndicatorsModal" class="fixed inset-0 z-50 hidden bg-black/70 backdrop-blur-sm">
+
+        <div class="mx-auto my-16 w-full max-w-lg px-6">
+            <div class="rounded-2xl border border-slate-800 bg-slate-950 text-slate-100">
+
+            <!-- HEADER -->
+            <div class="border-b border-slate-800 px-6 py-5">
+                <h3 class="text-lg font-semibold">
+                Maintenance of Revenue Records Filing System
+                </h3>
+                <p class="mt-1 text-sm text-slate-400">
+                Read-only list of indicators for this output.
+                </p>
+            </div>
+
+            <!-- BODY -->
+            <div class="px-6 py-6">
+                <div class="rounded-xl border border-slate-800 bg-slate-900/40 p-5">
+                <ol class="list-decimal space-y-3 pl-5 text-sm text-slate-300">
+                    <li>Weekly filing updated and retrievable</li>
+                    <li>Digital backups synced monthly</li>
+                    <li>Retrieval logs maintained for audits</li>
+                </ol>
                 </div>
-                <div class="px-5 py-4">
-                    <ul class="list-disc space-y-2 pl-5 text-sm text-slate-300">
-                        <li>Weekly filing updated and retrievable</li>
-                        <li>Digital backups synced monthly</li>
-                        <li>Retrieval logs maintained for audits</li>
-                    </ul>
-                </div>
-                <div class="flex justify-end border-t border-slate-800 px-5 py-3">
-                    <button type="button" data-modal-hide="mfo3IndicatorsModal"
-                            class="rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-sm">
-                        Close
-                    </button>
-                </div>
+            </div>
+
+            <!-- FOOTER -->
+            <div class="flex justify-end border-t border-slate-800 px-6 py-4">
+                <button data-modal-hide="mfo3IndicatorsModal"
+                        class="rounded-lg border border-slate-700 bg-slate-900 px-5 py-2 text-sm hover:bg-slate-800">
+                Close
+                </button>
+            </div>
+
             </div>
         </div>
     </div>
-
 
     @push('scripts')
         <script>
