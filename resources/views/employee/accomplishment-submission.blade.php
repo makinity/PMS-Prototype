@@ -286,4 +286,5 @@
             });
         </script>
     @endpush
+
 @endsection
