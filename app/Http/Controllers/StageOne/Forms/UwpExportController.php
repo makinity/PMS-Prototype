@@ -62,7 +62,7 @@ class UwpExportController extends Controller
 
         return $pdf->download('UWP_Revenue_Collection_Unit_Jan-Jun_2026.pdf');
     }
-    
+
     public function preview(){
         $uwp = [
             'office' => 'Revenue Collection Unit',

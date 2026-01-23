@@ -1,10 +1,11 @@
-<x-layouts.employee>
-        <!-- 1. Welcome & Status -->
+@extends('layouts.employee')
+
+@section('main-content')        <!-- 1. Welcome & Status -->
         <div class="mb-8 p-6 rounded-xl bg-gradient-to-r from-gray-900 to-gray-800 border border-gray-700 shadow-lg">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">Welcome, Juan Dela Cruz</h2>
-                    <p class="text-gray-300">Administrative Assistant I - Provincial HRMO</p>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">Welcome, Ramon Reyes</h2>
+                    <p class="text-gray-300">Records Management Officer - Revenue Collection Unit</p>
                 </div>
                 <div class="flex items-center gap-3">
                     <span class="px-4 py-2 rounded-full bg-gradient-to-r from-green-900/30 to-green-800/30 border border-green-700/50 text-green-300 text-sm font-medium flex items-center gap-2">
@@ -61,7 +62,7 @@
                     <i class="fas fa-clipboard-list text-purple-400"></i>
                     Task Status Overview
                 </h3>
-                
+
                 <div class="space-y-4">
                     <!-- Task 1 -->
                     <div class="flex items-center justify-between p-4 rounded-lg bg-gray-800/50 border border-gray-700">
@@ -119,7 +120,7 @@
                     <i class="fas fa-bell text-red-400"></i>
                     Alerts & Reminders
                 </h3>
-                
+
                 <div class="space-y-4">
                     <!-- Alert 1 -->
                     <div class="p-4 rounded-lg bg-gradient-to-r from-amber-900/20 to-amber-800/10 border border-amber-800/30">
@@ -258,7 +259,7 @@
                 <i class="fas fa-bolt text-yellow-400"></i>
                 Quick Actions
             </h3>
-            
+
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <a href="#" class="p-4 rounded-lg bg-gradient-to-r from-blue-900/20 to-blue-800/10 border border-blue-700/30 hover:border-blue-500/50 transition-all duration-300 group">
                     <div class="flex items-center gap-3">
@@ -316,7 +317,7 @@
                 <i class="fas fa-history text-gray-400"></i>
                 Recent Activity
             </h3>
-            
+
             <div class="space-y-3">
                 <div class="flex items-center gap-3 p-3 rounded-lg bg-gray-800/30">
                     <div class="w-8 h-8 rounded-full bg-green-900/20 flex items-center justify-center">
@@ -349,4 +350,4 @@
                 </div>
             </div>
         </div>
-</x-layouts.employee>
+@endsection

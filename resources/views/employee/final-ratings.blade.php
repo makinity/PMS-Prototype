@@ -1,4 +1,6 @@
-<x-layouts.employee>
+@extends('layouts.employee')
+
+@section('main-content')
     <section class="space-y-6">
 
         <!-- HEADER -->
@@ -81,4 +83,4 @@
         </div>
 
     </section>
-</x-layouts.employee>
+@endsection

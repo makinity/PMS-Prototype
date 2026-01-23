@@ -1,4 +1,6 @@
-<x-layouts.employee>
+@extends('layouts.employee')
+
+@section('main-content')
     <section class="space-y-6">
 
         {{-- Header --}}
@@ -29,8 +31,8 @@
                 <div class="lg:col-span-1 flex flex-col items-center">
                     <div class="relative mb-4">
                         {{-- DUMMY_DATA: replace with dynamic value --}}
-                        <img class="w-32 h-32 rounded-full border-4 border-gray-700 object-cover" 
-                             src="https://ui-avatars.com/api/-name=Juan+Dela+Cruz&background=1e40af&color=fff&size=128" 
+                        <img class="w-32 h-32 rounded-full border-4 border-gray-700 object-cover"
+                             src="https://ui-avatars.com/api/-name=Juan+Dela+Cruz&background=1e40af&color=fff&size=128"
                              alt="Profile picture">
                         <button class="absolute bottom-2 right-2 p-2 bg-blue-600 hover:bg-blue-700 rounded-full text-white transition-colors duration-200">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -49,7 +51,7 @@
                         <div>
                             <label class="block mb-2 text-sm font-medium text-white">Full Name</label>
                             {{-- DUMMY_DATA: replace with dynamic value --}}
-                            <input type="text" 
+                            <input type="text"
                                    class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
                                    value="Juan Dela Cruz" disabled>
                             <p class="mt-1 text-xs text-gray-400">Name updates require HR approval</p>
@@ -59,7 +61,7 @@
                             <label class="block mb-2 text-sm font-medium text-white">Email Address</label>
                             <div class="flex items-center">
                                 {{-- DUMMY_DATA: replace with dynamic value --}}
-                                <input type="email" 
+                                <input type="email"
                                        class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                        value="juan.delacruz@email.com">
                                 {{-- DUMMY_DATA: replace with dynamic value --}}
@@ -73,7 +75,7 @@
                         <div>
                             <label class="block mb-2 text-sm font-medium text-white">Position</label>
                             {{-- DUMMY_DATA: replace with dynamic value --}}
-                            <input type="text" 
+                            <input type="text"
                                    class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
                                    value="Administrative Assistant I" disabled>
                             <p class="mt-1 text-xs text-gray-400">Updated by HR</p>
@@ -82,7 +84,7 @@
                         <div>
                             <label class="block mb-2 text-sm font-medium text-white">Employee ID</label>
                             {{-- DUMMY_DATA: replace with dynamic value --}}
-                            <input type="text" 
+                            <input type="text"
                                    class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
                                   value="EMP-2023-04567" disabled>
                         </div>
@@ -90,7 +92,7 @@
                         <div>
                             <label class="block mb-2 text-sm font-medium text-white">Department</label>
                             {{-- DUMMY_DATA: replace with dynamic value --}}
-                            <input type="text" 
+                            <input type="text"
                                    class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
                                    value="Provincial Human Resource Management Office" disabled>
                         </div>
@@ -98,7 +100,7 @@
                         <div>
                             <label class="block mb-2 text-sm font-medium text-white">Phone Number</label>
                             {{-- DUMMY_DATA: replace with dynamic value --}}
-                            <input type="tel" 
+                            <input type="tel"
                                    class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                    placeholder="+63 912 345 6789">
                         </div>
@@ -132,12 +134,12 @@
             {{-- Password Change --}}
             <div class="bg-gray-750 border border-gray-600 rounded-lg p-5">
                 <h3 class="font-medium text-white mb-4">Change Password</h3>
-                
+
                 <div class="space-y-4">
                     <div>
                         <label class="block mb-2 text-sm font-medium text-white">Current Password</label>
                         <div class="relative">
-                            <input type="password" 
+                            <input type="password"
                                    class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                    placeholder="Enter current password">
                             <button class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-300">
@@ -152,7 +154,7 @@
                     <div>
                         <label class="block mb-2 text-sm font-medium text-white">New Password</label>
                         <div class="relative">
-                            <input type="password" 
+                            <input type="password"
                                    class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                    placeholder="Enter new password">
                             <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
@@ -168,7 +170,7 @@
 
                     <div>
                         <label class="block mb-2 text-sm font-medium text-white">Confirm New Password</label>
-                        <input type="password" 
+                        <input type="password"
                                class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                placeholder="Confirm new password">
                     </div>
@@ -471,4 +473,4 @@
     });
     </script>
     @endpush
-</x-layouts.employee>
+@endsection

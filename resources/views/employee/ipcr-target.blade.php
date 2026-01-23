@@ -1,4 +1,6 @@
-<x-layouts.employee>
+@extends('layouts.employee')
+
+@section('main-content')
     <div class="space-y-6">
 
         <!-- PAGE HEADER -->
@@ -440,4 +442,4 @@
     });
     </script>
     @endpush
-</x-layouts.employee>
+@endsection

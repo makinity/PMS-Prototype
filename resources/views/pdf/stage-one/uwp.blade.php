@@ -3,7 +3,6 @@
 <head>
     <meta charset="utf-8">
     <title>Unit Work Plan (Annex B)</title>
-
     <style>
         @page {
             size: A4 landscape;
@@ -13,18 +12,21 @@
         body {
             font-family: DejaVu Sans, sans-serif;
             font-size: 11px;
+            margin: 0;
+            padding: 0;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 12px;
+            table-layout: fixed;
         }
 
         th, td {
             border: 1px solid #000;
-            padding: 4px;
-            vertical-align: middle;
+            padding: 6px;
+            vertical-align: top;
         }
 
         th {
@@ -38,14 +40,58 @@
             margin-bottom: 14px;
         }
 
+        .meta {
+            margin-bottom: 10px;
+            width: 100%;
+        }
+
         .meta td {
             border: none;
             padding: 3px;
             font-size: 11px;
+            vertical-align: top;
+        }
+
+        .section {
+            font-weight: bold;
+            text-align: left;
+            background: #e6e6e6;
+            padding: 6px;
+        }
+
+        ul {
+            margin: 0;
+            padding-left: 16px;
         }
 
         .center {
             text-align: center;
+        }
+
+        .standards-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: -6px;
+        }
+
+        .standards-table th,
+        .standards-table td {
+            border: 1px solid #000;
+            text-align: center;
+            padding: 4px;
+            height: 24px;
+        }
+
+        .standards-table th {
+            background: #f2f2f2;
+        }
+
+        .standards-table tr:first-child th {
+            border-bottom: 1px solid #000;
+        }
+
+        .standards-table td {
+            border-top: none;
         }
     </style>
 </head>
@@ -58,8 +104,8 @@
 
 <table class="meta">
     <tr>
-        <td><strong>Office / Unit:</strong> {{ $uwp['office'] }}</td>
-        <td><strong>Supervisor:</strong> {{ $uwp['supervisor'] }}</td>
+        <td width="50%"><strong>Office / Unit:</strong> {{ $uwp['office'] }}</td>
+        <td width="50%"><strong>Supervisor:</strong> {{ $uwp['supervisor'] }}</td>
     </tr>
     <tr>
         <td><strong>Department Head:</strong> {{ $uwp['dept_head'] }}</td>
@@ -70,99 +116,94 @@
 <table>
     <thead>
         <tr>
-            <th rowspan="2" style="width:14%;">PPA / MFO</th>
-            <th rowspan="2" style="width:18%;">Success Indicators</th>
-            <th rowspan="2" style="width:7%;">Allotted Budget</th>
-            <th rowspan="2" style="width:10%;">Division / Individual Accountable</th>
-            <th rowspan="2" style="width:12%;">6 Months Summary of Accomplishment</th>
-            <th colspan="4" style="width:8%;">Rating</th>
-            <th colspan="5" style="width:10%;">Numerical Rating</th>
-            <th rowspan="2" style="width:10%;">Remarks</th>
-            <th rowspan="2" style="width:11%;">Standards per Success Indicator</th>
-        </tr>
-        <tr>
-            <th style="width:2%;">Q</th>
-            <th style="width:2%;">E</th>
-            <th style="width:2%;">T</th>
-            <th style="width:2%;">A</th>
-            <th style="width:2%;">5</th>
-            <th style="width:2%;">4</th>
-            <th style="width:2%;">3</th>
-            <th style="width:2%;">2</th>
-            <th style="width:2%;">1</th>
+            <th style="width:20%;">PPA / MFO</th>
+            <th style="width:40%;">Success Indicators</th>
+            <th style="width:15%;">Allotted Budget</th>
+            <th style="width:25%;">
+                <table class="standards-table">
+                    <tr>
+                        <th colspan="5">Standards per Success Indicator</th>
+                    </tr>
+                    <tr>
+                        <th style="width:20%;">5</th>
+                        <th style="width:20%;">4</th>
+                        <th style="width:20%;">3</th>
+                        <th style="width:20%;">2</th>
+                        <th style="width:20%;">1</th>
+                    </tr>
+                </table>
+            </th>
         </tr>
     </thead>
-
     <tbody>
-
-    <!-- CORE FUNCTIONS HEADER -->
-    <tr>
-        <td colspan="16" style="font-weight:bold; text-align:left;">
-            A. CORE FUNCTIONS (80%)
-        </td>
-    </tr>
-
-    @foreach ($uwp['outputs'] as $row)
-        @if(str_contains($row['function'], 'Core'))
+        <!-- CORE FUNCTIONS -->
         <tr>
-            <td>{{ $row['mfo'] }}</td>
-            <td>
-                <ul style="margin:0; padding-left:14px;">
-                    @foreach ($row['success_indicators'] as $indicator)
-                        <li>{{ $indicator }}</li>
-                    @endforeach
-                </ul>
-            </td>
-            <td class="center">{{ $row['budget'] ?? '' }}</td>
-            <td class="center">{{ $row['accountable'] ?? '' }}</td>
-
-            <!-- Stage 1: intentionally blank -->
-            <td></td>
-
-            <td></td><td></td><td></td><td></td>
-            <td></td><td></td><td></td><td></td><td></td>
-
-            <td></td>
-            <td>{{ $row['standard'] ?? '' }}</td>
+            <td colspan="4" class="section">A. CORE FUNCTIONS (80%)</td>
         </tr>
-        @endif
-    @endforeach
 
-    <!-- SUPPORT FUNCTIONS HEADER -->
-    <tr>
-        <td colspan="16" style="font-weight:bold; text-align:left;">
-            C. SUPPORT FUNCTIONS (20%)
-        </td>
-    </tr>
+        @foreach ($uwp['outputs'] as $row)
+            @if(str_contains($row['function'], 'Core'))
+                @php
+                    $indicatorCount = count($row['success_indicators']);
+                @endphp
 
-    @foreach ($uwp['outputs'] as $row)
-        @if(str_contains($row['function'], 'Support'))
+                @foreach ($row['success_indicators'] as $index => $indicator)
+                <tr>
+                    @if ($index === 0)
+                        <td rowspan="{{ $indicatorCount }}" style="vertical-align:top;">{{ $row['mfo'] }}</td>
+                    @endif
+                    <td>{{ $indicator }}</td>
+                    <td></td>
+                    <td>
+                        <table class="standards-table">
+                            <tr>
+                                <td style="width:20%;"></td>
+                                <td style="width:20%;"></td>
+                                <td style="width:20%;"></td>
+                                <td style="width:20%;"></td>
+                                <td style="width:20%;"></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                @endforeach
+            @endif
+        @endforeach
+
+        <!-- SUPPORT FUNCTIONS -->
         <tr>
-            <td>{{ $row['mfo'] }}</td>
-            <td>
-                <ul style="margin:0; padding-left:14px;">
-                    @foreach ($row['success_indicators'] as $indicator)
-                        <li>{{ $indicator }}</li>
-                    @endforeach
-                </ul>
-            </td>
-            <td class="center">{{ $row['budget'] ?? '' }}</td>
-            <td class="center">{{ $row['accountable'] ?? '' }}</td>
-
-            <!-- Stage 1: intentionally blank -->
-            <td></td>
-
-            <td></td><td></td><td></td><td></td>
-            <td></td><td></td><td></td><td></td><td></td>
-
-            <td></td>
-            <td>{{ $row['standard'] ?? '' }}</td>
+            <td colspan="4" class="section">B. SUPPORT FUNCTIONS (20%)</td>
         </tr>
-        @endif
-    @endforeach
 
-</tbody>
+        @foreach ($uwp['outputs'] as $row)
+            @if(str_contains($row['function'], 'Support'))
+                @php
+                    $indicatorCount = count($row['success_indicators']);
+                @endphp
 
+                @foreach ($row['success_indicators'] as $index => $indicator)
+                <tr>
+                    @if ($index === 0)
+                        <td rowspan="{{ $indicatorCount }}" style="vertical-align:top;">{{ $row['mfo'] }}</td>
+                    @endif
+                    <td>{{ $indicator }}</td>
+                    <td></td>
+                    <td>
+                        <table class="standards-table">
+                            <tr>
+                                <td style="width:20%;"></td>
+                                <td style="width:20%;"></td>
+                                <td style="width:20%;"></td>
+                                <td style="width:20%;"></td>
+                                <td style="width:20%;"></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                @endforeach
+            @endif
+        @endforeach
+    </tbody>
 </table>
 
 <br><br>

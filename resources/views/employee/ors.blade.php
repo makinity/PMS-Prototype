@@ -1,4 +1,6 @@
-<x-layouts.employee>
+@extends('layouts.employee')
+
+@section('main-content')
 
     <style>
         #ors-calendar .fc-col-header-cell {
@@ -1070,4 +1072,4 @@
     </script>
     @endpush
 
-</x-layouts.employee>
+@endsection
