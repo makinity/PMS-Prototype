@@ -1,4 +1,6 @@
-<x-layouts.pmt>
+@extends('layouts.pmt')
+
+@section('main-section')
     <section class="space-y-6">
 
         <!-- HEADER -->
@@ -136,4 +138,4 @@
             });
         </script>
     @endpush
-</x-layouts.pmt>
+@endsection

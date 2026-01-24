@@ -1,4 +1,6 @@
-<x-layouts.pmt>
+@extends('layouts.pmt')
+
+@section('main-content')
     <section class="space-y-6">
         <div class="flex flex-wrap items-center justify-between gap-4">
             <div>
@@ -95,4 +97,4 @@
             <p class="mt-3 text-xs text-slate-500">Reports inherit data from approved OPCRs and ORS logs. Manual overrides remain disabled to keep audit trails clean.</p>
         </div>
     </section>
-</x-layouts.pmt>
+@endsection

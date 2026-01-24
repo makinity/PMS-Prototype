@@ -1,4 +1,6 @@
-<x-layouts.pmt>
+@extends('layouts.pmt')
+
+@section('main-content')
     {{-- Page Header --}}
     <div class="mb-6">
         <h1>Unit Work Plan Approval</h1>
@@ -440,4 +442,4 @@
             })();
         </script>
     @endpush
-</x-layouts.pmt>
+@endsection

@@ -1,4 +1,6 @@
-<x-layouts.pmt>
+@extends('layouts.pmt')
+
+@section('main-content')
     <section class="space-y-6">
         <div class="flex flex-wrap items-center justify-between gap-4">
             <div>
@@ -57,4 +59,4 @@
             </div>
         </div>
     </section>
-</x-layouts.pmt>
+@endsection
