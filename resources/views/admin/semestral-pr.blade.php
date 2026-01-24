@@ -1,4 +1,6 @@
-<x-layouts.admin>
+@extends('layouts.admin')
+
+@section('main-content')
     <section class="space-y-6 admin-page">
         <div class="flex flex-wrap items-center justify-between gap-4">
             <div>
@@ -134,4 +136,4 @@
             </div>
         </div>
     </section>
-</x-layouts.admin>
+@endsection

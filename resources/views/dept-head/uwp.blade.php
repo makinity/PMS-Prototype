@@ -1,5 +1,6 @@
-<x-layouts.dept-head>
+@extends('layouts.dept-head')
     {{-- Page Header --}}
+    @section('main-content')
     <div class="mb-6">
         <h1 class="text-2xl font-semibold text-slate-100">Unit Work Plan Review</h1>
         <p class="text-sm text-slate-400 mt-1">
@@ -666,5 +667,4 @@
             })();
         </script>
     @endpush
-
-</x-layouts.dept-head>
+    @endsection

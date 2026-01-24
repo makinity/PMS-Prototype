@@ -1,4 +1,6 @@
-<x-layouts.dept-head>
+@extends('layouts.dept-head')
+
+@section('main-content')
     <section class="space-y-8">
 
     <!-- Page Header -->
@@ -165,6 +167,7 @@
 
 </section>
 
+@push('script')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Check if Chart is available
@@ -400,4 +403,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-</x-layouts.dept-head>
+@endpush
+@endsection

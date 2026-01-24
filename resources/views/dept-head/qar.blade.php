@@ -1,4 +1,6 @@
-<x-layouts.dept-head>
+@extends('layouts.dept-head')
+
+@section('main-content')
     <section class="space-y-6">
 
         <div class="flex items-start justify-between gap-3">
@@ -281,4 +283,4 @@
             });
         </script>
     @endpush
-</x-layouts.dept-head>
+@endsection

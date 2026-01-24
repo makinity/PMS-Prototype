@@ -1,4 +1,6 @@
-<x-layouts.admin>
+@extends('layouts.admin')
+
+@section('main-content')
     <section class="space-y-6 admin-page">
 
         <!-- HEADER -->
@@ -80,4 +82,4 @@
         </p>
 
     </section>
-</x-layouts.admin>
+@endsection

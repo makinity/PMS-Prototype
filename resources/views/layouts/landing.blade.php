@@ -59,7 +59,7 @@
 </head>
 <body class="antialiased">
     <main>
-        {{ $slot }}
+        @yield('main-content')
     </main>
 </body>
 </html>

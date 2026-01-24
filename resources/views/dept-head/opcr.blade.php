@@ -1,4 +1,6 @@
-<x-layouts.dept-head>
+@extends('layouts.dept-head')
+
+@section('main-content')
     <section class="space-y-6">
 
         <!-- PAGE HEADER -->
@@ -335,5 +337,4 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 @endpush
-
-</x-layouts.dept-head>
+@endsection

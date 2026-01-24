@@ -1,4 +1,6 @@
-<x-layouts.admin>
+@extends('layouts.admin')
+
+@section('main-content')
     <section class="space-y-6 admin-page">
         <div>
             <h1 class="text-2xl font-semibold text-white">Profile &amp; Security</h1>
@@ -296,4 +298,4 @@
     });
     </script>
     @endpush
-</x-layouts.admin>
+@endsection

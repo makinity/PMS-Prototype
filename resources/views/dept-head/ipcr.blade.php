@@ -1,4 +1,6 @@
-<x-layouts.dept-head>
+@extends('layouts.dept-head')
+
+@section('main-content')
     <div class="space-y-6">
         <div class="flex justify-between items-start">
             <div>
@@ -400,4 +402,4 @@
     });
     </script>
     @endpush
-</x-layouts.dept-head>
+@endsection

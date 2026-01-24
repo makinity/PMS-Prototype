@@ -373,7 +373,7 @@
         <div class="pt-2 sm:ml-72">
             <main id="main-content" class="px-4 pb-12 pt-6 lg:px-8">
                 <div class="mx-auto max-w-7xl">
-                    {{ $slot }}
+                    @yield('main-content')
                 </div>
             </main>
         </div>

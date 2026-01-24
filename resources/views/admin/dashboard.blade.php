@@ -1,4 +1,6 @@
-<x-layouts.admin>
+@extends('layouts.admin')
+
+@section('main-content')
     <section class="space-y-8 admin-page">
 
         <!-- Page Header -->
@@ -345,4 +347,4 @@
         });
     </script>
     @endpush
-</x-layouts.admin>
+@endsection

@@ -1,4 +1,6 @@
-<x-layouts.dept-head>
+@extends('layouts.dept-head')
+
+@section('main-content')
     <section class="space-y-6">
 
         {{-- Header --}}
@@ -471,4 +473,4 @@
     });
     </script>
     @endpush
-</x-layouts.dept-head>
+@endsection

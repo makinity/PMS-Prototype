@@ -1,4 +1,6 @@
-<x-layouts.dept-head>
+@extends('layouts.dept-head')
+
+@section('main-content')
     <section class="space-y-6">
         <div class="flex flex-col gap-1">
             <h1 class="text-2xl font-bold text-white">Individual Development Plan (IDP)</h1>
@@ -13,4 +15,4 @@
             </div>
         @endif
     </section>
-</x-layouts.dept-head>
+@endsection
