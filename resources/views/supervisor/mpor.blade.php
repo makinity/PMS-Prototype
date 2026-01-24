@@ -1,4 +1,6 @@
-<x-layouts.supervisor>
+@extends('layouts.supervisor')
+
+@section('main-content')
     @php
         $isValidationPhase = false;
         $modeTitle = 'Stage II - Monthly Performance Monitoring (MPOR Review)';
@@ -305,5 +307,5 @@
             });
         </script>
     @endpush
-</x-layouts.supervisor>
+@endsection
 

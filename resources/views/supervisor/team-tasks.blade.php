@@ -1,4 +1,6 @@
-<x-layouts.supervisor>
+@extends('layouts.supervisor')
+
+@section('main-content')
     <div class="mb-8 p-6 rounded-xl bg-gradient-to-r from-gray-900 to-gray-800 border border-gray-700 shadow-lg">
         <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
@@ -117,4 +119,4 @@
             </div>
         </div>
     </div>
-</x-layouts.supervisor>
+@endsection

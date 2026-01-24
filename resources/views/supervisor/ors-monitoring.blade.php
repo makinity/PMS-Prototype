@@ -1,4 +1,6 @@
-<x-layouts.supervisor>
+@extends('layouts.supervisor')
+
+@section('main-content')
     <style>
         #ors-calendar .fc-col-header-cell {
             background-color: rgba(15, 23, 42, 0.85);
@@ -353,4 +355,4 @@
             });
         </script>
     @endpush
-</x-layouts.supervisor>
+@endsection

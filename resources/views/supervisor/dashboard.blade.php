@@ -1,4 +1,6 @@
-<x-layouts.supervisor>
+@extends('layouts.supervisor')
+
+@section('main-content')
 
     <!-- 1. Welcome & Role Context -->
     <div class="mb-8 p-6 rounded-xl bg-gradient-to-r from-gray-900 to-gray-800 border border-gray-700 shadow-lg">
@@ -182,4 +184,4 @@
     </script>
     @endpush
 
-</x-layouts.supervisor>
+@endsection

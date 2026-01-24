@@ -1,4 +1,6 @@
-<x-layouts.supervisor>
+@extends('layouts.supervisor')
+
+@section('main-content')
     <div class="mb-8 p-6 rounded-xl bg-gradient-to-r from-gray-900 to-gray-800 border border-gray-700 shadow-lg">
         <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
@@ -101,4 +103,4 @@
             <p>Use this log to brief decision-makers. Supervisors do not reroute work; capture and communicate blockers promptly.</p>
         </div>
     </div>
-</x-layouts.supervisor>
+@endsection

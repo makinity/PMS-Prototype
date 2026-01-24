@@ -1,9 +1,9 @@
-<x-layouts.supervisor>
+@extends('layouts.supervisor')
     @php
         $status = $status ?? 'Draft';
         $isDraft = $status === 'Draft';
     @endphp
-
+@section('main-content')
     <section class="space-y-6">
         <div>
             <a href="{{ route('supervisor.uwp-page') }}"
@@ -656,4 +656,4 @@
             });
         </script>
     @endpush
-</x-layouts.supervisor>
+@endsection

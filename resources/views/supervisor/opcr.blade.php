@@ -1,4 +1,6 @@
-<x-layouts.supervisor>
+@extends('layouts.supervisor')
+
+@section('main-content')
     <section class="space-y-6">
         <div class="flex flex-wrap items-start justify-between gap-4">
             <div>
@@ -185,4 +187,4 @@
             <p class="text-sm text-slate-300">This OPCR is derived from approved IPCRs and is read-only for supervisors.</p>
         </div>
     </section>
-</x-layouts.supervisor>
+@endsection

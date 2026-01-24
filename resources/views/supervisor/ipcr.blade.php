@@ -1,4 +1,6 @@
-<x-layouts.supervisor>
+@extends('layouts.supervisor')
+
+@section('main-content')
     <div class="space-y-6">
 
         {{-- PAGE HEADER --}}
@@ -650,4 +652,4 @@
             });
         </script>
     @endpush
-</x-layouts.supervisor>
+@endsection
