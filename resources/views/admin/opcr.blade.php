@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('main-contet')
+@section('main-content')
     <section class="space-y-6 admin-page">
 
         <!-- HEADER -->
