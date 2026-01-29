@@ -21,8 +21,31 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
     use Exportable;
 
     private const RATINGS = [5, 4, 3, 2, 1];
+    private const BASE_ROW_HEIGHT = 22;      // minimum readable row height
+    private const LINE_HEIGHT = 14;          // per wrapped text line
+    private const CHARS_PER_LINE = 45;       // tuned for your column widths
 
-    // IPCR Standards columns
+
+    private function estimateRowHeight(string ...$cells): float
+    {
+        $maxLines = 1;
+
+        foreach ($cells as $text) {
+            $text = trim((string) $text);
+            if ($text === '') {
+                continue;
+            }
+
+            // count manual line breaks + wrapped lines
+            $lines = substr_count($text, "\n") + 1;
+            $wrapped = (int) ceil(mb_strlen($text) / self::CHARS_PER_LINE);
+
+            $maxLines = max($maxLines, $lines, $wrapped);
+        }
+
+        return self::BASE_ROW_HEIGHT + ($maxLines - 1) * self::LINE_HEIGHT;
+    }
+
     private const STANDARDS_COLUMNS = [
         5 => 'J',
         4 => 'K',
@@ -31,7 +54,6 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
         1 => 'N',
     ];
 
-    // Based on Annex D / sample
     private const TABLE_HEADER_ROW = 15;
     private const TABLE_SUBHEADER_ROW = 16;
     private const TABLE_START_ROW = 18;
@@ -59,16 +81,18 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
 
     public function columnWidths(): array
     {
-        // Matches Annex D_ IPCR Form.xlsx closely (A–N)
         return [
             'A' => 18.33,
             'B' => 37.89,
             'C' => 8.33,
             'D' => 9.11,
-            'E' => 5.33,
-            'F' => 13.0,
-            'G' => 13.0,
-            'H' => 13.0,
+
+            // Rating columns (Q/E/T/A) -> consistent width
+            'E' => 9.0,
+            'F' => 9.0,
+            'G' => 9.0,
+            'H' => 9.0,
+
             'I' => 9.0,
             'J' => 13.44,
             'K' => 13.0,
@@ -101,25 +125,28 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
 
         $currentRow = self::TABLE_START_ROW;
 
-        // A. CORE (80%)
         $currentRow = $this->writeSection($sheet, 'core', 'A. CORE FUNCTIONS (80%)', $currentRow);
-
-        // B. SUPPORT (20%)
         $currentRow = $this->writeSection($sheet, 'support', 'B. SUPPORT FUNCTIONS (20%)', $currentRow);
 
         $lastRow = max($currentRow - 1, self::TABLE_SUBHEADER_ROW);
 
-        // Alignment/wrap
+
         $sheet->getStyle("A" . self::TABLE_HEADER_ROW . ":N{$lastRow}")
             ->getAlignment()
             ->setVertical(Alignment::VERTICAL_TOP)
             ->setWrapText(true);
 
-        // Borders for table area
-        $sheet->getStyle("A" . self::TABLE_HEADER_ROW . ":N{$lastRow}")
+
+        $this->applyVerticalBordersOnly($sheet, self::TABLE_HEADER_ROW, $lastRow);
+
+        // Keep header block boxed
+        $sheet->getStyle("A" . self::TABLE_HEADER_ROW . ":N" . self::TABLE_SUBHEADER_ROW)
             ->getBorders()
             ->getAllBorders()
             ->setBorderStyle(Border::BORDER_THIN);
+
+        // Ensure section rows have bottom border (green line feel)
+        $this->applySectionRowBorders($sheet, self::TABLE_START_ROW, $lastRow);
     }
 
     private function setupPage(Worksheet $sheet): void
@@ -132,18 +159,15 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
 
     private function writeManualHeader(Worksheet $sheet): void
     {
-        // Title
         $sheet->mergeCells('A1:N1');
         $sheet->setCellValue('A1', 'INDIVIDUAL PERFORMANCE COMMITMENT AND REVIEW (IPCR)');
 
-        // Commitment statement (locked demo)
         $sheet->mergeCells('A3:N3');
         $sheet->setCellValue(
             'A3',
             'I RAMON REYES, of REVENUE COLLECTION UNIT section of REVENUE COLLECTION UNIT, commit to deliver and agree to be rated on the attainment of the following targets in accordance with the indicated measures for the period JANUARY – JUNE 2026.'
         );
 
-        // Reviewer / approver block (header area)
         $sheet->mergeCells('A10:C10');
         $sheet->setCellValue('A10', 'Reviewed by:');
 
@@ -168,7 +192,6 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
         $sheet->mergeCells('G13:L13');
         $sheet->setCellValue('G13', 'PGDH');
 
-        // Style header area
         $sheet->getStyle('A1:N1')->getFont()->setBold(true);
         $sheet->getStyle('A1:N1')->getAlignment()
             ->setHorizontal(Alignment::HORIZONTAL_CENTER)
@@ -182,15 +205,13 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
 
     private function writeTableHeader(Worksheet $sheet): void
     {
-        // Main headers (row 15)
         $sheet->setCellValue('A' . self::TABLE_HEADER_ROW, 'OUTPUT');
         $sheet->setCellValue('B' . self::TABLE_HEADER_ROW, "Success Indicators\n(Measure + Target)");
-        $sheet->setCellValue('C' . self::TABLE_HEADER_ROW, "6 Months Summary of Accomplishment");
+        $sheet->setCellValue('C' . self::TABLE_HEADER_ROW, "6 Months Summary\nof Accomplishment");
         $sheet->setCellValue('E' . self::TABLE_HEADER_ROW, 'Rating');
         $sheet->setCellValue('I' . self::TABLE_HEADER_ROW, 'Remarks');
         $sheet->setCellValue('J' . self::TABLE_HEADER_ROW, 'Standards per Success Indicator');
 
-        // Merges like Annex D
         $sheet->mergeCells('A' . self::TABLE_HEADER_ROW . ':A' . self::TABLE_SUBHEADER_ROW);
         $sheet->mergeCells('B' . self::TABLE_HEADER_ROW . ':B' . self::TABLE_SUBHEADER_ROW);
         $sheet->mergeCells('C' . self::TABLE_HEADER_ROW . ':D' . self::TABLE_SUBHEADER_ROW);
@@ -198,24 +219,22 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
         $sheet->mergeCells('I' . self::TABLE_HEADER_ROW . ':I' . self::TABLE_SUBHEADER_ROW);
         $sheet->mergeCells('J' . self::TABLE_HEADER_ROW . ':N' . self::TABLE_HEADER_ROW);
 
-        // Subheaders (row 16)
         $subHeaders = [
             'E' => 'Q',
             'F' => 'E',
             'G' => 'T',
             'H' => 'A',
-            'J' => '5.0',
-            'K' => '4.0',
-            'L' => '3.0',
-            'M' => '2.0',
-            'N' => '1.0',
+            'J' => '5',
+            'K' => '4',
+            'L' => '3',
+            'M' => '2',
+            'N' => '1',
         ];
 
         foreach ($subHeaders as $col => $text) {
             $sheet->setCellValue($col . self::TABLE_SUBHEADER_ROW, $text);
         }
 
-        // Style header rows
         $headerRange = "A" . self::TABLE_HEADER_ROW . ":N" . self::TABLE_SUBHEADER_ROW;
 
         $sheet->getStyle($headerRange)->getFont()->setBold(true);
@@ -248,6 +267,12 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
             ->setHorizontal(Alignment::HORIZONTAL_LEFT)
             ->setVertical(Alignment::VERTICAL_CENTER);
 
+        // Green-line feel (bottom border only)
+        $sheet->getStyle("A{$startRow}:N{$startRow}")
+            ->getBorders()
+            ->getBottom()
+            ->setBorderStyle(Border::BORDER_THIN);
+
         $row = $startRow + 1;
 
         return $this->writeIndicatorsFlat($sheet, $row, $this->ipcr[$type] ?? [], $this->standards);
@@ -261,47 +286,80 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
                 continue;
             }
 
+            $startRow = $row;
+            $indicatorCount = count($indicators);
+
             foreach ($indicators as $index => $indicator) {
-                // Output only on first indicator row
+                // OUTPUT (first row only, merged later)
                 $sheet->setCellValue("A{$row}", $index === 0 ? ($item['output'] ?? '') : '');
                 $sheet->setCellValue("B{$row}", $indicator);
 
-                // 6 Months Summary of Accomplishment (blank in Stage I export)
+                // 6 Months Summary (blank)
                 $sheet->setCellValue("C{$row}", '');
                 $sheet->setCellValue("D{$row}", '');
                 $sheet->mergeCells("C{$row}:D{$row}");
 
-                // Rating cells (blank; A is computed)
+                // Ratings
                 $sheet->setCellValue("E{$row}", '');
                 $sheet->setCellValue("F{$row}", '');
                 $sheet->setCellValue("G{$row}", '');
-                $sheet->setCellValue("H{$row}", "=IF(COUNT(E{$row}:G{$row})=0, \"\", AVERAGE(E{$row}:G{$row}))");
+                $sheet->setCellValue(
+                    "H{$row}",
+                    '=IF(COUNTA(E'.$row.':G'.$row.')=0,"",AVERAGE(E'.$row.':G'.$row.'))'
+                );
 
                 // Remarks
                 $sheet->setCellValue("I{$row}", '');
 
-                // Standards per indicator (J–N)
+                // Standards
+                $stdTexts = [];
                 foreach (self::RATINGS as $rating) {
                     $col = self::STANDARDS_COLUMNS[$rating];
-                    $sheet->setCellValue("{$col}{$row}", $this->formatStdBlock($standards, $indicator, $rating));
-                }
-
-                // Wrap heavy text columns
-                $sheet->getStyle("B{$row}")->getAlignment()->setWrapText(true);
-                foreach (self::STANDARDS_COLUMNS as $col) {
+                    $text = $this->formatStdBlock($standards, $indicator, $rating);
+                    $sheet->setCellValue("{$col}{$row}", $text);
                     $sheet->getStyle("{$col}{$row}")->getAlignment()->setWrapText(true);
+                    $stdTexts[] = $text;
                 }
 
-                // Center rating columns
-                $sheet->getStyle("E{$row}:H{$row}")->getAlignment()
+                // Wrapping / alignment
+                $sheet->getStyle("B{$row}")->getAlignment()->setWrapText(true);
+                $sheet->getStyle("E{$row}:H{$row}")
+                    ->getAlignment()
                     ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                // Vertical borders only
+                $this->applyRowVerticalBorders($sheet, $row);
+
+                // ✅ AUTO ROW HEIGHT (this is the key)
+                $sheet->getRowDimension($row)->setRowHeight(
+                    $this->estimateRowHeight($indicator, ...$stdTexts)
+                );
 
                 $row++;
             }
+
+            $endRow = $row - 1;
+
+            // Merge OUTPUT column
+            if ($endRow > $startRow) {
+                $sheet->mergeCells("A{$startRow}:A{$endRow}");
+                $sheet->getStyle("A{$startRow}:A{$endRow}")
+                    ->getAlignment()
+                    ->setHorizontal(Alignment::HORIZONTAL_LEFT)
+                    ->setVertical(Alignment::VERTICAL_TOP)
+                    ->setWrapText(true);
+            }
+
+            // Green boundary line (KEEP)
+            $sheet->getStyle("A{$endRow}:N{$endRow}")
+                ->getBorders()
+                ->getBottom()
+                ->setBorderStyle(Border::BORDER_THIN);
         }
 
         return $row;
     }
+
 
     private function formatStdBlock(array $standards, string $indicator, int $rating): string
     {
@@ -324,6 +382,44 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
         if (empty($values)) {
             return '—';
         }
+
         return implode('; ', array_map(fn ($v) => trim((string) $v), $values));
+    }
+
+
+    private function applyVerticalBordersOnly(Worksheet $sheet, int $fromRow, int $toRow): void
+    {
+        for ($r = $fromRow; $r <= $toRow; $r++) {
+            $this->applyRowVerticalBorders($sheet, $r);
+        }
+    }
+
+    private function applyRowVerticalBorders(Worksheet $sheet, int $row): void
+    {
+        // Apply left/right borders per cell (A..N), no top/bottom.
+        foreach (range('A', 'N') as $col) {
+            $sheet->getStyle("{$col}{$row}")
+                ->getBorders()
+                ->getLeft()
+                ->setBorderStyle(Border::BORDER_THIN);
+
+            $sheet->getStyle("{$col}{$row}")
+                ->getBorders()
+                ->getRight()
+                ->setBorderStyle(Border::BORDER_THIN);
+        }
+    }
+
+    private function applySectionRowBorders(Worksheet $sheet, int $fromRow, int $toRow): void
+    {
+        for ($r = $fromRow; $r <= $toRow; $r++) {
+            $value = trim((string) $sheet->getCell("A{$r}")->getValue());
+            if (in_array($value, ['A. CORE FUNCTIONS (80%)', 'B. SUPPORT FUNCTIONS (20%)'], true)) {
+                $sheet->getStyle("A{$r}:N{$r}")
+                    ->getBorders()
+                    ->getBottom()
+                    ->setBorderStyle(Border::BORDER_THIN);
+            }
+        }
     }
 }
