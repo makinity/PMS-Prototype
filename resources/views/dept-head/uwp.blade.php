@@ -8,100 +8,6 @@
         </p>
     </div>
 
-    {{-- View Endorsed UWP Modal --}}
-    {{-- <div id="view-uwp-modal" data-modal-container tabindex="-1" aria-hidden="true"
-         class="fixed inset-0 z-50 hidden flex items-center justify-center">
-        <div class="absolute inset-0 bg-slate-950/80 backdrop-blur" data-modal-hide="view-uwp-modal"></div>
-        <div class="relative z-10 w-full max-w-5xl px-4">
-            <div class="w-full overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl">
-                <div class="flex items-start justify-between gap-4 border-b border-slate-800 px-6 py-4">
-                    <div class="space-y-2">
-                        <p class="text-xs uppercase tracking-[0.2em] text-emerald-300">Endorsed UWP</p>
-                        <h3 class="text-lg font-semibold text-white">View UWP</h3>
-                        <div class="grid grid-cols-1 gap-3 text-sm text-slate-300 sm:grid-cols-2">
-                            <div>
-                                <p class="text-xs uppercase tracking-wide text-slate-500">Office / Unit</p>
-                                <p class="font-medium text-slate-100">Records Management Unit</p>
-                            </div>
-                            <div>
-                                <p class="text-xs uppercase tracking-wide text-slate-500">Supervisor</p>
-                                <p class="font-medium text-slate-100">Carlo D. Beray</p>
-                            </div>
-                            <div>
-                                <p class="text-xs uppercase tracking-wide text-slate-500">Performance Period</p>
-                                <p class="font-medium text-slate-100">January - June 2026</p>
-                            </div>
-                            <div>
-                                <p class="text-xs uppercase tracking-wide text-slate-500">UWP Type</p>
-                                <p class="font-medium text-slate-100">Unit-Level Plan</p>
-                            </div>
-                        </div>
-                        <span class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
-                            Endorsed by Dept Head
-                        </span>
-                    </div>
-                    <button type="button" data-modal-hide="view-uwp-modal"
-                            class="text-slate-400 transition hover:text-white">
-                        <i class="fa-solid fa-xmark text-lg"></i>
-                    </button>
-                </div>
-
-                <div class="px-6 py-5 space-y-5 max-h-[70vh] overflow-y-auto">
-                    <div class="rounded-xl border border-slate-800 bg-slate-900/70">
-                        <div class="border-b border-slate-800 px-4 py-3">
-                            <h4 class="text-sm font-medium text-slate-100">Planned Outputs</h4>
-                            <p class="text-xs text-slate-400 mt-1">Read-only. Endorsed UWPs are locked.</p>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full">
-                                <thead class="bg-slate-800/50">
-                                    <tr>
-                                        <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-400">Major Final Output</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-400">Expected Output</th>
-                                        <th class="px-4 py-3 text-center text-xs font-medium uppercase text-slate-400">Target</th>
-                                        <th class="px-4 py-3 text-center text-xs font-medium uppercase text-slate-400">Timeframe</th>
-                                        <th class="px-4 py-3 text-center text-xs font-medium uppercase text-slate-400">Function</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-800">
-                                    <tr class="hover:bg-slate-800/40 transition">
-                                        <td class="px-4 py-3 text-sm text-slate-100">Records Management</td>
-                                        <td class="px-4 py-3 text-sm text-slate-300">Process and file incoming documents</td>
-                                        <td class="px-4 py-3 text-sm text-center text-slate-100">1,200 documents</td>
-                                        <td class="px-4 py-3 text-sm text-center text-slate-300">Jan ƒ?\" Dec</td>
-                                        <td class="px-4 py-3 text-sm text-center">
-                                            <span class="px-2 py-1 rounded-md text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                                                Core
-                                            </span>
-                                        </td>
-                                    </tr>
-                                    <tr class="hover:bg-slate-800/40 transition">
-                                        <td class="px-4 py-3 text-sm text-slate-100">Client Support</td>
-                                        <td class="px-4 py-3 text-sm text-slate-300">Coordinate and resolve service tickets</td>
-                                        <td class="px-4 py-3 text-sm text-center text-slate-100">95% resolved on time</td>
-                                        <td class="px-4 py-3 text-sm text-center text-slate-300">Quarterly</td>
-                                        <td class="px-4 py-3 text-sm text-center">
-                                            <span class="px-2 py-1 rounded-md text-xs font-medium bg-blue-500/10 text-blue-300 border border-blue-400/30">
-                                                Support
-                                            </span>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex items-center justify-end gap-3 border-t border-slate-800 px-6 py-4">
-                    <button type="button" data-modal-hide="view-uwp-modal"
-                            class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-slate-800/80">
-                        Close
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div> --}}
-
     {{-- Filters / Meta (Optional but useful) --}}
     <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-5 mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
@@ -184,36 +90,6 @@
                             </a>
                         </td>
                     </tr>
-
-                    {{-- SAMPLE ROW: Endorsed --}}
-                    {{-- <tr class="hover:bg-slate-800/40 transition">
-                        <td class="px-4 py-3 text-sm text-slate-100 font-medium">
-                            Records Management Unit
-                        </td>
-                        <td class="px-4 py-3 text-sm text-slate-300">
-                            Carlo D. Beray
-                        </td>
-                        <td class="px-4 py-3 text-sm text-center text-slate-300">
-                            Unit-Level Plan
-                        </td>
-                        <td class="px-4 py-3 text-sm text-center">
-                            <span class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full
-                                bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
-                                Endorsed
-                            </span>
-                        </td>
-                        <td class="px-4 py-3 text-sm text-center">
-                            <a href="#uwp-unit-2"
-                               data-modal-target="view-uwp-modal"
-                               data-modal-toggle="view-uwp-modal"
-                               class="inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg
-                               border border-slate-700 text-slate-300 hover:bg-slate-800/60 transition">
-                                View
-                            </a>
-                        </td>
-                    </tr> --}}
-
-                    {{-- Add more rows here --}}
                 </tbody>
             </table>
         </div>
@@ -423,9 +299,11 @@
                         <div class="overflow-x-auto">
                             <table class="min-w-full">
                                 <thead class="bg-slate-800/50">
-                                    <tr>
+                                <tr>
                                     <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-400">PPA / MFO</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-400">Success Indicators</th>
+                                    <th class="px-4 py-3 text-center text-xs font-medium uppercase text-slate-400">Success Indicators</th>
+                                    <th class="px-4 py-3 text-center text-xs font-medium uppercase text-slate-400">Standards (Q/E/T)</th>
+                                    <th class="px-4 py-3 text-center text-xs font-medium uppercase text-slate-400">Assigned Employees</th>
                                     <th class="px-4 py-3 text-center text-xs font-medium uppercase text-slate-400">Timeline / Target</th>
                                     <th class="px-4 py-3 text-center text-xs font-medium uppercase text-slate-400">Function</th>
                                 </tr>
@@ -433,71 +311,143 @@
                             <tbody class="divide-y divide-slate-800">
                                 <tr class="hover:bg-slate-800/40 transition">
                                     <td class="px-4 py-3 text-sm text-slate-100">E-Bank Scanning and Encoding of Revenue Transactions</td>
-                                        <td class="px-4 py-3 text-sm text-slate-300">
-                                            <button type="button"
-                                                    class="inline-flex items-center gap-2 text-blue-300 hover:text-blue-200"
-                                                    data-uwp-view-indicators
-                                                    data-title="E-Bank Scanning and Encoding of Revenue Transactions"
-                                                    data-indicators='["All e-bank transactions scanned and encoded daily","Indexing complete with no missing pages","Audit trail maintained within 24 hours"]'>
-                                                <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12Z" />
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                                                </svg>
-                                                <span>(3)</span>
-                                            </button>
-                                        </td>
-                                        <td class="px-4 py-3 text-sm text-center text-slate-100">Daily; all e-bank transactions processed within the same working day</td>
-                                        <td class="px-4 py-3 text-sm text-center">
-                                            <span class="px-2 py-1 rounded-md text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                                                Core
-                                            </span>
-                                        </td>
-                                    </tr>
-                                    <tr class="hover:bg-slate-800/40 transition">
-                                        <td class="px-4 py-3 text-sm text-slate-100">Processing of over-the-counter revenue transactions</td>
-                                        <td class="px-4 py-3 text-sm text-slate-300">
-                                            <button type="button"
-                                                    class="inline-flex items-center gap-2 text-blue-300 hover:text-blue-200"
-                                                    data-uwp-view-indicators
-                                                    data-title="Processing of over-the-counter revenue transactions"
-                                                    data-indicators='["Same-day verification of OTC transactions","95% encoded within the business day","OR validation completed daily"]'>
-                                                <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12Z" />
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                                                </svg>
-                                                <span>(3)</span>
-                                            </button>
-                                        </td>
-                                        <td class="px-4 py-3 text-sm text-center text-slate-100">Daily; 95% processed within the same working day   </td>
-                                        <td class="px-4 py-3 text-sm text-center">
-                                            <span class="px-2 py-1 rounded-md text-xs font-medium bg-blue-500/10 text-blue-300 border border-blue-400/30">
-                                                Core
-                                            </span>
-                                        </td>
-                                    </tr>
-                                    <tr class="hover:bg-slate-800/40 transition">
-                                        <td class="px-4 py-3 text-sm text-slate-100">Maintenance of Revenue Records Filing System</td>
-                                        <td class="px-4 py-3 text-sm text-slate-300">
-                                            <button type="button"
-                                                    class="inline-flex items-center gap-2 text-blue-300 hover:text-blue-200"
-                                                    data-uwp-view-indicators
-                                                    data-title="Maintenance of Revenue Records Filing System"
-                                                    data-indicators='["Weekly filing updated and retrievable","Digital backups synced monthly","Retrieval logs maintained for audits"]'>
-                                                <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12Z" />
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                                                </svg>
-                                                <span>(3)</span>
-                                            </button>
-                                        </td>
-                                        <td class="px-4 py-3 text-sm text-center text-slate-100">Quarterly validation and update</td>
-                                        <td class="px-4 py-3 text-sm text-center">
-                                            <span class="px-2 py-1 rounded-md text-xs font-medium bg-blue-500/10 text-blue-300 border border-blue-400/30">
-                                                Support
-                                            </span>
-                                        </td>
-                                    </tr>
-                                </tbody>
+                                    <td class="px-4 py-3 text-sm text-slate-300">
+                                        <button type="button"
+                                                class="inline-flex items-center gap-2 text-blue-300 hover:text-blue-200"
+                                                data-uwp-view-indicators
+                                                data-title="E-Bank Scanning and Encoding of Revenue Transactions"
+                                                data-indicators='["All e-bank transactions scanned and encoded daily","Indexing complete with no missing pages","Audit trail maintained within 24 hours"]'>
+                                            <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12Z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                            </svg>
+                                            <span>(3)</span>
+                                        </button>
+                                    </td>
+                                    <td class="px-4 py-3 text-center">
+                                        <button type="button"
+                                                class="inline-flex items-center gap-1 text-blue-300 hover:text-blue-200"
+                                                data-uwp-view-standards
+                                                data-mfo-title="E-Bank Scanning and Encoding of Revenue Transactions">
+                                            <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12Z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                            </svg>
+                                            <span class="text-xs">View</span>
+                                        </button>
+                                    </td>
+                                    <td class="px-4 py-3 text-center">
+                                        <button type="button"
+                                                class="inline-flex items-center gap-1 text-blue-300 hover:text-blue-200"
+                                                data-uwp-view-assignees
+                                                data-unit="Revenue Collection Unit">
+                                            <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5c-4.5 0-8.25 3.75-8.25 8.25S7.5 21 12 21s8.25-3.75 8.25-8.25S16.5 4.5 12 4.5zm0 0v0" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8.25a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5z" />
+                                            </svg>
+                                            <span class="text-xs">View</span>
+                                        </button>
+                                    </td>
+                                    <td class="px-4 py-3 text-sm text-center text-slate-100">Daily; all e-bank transactions processed within the same working day</td>
+                                    <td class="px-4 py-3 text-sm text-center">
+                                        <span class="px-2 py-1 rounded-md text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                            Core
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-slate-800/40 transition">
+                                    <td class="px-4 py-3 text-sm text-slate-100">Processing of over-the-counter revenue transactions</td>
+                                    <td class="px-4 py-3 text-sm text-slate-300">
+                                        <button type="button"
+                                                class="inline-flex items-center gap-2 text-blue-300 hover:text-blue-200"
+                                                data-uwp-view-indicators
+                                                data-title="Processing of over-the-counter revenue transactions"
+                                                data-indicators='["Same-day verification of OTC transactions","95% encoded within the business day","OR validation completed daily"]'>
+                                            <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12Z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                            </svg>
+                                            <span>(3)</span>
+                                        </button>
+                                    </td>
+                                    <td class="px-4 py-3 text-center">
+                                        <button type="button"
+                                                class="inline-flex items-center gap-1 text-blue-300 hover:text-blue-200"
+                                                data-uwp-view-standards
+                                                data-mfo-title="Processing of over-the-counter revenue transactions">
+                                            <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12Z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                            </svg>
+                                            <span class="text-xs">View</span>
+                                        </button>
+                                    </td>
+                                    <td class="px-4 py-3 text-center">
+                                        <button type="button"
+                                                class="inline-flex items-center gap-1 text-blue-300 hover:text-blue-200"
+                                                data-uwp-view-assignees
+                                                data-unit="Revenue Collection Unit">
+                                            <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5c-4.5 0-8.25 3.75-8.25 8.25S7.5 21 12 21s8.25-3.75 8.25-8.25S16.5 4.5 12 4.5zm0 0v0" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8.25a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5z" />
+                                            </svg>
+                                            <span class="text-xs">View</span>
+                                        </button>
+                                    </td>
+                                    <td class="px-4 py-3 text-sm text-center text-slate-100">Daily; 95% processed within the same working day</td>
+                                    <td class="px-4 py-3 text-sm text-center">
+                                        <span class="px-2 py-1 rounded-md text-xs font-medium bg-blue-500/10 text-blue-300 border border-blue-400/30">
+                                            Core
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-slate-800/40 transition">
+                                    <td class="px-4 py-3 text-sm text-slate-100">Maintenance of Revenue Records Filing System</td>
+                                    <td class="px-4 py-3 text-sm text-slate-300">
+                                        <button type="button"
+                                                class="inline-flex items-center gap-2 text-blue-300 hover:text-blue-200"
+                                                data-uwp-view-indicators
+                                                data-title="Maintenance of Revenue Records Filing System"
+                                                data-indicators='["Weekly filing updated and retrievable","Digital backups synced monthly","Retrieval logs maintained for audits"]'>
+                                            <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12Z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                            </svg>
+                                            <span>(3)</span>
+                                        </button>
+                                    </td>
+                                    <td class="px-4 py-3 text-center">
+                                        <button type="button"
+                                                class="inline-flex items-center gap-1 text-blue-300 hover:text-blue-200"
+                                                data-uwp-view-standards
+                                                data-mfo-title="Maintenance of Revenue Records Filing System">
+                                            <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12Z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                            </svg>
+                                            <span class="text-xs">View</span>
+                                        </button>
+                                    </td>
+                                    <td class="px-4 py-3 text-center">
+                                        <button type="button"
+                                                class="inline-flex items-center gap-1 text-blue-300 hover:text-blue-200"
+                                                data-uwp-view-assignees
+                                                data-unit="Revenue Collection Unit">
+                                            <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5c-4.5 0-8.25 3.75-8.25 8.25S7.5 21 12 21s8.25-3.75 8.25-8.25S16.5 4.5 12 4.5zm0 0v0" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8.25a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5z" />
+                                            </svg>
+                                            <span class="text-xs">View</span>
+                                        </button>
+                                    </td>
+                                    <td class="px-4 py-3 text-sm text-center text-slate-100">Quarterly validation and update</td>
+                                    <td class="px-4 py-3 text-sm text-center">
+                                        <span class="px-2 py-1 rounded-md text-xs font-medium bg-blue-500/10 text-blue-300 border border-blue-400/30">
+                                            Support
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
                             </table>
                         </div>
                     </div>
@@ -568,8 +518,365 @@
         </div>
     </div>
 
+    <div id="uwp-standards-viewer-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 px-4 py-6">
+        <div class="w-full max-w-3xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
+            <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
+                <div>
+                    <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Target Difficulty / Standards</p>
+                    <h3 class="text-lg font-semibold text-white">Standards (Q/E/T)</h3>
+                    <p class="text-sm text-slate-400 mt-1">
+                        Indicator: <span id="uwp-standards-indicator-label" class="font-semibold text-slate-100">--</span>
+                    </p>
+                </div>
+                <button type="button" data-modal-hide="uwp-standards-viewer-modal" class="text-slate-400 hover:text-white">
+                    <span class="sr-only">Close</span>
+                    &times;
+                </button>
+            </div>
+
+            <div class="mt-4 space-y-4">
+                <label class="flex flex-col text-sm text-slate-300">
+                    <span class="text-xs uppercase tracking-wide text-slate-500">Select Indicator</span>
+                    <select id="uwp-standards-indicator-select"
+                            style="background:#0f172a;color:#e5e7eb;"
+                            class="mt-2 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none">
+                    </select>
+                </label>
+
+                <div class="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/40">
+                    <table class="w-full text-sm text-slate-100">
+                        <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.2em] text-slate-400">
+                            <tr>
+                                <th class="px-4 py-3 text-left">Rating</th>
+                                <th class="px-4 py-3 text-left">Quality (Q)</th>
+                                <th class="px-4 py-3 text-left">Efficiency (E)</th>
+                                <th class="px-4 py-3 text-left">Timeliness (T)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="uwp-standards-table-body" class="divide-y divide-slate-800"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="mt-4 flex justify-end border-t border-slate-800 pt-3">
+                <button data-modal-hide="uwp-standards-viewer-modal"
+                        class="rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="uwp-assignees-viewer-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 px-4 py-6">
+        <div class="w-full max-w-3xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
+            <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
+                <div>
+                    <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Assigned Employees</p>
+                    <h3 class="text-lg font-semibold text-white">Employees under the selected Office/Unit</h3>
+                    <p class="text-sm text-slate-400 mt-1">
+                        Office / Unit: <span id="uwp-assignees-unit-label" class="font-semibold text-slate-100">--</span>
+                    </p>
+                </div>
+                <button type="button" data-modal-hide="uwp-assignees-viewer-modal" class="text-slate-400 hover:text-white">
+                    <span class="sr-only">Close</span>
+                    &times;
+                </button>
+            </div>
+
+            <div class="mt-4 space-y-4">
+                <div class="grid gap-3 sm:grid-cols-2">
+                    <div>
+                        <input type="text"
+                               placeholder="Search employee…"
+                               class="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none"
+                               style="background:#0f172a;color:#e5e7eb;">
+                    </div>
+                    <div>
+                        <select
+                            class="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none"
+                            style="background:#0f172a;color:#e5e7eb;">
+                            <option>All Status</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/40">
+                    <table class="w-full text-sm text-slate-100">
+                        <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.2em] text-slate-400">
+                            <tr>
+                                <th class="px-4 py-3 text-left">Employee Name</th>
+                                <th class="px-4 py-3 text-left">Office / Unit</th>
+                                <th class="px-4 py-3 text-left">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800">
+                            <tr>
+                                <td class="px-4 py-3">Ramon Reyes</td>
+                                <td class="px-4 py-3">Revenue Collection Unit</td>
+                                <td class="px-4 py-3">
+                                    <span class="inline-flex rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300">
+                                        Assigned
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="mt-4 flex justify-end border-t border-slate-800 pt-3">
+                <button data-modal-hide="uwp-assignees-viewer-modal"
+                        class="rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
     @push('scripts')
         <script>
+            const standardRatings = [5, 4, 3, 2, 1];
+            const uwpIndicatorsByMfo = {
+                "E-Bank Scanning and Encoding of Revenue Transactions": [
+                    "All e-bank transactions scanned and encoded daily",
+                    "Indexing complete with no missing pages",
+                    "Audit trail maintained within 24 hours"
+                ],
+                "Processing of over-the-counter revenue transactions": [
+                    "Same-day verification of OTC transactions",
+                    "95% encoded within the business day",
+                    "OR validation completed daily"
+                ],
+                "Maintenance of Revenue Records Filing System": [
+                    "Weekly filing updated and retrievable",
+                    "Digital backups synced monthly",
+                    "Retrieval logs maintained for audits"
+                ]
+            };
+            const uwpStandardsByMfo = {
+                "E-Bank Scanning and Encoding of Revenue Transactions": {
+                    "All e-bank transactions scanned and encoded daily": {
+                        "5": { Q: ["No errors; accurate encoding"], E: ["100% processed"], T: ["Same working day"] },
+                        "4": { Q: ["1–2 minor errors"], E: ["100% processed"], T: ["Next working day"] },
+                        "3": { Q: ["3–4 minor errors"], E: ["95–99% processed"], T: ["By end of working day"] },
+                        "2": { Q: ["Major errors"], E: ["<95% processed"], T: ["Beyond working day"] },
+                        "1": { Q: ["Unacceptable / not done"], E: ["Majority unprocessed"], T: ["Not within acceptable time"] }
+                    },
+                    "Indexing complete with no missing pages": {
+                        "5": { Q: ["Indexing fully verified, zero gaps"], E: ["100% pages indexed"], T: ["Same day"] },
+                        "4": { Q: ["Minor indexing rechecks"], E: ["100% pages indexed"], T: ["Same day"] },
+                        "3": { Q: ["Occasional missing indexes fixed"], E: ["95–99% indexed"], T: ["Within 24 hours"] },
+                        "2": { Q: ["Frequent missing pages"], E: ["<95% indexed"], T: ["Beyond 24 hours"] },
+                        "1": { Q: ["Indexing largely incomplete"], E: ["Major gaps"], T: ["Unacceptable"] }
+                    },
+                    "Audit trail maintained within 24 hours": {
+                        "5": { Q: ["Complete trail, no errors"], E: ["100% entries captured"], T: ["Within 24 hours"] },
+                        "4": { Q: ["Minor corrections only"], E: ["100% entries captured"], T: ["Within 24 hours"] },
+                        "3": { Q: ["Some gaps corrected"], E: ["95–99% entries captured"], T: ["Within 48 hours"] },
+                        "2": { Q: ["Multiple missing logs"], E: ["<95% captured"], T: ["Beyond 48 hours"] },
+                        "1": { Q: ["Trail missing"], E: ["Majority uncaptured"], T: ["Unacceptable"] }
+                    }
+                },
+                "Processing of over-the-counter revenue transactions": {
+                    "Same-day verification of OTC transactions": {
+                        "5": { Q: ["Verified without discrepancies"], E: ["100% OTC verified"], T: ["Same working day"] },
+                        "4": { Q: ["Minor verifications pending"], E: ["100% OTC verified"], T: ["Same working day"] },
+                        "3": { Q: ["Few pending verifications"], E: ["95–99% verified"], T: ["End of working day"] },
+                        "2": { Q: ["Several unverified"], E: ["<95% verified"], T: ["Beyond working day"] },
+                        "1": { Q: ["Verification not done"], E: ["Majority unverified"], T: ["Unacceptable"] }
+                    },
+                    "95% encoded within the business day": {
+                        "5": { Q: ["Encodings error-free"], E: ["100% encoded"], T: ["Same business day"] },
+                        "4": { Q: ["Minor corrections"], E: ["100% encoded"], T: ["Same business day"] },
+                        "3": { Q: ["Few delays"], E: ["95–99% encoded"], T: ["By end of day"] },
+                        "2": { Q: ["Multiple delays"], E: ["<95% encoded"], T: ["Next day"] },
+                        "1": { Q: ["Encoding largely incomplete"], E: ["Major backlog"], T: ["Unacceptable"] }
+                    },
+                    "OR validation completed daily": {
+                        "5": { Q: ["All ORs validated error-free"], E: ["100% validated"], T: ["Daily"] },
+                        "4": { Q: ["Minor issues corrected same day"], E: ["100% validated"], T: ["Daily"] },
+                        "3": { Q: ["Some validations late"], E: ["95–99% validated"], T: ["Within 48 hours"] },
+                        "2": { Q: ["Frequent late validations"], E: ["<95% validated"], T: ["Beyond 48 hours"] },
+                        "1": { Q: ["Validations mostly missing"], E: ["Majority unvalidated"], T: ["Unacceptable"] }
+                    }
+                },
+                "Maintenance of Revenue Records Filing System": {
+                    "Weekly filing updated and retrievable": {
+                        "5": { Q: ["Zero retrieval issues"], E: ["100% weekly updates"], T: ["Within week"] },
+                        "4": { Q: ["Minor retrieval fixes"], E: ["100% weekly updates"], T: ["Within week"] },
+                        "3": { Q: ["Some items late"], E: ["95–99% updates"], T: ["Within next week"] },
+                        "2": { Q: ["Many late updates"], E: ["<95% updates"], T: ["Beyond next week"] },
+                        "1": { Q: ["Updates not done"], E: ["Major gaps"], T: ["Unacceptable"] }
+                    },
+                    "Digital backups synced monthly": {
+                        "5": { Q: ["Backups verified"], E: ["100% synced"], T: ["Within month"] },
+                        "4": { Q: ["Minor sync corrections"], E: ["100% synced"], T: ["Within month"] },
+                        "3": { Q: ["Some delays"], E: ["95–99% synced"], T: ["Within following week"] },
+                        "2": { Q: ["Frequent delays"], E: ["<95% synced"], T: ["Beyond following week"] },
+                        "1": { Q: ["Backups largely missing"], E: ["Major gaps"], T: ["Unacceptable"] }
+                    },
+                    "Retrieval logs maintained for audits": {
+                        "5": { Q: ["Logs complete and audit-ready"], E: ["100% requests logged"], T: ["Same day"] },
+                        "4": { Q: ["Minor log gaps corrected"], E: ["100% requests logged"], T: ["Same day"] },
+                        "3": { Q: ["Some gaps"], E: ["95–99% logged"], T: ["Within 48 hours"] },
+                        "2": { Q: ["Many gaps"], E: ["<95% logged"], T: ["Beyond 48 hours"] },
+                        "1": { Q: ["Logs largely missing"], E: ["Majority unlogged"], T: ["Unacceptable"] }
+                    }
+                }
+            };
+            let indicatorStandardsBody;
+            let standardsSelect;
+            let standardsModal;
+            let assigneesModal;
+            let currentStandards = { mfo: '', indicator: '' };
+            let currentAssigneeUnit = '';
+            const bodyOverflowClass = 'overflow-hidden';
+
+            function createEmptyStandardsRow() {
+                return { Q: [], E: [], T: [] };
+            }
+
+            function renderIndicatorStandards(mfoTitle, indicator) {
+                if (!indicatorStandardsBody) {
+                    return;
+                }
+                const mfoData = uwpStandardsByMfo[mfoTitle] || {};
+                const indicatorData = mfoData[indicator] || {};
+                indicatorStandardsBody.innerHTML = '';
+                standardRatings.forEach((level) => {
+                    const row = indicatorData[level] || createEmptyStandardsRow();
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-900/40';
+                    const ratingTd = document.createElement('td');
+                    ratingTd.className = 'px-4 py-3 font-semibold';
+                    ratingTd.textContent = level;
+                    const makeListCell = (items) => {
+                        const td = document.createElement('td');
+                        td.className = 'px-4 py-3 align-top';
+                        if (!items || items.length === 0) {
+                            td.textContent = '—';
+                            return td;
+                        }
+                        const ul = document.createElement('ul');
+                        ul.className = 'list-disc space-y-1 pl-4 text-slate-200';
+                        items.forEach((item) => {
+                            const li = document.createElement('li');
+                            li.textContent = item;
+                            ul.appendChild(li);
+                        });
+                        td.appendChild(ul);
+                        return td;
+                    };
+                    tr.append(
+                        ratingTd,
+                        makeListCell(row.Q),
+                        makeListCell(row.E),
+                        makeListCell(row.T)
+                    );
+                    indicatorStandardsBody.appendChild(tr);
+                });
+            }
+
+            function populateIndicatorSelect(mfoTitle, indicator) {
+                if (!standardsSelect) {
+                    return;
+                }
+                const indicators = uwpIndicatorsByMfo[mfoTitle] || [];
+                standardsSelect.innerHTML = '';
+                indicators.forEach((text) => {
+                    const option = document.createElement('option');
+                    option.value = text;
+                    option.textContent = text;
+                    standardsSelect.appendChild(option);
+                });
+                if (indicator && indicators.includes(indicator)) {
+                    standardsSelect.value = indicator;
+                } else if (indicators.length) {
+                    standardsSelect.value = indicators[0];
+                }
+            }
+
+            function showModal(modal) {
+                if (!modal) return;
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                document.body.classList.add(bodyOverflowClass);
+            }
+
+            function closeModal(modal) {
+                if (!modal) return;
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                document.body.classList.remove(bodyOverflowClass);
+            }
+
+            function openStandardsViewer(mfoTitle) {
+                if (!mfoTitle) return;
+                const indicators = uwpIndicatorsByMfo[mfoTitle] || [];
+                if (!indicators.length) return;
+                currentStandards.mfo = mfoTitle;
+                currentStandards.indicator = indicators[0];
+                populateIndicatorSelect(mfoTitle, currentStandards.indicator);
+                document.getElementById('uwp-standards-indicator-label').textContent = currentStandards.indicator;
+                renderIndicatorStandards(mfoTitle, currentStandards.indicator);
+                showModal(standardsModal);
+            }
+
+            function openAssigneesViewer(unit) {
+                currentAssigneeUnit = unit || 'Revenue Collection Unit';
+                const label = document.getElementById('uwp-assignees-unit-label');
+                if (label) {
+                    label.textContent = currentAssigneeUnit;
+                }
+                showModal(assigneesModal);
+            }
+
+            function handleIndicatorChange() {
+                if (!standardsSelect) return;
+                currentStandards.indicator = standardsSelect.value;
+                document.getElementById('uwp-standards-indicator-label').textContent = currentStandards.indicator;
+                renderIndicatorStandards(currentStandards.mfo, currentStandards.indicator);
+            }
+
+            document.addEventListener('DOMContentLoaded', () => {
+                indicatorStandardsBody = document.getElementById('uwp-standards-table-body');
+                standardsSelect = document.getElementById('uwp-standards-indicator-select');
+                standardsModal = document.getElementById('uwp-standards-viewer-modal');
+                assigneesModal = document.getElementById('uwp-assignees-viewer-modal');
+
+                document.querySelectorAll('[data-uwp-view-standards]').forEach((button) => {
+                    button.addEventListener('click', () => {
+                        openStandardsViewer(button.dataset.mfoTitle);
+                    });
+                });
+
+                document.querySelectorAll('[data-uwp-view-assignees]').forEach((button) => {
+                    button.addEventListener('click', () => {
+                        openAssigneesViewer(button.dataset.unit);
+                    });
+                });
+
+                document.querySelectorAll('[data-modal-hide="uwp-standards-viewer-modal"]').forEach((btn) => {
+                    btn.addEventListener('click', () => closeModal(standardsModal));
+                });
+                document.querySelectorAll('[data-modal-hide="uwp-assignees-viewer-modal"]').forEach((btn) => {
+                    btn.addEventListener('click', () => closeModal(assigneesModal));
+                });
+
+                standardsModal?.addEventListener('click', (event) => {
+                    if (event.target === standardsModal) {
+                        closeModal(standardsModal);
+                    }
+                });
+                assigneesModal?.addEventListener('click', (event) => {
+                    if (event.target === assigneesModal) {
+                        closeModal(assigneesModal);
+                    }
+                });
+
+                standardsSelect?.addEventListener('change', handleIndicatorChange);
+            });
+
             (function initViewUwpModal() {
                 const run = () => {
                     const viewModal = document.getElementById('view-uwp-modal');

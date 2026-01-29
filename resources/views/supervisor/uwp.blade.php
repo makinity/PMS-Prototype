@@ -100,9 +100,10 @@
                             <table class="min-w-full text-sm">
                                 <thead class="bg-slate-900/70 text-slate-300">
                                     <tr>
-                                        <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">PPA/MFO</th>
-                                        <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">Success Indicators</th>
-                                        <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Timeline / Target</th>
+                                        <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">PPA / MFO</th>
+                                        <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Success Indicators</th>
+                                        <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Assigned Employees</th>
+                                        <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Target / Timeline</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-800 text-slate-100">
@@ -110,10 +111,10 @@
                                         <td class="px-4 py-3">
                                             <input type="text" value="E-Bank Scanning and Encoding of Revenue Transactions" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="e.g., Records management and archiving" {{ $isDraft ? '' : 'disabled' }}>
                                         </td>
-                                        <td class="px-4 py-3">
+                                        <td class="px-4 py-3 text-center">
                                             <button
                                                 type="button"
-                                                class="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 transition"
+                                                class="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 transition justify-center"
                                                 data-uwp-indicators
                                                 data-title="E-Bank Scanning and Encoding of Revenue Transactions"
                                                 data-indicators='["All e-bank transactions scanned and encoded daily","Indexing complete with no missing pages","Audit trail maintained within 24 hours"]'
@@ -134,15 +135,31 @@
                                                     </g>
                                                 </svg>
 
-                                                <span class="text-xs">(3)</span>
+                                                <span class="text-xs">View (3)</span>
                                             </button>
+                                        </td>
+                                        <td class="px-4 py-3 text-center">
                                             <button
                                                 type="button"
-                                                class="ml-2 inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 transition"
+                                                class="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 transition justify-center"
                                                 data-uwp-assignees
                                                 aria-label="View assigned employees"
                                             >
-                                                Assigned Employees
+                                                <!-- Flowbite / Heroicons eye -->
+                                                <svg class="w-4 h-4"
+                                                    aria-hidden="true"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    fill="none"
+                                                    viewBox="0 0 20 14">
+                                                    <g stroke="currentColor"
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="1.5">
+                                                        <path d="M10 3c-3.5 0-6.5 2.3-8 5 1.5 2.7 4.5 5 8 5s6.5-2.3 8-5c-1.5-2.7-4.5-5-8-5Z"/>
+                                                        <path d="M10 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
+                                                    </g>
+                                                </svg>
+                                                <span class="text-xs">View</span>
                                             </button>
                                         </td>
                                         <td class="px-4 py-3 text-center">
@@ -154,10 +171,10 @@
                                         <td class="px-4 py-3">
                                             <input type="text" value="Processing of Over-the-Counter Revenue Transactions" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="e.g., Records management and archiving" {{ $isDraft ? '' : 'disabled' }}>
                                         </td>
-                                        <td class="px-4 py-3">
+                                        <td class="px-4 py-3 text-center">
                                             <button
                                                 type="button"
-                                                class="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 transition"
+                                                class="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 transition justify-center"
                                                 data-uwp-indicators
                                                 data-title="Processing of Over-the-Counter Revenue Transactions"
                                                 data-indicators='["Same-day verification of OTC transactions","95% encoded within the business day","OR validation completed daily"]'
@@ -178,15 +195,32 @@
                                                     </g>
                                                 </svg>
 
-                                                <span class="text-xs">(3)</span>
+                                                <span class="text-xs">View (3)</span>
                                             </button>
+                                        </td>
+
+                                        <td class="px-4 py-3 text-center">
                                             <button
                                                 type="button"
-                                                class="ml-2 inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 transition"
+                                                class="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 transition justify-center"
                                                 data-uwp-assignees
                                                 aria-label="View assigned employees"
                                             >
-                                                Assigned Employees
+                                                <!-- Flowbite / Heroicons eye -->
+                                                <svg class="w-4 h-4"
+                                                    aria-hidden="true"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    fill="none"
+                                                    viewBox="0 0 20 14">
+                                                    <g stroke="currentColor"
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="1.5">
+                                                        <path d="M10 3c-3.5 0-6.5 2.3-8 5 1.5 2.7 4.5 5 8 5s6.5-2.3 8-5c-1.5-2.7-4.5-5-8-5Z"/>
+                                                        <path d="M10 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
+                                                    </g>
+                                                </svg>
+                                                <span class="text-xs">View</span>
                                             </button>
                                         </td>
 
@@ -219,7 +253,8 @@
                                 <thead class="bg-slate-900/70 text-slate-300">
                                     <tr>
                                         <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">PPA / MFO</th>
-                                        <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">Success Indicators</th>
+                                        <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Success Indicators</th>
+                                        <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Assigned Employees</th>
                                         <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Target / Timeline</th>
                                     </tr>
                                 </thead>
@@ -228,10 +263,10 @@
                                         <td class="px-4 py-3">
                                             <input type="text" value="Maintenance of revenue records and filing system" class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="e.g., Staff training sessions" {{ $isDraft ? '' : 'disabled' }}>
                                         </td>
-                                        <td class="px-4 py-3">
+                                        <td class="px-4 py-3 text-center">
                                             <button
                                                 type="button"
-                                                class="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 transition"
+                                                class="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 transition justify-center"
                                                 data-uwp-indicators
                                                 data-title="Maintenance of revenue records and filing system"
                                                 data-indicators='["Weekly filing updated and retrievable","Digital backups synced monthly","Retrieval logs maintained for audits"]'
@@ -252,15 +287,32 @@
                                                     </g>
                                                 </svg>
 
-                                                <span class="text-xs">(3)</span>
+                                                <span class="text-xs">View (3)</span>
                                             </button>
+                                        </td>
+
+                                        <td class="px-4 py-3 text-center">
                                             <button
                                                 type="button"
-                                                class="ml-2 inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 transition"
+                                                class="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 transition justify-center"
                                                 data-uwp-assignees
                                                 aria-label="View assigned employees"
                                             >
-                                                Assigned Employees
+                                                <!-- Flowbite / Heroicons eye -->
+                                                <svg class="w-4 h-4"
+                                                    aria-hidden="true"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    fill="none"
+                                                    viewBox="0 0 20 14">
+                                                    <g stroke="currentColor"
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="1.5">
+                                                        <path d="M10 3c-3.5 0-6.5 2.3-8 5 1.5 2.7 4.5 5 8 5s6.5-2.3 8-5c-1.5-2.7-4.5-5-8-5Z"/>
+                                                        <path d="M10 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
+                                                    </g>
+                                                </svg>
+                                                <span class="text-xs">View</span>
                                             </button>
 
                                         </td>
@@ -764,7 +816,7 @@
 
                         const StandardBtn = document.createElement('button');
                         StandardBtn.type = 'button';
-                        StandardBtn.textContent = 'View Standards (Q/E/T)';
+                        StandardBtn.textContent = 'Standards';
                         StandardBtn.className = 'hover:text-blue-100 underline';
                         StandardBtn.addEventListener('click', () => openStandardsModal(idx));
                         actions.appendChild(StandardBtn);

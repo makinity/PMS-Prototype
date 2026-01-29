@@ -97,6 +97,35 @@
 </head>
 <body>
 
+@php
+function pdfSummarizeStandardSegment(array $values, int $limit = 26): string
+{
+    $text = implode('; ', array_filter($values, fn ($value) => $value !== null && $value !== ''));
+    if ($text === '') {
+        return '';
+    }
+    if (function_exists('mb_strlen') && mb_strlen($text) > $limit) {
+        $text = mb_substr($text, 0, $limit - 1) . '…';
+    } elseif (strlen($text) > $limit) {
+        $text = substr($text, 0, $limit - 1) . '…';
+    }
+    return $text;
+}
+
+function pdfFormatStandardsCell(array $standard): string
+{
+    $parts = [];
+    foreach (['q' => 'Q', 'e' => 'E', 't' => 'T'] as $key => $label) {
+        $summary = pdfSummarizeStandardSegment($standard[$key] ?? [], 28);
+        if ($summary === '') {
+            continue;
+        }
+        $parts[] = "{$label}: {$summary}";
+    }
+    return implode(' | ', $parts);
+}
+@endphp
+
 <div class="header">
     <h3>UNIT WORK PLAN (UWP)</h3>
     <p>{{ $uwp['period'] }}</p>
@@ -157,11 +186,18 @@
                     <td>
                         <table class="standards-table">
                             <tr>
-                                <td style="width:20%;"></td>
-                                <td style="width:20%;"></td>
-                                <td style="width:20%;"></td>
-                                <td style="width:20%;"></td>
-                                <td style="width:20%;"></td>
+                                @php
+                                    $standards = $row['indicator_standards'][$indicator] ?? [];
+                                @endphp
+                                @foreach (range(5, 1) as $rating)
+                                    @php
+                                        $detail = $standards[$rating] ?? ['q' => [], 'e' => [], 't' => []];
+                                        $summary = pdfFormatStandardsCell($detail);
+                                    @endphp
+                                    <td style="width:20%; font-size:9px; line-height:1.2; word-wrap:break-word;">
+                                        {{ $summary ?: '—' }}
+                                    </td>
+                                @endforeach
                             </tr>
                         </table>
                     </td>
@@ -191,11 +227,18 @@
                     <td>
                         <table class="standards-table">
                             <tr>
-                                <td style="width:20%;"></td>
-                                <td style="width:20%;"></td>
-                                <td style="width:20%;"></td>
-                                <td style="width:20%;"></td>
-                                <td style="width:20%;"></td>
+                                @php
+                                    $standards = $row['indicator_standards'][$indicator] ?? [];
+                                @endphp
+                                @foreach (range(5, 1) as $rating)
+                                    @php
+                                        $detail = $standards[$rating] ?? ['q' => [], 'e' => [], 't' => []];
+                                        $summary = pdfFormatStandardsCell($detail);
+                                    @endphp
+                                    <td style="width:20%; font-size:9px; line-height:1.2; word-wrap:break-word;">
+                                        {{ $summary ?: '—' }}
+                                    </td>
+                                @endforeach
                             </tr>
                         </table>
                     </td>

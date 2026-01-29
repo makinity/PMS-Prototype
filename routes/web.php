@@ -3,6 +3,7 @@
 use App\Http\Controllers\StageOne\Forms\IpcrExportController;
 use App\Http\Controllers\StageOne\Forms\OpcrExportController;
 use App\Http\Controllers\StageOne\Forms\UwpExportController;
+use App\Http\Controllers\StageOne\Forms\UwpExcelExportController;
 use App\Http\Controllers\StageThree\Forms\IpcrExportController as StageThreeFormsIpcrExportController;
 use App\Http\Controllers\StageTwo\Forms\IpcrExportController as FormsIpcrExportController;
 use App\Http\Controllers\StageTwo\Forms\MporExportController;
@@ -272,6 +273,12 @@ Route::prefix('pmt')->group(function(){
 
     Route::get('/uwp/preview/pdf', [UwpExportController::class, 'preview'])
         ->name('stage1.uwp.preview.pdf');
+
+    Route::get('/uwp/export/excel', [UwpExcelExportController::class, 'exportExcel'])
+        ->name('stage1.uwp.export.excel');
+
+    Route::get('/uwp/preview/excel', [UwpExcelExportController::class, 'previewExcel'])
+        ->name('stage1.uwp.preview.excel');
 
     Route::get('/ipcr/export/pdf', [StageThreeFormsIpcrExportController::class, 'exportPdf'])
     ->name('stage3.ipcr.export.pdf');
