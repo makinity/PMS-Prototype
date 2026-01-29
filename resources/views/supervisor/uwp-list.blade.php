@@ -335,9 +335,9 @@
 
             <!-- FOOTER -->
             <div class="flex gap-4 justify-end border-t border-slate-800 px-8 py-5">
-                <a href="{{ route('stage1.uwp.preview.pdf') }}"
+                <a href="{{ route('stage1.uwp.export.excel') }}"
                     class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800">
-                    Preview
+                    Export Excel
                 </a>
                 <button data-modal-hide="uwpPreviewModal"
                         class="rounded-lg border border-slate-700 bg-slate-900 px-5 py-2 text-sm hover:bg-slate-800">

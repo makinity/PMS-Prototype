@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Exports;
+namespace App\Exports\StageOne;
 
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;

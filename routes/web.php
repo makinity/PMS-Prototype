@@ -10,6 +10,8 @@ use App\Http\Controllers\StageTwo\Forms\MporExportController;
 use App\Http\Controllers\StageTwo\Forms\OrsExportController;
 use App\Http\Controllers\StageTwo\Forms\QarExportController;
 use App\Http\Controllers\StageTwo\Forms\SmporExportController;
+use App\Http\Controllers\StageOne\Forms\OpcrExcelExportController;
+use App\Http\Controllers\StageOne\Forms\IpcrExcelExportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -78,6 +80,9 @@ Route::prefix('employee')->group(function(){
 
     Route::get('/ipcr/export/pdf', [FormsIpcrExportController::class, 'exportPdf'])
         ->name('stage2.ipcr.export.pdf');
+
+    Route::get('/ipcr/export/excel', [IpcrExcelExportController::class, 'exportExcel'])
+        ->name('stage1.ipcr.export.excel');
 });
 
 
@@ -356,6 +361,9 @@ Route::prefix('administrator')->group(function(){
 
     Route::get('/opcr/export/pdf', [OpcrExportController::class, 'exportPdf'])
         ->name('stage1.opcr.export.pdf');
+
+    Route::get('/opcr/export/excel', [OpcrExcelExportController::class, 'exportExcel'])
+        ->name('stage1.opcr.export.excel');
 });
 
 

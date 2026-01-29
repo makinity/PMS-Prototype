@@ -2,13 +2,77 @@
 
 namespace App\Http\Controllers\StageOne\Forms;
 
-use App\Exports\StageOne\UwpExcelExport;
+use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
+use App\Exports\StageOne\OpcrExcelExport;
 use App\Http\Controllers\Controller;
 use Maatwebsite\Excel\Facades\Excel;
 
-class UwpExcelExportController extends Controller
+class OpcrExcelExportController extends Controller
 {
-    private function getStandardsSeedMap(): array
+    public function exportExcel()
+    {
+        $opcr = $this->buildOpcr();
+        $standards = $this->getStandardsSeedMap();
+        return Excel::download(new OpcrExcelExport($opcr, $standards), 'OPCR_Revenue_Collection_Unit_Jan-Jun_2026.xlsx');
+    }
+
+    public function previewExcel()
+    {
+        $opcr = $this->buildOpcr();
+        $standards = $this->getStandardsSeedMap();
+        return Excel::download(new OpcrExcelExport($opcr, $standards), 'OPCR_Revenue_Collection_Unit_Jan-Jun_2026_Preview.xlsx');
+    }
+
+    protected function buildOpcr(): array
+    {
+        $uwp = $this->getLockedApprovedUwp();
+        $data = ['core' => [], 'support' => []];
+        foreach (['core', 'support'] as $section) {
+            foreach ($uwp[$section] as $item) {
+                $data[$section][] = [
+                    'mfo' => $item['title'],
+                    'indicators' => $item['indicators'],
+                ];
+            }
+        }
+        return $data;
+    }
+
+    protected function getLockedApprovedUwp(): array
+    {
+        return [
+            'core' => [
+                [
+                    'title' => 'E-Bank Scanning and Encoding of Revenue Transactions',
+                    'indicators' => [
+                        'All e-bank transactions scanned and encoded daily',
+                        'Indexing complete with no missing pages',
+                        'Audit trail maintained within 24 hours',
+                    ],
+                ],
+                [
+                    'title' => 'Processing of Over-the-Counter Revenue Transactions',
+                    'indicators' => [
+                        'Same-day verification of OTC transactions',
+                        '95% encoded within the business day',
+                        'OR validation completed daily',
+                    ],
+                ],
+            ],
+            'support' => [
+                [
+                    'title' => 'Maintenance of Revenue Records Filing System',
+                    'indicators' => [
+                        'Weekly filing updated and retrievable',
+                        'Digital backups synced monthly',
+                        'Retrieval logs maintained for audits',
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    protected function getStandardsSeedMap(): array
     {
         return [
             'All e-bank transactions scanned and encoded daily' => [
@@ -75,70 +139,5 @@ class UwpExcelExportController extends Controller
                 1 => ['q' => ['Logs largely missing'], 'e' => ['Majority unlogged'], 't' => ['Unacceptable']],
             ],
         ];
-    }
-
-    private function getLockedUwp(): array
-    {
-        return [
-            'office' => 'Revenue Collection Unit',
-            'supervisor' => 'Carlo D. Beray',
-            'dept_head' => 'Dept-head',
-            'period' => 'January - June 2026',
-            'outputs' => [
-                [
-                    'mfo' => 'E-Bank Scanning and Encoding of Revenue Transactions',
-                    'success_indicators' => [
-                        'All e-bank transactions scanned and encoded daily',
-                        'Indexing complete with no missing pages',
-                        'Audit trail maintained within 24 hours',
-                    ],
-                    'target' => 'Daily; all e-bank transactions processed within the same working day',
-                    'function' => 'Core (50%)',
-                    'function_type' => 'core',
-                ],
-                [
-                    'mfo' => 'Processing of Over-the-Counter Revenue Transactions',
-                    'success_indicators' => [
-                        'Same-day verification of OTC transactions',
-                        '95% encoded within the business day',
-                        'OR validation completed daily',
-                    ],
-                    'target' => 'Daily; 95% processed within the same working day',
-                    'function' => 'Core (30%)',
-                    'function_type' => 'core',
-                ],
-                [
-                    'mfo' => 'Maintenance of Revenue Records Filing System',
-                    'success_indicators' => [
-                        'Weekly filing updated and retrievable',
-                        'Digital backups synced monthly',
-                        'Retrieval logs maintained for audits',
-                    ],
-                    'target' => 'Quarterly validation and update',
-                    'function' => 'Support (20%)',
-                    'function_type' => 'support',
-                ],
-            ],
-        ];
-    }
-
-    public function exportExcel()
-    {
-        $uwp = $this->getLockedUwp();
-        $standards = $this->getStandardsSeedMap();
-        return Excel::download(
-            new UwpExcelExport($uwp, $standards),
-            'UWP_Revenue_Collection_Unit_Jan-Jun_2026.xlsx'
-        );
-    }
-
-    public function previewExcel()
-    {
-        $uwp = $this->getLockedUwp();
-        $standards = $this->getStandardsSeedMap();
-        return Excel::download(
-            new UwpExcelExport($uwp, $standards),
-            'UWP_Revenue_Collection_Unit_Jan-Jun_2026_Preview.xlsx'
-        );
     }
 }

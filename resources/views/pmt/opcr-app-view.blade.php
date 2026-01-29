@@ -1,6 +1,6 @@
 @extends('layouts.pmt')
 
-@section('main-section')
+@section('main-content')
     <section class="space-y-6">
 
         <!-- HEADER -->

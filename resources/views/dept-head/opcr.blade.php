@@ -52,7 +52,7 @@
                             </td>
                         </tr>
 
-                        <!-- APPROVED -->
+                        {{-- <!-- APPROVED -->
                         <tr class="border-t border-slate-800">
                             <td class="px-4 py-3 text-white">Human Resource Unit</td>
                             <td class="px-4 py-3">Jan–Dec 2026</td>
@@ -69,7 +69,7 @@
                                     View
                                 </button>
                             </td>
-                        </tr>
+                        </tr> --}}
 
                     </tbody>
                 </table>
@@ -78,155 +78,366 @@
 
         <!-- REVIEW OPCR MODAL -->
         <div id="review-opcr-modal"
-            data-modal-container
+             data-modal-container
              class="fixed inset-0 z-[80] hidden flex items-center justify-center bg-black/60 px-4 py-6">
-            <div class="w-full max-w-2xl rounded-2xl border border-slate-800 bg-slate-900 p-6">
+            <div class="w-full max-w-6xl rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl">
 
-                <div class="flex items-start justify-between">
-                    <div>
-                        <h2 class="text-lg font-semibold text-white">
+                <!-- Modal Header -->
+                <div class="flex items-start justify-between gap-4 border-b border-slate-800 pb-4">
+                    <div class="min-w-0">
+                        <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Office Performance Commitment and Review</p>
+                        <h2 class="mt-1 text-lg font-semibold text-white truncate">
                             Review OPCR – Revenue Collection Unit
                         </h2>
                         <p class="text-sm text-slate-400">
-                            Derived from PMT-approved Unit Work Plan
+                            Derived from PMT-approved Unit Work Plan (Stage 1)
                         </p>
+                        <div class="mt-2">
+                            <span class="inline-flex items-center rounded-full bg-amber-500/15 px-2.5 py-1 text-[11px] font-semibold text-amber-200 border border-amber-500/30">
+                                For Department Head Review
+                            </span>
+                        </div>
                     </div>
-                    <button data-close-modal class="text-slate-400 hover:text-white">✕</button>
+                    <button data-close-modal
+                            class="shrink-0 rounded-lg border border-slate-800 bg-slate-950/50 px-2.5 py-2 text-slate-400 hover:text-white hover:bg-slate-950">
+                        ✕
+                    </button>
                 </div>
 
-                <!-- CONTEXT -->
-                <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3 text-sm">
-                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-                        <p class="text-xs text-slate-400">Office</p>
-                        <p class="text-white">Revenue Collection Unit</p>
+                <!-- OPCR Summary strip -->
+                <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                        <p class="text-[11px] uppercase tracking-wide text-slate-500">Office / Unit</p>
+                        <p class="mt-1 text-sm font-semibold text-white">Revenue Collection Unit</p>
                     </div>
-                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-                        <p class="text-xs text-slate-400">Period</p>
-                        <p class="text-white">January - June 2026</p>
+                    <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                        <p class="text-[11px] uppercase tracking-wide text-slate-500">Period</p>
+                        <p class="mt-1 text-sm font-semibold text-white">January - June 2026</p>
                     </div>
-                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-                        <p class="text-xs text-slate-400">Referenced UWP</p>
-                        <p class="text-white">Approved</p>
+                    <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                        <p class="text-[11px] uppercase tracking-wide text-slate-500">Referenced UWP</p>
+                        <p class="mt-1 text-sm font-semibold text-white">Approved</p>
                     </div>
                 </div>
 
-                <!-- OPCR TARGETS -->
-                <div class="mt-6 overflow-x-auto">
-                    <table class="w-full text-sm border border-slate-800">
-                        <thead class="bg-slate-950 text-slate-300">
-                            <tr>
-                                <th class="px-4 py-3 text-left">Major Final Output</th>
-                                <th class="px-4 py-3 text-left">Target</th>
-                                <th class="px-4 py-3 text-left">Weight</th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-slate-100">
-                            <tr class="border-t border-slate-800">
-                                <td class="px-4 py-3">
-                                    E-Bank Scanning and Encoding of Revenue Transactions
-                                </td>
-                                <td class="px-4 py-3">
-                                    Daily; all e-bank transactions processed within same working day
-                                </td>
-                                <td class="px-4 py-3">
-                                    50%
-                                </td>
-                            </tr>
+                <!-- OPCR Targets Table (FULL: indicators + standards + assigned + function) -->
+                <div class="mt-5 rounded-xl border border-slate-800 bg-slate-950/40 overflow-hidden">
+                    <div class="max-h-[46vh] overflow-auto">
+                        <table class="w-full text-sm text-slate-200">
+                            <thead class="sticky top-0 z-10 bg-slate-950 text-slate-300 text-xs uppercase">
+                                <tr class="border-b border-slate-800">
+                                    <th class="px-4 py-3 text-left w-[30%]">Output</th>
+                                    <th class="px-4 py-3 text-center w-[12%]">Success Indicators</th>
+                                    <th class="px-4 py-3 text-center w-[12%]">Assigned Employees</th>
+                                    <th class="px-4 py-3 text-left w-[26%]">Target Summary</th>
+                                    <th class="px-4 py-3 text-left w-[4%]">Weight</th>
+                                    <th class="px-4 py-3 text-left w-[4%]">Function</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800">
 
-                            <tr class="border-t border-slate-800">
-                                <td class="px-4 py-3">
-                                    Processing of Over-the-Counter Revenue Transactions
-                                </td>
-                                <td class="px-4 py-3">
-                                    Daily; 95% processed within same working day
-                                </td>
-                                <td class="px-4 py-3">
-                                    30%
-                                </td>
-                            </tr>
+                                <!-- ROW 1 -->
+                                <tr class="hover:bg-slate-900/40">
+                                    <td class="px-4 py-3 align-top text-white">
+                                        E-Bank Scanning and Encoding of Revenue Transactions
+                                    </td>
 
-                            <tr class="border-t border-slate-800">
-                                <td class="px-4 py-3">
-                                    Maintenance of Revenue Records Filing System
-                                </td>
-                                <td class="px-4 py-3">
-                                    Quarterly validation and update
-                                </td>
-                                <td class="px-4 py-3">
-                                    20%
-                                </td>
-                            </tr>
+                                    <td class="px-4 py-3 align-top text-center">
+                                        <button type="button"
+                                                class="inline-flex items-center justify-center gap-2 text-blue-300 hover:text-blue-200"
+                                                data-dh-view-indicators
+                                                data-title="E-Bank Scanning and Encoding of Revenue Transactions"
+                                                data-indicators='["All e-bank transactions scanned and encoded daily","Indexing complete with no missing pages","Audit trail maintained within 24 hours"]'>
+                                            <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12Z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                            </svg>
+                                            <span class="text-xs">(3)</span>
+                                        </button>
+                                    </td>
 
-                        </tbody>
-                    </table>
+                                    <td class="px-4 py-3 align-top text-center">
+                                        <button type="button"
+                                                class="inline-flex items-center justify-center gap-2 text-blue-300 hover:text-blue-200"
+                                                data-dh-open-assignees>
+                                            <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 21a7.5 7.5 0 0 0-9 0" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 13.5a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Z" />
+                                            </svg>
+                                            <span class="text-xs">View</span>
+                                        </button>
+                                    </td>
+
+                                    <td class="px-4 py-3 align-top text-slate-200">
+                                        Daily; all e-bank transactions processed within the same working day
+                                    </td>
+
+                                    <td class="px-4 py-3 align-top text-slate-200">
+                                        50%
+                                    </td>
+
+                                    <td class="px-4 py-3 align-top">
+                                        <span class="rounded-md bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-300 border border-emerald-500/20">
+                                            Core
+                                        </span>
+                                    </td>
+                                </tr>
+
+                                <!-- ROW 2 -->
+                                <tr class="hover:bg-slate-900/40">
+                                    <td class="px-4 py-3 align-top text-white">
+                                        Processing of Over-the-Counter Revenue Transactions
+                                    </td>
+
+                                    <td class="px-4 py-3 align-top text-center">
+                                        <button type="button"
+                                                class="inline-flex items-center justify-center gap-2 text-blue-300 hover:text-blue-200"
+                                                data-dh-view-indicators
+                                                data-title="Processing of Over-the-Counter Revenue Transactions"
+                                                data-indicators='["Same-day verification of OTC transactions","95% encoded within the business day","OR validation completed daily"]'>
+                                            <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12Z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                            </svg>
+                                            <span class="text-xs">(3)</span>
+                                        </button>
+                                    </td>
+
+                                    <td class="px-4 py-3 align-top text-center">
+                                        <button type="button"
+                                                class="inline-flex items-center justify-center gap-2 text-blue-300 hover:text-blue-200"
+                                                data-dh-open-assignees>
+                                            <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 21a7.5 7.5 0 0 0-9 0" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 13.5a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Z" />
+                                            </svg>
+                                            <span class="text-xs">View</span>
+                                        </button>
+                                    </td>
+
+                                    <td class="px-4 py-3 align-top text-slate-200">
+                                        Daily; 95% processed within the same working day
+                                    </td>
+
+                                    <td class="px-4 py-3 align-top text-slate-200">
+                                        30%
+                                    </td>
+
+                                    <td class="px-4 py-3 align-top">
+                                        <span class="rounded-md bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-300 border border-emerald-500/20">
+                                            Core
+                                        </span>
+                                    </td>
+                                </tr>
+
+                                <!-- ROW 3 -->
+                                <tr class="hover:bg-slate-900/40">
+                                    <td class="px-4 py-3 align-top text-white">
+                                        Maintenance of Revenue Records Filing System
+                                    </td>
+
+                                    <td class="px-4 py-3 align-top text-center">
+                                        <button type="button"
+                                                class="inline-flex items-center justify-center gap-2 text-blue-300 hover:text-blue-200"
+                                                data-dh-view-indicators
+                                                data-title="Maintenance of Revenue Records Filing System"
+                                                data-indicators='["Weekly filing updated and retrievable","Digital backups synced monthly","Retrieval logs maintained for audits"]'>
+                                            <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12Z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                            </svg>
+                                            <span class="text-xs">(3)</span>
+                                        </button>
+                                    </td>
+
+                                    <td class="px-4 py-3 align-top text-center">
+                                        <button type="button"
+                                                class="inline-flex items-center justify-center gap-2 text-blue-300 hover:text-blue-200"
+                                                data-dh-open-assignees>
+                                            <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 21a7.5 7.5 0 0 0-9 0" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 13.5a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Z" />
+                                            </svg>
+                                            <span class="text-xs">View</span>
+                                        </button>
+                                    </td>
+
+                                    <td class="px-4 py-3 align-top text-slate-200">
+                                        Quarterly validation and update
+                                    </td>
+
+                                    <td class="px-4 py-3 align-top text-slate-200">
+                                        20%
+                                    </td>
+
+                                    <td class="px-4 py-3 align-top">
+                                        <span class="rounded-md bg-blue-500/10 px-2 py-1 text-xs font-medium text-blue-300 border border-blue-400/30">
+                                            Support
+                                        </span>
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <!-- REMARKS -->
-                <div class="mt-6">
+                <div class="mt-5">
                     <label class="block mb-1 text-sm text-slate-300">
                         Remarks (required if returning)
                     </label>
                     <textarea rows="3"
-                            style="min-width:72px; background:#0f172a;color:#e5e7eb;"
-                              class="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-4 py-2 text-sm text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40"></textarea>
+                              style="min-width:72px; background:#0f172a;color:#e5e7eb;"
+                              class="w-full rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-2 text-sm text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40"></textarea>
+                    <p class="mt-2 text-[11px] text-slate-500">
+                        Remarks are required only when returning the OPCR to Admin (demo behavior).
+                    </p>
                 </div>
 
                 <!-- ACTIONS -->
-                <div class="mt-6 flex justify-end gap-3">
-                    <button type="button"
-                            data-close-modal
-                            class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">
-                        Close
-                    </button>
+                <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between border-t border-slate-800 pt-4">
+                    <p class="text-[11px] text-slate-500">
+                        Ensure targets and weights match the PMT-approved Unit Work Plan before approving.
+                    </p>
 
-                    <button type="button"
-                            data-opcr-return
-                            class="inline-flex items-center gap-2 rounded-lg border border-amber-600 px-4 py-2 text-sm font-semibold text-amber-300 hover:bg-amber-600/10">
-                        <span data-button-label>Return to Admin</span>
-                        <span data-button-spinner
-                              class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
-                    </button>
+                    <div class="flex flex-wrap justify-end gap-3">
+                        <button type="button"
+                                data-close-modal
+                                class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">
+                            Close
+                        </button>
 
-                    <button type="button"
-                            data-opcr-approve
-                            class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500">
-                        <span data-button-label>Approve OPCR</span>
-                        <span data-button-spinner
-                              class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
-                    </button>
+                        <button type="button"
+                                data-opcr-return
+                                class="inline-flex items-center gap-2 rounded-lg border border-amber-600 px-4 py-2 text-sm font-semibold text-amber-300 hover:bg-amber-600/10">
+                            <span data-button-label>Return to Admin</span>
+                            <span data-button-spinner
+                                  class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                        </button>
+
+                        <button type="button"
+                                data-opcr-approve
+                                class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500">
+                            <span data-button-label>Approve OPCR</span>
+                            <span data-button-spinner
+                                  class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- VIEW OPCR MODAL -->
         <div id="view-opcr-modal"
-            data-modal-container
+             data-modal-container
              class="fixed inset-0 z-[80] hidden flex items-center justify-center bg-black/60 px-4 py-6">
-            <div class="w-full max-w-xl rounded-2xl border border-slate-800 bg-slate-900 p-6">
+            <h1>Reserved for approved opcr view modal</h1>
+        </div>
 
-                <div class="flex items-start justify-between">
-                    <div>
-                        <h2 class="text-lg font-semibold text-white">
-                            View OPCR – Human Resource Unit
-                        </h2>
-                        <p class="text-sm text-slate-400">Read-only OPCR details</p>
+        <!-- SUCCESS INDICATORS MODAL (Dept Head: Read-only) -->
+        <div id="dh-indicators-modal" class="fixed inset-0 z-[90] hidden items-center justify-center bg-black/70 px-4 py-6">
+            <div class="w-full max-w-2xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
+                <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
+                    <div class="min-w-0">
+                        <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Success Indicators</p>
+                        <h3 id="dh-indicators-title" class="text-lg font-semibold text-white truncate">--</h3>
+                        <p class="text-xs text-slate-400 mt-1">Read-only list derived from the approved UWP.</p>
                     </div>
-                    <button data-close-modal class="text-slate-400 hover:text-white">✕</button>
+                    <button type="button" data-dh-close-submodal class="text-slate-400 hover:text-white">
+                        <span class="sr-only">Close</span>
+                        &times;
+                    </button>
                 </div>
 
-                <div class="mt-6 space-y-2 text-sm text-slate-300">
-                    <p><strong>Office:</strong> Human Resource Unit</p>
-                    <p><strong>Period:</strong> Jan–Dec 2026</p>
-                    <p><strong>Referenced UWP:</strong> Approved</p>
-                    <p><strong>Major Final Output:</strong> E-Bank Scanning and Encoding of Revenue Transactions</p>
-                    <p><strong>Target:</strong> Daily; all e-bank transactions processed within same working day</p>
-                    <p><strong>Weight:</strong> 50%</p>
-                    <p><strong>Status:</strong> Approved</p>
+                <div class="mt-4 max-h-64 overflow-y-auto rounded-lg border border-slate-800 bg-slate-950/70 p-3">
+                    <ol id="dh-indicators-list" class="space-y-2 pl-5 text-sm text-slate-100 list-decimal"></ol>
                 </div>
 
-                <div class="mt-6 flex justify-end">
-                    <button data-close-modal
-                            class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">
+                <div class="mt-5 flex justify-end">
+                    <button type="button"
+                            data-dh-close-submodal
+                            class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- STANDARDS MODAL (Dept Head: Read-only) -->
+        <div id="dh-standards-modal" class="fixed inset-0 z-[92] hidden items-center justify-center bg-black/70 px-4 py-8">
+            <div class="w-full max-w-5xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
+                <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
+                    <div class="min-w-0">
+                        <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Standards</p>
+                        <h3 class="text-lg font-semibold text-white">Standards (Q/E/T)</h3>
+                        <p id="dh-standards-indicator" class="text-[11px] text-slate-400 mt-1 truncate"></p>
+                    </div>
+                    <button type="button" data-dh-close-standards class="text-slate-400 hover:text-white">
+                        <span class="sr-only">Close</span>
+                        &times;
+                    </button>
+                </div>
+
+                <div class="mt-4 max-h-[70vh] overflow-y-auto rounded-xl border border-slate-800 bg-slate-950/40 p-3">
+                    <div id="dh-standards-list" class="w-full"></div>
+                </div>
+
+                <div class="mt-5 flex justify-end border-t border-slate-800 pt-3">
+                    <button type="button"
+                            data-dh-close-standards
+                            class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ASSIGNED EMPLOYEES MODAL (Dept Head: Read-only) -->
+        <div id="dh-assigned-modal" class="fixed inset-0 z-[91] hidden items-center justify-center bg-black/70 px-4 py-8">
+            <div class="w-full max-w-3xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
+                <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
+                    <div class="min-w-0">
+                        <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Assigned Employees</p>
+                        <h3 class="text-lg font-semibold text-white">Employees under the selected Office/Unit</h3>
+                        <p class="text-[11px] text-slate-400 mt-1">Office / Unit: <span id="dh-assigned-unit">Revenue Collection Unit</span></p>
+                    </div>
+                    <button type="button" data-dh-close-assigned class="text-slate-400 hover:text-white">
+                        <span class="sr-only">Close</span>
+                        &times;
+                    </button>
+                </div>
+
+                <div class="mt-4 space-y-3 text-sm text-slate-200 max-h-[60vh] overflow-y-auto">
+                    <div class="relative">
+                        <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-500 text-xs">🔍</span>
+                        <input type="text"
+                               id="dh-assigned-search"
+                               style="background:#0f172a;color:#e5e7eb;"
+                               placeholder="Search employee name…"
+                               class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 pl-8 text-sm text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none">
+                    </div>
+
+                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 overflow-hidden">
+                        <table class="min-w-full text-sm">
+                            <thead class="bg-slate-900/70 text-slate-200">
+                                <tr>
+                                    <th class="px-4 py-2 text-left">Employee Name</th>
+                                    <th class="px-4 py-2 text-left">Office / Unit</th>
+                                    <th class="px-4 py-2 text-left">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dh-assigned-list" class="divide-y divide-slate-800"></tbody>
+                        </table>
+                    </div>
+
+                    <p id="dh-assigned-empty" class="text-[12px] text-slate-500 hidden">No employees available (demo).</p>
+                </div>
+
+                <div class="mt-4 flex items-center justify-end gap-3 border-t border-slate-800 pt-3">
+                    <button type="button"
+                            data-dh-close-assigned
+                            class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800">
                         Close
                     </button>
                 </div>
@@ -239,8 +450,6 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
-    const modalIds = ['review-opcr-modal', 'view-opcr-modal'];
-
     function getModalEl(id) {
         return document.getElementById(id);
     }
@@ -250,6 +459,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!modal) return;
 
         modal.classList.remove('hidden');
+        modal.classList.add('flex');
         document.body.classList.add('overflow-hidden');
     }
 
@@ -257,16 +467,23 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!modal) return;
 
         modal.classList.add('hidden');
+        modal.classList.remove('flex');
 
-        // If no other modal is open, restore scrolling
-        const anyOpen = document.querySelector('[data-modal-container]:not(.hidden)');
+        const anyOpen = document.querySelector('[data-modal-container]:not(.hidden), #dh-indicators-modal:not(.hidden), #dh-standards-modal:not(.hidden), #dh-assigned-modal:not(.hidden)');
         if (!anyOpen) {
             document.body.classList.remove('overflow-hidden');
         }
     }
 
     function closeAllModals() {
-        document.querySelectorAll('[data-modal-container]').forEach(m => m.classList.add('hidden'));
+        document.querySelectorAll('[data-modal-container]').forEach(m => {
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+        });
+        ['dh-indicators-modal','dh-standards-modal','dh-assigned-modal'].forEach((id) => {
+            const el = document.getElementById(id);
+            if (el) { el.classList.add('hidden'); el.classList.remove('flex'); }
+        });
         document.body.classList.remove('overflow-hidden');
     }
 
@@ -292,7 +509,343 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Open buttons
+    // -------------------------
+    // Dept Head: Indicators Modal
+    // -------------------------
+    const indicatorsModal = document.getElementById('dh-indicators-modal');
+    const indicatorsTitle = document.getElementById('dh-indicators-title');
+    const indicatorsList = document.getElementById('dh-indicators-list');
+
+    function openIndicatorsModal(title, indicators) {
+        if (!indicatorsModal || !indicatorsTitle || !indicatorsList) return;
+        indicatorsTitle.textContent = title || '--';
+        indicatorsList.innerHTML = '';
+
+        (indicators || []).forEach((text) => {
+            const value = (text || '').trim();
+            if (!value) return;
+
+            const li = document.createElement('li');
+            li.className = 'flex items-start justify-between gap-3';
+
+            const left = document.createElement('div');
+            left.className = 'min-w-0 flex-1';
+            const span = document.createElement('span');
+            span.className = 'text-slate-100';
+            span.textContent = value;
+            left.appendChild(span);
+
+            const right = document.createElement('div');
+            right.className = 'shrink-0';
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'text-[11px] text-blue-300 hover:text-blue-200 underline';
+            btn.textContent = 'Standards';
+            btn.addEventListener('click', () => openStandardsModal(value));
+            right.appendChild(btn);
+
+            li.appendChild(left);
+            li.appendChild(right);
+            indicatorsList.appendChild(li);
+        });
+
+        indicatorsModal.classList.remove('hidden');
+        indicatorsModal.classList.add('flex');
+        document.body.classList.add('overflow-hidden');
+    }
+
+    function closeIndicatorsModal() {
+        if (!indicatorsModal) return;
+        indicatorsModal.classList.add('hidden');
+        indicatorsModal.classList.remove('flex');
+
+        const anyOpen = document.querySelector('[data-modal-container]:not(.hidden), #dh-standards-modal:not(.hidden), #dh-assigned-modal:not(.hidden)');
+        if (!anyOpen) document.body.classList.remove('overflow-hidden');
+    }
+
+    document.querySelectorAll('[data-dh-view-indicators]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            let indicators = [];
+            try { indicators = JSON.parse(btn.dataset.indicators || '[]'); } catch (e) { indicators = []; }
+            openIndicatorsModal(btn.dataset.title || '--', indicators);
+        });
+    });
+
+    document.querySelectorAll('[data-dh-close-submodal]').forEach((btn) => {
+        btn.addEventListener('click', closeIndicatorsModal);
+    });
+
+    // -------------------------
+    // Dept Head: Standards Modal (seeded)
+    // -------------------------
+    const standardsModal = document.getElementById('dh-standards-modal');
+    const standardsList = document.getElementById('dh-standards-list');
+    const standardsIndicatorLabel = document.getElementById('dh-standards-indicator');
+
+    const standardsSeedMap = {
+        'All e-bank transactions scanned and encoded daily': {
+            5: { q: ['No errors; accurate encoding'], e: ['100% processed'], t: ['Same working day'] },
+            4: { q: ['Minor errors'], e: ['100% processed'], t: ['Same working day'] },
+            3: { q: ['Few minor errors'], e: ['95–99% processed'], t: ['End of working day'] },
+            2: { q: ['Multiple errors'], e: ['<95% processed'], t: ['Beyond working day'] },
+            1: { q: ['Major errors/missing'], e: ['Majority unprocessed'], t: ['Not within acceptable time'] },
+        },
+        'Indexing complete with no missing pages': {
+            5: { q: ['Indexing fully verified, zero gaps'], e: ['100% pages indexed'], t: ['Same day'] },
+            4: { q: ['Indexing minor rechecks'], e: ['100% pages indexed'], t: ['Same day'] },
+            3: { q: ['Occasional missing indexes fixed'], e: ['95–99% indexed'], t: ['Within 24 hours'] },
+            2: { q: ['Frequent missing pages'], e: ['<95% indexed'], t: ['Beyond 24 hours'] },
+            1: { q: ['Indexing largely incomplete'], e: ['Major gaps'], t: ['Unacceptable'] },
+        },
+        'Audit trail maintained within 24 hours': {
+            5: { q: ['Complete trail, no errors'], e: ['100% entries captured'], t: ['Within 24 hours'] },
+            4: { q: ['Minor corrections only'], e: ['100% entries captured'], t: ['Within 24 hours'] },
+            3: { q: ['Some gaps corrected'], e: ['95–99% entries captured'], t: ['Within 48 hours'] },
+            2: { q: ['Multiple missing logs'], e: ['<95% captured'], t: ['Beyond 48 hours'] },
+            1: { q: ['Trail missing'], e: ['Majority uncaptured'], t: ['Unacceptable'] },
+        },
+        'Same-day verification of OTC transactions': {
+            5: { q: ['Verified without discrepancies'], e: ['100% OTC verified'], t: ['Same working day'] },
+            4: { q: ['Minor verifications pending'], e: ['100% OTC verified'], t: ['Same working day'] },
+            3: { q: ['Few pending verifications'], e: ['95–99% verified'], t: ['End of working day'] },
+            2: { q: ['Several unverified'], e: ['<95% verified'], t: ['Beyond working day'] },
+            1: { q: ['Verification not done'], e: ['Majority unverified'], t: ['Unacceptable'] },
+        },
+        '95% encoded within the business day': {
+            5: { q: ['Encodings error-free'], e: ['100% encoded'], t: ['Same business day'] },
+            4: { q: ['Minor corrections'], e: ['100% encoded'], t: ['Same business day'] },
+            3: { q: ['Few delays'], e: ['95–99% encoded'], t: ['By end of day'] },
+            2: { q: ['Multiple delays'], e: ['<95% encoded'], t: ['Next day'] },
+            1: { q: ['Encoding largely incomplete'], e: ['Major backlog'], t: ['Unacceptable'] },
+        },
+        'OR validation completed daily': {
+            5: { q: ['All ORs validated error-free'], e: ['100% validated'], t: ['Daily'] },
+            4: { q: ['Minor issues corrected same day'], e: ['100% validated'], t: ['Daily'] },
+            3: { q: ['Some validations late'], e: ['95–99% validated'], t: ['Within 48 hours'] },
+            2: { q: ['Frequent late validations'], e: ['<95% validated'], t: ['Beyond 48 hours'] },
+            1: { q: ['Validations mostly missing'], e: ['Majority unvalidated'], t: ['Unacceptable'] },
+        },
+        'Weekly filing updated and retrievable': {
+            5: { q: ['Zero retrieval issues'], e: ['100% weekly updates'], t: ['Within week'] },
+            4: { q: ['Minor retrieval fixes'], e: ['100% weekly updates'], t: ['Within week'] },
+            3: { q: ['Some items late'], e: ['95–99% updates'], t: ['Within next week'] },
+            2: { q: ['Many late updates'], e: ['<95% updates'], t: ['Beyond next week'] },
+            1: { q: ['Updates not done'], e: ['Major gaps'], t: ['Unacceptable'] },
+        },
+        'Digital backups synced monthly': {
+            5: { q: ['Backups verified'], e: ['100% synced'], t: ['Within month'] },
+            4: { q: ['Minor sync corrections'], e: ['100% synced'], t: ['Within month'] },
+            3: { q: ['Some delays'], e: ['95–99% synced'], t: ['Within following week'] },
+            2: { q: ['Frequent delays'], e: ['<95% synced'], t: ['Beyond following week'] },
+            1: { q: ['Backups largely missing'], e: ['Major gaps'], t: ['Unacceptable'] },
+        },
+        'Retrieval logs maintained for audits': {
+            5: { q: ['Logs complete and audit-ready'], e: ['100% requests logged'], t: ['Same day'] },
+            4: { q: ['Minor log gaps corrected'], e: ['100% requests logged'], t: ['Same day'] },
+            3: { q: ['Some gaps'], e: ['95–99% logged'], t: ['Within 48 hours'] },
+            2: { q: ['Many gaps'], e: ['<95% logged'], t: ['Beyond 48 hours'] },
+            1: { q: ['Logs largely missing'], e: ['Majority unlogged'], t: ['Unacceptable'] },
+        },
+    };
+
+    function createEmptyStandards() {
+        return { 5:{q:[],e:[],t:[]},4:{q:[],e:[],t:[]},3:{q:[],e:[],t:[]},2:{q:[],e:[],t:[]},1:{q:[],e:[],t:[]} };
+    }
+
+    function seedStandardsForIndicator(text) {
+        const seed = standardsSeedMap[text];
+        if (!seed) return createEmptyStandards();
+        const base = createEmptyStandards();
+        [5,4,3,2,1].forEach((lvl) => {
+            if (seed[lvl]) {
+                base[lvl] = {
+                    q: Array.isArray(seed[lvl].q) ? [...seed[lvl].q] : [seed[lvl].q],
+                    e: Array.isArray(seed[lvl].e) ? [...seed[lvl].e] : [seed[lvl].e],
+                    t: Array.isArray(seed[lvl].t) ? [...seed[lvl].t] : [seed[lvl].t],
+                };
+            }
+        });
+        return base;
+    }
+
+    function renderStandardsTable(data) {
+        if (!standardsList) return;
+        standardsList.innerHTML = '';
+
+        const table = document.createElement('table');
+        table.className = 'w-full text-sm border border-slate-800 overflow-hidden rounded-lg';
+        table.innerHTML = `
+            <thead class="bg-slate-900/70 text-slate-200">
+                <tr>
+                    <th class="px-3 py-2 text-left">Rating</th>
+                    <th class="px-3 py-2 text-left">Quality (Q)</th>
+                    <th class="px-3 py-2 text-left">Efficiency (E)</th>
+                    <th class="px-3 py-2 text-left">Timeliness (T)</th>
+                </tr>
+            </thead>
+        `;
+
+        const tbody = document.createElement('tbody');
+        tbody.className = 'divide-y divide-slate-800 text-slate-100';
+
+        const makeCell = (arr) => {
+            const td = document.createElement('td');
+            td.className = 'px-3 py-2 align-top';
+            if (!arr || arr.length === 0) {
+                td.textContent = '—';
+                td.classList.add('text-slate-500');
+                return td;
+            }
+            const wrap = document.createElement('div');
+            wrap.className = 'space-y-1';
+            arr.forEach((txt) => {
+                const line = document.createElement('div');
+                line.className = 'flex items-start gap-2';
+                const bullet = document.createElement('span');
+                bullet.textContent = '•';
+                bullet.className = 'text-slate-400';
+                const text = document.createElement('span');
+                text.className = 'flex-1';
+                text.textContent = txt;
+                line.append(bullet, text);
+                wrap.appendChild(line);
+            });
+            td.appendChild(wrap);
+            return td;
+        };
+
+        [5,4,3,2,1].forEach((lvl) => {
+            const row = data[lvl] || { q:[], e:[], t:[] };
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-slate-900/40';
+
+            const ratingTd = document.createElement('td');
+            ratingTd.className = 'px-3 py-2 text-left text-white font-semibold';
+            ratingTd.textContent = lvl;
+
+            tr.appendChild(ratingTd);
+            tr.appendChild(makeCell(row.q));
+            tr.appendChild(makeCell(row.e));
+            tr.appendChild(makeCell(row.t));
+            tbody.appendChild(tr);
+        });
+
+        table.appendChild(tbody);
+        standardsList.appendChild(table);
+    }
+
+    function openStandardsModal(indicatorText) {
+        if (!standardsModal || !standardsIndicatorLabel) return;
+        standardsIndicatorLabel.textContent = indicatorText || '';
+        const data = seedStandardsForIndicator(indicatorText || '');
+        renderStandardsTable(data);
+
+        standardsModal.classList.remove('hidden');
+        standardsModal.classList.add('flex');
+        document.body.classList.add('overflow-hidden');
+    }
+
+    function closeStandardsModal() {
+        if (!standardsModal) return;
+        standardsModal.classList.add('hidden');
+        standardsModal.classList.remove('flex');
+
+        const anyOpen = document.querySelector('[data-modal-container]:not(.hidden), #dh-indicators-modal:not(.hidden), #dh-assigned-modal:not(.hidden)');
+        if (!anyOpen) document.body.classList.remove('overflow-hidden');
+    }
+
+    document.querySelectorAll('[data-dh-open-standards]').forEach((btn) => {
+        btn.addEventListener('click', () => openStandardsModal(btn.dataset.indicator || ''));
+    });
+
+    document.querySelectorAll('[data-dh-close-standards]').forEach((btn) => {
+        btn.addEventListener('click', closeStandardsModal);
+    });
+
+    // -------------------------
+    // Dept Head: Assigned Employees Modal (seeded)
+    // -------------------------
+    const assignedModal = document.getElementById('dh-assigned-modal');
+    const assignedList = document.getElementById('dh-assigned-list');
+    const assignedEmpty = document.getElementById('dh-assigned-empty');
+    const assignedSearch = document.getElementById('dh-assigned-search');
+
+    const assignedSeed = [
+        { name: 'Ramon Reyes', unit: 'Revenue Collection Unit', assigned: true },
+    ];
+
+    function renderAssigned(filterText) {
+        if (!assignedList || !assignedEmpty) return;
+        const q = (filterText || '').trim().toLowerCase();
+
+        assignedList.innerHTML = '';
+        const rows = assignedSeed.filter((r) => !q || r.name.toLowerCase().includes(q));
+
+        if (!rows.length) {
+            assignedEmpty.classList.remove('hidden');
+            return;
+        }
+        assignedEmpty.classList.add('hidden');
+
+        rows.forEach((emp) => {
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-slate-900/40';
+
+            const nameTd = document.createElement('td');
+            nameTd.className = 'px-4 py-2';
+            nameTd.textContent = emp.name;
+
+            const unitTd = document.createElement('td');
+            unitTd.className = 'px-4 py-2';
+            unitTd.textContent = emp.unit;
+
+            const statusTd = document.createElement('td');
+            statusTd.className = 'px-4 py-2';
+            const badge = document.createElement('span');
+            badge.className = `inline-flex items-center px-2 py-1 text-[11px] font-semibold rounded-full border ${
+                emp.assigned ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-200' : 'border-slate-600 bg-slate-800 text-slate-300'
+            }`;
+            badge.textContent = emp.assigned ? 'Assigned' : 'Not Assigned';
+            statusTd.appendChild(badge);
+
+            tr.append(nameTd, unitTd, statusTd);
+            assignedList.appendChild(tr);
+        });
+    }
+
+    function openAssignedModal() {
+        if (!assignedModal) return;
+        renderAssigned('');
+        if (assignedSearch) assignedSearch.value = '';
+        assignedModal.classList.remove('hidden');
+        assignedModal.classList.add('flex');
+        document.body.classList.add('overflow-hidden');
+    }
+
+    function closeAssignedModal() {
+        if (!assignedModal) return;
+        assignedModal.classList.add('hidden');
+        assignedModal.classList.remove('flex');
+
+        const anyOpen = document.querySelector('[data-modal-container]:not(.hidden), #dh-indicators-modal:not(.hidden), #dh-standards-modal:not(.hidden)');
+        if (!anyOpen) document.body.classList.remove('overflow-hidden');
+    }
+
+    document.querySelectorAll('[data-dh-open-assignees]').forEach((btn) => {
+        btn.addEventListener('click', openAssignedModal);
+    });
+
+    document.querySelectorAll('[data-dh-close-assigned]').forEach((btn) => {
+        btn.addEventListener('click', closeAssignedModal);
+    });
+
+    if (assignedSearch) {
+        assignedSearch.addEventListener('input', () => renderAssigned(assignedSearch.value));
+    }
+
+    // -------------------------
+    // Main modals open/close
+    // -------------------------
     document.querySelectorAll('[data-open-review-opcr]').forEach(btn => {
         btn.addEventListener('click', () => openModal('review-opcr-modal'));
     });
@@ -301,7 +854,6 @@ document.addEventListener('DOMContentLoaded', function () {
         btn.addEventListener('click', () => openModal('view-opcr-modal'));
     });
 
-    // Close buttons (closes nearest modal only)
     document.querySelectorAll('[data-close-modal]').forEach(btn => {
         btn.addEventListener('click', () => {
             const modal = btn.closest('[data-modal-container]');
@@ -309,16 +861,39 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Click outside to close
     document.querySelectorAll('[data-modal-container]').forEach(modal => {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) closeModal(modal);
         });
     });
 
-    // Esc to close all
+    // click outside close for sub-modals
+    [indicatorsModal, standardsModal, assignedModal].forEach((m) => {
+        if (!m) return;
+        m.addEventListener('click', (e) => {
+            if (e.target !== m) return;
+            if (m === indicatorsModal) closeIndicatorsModal();
+            else if (m === standardsModal) closeStandardsModal();
+            else if (m === assignedModal) closeAssignedModal();
+        });
+    });
+
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeAllModals();
+        if (e.key !== 'Escape') return;
+
+        if (standardsModal && !standardsModal.classList.contains('hidden')) {
+            closeStandardsModal();
+            return;
+        }
+        if (assignedModal && !assignedModal.classList.contains('hidden')) {
+            closeAssignedModal();
+            return;
+        }
+        if (indicatorsModal && !indicatorsModal.classList.contains('hidden')) {
+            closeIndicatorsModal();
+            return;
+        }
+        closeAllModals();
     });
 
     // Approve/Return loading demo
