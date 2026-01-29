@@ -83,7 +83,7 @@ class UwpExcelExportController extends Controller
             'office' => 'Revenue Collection Unit',
             'supervisor' => 'Carlo D. Beray',
             'dept_head' => 'Dept-head',
-            'period' => 'January â€“ June 2026',
+            'period' => 'January - June 2026',
             'outputs' => [
                 [
                     'mfo' => 'E-Bank Scanning and Encoding of Revenue Transactions',

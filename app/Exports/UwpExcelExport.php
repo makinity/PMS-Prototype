@@ -8,22 +8,18 @@ use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithEvents;
-use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\WithTemplate;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class UwpExcelExport implements FromArray, WithHeadings, WithStyles, WithColumnWidths, WithTitle, WithEvents
+class UwpExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTitle, WithEvents
 {
     use Exportable;
 
     private const RATINGS = [5, 4, 3, 2, 1];
-    private const TEMPLATE_PATH = 'templates/uwp_template.xlsx';
-    private const TOTAL_COLUMNS = 8;
     private const STANDARDS_COLUMNS = [
         5 => 'D',
         4 => 'E',
@@ -31,26 +27,20 @@ class UwpExcelExport implements FromArray, WithHeadings, WithStyles, WithColumnW
         2 => 'G',
         1 => 'H',
     ];
+    private const TABLE_HEADER_ROW = 17;
+    private const TABLE_RATING_ROW = 18;
+    private const TABLE_START_ROW = self::TABLE_RATING_ROW + 1;
 
     private array $uwp;
     private array $standards;
-    private array $rows = [];
-    private bool $templateAvailable;
 
     public function __construct(array $uwp, array $standards)
     {
         $this->uwp = $uwp;
         $this->standards = $standards;
-        $this->templateAvailable = file_exists(resource_path(self::TEMPLATE_PATH));
-        $this->buildRows();
     }
 
     public function array(): array
-    {
-        return $this->rows;
-    }
-
-    public function headings(): array
     {
         return [];
     }
@@ -81,109 +71,92 @@ class UwpExcelExport implements FromArray, WithHeadings, WithStyles, WithColumnW
         return 'Unit Work Plan';
     }
 
-    public function template(): string
-    {
-        return $this->templateAvailable ? resource_path(self::TEMPLATE_PATH) : '';
-    }
-
     public function registerEvents(): array
     {
         return [
             AfterSheet::class => function (AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
-                if ($this->templateAvailable) {
-                     $sheet->removeRow(5, 13);
-                    $this->populateTemplate($sheet);
-                } else {
-                    $sheet->fromArray($this->rows, null, 'A1', true);
-                }
+                $this->populateTemplate($sheet);
             },
         ];
     }
 
-    private function buildRows(): void
-    {
-        $this->addRow(['UNIT WORK PLAN (UWP)']);
-        $this->addRow(['Performance Period:', $this->uwp['period']]);
-        $this->addRow(['Office / Unit:', $this->uwp['office']]);
-        $this->addRow([
-            'Supervisor:', $this->uwp['supervisor'],
-            'Department Head:', $this->uwp['dept_head'],
-        ]);
-        $this->addRow([]);
-        $header = [
-            'PPA / MFO',
-            'Success Indicator',
-            'Allotted Budget',
-            'Rating 5 – Standards (Q / E / T)',
-            'Rating 4 – Standards (Q / E / T)',
-            'Rating 3 – Standards (Q / E / T)',
-            'Rating 2 – Standards (Q / E / T)',
-            'Rating 1 – Standards (Q / E / T)',
-        ];
-        $this->addRow($header);
-        $this->addSection('core', 'A. CORE FUNCTIONS (80%)');
-        $this->addSection('support', 'B. SUPPORT FUNCTIONS (20%)');
-    }
-
-    private function addSection(string $type, string $label): void
-    {
-        $outputs = Arr::where($this->uwp['outputs'] ?? [], fn ($row) => Str::contains(Str::lower($row['function']), $type));
-        if (empty($outputs)) {
-            return;
-        }
-        $this->addRow([$label]);
-        foreach ($outputs as $output) {
-            foreach ($output['success_indicators'] ?? [] as $indicator) {
-                $row = [
-                    $output['mfo'],
-                    $indicator,
-                    '',
-                ];
-                foreach (self::RATINGS as $rating) {
-                    $row[] = $this->formatStandards($indicator, $rating);
-                }
-                $this->addRow($row);
-            }
-        }
-    }
-
-    private function formatStandards(string $indicator, int $rating): ?string
-    {
-        $lines = [];
-        foreach (['q' => 'Q', 'e' => 'E', 't' => 'T'] as $key => $label) {
-            $values = Arr::wrap($this->standards[$indicator][$rating][$key] ?? []);
-            $values = array_filter($values, fn ($value) => $value !== '' && $value !== null);
-            if (empty($values)) {
-                continue;
-            }
-            $lines[] = "{$label}: " . implode('; ', $values);
-        }
-        return empty($lines) ? null : implode("\n", $lines);
-    }
-
-    private function addRow(array $row): void
-    {
-        $this->rows[] = array_pad($row, self::TOTAL_COLUMNS, null);
-    }
-
     private function populateTemplate(Worksheet $sheet): void
     {
-        $sheet->setCellValue('E3', $this->uwp['period']);
-        $sheet->setCellValue('B5', $this->uwp['office']);
-        $sheet->setCellValue('G5', $this->uwp['supervisor']);
-        $sheet->setCellValue('D6', $this->uwp['dept_head']);
+        $this->writeManualHeader($sheet);
+        $this->writeTableHeader($sheet);
 
-        $currentRow = 19;
-
+        $currentRow = self::TABLE_START_ROW;
         $currentRow = $this->writeSection($sheet, 'core', 'A. CORE FUNCTIONS (80%)', $currentRow);
         $currentRow = $this->writeSection($sheet, 'support', 'B. SUPPORT FUNCTIONS (20%)', $currentRow);
 
-        $tableRange = "A19:H{$currentRow}";
+        $lastRow = max($currentRow - 1, self::TABLE_RATING_ROW);
+        $tableRange = 'A' . self::TABLE_HEADER_ROW . ":H{$lastRow}";
         $sheet->getStyle($tableRange)->getAlignment()
             ->setWrapText(true)
             ->setVertical(Alignment::VERTICAL_TOP);
-        $sheet->getStyle($tableRange)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $sheet->getStyle($tableRange)->getBorders()->getAllBorders()
+            ->setBorderStyle(Border::BORDER_THIN);
+    }
+
+    private function writeManualHeader(Worksheet $sheet): void
+    {
+        $sheet->mergeCells('A1:H1');
+        $sheet->setCellValue('A1', 'UNIT WORK PLAN (UWP)');
+        $sheet->getStyle('A1')->getFont()->setBold(true);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        $period = $this->uwp['period'] ?? '';
+        $period = preg_replace('/\s*[-–—]+\s*/u', ' ' . "\u{2013}" . ' ', $period);
+        $sheet->setCellValue('E3', trim($period));
+        $sheet->getStyle('E3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        $sheet->setCellValue('A5', 'Office / Unit:');
+        $sheet->getStyle('A5')->getFont()->setBold(true);
+        $sheet->setCellValue('B5', $this->uwp['office'] ?? '');
+
+        $sheet->setCellValue('F5', 'Supervisor:');
+        $sheet->getStyle('F5')->getFont()->setBold(true);
+        $sheet->setCellValue('G5', $this->uwp['supervisor'] ?? '');
+
+        $sheet->setCellValue('A6', 'Department Head:');
+        $sheet->getStyle('A6')->getFont()->setBold(true);
+        $sheet->setCellValue('D6', $this->uwp['dept_head'] ?? '');
+
+        $sheet->getStyle('A5:H6')->getAlignment()
+            ->setWrapText(true)
+            ->setVertical(Alignment::VERTICAL_CENTER);
+    }
+
+    private function writeTableHeader(Worksheet $sheet): void
+    {
+        $headers = [
+            'A' => 'PPA / MFO',
+            'B' => 'Success Indicators',
+            'C' => 'Allotted Budget',
+        ];
+        foreach ($headers as $column => $text) {
+            $cell = "{$column}" . self::TABLE_HEADER_ROW;
+            $sheet->setCellValue($cell, $text);
+            $sheet->getStyle($cell)->getFont()->setBold(true);
+            $sheet->getStyle($cell)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        }
+
+        $sheet->setCellValue('D' . self::TABLE_HEADER_ROW, 'Standards per Success Indicator');
+        $sheet->mergeCells('D' . self::TABLE_HEADER_ROW . ':H' . self::TABLE_HEADER_ROW);
+        $sheet->getStyle('D' . self::TABLE_HEADER_ROW)->getFont()->setBold(true);
+        $sheet->getStyle('D' . self::TABLE_HEADER_ROW)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        foreach (self::RATINGS as $rating) {
+            $column = self::STANDARDS_COLUMNS[$rating];
+            $cell = "{$column}" . self::TABLE_RATING_ROW;
+            $sheet->setCellValue($cell, (string) $rating);
+            $sheet->getStyle($cell)->getFont()->setBold(true);
+            $sheet->getStyle($cell)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        }
+        $sheet->getStyle('D' . self::TABLE_RATING_ROW . ':H' . self::TABLE_RATING_ROW)
+            ->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER);
     }
 
     private function writeSection(Worksheet $sheet, string $type, string $label, int $startRow): int
@@ -212,5 +185,19 @@ class UwpExcelExport implements FromArray, WithHeadings, WithStyles, WithColumnW
         }
 
         return $row;
+    }
+
+    private function formatStandards(string $indicator, int $rating): ?string
+    {
+        $lines = [];
+        foreach (['q' => 'Q', 'e' => 'E', 't' => 'T'] as $key => $label) {
+            $values = Arr::wrap($this->standards[$indicator][$rating][$key] ?? []);
+            $values = array_filter($values, fn ($value) => $value !== '' && $value !== null);
+            if (empty($values)) {
+                continue;
+            }
+            $lines[] = "{$label}: " . implode('; ', $values);
+        }
+        return empty($lines) ? null : implode("\n", $lines);
     }
 }
