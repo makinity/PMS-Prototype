@@ -3,7 +3,6 @@
 namespace App\Exports\StageOne;
 
 use Illuminate\Support\Arr;
-use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
@@ -11,6 +10,7 @@ use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Events\AfterSheet;
+use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
@@ -21,6 +21,7 @@ class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
     use Exportable;
 
     private const RATINGS = [5, 4, 3, 2, 1];
+
     private const STANDARDS_COLUMNS = [
         5 => 'K',
         4 => 'L',
@@ -28,9 +29,15 @@ class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
         2 => 'N',
         1 => 'O',
     ];
+
     private const TABLE_HEADER_ROW = 9;
     private const TABLE_SUBHEADER_ROW = 10;
     private const TABLE_START_ROW = 11;
+
+    // ✅ Same “approach” as UWP (auto height + vertical-only borders + group separators)
+    private const BASE_ROW_HEIGHT = 22;
+    private const LINE_HEIGHT = 14;
+    private const CHARS_PER_LINE = 42;
 
     private array $opcr;
     private array $standards;
@@ -55,6 +62,7 @@ class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
 
     public function columnWidths(): array
     {
+        // ✅ Make standards columns wider (match UWP “feel”)
         return [
             'A' => 35,
             'B' => 40,
@@ -66,11 +74,11 @@ class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
             'H' => 6,
             'I' => 6,
             'J' => 14,
-            'K' => 14,
-            'L' => 14,
-            'M' => 14,
-            'N' => 14,
-            'O' => 14,
+            'K' => 30,
+            'L' => 30,
+            'M' => 30,
+            'N' => 30,
+            'O' => 30,
         ];
     }
 
@@ -92,6 +100,11 @@ class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
     private function populateTemplate(Worksheet $sheet): void
     {
         $this->setupPage($sheet);
+
+        // ✅ UWP look: these “horizontal lines” come from Excel gridlines
+        // (and merged MFO cells hide gridlines inside)
+        $sheet->setShowGridlines(true);
+
         $this->writeManualHeader($sheet);
         $this->writeTableHeader($sheet);
 
@@ -100,37 +113,54 @@ class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
         $currentRow = $this->writeSection($sheet, 'support', 'C. SUPPORT FUNCTIONS (20%)', $currentRow, false);
 
         $lastRow = max($currentRow - 1, self::TABLE_SUBHEADER_ROW);
-        $this->unmergeDataArea($sheet, self::TABLE_START_ROW, $lastRow);
-        $sheet->getStyle("A" . self::TABLE_HEADER_ROW . ":O{$lastRow}")->getAlignment()
-            ->setVertical(Alignment::VERTICAL_TOP)
-            ->setWrapText(true);
-        $range = "B" . self::TABLE_HEADER_ROW . ":O{$lastRow}";
-        $sheet->getStyle($range)->getBorders()->getAllBorders()
+
+        // Global wrap + top vertical align (same as UWP)
+        $range = "A" . self::TABLE_HEADER_ROW . ":O{$lastRow}";
+        $sheet->getStyle($range)->getAlignment()
+            ->setWrapText(true)
+            ->setVertical(Alignment::VERTICAL_TOP);
+
+        // ✅ Header block boxed (ONLY header rows)
+        $sheet->getStyle("A" . self::TABLE_HEADER_ROW . ":O" . self::TABLE_SUBHEADER_ROW)
+            ->getBorders()
+            ->getAllBorders()
             ->setBorderStyle(Border::BORDER_THIN);
-        $this->applyMfoColumnBorders($sheet, self::TABLE_START_ROW, $lastRow);
+
+        // ✅ Data rows: vertical borders only (NO per-row horizontal lines)
+        $this->applyVerticalBordersOnly($sheet, self::TABLE_START_ROW, $lastRow);
+
+        // ✅ Section label rows: keep bottom separator line
+        $this->applySectionRowBorders($sheet, self::TABLE_START_ROW, $lastRow);
     }
 
     private function setupPage(Worksheet $sheet): void
-{
-    $sheet->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_LEGAL);
-    $sheet->getPageSetup()->setOrientation(PageSetup::ORIENTATION_LANDSCAPE);
-    $sheet->getPageSetup()->setFitToWidth(1);
-    $sheet->getPageSetup()->setFitToHeight(0);
-}
+    {
+        // ❌ This was breaking the UWP look (you want gridlines)
+        // $sheet->setShowGridlines(false);
 
+        $sheet->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_LEGAL);
+        $sheet->getPageSetup()->setOrientation(PageSetup::ORIENTATION_LANDSCAPE);
+        $sheet->getPageSetup()->setFitToWidth(1);
+        $sheet->getPageSetup()->setFitToHeight(0);
+    }
 
     private function writeManualHeader(Worksheet $sheet): void
     {
         $sheet->mergeCells('A1:O1');
         $sheet->setCellValue('A1', 'OFFICE PERFORMANCE COMMITMENT AND REVIEW (OPCR)');
+
         $sheet->mergeCells('A2:O2');
         $sheet->setCellValue('A2', 'January – June 2026');
+
         $sheet->setCellValue('A4', 'Office / Unit:');
         $sheet->setCellValue('B4', 'Revenue Collection Unit');
+
         $sheet->setCellValue('A5', 'Office Head:');
         $sheet->setCellValue('B5', 'Carlo D. Beray');
+
         $sheet->setCellValue('A6', 'Department Head:');
         $sheet->setCellValue('B6', 'Dept-head');
+
         $sheet->getStyle('A1:O2')->getFont()->setBold(true);
         $sheet->getStyle('A1:O2')->getAlignment()
             ->setHorizontal(Alignment::HORIZONTAL_CENTER)
@@ -148,27 +178,32 @@ class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
             'J' => 'Remarks',
         ];
 
-
-        foreach ($headers as $column => $text) {
-            $sheet->setCellValue("{$column}" . self::TABLE_HEADER_ROW, $text);
-            $sheet->getStyle("{$column}" . self::TABLE_HEADER_ROW)->getFont()->setBold(true);
-            $sheet->getStyle("{$column}" . self::TABLE_HEADER_ROW)
-                ->getAlignment()
-                ->setHorizontal(Alignment::HORIZONTAL_CENTER)
-                ->setVertical(Alignment::VERTICAL_CENTER);
-            $sheet->getStyle("{$column}" . self::TABLE_HEADER_ROW)
-                ->getFill()
-                ->setFillType(Fill::FILL_SOLID)
-                ->getStartColor()
-                ->setRGB('D9D9D9');
+        foreach ($headers as $col => $text) {
+            $sheet->setCellValue($col . self::TABLE_HEADER_ROW, $text);
         }
 
         $sheet->mergeCells('F' . self::TABLE_HEADER_ROW . ':I' . self::TABLE_HEADER_ROW);
         $sheet->setCellValue('F' . self::TABLE_HEADER_ROW, 'Rating');
+
         $sheet->mergeCells('K' . self::TABLE_HEADER_ROW . ':O' . self::TABLE_HEADER_ROW);
         $sheet->setCellValue('K' . self::TABLE_HEADER_ROW, 'Standards per Success Indicator');
 
-        $this->fillHeaderRow(self::TABLE_HEADER_ROW, $sheet);
+        $headerRange = 'A' . self::TABLE_HEADER_ROW . ':O' . self::TABLE_SUBHEADER_ROW;
+
+        $sheet->getStyle($headerRange)->getFont()->setBold(true);
+        $sheet->getStyle($headerRange)->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+            ->setVertical(Alignment::VERTICAL_CENTER)
+            ->setWrapText(true);
+
+        $sheet->getStyle($headerRange)->getFill()
+            ->setFillType(Fill::FILL_SOLID)
+            ->getStartColor()
+            ->setRGB('D9D9D9');
+
+        foreach (['A', 'B', 'C', 'D', 'E', 'J'] as $col) {
+            $sheet->mergeCells($col . self::TABLE_HEADER_ROW . ':' . $col . self::TABLE_SUBHEADER_ROW);
+        }
 
         $subHeaders = [
             'F' => 'Q',
@@ -182,33 +217,9 @@ class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
             'O' => '1',
         ];
 
-        // ✅ Vertically merge these headers across row 9–10
-        foreach (['A','B','C','D','E','J'] as $col) {
-            $sheet->mergeCells($col . self::TABLE_HEADER_ROW . ':' . $col . self::TABLE_SUBHEADER_ROW);
+        foreach ($subHeaders as $col => $text) {
+            $sheet->setCellValue($col . self::TABLE_SUBHEADER_ROW, $text);
         }
-
-
-        foreach ($subHeaders as $column => $text) {
-            $cell = "{$column}" . self::TABLE_SUBHEADER_ROW;
-            $sheet->setCellValue($cell, $text);
-            $sheet->getStyle($cell)->getFont()->setBold(true);
-            $sheet->getStyle($cell)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle($cell)->getFill()
-                ->setFillType(Fill::FILL_SOLID)
-                ->getStartColor()
-                ->setRGB('D9D9D9');
-        }
-    }
-
-    private function fillHeaderRow(int $row, Worksheet $sheet): void
-    {
-        $sheet->getStyle("A{$row}:O{$row}")->getFill()
-            ->setFillType(Fill::FILL_SOLID)
-            ->getStartColor()
-            ->setRGB('D9D9D9');
-        $sheet->getStyle("A{$row}:O{$row}")->getAlignment()
-            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
-            ->setVertical(Alignment::VERTICAL_CENTER);
     }
 
     private function writeSection(
@@ -220,214 +231,190 @@ class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
     ): int {
         $sheet->setCellValue("A{$startRow}", $label);
         $sheet->mergeCells("A{$startRow}:O{$startRow}");
+
         $sheet->getStyle("A{$startRow}:O{$startRow}")->getFont()->setBold(true);
         $sheet->getStyle("A{$startRow}:O{$startRow}")->getFill()
             ->setFillType(Fill::FILL_SOLID)
             ->getStartColor()
             ->setRGB('E2E8F0');
+
+        $sheet->getStyle("A{$startRow}:O{$startRow}")->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_LEFT)
+            ->setVertical(Alignment::VERTICAL_CENTER);
+
+        $sheet->getStyle("A{$startRow}:O{$startRow}")
+            ->getBorders()
+            ->getBottom()
+            ->setBorderStyle(Border::BORDER_THIN);
+
         $row = $startRow + 1;
 
         if ($includeRevenueRow) {
             $sheet->setCellValue("A{$row}", 'REVENUE');
             $sheet->mergeCells("A{$row}:O{$row}");
+
             $sheet->getStyle("A{$row}:O{$row}")->getFont()->setBold(true);
-            $sheet->getStyle("A{$row}:O{$row}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+            $sheet->getStyle("A{$row}:O{$row}")->getAlignment()
+                ->setHorizontal(Alignment::HORIZONTAL_LEFT)
+                ->setVertical(Alignment::VERTICAL_CENTER);
+
+            $sheet->getStyle("A{$row}:O{$row}")
+                ->getBorders()
+                ->getBottom()
+                ->setBorderStyle(Border::BORDER_THIN);
+
             $row++;
         }
 
-        return $this->writeIndicatorsFlat($sheet, $row, $this->opcr[$type] ?? [], $this->standards, $type);
+        return $this->writeIndicatorsLikeUwp($sheet, $row, $this->opcr[$type] ?? []);
     }
 
-    private function writeIndicatorsFlat(
-        Worksheet $sheet,
-        int $row,
-        array $items,
-        array $standards,
-        string $type
-    ): int {
+    private function writeIndicatorsLikeUwp(Worksheet $sheet, int $row, array $items): int
+    {
         foreach ($items as $item) {
             $indicators = $item['indicators'] ?? [];
             if (empty($indicators)) {
                 continue;
             }
-            $indicatorCount = count($indicators);
-            foreach ($indicators as $index => $indicator) {
-                $sheet->setCellValue("A{$row}", $index === 0 ? $item['mfo'] : '');
-                $sheet->setCellValue("B{$row}", $indicator);
+
+            $mfoStart = $row;
+
+            foreach ($indicators as $indicator) {
+
+                // ✅ Support both formats:
+                // - old: 'indicator string'
+                // - new: ['text' => '...', 'employee' => '...']
+                $indicatorText = is_array($indicator)
+                    ? (string) ($indicator['text'] ?? '')
+                    : (string) $indicator;
+
+                $employee = is_array($indicator)
+                    ? (string) ($indicator['employee'] ?? '')
+                    : (string) ($item['employee'] ?? ''); // fallback if you ever keep MFO-level employee
+
+                $sheet->setCellValue("A{$row}", '');
+                $sheet->setCellValue("B{$row}", $indicatorText);
                 $sheet->setCellValue("C{$row}", '');
-                $sheet->setCellValue("D{$row}", 'Revenue');
+                $sheet->setCellValue("D{$row}", $employee); // ✅ NOW PER INDICATOR
                 $sheet->setCellValue("E{$row}", '');
-                foreach (range('F', 'I') as $column) {
-                    $sheet->setCellValue("{$column}{$row}", '');
+
+                foreach (range('F', 'I') as $col) {
+                    $sheet->setCellValue("{$col}{$row}", '');
                 }
+
                 $sheet->setCellValue("J{$row}", '');
 
+                $stdTexts = [];
                 foreach (self::RATINGS as $rating) {
-                    $column = self::STANDARDS_COLUMNS[$rating];
-                    $sheet->setCellValue("{$column}{$row}", $this->formatStdBlock($standards, $indicator, $rating));
+                    $col = self::STANDARDS_COLUMNS[$rating];
+                    $text = $this->formatStdBlock($indicatorText, $rating); // ✅ use text for standards lookup
+                    $sheet->setCellValue("{$col}{$row}", $text);
+                    $sheet->getStyle("{$col}{$row}")->getAlignment()->setWrapText(true);
+                    $stdTexts[] = $text;
                 }
+
                 $sheet->getStyle("B{$row}")->getAlignment()->setWrapText(true);
-                foreach (self::STANDARDS_COLUMNS as $column) {
-                    $sheet->getStyle("{$column}{$row}")->getAlignment()->setWrapText(true);
-                }
-                $sheet->getStyle("B{$row}:O{$row}")->applyFromArray([
-                    'borders' => [
-                        'allBorders' => [
-                            'borderStyle' => Border::BORDER_THIN,
-                            'color' => ['rgb' => '000000'],
-                        ],
-                    ],
-                ]);
-                $isBoundary = $index === 0 || $index === $indicatorCount - 1;
-                if ($isBoundary) {
-                    $sheet->getStyle("A{$row}")->applyFromArray([
-                        'borders' => [
-                            'allBorders' => [
-                                'borderStyle' => Border::BORDER_THIN,
-                                'color' => ['rgb' => '000000'],
-                            ],
-                        ],
-                    ]);
-                } else {
-                    $sheet->getStyle("A{$row}")->applyFromArray([
-                        'borders' => [
-                            'left' => [
-                                'borderStyle' => Border::BORDER_THIN,
-                                'color' => ['rgb' => '000000'],
-                            ],
-                            'right' => [
-                                'borderStyle' => Border::BORDER_THIN,
-                                'color' => ['rgb' => '000000'],
-                            ],
-                        ],
-                    ]);
-                }
+
+                // ✅ vertical borders only (A..O), NO top/bottom
+                $this->applyRowVerticalBorders($sheet, $row);
+
+                // Auto row height
+                $sheet->getRowDimension($row)->setRowHeight(
+                    $this->estimateRowHeight($indicatorText, ...$stdTexts)
+                );
+
                 $row++;
+            }
+
+            $mfoEnd = $row - 1;
+
+            if ($mfoEnd >= $mfoStart) {
+                if ($mfoEnd > $mfoStart) {
+                    $sheet->mergeCells("A{$mfoStart}:A{$mfoEnd}");
+                }
+
+                $sheet->setCellValue("A{$mfoStart}", (string) ($item['mfo'] ?? ''));
+
+                $sheet->getStyle("A{$mfoStart}:A{$mfoEnd}")->getAlignment()
+                    ->setHorizontal(Alignment::HORIZONTAL_LEFT)
+                    ->setVertical(Alignment::VERTICAL_TOP)
+                    ->setWrapText(true);
+
+                // ✅ still no bottom border in A (keeps MFO clean)
             }
         }
 
         return $row;
     }
 
-    private function formatStdBlock(array $standards, string $indicator, int $rating): string
+
+    private function formatStdBlock(string $indicator, int $rating): string
     {
-        $entry = $standards[$indicator][$rating] ?? ['q' => [], 'e' => [], 't' => []];
+        $entry = $this->standards[$indicator][$rating] ?? ['q' => [], 'e' => [], 't' => []];
+
         $q = $this->formatDimension(Arr::wrap($entry['q'] ?? []));
         $e = $this->formatDimension(Arr::wrap($entry['e'] ?? []));
         $t = $this->formatDimension(Arr::wrap($entry['t'] ?? []));
 
-        $lines = [
+        return implode("\n", [
             "Q = {$q}",
             "E = {$e}",
             "T = {$t}",
-        ];
-
-        return implode("\n", $lines);
+        ]);
     }
 
     private function formatDimension(array $values): string
     {
-        $values = array_filter($values, fn ($value) => $value !== null && $value !== '');
-        if (empty($values)) {
-            return '—';
-        }
-        return implode('; ', array_map(fn ($value) => trim((string) $value), $values));
+        $values = array_filter($values, fn ($v) => $v !== null && $v !== '');
+        return empty($values) ? '—' : implode('; ', array_map(fn ($v) => trim((string) $v), $values));
     }
 
-    private function unmergeDataArea(Worksheet $sheet, int $fromRow, int $toRow): void
+    private function estimateRowHeight(string ...$texts): float
     {
-        foreach ($sheet->getMergeCells() as $range) {
-            if (!str_contains($range, ':')) {
-                continue;
-            }
-            [$start, $end] = explode(':', $range);
-            $startCol = preg_replace('/[0-9]/', '', $start);
-            $endCol = preg_replace('/[0-9]/', '', $end);
-            $startRow = (int) preg_replace('/[^0-9]/', '', $start);
-            $endRow = (int) preg_replace('/[^0-9]/', '', $end);
+        $maxLines = 1;
 
-            if ($endRow < $fromRow || $startRow > $toRow) {
+        foreach ($texts as $text) {
+            $text = trim((string) $text);
+            if ($text === '') {
                 continue;
             }
 
-            if ($startCol === 'A' && $endCol === 'O' && $startRow === $endRow) {
-                continue;
-            }
+            $explicit = substr_count($text, "\n") + 1;
+            $wrapped = (int) ceil(mb_strlen($text) / self::CHARS_PER_LINE);
 
-            $sheet->unmergeCells($range);
+            $maxLines = max($maxLines, $explicit, $wrapped);
         }
+
+        return self::BASE_ROW_HEIGHT + ($maxLines - 1) * self::LINE_HEIGHT;
     }
 
-    private function applyMfoColumnBorders(Worksheet $sheet, int $fromRow, int $toRow): void
+    private function applyVerticalBordersOnly(Worksheet $sheet, int $fromRow, int $toRow): void
     {
-        $row = $fromRow;
-        while ($row <= $toRow) {
-            if ($this->isSectionRow($sheet, $row)) {
-                $row++;
-                continue;
-            }
-
-            $valueA = trim((string) $sheet->getCell("A{$row}")->getValue());
-            $valueB = trim((string) $sheet->getCell("B{$row}")->getValue());
-            if ($valueA === '' || $valueB === '') {
-                $row++;
-                continue;
-            }
-
-            $start = $row;
-            $end = $row;
-            $next = $row + 1;
-            while ($next <= $toRow) {
-                if ($this->isSectionRow($sheet, $next)) {
-                    break;
-                }
-                $nextA = trim((string) $sheet->getCell("A{$next}")->getValue());
-                if ($nextA !== '') {
-                    break;
-                }
-                $nextB = trim((string) $sheet->getCell("B{$next}")->getValue());
-                if ($nextB === '') {
-                    break;
-                }
-                $end = $next;
-                $next++;
-            }
-
-            for ($r = $start; $r <= $end; $r++) {
-                $sheet->getStyle("A{$r}")->applyFromArray([
-                    'borders' => [
-                        'left' => $this->thinBorderSpec(),
-                        'right' => $this->thinBorderSpec(),
-                        'top' => $this->thinBorderSpec($r === $start),
-                        'bottom' => $this->thinBorderSpec($r === $end),
-                    ],
-                ]);
-            }
-
-            $row = $end + 1;
+        for ($r = $fromRow; $r <= $toRow; $r++) {
+            $this->applyRowVerticalBorders($sheet, $r);
         }
     }
 
-    private function isSectionRow(Worksheet $sheet, int $row): bool
+    private function applyRowVerticalBorders(Worksheet $sheet, int $row): void
     {
-        $value = trim((string) $sheet->getCell("A{$row}")->getValue());
-        $protected = [
-            'A. CORE FUNCTIONS (80%)',
-            'REVENUE',
-            'C. SUPPORT FUNCTIONS (20%)',
-        ];
-        return in_array($value, $protected, true);
+        foreach (range('A', 'O') as $col) {
+            $b = $sheet->getStyle("{$col}{$row}")->getBorders();
+            $b->getLeft()->setBorderStyle(Border::BORDER_THIN);
+            $b->getRight()->setBorderStyle(Border::BORDER_THIN);
+            // IMPORTANT: don't touch top/bottom (same as UWP)
+        }
     }
 
-    private function thinBorderSpec(bool $active = true): array
+    private function applySectionRowBorders(Worksheet $sheet, int $fromRow, int $toRow): void
     {
-        if ($active) {
-            return [
-                'borderStyle' => Border::BORDER_THIN,
-                'color' => ['rgb' => '000000'],
-            ];
+        for ($r = $fromRow; $r <= $toRow; $r++) {
+            $value = trim((string) $sheet->getCell("A{$r}")->getValue());
+            if (in_array($value, ['A. CORE FUNCTIONS (80%)', 'REVENUE', 'C. SUPPORT FUNCTIONS (20%)'], true)) {
+                $sheet->getStyle("A{$r}:O{$r}")
+                    ->getBorders()
+                    ->getBottom()
+                    ->setBorderStyle(Border::BORDER_THIN);
+            }
         }
-
-        return ['borderStyle' => Border::BORDER_NONE];
     }
 }

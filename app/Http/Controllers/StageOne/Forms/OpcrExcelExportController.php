@@ -27,6 +27,7 @@ class OpcrExcelExportController extends Controller
     {
         $uwp = $this->getLockedApprovedUwp();
         $data = ['core' => [], 'support' => []];
+
         foreach (['core', 'support'] as $section) {
             foreach ($uwp[$section] as $item) {
                 $data[$section][] = [
@@ -40,22 +41,41 @@ class OpcrExcelExportController extends Controller
 
     protected function getLockedApprovedUwp(): array
     {
+
         return [
             'core' => [
                 [
                     'title' => 'E-Bank Scanning and Encoding of Revenue Transactions',
                     'indicators' => [
-                        'All e-bank transactions scanned and encoded daily',
-                        'Indexing complete with no missing pages',
-                        'Audit trail maintained within 24 hours',
+                        [
+                            'text' => 'All e-bank transactions scanned and encoded daily',
+                            'employee' => 'RAMON REYES',
+                        ],
+                        [
+                            'text' => 'Indexing complete with no missing pages',
+                            'employee' => 'RAMON REYES',
+                        ],
+                        [
+                            'text' => 'Audit trail maintained within 24 hours',
+                            'employee' => 'RAMON REYES',
+                        ],
                     ],
                 ],
                 [
                     'title' => 'Processing of Over-the-Counter Revenue Transactions',
                     'indicators' => [
-                        'Same-day verification of OTC transactions',
-                        '95% encoded within the business day',
-                        'OR validation completed daily',
+                        [
+                            'text' => 'Same-day verification of OTC transactions',
+                            'employee' => 'RAMON REYES',
+                        ],
+                        [
+                            'text' => '95% encoded within the business day',
+                            'employee' => 'RAMON REYES',
+                        ],
+                        [
+                            'text' => 'OR validation completed daily',
+                            'employee' => 'RAMON REYES',
+                        ],
                     ],
                 ],
             ],
@@ -63,14 +83,24 @@ class OpcrExcelExportController extends Controller
                 [
                     'title' => 'Maintenance of Revenue Records Filing System',
                     'indicators' => [
-                        'Weekly filing updated and retrievable',
-                        'Digital backups synced monthly',
-                        'Retrieval logs maintained for audits',
+                        [
+                            'text' => 'Weekly filing updated and retrievable',
+                            'employee' => 'RAMON REYES',
+                        ],
+                        [
+                            'text' => 'Digital backups synced monthly',
+                            'employee' => 'RAMON REYES',
+                        ],
+                        [
+                            'text' => 'Retrieval logs maintained for audits',
+                            'employee' => 'RAMON REYES',
+                        ],
                     ],
                 ],
             ],
         ];
     }
+
 
     protected function getStandardsSeedMap(): array
     {
