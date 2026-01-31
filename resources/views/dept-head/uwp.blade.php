@@ -302,7 +302,6 @@
                                 <tr>
                                     <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-400">PPA / MFO</th>
                                     <th class="px-4 py-3 text-center text-xs font-medium uppercase text-slate-400">Success Indicators</th>
-                                    <th class="px-4 py-3 text-center text-xs font-medium uppercase text-slate-400">Standards (Q/E/T)</th>
                                     <th class="px-4 py-3 text-center text-xs font-medium uppercase text-slate-400">Assigned Employees</th>
                                     <th class="px-4 py-3 text-center text-xs font-medium uppercase text-slate-400">Timeline / Target</th>
                                     <th class="px-4 py-3 text-center text-xs font-medium uppercase text-slate-400">Function</th>
@@ -322,18 +321,6 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                                             </svg>
                                             <span>(3)</span>
-                                        </button>
-                                    </td>
-                                    <td class="px-4 py-3 text-center">
-                                        <button type="button"
-                                                class="inline-flex items-center gap-1 text-blue-300 hover:text-blue-200"
-                                                data-uwp-view-standards
-                                                data-mfo-title="E-Bank Scanning and Encoding of Revenue Transactions">
-                                            <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12Z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                                            </svg>
-                                            <span class="text-xs">View</span>
                                         </button>
                                     </td>
                                     <td class="px-4 py-3 text-center">
@@ -373,18 +360,6 @@
                                     <td class="px-4 py-3 text-center">
                                         <button type="button"
                                                 class="inline-flex items-center gap-1 text-blue-300 hover:text-blue-200"
-                                                data-uwp-view-standards
-                                                data-mfo-title="Processing of over-the-counter revenue transactions">
-                                            <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12Z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                                            </svg>
-                                            <span class="text-xs">View</span>
-                                        </button>
-                                    </td>
-                                    <td class="px-4 py-3 text-center">
-                                        <button type="button"
-                                                class="inline-flex items-center gap-1 text-blue-300 hover:text-blue-200"
                                                 data-uwp-view-assignees
                                                 data-unit="Revenue Collection Unit">
                                             <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
@@ -414,18 +389,6 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                                             </svg>
                                             <span>(3)</span>
-                                        </button>
-                                    </td>
-                                    <td class="px-4 py-3 text-center">
-                                        <button type="button"
-                                                class="inline-flex items-center gap-1 text-blue-300 hover:text-blue-200"
-                                                data-uwp-view-standards
-                                                data-mfo-title="Maintenance of Revenue Records Filing System">
-                                            <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12Z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                                            </svg>
-                                            <span class="text-xs">View</span>
                                         </button>
                                     </td>
                                     <td class="px-4 py-3 text-center">
@@ -498,20 +461,33 @@
                     <h3 id="uwp-indicators-title" class="text-lg font-semibold text-white">--</h3>
                     <p class="text-xs text-slate-400 mt-1">Read-only list of success indicators for this output.</p>
                 </div>
-                <button type="button" onclick="closeUwpIndicatorsModal()" class="text-slate-400 hover:text-white">
+                <button type="button" data-modal-hide="uwp-indicators-modal" class="text-slate-400 hover:text-white">
                     <span class="sr-only">Close</span>
                     &times;
                 </button>
             </div>
 
-            <div class="mt-4 max-h-64 overflow-y-auto rounded-lg border border-slate-800 bg-slate-950/70 p-3">
-                <ol id="uwp-indicators-list" class="list-decimal space-y-2 pl-5 text-sm text-slate-100"></ol>
+            <div class="mt-4">
+                <div class="overflow-hidden rounded-lg border border-slate-800 bg-slate-950/70">
+                    <div class="max-h-64 overflow-y-auto">
+                        <table class="w-full text-sm text-slate-100">
+                            <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.2em] text-slate-400">
+                                <tr>
+                                    <th class="px-4 py-3 text-left">Success Indicator</th>
+                                    <th class="px-4 py-3 text-center">Standards</th>
+                                </tr>
+                            </thead>
+                            <tbody id="uwp-indicators-table-body" class="divide-y divide-slate-800">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
 
             <div class="mt-5 flex justify-end">
                 <button type="button"
-                        class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800"
-                        onclick="closeUwpIndicatorsModal()">
+                        data-modal-hide="uwp-indicators-modal"
+                        class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800">
                     Close
                 </button>
             </div>
@@ -535,14 +511,6 @@
             </div>
 
             <div class="mt-4 space-y-4">
-                <label class="flex flex-col text-sm text-slate-300">
-                    <span class="text-xs uppercase tracking-wide text-slate-500">Select Indicator</span>
-                    <select id="uwp-standards-indicator-select"
-                            style="background:#0f172a;color:#e5e7eb;"
-                            class="mt-2 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none">
-                    </select>
-                </label>
-
                 <div class="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/40">
                     <table class="w-full text-sm text-slate-100">
                         <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.2em] text-slate-400">
@@ -725,11 +693,8 @@
                 }
             };
             let indicatorStandardsBody;
-            let standardsSelect;
             let standardsModal;
             let assigneesModal;
-            let currentStandards = { mfo: '', indicator: '' };
-            let currentAssigneeUnit = '';
             const bodyOverflowClass = 'overflow-hidden';
 
             function createEmptyStandardsRow() {
@@ -740,9 +705,9 @@
                 if (!indicatorStandardsBody) {
                     return;
                 }
+                indicatorStandardsBody.innerHTML = '';
                 const mfoData = uwpStandardsByMfo[mfoTitle] || {};
                 const indicatorData = mfoData[indicator] || {};
-                indicatorStandardsBody.innerHTML = '';
                 standardRatings.forEach((level) => {
                     const row = indicatorData[level] || createEmptyStandardsRow();
                     const tr = document.createElement('tr');
@@ -754,7 +719,7 @@
                         const td = document.createElement('td');
                         td.className = 'px-4 py-3 align-top';
                         if (!items || items.length === 0) {
-                            td.textContent = '—';
+                            td.textContent = '\u2014';
                             return td;
                         }
                         const ul = document.createElement('ul');
@@ -767,33 +732,9 @@
                         td.appendChild(ul);
                         return td;
                     };
-                    tr.append(
-                        ratingTd,
-                        makeListCell(row.Q),
-                        makeListCell(row.E),
-                        makeListCell(row.T)
-                    );
+                    tr.append(ratingTd, makeListCell(row.Q), makeListCell(row.E), makeListCell(row.T));
                     indicatorStandardsBody.appendChild(tr);
                 });
-            }
-
-            function populateIndicatorSelect(mfoTitle, indicator) {
-                if (!standardsSelect) {
-                    return;
-                }
-                const indicators = uwpIndicatorsByMfo[mfoTitle] || [];
-                standardsSelect.innerHTML = '';
-                indicators.forEach((text) => {
-                    const option = document.createElement('option');
-                    option.value = text;
-                    option.textContent = text;
-                    standardsSelect.appendChild(option);
-                });
-                if (indicator && indicators.includes(indicator)) {
-                    standardsSelect.value = indicator;
-                } else if (indicators.length) {
-                    standardsSelect.value = indicators[0];
-                }
             }
 
             function showModal(modal) {
@@ -810,45 +751,37 @@
                 document.body.classList.remove(bodyOverflowClass);
             }
 
-            function openStandardsViewer(mfoTitle) {
-                if (!mfoTitle) return;
-                const indicators = uwpIndicatorsByMfo[mfoTitle] || [];
-                if (!indicators.length) return;
-                currentStandards.mfo = mfoTitle;
-                currentStandards.indicator = indicators[0];
-                populateIndicatorSelect(mfoTitle, currentStandards.indicator);
-                document.getElementById('uwp-standards-indicator-label').textContent = currentStandards.indicator;
-                renderIndicatorStandards(mfoTitle, currentStandards.indicator);
+            function openStandardsViewer(mfoTitle, indicator) {
+                if (!mfoTitle || !indicator) return;
+                if (!standardsModal) {
+                    standardsModal = document.getElementById('uwp-standards-viewer-modal');
+                }
+                if (!standardsModal) return;
+                const label = document.getElementById('uwp-standards-indicator-label');
+                if (label) {
+                    label.textContent = indicator;
+                }
+                renderIndicatorStandards(mfoTitle, indicator);
                 showModal(standardsModal);
             }
 
             function openAssigneesViewer(unit) {
-                currentAssigneeUnit = unit || 'Revenue Collection Unit';
+                const currentUnit = unit || 'Revenue Collection Unit';
+                if (!assigneesModal) {
+                    assigneesModal = document.getElementById('uwp-assignees-viewer-modal');
+                }
+                if (!assigneesModal) return;
                 const label = document.getElementById('uwp-assignees-unit-label');
                 if (label) {
-                    label.textContent = currentAssigneeUnit;
+                    label.textContent = currentUnit;
                 }
                 showModal(assigneesModal);
             }
 
-            function handleIndicatorChange() {
-                if (!standardsSelect) return;
-                currentStandards.indicator = standardsSelect.value;
-                document.getElementById('uwp-standards-indicator-label').textContent = currentStandards.indicator;
-                renderIndicatorStandards(currentStandards.mfo, currentStandards.indicator);
-            }
-
-            document.addEventListener('DOMContentLoaded', () => {
+            function initModalHandlers() {
                 indicatorStandardsBody = document.getElementById('uwp-standards-table-body');
-                standardsSelect = document.getElementById('uwp-standards-indicator-select');
                 standardsModal = document.getElementById('uwp-standards-viewer-modal');
                 assigneesModal = document.getElementById('uwp-assignees-viewer-modal');
-
-                document.querySelectorAll('[data-uwp-view-standards]').forEach((button) => {
-                    button.addEventListener('click', () => {
-                        openStandardsViewer(button.dataset.mfoTitle);
-                    });
-                });
 
                 document.querySelectorAll('[data-uwp-view-assignees]').forEach((button) => {
                     button.addEventListener('click', () => {
@@ -873,9 +806,76 @@
                         closeModal(assigneesModal);
                     }
                 });
+            }
 
-                standardsSelect?.addEventListener('change', handleIndicatorChange);
-            });
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initModalHandlers);
+            } else {
+                initModalHandlers();
+            }
+
+            (function initIndicatorsModal() {
+                const modal = document.getElementById('uwp-indicators-modal');
+                const titleEl = document.getElementById('uwp-indicators-title');
+                const tableBody = document.getElementById('uwp-indicators-table-body');
+
+                if (!modal || !titleEl || !tableBody) {
+                    return;
+                }
+
+                function openIndicatorsModal(title, mfoTitle, indicators) {
+                    titleEl.textContent = title || '--';
+                    tableBody.innerHTML = '';
+                    (indicators || []).forEach((text) => {
+                        const value = (text || '').trim();
+                        if (!value) {
+                            return;
+                        }
+                        const tr = document.createElement('tr');
+                        tr.className = 'hover:bg-slate-900/40';
+                        const indicatorTd = document.createElement('td');
+                        indicatorTd.className = 'px-4 py-3 text-slate-100';
+                        indicatorTd.textContent = value;
+                        const actionTd = document.createElement('td');
+                        actionTd.className = 'px-4 py-3 text-center';
+                        const button = document.createElement('button');
+                        button.type = 'button';
+                        button.className = 'inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80';
+                        button.dataset.mfoTitle = mfoTitle || '';
+                        button.dataset.indicator = value;
+                        button.innerHTML = '<i class="fa-regular fa-eye text-sm"></i><span>View Standards</span>';
+                        button.addEventListener('click', () => {
+                            openStandardsViewer(button.dataset.mfoTitle, button.dataset.indicator);
+                        });
+                        actionTd.appendChild(button);
+                        tr.append(indicatorTd, actionTd);
+                        tableBody.appendChild(tr);
+                    });
+                    showModal(modal);
+                }
+
+                document.querySelectorAll('[data-uwp-view-indicators]').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        let indicators = [];
+                        try {
+                            indicators = JSON.parse(btn.dataset.indicators || '[]');
+                        } catch (e) {
+                            indicators = [];
+                        }
+                        openIndicatorsModal(btn.dataset.title || '--', btn.dataset.title || '', indicators);
+                    });
+                });
+
+                document.querySelectorAll('[data-modal-hide="uwp-indicators-modal"]').forEach((button) => {
+                    button.addEventListener('click', () => closeModal(modal));
+                });
+
+                modal.addEventListener('click', (event) => {
+                    if (event.target === modal) {
+                        closeModal(modal);
+                    }
+                });
+            })();
 
             (function initViewUwpModal() {
                 const run = () => {
@@ -930,47 +930,6 @@
                 } else {
                     run();
                 }
-            })();
-
-            (function initIndicatorsModal() {
-                const modal = document.getElementById('uwp-indicators-modal');
-                const titleEl = document.getElementById('uwp-indicators-title');
-                const listEl = document.getElementById('uwp-indicators-list');
-
-                window.closeUwpIndicatorsModal = function () {
-                    if (!modal) return;
-                    modal.classList.add('hidden');
-                    modal.classList.remove('flex');
-                    document.body.classList.remove('overflow-hidden');
-                };
-
-                function openIndicatorsModal(title, indicators) {
-                    if (!modal || !titleEl || !listEl) return;
-                    titleEl.textContent = title || '--';
-                    listEl.innerHTML = '';
-                    (indicators || []).forEach((text) => {
-                        const value = (text || '').trim();
-                        if (!value) return;
-                        const li = document.createElement('li');
-                        li.textContent = value;
-                        listEl.appendChild(li);
-                    });
-                    modal.classList.remove('hidden');
-                    modal.classList.add('flex');
-                    document.body.classList.add('overflow-hidden');
-                }
-
-                document.querySelectorAll('[data-uwp-view-indicators]').forEach((btn) => {
-                    btn.addEventListener('click', () => {
-                        let indicators = [];
-                        try {
-                            indicators = JSON.parse(btn.dataset.indicators || '[]');
-                        } catch (e) {
-                            indicators = [];
-                        }
-                        openIndicatorsModal(btn.dataset.title || '--', indicators);
-                    });
-                });
             })();
         </script>
     @endpush

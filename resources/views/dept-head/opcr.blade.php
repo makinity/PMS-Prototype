@@ -368,18 +368,27 @@
         <div id="dh-standards-modal" class="fixed inset-0 z-[92] hidden items-center justify-center bg-black/70 px-4 py-8">
             <div class="w-full max-w-5xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
                 <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
-                    <div class="min-w-0">
-                        <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Standards</p>
-                        <h3 class="text-lg font-semibold text-white">Standards (Q/E/T)</h3>
-                        <p id="dh-standards-indicator" class="text-[11px] text-slate-400 mt-1 truncate"></p>
+                    <div>
+                        <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Standards (Q/E/T)</p>
+                        <h3 id="dh-standards-title" class="text-lg font-semibold text-white">Standards (Q/E/T)</h3>
+                        <p class="text-[11px] text-slate-400 mt-1">
+                            Indicator: <span id="dh-standards-indicator">--</span>
+                        </p>
                     </div>
-                    <button type="button" data-dh-close-standards class="text-slate-400 hover:text-white">
+                    <button type="button" class="text-slate-400 hover:text-white" data-dh-close-standards>
                         <span class="sr-only">Close</span>
                         &times;
                     </button>
                 </div>
 
-                <div class="mt-4 max-h-[70vh] overflow-y-auto rounded-xl border border-slate-800 bg-slate-950/40 p-3">
+                <div class="mt-4 space-y-4 text-sm text-slate-200 max-h-[70vh] overflow-y-auto">
+                    <div class="grid gap-3 sm:grid-cols-2">
+                        <div>
+                            <p class="text-xs uppercase tracking-[0.2em] text-slate-400 mb-1">Indicator</p>
+                            <p id="dh-standards-indicator-display" class="text-sm font-semibold text-slate-100">--</p>
+                        </div>
+                    </div>
+
                     <div id="dh-standards-list" class="w-full"></div>
                 </div>
 
@@ -515,10 +524,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const indicatorsModal = document.getElementById('dh-indicators-modal');
     const indicatorsTitle = document.getElementById('dh-indicators-title');
     const indicatorsList = document.getElementById('dh-indicators-list');
+    let currentMfoTitle = '--';
 
     function openIndicatorsModal(title, indicators) {
         if (!indicatorsModal || !indicatorsTitle || !indicatorsList) return;
-        indicatorsTitle.textContent = title || '--';
+        currentMfoTitle = title || '--';
+        indicatorsTitle.textContent = currentMfoTitle;
         indicatorsList.innerHTML = '';
 
         (indicators || []).forEach((text) => {
@@ -541,7 +552,7 @@ document.addEventListener('DOMContentLoaded', function () {
             btn.type = 'button';
             btn.className = 'text-[11px] text-blue-300 hover:text-blue-200 underline';
             btn.textContent = 'Standards';
-            btn.addEventListener('click', () => openStandardsModal(value));
+            btn.addEventListener('click', () => openStandardsModal(value, currentMfoTitle));
             right.appendChild(btn);
 
             li.appendChild(left);
@@ -580,7 +591,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // -------------------------
     const standardsModal = document.getElementById('dh-standards-modal');
     const standardsList = document.getElementById('dh-standards-list');
+    const standardsTitle = document.getElementById('dh-standards-title');
     const standardsIndicatorLabel = document.getElementById('dh-standards-indicator');
+    const standardsIndicatorDisplay = document.getElementById('dh-standards-indicator-display');
 
     const standardsSeedMap = {
         'All e-bank transactions scanned and encoded daily': {
@@ -734,10 +747,17 @@ document.addEventListener('DOMContentLoaded', function () {
         standardsList.appendChild(table);
     }
 
-    function openStandardsModal(indicatorText) {
-        if (!standardsModal || !standardsIndicatorLabel) return;
-        standardsIndicatorLabel.textContent = indicatorText || '';
-        const data = seedStandardsForIndicator(indicatorText || '');
+    function openStandardsModal(indicatorText, mfoTitle) {
+        if (!standardsModal) return;
+        const rawIndicator = (indicatorText || '').trim();
+        const indicatorLabel = rawIndicator || '--';
+        const activeMfo = (mfoTitle || currentMfoTitle || '--').trim() || '--';
+
+        if (standardsIndicatorLabel) standardsIndicatorLabel.textContent = indicatorLabel;
+        if (standardsIndicatorDisplay) standardsIndicatorDisplay.textContent = indicatorLabel;
+        if (standardsTitle) standardsTitle.textContent = `Standards (Q/E/T) — ${activeMfo}`;
+
+        const data = seedStandardsForIndicator(rawIndicator);
         renderStandardsTable(data);
 
         standardsModal.classList.remove('hidden');
@@ -755,7 +775,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     document.querySelectorAll('[data-dh-open-standards]').forEach((btn) => {
-        btn.addEventListener('click', () => openStandardsModal(btn.dataset.indicator || ''));
+        btn.addEventListener('click', () => openStandardsModal(btn.dataset.indicator || '', btn.dataset.mfoTitle));
     });
 
     document.querySelectorAll('[data-dh-close-standards]').forEach((btn) => {

@@ -115,7 +115,7 @@
                                     <th class="py-2 text-left">Output</th>
                                     <th class="py-2 text-left">Success Indicators</th>
                                     <th class="py-2 text-left">Standards (Q/E/T)</th>
-                                    <th class="py-2 text-left">Target Summary</th>
+                                    <th class="py-2 text-left">Timeline / Target</th>
                                     <th class="py-2 text-left">Weight</th>
                                     <th class="py-2 text-left">Function</th>
                                 </tr>
@@ -316,17 +316,16 @@
                 <div class="max-h-[58vh] overflow-y-auto">
                     <table class="min-w-full text-sm text-slate-200">
                         <thead class="sticky top-0 z-10 bg-slate-900/90 border-b border-slate-800 text-xs uppercase text-slate-500">
-                            <tr class="grid grid-cols-[2.3fr_1fr_0.9fr_1.25fr_0.7fr_0.7fr]">
+                            <tr class="grid grid-cols-[2.3fr_1fr_1.25fr_0.7fr_0.7fr]">
                                 <th class="px-4 py-3 text-left">Output</th>
                                 <th class="px-4 py-3 text-left">Success Indicators</th>
-                                <th class="px-4 py-3 text-left">Standards (Q/E/T)</th>
                                 <th class="px-4 py-3 text-left">Target Summary</th>
                                 <th class="px-4 py-3 text-left">Weight</th>
                                 <th class="px-4 py-3 text-left">Function</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-800">
-                        <tr class="grid grid-cols-[2.3fr_1fr_0.9fr_1.25fr_0.7fr_0.7fr] hover:bg-slate-900/40 transition-colors">
+                        <tr class="grid grid-cols-[2.3fr_1fr_1.25fr_0.7fr_0.7fr] hover:bg-slate-900/40 transition-colors">
                             <td class="px-4 py-4 font-medium text-slate-100">E-Bank Scanning and Encoding of Revenue Transactions</td>
                             <td class="px-4 py-4">
                                 <button type="button"
@@ -342,20 +341,6 @@
                                 </button>
                             </td>
                             <td class="px-4 py-4">
-                                <button type="button"
-                                        class="inline-flex items-center gap-2 text-blue-300 hover:text-blue-200"
-                                        data-uwp-view-standards
-                                        data-title="E-Bank Scanning and Encoding of Revenue Transactions"
-                                        data-indicators='["All e-bank transactions scanned and encoded daily","Indexing complete with no missing pages","Audit trail maintained within 24 hours"]'>
-                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12h19.5" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h12" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 15.75h12" />
-                                    </svg>
-                                    <span>View</span>
-                                </button>
-                            </td>
-                            <td class="px-4 py-4">
                                 Daily; all e-bank transactions processed within the same working day
                             </td>
                             <td class="px-4 py-4 text-sm">50%</td>
@@ -365,7 +350,7 @@
                                 </span>
                             </td>
                         </tr>
-                        <tr class="grid grid-cols-[2.3fr_1fr_0.9fr_1.25fr_0.7fr_0.7fr] hover:bg-slate-900/40 transition-colors">
+                        <tr class="grid grid-cols-[2.3fr_1fr_1.25fr_0.7fr_0.7fr] hover:bg-slate-900/40 transition-colors">
                             <td class="px-4 py-4 font-medium text-slate-100">Processing of Over-the-Counter Revenue Transactions</td>
                             <td class="px-4 py-4">
                                 <button type="button"
@@ -381,20 +366,6 @@
                                 </button>
                             </td>
                             <td class="px-4 py-4">
-                                <button type="button"
-                                        class="inline-flex items-center gap-2 text-blue-300 hover:text-blue-200"
-                                        data-uwp-view-standards
-                                        data-title="Processing of Over-the-Counter Revenue Transactions"
-                                        data-indicators='["Same-day verification of OTC transactions","95% encoded within the business day","OR validation completed daily"]'>
-                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12h19.5" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h12" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 15.75h12" />
-                                    </svg>
-                                    <span>View</span>
-                                </button>
-                            </td>
-                            <td class="px-4 py-4">
                                 Daily; 95% processed within the same working day
                             </td>
                             <td class="px-4 py-4 text-sm">30%</td>
@@ -404,7 +375,7 @@
                                 </span>
                             </td>
                         </tr>
-                        <tr class="grid grid-cols-[2.3fr_1fr_0.9fr_1.25fr_0.7fr_0.7fr] hover:bg-slate-900/40 transition-colors">
+                        <tr class="grid grid-cols-[2.3fr_1fr_1.25fr_0.7fr_0.7fr] hover:bg-slate-900/40 transition-colors">
                             <td class="px-4 py-4 font-medium text-slate-100">Maintenance of Revenue Records Filing System</td>
                             <td class="px-4 py-4">
                                 <button type="button"
@@ -417,20 +388,6 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                                     </svg>
                                     <span>(3)</span>
-                                </button>
-                            </td>
-                            <td class="px-4 py-4">
-                                <button type="button"
-                                        class="inline-flex items-center gap-2 text-blue-300 hover:text-blue-200"
-                                        data-uwp-view-standards
-                                        data-title="Maintenance of Revenue Records Filing System"
-                                        data-indicators='["Weekly filing updated and retrievable","Digital backups synced monthly","Retrieval logs maintained for audits"]'>
-                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12h19.5" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h12" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 15.75h12" />
-                                    </svg>
-                                    <span>View</span>
                                 </button>
                             </td>
                             <td class="px-4 py-4">
@@ -513,22 +470,11 @@
                 </button>
             </div>
 
-            <div class="mt-4 space-y-4 text-sm text-slate-200 max-h-[70vh] overflow-y-auto">
+                <div class="mt-4 space-y-4 text-sm text-slate-200 max-h-[70vh] overflow-y-auto">
                 <div class="grid gap-3 sm:grid-cols-2">
                     <div>
-                        <p class="text-xs uppercase tracking-wide text-slate-400 mb-1">Select Indicator</p>
-                        <select id="uwp-standards-select"
-                                style="background:#0f172a;color:#e5e7eb;"
-                                class="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none">
-                        </select>
-                        <p class="text-[11px] text-slate-500 mt-1">Standards are seeded dummy data (read-only).</p>
-                    </div>
-                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-                        <p class="text-xs text-slate-400">Notes</p>
-                        <ul class="mt-2 space-y-1 text-[11px] text-slate-500 list-disc pl-4">
-                            <li>Each indicator has Q (Quality), E (Efficiency), and T (Timeliness) standards per rating.</li>
-                            <li>These values are derived from your UWP seeded dummy data (same mapping as UWP Standards modal).</li>
-                        </ul>
+                        <p class="text-xs uppercase tracking-wide text-slate-400 mb-1">Indicator</p>
+                        <p id="uwp-standards-indicator-display" class="text-sm font-semibold text-slate-100">--</p>
                     </div>
                 </div>
 
@@ -721,22 +667,20 @@ document.addEventListener('DOMContentLoaded', function () {
     const standardsModal = document.getElementById('uwp-standards-modal');
     const standardsTitle = document.getElementById('uwp-standards-title');
     const standardsIndicatorLabel = document.getElementById('uwp-standards-indicator');
-    const standardsSelect = document.getElementById('uwp-standards-select');
+    const standardsIndicatorDisplay = document.getElementById('uwp-standards-indicator-display');
     const standardsTableWrap = document.getElementById('uwp-standards-table');
 
     // Current context (per MFO row)
     let activeMfoTitle = '--';
-    let activeIndicators = [];
 
     function openUwpIndicatorsModal(title, indicators) {
         activeMfoTitle = title || '--';
-        activeIndicators = Array.isArray(indicators) ? [...indicators] : [];
 
         if (indicatorsTitle) indicatorsTitle.textContent = activeMfoTitle;
 
         if (indicatorsList) {
             indicatorsList.innerHTML = '';
-            activeIndicators.forEach((text, idx) => {
+            (Array.isArray(indicators) ? indicators : []).forEach((text) => {
                 const value = (text || '').trim();
                 if (!value) return;
 
@@ -750,13 +694,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 const right = document.createElement('div');
                 right.className = 'shrink-0';
 
-                // Standards (per indicator)
                 const standardsBtn = document.createElement('button');
                 standardsBtn.type = 'button';
                 standardsBtn.className = 'text-[11px] text-blue-300 hover:text-blue-200 underline';
                 standardsBtn.textContent = 'Standards';
                 standardsBtn.addEventListener('click', () => {
-                    openUwpStandardsModal(activeMfoTitle, activeIndicators, idx);
+                    openUwpStandardsModal(activeMfoTitle, value);
                 });
 
                 right.appendChild(standardsBtn);
@@ -834,45 +777,21 @@ document.addEventListener('DOMContentLoaded', function () {
         standardsTableWrap.appendChild(table);
     }
 
-    function openUwpStandardsModal(mfoTitle, indicators, initialIndex = 0) {
+    function openUwpStandardsModal(mfoTitle, indicatorText) {
         activeMfoTitle = mfoTitle || '--';
-        activeIndicators = Array.isArray(indicators) ? [...indicators] : [];
+        const indicator = (indicatorText || '').trim() || '--';
 
         if (standardsTitle) standardsTitle.textContent = `Standards (Q/E/T) — ${activeMfoTitle}`;
+        if (standardsIndicatorLabel) standardsIndicatorLabel.textContent = indicator;
+        if (standardsIndicatorDisplay) standardsIndicatorDisplay.textContent = indicator;
 
-        // build select options
-        if (standardsSelect) {
-            standardsSelect.innerHTML = '';
-            activeIndicators.forEach((txt, idx) => {
-                const opt = document.createElement('option');
-                opt.value = String(idx);
-                opt.textContent = txt;
-                standardsSelect.appendChild(opt);
-            });
-            const safeIndex = Math.min(Math.max(Number(initialIndex) || 0, 0), Math.max(activeIndicators.length - 1, 0));
-            standardsSelect.value = String(safeIndex);
-        }
-
-        const currentIdx = Number(standardsSelect?.value || 0);
-        const indicatorText = activeIndicators[currentIdx] || '--';
-        if (standardsIndicatorLabel) standardsIndicatorLabel.textContent = indicatorText;
-
-        renderStandardsTableFor(indicatorText);
+        renderStandardsTableFor(indicator);
 
         if (standardsModal) {
             standardsModal.classList.remove('hidden');
             standardsModal.classList.add('flex');
             document.body.classList.add('overflow-hidden');
         }
-    }
-
-    if (standardsSelect) {
-        standardsSelect.addEventListener('change', () => {
-            const idx = Number(standardsSelect.value || 0);
-            const indicatorText = activeIndicators[idx] || '--';
-            if (standardsIndicatorLabel) standardsIndicatorLabel.textContent = indicatorText;
-            renderStandardsTableFor(indicatorText);
-        });
     }
 
     window.closeUwpStandardsModal = function () {
@@ -899,8 +818,8 @@ document.addEventListener('DOMContentLoaded', function () {
         btn.addEventListener('click', () => {
             let indicators = [];
             try { indicators = JSON.parse(btn.dataset.indicators || '[]'); } catch (e) { indicators = []; }
-            // open standards modal and default to first indicator
-            openUwpStandardsModal(btn.dataset.title || '--', indicators, 0);
+            const indicator = (indicators[0] || '').trim() || '--';
+            openUwpStandardsModal(btn.dataset.title || '--', indicator);
         });
     });
 

@@ -137,7 +137,6 @@
                                 <tr>
                                     <th class="px-4 py-3 text-left text-xs uppercase text-slate-400">PPA / MFO</th>
                                     <th class="px-4 py-3 text-center text-xs uppercase text-slate-400">Success Indicators</th>
-                                    <th class="px-4 py-3 text-center text-xs uppercase text-slate-400">Standards (Q/E/T)</th>
                                     <th class="px-4 py-3 text-center text-xs uppercase text-slate-400">Assigned Employees</th>
                                     <th class="px-4 py-3 text-center text-xs uppercase text-slate-400">Target / Timeline</th>
                                     <th class="px-4 py-3 text-center text-xs uppercase text-slate-400">Function</th>
@@ -159,20 +158,6 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                                                 </svg>
                                                 <span>(3)</span>
-                                            </button>
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-3 text-sm text-center">
-                                        <div class="flex justify-center">
-                                            <button
-                                                type="button"
-                                                data-pmt-standards-trigger
-                                                data-mfo-key="mfo1"
-                                                data-mfo-title="E-Bank Scanning and Encoding of Revenue Transactions"
-                                                data-indicators='["All e-bank transactions scanned and encoded daily","Indexing complete with no missing pages","Audit trail maintained within 24 hours"]'
-                                                class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[90px]">
-                                                <i class="fa-regular fa-eye text-sm"></i>
-                                                <span>View</span>
                                             </button>
                                         </div>
                                     </td>
@@ -218,20 +203,6 @@
                                         <div class="flex justify-center">
                                             <button
                                                 type="button"
-                                                data-pmt-standards-trigger
-                                                data-mfo-key="mfo2"
-                                                data-mfo-title="Processing of over-the-counter revenue transactions"
-                                                data-indicators='["Same-day verification of OTC transactions","95% encoded within the business day","OR validation completed daily"]'
-                                                class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[90px]">
-                                                <i class="fa-regular fa-eye text-sm"></i>
-                                                <span>View</span>
-                                            </button>
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-3 text-sm text-center">
-                                        <div class="flex justify-center">
-                                            <button
-                                                type="button"
                                                 data-pmt-assignees-trigger
                                                 data-unit="Revenue Collection Unit"
                                                 class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[90px]">
@@ -262,20 +233,6 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                                                 </svg>
                                                 <span>(3)</span>
-                                            </button>
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-3 text-sm text-center">
-                                        <div class="flex justify-center">
-                                            <button
-                                                type="button"
-                                                data-pmt-standards-trigger
-                                                data-mfo-key="mfo3"
-                                                data-mfo-title="Maintenance of Revenue Records Filing System"
-                                                data-indicators='["Weekly filing updated and retrievable","Digital backups synced monthly","Retrieval logs maintained for audits"]'
-                                                class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[90px]">
-                                                <i class="fa-regular fa-eye text-sm"></i>
-                                                <span>View</span>
                                             </button>
                                         </div>
                                     </td>
@@ -356,7 +313,15 @@
             </div>
 
             <div class="mt-4 max-h-64 overflow-y-auto rounded-lg border border-slate-800 bg-slate-950/70 p-3">
-                <ol id="uwp-indicators-list" class="list-decimal space-y-2 pl-5 text-sm text-slate-100"></ol>
+                <table class="w-full text-sm text-slate-100">
+                    <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.2em] text-slate-400">
+                        <tr>
+                            <th class="px-4 py-3 text-left">Success Indicator</th>
+                            <th class="px-4 py-3 text-center">Standards</th>
+                        </tr>
+                    </thead>
+                    <tbody id="uwp-indicators-table-body" class="divide-y divide-slate-800"></tbody>
+                </table>
             </div>
 
             <div class="mt-5 flex justify-end">
@@ -387,17 +352,6 @@
                 <div>
                     <p class="text-xs uppercase tracking-[0.2em] text-slate-500">MFO</p>
                     <p class="text-sm font-semibold text-white" data-standards-mfo>--</p>
-                </div>
-
-                <div class="space-y-2">
-                    <label class="text-xs uppercase tracking-[0.2em] text-slate-500">Select Indicator</label>
-                    <div class="rounded-lg border border-slate-800 bg-slate-900/70 px-3 py-2">
-                        <select
-                            data-standards-indicator-select
-                            class="w-full bg-transparent text-sm text-slate-100 focus:ring-0 focus:outline-none"
-                        >
-                        </select>
-                    </div>
                 </div>
 
                 <div>
@@ -530,7 +484,7 @@
             (function initPmtIndicatorsModal() {
                 const modal = document.getElementById('uwp-indicators-modal');
                 const titleEl = document.getElementById('uwp-indicators-title');
-                const listEl = document.getElementById('uwp-indicators-list');
+                const tableBody = document.getElementById('uwp-indicators-table-body');
 
                 window.closePmtIndicatorsModal = function () {
                     if (!modal) return;
@@ -539,16 +493,34 @@
                     document.body.classList.remove('overflow-hidden');
                 };
 
-                function openIndicatorsModal(title, indicators) {
-                    if (!modal || !titleEl || !listEl) return;
+                function openIndicatorsModal(title, mfoTitle, indicators) {
+                    if (!modal || !titleEl || !tableBody) return;
                     titleEl.textContent = title || '--';
-                    listEl.innerHTML = '';
+                    tableBody.innerHTML = '';
                     (indicators || []).forEach((text) => {
                         const value = (text || '').trim();
                         if (!value) return;
-                        const li = document.createElement('li');
-                        li.textContent = value;
-                        listEl.appendChild(li);
+                        const tr = document.createElement('tr');
+                        tr.className = 'hover:bg-slate-900/40';
+                        const indicatorTd = document.createElement('td');
+                        indicatorTd.className = 'px-4 py-3 text-sm text-slate-100';
+                        indicatorTd.textContent = value;
+                        const actionTd = document.createElement('td');
+                        actionTd.className = 'px-4 py-3 text-center';
+                        const button = document.createElement('button');
+                        button.type = 'button';
+                        button.className = 'inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[90px]';
+                        button.innerHTML = '<i class="fa-regular fa-eye text-sm"></i><span>View Standards</span>';
+                        button.dataset.mfoTitle = mfoTitle || '';
+                        button.dataset.indicator = value;
+                        button.addEventListener('click', () => {
+                            if (window.openPmtStandardsModal) {
+                                window.openPmtStandardsModal(button.dataset.mfoTitle, button.dataset.indicator);
+                            }
+                        });
+                        actionTd.appendChild(button);
+                        tr.append(indicatorTd, actionTd);
+                        tableBody.appendChild(tr);
                     });
                     modal.classList.remove('hidden');
                     modal.classList.add('flex');
@@ -563,7 +535,7 @@
                         } catch (e) {
                             indicators = [];
                         }
-                        openIndicatorsModal(btn.dataset.title || '--', indicators);
+                        openIndicatorsModal(btn.dataset.title || '--', btn.dataset.title || '', indicators);
                     });
                 });
             })();
@@ -621,7 +593,6 @@
                 const modal = document.getElementById('pmt-standards-modal');
                 const mfoEl = modal?.querySelector('[data-standards-mfo]');
                 const indicatorEl = modal?.querySelector('[data-standards-indicator]');
-                const selectEl = modal?.querySelector('[data-standards-indicator-select]');
                 const bodyEl = modal?.querySelector('[data-standards-body]');
                 const ratings = [5, 4, 3, 2, 1];
                 const standardsSeedMap = {
@@ -731,53 +702,30 @@
                                 li.textContent = value;
                                 ul.appendChild(li);
                             });
-                            td.appendChild(ul);
-                            return td;
-                        };
+                        td.appendChild(ul);
+                        return td;
+                    };
 
-                        row.append(
-                            ratingCell,
-                            makeList(data.q),
-                            makeList(data.e),
-                            makeList(data.t)
-                        );
-                        bodyEl.appendChild(row);
-                    });
-                }
+                    row.append(
+                        ratingCell,
+                        makeList(data.q),
+                        makeList(data.e),
+                        makeList(data.t)
+                    );
+                    bodyEl.appendChild(row);
+                });
+            }
 
-                window.closePmtStandardsModal = closeModal;
+            window.closePmtStandardsModal = closeModal;
 
-                function openStandardsModal(mfoTitle, indicators) {
-                    if (!modal || !selectEl) return;
+                function openStandardsModal(mfoTitle, indicator) {
+                    if (!modal) return;
                     mfoEl && (mfoEl.textContent = mfoTitle || '--');
-                    selectEl.innerHTML = '';
-                    (indicators || []).forEach((indicator) => {
-                        const option = document.createElement('option');
-                        option.value = indicator;
-                        option.textContent = indicator;
-                        selectEl.appendChild(option);
-                    });
-                    const initial = indicators?.[0] || '';
-                    selectEl.value = initial;
-                    renderStandards(initial);
+                    renderStandards(indicator);
                     showModal();
                 }
 
-                selectEl?.addEventListener('change', () => {
-                    renderStandards(selectEl.value);
-                });
-
-                document.querySelectorAll('[data-pmt-standards-trigger]').forEach((btn) => {
-                    btn.addEventListener('click', () => {
-                        let parsed = [];
-                        try {
-                            parsed = JSON.parse(btn.dataset.indicators || '[]');
-                        } catch (error) {
-                            parsed = [];
-                        }
-                        openStandardsModal(btn.dataset.mfoTitle || '--', parsed);
-                    });
-                });
+                window.openPmtStandardsModal = openStandardsModal;
             })();
 
             (function initPmtAssigneesModal() {
