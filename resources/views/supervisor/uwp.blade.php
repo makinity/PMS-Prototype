@@ -955,8 +955,9 @@
                             if (isDraft) {
                                 const addLink = document.createElement('button');
                                 addLink.type = 'button';
-                                addLink.className = 'mt-1 text-[11px] text-blue-300 hover:text-blue-200';
-                                addLink.textContent = 'Add to this cell';
+                                addLink.className = 'mt-1 text-[11px]';
+                                addLink.style.color = '#60a5fa';
+                                addLink.textContent = 'Add +';
                                 addLink.addEventListener('click', () => {
                                     const ratingSelect = document.getElementById('uwp-standard-rating');
                                     const dimSelect = document.getElementById('uwp-standard-dimension');
