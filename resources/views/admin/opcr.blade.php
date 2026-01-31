@@ -67,7 +67,7 @@
     <!-- CREATE OPCR MODAL -->
     <div id="create-opcr-modal"
         class="fixed inset-0 z-[80] hidden flex items-center justify-center bg-black/60 px-4 py-6">
-        <div class="w-full max-w-2xl rounded-2xl border border-slate-800 bg-slate-900 p-6">
+        <div class="w-full max-w-4xl rounded-2xl border border-slate-800 bg-slate-900 p-6">
 
             <!-- MODAL HEADER -->
             <div class="flex items-start justify-between">
@@ -114,10 +114,9 @@
                                 <tr>
                                     <th class="py-2 text-left">Output</th>
                                     <th class="py-2 text-left">Success Indicators</th>
-                                    <th class="py-2 text-left">Standards (Q/E/T)</th>
                                     <th class="py-2 text-left">Timeline / Target</th>
-                                    <th class="py-2 text-left">Weight</th>
-                                    <th class="py-2 text-left">Function</th>
+                                    <th class="py-2 pr-4 text-left">Weight</th>
+                                    <th class="py-2 pl-4 text-left">Function</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -138,23 +137,9 @@
                                             <span>(3)</span>
                                         </button>
                                     </td>
-                                    <td class="py-2">
-                                        <button type="button"
-                                                class="inline-flex items-center gap-2 text-blue-300 hover:text-blue-200"
-                                                data-uwp-view-standards
-                                                data-title="E-Bank Scanning and Encoding of Revenue Transactions"
-                                                data-indicators='["All e-bank transactions scanned and encoded daily","Indexing complete with no missing pages","Audit trail maintained within 24 hours"]'>
-                                            <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12h19.5" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h12" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 15.75h12" />
-                                            </svg>
-                                            <span>View</span>
-                                        </button>
-                                    </td>
                                     <td class="py-2">Daily; all e-bank transactions processed within the same working day</td>
-                                    <td class="py-2">50%</td>
-                                    <td class="py-2">
+                                    <td class="py-2 pr-4">50%</td>
+                                    <td class="py-2 pl-4">
                                         <span class="rounded-md bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-300 border border-emerald-500/20">
                                             Core
                                         </span>
@@ -178,23 +163,9 @@
                                             <span>(3)</span>
                                         </button>
                                     </td>
-                                    <td class="py-2">
-                                        <button type="button"
-                                                class="inline-flex items-center gap-2 text-blue-300 hover:text-blue-200"
-                                                data-uwp-view-standards
-                                                data-title="Processing of Over-the-Counter Revenue Transactions"
-                                                data-indicators='["Same-day verification of OTC transactions","95% encoded within the business day","OR validation completed daily"]'>
-                                            <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12h19.5" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h12" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 15.75h12" />
-                                            </svg>
-                                            <span>View</span>
-                                        </button>
-                                    </td>
                                     <td class="py-2">Daily; 95% processed within the same working day</td>
-                                    <td class="py-2">30%</td>
-                                    <td class="py-2">
+                                    <td class="py-2 pr-4">30%</td>
+                                    <td class="py-2 pl-4">
                                         <span class="rounded-md bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-300 border border-emerald-500/20">
                                             Core
                                         </span>
@@ -218,23 +189,9 @@
                                             <span>(3)</span>
                                         </button>
                                     </td>
-                                    <td class="py-2">
-                                        <button type="button"
-                                                class="inline-flex items-center gap-2 text-blue-300 hover:text-blue-200"
-                                                data-uwp-view-standards
-                                                data-title="Maintenance of Revenue Records Filing System"
-                                                data-indicators='["Weekly filing updated and retrievable","Digital backups synced monthly","Retrieval logs maintained for audits"]'>
-                                            <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12h19.5" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h12" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 15.75h12" />
-                                            </svg>
-                                            <span>View</span>
-                                        </button>
-                                    </td>
                                     <td class="py-2">Quarterly validation and update</td>
-                                    <td class="py-2">20%</td>
-                                    <td class="py-2">
+                                    <td class="py-2 pr-4">20%</td>
+                                    <td class="py-2 pl-4">
                                         <span class="rounded-md bg-blue-500/10 px-2 py-1 text-xs font-medium text-blue-300 border border-blue-400/30">
                                             Support
                                         </span>
