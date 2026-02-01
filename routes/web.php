@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\ActivationController;
 use App\Http\Controllers\StageOne\Forms\IpcrExportController;
 use App\Http\Controllers\StageOne\Forms\OpcrExportController;
 use App\Http\Controllers\StageOne\Forms\UwpExportController;
@@ -18,9 +19,27 @@ Route::get('/', function () {
     return view('landing');
 });
 
+Route::post('/activate/verify', [ActivationController::class, 'verify']);
+Route::post('/activate/complete', [ActivationController::class, 'complete']);
+
 Route::fallback(function(){
     return view('no-page');
 });
+
+Route::get('/dashboard', function () {
+    $user = auth()->user();
+
+    if (! $user) {
+        return redirect()->route('login');
+    }
+
+    return match ($user->role) {
+        'employee'   => redirect()->route('employee.dashboard'),
+        'supervisor' => redirect()->route('supervisor.dashboard'),
+        default      => abort(403, 'Unauthorized role'),
+    };
+})->middleware('auth');
+
 
 Route::prefix('employee')->group(function(){
     Route::get('/dashboard', function () {

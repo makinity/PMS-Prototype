@@ -14,7 +14,7 @@ const body = document.body;
 
 function toggleMobileMenu() {
     const isActive = mobileMenu.classList.contains('active');
-    
+
     if (isActive) {
         // Close menu
         mobileMenu.classList.remove('active');
@@ -35,7 +35,7 @@ if (mobileMenuBtn && mobileMenu) {
         e.stopPropagation();
         toggleMobileMenu();
     });
-    
+
     // Close mobile menu when clicking links
     mobileMenu.querySelectorAll('a, button').forEach(element => {
         element.addEventListener('click', function() {
@@ -47,7 +47,7 @@ if (mobileMenuBtn && mobileMenu) {
             }
         });
     });
-    
+
     // Close mobile menu when clicking outside
     document.addEventListener('click', function(event) {
         if (!mobileMenu.contains(event.target) && !mobileMenuBtn.contains(event.target)) {
@@ -59,7 +59,7 @@ if (mobileMenuBtn && mobileMenu) {
             }
         }
     });
-    
+
     // Close mobile menu on scroll
     window.addEventListener('scroll', function() {
         if (mobileMenu && mobileMenu.classList.contains('active')) {
@@ -71,7 +71,7 @@ if (mobileMenuBtn && mobileMenu) {
             }
         }
     });
-    
+
     // Close menu on escape key
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && mobileMenu.classList.contains('active')) {
@@ -98,7 +98,7 @@ const fadeInOnScroll = function() {
     fadeElements.forEach(element => {
         const elementTop = element.getBoundingClientRect().top;
         const elementVisible = 100;
-        
+
         if (elementTop < window.innerHeight - elementVisible) {
             element.classList.add('visible');
         }
@@ -244,6 +244,107 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         }
     });
 });
+
+const loginForm = document.getElementById('loginForm');
+const loginNameInput = document.getElementById('login_name');
+const loginPasswordInput = document.getElementById('password');
+const loginText = document.getElementById('loginText');
+const loginSpinner = document.getElementById('loginSpinner');
+const loginSubmitBtn = document.getElementById('loginToDashboardBtn');
+
+const getLoginCsrfToken = () => {
+    const metaToken = document.querySelector('meta[name="csrf-token"]');
+    return metaToken ? metaToken.getAttribute('content') ?? '' : '';
+};
+
+const parseLoginJsonSafe = async response => {
+    try {
+        return await response.json();
+    } catch {
+        return null;
+    }
+};
+
+if (loginForm && loginNameInput && loginPasswordInput && loginText && loginSpinner && loginSubmitBtn) {
+    loginForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const name = loginNameInput.value.trim();
+        const password = loginPasswordInput.value.trim();
+
+        if (!name) {
+            showError(loginNameInput, 'Name is required');
+            return;
+        }
+
+        if (!password) {
+            showError(loginPasswordInput, 'Password is required');
+            return;
+        }
+
+        loginText.classList.add('hidden');
+        loginSpinner.classList.remove('hidden');
+        loginSubmitBtn.disabled = true;
+        loginSubmitBtn.style.pointerEvents = 'none';
+
+        try {
+            const csrf = getLoginCsrfToken();
+            const response = await fetch('/login', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrf,
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: JSON.stringify({
+                    name,
+                    password,
+                }),
+            });
+
+            const payload = await parseLoginJsonSafe(response);
+
+            if (response.ok) {
+                if (loginModalInstance) {
+                    loginModalInstance.hide();
+                }
+                window.location.href = '/dashboard';
+                return;
+            }
+
+            if (response.status === 422) {
+                const errors = payload?.errors ?? {};
+                const message = payload?.message ?? '';
+                if (errors.name) {
+                    showError(loginNameInput, errors.name[0]);
+                }
+                if (errors.password) {
+                    showError(loginPasswordInput, errors.password[0]);
+                }
+                if (message === 'Activate account first.') {
+                    showError(loginNameInput, message);
+                }
+                return;
+            }
+
+            if (response.status === 401) {
+                showError(loginNameInput, 'Invalid credentials.');
+                return;
+            }
+
+            alert(payload?.message ?? 'Login failed. Please try again.');
+        } catch (error) {
+            alert('Login failed. Please try again.');
+        } finally {
+            loginText.classList.remove('hidden');
+            loginSpinner.classList.add('hidden');
+            loginSubmitBtn.disabled = false;
+            loginSubmitBtn.style.pointerEvents = '';
+        }
+    });
+}
 });
 
 
@@ -252,6 +353,7 @@ const activationForm = document.getElementById('activationForm');
 if (!activationForm) {
     return;
 }
+
 // Get DOM elements
 const verifyPhase = document.getElementById('activationPhaseVerify');
 const passwordPhase = document.getElementById('activationPhasePassword');
@@ -273,334 +375,468 @@ const profilePreviewImage = document.getElementById('profilePreviewImage');
 const profilePreviewIcon = document.getElementById('profilePreviewIcon');
 const removeProfilePhotoBtn = document.getElementById('removeProfilePhoto');
 
+const requiredElements = [
+    verifyPhase,
+    passwordPhase,
+    verifyBtn,
+    backBtn,
+    activateBtn,
+    currentStepSpan,
+    modalTitle,
+    employeeIdInput,
+    emailInput,
+    passwordInput,
+    confirmPasswordInput,
+    passwordStrengthBar,
+    passwordStrengthText,
+];
+
+if (requiredElements.some(element => !element)) {
+    return;
+}
+
+const getCsrfToken = () => {
+    const metaToken = document.querySelector('meta[name="csrf-token"]');
+    if (metaToken) {
+        return metaToken.getAttribute('content') ?? '';
+    }
+
+    const hiddenToken = document.querySelector('input[name="_token"]');
+    return hiddenToken ? hiddenToken.value : '';
+};
+
+const parseJsonSafe = async response => {
+    try {
+        return await response.json();
+    } catch {
+        return null;
+    }
+};
+
+const employeeIdPattern = /^EMP-\d{4}-\d{5}$/;
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const activateLoadingState = (button, text) => {
+    if (!button) return null;
+    const original = button.innerHTML;
+    button.innerHTML = `<span class="loading-spinner"></span> ${text}`;
+    button.disabled = true;
+    return original;
+};
+
+const restoreButton = (button, original) => {
+    if (!button || original === null) return;
+    button.innerHTML = original;
+    button.disabled = false;
+};
+
 // Track current step
 let currentStep = 1;
 let verifiedData = null;
 
 // Step 1: Verify Account
-verifyBtn.addEventListener('click', function() {
-// Get form values
-const employeeId = employeeIdInput.value.trim();
-const email = emailInput.value.trim();
+verifyBtn.addEventListener('click', async function() {
+    const employeeId = employeeIdInput.value.trim();
+    const email = emailInput.value.trim();
 
-// Validation
-if (!employeeId) {
-    showError(employeeIdInput, 'Employee ID is required');
-    return;
-}
+    if (!employeeId) {
+        showError(employeeIdInput, 'Employee ID is required');
+        return;
+    }
 
-if (!email) {
-    showError(emailInput, 'Email is required');
-    return;
-}
+    if (!email) {
+        showError(emailInput, 'Email is required');
+        return;
+    }
 
-// Validate Employee ID format
-const employeeIdPattern = /^EMP-\d{4}-\d{5}$/;
-if (!employeeIdPattern.test(employeeId)) {
-    showError(employeeIdInput, 'Invalid format. Use EMP-YYYY-XXXXX');
-    return;
-}
+    if (!employeeIdPattern.test(employeeId)) {
+        showError(employeeIdInput, 'Invalid format. Use EMP-YYYY-XXXXX');
+        return;
+    }
 
-// Validate email format
-const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-if (!emailPattern.test(email)) {
-    showError(emailInput, 'Please enter a valid email address');
-    return;
-}
+    if (!emailPattern.test(email)) {
+        showError(emailInput, 'Please enter a valid email address');
+        return;
+    }
 
-// Show loading state
-const originalText = verifyBtn.innerHTML;
-verifyBtn.innerHTML = '<span class="loading-spinner"></span> Verifying...';
-verifyBtn.disabled = true;
+    const originalText = activateLoadingState(verifyBtn, 'Verifying...');
 
-// Simulate API call to verify account
-setTimeout(() => {
-    // For demo purposes, we'll simulate a successful verification
-    // In real application, this would be an API call
-    const isVerified = Math.random() > 0.2; // 80% success rate for demo
-
-    if (isVerified) {
-        // Save verified data
-        verifiedData = {
-            employeeId: employeeId,
-            email: email
+    try {
+        const headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
         };
+        const csrf = getCsrfToken();
+        if (csrf) {
+            headers['X-CSRF-TOKEN'] = csrf;
+        }
 
-        // Move to next step
-        goToStep(2);
-    } else {
-        // Show error
-        alert('Account verification failed. Please check your Employee ID and email, or contact HR.');
+        const response = await fetch('/activate/verify', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                ...headers,
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: JSON.stringify({ employee_id: employeeId, email }),
+        });
+
+
+        const payload = await parseJsonSafe(response);
+
+        if (response.ok) {
+            verifiedData = {
+                employeeId,
+                email,
+                token: payload?.token ?? '',
+                user: payload?.user ?? null,
+            };
+
+            goToStep(2);
+        } else {
+            const message = payload?.message ?? 'Account verification failed.';
+            if (response.status === 409) {
+                alert(message);
+            } else if (/email/i.test(message)) {
+                showError(emailInput, message);
+            } else {
+                showError(employeeIdInput, message);
+            }
+        }
+    } catch (error) {
+        alert('Unable to verify your account. Please try again.');
+    } finally {
+        restoreButton(verifyBtn, originalText);
     }
-
-    // Reset button
-    verifyBtn.innerHTML = originalText;
-    verifyBtn.disabled = false;
-}, 1500);
 });
 
-// Step 2: Back to Verify
-backBtn.addEventListener('click', function() {
-goToStep(1);
-});
+if (backBtn) {
+    backBtn.addEventListener('click', function() {
+        goToStep(1);
+    });
+}
 
-// Password strength checker
-passwordInput.addEventListener('input', function() {
-checkPasswordStrength(this.value);
-});
+if (passwordInput) {
+    passwordInput.addEventListener('input', function() {
+        checkPasswordStrength(this.value);
+    });
+}
 
-// Profile photo preview
 function resetProfilePhoto() {
-if (profilePhotoInput) {
-    profilePhotoInput.value = '';
-}
-if (profilePreviewImage) {
-    profilePreviewImage.src = '';
-    profilePreviewImage.classList.add('hidden');
-}
-if (profilePreviewIcon) {
-    profilePreviewIcon.classList.remove('hidden');
-}
-if (removeProfilePhotoBtn) {
-    removeProfilePhotoBtn.classList.add('hidden');
-}
-}
-
-if (profilePhotoInput) {
-profilePhotoInput.addEventListener('change', function() {
-    const file = this.files && this.files[0];
-    if (!file) {
-        resetProfilePhoto();
-        return;
+    if (profilePhotoInput) {
+        profilePhotoInput.value = '';
     }
-
-    if (!file.type.startsWith('image/')) {
-        alert('Please select an image file.');
-        resetProfilePhoto();
-        return;
+    if (profilePreviewImage) {
+        profilePreviewImage.src = '';
+        profilePreviewImage.classList.add('hidden');
     }
+    if (profilePreviewIcon) {
+        profilePreviewIcon.classList.remove('hidden');
+    }
+    if (removeProfilePhotoBtn) {
+        removeProfilePhotoBtn.classList.add('hidden');
+    }
+}
 
-    const reader = new FileReader();
-    reader.onload = function(event) {
-        if (profilePreviewImage) {
-            profilePreviewImage.src = event.target.result;
-            profilePreviewImage.classList.remove('hidden');
+if (profilePhotoInput) {
+    profilePhotoInput.addEventListener('change', function() {
+        const file = this.files && this.files[0];
+        if (!file) {
+            resetProfilePhoto();
+            return;
         }
-        if (profilePreviewIcon) {
-            profilePreviewIcon.classList.add('hidden');
+
+        if (!file.type.startsWith('image/')) {
+            alert('Please select an image file.');
+            resetProfilePhoto();
+            return;
         }
-        if (removeProfilePhotoBtn) {
-            removeProfilePhotoBtn.classList.remove('hidden');
-        }
-    };
-    reader.readAsDataURL(file);
-});
+
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            if (profilePreviewImage) {
+                profilePreviewImage.src = event.target.result;
+                profilePreviewImage.classList.remove('hidden');
+            }
+            if (profilePreviewIcon) {
+                profilePreviewIcon.classList.add('hidden');
+            }
+            if (removeProfilePhotoBtn) {
+                removeProfilePhotoBtn.classList.remove('hidden');
+            }
+        };
+        reader.readAsDataURL(file);
+    });
 }
 
 if (removeProfilePhotoBtn) {
-removeProfilePhotoBtn.addEventListener('click', function() {
-    resetProfilePhoto();
-});
+    removeProfilePhotoBtn.addEventListener('click', function() {
+        resetProfilePhoto();
+    });
 }
 
-// Password visibility toggle function
 window.togglePassword = function(inputId, button) {
-const input = document.getElementById(inputId);
-const icon = button.querySelector('i');
+    const input = document.getElementById(inputId);
+    const icon = button.querySelector('i');
 
-if (input.type === 'password') {
-    input.type = 'text';
-    icon.classList.remove('fa-eye');
-    icon.classList.add('fa-eye-slash');
-} else {
-    input.type = 'password';
-    icon.classList.remove('fa-eye-slash');
-    icon.classList.add('fa-eye');
-}
+    if (!input || !icon) {
+        return;
+    }
+
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
 };
 
-// Form submission
-document.getElementById('activationForm').addEventListener('submit', function(e) {
-e.preventDefault();
+activationForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
 
-// Validate passwords
-const password = passwordInput.value;
-const confirmPassword = confirmPasswordInput.value;
-
-if (!password) {
-    showError(passwordInput, 'Password is required');
-    return;
-}
-
-if (!confirmPassword) {
-    showError(confirmPasswordInput, 'Please confirm your password');
-    return;
-}
-
-if (password !== confirmPassword) {
-    showError(confirmPasswordInput, 'Passwords do not match');
-    return;
-}
-
-// Password strength validation
-const strength = calculatePasswordStrength(password);
-if (strength < 2) { // Less than "fair"
-    alert('Please use a stronger password (at least 8 characters with letters and numbers)');
-    return;
-}
-
-// Show loading state
-const originalText = activateBtn.innerHTML;
-activateBtn.innerHTML = '<span class="loading-spinner"></span> Activating...';
-activateBtn.disabled = true;
-
-// Simulate account activation
-setTimeout(() => {
-    // Success!
-    alert(`Account activated successfully!\n\nEmployee ID: ${verifiedData.employeeId}\nEmail: ${verifiedData.email}\n\nYou can now login to the Performance Management System.`);
-
-    // Reset form and close modal
-    resetForm();
-    
-    // Close modal (using Flowbite)
-    const modal = document.getElementById('accountActivationModal');
-    const modalInstance = Modal.getInstance(modal);
-    if (modalInstance) {
-        modalInstance.hide();
+    if (!passwordInput || !confirmPasswordInput || !activateBtn) {
+        return;
     }
 
-    // Reset button
-    activateBtn.innerHTML = originalText;
-    activateBtn.disabled = false;
-}, 2000);
+    const password = passwordInput.value.trim();
+    const confirmPassword = confirmPasswordInput.value.trim();
+
+    if (!password) {
+        showError(passwordInput, 'Password is required');
+        return;
+    }
+
+    if (!confirmPassword) {
+        showError(confirmPasswordInput, 'Please confirm your password');
+        return;
+    }
+
+    if (password !== confirmPassword) {
+        showError(confirmPasswordInput, 'Passwords do not match');
+        return;
+    }
+
+    const strength = calculatePasswordStrength(password);
+    if (strength < 2) {
+        alert('Please use a stronger password (at least 8 characters with letters and numbers)');
+        return;
+    }
+
+    if (!verifiedData?.token) {
+        goToStep(1);
+        alert('Please verify your account first.');
+        return;
+    }
+
+    const originalText = activateLoadingState(activateBtn, 'Activating...');
+
+    try {
+        const formData = new FormData();
+        formData.append('token', verifiedData.token);
+        formData.append('password', password);
+        formData.append('password_confirmation', confirmPassword);
+        if (profilePhotoInput && profilePhotoInput.files.length) {
+            formData.append('profile_photo', profilePhotoInput.files[0]);
+        }
+
+        const headers = {
+            'Accept': 'application/json',
+        };
+        const csrf = getCsrfToken();
+        if (csrf) {
+            headers['X-CSRF-TOKEN'] = csrf;
+        }
+
+        const response = await fetch('/activate/complete', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                ...headers,
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: formData,
+        });
+
+        const payload = await parseJsonSafe(response);
+
+        if (response.ok) {
+            const message = payload?.message ?? 'Account activated successfully.';
+            alert(message);
+            resetForm();
+
+            const modal = document.getElementById('accountActivationModal');
+            const modalInstance = Modal.getInstance(modal);
+            if (modalInstance) {
+                modalInstance.hide();
+            }
+
+            setTimeout(() => {
+                if (typeof loginModalInstance !== 'undefined') {
+                    loginModalInstance.show();
+                }
+            }, 300);
+        } else {
+            const message = payload?.message ?? 'Unable to activate your account.';
+            if (payload?.errors?.password) {
+                showError(passwordInput, payload.errors.password[0]);
+            }
+            if (payload?.errors?.token) {
+                alert(payload.errors.token[0]);
+                goToStep(1);
+                return;
+            }
+            alert(message);
+        }
+    } catch (error) {
+        alert('Unable to activate your account. Please try again.');
+    } finally {
+        restoreButton(activateBtn, originalText);
+    }
 });
 
-// Helper functions
 function goToStep(step) {
-currentStep = step;
+    currentStep = step;
 
-// Update UI
-if (step === 1) {
-    verifyPhase.classList.remove('hidden');
-    passwordPhase.classList.add('hidden');
-    modalTitle.textContent = 'Activate PMS Account';
-} else if (step === 2) {
-    verifyPhase.classList.add('hidden');
-    passwordPhase.classList.remove('hidden');
-    modalTitle.textContent = 'Set Your Password';
-    
-    // Pre-fill email from verification
-    if (verifiedData) {
-        document.getElementById('act_password').focus();
+    if (step === 1) {
+        verifyPhase.classList.remove('hidden');
+        passwordPhase.classList.add('hidden');
+        modalTitle.textContent = 'Activate PMS Account';
+    } else if (step === 2) {
+        verifyPhase.classList.add('hidden');
+        passwordPhase.classList.remove('hidden');
+        modalTitle.textContent = 'Set Your Password';
+
+        if (verifiedData) {
+            document.getElementById('act_password').focus();
+        }
     }
-}
 
-// Update step indicators
-stepIndicators.forEach(indicator => {
-    const stepNum = parseInt(indicator.getAttribute('data-step'));
-    if (stepNum <= step) {
-        indicator.classList.add('active');
-    } else {
-        indicator.classList.remove('active');
-    }
-});
+    stepIndicators.forEach(indicator => {
+        const stepNum = parseInt(indicator.getAttribute('data-step'), 10);
+        if (stepNum <= step) {
+            indicator.classList.add('active');
+        } else {
+            indicator.classList.remove('active');
+        }
+    });
 
-// Update step text
-currentStepSpan.textContent = step;
+    currentStepSpan.textContent = step;
 }
 
 function checkPasswordStrength(password) {
-const strength = calculatePasswordStrength(password);
+    if (!passwordStrengthBar || !passwordStrengthText) {
+        return;
+    }
 
-// Update progress bar and text
-passwordStrengthBar.className = 'h-1.5 rounded-full';
-passwordStrengthBar.style.width = '0%';
+    const strength = calculatePasswordStrength(password);
 
-switch(strength) {
-    case 0:
-        passwordStrengthText.textContent = 'None';
-        break;
-    case 1:
-        passwordStrengthText.textContent = 'Weak';
-        passwordStrengthBar.classList.add('weak');
-        break;
-    case 2:
-        passwordStrengthText.textContent = 'Fair';
-        passwordStrengthBar.classList.add('fair');
-        break;
-    case 3:
-        passwordStrengthText.textContent = 'Good';
-        passwordStrengthBar.classList.add('good');
-        break;
-    case 4:
-        passwordStrengthText.textContent = 'Strong';
-        passwordStrengthBar.classList.add('strong');
-        break;
-}
+    passwordStrengthBar.className = 'h-1.5 rounded-full';
+    passwordStrengthBar.style.width = '0%';
+
+    switch (strength) {
+        case 0:
+            passwordStrengthText.textContent = 'None';
+            break;
+        case 1:
+            passwordStrengthText.textContent = 'Weak';
+            passwordStrengthBar.classList.add('weak');
+            break;
+        case 2:
+            passwordStrengthText.textContent = 'Fair';
+            passwordStrengthBar.classList.add('fair');
+            break;
+        case 3:
+            passwordStrengthText.textContent = 'Good';
+            passwordStrengthBar.classList.add('good');
+            break;
+        case 4:
+            passwordStrengthText.textContent = 'Strong';
+            passwordStrengthBar.classList.add('strong');
+            break;
+    }
 }
 
 function calculatePasswordStrength(password) {
-let strength = 0;
+    let strength = 0;
 
-if (password.length >= 8) strength++;
-if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
-if (/\d/.test(password)) strength++;
-if (/[^A-Za-z0-9]/.test(password)) strength++;
+    if (password.length >= 8) {
+        strength++;
+    }
+    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) {
+        strength++;
+    }
+    if (/\d/.test(password)) {
+        strength++;
+    }
+    if (/[^A-Za-z0-9]/.test(password)) {
+        strength++;
+    }
 
-return strength;
+    return strength;
 }
 
 function showError(inputElement, message) {
-// Add error styling
-inputElement.classList.add('border-red-500');
-
-// Show error message
-let errorDiv = inputElement.nextElementSibling;
-if (!errorDiv || !errorDiv.classList.contains('error-message')) {
-    errorDiv = document.createElement('div');
-    errorDiv.className = 'error-message text-xs text-red-400 mt-1';
-    inputElement.parentNode.insertBefore(errorDiv, inputElement.nextSibling);
-}
-errorDiv.textContent = message;
-
-// Focus the input
-inputElement.focus();
-
-// Remove error after 3 seconds
-setTimeout(() => {
-    inputElement.classList.remove('border-red-500');
-    if (errorDiv && errorDiv.parentNode) {
-        errorDiv.remove();
+    if (!inputElement) {
+        return;
     }
-}, 3000);
+
+    inputElement.classList.add('border-red-500');
+
+    let errorDiv = inputElement.nextElementSibling;
+    if (!errorDiv || !errorDiv.classList.contains('error-message')) {
+        errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message text-xs text-red-400 mt-1';
+        inputElement.parentNode.insertBefore(errorDiv, inputElement.nextSibling);
+    }
+    errorDiv.textContent = message;
+
+    inputElement.focus();
+
+    setTimeout(() => {
+        inputElement.classList.remove('border-red-500');
+        if (errorDiv && errorDiv.parentNode) {
+            errorDiv.remove();
+        }
+    }, 3000);
 }
 
 function resetForm() {
-// Reset form inputs
-employeeIdInput.value = '';
-emailInput.value = '';
-if (fullNameInput) {
-    fullNameInput.value = '';
+    if (employeeIdInput) {
+        employeeIdInput.value = '';
+    }
+    if (emailInput) {
+        emailInput.value = '';
+    }
+    if (fullNameInput) {
+        fullNameInput.value = '';
+    }
+    if (passwordInput) {
+        passwordInput.value = '';
+    }
+    if (confirmPasswordInput) {
+        confirmPasswordInput.value = '';
+    }
+
+    resetProfilePhoto();
+
+    goToStep(1);
+    verifiedData = null;
+
+    if (passwordStrengthBar) {
+        passwordStrengthBar.style.width = '0%';
+        passwordStrengthBar.className = 'h-1.5 rounded-full';
+    }
+    if (passwordStrengthText) {
+        passwordStrengthText.textContent = 'None';
+    }
 }
-passwordInput.value = '';
-confirmPasswordInput.value = '';
-resetProfilePhoto();
 
-// Reset steps
-goToStep(1);
-verifiedData = null;
-
-// Reset password strength meter
-passwordStrengthBar.style.width = '0%';
-passwordStrengthText.textContent = 'None';
-passwordStrengthBar.className = 'h-1.5 rounded-full';
-}
-
-// Initialize
 goToStep(1);
 });
 // End Landing Page
-
 
 // Employee-Dashboard
 document.addEventListener('DOMContentLoaded', function() {

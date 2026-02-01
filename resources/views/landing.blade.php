@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Performance Management System | HR Ecosystem</title>
     <!-- Flowbite CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet">
@@ -358,15 +359,15 @@
                     </button>
                 </div>
                 <div class="p-4 md:p-6">
-                    <form class="space-y-4 md:space-y-5">
+                    <form id="loginForm" class="space-y-4 md:space-y-5">
                         <div>
-                            <label for="email" class="block mb-2 text-sm font-medium text-gray-300">Email Address</label>
+                            <label for="login_name" class="block mb-2 text-sm font-medium text-gray-300">Name</label>
                             {{-- DUMMY_DATA: replace with dynamic value --}}
-                            <input type="email" name="email" id="email" class="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg block w-full p-3" placeholder="employee@company.com">
+                            <input type="text" name="name" id="login_name" class="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg block w-full p-3" placeholder="Ramon Reyes">
                         </div>
                         <div>
                             <label for="password" class="block mb-2 text-sm font-medium text-gray-300">Password</label>
-                            <input type="password" name="password" id="password" class="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg block w-full p-3">
+                            <input type="password" name="password" id="password" placeholder="Your Password" class="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg block w-full p-3">
                         </div>
                         <div class="flex justify-between items-center">
                             <div class="flex items-center">
@@ -375,12 +376,12 @@
                             </div>
                             <a href="#" id="openPasswordReset" class="text-sm text-purple-400 hover:text-purple-300">Forgot Password?</a>
                         </div>
-                        <a href="{{ route('employee.dashboard') }}" id="loginToDashboardBtn" class="btn-gradient w-full py-3 rounded-lg font-medium relative">
+                        <button type="submit" id="loginToDashboardBtn" data-dashboard-url="{{ route('employee.dashboard') }}" class="btn-gradient w-full py-3 rounded-lg font-medium relative">
                             <span id="loginText">Login to PMS Dashboard</span>
                             <div id="loginSpinner" class="hidden absolute inset-0 flex items-center justify-center">
                                 <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                             </div>
-                        </a>
+                        </button>
                         <div class="text-sm font-medium text-gray-400 text-center">
                             Need to activate your account? <a href="#" id="openAccountActivationFromLogin" class="text-purple-400 hover:text-purple-300">Activate here</a>
                         </div>
@@ -436,9 +437,9 @@
                             </div>
 
                             <div>
-                            <label for="name" class="block mb-2 text-sm font-medium text-gray-300">Employee Name</label>
-                            {{-- DUMMY_DATA: replace with dynamic value --}}
-                            <input type="text" name="name" id="name" class="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg block w-full p-3" placeholder="Juan Delacruz">
+                                <label for="act_email" class="block mb-2 text-sm font-medium text-gray-300">Email Address</label>
+                                {{-- DUMMY_DATA: replace with dynamic value --}}
+                                <input type="email" name="email" id="act_email" class="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg block w-full p-3" placeholder="ramonreyes@gmail.com">
                             </div>
 
                             <div class="bg-purple-900/30 border border-purple-800/50 p-3 md:p-4 rounded-lg">
@@ -599,19 +600,5 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
     <!-- Font Awesome -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-    <!-- Custom Script -->
-    <script>
-        document.getElementById('loginToDashboardBtn').addEventListener('click', function(e) {
-            const loginText = document.getElementById('loginText');
-            const loginSpinner = document.getElementById('loginSpinner');
-
-            // Show spinner and hide text
-            loginText.classList.add('hidden');
-            loginSpinner.classList.remove('hidden');
-
-            // Disable the button to prevent multiple clicks
-            this.style.pointerEvents = 'none';
-        });
-    </script>
 </body>
 </html>
