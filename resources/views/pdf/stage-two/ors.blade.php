@@ -4,19 +4,49 @@
     <meta charset="utf-8">
     <title>Output Rating Sheet (Stage II – Monitoring Copy)</title>
     <style>
-        @page { size: A4 portrait; margin: 18mm; }
-        body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #000; }
+        @page { size: A4 portrait; margin: 16mm; }
+
+        body {
+            font-family: DejaVu Sans, sans-serif;
+            font-size: 11px;
+            color: #000;
+        }
+
         .header { text-align: center; margin-bottom: 10px; }
         .header strong { display: block; }
-        .title { margin: 8px 0 6px; font-size: 14px; font-weight: 700; text-decoration: underline; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 4px 4px; vertical-align: top; }
-        .label { width: 32%; font-weight: bold; }
-        .line { border-bottom: 1px solid #000; min-height: 14px; }
-        .line-wide { border-bottom: 1px solid #000; min-height: 18px; }
-        .section { margin-top: 12px; }
+        .office { margin-top: 8px; font-size: 12px; font-weight: 700; }
+        .sheet-title { margin: 10px 0 2px; font-size: 14px; font-weight: 800; text-decoration: underline; }
         .muted { font-size: 10px; color: #444; }
-        .spacer { height: 10px; }
+
+        table { width: 100%; border-collapse: collapse; }
+        td { padding: 4px 4px; vertical-align: middle; }
+
+        .label { width: 34%; font-weight: 700; }
+        .line {
+            border-bottom: 1px solid #000;
+            min-height: 16px;
+            padding: 2px 4px;
+        }
+        .line-wide {
+            border-bottom: 1px solid #000;
+            min-height: 18px;
+            padding: 2px 4px;
+        }
+
+        .rating-wrap { margin-top: 10px; }
+        .rating-label { width: 18%; font-weight: 700; }
+        .rating-sub { width: 18%; font-weight: 700; }
+        .rating-line { border-bottom: 1px solid #000; min-height: 16px; }
+
+        .remarks-block { margin-top: 10px; }
+        .remarks-label { width: 34%; font-weight: 700; vertical-align: top; padding-top: 6px; }
+        .remarks-line { border-bottom: 1px solid #000; min-height: 18px; padding: 2px 4px; }
+
+        .footer { margin-top: 12px; }
+        .small-note { margin-top: 10px; font-size: 10px; color: #444; }
+
+        .value { display: inline-block; }
+        .value-center { text-align: center; font-weight: 700; }
     </style>
 </head>
 <body>
@@ -25,9 +55,9 @@
         <strong>Republic of the Philippines</strong>
         <strong style="font-size:13px;">PROVINCE OF DAVAO DEL SUR</strong>
         <strong>Matti, Digos City</strong>
-        <strong style="margin-top:8px; font-size:12px;">PROVINCIAL HUMAN RESOURCE MANAGEMENT OFFICE</strong>
-        <div class="title">OUTPUT RATING SHEET</div>
-        <div class="muted">(Stage II – Monitoring Copy | Read-only)</div>
+        <div class="office">PROVINCIAL HUMAN RESOURCE MANAGEMENT OFFICE</div>
+        <div class="sheet-title">OUTPUT RATING SHEET</div>
+        <div class="muted">(Stage II – Monitoring Copy | Demo)</div>
     </div>
 
     <table>
@@ -45,60 +75,65 @@
         </tr>
     </table>
 
-    <div class="spacer"></div>
+    <div class="rating-wrap">
+        <table>
+            <tr>
+                <td class="rating-label">RATING:</td>
+                <td style="width:6%;"></td>
+                <td class="rating-sub">Quantity:</td>
+                <td class="rating-line">
+                    <div class="value value-center">{{ $ors['quantity'] }}</div>
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+                <td class="rating-sub">Quality:</td>
+                <td class="rating-line">
+                    <div class="value value-center">{{ $ors['quality'] }}</div>
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+                <td class="rating-sub">Timeliness:</td>
+                <td class="rating-line">
+                    <div class="value value-center">{{ $ors['timeliness'] }}</div>
+                </td>
+            </tr>
+        </table>
 
-    <table>
-        <tr>
-            <td class="label">RATING:</td>
-            <td style="width:8%;"></td>
-            <td class="label" style="width:20%;">Quantity:</td>
-            <td class="line">{{ $ors['quantity'] }}</td>
-        </tr>
-        <tr>
-            <td class="label"></td>
-            <td></td>
-            <td class="label">Quality:</td>
-            <td class="line">{{ $ors['quality'] }}</td>
-        </tr>
-        <tr>
-            <td class="label"></td>
-            <td></td>
-            <td class="label">Timeliness:</td>
-            <td class="line">{{ $ors['timeliness'] }}</td>
-        </tr>
-    </table>
-    <div class="muted" style="margin-top:4px;">Rating fields are completed during Stage III – Performance Review.</div>
+        <div class="small-note">
+            Demo rule: Quantity is employee-declared (locked). Quality & Timeliness default to 5 for export preview.
+        </div>
+    </div>
 
-    <div class="spacer"></div>
+    <div class="remarks-block">
+        <table>
+            <tr>
+                <td class="remarks-label">Remarks:</td>
+                <td class="remarks-line">{{ $ors['remarks'] }}</td>
+            </tr>
+            <tr><td></td><td class="remarks-line"></td></tr>
+            <tr><td></td><td class="remarks-line"></td></tr>
+            <tr><td></td><td class="remarks-line"></td></tr>
+        </table>
+    </div>
 
-    <table>
-        <tr>
-            <td class="label">Remarks / Actual Accomplishment:</td>
-            <td class="line-wide">{{ $ors['remarks'] }}</td>
-        </tr>
-        <tr><td></td><td class="line-wide"></td></tr>
-        <tr><td></td><td class="line-wide"></td></tr>
-        <tr><td></td><td class="line-wide"></td></tr>
-    </table>
+    <div class="footer">
+        <table>
+            <tr>
+                <td class="label">Rater Signature / Date:</td>
+                <td class="line-wide">{{ $ors['rater_signature'] }}</td>
+            </tr>
+            <tr>
+                <td class="label">Date returned by Rater to Ratee:</td>
+                <td class="line-wide">{{ $ors['date_returned'] }}</td>
+            </tr>
+        </table>
 
-    <div class="spacer"></div>
-
-    <table>
-        <tr>
-            <td class="label">Rater Signature / Date:</td>
-            <td class="line-wide">{{ $ors['rater_signature'] }}</td>
-        </tr>
-        <tr>
-            <td class="label">Date returned by Rater to Ratee:</td>
-            <td class="line-wide">{{ $ors['date_returned'] }}</td>
-        </tr>
-    </table>
-
-    <div class="section">
-        <div class="muted">
-            This document is a system-generated, read-only monitoring copy.<br>
-            Generated from ORS for Stage II – Performance Monitoring and Coaching.<br>
-            It does not constitute validation, approval, or performance rating.
+        <div class="small-note">
+            System-generated ORS copy for Stage II (Monitoring). Read-only export aligned to demo dummy data.
         </div>
     </div>
 

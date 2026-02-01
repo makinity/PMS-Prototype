@@ -86,26 +86,26 @@
             </p>
         </div>
 
-        <!-- Stats Overview -->
+        <!-- Stats Overview (DEMO LOCKED: 4 tasks total) -->
         <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
             <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">This Week</p>
-                <p class="mt-1 text-2xl font-semibold text-white">6</p>
+                <p class="mt-1 text-2xl font-semibold text-white">4</p>
                 <p class="text-xs text-slate-400">Tasks logged (ORS)</p>
             </div>
             <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Drafts</p>
-                <p class="mt-1 text-2xl font-semibold text-amber-300">2</p>
+                <p class="mt-1 text-2xl font-semibold text-amber-300">0</p>
                 <p class="text-xs text-slate-400">Need submission</p>
             </div>
             <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Submitted</p>
-                <p class="mt-1 text-2xl font-semibold text-blue-300">3</p>
+                <p class="mt-1 text-2xl font-semibold text-blue-300">2</p>
                 <p class="text-xs text-slate-400">Eligible for MPOR summary</p>
             </div>
             <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Validated</p>
-                <p class="mt-1 text-2xl font-semibold text-emerald-300">1</p>
+                <p class="mt-1 text-2xl font-semibold text-emerald-300">0</p>
                 <p class="text-xs text-slate-400">In SMPOR</p>
             </div>
         </div>
@@ -361,21 +361,31 @@
                 </span>
             </div>
 
-            <div class="mt-4 grid grid-cols-1 gap-3 text-sm">
-                <div>
-                    <p class="text-xs text-slate-400">Supervisor</p>
-                    <p class="text-slate-200" id="taskDetailClient">--</p>
-                </div>
-                <div>
-                    <p class="text-xs text-slate-400">Request ID</p>
-                    <p class="text-slate-200" id="taskDetailRequest">--</p>
-                </div>
-                <div>
-                    <p class="text-xs text-slate-400">Output Type</p>
-                    <p class="text-slate-200" id="taskDetailOutput">--</p>
-                </div>
-                <div>
-                    <p class="text-xs text-slate-400">Status</p>
+                <div class="mt-4 grid grid-cols-1 gap-3 text-sm">
+                    <div>
+                        <p class="text-xs text-slate-400">Supervisor</p>
+                        <p class="text-slate-200" id="taskDetailClient">--</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400">Request ID</p>
+                        <p class="text-slate-200" id="taskDetailRequest">--</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400">Quantity (employee-declared)</p>
+                        <input id="taskDetailQuantity"
+                               type="text"
+                               class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200"
+                               placeholder="e.g., 12 transactions">
+                        <p class="mt-1 text-[11px] text-slate-400">
+                            Quantity is declared by the employee. Supervisor rates Quality & Timeliness during ORS Monitoring.
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400">Output Type</p>
+                        <p class="text-slate-200" id="taskDetailOutput">--</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400">Status</p>
                     <p class="text-slate-200" id="taskDetailStatusText">--</p>
                 </div>
                 <div>
@@ -462,7 +472,7 @@
                 draft: { label: 'Draft (Stopped)', color: '#fbbf24', badge: 'border-amber-300/60 bg-amber-300/10 text-amber-100', editable: true },
                 submitted: { label: 'Submitted (Locked)', color: '#3b82f6', badge: 'border-blue-500/60 bg-blue-500/10 text-blue-100', editable: false },
                 locked: { label: 'Submitted (Locked)', color: '#10b981', badge: 'border-emerald-500/60 bg-emerald-500/10 text-emerald-100', editable: false },
-                missing: { label: 'Missing / Overdue', color: '#ef4444', badge: 'border-red-500/60 bg-red-500/10 text-red-100', editable: true },
+                missing: { label: 'Missing / Overdue', color: '#ef4444', badge: 'border-red-500/60 bg-red-500/10 text-red-100', editable: false },
             };
 
             const UWP_INDICATORS = {
@@ -479,92 +489,77 @@
                 records_maintenance: [
                     'Weekly filing updated and retrievable',
                     'Digital backups synced monthly',
-                    'Retrieval logs maintained for audits',
+                    'Retrieval logs maintained for audit purposes',
                 ],
             };
 
+            /**
+             * DEMO LOCKED DATASET (Stage II) — Employee Assigned: Ramon Reyes ONLY
+             * Required statuses:
+             * - Jan 2, 2026: Submitted (Locked) — Same-day verification of OTC transactions
+             * - Jan 4, 2026: Submitted (Locked) — All e-bank transactions scanned and encoded daily
+             * - Jan 5, 2026: Recording — OR validation completed daily
+             * - Jan 6, 2026: Missing / Overdue — Retrieval logs maintained for audit purposes
+             */
             let tasks = [
-                    {
-                        id: 'task-1',
-                        title: 'E-Bank Scanning',
-                        date: '2026-01-05',
-                        client: 'Revenue Collection Unit',
-                        requestId: 'REQ-2026-001',
-                        output: 'Bank Statement Form (BSF-01)',
-                        notes: 'Morning batch of e-bank transactions',
-                        rating: '--',
-                        state: 'recording',
-                        startTime: new Date(new Date().getTime() - (45 * 60 * 1000)),
-                        durationMs: 0
-                    },
-                    {
-                        id: 'task-2',
-                        title: 'E-Bank Scanning',
-                        date: '2026-01-04',
-                        client: 'Revenue Collection Unit',
-                        requestId: 'REQ-2026-002',
-                        output: 'Scanned Supporting Document',
-                        notes: 'Submitted with late uploads',
-                        rating: '--',
-                        state: 'submitted',
-                        startTime: null,
-                        durationMs: 90 * 60 * 1000
-                    },
-                    {
-                        id: 'task-3',
-                        title: 'OTC Revenue Transaction Processing',
-                        date: '2026-01-03',
-                        client: 'Revenue Collection Unit',
-                        requestId: 'REQ-2026-003',
-                        output: 'Official Receipt (OR)',
-                        notes: 'Counter transactions validated',
-                        rating: '--',
-                        state: 'submitted',
-                        startTime: null,
-                        durationMs: 2 * 60 * 60 * 1000
-                    },
-                    {
-                        id: 'task-4',
-                        title: 'OTC Revenue Transaction Processing',
-                        date: '2026-01-02',
-                        client: 'Revenue Collection Unit',
-                        requestId: 'REQ-2026-004',
-                        output: 'Official Receipt (OR)',
-                        notes: 'Submitted by employee',
-                        rating: '--',
-                        state: 'submitted',
-                        startTime: null,
-                        durationMs: 3 * 60 * 60 * 1000
-                    },
-                    {
-                        id: 'task-5',
-                        title: 'Maintenance of Revenue Records Filing System',
-                        date: '2026-01-06',
-                        client: 'Revenue Collection Unit',
-                        requestId: 'REQ-2026-005',
-                        output: 'Records Inventory Checklist',
-                        notes: 'Quarterly records validation pending',
-                        rating: '--',
-                        state: 'missing',
-                        startTime: null,
-                        durationMs: 0
-                    },
-
-                    {
-                        id: 'task-6',
-                        title: 'All e-bank transactions scanned and encoded daily',
-                        date: '2026-01-19',
-                        client: 'Revenue Collection Unit',
-                        requestId: 'REQ-2026-019',
-                        output: 'Bank Statement Form (BSF-01)',
-                        notes: 'Demo: logged task for January 19',
-                        rating: '--',
-                        state: 'recording',
-                        startTime: new Date(), // timer starts now
-                        durationMs: 0
-                    }
-
-                ];
+                {
+                    id: 'task-jan-02',
+                    title: 'Same-day verification of OTC transactions',
+                    date: '2026-01-02',
+                    client: 'Revenue Collection Unit',
+                    requestId: 'REQ-2026-002',
+                    output: 'Official Receipt (OR)',
+                    notes: 'Demo: Same-day OTC verification completed and submitted.',
+                    quantity: '12 transactions',
+                    rating: '--',
+                    state: 'submitted',
+                    startTime: null,
+                    durationMs: 2 * 60 * 60 * 1000
+                },
+                {
+                    id: 'task-jan-04',
+                    title: 'All e-bank transactions scanned and encoded daily',
+                    date: '2026-01-04',
+                    client: 'Revenue Collection Unit',
+                    requestId: 'REQ-2026-004',
+                    output: 'Bank Statement Form (BSF-01)',
+                    notes: 'Demo: E-bank scanning submitted with evidence (BSF-01).',
+                    quantity: '1 daily batch',
+                    rating: '--',
+                    state: 'submitted',
+                    startTime: null,
+                    durationMs: 90 * 60 * 1000
+                },
+                {
+                    id: 'task-jan-05',
+                    title: 'OR validation completed daily',
+                    date: '2026-01-05',
+                    client: 'Revenue Collection Unit',
+                    requestId: 'REQ-2026-005',
+                    output: 'Official Receipt (OR)',
+                    notes: 'Demo: OR validation is currently in progress.',
+                    quantity: '6 receipts validated',
+                    rating: '--',
+                    state: 'recording',
+                    // make it look active without depending on user clock too much
+                    startTime: new Date(Date.now() - (18 * 60 * 1000)), // started 18 minutes ago
+                    durationMs: 0
+                },
+                {
+                    id: 'task-jan-06',
+                    title: 'Retrieval logs maintained for audit purposes',
+                    date: '2026-01-06',
+                    client: 'Revenue Collection Unit',
+                    requestId: 'REQ-2026-006',
+                    output: 'Records Inventory Checklist',
+                    notes: 'Demo: No ORS entry submitted — flagged as Missing / Overdue.',
+                    quantity: '',
+                    rating: '--',
+                    state: 'missing',
+                    startTime: null,
+                    durationMs: 0
+                },
+            ];
 
             const uwpSelect = document.getElementById('orsUwpOutput');
             const taskSelect = document.getElementById('orsTaskType');
@@ -592,6 +587,7 @@
                 });
             }
 
+            // DEMO: exactly one active timer -> Jan 5 recording
             let activeTaskId = tasks.find(t => t.state === 'recording' || t.state === 'paused')?.id || null;
             let detailTaskId = null;
 
@@ -622,7 +618,7 @@
                 eventContent(arg) {
                     const meta = STATE_META[arg.event.extendedProps.state] || STATE_META.draft;
                     const label = meta.label.length > 16 ? meta.label.substring(0, 13) + '...' : meta.label;
-                    const title = arg.event.title.length > 18 ? arg.event.title.substring(0, 15) + '...' : arg.event.title;
+                    const title = arg.event.title.length > 28 ? arg.event.title.substring(0, 25) + '...' : arg.event.title;
                     const wrapper = document.createElement('div');
                     wrapper.classList.add('text-[11px]', 'leading-tight', 'px-1', 'py-[2px]');
                     wrapper.innerHTML = `
@@ -656,6 +652,13 @@
                 const modal = document.getElementById(modalId);
                 if (modal) {
                     modal.classList.add('hidden');
+                }
+                if (modalId === 'taskDetailsModal') {
+                    if (detailTaskId) {
+                        const currentTask = getTaskById(detailTaskId);
+                        syncQuantityFromInput(currentTask);
+                    }
+                    detailTaskId = null;
                 }
                 updateModalState();
             };
@@ -701,6 +704,17 @@
 
             function isLockedState(state) {
                 return state === 'submitted' || state === 'locked';
+            }
+
+            function syncQuantityFromInput(task) {
+                if (!task) return '';
+                const quantityInput = document.getElementById('taskDetailQuantity');
+                if (!quantityInput || detailTaskId !== task.id) {
+                    return task.quantity || '';
+                }
+                const trimmed = quantityInput.value.trim();
+                task.quantity = trimmed;
+                return trimmed;
             }
 
             function formatDuration(ms) {
@@ -775,6 +789,14 @@
                 document.getElementById('taskDetailDuration').textContent = formatDuration(computeElapsed(task));
                 document.getElementById('taskDetailRating').textContent = task.rating || '--';
                 document.getElementById('taskDetailNotes').textContent = task.notes || '--';
+                const quantityInput = document.getElementById('taskDetailQuantity');
+                if (quantityInput) {
+                    quantityInput.value = task.quantity || '';
+                    const quantityDisabled = isLockedState(task.state);
+                    quantityInput.disabled = quantityDisabled;
+                    quantityInput.classList.toggle('opacity-70', quantityDisabled);
+                }
+
                 const isMissing = task.state === 'missing';
                 document.getElementById('taskDetailUpload').disabled = isLockedState(task.state) && !isMissing;
 
@@ -785,6 +807,7 @@
                 const draftMsg = document.getElementById('taskDetailDraftMessage');
 
                 const locked = !isMissing && isLockedState(task.state);
+
                 if (isMissing) {
                     if (lockBadge) {
                         lockBadge.classList.add('hidden');
@@ -824,20 +847,16 @@
             function startTask(taskId) {
                 const task = getTaskById(taskId);
                 if (!task) return false;
-                if (activeTaskId && activeTaskId !== taskId) {
-                    return false;
-                }
-                if (isLockedState(task.state)) {
-                    return false;
-                }
+                if (activeTaskId && activeTaskId !== taskId) return false;
+                if (isLockedState(task.state)) return false;
+
                 task.state = 'recording';
                 task.startTime = new Date();
                 activeTaskId = taskId;
+
                 refreshCalendar();
                 updateActivePanel();
-                if (detailTaskId === taskId) {
-                    openTaskDetails(taskId);
-                }
+                if (detailTaskId === taskId) openTaskDetails(taskId);
                 return true;
             }
 
@@ -850,6 +869,7 @@
                 task.startTime = null;
                 task.state = 'paused';
                 activeTaskId = taskId;
+
                 refreshCalendar();
                 updateActivePanel();
                 if (detailTaskId === taskId) openTaskDetails(taskId);
@@ -858,12 +878,12 @@
             function resumeTask(taskId) {
                 const task = getTaskById(taskId);
                 if (!task || task.state !== 'paused') return;
-                if (activeTaskId && activeTaskId !== taskId) {
-                    return;
-                }
+                if (activeTaskId && activeTaskId !== taskId) return;
+
                 task.startTime = new Date();
                 task.state = 'recording';
                 activeTaskId = taskId;
+
                 refreshCalendar();
                 updateActivePanel();
                 if (detailTaskId === taskId) openTaskDetails(taskId);
@@ -872,14 +892,16 @@
             function stopTask(taskId) {
                 const task = getTaskById(taskId);
                 if (!task) return;
+                syncQuantityFromInput(task);
+
                 if (task.state === 'recording' && task.startTime) {
                     task.durationMs = (task.durationMs || 0) + (Date.now() - task.startTime.getTime());
                 }
                 task.startTime = null;
                 task.state = 'draft';
-                if (activeTaskId === taskId) {
-                    activeTaskId = null;
-                }
+
+                if (activeTaskId === taskId) activeTaskId = null;
+
                 refreshCalendar();
                 updateActivePanel();
                 if (detailTaskId === taskId) openTaskDetails(taskId);
@@ -888,17 +910,19 @@
             function submitTask(taskId) {
                 const task = getTaskById(taskId);
                 if (!task) return false;
-                if (task.state === 'recording') {
+                if (task.state === 'recording') return false;
+                if (isLockedState(task.state)) return false;
+                const qtyValue = syncQuantityFromInput(task);
+                if (!qtyValue) {
+                    alert('Quantity is required before submitting an ORS entry.');
                     return false;
                 }
-                if (isLockedState(task.state)) {
-                    return false;
-                }
+
                 task.state = 'submitted';
                 task.startTime = null;
-                if (activeTaskId === taskId) {
-                    activeTaskId = null;
-                }
+
+                if (activeTaskId === taskId) activeTaskId = null;
+
                 refreshCalendar();
                 updateActivePanel();
                 if (detailTaskId === taskId) openTaskDetails(taskId);
@@ -945,9 +969,7 @@
                 const task = getTaskById(detailTaskId);
                 if (!task) return;
                 const durationEl = document.getElementById('taskDetailDuration');
-                if (durationEl) {
-                    durationEl.textContent = formatDuration(computeElapsed(task));
-                }
+                if (durationEl) durationEl.textContent = formatDuration(computeElapsed(task));
             }
 
             function wireTaskForm() {
@@ -956,6 +978,7 @@
 
                 taskForm.addEventListener('submit', function (e) {
                     e.preventDefault();
+
                     const selectedDate = document.getElementById('orsSelectedDate').value;
                     const uwpOutputSelect = document.getElementById('orsUwpOutput');
                     const taskTypeSelect = document.getElementById('orsTaskType');
@@ -994,6 +1017,7 @@
                             currentActive.state = 'draft';
                             activeTaskId = null;
                         }
+
                         const newTask = {
                             id: `task-${Date.now()}`,
                             title: taskTypeSelect.options[taskTypeSelect.selectedIndex].text,
@@ -1004,23 +1028,25 @@
                             uwpOutputId: uwpOutputKey,
                             uwpOutput: uwpOutputLabel,
                             notes: notesInput && notesInput.value ? notesInput.value : 'No notes',
+                            quantity: '',
                             rating: '--',
                             state: 'recording',
                             startTime: new Date(),
                             durationMs: 0
                         };
+
                         tasks.push(newTask);
                         activeTaskId = newTask.id;
+
                         refreshCalendar();
-                        if (calendar && selectedDate) {
-                            calendar.gotoDate(selectedDate);
-                        }
+                        if (calendar && selectedDate) calendar.gotoDate(selectedDate);
                         updateActivePanel();
+
                         closeOrsModal('orsTaskModal');
                         taskForm.reset();
                         document.getElementById('orsSelectedDate').value = '';
                         setButtonLoading(submitBtn, false);
-                        // Task logged and recording; proceed without additional prompts.
+
                         openTaskDetails(newTask.id);
                     }, 400);
                 });
@@ -1042,12 +1068,8 @@
             updateActivePanel();
 
             setInterval(() => {
-                if (activeTaskId) {
-                    updateActivePanel();
-                }
-                if (detailTaskId) {
-                    updateDetailElapsed();
-                }
+                if (activeTaskId) updateActivePanel();
+                if (detailTaskId) updateDetailElapsed();
             }, 1000);
 
             function runWithLoading(button, loadingText, actionFn) {
