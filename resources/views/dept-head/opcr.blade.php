@@ -52,25 +52,6 @@
                             </td>
                         </tr>
 
-                        {{-- <!-- APPROVED -->
-                        <tr class="border-t border-slate-800">
-                            <td class="px-4 py-3 text-white">Human Resource Unit</td>
-                            <td class="px-4 py-3">Jan–Dec 2026</td>
-                            <td class="px-4 py-3">Approved UWP</td>
-                            <td class="px-4 py-3">
-                                <span class="rounded-full bg-emerald-500/20 px-2 py-1 text-xs text-emerald-300">
-                                    Approved
-                                </span>
-                            </td>
-                            <td class="px-4 py-3">
-                                <button type="button"
-                                        data-open-view-opcr
-                                        class="text-blue-400 hover:text-blue-300">
-                                    View
-                                </button>
-                            </td>
-                        </tr> --}}
-
                     </tbody>
                 </table>
             </div>
@@ -128,7 +109,6 @@
                                 <tr class="border-b border-slate-800">
                                     <th class="px-4 py-3 text-left w-[30%]">Output</th>
                                     <th class="px-4 py-3 text-center w-[12%]">Success Indicators</th>
-                                    <th class="px-4 py-3 text-center w-[12%]">Assigned Employees</th>
                                     <th class="px-4 py-3 text-left w-[26%]">Target Summary</th>
                                     <th class="px-4 py-3 text-left w-[4%]">Weight</th>
                                     <th class="px-4 py-3 text-left w-[4%]">Function</th>
@@ -153,18 +133,6 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                                             </svg>
                                             <span class="text-xs">(3)</span>
-                                        </button>
-                                    </td>
-
-                                    <td class="px-4 py-3 align-top text-center">
-                                        <button type="button"
-                                                class="inline-flex items-center justify-center gap-2 text-blue-300 hover:text-blue-200"
-                                                data-dh-open-assignees>
-                                            <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 21a7.5 7.5 0 0 0-9 0" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 13.5a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Z" />
-                                            </svg>
-                                            <span class="text-xs">View</span>
                                         </button>
                                     </td>
 
@@ -203,18 +171,6 @@
                                         </button>
                                     </td>
 
-                                    <td class="px-4 py-3 align-top text-center">
-                                        <button type="button"
-                                                class="inline-flex items-center justify-center gap-2 text-blue-300 hover:text-blue-200"
-                                                data-dh-open-assignees>
-                                            <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 21a7.5 7.5 0 0 0-9 0" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 13.5a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Z" />
-                                            </svg>
-                                            <span class="text-xs">View</span>
-                                        </button>
-                                    </td>
-
                                     <td class="px-4 py-3 align-top text-slate-200">
                                         Daily; 95% processed within the same working day
                                     </td>
@@ -247,18 +203,6 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                                             </svg>
                                             <span class="text-xs">(3)</span>
-                                        </button>
-                                    </td>
-
-                                    <td class="px-4 py-3 align-top text-center">
-                                        <button type="button"
-                                                class="inline-flex items-center justify-center gap-2 text-blue-300 hover:text-blue-200"
-                                                data-dh-open-assignees>
-                                            <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 21a7.5 7.5 0 0 0-9 0" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 13.5a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Z" />
-                                            </svg>
-                                            <span class="text-xs">View</span>
                                         </button>
                                     </td>
 
@@ -336,27 +280,81 @@
         </div>
 
         <!-- SUCCESS INDICATORS MODAL (Dept Head: Read-only) -->
+        <!-- Updated to match provided image: table with Standards + Assigned Employee -->
         <div id="dh-indicators-modal" class="fixed inset-0 z-[90] hidden items-center justify-center bg-black/70 px-4 py-6">
-            <div class="w-full max-w-2xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
-                <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
+            <div class="w-full max-w-5xl rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl">
+
+                <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-4">
                     <div class="min-w-0">
                         <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Success Indicators</p>
-                        <h3 id="dh-indicators-title" class="text-lg font-semibold text-white truncate">--</h3>
-                        <p class="text-xs text-slate-400 mt-1">Read-only list derived from the approved UWP.</p>
+                        <h3 id="dh-indicators-title" class="mt-1 text-xl font-semibold text-white truncate">--</h3>
+                        <p class="text-xs text-slate-400 mt-1">Read-only list of indicators for this output. One employee is assigned per success indicator.</p>
                     </div>
-                    <button type="button" data-dh-close-submodal class="text-slate-400 hover:text-white">
+                    <button type="button" data-dh-close-indicators class="text-slate-400 hover:text-white">
                         <span class="sr-only">Close</span>
                         &times;
                     </button>
                 </div>
 
-                <div class="mt-4 max-h-64 overflow-y-auto rounded-lg border border-slate-800 bg-slate-950/70 p-3">
-                    <ol id="dh-indicators-list" class="space-y-2 pl-5 text-sm text-slate-100 list-decimal"></ol>
+                <div class="mt-5 rounded-xl border border-slate-800 bg-slate-950/50 overflow-hidden">
+                    <div class="max-h-[55vh] overflow-auto">
+                        <table class="min-w-full text-sm text-slate-200">
+                            <thead class="bg-slate-900/70 text-slate-200 text-xs uppercase">
+                                <tr class="border-b border-slate-800">
+                                    <th class="px-4 py-3 text-left w-[56%]">Success Indicator</th>
+                                    <th class="px-4 py-3 text-left w-[20%]">Standards</th>
+                                    <th class="px-4 py-3 text-left w-[24%]">Assigned Employee</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dh-indicators-table-body" class="divide-y divide-slate-800"></tbody>
+                        </table>
+                    </div>
                 </div>
 
-                <div class="mt-5 flex justify-end">
+                <div class="mt-6 flex justify-end">
                     <button type="button"
-                            data-dh-close-submodal
+                            data-dh-close-indicators
+                            class="rounded-lg border border-slate-700 px-5 py-2 text-sm text-slate-200 hover:bg-slate-800">
+                        Close
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- INDICATOR ASSIGNEE MODAL (Dept Head: Read-only; per indicator) -->
+        <div id="dh-indicator-assignee-modal" class="fixed inset-0 z-[91] hidden items-center justify-center bg-black/70 px-4 py-8">
+            <div class="w-full max-w-3xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
+                <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
+                    <div class="min-w-0">
+                        <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Assigned Employee</p>
+                        <h3 class="text-lg font-semibold text-white truncate">Employee assigned to this success indicator</h3>
+                        <p class="text-[11px] text-slate-400 mt-1">
+                            Indicator: <span id="dh-indicator-assignee-indicator" class="text-slate-200">--</span>
+                        </p>
+                    </div>
+                    <button type="button" data-dh-close-indicator-assignee class="text-slate-400 hover:text-white">
+                        <span class="sr-only">Close</span>
+                        &times;
+                    </button>
+                </div>
+
+                <div class="mt-4 rounded-lg border border-slate-800 bg-slate-950/60 overflow-hidden">
+                    <table class="min-w-full text-sm text-slate-200">
+                        <thead class="bg-slate-900/70 text-slate-200">
+                            <tr>
+                                <th class="px-4 py-2 text-left">Employee Name</th>
+                                <th class="px-4 py-2 text-left">Office / Unit</th>
+                                <th class="px-4 py-2 text-left">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dh-indicator-assignee-body" class="divide-y divide-slate-800"></tbody>
+                    </table>
+                </div>
+
+                <div class="mt-4 flex items-center justify-end gap-3 border-t border-slate-800 pt-3">
+                    <button type="button"
+                            data-dh-close-indicator-assignee
                             class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800">
                         Close
                     </button>
@@ -478,7 +476,7 @@ document.addEventListener('DOMContentLoaded', function () {
         modal.classList.add('hidden');
         modal.classList.remove('flex');
 
-        const anyOpen = document.querySelector('[data-modal-container]:not(.hidden), #dh-indicators-modal:not(.hidden), #dh-standards-modal:not(.hidden), #dh-assigned-modal:not(.hidden)');
+        const anyOpen = document.querySelector('[data-modal-container]:not(.hidden), #dh-indicators-modal:not(.hidden), #dh-standards-modal:not(.hidden), #dh-assigned-modal:not(.hidden), #dh-indicator-assignee-modal:not(.hidden)');
         if (!anyOpen) {
             document.body.classList.remove('overflow-hidden');
         }
@@ -489,7 +487,7 @@ document.addEventListener('DOMContentLoaded', function () {
             m.classList.add('hidden');
             m.classList.remove('flex');
         });
-        ['dh-indicators-modal','dh-standards-modal','dh-assigned-modal'].forEach((id) => {
+        ['dh-indicators-modal','dh-standards-modal','dh-assigned-modal','dh-indicator-assignee-modal'].forEach((id) => {
             const el = document.getElementById(id);
             if (el) { el.classList.add('hidden'); el.classList.remove('flex'); }
         });
@@ -519,45 +517,83 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // -------------------------
-    // Dept Head: Indicators Modal
+    // Dept Head: Indicators Modal (UPDATED)
     // -------------------------
     const indicatorsModal = document.getElementById('dh-indicators-modal');
     const indicatorsTitle = document.getElementById('dh-indicators-title');
-    const indicatorsList = document.getElementById('dh-indicators-list');
+    const indicatorsTbody = document.getElementById('dh-indicators-table-body');
     let currentMfoTitle = '--';
 
+    // demo: one employee per indicator
+    const indicatorAssigneeMap = {
+        'All e-bank transactions scanned and encoded daily': { name: 'Ramon Reyes', unit: 'Revenue Collection Unit', assigned: true },
+        'Indexing complete with no missing pages': { name: 'Ramon Reyes', unit: 'Revenue Collection Unit', assigned: true },
+        'Audit trail maintained within 24 hours': { name: 'Ramon Reyes', unit: 'Revenue Collection Unit', assigned: true },
+
+        'Same-day verification of OTC transactions': { name: 'Ramon Reyes', unit: 'Revenue Collection Unit', assigned: true },
+        '95% encoded within the business day': { name: 'Ramon Reyes', unit: 'Revenue Collection Unit', assigned: true },
+        'OR validation completed daily': { name: 'Ramon Reyes', unit: 'Revenue Collection Unit', assigned: true },
+
+        'Weekly filing updated and retrievable': { name: 'Ramon Reyes', unit: 'Revenue Collection Unit', assigned: true },
+        'Digital backups synced monthly': { name: 'Ramon Reyes', unit: 'Revenue Collection Unit', assigned: true },
+        'Retrieval logs maintained for audits': { name: 'Ramon Reyes', unit: 'Revenue Collection Unit', assigned: true },
+    };
+
     function openIndicatorsModal(title, indicators) {
-        if (!indicatorsModal || !indicatorsTitle || !indicatorsList) return;
+        if (!indicatorsModal || !indicatorsTitle || !indicatorsTbody) return;
+
         currentMfoTitle = title || '--';
         indicatorsTitle.textContent = currentMfoTitle;
-        indicatorsList.innerHTML = '';
+        indicatorsTbody.innerHTML = '';
 
         (indicators || []).forEach((text) => {
-            const value = (text || '').trim();
-            if (!value) return;
+            const indicatorText = (text || '').trim();
+            if (!indicatorText) return;
 
-            const li = document.createElement('li');
-            li.className = 'flex items-start justify-between gap-3';
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-slate-900/40';
 
-            const left = document.createElement('div');
-            left.className = 'min-w-0 flex-1';
-            const span = document.createElement('span');
-            span.className = 'text-slate-100';
-            span.textContent = value;
-            left.appendChild(span);
+            // Success Indicator
+            const tdIndicator = document.createElement('td');
+            tdIndicator.className = 'px-4 py-3 text-slate-100';
+            tdIndicator.textContent = indicatorText;
 
-            const right = document.createElement('div');
-            right.className = 'shrink-0';
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = 'text-[11px] text-blue-300 hover:text-blue-200 underline';
-            btn.textContent = 'Standards';
-            btn.addEventListener('click', () => openStandardsModal(value, currentMfoTitle));
-            right.appendChild(btn);
+            // Standards button
+            const tdStandards = document.createElement('td');
+            tdStandards.className = 'px-4 py-3';
 
-            li.appendChild(left);
-            li.appendChild(right);
-            indicatorsList.appendChild(li);
+            const standardsBtn = document.createElement('button');
+            standardsBtn.type = 'button';
+            standardsBtn.className = 'inline-flex items-center gap-2 text-blue-300 hover:text-blue-200';
+            standardsBtn.innerHTML = `
+                <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12Z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                </svg>
+                <span class="text-sm font-medium">View Standards</span>
+            `;
+            standardsBtn.addEventListener('click', () => openStandardsModal(indicatorText, currentMfoTitle));
+            tdStandards.appendChild(standardsBtn);
+
+            // Assigned Employee button (View (1))
+            const tdAssignee = document.createElement('td');
+            tdAssignee.className = 'px-4 py-3';
+
+            const assigneeBtn = document.createElement('button');
+            assigneeBtn.type = 'button';
+            assigneeBtn.className = 'inline-flex items-center gap-2 text-blue-300 hover:text-blue-200';
+            assigneeBtn.innerHTML = `
+                <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12Z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                </svg>
+                <span class="text-sm font-medium">View (1)</span>
+            `;
+            assigneeBtn.addEventListener('click', () => openIndicatorAssigneeModal(indicatorText));
+            tdAssignee.appendChild(assigneeBtn);
+
+            tr.append(tdIndicator, tdStandards, tdAssignee);
+            indicatorsTbody.appendChild(tr);
         });
 
         indicatorsModal.classList.remove('hidden');
@@ -570,7 +606,7 @@ document.addEventListener('DOMContentLoaded', function () {
         indicatorsModal.classList.add('hidden');
         indicatorsModal.classList.remove('flex');
 
-        const anyOpen = document.querySelector('[data-modal-container]:not(.hidden), #dh-standards-modal:not(.hidden), #dh-assigned-modal:not(.hidden)');
+        const anyOpen = document.querySelector('[data-modal-container]:not(.hidden), #dh-standards-modal:not(.hidden), #dh-assigned-modal:not(.hidden), #dh-indicator-assignee-modal:not(.hidden)');
         if (!anyOpen) document.body.classList.remove('overflow-hidden');
     }
 
@@ -582,8 +618,66 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    document.querySelectorAll('[data-dh-close-submodal]').forEach((btn) => {
+    document.querySelectorAll('[data-dh-close-indicators]').forEach((btn) => {
         btn.addEventListener('click', closeIndicatorsModal);
+    });
+
+    // -------------------------
+    // Indicator Assignee Modal (NEW)
+    // -------------------------
+    const indicatorAssigneeModal = document.getElementById('dh-indicator-assignee-modal');
+    const indicatorAssigneeIndicator = document.getElementById('dh-indicator-assignee-indicator');
+    const indicatorAssigneeBody = document.getElementById('dh-indicator-assignee-body');
+
+    function openIndicatorAssigneeModal(indicatorText) {
+        if (!indicatorAssigneeModal || !indicatorAssigneeIndicator || !indicatorAssigneeBody) return;
+
+        const key = (indicatorText || '').trim();
+        indicatorAssigneeIndicator.textContent = key || '--';
+        indicatorAssigneeBody.innerHTML = '';
+
+        const emp = indicatorAssigneeMap[key] || { name: 'Ramon Reyes', unit: 'Revenue Collection Unit', assigned: true };
+
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-900/40';
+
+        const nameTd = document.createElement('td');
+        nameTd.className = 'px-4 py-2';
+        nameTd.textContent = emp.name;
+
+        const unitTd = document.createElement('td');
+        unitTd.className = 'px-4 py-2';
+        unitTd.textContent = emp.unit;
+
+        const statusTd = document.createElement('td');
+        statusTd.className = 'px-4 py-2';
+
+        const badge = document.createElement('span');
+        badge.className = `inline-flex items-center px-2 py-1 text-[11px] font-semibold rounded-full border ${
+            emp.assigned ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-200' : 'border-slate-600 bg-slate-800 text-slate-300'
+        }`;
+        badge.textContent = emp.assigned ? 'Assigned' : 'Not Assigned';
+        statusTd.appendChild(badge);
+
+        tr.append(nameTd, unitTd, statusTd);
+        indicatorAssigneeBody.appendChild(tr);
+
+        indicatorAssigneeModal.classList.remove('hidden');
+        indicatorAssigneeModal.classList.add('flex');
+        document.body.classList.add('overflow-hidden');
+    }
+
+    function closeIndicatorAssigneeModal() {
+        if (!indicatorAssigneeModal) return;
+        indicatorAssigneeModal.classList.add('hidden');
+        indicatorAssigneeModal.classList.remove('flex');
+
+        const anyOpen = document.querySelector('[data-modal-container]:not(.hidden), #dh-indicators-modal:not(.hidden), #dh-standards-modal:not(.hidden), #dh-assigned-modal:not(.hidden)');
+        if (!anyOpen) document.body.classList.remove('overflow-hidden');
+    }
+
+    document.querySelectorAll('[data-dh-close-indicator-assignee]').forEach((btn) => {
+        btn.addEventListener('click', closeIndicatorAssigneeModal);
     });
 
     // -------------------------
@@ -770,13 +864,9 @@ document.addEventListener('DOMContentLoaded', function () {
         standardsModal.classList.add('hidden');
         standardsModal.classList.remove('flex');
 
-        const anyOpen = document.querySelector('[data-modal-container]:not(.hidden), #dh-indicators-modal:not(.hidden), #dh-assigned-modal:not(.hidden)');
+        const anyOpen = document.querySelector('[data-modal-container]:not(.hidden), #dh-indicators-modal:not(.hidden), #dh-assigned-modal:not(.hidden), #dh-indicator-assignee-modal:not(.hidden)');
         if (!anyOpen) document.body.classList.remove('overflow-hidden');
     }
-
-    document.querySelectorAll('[data-dh-open-standards]').forEach((btn) => {
-        btn.addEventListener('click', () => openStandardsModal(btn.dataset.indicator || '', btn.dataset.mfoTitle));
-    });
 
     document.querySelectorAll('[data-dh-close-standards]').forEach((btn) => {
         btn.addEventListener('click', closeStandardsModal);
@@ -847,7 +937,7 @@ document.addEventListener('DOMContentLoaded', function () {
         assignedModal.classList.add('hidden');
         assignedModal.classList.remove('flex');
 
-        const anyOpen = document.querySelector('[data-modal-container]:not(.hidden), #dh-indicators-modal:not(.hidden), #dh-standards-modal:not(.hidden)');
+        const anyOpen = document.querySelector('[data-modal-container]:not(.hidden), #dh-indicators-modal:not(.hidden), #dh-standards-modal:not(.hidden), #dh-indicator-assignee-modal:not(.hidden)');
         if (!anyOpen) document.body.classList.remove('overflow-hidden');
     }
 
@@ -888,13 +978,14 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // click outside close for sub-modals
-    [indicatorsModal, standardsModal, assignedModal].forEach((m) => {
+    [indicatorsModal, standardsModal, assignedModal, indicatorAssigneeModal].forEach((m) => {
         if (!m) return;
         m.addEventListener('click', (e) => {
             if (e.target !== m) return;
             if (m === indicatorsModal) closeIndicatorsModal();
             else if (m === standardsModal) closeStandardsModal();
             else if (m === assignedModal) closeAssignedModal();
+            else if (m === indicatorAssigneeModal) closeIndicatorAssigneeModal();
         });
     });
 
@@ -903,6 +994,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (standardsModal && !standardsModal.classList.contains('hidden')) {
             closeStandardsModal();
+            return;
+        }
+        if (indicatorAssigneeModal && !indicatorAssigneeModal.classList.contains('hidden')) {
+            closeIndicatorAssigneeModal();
             return;
         }
         if (assignedModal && !assignedModal.classList.contains('hidden')) {
