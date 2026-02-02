@@ -137,7 +137,7 @@
                                 <tr>
                                     <th class="px-4 py-3 text-left text-xs uppercase text-slate-400">PPA / MFO</th>
                                     <th class="px-4 py-3 text-center text-xs uppercase text-slate-400">Success Indicators</th>
-                                    <th class="px-4 py-3 text-center text-xs uppercase text-slate-400">Assigned Employees</th>
+                                    {{-- REMOVED: Assigned Employees --}}
                                     <th class="px-4 py-3 text-center text-xs uppercase text-slate-400">Target / Timeline</th>
                                     <th class="px-4 py-3 text-center text-xs uppercase text-slate-400">Function</th>
                                 </tr>
@@ -161,18 +161,6 @@
                                             </button>
                                         </div>
                                     </td>
-                                    <td class="px-4 py-3 text-sm text-center">
-                                        <div class="flex justify-center">
-                                            <button
-                                                type="button"
-                                                data-pmt-assignees-trigger
-                                                data-unit="Revenue Collection Unit"
-                                                class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[90px]">
-                                                <i class="fa-regular fa-eye text-sm"></i>
-                                                <span>View</span>
-                                            </button>
-                                        </div>
-                                    </td>
                                     <td class="px-4 py-3 text-sm text-center text-white">Daily; all e-bank transactions processed within the same working day</td>
                                     <td class="px-4 py-3 text-sm text-center">
                                         <span class="rounded-md bg-emerald-500/10 px-2 py-1 text-xs font-medium
@@ -181,6 +169,7 @@
                                         </span>
                                     </td>
                                 </tr>
+
                                 <tr class="hover:bg-slate-800/40 transition">
                                     <td class="px-4 py-3 text-sm text-slate-100">Processing of over-the-counter revenue transactions</td>
                                     <td class="px-4 py-3 text-sm text-center">
@@ -199,18 +188,6 @@
                                             </button>
                                         </div>
                                     </td>
-                                    <td class="px-4 py-3 text-sm text-center">
-                                        <div class="flex justify-center">
-                                            <button
-                                                type="button"
-                                                data-pmt-assignees-trigger
-                                                data-unit="Revenue Collection Unit"
-                                                class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[90px]">
-                                                <i class="fa-regular fa-eye text-sm"></i>
-                                                <span>View</span>
-                                            </button>
-                                        </div>
-                                    </td>
                                     <td class="px-4 py-3 text-sm text-center text-slate-100">Daily; 95% processed within the same working day</td>
                                     <td class="px-4 py-3 text-sm text-center">
                                         <span class="px-2 py-1 rounded-md text-xs font-medium bg-blue-500/10 text-blue-300 border border-blue-400/30">
@@ -218,6 +195,7 @@
                                         </span>
                                     </td>
                                 </tr>
+
                                 <tr class="hover:bg-slate-800/40 transition">
                                     <td class="px-4 py-3 text-sm text-slate-100">Maintenance of Revenue Records Filing System</td>
                                     <td class="px-4 py-3 text-sm text-center">
@@ -236,18 +214,6 @@
                                             </button>
                                         </div>
                                     </td>
-                                    <td class="px-4 py-3 text-sm text-center">
-                                        <div class="flex justify-center">
-                                            <button
-                                                type="button"
-                                                data-pmt-assignees-trigger
-                                                data-unit="Revenue Collection Unit"
-                                                class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[90px]">
-                                                <i class="fa-regular fa-eye text-sm"></i>
-                                                <span>View</span>
-                                            </button>
-                                        </div>
-                                    </td>
                                     <td class="px-4 py-3 text-sm text-center text-slate-100">Quarterly validation and update</td>
                                     <td class="px-4 py-3 text-sm text-center">
                                         <span class="px-2 py-1 rounded-md text-xs font-medium bg-blue-500/10 text-blue-300 border border-blue-400/30">
@@ -255,6 +221,7 @@
                                         </span>
                                     </td>
                                 </tr>
+
                             </tbody>
                         </table>
                     </div>
@@ -298,8 +265,11 @@
         </div>
     </div>
 
+    {{-- ========================= --}}
+    {{-- SUCCESS INDICATORS MODAL (NOW INCLUDES ASSIGNEES) --}}
+    {{-- ========================= --}}
     <div id="uwp-indicators-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 px-4 py-6">
-        <div class="w-full max-w-2xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
+        <div class="w-full max-w-3xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
             <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
                 <div>
                     <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Success Indicators</p>
@@ -318,6 +288,7 @@
                         <tr>
                             <th class="px-4 py-3 text-left">Success Indicator</th>
                             <th class="px-4 py-3 text-center">Standards</th>
+                            <th class="px-4 py-3 text-center">Assigned Employees</th>
                         </tr>
                     </thead>
                     <tbody id="uwp-indicators-table-body" class="divide-y divide-slate-800"></tbody>
@@ -334,6 +305,9 @@
         </div>
     </div>
 
+    {{-- ========================= --}}
+    {{-- STANDARDS MODAL --}}
+    {{-- ========================= --}}
     <div id="pmt-standards-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 px-4 py-6">
         <div class="w-full max-w-3xl rounded-2xl border border-slate-800 bg-slate-950 p-5 shadow-2xl">
             <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
@@ -385,14 +359,20 @@
         </div>
     </div>
 
+    {{-- ========================= --}}
+    {{-- ASSIGNEES MODAL (NOW PER INDICATOR) --}}
+    {{-- ========================= --}}
     <div id="pmt-assignees-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 px-4 py-6">
         <div class="w-full max-w-2xl rounded-2xl border border-slate-800 bg-slate-950 p-5 shadow-2xl">
             <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
                 <div>
                     <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Assigned Employees</p>
-                    <h3 class="text-lg font-semibold text-white">Employees under the selected Office / Unit</h3>
+                    <h3 class="text-lg font-semibold text-white">Employees assigned to the selected indicator</h3>
                     <p class="text-xs text-slate-400 mt-1">
-                        Office / Unit: <span data-assignees-unit class="font-semibold text-slate-100">--</span>
+                        MFO: <span data-assignees-mfo class="font-semibold text-slate-100">--</span>
+                    </p>
+                    <p class="text-xs text-slate-400 mt-1">
+                        Indicator: <span data-assignees-indicator class="font-semibold text-slate-100">--</span>
                     </p>
                 </div>
                 <button type="button" onclick="closePmtAssigneesModal()" class="text-slate-400 hover:text-white">
@@ -410,17 +390,7 @@
                             <th class="px-4 py-3 text-left">Status</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td class="px-4 py-3">Ramon Reyes</td>
-                            <td class="px-4 py-3">Revenue Collection Unit</td>
-                            <td class="px-4 py-3">
-                                <span class="inline-flex rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300">
-                                    Assigned
-                                </span>
-                            </td>
-                        </tr>
-                    </tbody>
+                    <tbody data-assignees-body class="divide-y divide-slate-800"></tbody>
                 </table>
             </div>
 
@@ -486,6 +456,10 @@
                 const titleEl = document.getElementById('uwp-indicators-title');
                 const tableBody = document.getElementById('uwp-indicators-table-body');
 
+                // DEMO: all indicators have 1 assignee (Ramon Reyes)
+                const DEMO_ASSIGNEES = ['Ramon Reyes'];
+                const DEMO_UNIT = 'Revenue Collection Unit';
+
                 window.closePmtIndicatorsModal = function () {
                     if (!modal) return;
                     modal.classList.add('hidden');
@@ -495,33 +469,58 @@
 
                 function openIndicatorsModal(title, mfoTitle, indicators) {
                     if (!modal || !titleEl || !tableBody) return;
+
                     titleEl.textContent = title || '--';
                     tableBody.innerHTML = '';
+
                     (indicators || []).forEach((text) => {
                         const value = (text || '').trim();
                         if (!value) return;
+
                         const tr = document.createElement('tr');
                         tr.className = 'hover:bg-slate-900/40';
+
+                        // Indicator text
                         const indicatorTd = document.createElement('td');
                         indicatorTd.className = 'px-4 py-3 text-sm text-slate-100';
                         indicatorTd.textContent = value;
-                        const actionTd = document.createElement('td');
-                        actionTd.className = 'px-4 py-3 text-center';
-                        const button = document.createElement('button');
-                        button.type = 'button';
-                        button.className = 'inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[90px]';
-                        button.innerHTML = '<i class="fa-regular fa-eye text-sm"></i><span>View Standards</span>';
-                        button.dataset.mfoTitle = mfoTitle || '';
-                        button.dataset.indicator = value;
-                        button.addEventListener('click', () => {
+
+                        // Standards button
+                        const standardsTd = document.createElement('td');
+                        standardsTd.className = 'px-4 py-3 text-center';
+
+                        const standardsBtn = document.createElement('button');
+                        standardsBtn.type = 'button';
+                        standardsBtn.className = 'inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[120px]';
+                        standardsBtn.innerHTML = '<i class="fa-regular fa-eye text-sm"></i><span>View Standards</span>';
+                        standardsBtn.dataset.mfoTitle = mfoTitle || '';
+                        standardsBtn.dataset.indicator = value;
+                        standardsBtn.addEventListener('click', () => {
                             if (window.openPmtStandardsModal) {
-                                window.openPmtStandardsModal(button.dataset.mfoTitle, button.dataset.indicator);
+                                window.openPmtStandardsModal(standardsBtn.dataset.mfoTitle, standardsBtn.dataset.indicator);
                             }
                         });
-                        actionTd.appendChild(button);
-                        tr.append(indicatorTd, actionTd);
+                        standardsTd.appendChild(standardsBtn);
+
+                        // Assignees button (per indicator)
+                        const assigneesTd = document.createElement('td');
+                        assigneesTd.className = 'px-4 py-3 text-center';
+
+                        const assigneesBtn = document.createElement('button');
+                        assigneesBtn.type = 'button';
+                        assigneesBtn.className = 'inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[110px]';
+                        assigneesBtn.innerHTML = '<i class="fa-regular fa-eye text-sm"></i><span>View (' + (DEMO_ASSIGNEES.length) + ')</span>';
+                        assigneesBtn.addEventListener('click', () => {
+                            if (window.openPmtAssigneesModal) {
+                                window.openPmtAssigneesModal(mfoTitle || '', value, DEMO_UNIT, DEMO_ASSIGNEES);
+                            }
+                        });
+                        assigneesTd.appendChild(assigneesBtn);
+
+                        tr.append(indicatorTd, standardsTd, assigneesTd);
                         tableBody.appendChild(tr);
                     });
+
                     modal.classList.remove('hidden');
                     modal.classList.add('flex');
                     document.body.classList.add('overflow-hidden');
@@ -568,7 +567,7 @@
                         remarks.focus();
                         return;
                     }
-                    const confirmBtn = modal.querySelector('[onclick=\"submitPmtReturn()\"]');
+                    const confirmBtn = modal.querySelector('[onclick="submitPmtReturn()"]');
                     if (confirmBtn && confirmBtn.dataset.adminLoading) {
                         const label = confirmBtn.querySelector('[data-button-label]');
                         const spinner = confirmBtn.querySelector('[data-button-spinner]');
@@ -595,6 +594,7 @@
                 const indicatorEl = modal?.querySelector('[data-standards-indicator]');
                 const bodyEl = modal?.querySelector('[data-standards-body]');
                 const ratings = [5, 4, 3, 2, 1];
+
                 const standardsSeedMap = {
                     'All e-bank transactions scanned and encoded daily': {
                         '5': { q: ['No errors; accurate encoding'], e: ['100% processed'], t: ['Same working day'] },
@@ -679,10 +679,13 @@
                     if (!bodyEl) return;
                     indicatorEl && (indicatorEl.textContent = indicator || '--');
                     bodyEl.innerHTML = '';
+
                     ratings.forEach((level) => {
                         const data = standardsSeedMap[indicator]?.[String(level)] || {};
+
                         const row = document.createElement('tr');
                         row.className = 'hover:bg-slate-900/40';
+
                         const ratingCell = document.createElement('td');
                         ratingCell.className = 'px-4 py-3 font-semibold';
                         ratingCell.textContent = level;
@@ -702,21 +705,22 @@
                                 li.textContent = value;
                                 ul.appendChild(li);
                             });
-                        td.appendChild(ul);
-                        return td;
-                    };
+                            td.appendChild(ul);
+                            return td;
+                        };
 
-                    row.append(
-                        ratingCell,
-                        makeList(data.q),
-                        makeList(data.e),
-                        makeList(data.t)
-                    );
-                    bodyEl.appendChild(row);
-                });
-            }
+                        row.append(
+                            ratingCell,
+                            makeList(data.q),
+                            makeList(data.e),
+                            makeList(data.t)
+                        );
 
-            window.closePmtStandardsModal = closeModal;
+                        bodyEl.appendChild(row);
+                    });
+                }
+
+                window.closePmtStandardsModal = closeModal;
 
                 function openStandardsModal(mfoTitle, indicator) {
                     if (!modal) return;
@@ -730,7 +734,9 @@
 
             (function initPmtAssigneesModal() {
                 const modal = document.getElementById('pmt-assignees-modal');
-                const unitEl = modal?.querySelector('[data-assignees-unit]');
+                const mfoEl = modal?.querySelector('[data-assignees-mfo]');
+                const indicatorEl = modal?.querySelector('[data-assignees-indicator]');
+                const bodyEl = modal?.querySelector('[data-assignees-body]');
 
                 function closeModal() {
                     if (!modal) return;
@@ -748,16 +754,43 @@
 
                 window.closePmtAssigneesModal = closeModal;
 
-                function openAssignees(unit) {
-                    unitEl && (unitEl.textContent = unit || '--');
-                    showModal();
-                }
+                window.openPmtAssigneesModal = function (mfoTitle, indicator, unit, employees) {
+                    if (!modal || !bodyEl) return;
 
-                document.querySelectorAll('[data-pmt-assignees-trigger]').forEach((btn) => {
-                    btn.addEventListener('click', () => {
-                        openAssignees(btn.dataset.unit || '--');
+                    mfoEl && (mfoEl.textContent = mfoTitle || '--');
+                    indicatorEl && (indicatorEl.textContent = indicator || '--');
+
+                    const list = Array.isArray(employees) ? employees : [];
+                    bodyEl.innerHTML = '';
+
+                    if (!list.length) {
+                        const tr = document.createElement('tr');
+                        tr.className = 'hover:bg-slate-900/40';
+                        tr.innerHTML = `
+                            <td class="px-4 py-3 text-slate-300" colspan="3">No assigned employees.</td>
+                        `;
+                        bodyEl.appendChild(tr);
+                        showModal();
+                        return;
+                    }
+
+                    list.forEach((name) => {
+                        const tr = document.createElement('tr');
+                        tr.className = 'hover:bg-slate-900/40';
+                        tr.innerHTML = `
+                            <td class="px-4 py-3">${name}</td>
+                            <td class="px-4 py-3">${unit || '—'}</td>
+                            <td class="px-4 py-3">
+                                <span class="inline-flex rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300">
+                                    Assigned
+                                </span>
+                            </td>
+                        `;
+                        bodyEl.appendChild(tr);
                     });
-                });
+
+                    showModal();
+                };
             })();
         </script>
     @endpush

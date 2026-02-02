@@ -147,7 +147,7 @@
                         <tr>
                             <th class="px-5 py-4">PPA / MFO</th>
                             <th class="px-5 py-4 text-center">Success Indicators</th>
-                            <th class="px-5 py-4 text-center">Assigned Employees</th>
+                            {{-- Assigned Employees column removed; now per-indicator inside Success Indicators modal --}}
                             <th class="px-5 py-4">Target / Timeline</th>
                             <th class="px-5 py-4 text-center">Function</th>
                         </tr>
@@ -170,18 +170,6 @@
                                             class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[90px]">
                                             <i class="fa-regular fa-eye text-sm"></i>
                                             <span>(3)</span>
-                                        </button>
-                                    </div>
-                                </td>
-
-                               <td class="px-5 py-5 text-center">
-                                    <div class="flex justify-center">
-                                        <button
-                                            data-modal-target="assignedEmployeesModal"
-                                            data-modal-toggle="assignedEmployeesModal"
-                                            class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[90px]">
-                                            <i class="fa-regular fa-eye text-sm"></i>
-                                            <span>View</span>
                                         </button>
                                     </div>
                                 </td>
@@ -215,18 +203,6 @@
                                     </div>
                                 </td>
 
-                               <td class="px-5 py-5 text-center">
-                                    <div class="flex justify-center">
-                                        <button
-                                            data-modal-target="assignedEmployeesModal"
-                                            data-modal-toggle="assignedEmployeesModal"
-                                            class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[90px]">
-                                            <i class="fa-regular fa-eye text-sm"></i>
-                                            <span>View</span>
-                                        </button>
-                                    </div>
-                                </td>
-
                                 <td class="px-5 py-5 text-slate-300">
                                     Daily; 95% processed within the same working day
                                 </td>
@@ -252,18 +228,6 @@
                                             class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[90px]">
                                             <i class="fa-regular fa-eye text-sm"></i>
                                             <span>(3)</span>
-                                        </button>
-                                    </div>
-                                </td>
-
-                               <td class="px-5 py-5 text-center">
-                                    <div class="flex justify-center">
-                                        <button
-                                            data-modal-target="assignedEmployeesModal"
-                                            data-modal-toggle="assignedEmployeesModal"
-                                            class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[90px]">
-                                            <i class="fa-regular fa-eye text-sm"></i>
-                                            <span>View</span>
                                         </button>
                                     </div>
                                 </td>
@@ -300,307 +264,464 @@
         </div>
     </div>
 
-    <div id="mfo1IndicatorsModal" class="fixed inset-0 z-50 hidden bg-black/70 backdrop-blur-sm">
+    {{-- =========================
+        SUCCESS INDICATORS MODALS
+        Expanded to 3 columns:
+        - Success Indicator
+        - Standards
+        - Assigned Employee (per indicator)
+    ========================== --}}
 
-        <div class="mx-auto my-16 w-full max-w-lg px-6">
+    <div id="mfo1IndicatorsModal" class="fixed inset-0 z-50 hidden bg-black/70 backdrop-blur-sm">
+        <div class="mx-auto my-16 w-full max-w-5xl px-6">
             <div class="rounded-2xl border border-slate-800 bg-slate-950 text-slate-100">
 
-            <!-- HEADER -->
-            <div class="border-b border-slate-800 px-6 py-5">
-                <h3 class="text-lg font-semibold">
-                E-Bank Scanning and Encoding of Revenue Transactions
-                </h3>
-                <p class="mt-1 text-sm text-slate-400">
-                Read-only list of indicators for this output.
-                </p>
-            </div>
-
-            <!-- BODY -->
-            <div class="px-6 py-6">
-                <div class="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/40">
-                    <table class="w-full text-sm text-slate-100">
-                        <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.2em] text-slate-400">
-                            <tr>
-                                <th class="px-4 py-3 text-left">Success Indicator</th>
-                                <th class="px-4 py-3 text-center">Standards</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-800">
-                            <tr>
-                                <td class="px-4 py-4 text-slate-100">
-                                    All e-bank transactions scanned and encoded daily
-                                </td>
-                                <td class="px-4 py-4 text-center">
-                                    <button
-                                        type="button"
-                                        data-modal-target="indicatorStandardsModal"
-                                        data-modal-toggle="indicatorStandardsModal"
-                                        data-indicator-standards
-                                        data-mfo-title="E-Bank Scanning and Encoding of Revenue Transactions"
-                                        data-indicator-text="All e-bank transactions scanned and encoded daily"
-                                        class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[90px]">
-                                        <i class="fa-regular fa-eye text-sm"></i>
-                                        <span>View Standards</span>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="px-4 py-4 text-slate-100">
-                                    Indexing complete with no missing pages
-                                </td>
-                                <td class="px-4 py-4 text-center">
-                                    <button
-                                        type="button"
-                                        data-modal-target="indicatorStandardsModal"
-                                        data-modal-toggle="indicatorStandardsModal"
-                                        data-indicator-standards
-                                        data-mfo-title="E-Bank Scanning and Encoding of Revenue Transactions"
-                                        data-indicator-text="Indexing complete with no missing pages"
-                                        class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[90px]">
-                                        <i class="fa-regular fa-eye text-sm"></i>
-                                        <span>View Standards</span>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="px-4 py-4 text-slate-100">
-                                    Audit trail maintained within 24 hours
-                                </td>
-                                <td class="px-4 py-4 text-center">
-                                    <button
-                                        type="button"
-                                        data-modal-target="indicatorStandardsModal"
-                                        data-modal-toggle="indicatorStandardsModal"
-                                        data-indicator-standards
-                                        data-mfo-title="E-Bank Scanning and Encoding of Revenue Transactions"
-                                        data-indicator-text="Audit trail maintained within 24 hours"
-                                        class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[90px]">
-                                        <i class="fa-regular fa-eye text-sm"></i>
-                                        <span>View Standards</span>
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <!-- HEADER -->
+                <div class="border-b border-slate-800 px-6 py-5">
+                    <h3 class="text-lg font-semibold">
+                        E-Bank Scanning and Encoding of Revenue Transactions
+                    </h3>
+                    <p class="mt-1 text-sm text-slate-400">
+                        Read-only list of indicators for this output. One employee is assigned per success indicator.
+                    </p>
                 </div>
-            </div>
 
-            <!-- FOOTER -->
-            <div class="flex justify-end border-t border-slate-800 px-6 py-4">
-                <button data-modal-hide="mfo1IndicatorsModal"
-                        class="rounded-lg border border-slate-700 bg-slate-900 px-5 py-2 text-sm hover:bg-slate-800">
-                Close
-                </button>
-            </div>
+                <!-- BODY -->
+                <div class="px-6 py-6">
+                    <div class="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/40">
+                        <table class="w-full text-sm text-slate-100">
+                            <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.2em] text-slate-400">
+                                <tr>
+                                    <th class="px-4 py-3 text-left">Success Indicator</th>
+                                    <th class="px-4 py-3 text-center">Standards</th>
+                                    <th class="px-4 py-3 text-center">Assigned Employee</th>
+                                </tr>
+                            </thead>
+
+                            <tbody class="divide-y divide-slate-800">
+                                <tr>
+                                    <td class="px-4 py-4 text-slate-100">
+                                        All e-bank transactions scanned and encoded daily
+                                    </td>
+
+                                    <td class="px-4 py-4 text-center">
+                                        <button
+                                            type="button"
+                                            data-modal-target="indicatorStandardsModal"
+                                            data-modal-toggle="indicatorStandardsModal"
+                                            data-indicator-standards
+                                            data-mfo-title="E-Bank Scanning and Encoding of Revenue Transactions"
+                                            data-indicator-text="All e-bank transactions scanned and encoded daily"
+                                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[120px]">
+                                            <i class="fa-regular fa-eye text-sm"></i>
+                                            <span>View Standards</span>
+                                        </button>
+                                    </td>
+
+                                    <td class="px-4 py-4 text-center">
+                                        <button
+                                            type="button"
+                                            data-modal-target="assignedEmployeesModal"
+                                            data-modal-toggle="assignedEmployeesModal"
+                                            data-assigned-employee
+                                            data-assigned-name="Ramon Reyes"
+                                            data-assigned-unit="Revenue Collection Unit"
+                                            data-assigned-indicator="All e-bank transactions scanned and encoded daily"
+                                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[110px]">
+                                            <i class="fa-regular fa-eye text-sm"></i>
+                                            <span>View (1)</span>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td class="px-4 py-4 text-slate-100">
+                                        Indexing complete with no missing pages
+                                    </td>
+
+                                    <td class="px-4 py-4 text-center">
+                                        <button
+                                            type="button"
+                                            data-modal-target="indicatorStandardsModal"
+                                            data-modal-toggle="indicatorStandardsModal"
+                                            data-indicator-standards
+                                            data-mfo-title="E-Bank Scanning and Encoding of Revenue Transactions"
+                                            data-indicator-text="Indexing complete with no missing pages"
+                                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[120px]">
+                                            <i class="fa-regular fa-eye text-sm"></i>
+                                            <span>View Standards</span>
+                                        </button>
+                                    </td>
+
+                                    <td class="px-4 py-4 text-center">
+                                        <button
+                                            type="button"
+                                            data-modal-target="assignedEmployeesModal"
+                                            data-modal-toggle="assignedEmployeesModal"
+                                            data-assigned-employee
+                                            data-assigned-name="Ramon Reyes"
+                                            data-assigned-unit="Revenue Collection Unit"
+                                            data-assigned-indicator="Indexing complete with no missing pages"
+                                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[110px]">
+                                            <i class="fa-regular fa-eye text-sm"></i>
+                                            <span>View (1)</span>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td class="px-4 py-4 text-slate-100">
+                                        Audit trail maintained within 24 hours
+                                    </td>
+
+                                    <td class="px-4 py-4 text-center">
+                                        <button
+                                            type="button"
+                                            data-modal-target="indicatorStandardsModal"
+                                            data-modal-toggle="indicatorStandardsModal"
+                                            data-indicator-standards
+                                            data-mfo-title="E-Bank Scanning and Encoding of Revenue Transactions"
+                                            data-indicator-text="Audit trail maintained within 24 hours"
+                                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[120px]">
+                                            <i class="fa-regular fa-eye text-sm"></i>
+                                            <span>View Standards</span>
+                                        </button>
+                                    </td>
+
+                                    <td class="px-4 py-4 text-center">
+                                        <button
+                                            type="button"
+                                            data-modal-target="assignedEmployeesModal"
+                                            data-modal-toggle="assignedEmployeesModal"
+                                            data-assigned-employee
+                                            data-assigned-name="Ramon Reyes"
+                                            data-assigned-unit="Revenue Collection Unit"
+                                            data-assigned-indicator="Audit trail maintained within 24 hours"
+                                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[110px]">
+                                            <i class="fa-regular fa-eye text-sm"></i>
+                                            <span>View (1)</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- FOOTER -->
+                <div class="flex justify-end border-t border-slate-800 px-6 py-4">
+                    <button data-modal-hide="mfo1IndicatorsModal"
+                            class="rounded-lg border border-slate-700 bg-slate-900 px-5 py-2 text-sm hover:bg-slate-800">
+                        Close
+                    </button>
+                </div>
 
             </div>
         </div>
     </div>
 
     <div id="mfo2IndicatorsModal" class="fixed inset-0 z-50 hidden bg-black/70 backdrop-blur-sm">
-
-        <div class="mx-auto my-16 w-full max-w-lg px-6">
+        <div class="mx-auto my-16 w-full max-w-5xl px-6">
             <div class="rounded-2xl border border-slate-800 bg-slate-950 text-slate-100">
 
-            <!-- HEADER -->
-            <div class="border-b border-slate-800 px-6 py-5">
-                <h3 class="text-lg font-semibold">
-                Processing of over-the-counter revenue transactions
-                </h3>
-                <p class="mt-1 text-sm text-slate-400">
-                Read-only list of indicators for this output.
-                </p>
-            </div>
-
-            <!-- BODY -->
-            <div class="px-6 py-6">
-                <div class="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/40">
-                    <table class="w-full text-sm text-slate-100">
-                        <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.2em] text-slate-400">
-                            <tr>
-                                <th class="px-4 py-3 text-left">Success Indicator</th>
-                                <th class="px-4 py-3 text-center">Standards</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-800">
-                            <tr>
-                                <td class="px-4 py-4 text-slate-100">
-                                    Same-day verification of OTC transactions
-                                </td>
-                                <td class="px-4 py-4 text-center">
-                                    <button
-                                        type="button"
-                                        data-modal-target="indicatorStandardsModal"
-                                        data-modal-toggle="indicatorStandardsModal"
-                                        data-indicator-standards
-                                        data-mfo-title="Processing of over-the-counter revenue transactions"
-                                        data-indicator-text="Same-day verification of OTC transactions"
-                                        class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[90px]">
-                                        <i class="fa-regular fa-eye text-sm"></i>
-                                        <span>View Standards</span>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="px-4 py-4 text-slate-100">
-                                    95% encoded within the business day
-                                </td>
-                                <td class="px-4 py-4 text-center">
-                                    <button
-                                        type="button"
-                                        data-modal-target="indicatorStandardsModal"
-                                        data-modal-toggle="indicatorStandardsModal"
-                                        data-indicator-standards
-                                        data-mfo-title="Processing of over-the-counter revenue transactions"
-                                        data-indicator-text="95% encoded within the business day"
-                                        class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[90px]">
-                                        <i class="fa-regular fa-eye text-sm"></i>
-                                        <span>View Standards</span>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="px-4 py-4 text-slate-100">
-                                    OR validation completed daily
-                                </td>
-                                <td class="px-4 py-4 text-center">
-                                    <button
-                                        type="button"
-                                        data-modal-target="indicatorStandardsModal"
-                                        data-modal-toggle="indicatorStandardsModal"
-                                        data-indicator-standards
-                                        data-mfo-title="Processing of over-the-counter revenue transactions"
-                                        data-indicator-text="OR validation completed daily"
-                                        class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[90px]">
-                                        <i class="fa-regular fa-eye text-sm"></i>
-                                        <span>View Standards</span>
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <!-- HEADER -->
+                <div class="border-b border-slate-800 px-6 py-5">
+                    <h3 class="text-lg font-semibold">
+                        Processing of over-the-counter revenue transactions
+                    </h3>
+                    <p class="mt-1 text-sm text-slate-400">
+                        Read-only list of indicators for this output. One employee is assigned per success indicator.
+                    </p>
                 </div>
-            </div>
 
-            <!-- FOOTER -->
-            <div class="flex justify-end border-t border-slate-800 px-6 py-4">
-                <button data-modal-hide="mfo2IndicatorsModal"
-                        class="rounded-lg border border-slate-700 bg-slate-900 px-5 py-2 text-sm hover:bg-slate-800">
-                Close
-                </button>
-            </div>
+                <!-- BODY -->
+                <div class="px-6 py-6">
+                    <div class="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/40">
+                        <table class="w-full text-sm text-slate-100">
+                            <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.2em] text-slate-400">
+                                <tr>
+                                    <th class="px-4 py-3 text-left">Success Indicator</th>
+                                    <th class="px-4 py-3 text-center">Standards</th>
+                                    <th class="px-4 py-3 text-center">Assigned Employee</th>
+                                </tr>
+                            </thead>
+
+                            <tbody class="divide-y divide-slate-800">
+                                <tr>
+                                    <td class="px-4 py-4 text-slate-100">
+                                        Same-day verification of OTC transactions
+                                    </td>
+                                    <td class="px-4 py-4 text-center">
+                                        <button
+                                            type="button"
+                                            data-modal-target="indicatorStandardsModal"
+                                            data-modal-toggle="indicatorStandardsModal"
+                                            data-indicator-standards
+                                            data-mfo-title="Processing of over-the-counter revenue transactions"
+                                            data-indicator-text="Same-day verification of OTC transactions"
+                                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[120px]">
+                                            <i class="fa-regular fa-eye text-sm"></i>
+                                            <span>View Standards</span>
+                                        </button>
+                                    </td>
+                                    <td class="px-4 py-4 text-center">
+                                        <button
+                                            type="button"
+                                            data-modal-target="assignedEmployeesModal"
+                                            data-modal-toggle="assignedEmployeesModal"
+                                            data-assigned-employee
+                                            data-assigned-name="Ramon Reyes"
+                                            data-assigned-unit="Revenue Collection Unit"
+                                            data-assigned-indicator="Same-day verification of OTC transactions"
+                                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[110px]">
+                                            <i class="fa-regular fa-eye text-sm"></i>
+                                            <span>View (1)</span>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td class="px-4 py-4 text-slate-100">
+                                        95% encoded within the business day
+                                    </td>
+                                    <td class="px-4 py-4 text-center">
+                                        <button
+                                            type="button"
+                                            data-modal-target="indicatorStandardsModal"
+                                            data-modal-toggle="indicatorStandardsModal"
+                                            data-indicator-standards
+                                            data-mfo-title="Processing of over-the-counter revenue transactions"
+                                            data-indicator-text="95% encoded within the business day"
+                                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[120px]">
+                                            <i class="fa-regular fa-eye text-sm"></i>
+                                            <span>View Standards</span>
+                                        </button>
+                                    </td>
+                                    <td class="px-4 py-4 text-center">
+                                        <button
+                                            type="button"
+                                            data-modal-target="assignedEmployeesModal"
+                                            data-modal-toggle="assignedEmployeesModal"
+                                            data-assigned-employee
+                                            data-assigned-name="Ramon Reyes"
+                                            data-assigned-unit="Revenue Collection Unit"
+                                            data-assigned-indicator="95% encoded within the business day"
+                                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[110px]">
+                                            <i class="fa-regular fa-eye text-sm"></i>
+                                            <span>View (1)</span>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td class="px-4 py-4 text-slate-100">
+                                        OR validation completed daily
+                                    </td>
+                                    <td class="px-4 py-4 text-center">
+                                        <button
+                                            type="button"
+                                            data-modal-target="indicatorStandardsModal"
+                                            data-modal-toggle="indicatorStandardsModal"
+                                            data-indicator-standards
+                                            data-mfo-title="Processing of over-the-counter revenue transactions"
+                                            data-indicator-text="OR validation completed daily"
+                                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[120px]">
+                                            <i class="fa-regular fa-eye text-sm"></i>
+                                            <span>View Standards</span>
+                                        </button>
+                                    </td>
+                                    <td class="px-4 py-4 text-center">
+                                        <button
+                                            type="button"
+                                            data-modal-target="assignedEmployeesModal"
+                                            data-modal-toggle="assignedEmployeesModal"
+                                            data-assigned-employee
+                                            data-assigned-name="Ramon Reyes"
+                                            data-assigned-unit="Revenue Collection Unit"
+                                            data-assigned-indicator="OR validation completed daily"
+                                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[110px]">
+                                            <i class="fa-regular fa-eye text-sm"></i>
+                                            <span>View (1)</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- FOOTER -->
+                <div class="flex justify-end border-t border-slate-800 px-6 py-4">
+                    <button data-modal-hide="mfo2IndicatorsModal"
+                            class="rounded-lg border border-slate-700 bg-slate-900 px-5 py-2 text-sm hover:bg-slate-800">
+                        Close
+                    </button>
+                </div>
 
             </div>
         </div>
     </div>
 
     <div id="mfo3IndicatorsModal" class="fixed inset-0 z-50 hidden bg-black/70 backdrop-blur-sm">
-
-        <div class="mx-auto my-16 w-full max-w-lg px-6">
+        <div class="mx-auto my-16 w-full max-w-5xl px-6">
             <div class="rounded-2xl border border-slate-800 bg-slate-950 text-slate-100">
 
-            <!-- HEADER -->
-            <div class="border-b border-slate-800 px-6 py-5">
-                <h3 class="text-lg font-semibold">
-                Maintenance of Revenue Records Filing System
-                </h3>
-                <p class="mt-1 text-sm text-slate-400">
-                Read-only list of indicators for this output.
-                </p>
-            </div>
-
-            <!-- BODY -->
-            <div class="px-6 py-6">
-                <div class="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/40">
-                    <table class="w-full text-sm text-slate-100">
-                        <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.2em] text-slate-400">
-                            <tr>
-                                <th class="px-4 py-3 text-left">Success Indicator</th>
-                                <th class="px-4 py-3 text-center">Standards</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-800">
-                            <tr>
-                                <td class="px-4 py-4 text-slate-100">
-                                    Weekly filing updated and retrievable
-                                </td>
-                                <td class="px-4 py-4 text-center">
-                                    <button
-                                        type="button"
-                                        data-modal-target="indicatorStandardsModal"
-                                        data-modal-toggle="indicatorStandardsModal"
-                                        data-indicator-standards
-                                        data-mfo-title="Maintenance of Revenue Records Filing System"
-                                        data-indicator-text="Weekly filing updated and retrievable"
-                                        class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[90px]">
-                                        <i class="fa-regular fa-eye text-sm"></i>
-                                        <span>View Standards</span>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="px-4 py-4 text-slate-100">
-                                    Digital backups synced monthly
-                                </td>
-                                <td class="px-4 py-4 text-center">
-                                    <button
-                                        type="button"
-                                        data-modal-target="indicatorStandardsModal"
-                                        data-modal-toggle="indicatorStandardsModal"
-                                        data-indicator-standards
-                                        data-mfo-title="Maintenance of Revenue Records Filing System"
-                                        data-indicator-text="Digital backups synced monthly"
-                                        class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[90px]">
-                                        <i class="fa-regular fa-eye text-sm"></i>
-                                        <span>View Standards</span>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="px-4 py-4 text-slate-100">
-                                    Retrieval logs maintained for audits
-                                </td>
-                                <td class="px-4 py-4 text-center">
-                                    <button
-                                        type="button"
-                                        data-modal-target="indicatorStandardsModal"
-                                        data-modal-toggle="indicatorStandardsModal"
-                                        data-indicator-standards
-                                        data-mfo-title="Maintenance of Revenue Records Filing System"
-                                        data-indicator-text="Retrieval logs maintained for audits"
-                                        class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[90px]">
-                                        <i class="fa-regular fa-eye text-sm"></i>
-                                        <span>View Standards</span>
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <!-- HEADER -->
+                <div class="border-b border-slate-800 px-6 py-5">
+                    <h3 class="text-lg font-semibold">
+                        Maintenance of Revenue Records Filing System
+                    </h3>
+                    <p class="mt-1 text-sm text-slate-400">
+                        Read-only list of indicators for this output. One employee is assigned per success indicator.
+                    </p>
                 </div>
-            </div>
 
-            <!-- FOOTER -->
-            <div class="flex justify-end border-t border-slate-800 px-6 py-4">
-                <button data-modal-hide="mfo3IndicatorsModal"
-                        class="rounded-lg border border-slate-700 bg-slate-900 px-5 py-2 text-sm hover:bg-slate-800">
-                Close
-                </button>
-            </div>
+                <!-- BODY -->
+                <div class="px-6 py-6">
+                    <div class="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/40">
+                        <table class="w-full text-sm text-slate-100">
+                            <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.2em] text-slate-400">
+                                <tr>
+                                    <th class="px-4 py-3 text-left">Success Indicator</th>
+                                    <th class="px-4 py-3 text-center">Standards</th>
+                                    <th class="px-4 py-3 text-center">Assigned Employee</th>
+                                </tr>
+                            </thead>
+
+                            <tbody class="divide-y divide-slate-800">
+                                <tr>
+                                    <td class="px-4 py-4 text-slate-100">
+                                        Weekly filing updated and retrievable
+                                    </td>
+                                    <td class="px-4 py-4 text-center">
+                                        <button
+                                            type="button"
+                                            data-modal-target="indicatorStandardsModal"
+                                            data-modal-toggle="indicatorStandardsModal"
+                                            data-indicator-standards
+                                            data-mfo-title="Maintenance of Revenue Records Filing System"
+                                            data-indicator-text="Weekly filing updated and retrievable"
+                                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[120px]">
+                                            <i class="fa-regular fa-eye text-sm"></i>
+                                            <span>View Standards</span>
+                                        </button>
+                                    </td>
+                                    <td class="px-4 py-4 text-center">
+                                        <button
+                                            type="button"
+                                            data-modal-target="assignedEmployeesModal"
+                                            data-modal-toggle="assignedEmployeesModal"
+                                            data-assigned-employee
+                                            data-assigned-name="Ramon Reyes"
+                                            data-assigned-unit="Revenue Collection Unit"
+                                            data-assigned-indicator="Weekly filing updated and retrievable"
+                                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[110px]">
+                                            <i class="fa-regular fa-eye text-sm"></i>
+                                            <span>View (1)</span>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td class="px-4 py-4 text-slate-100">
+                                        Digital backups synced monthly
+                                    </td>
+                                    <td class="px-4 py-4 text-center">
+                                        <button
+                                            type="button"
+                                            data-modal-target="indicatorStandardsModal"
+                                            data-modal-toggle="indicatorStandardsModal"
+                                            data-indicator-standards
+                                            data-mfo-title="Maintenance of Revenue Records Filing System"
+                                            data-indicator-text="Digital backups synced monthly"
+                                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[120px]">
+                                            <i class="fa-regular fa-eye text-sm"></i>
+                                            <span>View Standards</span>
+                                        </button>
+                                    </td>
+                                    <td class="px-4 py-4 text-center">
+                                        <button
+                                            type="button"
+                                            data-modal-target="assignedEmployeesModal"
+                                            data-modal-toggle="assignedEmployeesModal"
+                                            data-assigned-employee
+                                            data-assigned-name="Ramon Reyes"
+                                            data-assigned-unit="Revenue Collection Unit"
+                                            data-assigned-indicator="Digital backups synced monthly"
+                                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[110px]">
+                                            <i class="fa-regular fa-eye text-sm"></i>
+                                            <span>View (1)</span>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td class="px-4 py-4 text-slate-100">
+                                        Retrieval logs maintained for audits
+                                    </td>
+                                    <td class="px-4 py-4 text-center">
+                                        <button
+                                            type="button"
+                                            data-modal-target="indicatorStandardsModal"
+                                            data-modal-toggle="indicatorStandardsModal"
+                                            data-indicator-standards
+                                            data-mfo-title="Maintenance of Revenue Records Filing System"
+                                            data-indicator-text="Retrieval logs maintained for audits"
+                                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[120px]">
+                                            <i class="fa-regular fa-eye text-sm"></i>
+                                            <span>View Standards</span>
+                                        </button>
+                                    </td>
+                                    <td class="px-4 py-4 text-center">
+                                        <button
+                                            type="button"
+                                            data-modal-target="assignedEmployeesModal"
+                                            data-modal-toggle="assignedEmployeesModal"
+                                            data-assigned-employee
+                                            data-assigned-name="Ramon Reyes"
+                                            data-assigned-unit="Revenue Collection Unit"
+                                            data-assigned-indicator="Retrieval logs maintained for audits"
+                                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[110px]">
+                                            <i class="fa-regular fa-eye text-sm"></i>
+                                            <span>View (1)</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- FOOTER -->
+                <div class="flex justify-end border-t border-slate-800 px-6 py-4">
+                    <button data-modal-hide="mfo3IndicatorsModal"
+                            class="rounded-lg border border-slate-700 bg-slate-900 px-5 py-2 text-sm hover:bg-slate-800">
+                        Close
+                    </button>
+                </div>
 
             </div>
         </div>
     </div>
 
+    {{-- =========================
+        ASSIGNED EMPLOYEE MODAL
+        Now includes the Success Indicator assigned
+    ========================== --}}
     <div id="assignedEmployeesModal" class="fixed inset-0 z-50 hidden bg-black/70 backdrop-blur-sm">
         <div class="mx-auto my-16 w-full max-w-2xl px-6">
             <div class="rounded-2xl border border-slate-800 bg-slate-950 text-slate-100">
                 <div class="border-b border-slate-800 px-6 py-5">
-                    <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Assigned Employees</p>
-                    <h3 class="text-lg font-semibold">Employees under the selected Office/Unit</h3>
+                    <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Assigned Employee</p>
+                    <h3 class="text-lg font-semibold">Employee assignment for selected success indicator</h3>
                     <p class="mt-1 text-sm text-slate-400">
-                        Office / Unit: <span class="font-semibold text-slate-100">Revenue Collection Unit</span>
+                        Office / Unit: <span id="assignedModalUnit" class="font-semibold text-slate-100">Revenue Collection Unit</span>
+                    </p>
+                    <p class="mt-1 text-sm text-slate-400">
+                        Success Indicator: <span id="assignedModalIndicator" class="font-semibold text-slate-100">--</span>
                     </p>
                 </div>
+
                 <div class="px-6 py-6">
                     <div class="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/40">
                         <table class="w-full text-sm text-slate-100">
@@ -613,8 +734,8 @@
                             </thead>
                             <tbody class="divide-y divide-slate-800">
                                 <tr>
-                                    <td class="px-4 py-3">Ramon Reyes</td>
-                                    <td class="px-4 py-3">Revenue Collection Unit</td>
+                                    <td id="assignedModalName" class="px-4 py-3">Ramon Reyes</td>
+                                    <td id="assignedModalUnitCell" class="px-4 py-3">Revenue Collection Unit</td>
                                     <td class="px-4 py-3">
                                         <span class="inline-flex rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300">
                                             Assigned
@@ -625,6 +746,7 @@
                         </table>
                     </div>
                 </div>
+
                 <div class="flex justify-end border-t border-slate-800 px-6 py-4">
                     <button data-modal-hide="assignedEmployeesModal"
                             class="rounded-lg border border-slate-700 bg-slate-900 px-5 py-2 text-sm hover:bg-slate-800">
@@ -635,6 +757,7 @@
         </div>
     </div>
 
+    {{-- Standards Modal (unchanged) --}}
     <div id="indicatorStandardsModal" class="fixed inset-0 z-50 hidden bg-black/70 backdrop-blur-sm">
         <div class="mx-auto my-16 w-full max-w-3xl px-6">
             <div class="rounded-2xl border border-slate-800 bg-slate-950 text-slate-100">
@@ -684,74 +807,80 @@
         <script>
             const standardRatings = [5, 4, 3, 2, 1];
             const standardsSeedMap = {
-                    'All e-bank transactions scanned and encoded daily': {
-                        5: { q: ['No errors; accurate encoding'], e: ['100% processed'], t: ['Same working day'] },
-                        4: { q: ['Minor errors'], e: ['100% processed'], t: ['Same working day'] },
-                        3: { q: ['Few minor errors'], e: ['95–99% processed'], t: ['End of working day'] },
-                        2: { q: ['Multiple errors'], e: ['<95% processed'], t: ['Beyond working day'] },
-                        1: { q: ['Major errors/missing'], e: ['Majority unprocessed'], t: ['Not within acceptable time'] },
-                    },
-                    'Indexing complete with no missing pages': {
-                        5: { q: ['Indexing fully verified, zero gaps'], e: ['100% pages indexed'], t: ['Same day'] },
-                        4: { q: ['Indexing minor rechecks'], e: ['100% pages indexed'], t: ['Same day'] },
-                        3: { q: ['Occasional missing indexes fixed'], e: ['95–99% indexed'], t: ['Within 24 hours'] },
-                        2: { q: ['Frequent missing pages'], e: ['<95% indexed'], t: ['Beyond 24 hours'] },
-                        1: { q: ['Indexing largely incomplete'], e: ['Major gaps'], t: ['Unacceptable'] },
-                    },
-                    'Audit trail maintained within 24 hours': {
-                        5: { q: ['Complete trail, no errors'], e: ['100% entries captured'], t: ['Within 24 hours'] },
-                        4: { q: ['Minor corrections only'], e: ['100% entries captured'], t: ['Within 24 hours'] },
-                        3: { q: ['Some gaps corrected'], e: ['95–99% entries captured'], t: ['Within 48 hours'] },
-                        2: { q: ['Multiple missing logs'], e: ['<95% captured'], t: ['Beyond 48 hours'] },
-                        1: { q: ['Trail missing'], e: ['Majority uncaptured'], t: ['Unacceptable'] },
-                    },
-                    'Same-day verification of OTC transactions': {
-                        5: { q: ['Verified without discrepancies'], e: ['100% OTC verified'], t: ['Same working day'] },
-                        4: { q: ['Minor verifications pending'], e: ['100% OTC verified'], t: ['Same working day'] },
-                        3: { q: ['Few pending verifications'], e: ['95–99% verified'], t: ['End of working day'] },
-                        2: { q: ['Several unverified'], e: ['<95% verified'], t: ['Beyond working day'] },
-                        1: { q: ['Verification not done'], e: ['Majority unverified'], t: ['Unacceptable'] },
-                    },
-                    '95% encoded within the business day': {
-                        5: { q: ['Encodings error-free'], e: ['100% encoded'], t: ['Same business day'] },
-                        4: { q: ['Minor corrections'], e: ['100% encoded'], t: ['Same business day'] },
-                        3: { q: ['Few delays'], e: ['95–99% encoded'], t: ['By end of day'] },
-                        2: { q: ['Multiple delays'], e: ['<95% encoded'], t: ['Next day'] },
-                        1: { q: ['Encoding largely incomplete'], e: ['Major backlog'], t: ['Unacceptable'] },
-                    },
-                    'OR validation completed daily': {
-                        5: { q: ['All ORs validated error-free'], e: ['100% validated'], t: ['Daily'] },
-                        4: { q: ['Minor issues corrected same day'], e: ['100% validated'], t: ['Daily'] },
-                        3: { q: ['Some validations late'], e: ['95–99% validated'], t: ['Within 48 hours'] },
-                        2: { q: ['Frequent late validations'], e: ['<95% validated'], t: ['Beyond 48 hours'] },
-                        1: { q: ['Validations mostly missing'], e: ['Majority unvalidated'], t: ['Unacceptable'] },
-                    },
-                    'Weekly filing updated and retrievable': {
-                        5: { q: ['Zero retrieval issues'], e: ['100% weekly updates'], t: ['Within week'] },
-                        4: { q: ['Minor retrieval fixes'], e: ['100% weekly updates'], t: ['Within week'] },
-                        3: { q: ['Some items late'], e: ['95–99% updates'], t: ['Within next week'] },
-                        2: { q: ['Many late updates'], e: ['<95% updates'], t: ['Beyond next week'] },
-                        1: { q: ['Updates not done'], e: ['Major gaps'], t: ['Unacceptable'] },
-                    },
-                    'Digital backups synced monthly': {
-                        5: { q: ['Backups verified'], e: ['100% synced'], t: ['Within month'] },
-                        4: { q: ['Minor sync corrections'], e: ['100% synced'], t: ['Within month'] },
-                        3: { q: ['Some delays'], e: ['95–99% synced'], t: ['Within following week'] },
-                        2: { q: ['Frequent delays'], e: ['<95% synced'], t: ['Beyond following week'] },
-                        1: { q: ['Backups largely missing'], e: ['Major gaps'], t: ['Unacceptable'] },
-                    },
-                    'Retrieval logs maintained for audits': {
-                        5: { q: ['Logs complete and audit-ready'], e: ['100% requests logged'], t: ['Same day'] },
-                        4: { q: ['Minor log gaps corrected'], e: ['100% requests logged'], t: ['Same day'] },
-                        3: { q: ['Some gaps'], e: ['95–99% logged'], t: ['Within 48 hours'] },
-                        2: { q: ['Many gaps'], e: ['<95% logged'], t: ['Beyond 48 hours'] },
-                        1: { q: ['Logs largely missing'], e: ['Majority unlogged'], t: ['Unacceptable'] },
-                    },
-                };
+                'All e-bank transactions scanned and encoded daily': {
+                    5: { q: ['No errors; accurate encoding'], e: ['100% processed'], t: ['Same working day'] },
+                    4: { q: ['Minor errors'], e: ['100% processed'], t: ['Same working day'] },
+                    3: { q: ['Few minor errors'], e: ['95–99% processed'], t: ['End of working day'] },
+                    2: { q: ['Multiple errors'], e: ['<95% processed'], t: ['Beyond working day'] },
+                    1: { q: ['Major errors/missing'], e: ['Majority unprocessed'], t: ['Not within acceptable time'] },
+                },
+                'Indexing complete with no missing pages': {
+                    5: { q: ['Indexing fully verified, zero gaps'], e: ['100% pages indexed'], t: ['Same day'] },
+                    4: { q: ['Indexing minor rechecks'], e: ['100% pages indexed'], t: ['Same day'] },
+                    3: { q: ['Occasional missing indexes fixed'], e: ['95–99% indexed'], t: ['Within 24 hours'] },
+                    2: { q: ['Frequent missing pages'], e: ['<95% indexed'], t: ['Beyond 24 hours'] },
+                    1: { q: ['Indexing largely incomplete'], e: ['Major gaps'], t: ['Unacceptable'] },
+                },
+                'Audit trail maintained within 24 hours': {
+                    5: { q: ['Complete trail, no errors'], e: ['100% entries captured'], t: ['Within 24 hours'] },
+                    4: { q: ['Minor corrections only'], e: ['100% entries captured'], t: ['Within 24 hours'] },
+                    3: { q: ['Some gaps corrected'], e: ['95–99% entries captured'], t: ['Within 48 hours'] },
+                    2: { q: ['Multiple missing logs'], e: ['<95% captured'], t: ['Beyond 48 hours'] },
+                    1: { q: ['Trail missing'], e: ['Majority uncaptured'], t: ['Unacceptable'] },
+                },
+                'Same-day verification of OTC transactions': {
+                    5: { q: ['Verified without discrepancies'], e: ['100% OTC verified'], t: ['Same working day'] },
+                    4: { q: ['Minor verifications pending'], e: ['100% OTC verified'], t: ['Same working day'] },
+                    3: { q: ['Few pending verifications'], e: ['95–99% verified'], t: ['End of working day'] },
+                    2: { q: ['Several unverified'], e: ['<95% verified'], t: ['Beyond working day'] },
+                    1: { q: ['Verification not done'], e: ['Majority unverified'], t: ['Unacceptable'] },
+                },
+                '95% encoded within the business day': {
+                    5: { q: ['Encodings error-free'], e: ['100% encoded'], t: ['Same business day'] },
+                    4: { q: ['Minor corrections'], e: ['100% encoded'], t: ['Same business day'] },
+                    3: { q: ['Few delays'], e: ['95–99% encoded'], t: ['By end of day'] },
+                    2: { q: ['Multiple delays'], e: ['<95% encoded'], t: ['Next day'] },
+                    1: { q: ['Encoding largely incomplete'], e: ['Major backlog'], t: ['Unacceptable'] },
+                },
+                'OR validation completed daily': {
+                    5: { q: ['All ORs validated error-free'], e: ['100% validated'], t: ['Daily'] },
+                    4: { q: ['Minor issues corrected same day'], e: ['100% validated'], t: ['Daily'] },
+                    3: { q: ['Some validations late'], e: ['95–99% validated'], t: ['Within 48 hours'] },
+                    2: { q: ['Frequent late validations'], e: ['<95% validated'], t: ['Beyond 48 hours'] },
+                    1: { q: ['Validations mostly missing'], e: ['Majority unvalidated'], t: ['Unacceptable'] },
+                },
+                'Weekly filing updated and retrievable': {
+                    5: { q: ['Zero retrieval issues'], e: ['100% weekly updates'], t: ['Within week'] },
+                    4: { q: ['Minor retrieval fixes'], e: ['100% weekly updates'], t: ['Within week'] },
+                    3: { q: ['Some items late'], e: ['95–99% updates'], t: ['Within next week'] },
+                    2: { q: ['Many late updates'], e: ['<95% updates'], t: ['Beyond next week'] },
+                    1: { q: ['Updates not done'], e: ['Major gaps'], t: ['Unacceptable'] },
+                },
+                'Digital backups synced monthly': {
+                    5: { q: ['Backups verified'], e: ['100% synced'], t: ['Within month'] },
+                    4: { q: ['Minor sync corrections'], e: ['100% synced'], t: ['Within month'] },
+                    3: { q: ['Some delays'], e: ['95–99% synced'], t: ['Within following week'] },
+                    2: { q: ['Frequent delays'], e: ['<95% synced'], t: ['Beyond following week'] },
+                    1: { q: ['Backups largely missing'], e: ['Major gaps'], t: ['Unacceptable'] },
+                },
+                'Retrieval logs maintained for audits': {
+                    5: { q: ['Logs complete and audit-ready'], e: ['100% requests logged'], t: ['Same day'] },
+                    4: { q: ['Minor log gaps corrected'], e: ['100% requests logged'], t: ['Same day'] },
+                    3: { q: ['Some gaps'], e: ['95–99% logged'], t: ['Within 48 hours'] },
+                    2: { q: ['Many gaps'], e: ['<95% logged'], t: ['Beyond 48 hours'] },
+                    1: { q: ['Logs largely missing'], e: ['Majority unlogged'], t: ['Unacceptable'] },
+                },
+            };
+
             let indicatorStandardsBody;
             let standardsModalMfo;
             let standardsModalIndicator;
             let standardsModalBodyIndicator;
+
+            let assignedModalName;
+            let assignedModalUnit;
+            let assignedModalUnitCell;
+            let assignedModalIndicator;
 
             function createEmptyStandards() {
                 const base = {};
@@ -780,18 +909,20 @@
             }
 
             function renderIndicatorStandards(indicator) {
-                if (!indicatorStandardsBody) {
-                    return;
-                }
+                if (!indicatorStandardsBody) return;
+
                 const data = seedStandardsForIndicator(indicator);
                 indicatorStandardsBody.innerHTML = '';
+
                 standardRatings.forEach((level) => {
                     const row = data[level] || { q: [], e: [], t: [] };
                     const tr = document.createElement('tr');
                     tr.className = 'hover:bg-slate-900/40';
+
                     const ratingTd = document.createElement('td');
                     ratingTd.className = 'px-4 py-3 font-semibold';
                     ratingTd.textContent = level;
+
                     const makeListCell = (items) => {
                         const td = document.createElement('td');
                         td.className = 'px-4 py-3 align-top';
@@ -809,12 +940,14 @@
                         td.appendChild(ul);
                         return td;
                     };
+
                     tr.append(
                         ratingTd,
                         makeListCell(row.q),
                         makeListCell(row.e),
                         makeListCell(row.t)
                     );
+
                     indicatorStandardsBody.appendChild(tr);
                 });
             }
@@ -822,35 +955,42 @@
             function handleStandardsButton(button) {
                 const mfoTitle = button.dataset.mfoTitle || '';
                 const indicatorText = button.dataset.indicatorText || '';
-                if (standardsModalMfo) {
-                    standardsModalMfo.textContent = mfoTitle || '--';
-                }
-                if (standardsModalIndicator) {
-                    standardsModalIndicator.textContent = indicatorText || '--';
-                }
-                if (standardsModalBodyIndicator) {
-                    standardsModalBodyIndicator.textContent = indicatorText || '--';
-                }
+
+                if (standardsModalMfo) standardsModalMfo.textContent = mfoTitle || '--';
+                if (standardsModalIndicator) standardsModalIndicator.textContent = indicatorText || '--';
+                if (standardsModalBodyIndicator) standardsModalBodyIndicator.textContent = indicatorText || '--';
+
                 renderIndicatorStandards(indicatorText);
             }
 
+            function handleAssignedEmployeeButton(button) {
+                const name = button.dataset.assignedName || 'Ramon Reyes';
+                const unit = button.dataset.assignedUnit || 'Revenue Collection Unit';
+                const indicator = button.dataset.assignedIndicator || '--';
+
+                if (assignedModalName) assignedModalName.textContent = name;
+                if (assignedModalUnit) assignedModalUnit.textContent = unit;
+                if (assignedModalUnitCell) assignedModalUnitCell.textContent = unit;
+                if (assignedModalIndicator) assignedModalIndicator.textContent = indicator;
+            }
+
             document.addEventListener('DOMContentLoaded', () => {
-                const statusText = document.getElementById('uwp-status-text');
-                document.querySelectorAll('[data-modal-target="uwpPreviewModal"]').forEach((btn) => {
-                    btn.addEventListener('click', () => {
-                        const status = btn.dataset.status || 'Draft';
-                        if (statusText) statusText.textContent = status;
-                    });
-                });
                 indicatorStandardsBody = document.getElementById('indicatorStandardsBody');
                 standardsModalMfo = document.getElementById('indicatorStandardsModalMfo');
                 standardsModalIndicator = document.getElementById('indicatorStandardsModalIndicator');
                 standardsModalBodyIndicator = document.getElementById('indicatorStandardsModalBodyIndicator');
 
+                assignedModalName = document.getElementById('assignedModalName');
+                assignedModalUnit = document.getElementById('assignedModalUnit');
+                assignedModalUnitCell = document.getElementById('assignedModalUnitCell');
+                assignedModalIndicator = document.getElementById('assignedModalIndicator');
+
                 document.querySelectorAll('[data-indicator-standards]').forEach((button) => {
-                    button.addEventListener('click', () => {
-                        handleStandardsButton(button);
-                    });
+                    button.addEventListener('click', () => handleStandardsButton(button));
+                });
+
+                document.querySelectorAll('[data-assigned-employee]').forEach((button) => {
+                    button.addEventListener('click', () => handleAssignedEmployeeButton(button));
                 });
             });
         </script>
