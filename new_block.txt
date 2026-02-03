@@ -1,0 +1,120 @@
+﻿                // ===== Standards Modal (existing, unchanged behavior) =====
+                function openStandardsModal(idx) {
+                    if (!standardsModal || !standardsList) return;
+
+                    const data = standardsData[idx] || seedStandardsForIndicator(activeIndicators[idx] || '');
+                    standardsData[idx] = data;
+
+                    standardsList.innerHTML = '';
+                    if (standardsIndicatorLabel) standardsIndicatorLabel.textContent = activeIndicators[idx] || '';
+
+                    const table = document.createElement('table');
+                    table.className = 'w-full text-sm border border-slate-800';
+                    table.innerHTML = 
+                        <thead class="bg-slate-900/70 text-slate-200">
+                            <tr>
+                                <th class="px-3 py-2 text-left">Rating</th>
+                                <th class="px-3 py-2 text-left">Quality (Q)</th>
+                                <th class="px-3 py-2 text-left">Efficiency (E)</th>
+                                <th class="px-3 py-2 text-left">Timeliness (T)</th>
+                            </tr>
+                        </thead>
+                    ;
+
+                    const tbody = document.createElement('tbody');
+                    tbody.className = 'divide-y divide-slate-800 text-slate-100';
+
+                    const makeCell = (value, lvl, dim) => {
+                        const td = document.createElement('td');
+                        td.className = 'px-3 py-2 text-left align-top';
+
+                        const txt = (value || '').trim();
+
+                        const textEl = document.createElement('div');
+                        textEl.className = 'text-slate-100';
+                        textEl.textContent = txt ? txt : '—';
+                        td.appendChild(textEl);
+
+                        if (isDraft) {
+                            const actionBtn = document.createElement('button');
+                            actionBtn.type = 'button';
+                            actionBtn.className = 'mt-1 text-[11px]';
+                            actionBtn.style.color = '#60a5fa';
+                            actionBtn.textContent = txt ? 'Edit' : 'Add +';
+
+                            actionBtn.addEventListener('click', () => {
+                                if (!ratingSelectEl || !dimSelectEl || !standardsInput) return;
+
+                                ratingSelectEl.value = String(lvl);
+                                dimSelectEl.value = dim;
+
+                                standardsEditTarget = { rating: String(lvl), dim };
+                                standardsInput.value = txt ? txt : '';
+                                standardsInput.focus();
+                            });
+
+                            td.appendChild(actionBtn);
+                        }
+
+                        return td;
+                    };
+
+                    [5,4,3,2,1].forEach((lvl) => {
+                        const row = data[lvl] || { q: '', e: '', t: '' };
+                        const tr = document.createElement('tr');
+                        tr.className = 'hover:bg-slate-900/40';
+
+                        const ratingTd = document.createElement('td');
+                        ratingTd.className = 'px-3 py-2 text-left';
+                        ratingTd.textContent = lvl;
+
+                        tr.append(
+                            ratingTd,
+                            makeCell(row.q, lvl, 'q'),
+                            makeCell(row.e, lvl, 'e'),
+                            makeCell(row.t, lvl, 't')
+                        );
+
+                        tbody.appendChild(tr);
+                    });
+
+                    table.appendChild(tbody);
+                    standardsList.appendChild(table);
+
+                    standardsModal.dataset.currentIndex = idx;
+                    standardsModal.classList.remove('hidden');
+                    standardsModal.classList.add('flex');
+                    document.body.classList.add('overflow-hidden');
+                }
+
+                function handleAddStandard() {
+                    if (!standardsModal || !standardsInput) return;
+
+                    const idx = Number(standardsModal.dataset.currentIndex || 0);
+                    if (!ratingSelectEl || !dimSelectEl) return;
+
+                    const raw = standardsInput.value.trim();
+                    if (!raw) return;
+
+                    const rating = standardsEditTarget?.rating || ratingSelectEl.value;
+                    const dim = standardsEditTarget?.dim || dimSelectEl.value;
+
+                    standardsData[idx] = standardsData[idx] || createEmptyStandards();
+                    if (!standardsData[idx][rating]) standardsData[idx][rating] = { q: '', e: '', t: '' };
+
+                    standardsData[idx][rating][dim] = raw;
+
+                    standardsInput.value = '';
+                    standardsEditTarget = null;
+
+                    openStandardsModal(idx);
+                }
+
+                function closeStandardsModal() {
+                    if (standardsModal) {
+                        standardsModal.classList.add('hidden');
+                        standardsModal.classList.remove('flex');
+                    }
+                    document.body.classList.remove('overflow-hidden');
+                }
+

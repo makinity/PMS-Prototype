@@ -45,6 +45,7 @@
                     <span class="text-xs uppercase tracking-wide text-slate-400">Office / Unit</span>
 
                     <select
+                        id="uwp-office-unit"
                         class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2
                             text-sm text-slate-100 focus:border-blue-500
                             focus:ring-2 focus:ring-blue-500/40 focus:outline-none
@@ -605,6 +606,9 @@
                 const standardsIndicatorLabel = document.getElementById('uwp-standards-indicator');
                 const standardsInput = document.getElementById('uwp-standards-input');
                 const addStandardBtn = document.getElementById('uwp-add-standard');
+                const ratingSelectEl = document.getElementById('uwp-standard-rating');
+                const dimSelectEl = document.getElementById('uwp-standard-dimension');
+                let standardsEditTarget = null; // { rating: '5', dim: 'q' }
 
                 const assignedModal = document.getElementById('uwp-assigned-employees-modal');
                 const assignedList = document.getElementById('uwp-assigned-list');
@@ -613,7 +617,7 @@
                 const assignedIndicator = document.getElementById('uwp-assigned-indicator');
                 const saveAssignmentsBtn = document.getElementById('uwp-save-assignments');
 
-                const unitSelect = document.querySelector('select[aria-label="Office / Unit"]') || document.querySelector('select');
+                const unitSelect = document.getElementById('uwp-office-unit');
 
                 let activeIndicators = [];
                 let standardsData = [];
@@ -703,11 +707,11 @@
 
                 function createEmptyStandards() {
                     return {
-                        5: { q: [], e: [], t: [] },
-                        4: { q: [], e: [], t: [] },
-                        3: { q: [], e: [], t: [] },
-                        2: { q: [], e: [], t: [] },
-                        1: { q: [], e: [], t: [] },
+                        5: { q: '', e: '', t: '' },
+                        4: { q: '', e: '', t: '' },
+                        3: { q: '', e: '', t: '' },
+                        2: { q: '', e: '', t: '' },
+                        1: { q: '', e: '', t: '' },
                     };
                 }
 
@@ -716,13 +720,13 @@
                     if (!seed) return createEmptyStandards();
                     const base = createEmptyStandards();
                     [5,4,3,2,1].forEach((lvl) => {
-                        if (seed[lvl]) {
-                            base[lvl] = {
-                                q: Array.isArray(seed[lvl].q) ? [...seed[lvl].q] : [seed[lvl].q],
-                                e: Array.isArray(seed[lvl].e) ? [...seed[lvl].e] : [seed[lvl].e],
-                                t: Array.isArray(seed[lvl].t) ? [...seed[lvl].t] : [seed[lvl].t],
-                            };
-                        }
+                        if (!seed[lvl]) return;
+
+                        base[lvl] = {
+                            q: Array.isArray(seed[lvl].q) ? (seed[lvl].q[0] || '') : (seed[lvl].q || ''),
+                            e: Array.isArray(seed[lvl].e) ? (seed[lvl].e[0] || '') : (seed[lvl].e || ''),
+                            t: Array.isArray(seed[lvl].t) ? (seed[lvl].t[0] || '') : (seed[lvl].t || ''),
+                        };
                     });
                     return base;
                 }
@@ -966,9 +970,10 @@
                     document.body.classList.remove('overflow-hidden');
                 }
 
-                // ===== Standards Modal (existing, unchanged behavior) =====
+                                                                                                                                                // ===== Standards Modal (existing, unchanged behavior) =====
                 function openStandardsModal(idx) {
                     if (!standardsModal || !standardsList) return;
+
                     const data = standardsData[idx] || seedStandardsForIndicator(activeIndicators[idx] || '');
                     standardsData[idx] = data;
 
@@ -991,8 +996,74 @@
                     const tbody = document.createElement('tbody');
                     tbody.className = 'divide-y divide-slate-800 text-slate-100';
 
+                    const makeCell = (value, lvl, dim) => {
+                        const td = document.createElement('td');
+                        td.className = 'px-3 py-2 text-left align-top';
+
+                        const txt = (value || '').trim();
+
+                        const textEl = document.createElement('div');
+                        textEl.className = 'text-slate-100';
+                        textEl.textContent = txt ? txt : '—';
+                        td.appendChild(textEl);
+
+                        if (isDraft) {
+                            const actionBtn = document.createElement('button');
+                            actionBtn.type = 'button';
+                            actionBtn.className = 'mt-1 text-[11px]';
+                            actionBtn.style.color = '#60a5fa';
+                            actionBtn.textContent = txt ? 'Edit' : 'Add +';
+
+                            actionBtn.addEventListener('click', () => {
+                                ratingSelectEl.value = String(lvl);
+                                dimSelectEl.value = dim;
+                                standardsEditTarget = { rating: String(lvl), dim };
+                                standardsInput.value = txt ? txt : '';
+                                standardsInput.focus();
+                            });
+
+                            td.appendChild(actionBtn);
+                        }
+
+                        if (isDraft && txt) {
+                            const clearBtn = document.createElement('button');
+                            clearBtn.type = 'button';
+                            clearBtn.className = 'mt-1 ml-3 text-[11px]';
+                            clearBtn.style.color = '#f87171'; // rose-400
+                            clearBtn.textContent = 'Clear';
+
+                            clearBtn.addEventListener('click', () => {
+                                standardsData[idx] = standardsData[idx] || createEmptyStandards();
+                                if (!standardsData[idx][String(lvl)]) {
+                                    standardsData[idx][String(lvl)] = { q:'', e:'', t:'' };
+                                }
+
+                                // clear only this cell
+                                standardsData[idx][String(lvl)][dim] = '';
+
+                                // reset editor if user was editing this same cell
+                                if (
+                                    standardsEditTarget &&
+                                    standardsEditTarget.rating === String(lvl) &&
+                                    standardsEditTarget.dim === dim
+                                ) {
+                                    standardsEditTarget = null;
+                                    if (standardsInput) standardsInput.value = '';
+                                }
+
+                                openStandardsModal(idx);
+                            });
+
+                            td.appendChild(clearBtn);
+                        }
+
+                        return td;
+                    };
+
+
                     [5,4,3,2,1].forEach((lvl) => {
-                        const row = data[lvl] || { q:[], e:[], t:[] };
+                        const row = data[lvl] || { q:'', e:'', t:'' };
+
                         const tr = document.createElement('tr');
                         tr.className = 'hover:bg-slate-900/40';
 
@@ -1000,66 +1071,13 @@
                         ratingTd.className = 'px-3 py-2 text-left';
                         ratingTd.textContent = lvl;
 
-                        const makeCell = (arr, dim) => {
-                            const td = document.createElement('td');
-                            td.className = 'px-3 py-2 text-left align-top';
-
-                            if (!arr || arr.length === 0) {
-                                td.textContent = '—';
-                            } else {
-                                const list = document.createElement('div');
-                                list.className = 'space-y-1';
-                                arr.forEach((txt, itemIdx) => {
-                                    const line = document.createElement('div');
-                                    line.className = 'flex items-start gap-2';
-                                    const bullet = document.createElement('span');
-                                    bullet.textContent = '•';
-                                    bullet.className = 'text-slate-400';
-                                    const text = document.createElement('span');
-                                    text.className = 'flex-1';
-                                    text.textContent = txt;
-                                    line.append(bullet, text);
-
-                                    if (isDraft) {
-                                        const del = document.createElement('button');
-                                        del.type = 'button';
-                                        del.className = 'text-rose-400 hover:text-rose-300 text-[11px]';
-                                        del.textContent = '×';
-                                        del.addEventListener('click', () => removeStandard(idx, lvl, dim, itemIdx));
-                                        line.appendChild(del);
-                                    }
-                                    list.appendChild(line);
-                                });
-                                td.appendChild(list);
-                            }
-
-                            if (isDraft) {
-                                const addLink = document.createElement('button');
-                                addLink.type = 'button';
-                                addLink.className = 'mt-1 text-[11px]';
-                                addLink.style.color = '#60a5fa';
-                                addLink.textContent = 'Add +';
-                                addLink.addEventListener('click', () => {
-                                    const ratingSelect = document.getElementById('uwp-standard-rating');
-                                    const dimSelect = document.getElementById('uwp-standard-dimension');
-                                    if (ratingSelect && dimSelect && standardsInput) {
-                                        ratingSelect.value = String(lvl);
-                                        dimSelect.value = dim;
-                                        standardsInput.focus();
-                                    }
-                                });
-                                td.appendChild(addLink);
-                            }
-
-                            return td;
-                        };
-
                         tr.append(
                             ratingTd,
-                            makeCell(row.q, 'q'),
-                            makeCell(row.e, 'e'),
-                            makeCell(row.t, 't')
+                            makeCell(row.q, lvl, 'q'),
+                            makeCell(row.e, lvl, 'e'),
+                            makeCell(row.t, lvl, 't')
                         );
+
                         tbody.appendChild(tr);
                     });
 
@@ -1074,32 +1092,28 @@
 
                 function handleAddStandard() {
                     if (!standardsModal || !standardsInput) return;
-                    const idx = Number(standardsModal.dataset.currentIndex);
-                    const ratingSelect = document.getElementById('uwp-standard-rating');
-                    const dimensionSelect = document.getElementById('uwp-standard-dimension');
-                    if (!ratingSelect || !dimensionSelect) return;
 
-                    const rating = ratingSelect.value;
-                    const dim = dimensionSelect.value; // q | e | t
+                    const idx = Number(standardsModal.dataset.currentIndex || 0);
+                    if (!ratingSelectEl || !dimSelectEl) return;
+
                     const raw = standardsInput.value.trim();
                     if (!raw) return;
 
+                    const rating = standardsEditTarget?.rating || ratingSelectEl.value;
+                    const dim = standardsEditTarget?.dim || dimSelectEl.value; // q|e|t
+
                     standardsData[idx] = standardsData[idx] || createEmptyStandards();
-                    if (!Array.isArray(standardsData[idx][rating][dim])) {
-                        standardsData[idx][rating][dim] = [];
-                    }
-                    standardsData[idx][rating][dim].push(raw);
+                    if (!standardsData[idx][rating]) standardsData[idx][rating] = { q:'', e:'', t:'' };
+
+                    // overwrite single sentence
+                    standardsData[idx][rating][dim] = raw;
+
                     standardsInput.value = '';
+                    standardsEditTarget = null;
+
                     openStandardsModal(idx);
                 }
 
-                function removeStandard(itemIdx, ratingLevel, dim, itemIdxInDim) {
-                    if (!standardsData[itemIdx] || !standardsData[itemIdx][ratingLevel]) return;
-                    const arr = standardsData[itemIdx][ratingLevel][dim];
-                    if (!Array.isArray(arr) || itemIdxInDim === undefined) return;
-                    arr.splice(itemIdxInDim, 1);
-                    openStandardsModal(itemIdx);
-                }
 
                 function closeStandardsModal() {
                     if (standardsModal) {
@@ -1217,6 +1231,8 @@
                     resetStandardBtn.addEventListener('click', () => {
                         const idx = Number(standardsModal?.dataset.currentIndex || 0);
                         standardsData[idx] = seedStandardsForIndicator(activeIndicators[idx] || '');
+                        standardsEditTarget = null;
+                        if (standardsInput) standardsInput.value = '';
                         openStandardsModal(idx);
                     });
                 }
@@ -1257,7 +1273,6 @@
                 // expose closers
                 window.closeStandardsModal = closeStandardsModal;
                 window.closeAssignedModal = closeAssignedModal;
-                window.removeStandard = removeStandard;
             });
         </script>
     @endpush
