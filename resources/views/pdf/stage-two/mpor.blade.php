@@ -55,11 +55,13 @@
                 <th style="width:4%;">W3</th>
                 <th style="width:4%;">W4</th>
                 <th style="width:4%;">TOTAL</th>
+
                 <th style="width:4%;">W1</th>
                 <th style="width:4%;">W2</th>
                 <th style="width:4%;">W3</th>
                 <th style="width:4%;">W4</th>
                 <th style="width:4%;">TOTAL</th>
+
                 <th style="width:4%;">W1</th>
                 <th style="width:4%;">W2</th>
                 <th style="width:4%;">W3</th>
@@ -71,50 +73,133 @@
             <tr>
                 <td class="section-label" colspan="16">CORE FUNCTIONS (80%)</td>
             </tr>
+
             @foreach ($mpor['core'] as $row)
                 <tr>
                     <td class="left">{{ $row['output'] }}</td>
-                    <td>{{ $row['week1'] }}</td>
-                    <td>{{ $row['week2'] }}</td>
-                    <td>{{ $row['week3'] }}</td>
-                    <td>{{ $row['week4'] }}</td>
-                    <td>{{ $row['total'] }}</td>
-                    <td>{{ $row['week1'] }}</td>
-                    <td>{{ $row['week2'] }}</td>
-                    <td>{{ $row['week3'] }}</td>
-                    <td>{{ $row['week4'] }}</td>
-                    <td>{{ $row['total'] }}</td>
-                    <td>{{ $row['week1'] }}</td>
-                    <td>{{ $row['week2'] }}</td>
-                    <td>{{ $row['week3'] }}</td>
-                    <td>{{ $row['week4'] }}</td>
-                    <td>{{ $row['total'] }}</td>
+
+                    {{-- Efficiency / Quantity --}}
+                    <td>{{ $row['qty']['week1'] }}</td>
+                    <td>{{ $row['qty']['week2'] }}</td>
+                    <td>{{ $row['qty']['week3'] }}</td>
+                    <td>{{ $row['qty']['week4'] }}</td>
+                    <td>{{ $row['qty']['total'] }}</td>
+
+                    {{-- Quality / Effectiveness (points) --}}
+                    <td>{{ $row['qual']['week1'] }}</td>
+                    <td>{{ $row['qual']['week2'] }}</td>
+                    <td>{{ $row['qual']['week3'] }}</td>
+                    <td>{{ $row['qual']['week4'] }}</td>
+                    <td>{{ $row['qual']['total'] }}</td>
+
+                    {{-- Timeliness (points) --}}
+                    <td>{{ $row['time']['week1'] }}</td>
+                    <td>{{ $row['time']['week2'] }}</td>
+                    <td>{{ $row['time']['week3'] }}</td>
+                    <td>{{ $row['time']['week4'] }}</td>
+                    <td>{{ $row['time']['total'] }}</td>
                 </tr>
             @endforeach
+
+            {{-- TOTAL CORE --}}
+            <tr>
+                <td class="section-label left">TOTAL — CORE</td>
+
+                <td class="section-label">{{ $mpor['totals']['core']['qty']['week1'] }}</td>
+                <td class="section-label">{{ $mpor['totals']['core']['qty']['week2'] }}</td>
+                <td class="section-label">{{ $mpor['totals']['core']['qty']['week3'] }}</td>
+                <td class="section-label">{{ $mpor['totals']['core']['qty']['week4'] }}</td>
+                <td class="section-label">{{ $mpor['totals']['core']['qty']['total'] }}</td>
+
+                <td class="section-label">{{ $mpor['totals']['core']['qual']['week1'] }}</td>
+                <td class="section-label">{{ $mpor['totals']['core']['qual']['week2'] }}</td>
+                <td class="section-label">{{ $mpor['totals']['core']['qual']['week3'] }}</td>
+                <td class="section-label">{{ $mpor['totals']['core']['qual']['week4'] }}</td>
+                <td class="section-label">{{ $mpor['totals']['core']['qual']['total'] }}</td>
+
+                <td class="section-label">{{ $mpor['totals']['core']['time']['week1'] }}</td>
+                <td class="section-label">{{ $mpor['totals']['core']['time']['week2'] }}</td>
+                <td class="section-label">{{ $mpor['totals']['core']['time']['week3'] }}</td>
+                <td class="section-label">{{ $mpor['totals']['core']['time']['week4'] }}</td>
+                <td class="section-label">{{ $mpor['totals']['core']['time']['total'] }}</td>
+            </tr>
 
             <tr>
                 <td class="section-label" colspan="16">SUPPORT FUNCTIONS (20%)</td>
             </tr>
+
             @foreach ($mpor['support'] as $row)
                 <tr>
                     <td class="left">{{ $row['output'] }}</td>
-                    <td>{{ $row['week1'] }}</td>
-                    <td>{{ $row['week2'] }}</td>
-                    <td>{{ $row['week3'] }}</td>
-                    <td>{{ $row['week4'] }}</td>
-                    <td>{{ $row['total'] }}</td>
-                    <td>{{ $row['week1'] }}</td>
-                    <td>{{ $row['week2'] }}</td>
-                    <td>{{ $row['week3'] }}</td>
-                    <td>{{ $row['week4'] }}</td>
-                    <td>{{ $row['total'] }}</td>
-                    <td>{{ $row['week1'] }}</td>
-                    <td>{{ $row['week2'] }}</td>
-                    <td>{{ $row['week3'] }}</td>
-                    <td>{{ $row['week4'] }}</td>
-                    <td>{{ $row['total'] }}</td>
+
+                    {{-- Efficiency / Quantity --}}
+                    <td>{{ $row['qty']['week1'] }}</td>
+                    <td>{{ $row['qty']['week2'] }}</td>
+                    <td>{{ $row['qty']['week3'] }}</td>
+                    <td>{{ $row['qty']['week4'] }}</td>
+                    <td>{{ $row['qty']['total'] }}</td>
+
+                    {{-- Quality / Effectiveness (points) --}}
+                    <td>{{ $row['qual']['week1'] }}</td>
+                    <td>{{ $row['qual']['week2'] }}</td>
+                    <td>{{ $row['qual']['week3'] }}</td>
+                    <td>{{ $row['qual']['week4'] }}</td>
+                    <td>{{ $row['qual']['total'] }}</td>
+
+                    {{-- Timeliness (points) --}}
+                    <td>{{ $row['time']['week1'] }}</td>
+                    <td>{{ $row['time']['week2'] }}</td>
+                    <td>{{ $row['time']['week3'] }}</td>
+                    <td>{{ $row['time']['week4'] }}</td>
+                    <td>{{ $row['time']['total'] }}</td>
                 </tr>
             @endforeach
+
+            {{-- TOTAL SUPPORT --}}
+            <tr>
+                <td class="section-label left">TOTAL — SUPPORT</td>
+
+                <td class="section-label">{{ $mpor['totals']['support']['qty']['week1'] }}</td>
+                <td class="section-label">{{ $mpor['totals']['support']['qty']['week2'] }}</td>
+                <td class="section-label">{{ $mpor['totals']['support']['qty']['week3'] }}</td>
+                <td class="section-label">{{ $mpor['totals']['support']['qty']['week4'] }}</td>
+                <td class="section-label">{{ $mpor['totals']['support']['qty']['total'] }}</td>
+
+                <td class="section-label">{{ $mpor['totals']['support']['qual']['week1'] }}</td>
+                <td class="section-label">{{ $mpor['totals']['support']['qual']['week2'] }}</td>
+                <td class="section-label">{{ $mpor['totals']['support']['qual']['week3'] }}</td>
+                <td class="section-label">{{ $mpor['totals']['support']['qual']['week4'] }}</td>
+                <td class="section-label">{{ $mpor['totals']['support']['qual']['total'] }}</td>
+
+                <td class="section-label">{{ $mpor['totals']['support']['time']['week1'] }}</td>
+                <td class="section-label">{{ $mpor['totals']['support']['time']['week2'] }}</td>
+                <td class="section-label">{{ $mpor['totals']['support']['time']['week3'] }}</td>
+                <td class="section-label">{{ $mpor['totals']['support']['time']['week4'] }}</td>
+                <td class="section-label">{{ $mpor['totals']['support']['time']['total'] }}</td>
+            </tr>
+
+            {{-- GRAND TOTAL --}}
+            <tr>
+                <td class="section-label left">GRAND TOTAL</td>
+
+                <td class="section-label">{{ $mpor['totals']['grand']['qty']['week1'] }}</td>
+                <td class="section-label">{{ $mpor['totals']['grand']['qty']['week2'] }}</td>
+                <td class="section-label">{{ $mpor['totals']['grand']['qty']['week3'] }}</td>
+                <td class="section-label">{{ $mpor['totals']['grand']['qty']['week4'] }}</td>
+                <td class="section-label">{{ $mpor['totals']['grand']['qty']['total'] }}</td>
+
+                <td class="section-label">{{ $mpor['totals']['grand']['qual']['week1'] }}</td>
+                <td class="section-label">{{ $mpor['totals']['grand']['qual']['week2'] }}</td>
+                <td class="section-label">{{ $mpor['totals']['grand']['qual']['week3'] }}</td>
+                <td class="section-label">{{ $mpor['totals']['grand']['qual']['week4'] }}</td>
+                <td class="section-label">{{ $mpor['totals']['grand']['qual']['total'] }}</td>
+
+                <td class="section-label">{{ $mpor['totals']['grand']['time']['week1'] }}</td>
+                <td class="section-label">{{ $mpor['totals']['grand']['time']['week2'] }}</td>
+                <td class="section-label">{{ $mpor['totals']['grand']['time']['week3'] }}</td>
+                <td class="section-label">{{ $mpor['totals']['grand']['time']['week4'] }}</td>
+                <td class="section-label">{{ $mpor['totals']['grand']['time']['total'] }}</td>
+            </tr>
         </tbody>
     </table>
 
@@ -136,7 +221,7 @@
                 <td>{{ $mpor['attendance']['absence']['week2'] }}</td>
                 <td>{{ $mpor['attendance']['absence']['week3'] }}</td>
                 <td>{{ $mpor['attendance']['absence']['week4'] }}</td>
-                <td>{{ $mpor['attendance']['absence']['week1'] + $mpor['attendance']['absence']['week2'] + $mpor['attendance']['absence']['week3'] + $mpor['attendance']['absence']['week4'] }}days</td>
+                <td>{{ $mpor['attendance']['absence']['total'] ?? ($mpor['attendance']['absence']['week1'] + $mpor['attendance']['absence']['week2'] + $mpor['attendance']['absence']['week3'] + $mpor['attendance']['absence']['week4']) }}days</td>
             </tr>
             <tr>
                 <td class="left"><strong>MAN HRS./MINUTES LOST THRU TARDINESS / UNDERTIME</strong></td>
@@ -144,7 +229,7 @@
                 <td>{{ $mpor['attendance']['tardiness']['week2'] }}</td>
                 <td>{{ $mpor['attendance']['tardiness']['week3'] }}</td>
                 <td>{{ $mpor['attendance']['tardiness']['week4'] }}</td>
-                <td>{{ $mpor['attendance']['tardiness']['week1'] + $mpor['attendance']['tardiness']['week2'] + $mpor['attendance']['tardiness']['week3'] + $mpor['attendance']['tardiness']['week4'] }}mins</td>
+                <td>{{ $mpor['attendance']['tardiness']['total'] ?? ($mpor['attendance']['tardiness']['week1'] + $mpor['attendance']['tardiness']['week2'] + $mpor['attendance']['tardiness']['week3'] + $mpor['attendance']['tardiness']['week4']) }}mins</td>
             </tr>
         </tbody>
     </table>
@@ -154,17 +239,19 @@
             <td style="width:45%; text-align:center;">
                 <div style="border-top:1px solid #000; margin-top:18px; padding-top:2px;">CONFIRMED:</div>
                 <div style="min-height:18px;">&nbsp;</div>
+                <div style="font-size:9px;"><strong>Supervisor:</strong> {{ $mpor['supervisor_name'] ?? '—' }}</div>
             </td>
             <td style="width:10%;"></td>
             <td style="width:45%; text-align:center;">
                 <div style="border-top:1px solid #000; margin-top:18px; padding-top:2px;">Above information are true and correct:</div>
                 <div style="min-height:18px;">&nbsp;</div>
+                <div style="font-size:9px;"><strong>Employee:</strong> {{ $mpor['employee'] }}</div>
             </td>
         </tr>
     </table>
 
     <div class="muted" style="margin-top:8px;">
-        This is a system-generated monitoring report derived from ORS. Validation, SMPOR generation, and performance rating occur in Stage III – Performance Review.
+        {{ $mpor['footer_note'] ?? 'This is a system-generated monitoring report derived from ORS. Validation, SMPOR generation, and performance rating occur in Stage III – Performance Review.' }}
     </div>
 
 </body>

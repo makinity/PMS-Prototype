@@ -97,6 +97,12 @@ Route::prefix('employee')->group(function(){
     Route::get('/smpor/export/pdf', [SmporExportController::class, 'exportPdf'])
         ->name('stage2.smpor.export.pdf');
 
+    Route::get('/ors/export/pdf', [OrsExportController::class, 'exportPdf'])
+        ->name('employee.ors.export.pdf');
+
+    Route::get('/employee/mpor/export/pdf', [MporExportController::class, 'exportPdf'])
+        ->name('employee.mpor.export.pdf');
+
     Route::get('/ipcr/export/pdf', [FormsIpcrExportController::class, 'exportPdf'])
         ->name('stage2.ipcr.export.pdf');
 
@@ -189,9 +195,6 @@ Route::prefix('supervisor')->group(function(){
         return view('supervisor.mpor');
     })->name('supervisor.mpor');
 
-    Route::get('/mpor/export/pdf', [MporExportController::class, 'exportPdf'])
-        ->name('supervisor.mpor.export.pdf');
-
     Route::get('/mpor-validation', function () {
         return view('supervisor.mpor-validation');
     })->name('supervisor.mpor-validation');
@@ -199,9 +202,6 @@ Route::prefix('supervisor')->group(function(){
     Route::get('/ors-monitoring', function () {
         return view('supervisor.ors-monitoring');
     })->name('supervisor.ors-monitoring');
-
-    Route::get('/ors/export/pdf', [OrsExportController::class, 'exportPdf'])
-        ->name('supervisor.ors.export.pdf');
 
     Route::get('/overdue-alerts', function () {
         return view('supervisor.overdue-alerts');

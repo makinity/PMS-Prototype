@@ -253,7 +253,7 @@
                         <button type="button" onclick="closeTaskViewModal()" class="rounded-lg border border-gray-600 px-4 py-2 text-sm font-medium text-gray-200 transition hover:bg-gray-800">
                             Close
                         </button>
-                        <a href="{{ route('supervisor.ors.export.pdf') }}" id="exportOrsBtn" title="Export available only after supervisor rating" class="rounded-lg border border-gray-600 px-4 py-2 text-sm font-medium text-gray-200 transition hover:bg-gray-800 opacity-50 pointer-events-none cursor-not-allowed">
+                        <a href="{{ route('employee.ors.export.pdf') }}" id="exportOrsBtn" title="Export available only after supervisor rating" class="rounded-lg border border-gray-600 px-4 py-2 text-sm font-medium text-gray-200 transition hover:bg-gray-800 opacity-50 pointer-events-none cursor-not-allowed">
                             Export ORS
                         </a>
                         <a href="{{ route('employee.ors') }}" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-500">
