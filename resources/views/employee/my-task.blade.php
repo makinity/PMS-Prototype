@@ -67,7 +67,7 @@
                             <td class="px-4 py-3 text-gray-300">12 transactions</td>
                             <td class="px-4 py-3">
                                 <button type="button"
-                                        onclick="openTaskViewModal({task:'Same-day verification of OTC transactions', date:'Jan 2, 2026', status:'Submitted (Locked)', outputState:'Output submitted', outputType:'Official Receipt (OR)', quantity:'12 transactions', evidence:'Attached', notes:'Visible to supervisor (rateable in ORS Monitoring)'})"
+                                        onclick="openTaskViewModal({task:'Same-day verification of OTC transactions', date:'Jan 2, 2026', status:'Submitted (Locked)', outputState:'Output submitted', outputType:'Official Receipt (OR)', quantity:'12 transactions', evidence:'Attached', notes:'Supervisor monitoring rating recorded (see below).', supervisorName:'Carlo D. Beray', supervisorQuality:'5', supervisorTimeliness:'5', supervisorRemarks:'All Goods'})"
                                         class="rounded-lg border border-gray-600 px-3 py-1.5 text-xs font-semibold text-gray-200 hover:bg-gray-800">
                                     View
                                 </button>
@@ -93,7 +93,7 @@
                             <td class="px-4 py-3 text-gray-300">1 daily batch</td>
                             <td class="px-4 py-3">
                                 <button type="button"
-                                        onclick="openTaskViewModal({task:'All e-bank transactions scanned and encoded daily', date:'Jan 4, 2026', status:'Submitted (Locked)', outputState:'Output submitted', outputType:'Bank Statement Form (BSF-01)', quantity:'1 daily batch', evidence:'Attached', notes:'Evidence attached (BSF-01)'})"
+                                        onclick="openTaskViewModal({task:'All e-bank transactions scanned and encoded daily', date:'Jan 4, 2026', status:'Submitted (Locked)', outputState:'Output submitted', outputType:'Bank Statement Form (BSF-01)', quantity:'1 daily batch', evidence:'Attached', notes:'Supervisor monitoring rating recorded (see below).', supervisorName:'Carlo D. Beray', supervisorQuality:'5', supervisorTimeliness:'5', supervisorRemarks:'All Goods'})"
                                         class="rounded-lg border border-gray-600 px-3 py-1.5 text-xs font-semibold text-gray-200 hover:bg-gray-800">
                                     View
                                 </button>
@@ -119,7 +119,7 @@
                             <td class="px-4 py-3 text-gray-300">—</td>
                             <td class="px-4 py-3">
                                 <button type="button"
-                                        onclick="openTaskViewModal({task:'OR validation completed daily', date:'Jan 5, 2026', status:'Recording', outputState:'Output pending', outputType:'Official Receipt (OR)', quantity:'—', evidence:'N/A', notes:'Active timer'})"
+                                        onclick="openTaskViewModal({task:'OR validation completed daily', date:'Jan 5, 2026', status:'Recording', outputState:'Output pending', outputType:'Official Receipt (OR)', quantity:'—', evidence:'N/A', notes:'Active timer', supervisorName:'', supervisorQuality:'', supervisorTimeliness:'', supervisorRemarks:''})"
                                         class="rounded-lg border border-gray-600 px-3 py-1.5 text-xs font-semibold text-gray-200 hover:bg-gray-800">
                                     View
                                 </button>
@@ -145,7 +145,7 @@
                             <td class="px-4 py-3 text-gray-300">—</td>
                             <td class="px-4 py-3">
                                 <button type="button"
-                                        onclick="openTaskViewModal({task:'Retrieval logs maintained for audit purposes', date:'Jan 6, 2026', status:'Missing / Overdue', outputState:'Output Missing', outputType:'Records Inventory Checklist', quantity:'—', evidence:'None', notes:'No ORS entry submitted for the day'})"
+                                        onclick="openTaskViewModal({task:'Retrieval logs maintained for audit purposes', date:'Jan 6, 2026', status:'Missing / Overdue', outputState:'Output Missing', outputType:'Records Inventory Checklist', quantity:'—', evidence:'None', notes:'No ORS entry submitted for the day', supervisorName:'', supervisorQuality:'', supervisorTimeliness:'', supervisorRemarks:''})"
                                         class="rounded-lg border border-gray-600 px-3 py-1.5 text-xs font-semibold text-gray-200 hover:bg-gray-800">
                                     View
                                 </button>
@@ -216,6 +216,33 @@
                             </div>
                         </div>
 
+                        <div class="mt-6 rounded-2xl border border-gray-700 bg-gray-900/60 p-5 shadow-inner shadow-black/40">
+                            <div class="flex items-center justify-between">
+                                <p class="text-xs uppercase tracking-wide text-gray-500">Supervisor Monitoring Rating (ORS)</p>
+                                <span class="text-[0.65rem] font-semibold uppercase tracking-wider text-gray-500">Stage II</span>
+                            </div>
+                            <div class="mt-4 space-y-4">
+                                <div>
+                                    <p class="text-xs uppercase tracking-wide text-gray-500">Supervisor</p>
+                                    <p id="mvSupName" class="text-sm font-medium text-white">�</p>
+                                </div>
+                                <div class="grid gap-4 md:grid-cols-3">
+                                    <div>
+                                        <p class="text-xs uppercase tracking-wide text-gray-500">Quality</p>
+                                        <span id="mvSupQuality" class="mt-1 inline-flex items-center justify-center rounded-full border border-gray-700 bg-gray-800 px-3 py-1 text-xs font-semibold text-gray-200">�</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs uppercase tracking-wide text-gray-500">Timeliness</p>
+                                        <span id="mvSupTimeliness" class="mt-1 inline-flex items-center justify-center rounded-full border border-gray-700 bg-gray-800 px-3 py-1 text-xs font-semibold text-gray-200">�</span>
+                                    </div>
+                                    <div class="md:col-span-3">
+                                        <p class="text-xs uppercase tracking-wide text-gray-500">Remarks</p>
+                                        <div id="mvSupRemarks" class="mt-1 min-h-[48px] rounded-xl border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-gray-300 leading-relaxed">�</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="mt-4">
                             <p class="text-xs uppercase tracking-wide text-gray-500">Notes</p>
                             <p id="mvNotes" class="mt-1 text-sm text-gray-300">—</p>
@@ -226,6 +253,9 @@
                         <button type="button" onclick="closeTaskViewModal()" class="rounded-lg border border-gray-600 px-4 py-2 text-sm font-medium text-gray-200 transition hover:bg-gray-800">
                             Close
                         </button>
+                        <a href="{{ route('supervisor.ors.export.pdf') }}" id="exportOrsBtn" title="Export available only after supervisor rating" class="rounded-lg border border-gray-600 px-4 py-2 text-sm font-medium text-gray-200 transition hover:bg-gray-800 opacity-50 pointer-events-none cursor-not-allowed">
+                            Export ORS
+                        </a>
                         <a href="{{ route('employee.ors') }}" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-500">
                             View in ORS
                         </a>
@@ -237,6 +267,7 @@
         <script>
             (function () {
                 const modal = document.getElementById('task-view-modal');
+                const exportBtn = document.getElementById('exportOrsBtn');
                 const fields = {
                     task: document.getElementById('mvTask'),
                     date: document.getElementById('mvDate'),
@@ -246,12 +277,28 @@
                     quantity: document.getElementById('mvQuantity'),
                     evidence: document.getElementById('mvEvidence'),
                     notes: document.getElementById('mvNotes'),
+                    supName: document.getElementById('mvSupName'),
+                    supQuality: document.getElementById('mvSupQuality'),
+                    supTimeliness: document.getElementById('mvSupTimeliness'),
+                    supRemarks: document.getElementById('mvSupRemarks'),
                 };
 
-                function setField(key, value, fallback = '—') {
+                function setField(key, value, fallback = '�') {
                     if (!fields[key]) return;
                     fields[key].textContent = value || fallback;
                 }
+
+                function updateExportButton(status = '', quality = '', timeliness = '') {
+                    if (!exportBtn) return;
+                    const enabled = status === 'Submitted (Locked)' && quality && timeliness;
+                    exportBtn.classList.toggle('pointer-events-none', !enabled);
+                    exportBtn.classList.toggle('opacity-50', !enabled);
+                    exportBtn.classList.toggle('cursor-not-allowed', !enabled);
+                    exportBtn.setAttribute('title', enabled ? 'Export ORS (Supervisor-rated)' : 'Export available only after supervisor rating');
+                    exportBtn.setAttribute('aria-disabled', (!enabled).toString());
+                }
+
+                updateExportButton();
 
                 window.openTaskViewModal = function (data = {}) {
                     if (!modal) return;
@@ -260,9 +307,14 @@
                     setField('status', data.status);
                     setField('outputType', data.outputType);
                     setField('outputState', data.outputState);
-                    setField('quantity', data.quantity, '—');
+                    setField('quantity', data.quantity, '�');
                     setField('evidence', data.evidence, 'N/A');
-                    setField('notes', data.notes, '—');
+                    setField('notes', data.notes, '�');
+                    setField('supName', data.supervisorName);
+                    setField('supQuality', data.supervisorQuality);
+                    setField('supTimeliness', data.supervisorTimeliness);
+                    setField('supRemarks', data.supervisorRemarks);
+                    updateExportButton(data.status, data.supervisorQuality, data.supervisorTimeliness);
 
                     modal.classList.remove('hidden');
                     document.body.classList.add('overflow-hidden');
@@ -290,3 +342,4 @@
 
     </section>
 @endsection
+

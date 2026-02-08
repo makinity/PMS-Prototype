@@ -9,21 +9,24 @@ class OrsExportController extends Controller
 {
     public function exportPdf()
     {
-        // DEMO LOCKED DATASET (Stage II) — Supervisor Monitoring export
-        // Matches ORS format screenshot + dummy data
-        // Quantity = employee-declared (locked)
-        // Quality + Timeliness = default 5 (per demo rule)
+        // DEMO LOCKED DATASET (Stage II – Supervisor Monitoring Export)
+        // Aligned with Supervisor ORS + Employee My Tasks
         $ors = [
             'ratee' => 'Ramon Reyes',
-            'output' => 'E-Bank Scanning and Encoding of Revenue Transactions',
-            'date_submitted' => 'January 4, 2026',
-            'remarks' => 'All e-bank transactions scanned and encoded daily',
+            'supervisor' => 'Carlo D. Beray',
 
-            // Locked demo values
-            'quantity' => '35',
+            'output' => 'All e-bank transactions scanned and encoded daily',
+            'date_submitted' => 'January 4, 2026',
+
+            // Employee-declared (locked)
+            'quantity' => '1 daily batch',
+
+            // Supervisor monitoring rating (locked demo)
             'quality' => '5',
             'timeliness' => '5',
+            'remarks' => 'All Goods',
 
+            // Signature placeholders (future)
             'rater_signature' => '',
             'date_returned' => '',
         ];
@@ -36,16 +39,19 @@ class OrsExportController extends Controller
 
     public function preview()
     {
-        // DEMO LOCKED DATASET (Stage II) — Supervisor Monitoring export
+        // Same locked dataset for preview consistency
         $ors = [
             'ratee' => 'Ramon Reyes',
-            'output' => 'E-Bank Scanning and Encoding of Revenue Transactions',
-            'date_submitted' => 'January 4, 2026',
-            'remarks' => 'All e-bank transactions scanned and encoded daily',
+            'supervisor' => 'Carlo D. Beray',
 
-            'quantity' => '35',
+            'output' => 'All e-bank transactions scanned and encoded daily',
+            'date_submitted' => 'January 4, 2026',
+
+            'quantity' => '1 daily batch',
+
             'quality' => '5',
             'timeliness' => '5',
+            'remarks' => 'All Goods',
 
             'rater_signature' => '',
             'date_returned' => '',
