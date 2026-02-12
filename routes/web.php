@@ -138,6 +138,10 @@ Route::prefix('dept-head')->group(function(){
         return view('dept-head.smpor');
     })->name('dept-head.smpor');
 
+    Route::get('/smpor-ipcr-review', function () {
+        return view('dept-head.smpor-ipcr-review');
+    })->name('dept-head.smpor-ipcr-review');
+
     Route::get('/IPCR', function () {
         return view('dept-head.ipcr');
     })->name('dept-head.ipcr');
@@ -182,6 +186,10 @@ Route::prefix('supervisor')->group(function(){
     Route::get('/ipcr', function () {
         return view('supervisor.ipcr');
     })->name('supervisor.ipcr');
+
+    Route::get('/smpor-ipcr-review', function () {
+        return view('supervisor.smpor-ipcr-review');
+    })->name('supervisor.smpor-ipcr-review');
 
     Route::get('/ipcr-target', function () {
         return view('supervisor.ipcr-target');
@@ -259,6 +267,10 @@ Route::prefix('pmt')->group(function(){
     Route::get('/ipcr', function () {
         return view('pmt.ipcr');
     })->name('pmt.ipcr');
+
+    Route::get('/smpor-ipcr-review', function () {
+        return view('pmt.smpor-ipcr-review');
+    })->name('pmt.smpor-ipcr-review');
 
     Route::get('/ipcr-overview', function () {
         return view('pmt.ipcr-calib-overview');

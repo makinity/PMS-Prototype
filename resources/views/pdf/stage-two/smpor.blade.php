@@ -33,6 +33,9 @@
         </tr>
     </table>
 
+    @php
+        $hasStrategicObjectives = collect($strategicObjectives)->filter(fn($row) => trim($row['output']) !== '')->isNotEmpty();
+    @endphp
     <table>
         <thead>
             <tr>
@@ -56,7 +59,7 @@
                     <td class="left">{{ $row['output'] }}</td>
                     <td>{{ $row['efficiency']['Jan'] }}</td><td>{{ $row['efficiency']['Feb'] }}</td><td>{{ $row['efficiency']['Mar'] }}</td><td>{{ $row['efficiency']['Apr'] }}</td><td>{{ $row['efficiency']['May'] }}</td><td>{{ $row['efficiency']['Jun'] }}</td><td>{{ $row['efficiency']['Total'] }}</td><td>{{ $row['efficiency']['Average'] }}</td>
                     <td>{{ $row['quality']['Jan'] }}</td><td>{{ $row['quality']['Feb'] }}</td><td>{{ $row['quality']['Mar'] }}</td><td>{{ $row['quality']['Apr'] }}</td><td>{{ $row['quality']['May'] }}</td><td>{{ $row['quality']['Jun'] }}</td><td>{{ $row['quality']['Total'] }}</td><td>{{ $row['quality']['Average'] }}</td>
-                    <td>{{ $row['quality']['Jan'] }}</td><td>{{ $row['quality']['Feb'] }}</td><td>{{ $row['quality']['Mar'] }}</td><td>{{ $row['quality']['Apr'] }}</td><td>{{ $row['quality']['May'] }}</td><td>{{ $row['quality']['Jun'] }}</td><td>{{ $row['quality']['Total'] }}</td><td>{{ $row['quality']['Average'] }}</td>
+                    <td>{{ $row['timeliness']['Jan'] }}</td><td>{{ $row['timeliness']['Feb'] }}</td><td>{{ $row['timeliness']['Mar'] }}</td><td>{{ $row['timeliness']['Apr'] }}</td><td>{{ $row['timeliness']['May'] }}</td><td>{{ $row['timeliness']['Jun'] }}</td><td>{{ $row['timeliness']['Total'] }}</td><td>{{ $row['timeliness']['Average'] }}</td>
                 </tr>
             @endforeach
 
@@ -68,20 +71,38 @@
                     <td class="left">{{ $row['output'] }}</td>
                     <td>{{ $row['efficiency']['Jan'] }}</td><td>{{ $row['efficiency']['Feb'] }}</td><td>{{ $row['efficiency']['Mar'] }}</td><td>{{ $row['efficiency']['Apr'] }}</td><td>{{ $row['efficiency']['May'] }}</td><td>{{ $row['efficiency']['Jun'] }}</td><td>{{ $row['efficiency']['Total'] }}</td><td>{{ $row['efficiency']['Average'] }}</td>
                     <td>{{ $row['quality']['Jan'] }}</td><td>{{ $row['quality']['Feb'] }}</td><td>{{ $row['quality']['Mar'] }}</td><td>{{ $row['quality']['Apr'] }}</td><td>{{ $row['quality']['May'] }}</td><td>{{ $row['quality']['Jun'] }}</td><td>{{ $row['quality']['Total'] }}</td><td>{{ $row['quality']['Average'] }}</td>
-                    <td>{{ $row['quality']['Jan'] }}</td><td>{{ $row['quality']['Feb'] }}</td><td>{{ $row['quality']['Mar'] }}</td><td>{{ $row['quality']['Apr'] }}</td><td>{{ $row['quality']['May'] }}</td><td>{{ $row['quality']['Jun'] }}</td><td>{{ $row['quality']['Total'] }}</td><td>{{ $row['quality']['Average'] }}</td>
+                    <td>{{ $row['timeliness']['Jan'] }}</td><td>{{ $row['timeliness']['Feb'] }}</td><td>{{ $row['timeliness']['Mar'] }}</td><td>{{ $row['timeliness']['Apr'] }}</td><td>{{ $row['timeliness']['May'] }}</td><td>{{ $row['timeliness']['Jun'] }}</td><td>{{ $row['timeliness']['Total'] }}</td><td>{{ $row['timeliness']['Average'] }}</td>
                 </tr>
             @endforeach
+            @if ($hasStrategicObjectives)
+                <tr>
+                    <td class="section-header" colspan="25">STRATEGIC OBJECTIVES</td>
+                </tr>
+                @foreach ($strategicObjectives as $row)
+                    @continue(trim($row['output']) === '')
+                    <tr>
+                        <td class="left">{{ $row['output'] }}</td>
+                        <td>{{ $row['efficiency']['Jan'] }}</td><td>{{ $row['efficiency']['Feb'] }}</td><td>{{ $row['efficiency']['Mar'] }}</td><td>{{ $row['efficiency']['Apr'] }}</td><td>{{ $row['efficiency']['May'] }}</td><td>{{ $row['efficiency']['Jun'] }}</td><td>{{ $row['efficiency']['Total'] }}</td><td>{{ $row['efficiency']['Average'] }}</td>
+                        <td>{{ $row['quality']['Jan'] }}</td><td>{{ $row['quality']['Feb'] }}</td><td>{{ $row['quality']['Mar'] }}</td><td>{{ $row['quality']['Apr'] }}</td><td>{{ $row['quality']['May'] }}</td><td>{{ $row['quality']['Jun'] }}</td><td>{{ $row['quality']['Total'] }}</td><td>{{ $row['quality']['Average'] }}</td>
+                        <td>{{ $row['timeliness']['Jan'] }}</td><td>{{ $row['timeliness']['Feb'] }}</td><td>{{ $row['timeliness']['Mar'] }}</td><td>{{ $row['timeliness']['Apr'] }}</td><td>{{ $row['timeliness']['May'] }}</td><td>{{ $row['timeliness']['Jun'] }}</td><td>{{ $row['timeliness']['Total'] }}</td><td>{{ $row['timeliness']['Average'] }}</td>
+                    </tr>
+                @endforeach
+            @endif
         </tbody>
     </table>
 
-    <table style="margin-top:10px;">
+        <table style="margin-top:10px;">
         <tr>
             <td class="left" style="width:50%;">MAN DAY(S) LOST THRU ABSENCE</td>
             <td>Jan</td><td>Feb</td><td>March</td><td>April</td><td>May</td><td>June</td><td>Total</td>
         </tr>
         <tr>
+            <td class="left">MAN DAY(S) LOST THRU ABSENCE</td>
+            <td>{{ $absenceByMonth['Jan'] }}</td><td>{{ $absenceByMonth['Feb'] }}</td><td>{{ $absenceByMonth['Mar'] }}</td><td>{{ $absenceByMonth['Apr'] }}</td><td>{{ $absenceByMonth['May'] }}</td><td>{{ $absenceByMonth['Jun'] }}</td><td>{{ $absenceTotal }}</td>
+        </tr>
+        <tr>
             <td class="left">MAN HRS./MINUTES LOST THRU TARDINESS/UNDERTIME</td>
-            <td>{{ $timeliness['core']['Jan'] }}</td><td>{{ $timeliness['core']['Feb'] }}</td><td>{{ $timeliness['core']['Mar'] }}</td><td>{{ $timeliness['core']['Apr'] }}</td><td>{{ $timeliness['core']['May'] }}</td><td>{{ $timeliness['core']['Jun'] }}</td><td>{{ $manHoursLost }}mins</td>
+            <td>{{ $tardinessByMonth['Jan'] }}</td><td>{{ $tardinessByMonth['Feb'] }}</td><td>{{ $tardinessByMonth['Mar'] }}</td><td>{{ $tardinessByMonth['Apr'] }}</td><td>{{ $tardinessByMonth['May'] }}</td><td>{{ $tardinessByMonth['Jun'] }}</td><td>{{ $tardinessTotal }}</td>
         </tr>
     </table>
 

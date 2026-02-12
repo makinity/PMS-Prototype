@@ -28,6 +28,10 @@ class SmporExportController extends Controller
                     'Jan' => '✓', 'Feb' => '0', 'Mar' => '0', 'Apr' => '0', 'May' => '0', 'Jun' => '0',
                     'Total' => 1, 'Average' => '',
                 ],
+                'timeliness' => [
+                    'Jan' => '✓', 'Feb' => '0', 'Mar' => '0', 'Apr' => '0', 'May' => '0', 'Jun' => '0',
+                    'Total' => 1, 'Average' => '',
+                ],
             ],
             [
                 'output' => 'Processing of Over-the-Counter Revenue Transactions',
@@ -36,6 +40,10 @@ class SmporExportController extends Controller
                     'Total' => 1, 'Average' => '',
                 ],
                 'quality' => [
+                    'Jan' => '✓', 'Feb' => '0', 'Mar' => '0', 'Apr' => '0', 'May' => '0', 'Jun' => '0',
+                    'Total' => 1, 'Average' => '',
+                ],
+                'timeliness' => [
                     'Jan' => '✓', 'Feb' => '0', 'Mar' => '0', 'Apr' => '0', 'May' => '0', 'Jun' => '0',
                     'Total' => 1, 'Average' => '',
                 ],
@@ -53,6 +61,10 @@ class SmporExportController extends Controller
                     'Jan' => '0', 'Feb' => '0', 'Mar' => '0', 'Apr' => '0', 'May' => '0', 'Jun' => '0',
                     'Total' => '', 'Average' => '',
                 ],
+                'timeliness' => [
+                    'Jan' => '0', 'Feb' => '0', 'Mar' => '0', 'Apr' => '0', 'May' => '0', 'Jun' => '0',
+                    'Total' => '', 'Average' => '',
+                ],
             ],
         ];
 
@@ -67,17 +79,21 @@ class SmporExportController extends Controller
                     'Jan' => '0', 'Feb' => '0', 'Mar' => '0', 'Apr' => '0', 'May' => '0', 'Jun' => '0',
                     'Total' => 0, 'Average' => '',
                 ],
+                'timeliness' => [
+                    'Jan' => '0', 'Feb' => '0', 'Mar' => '0', 'Apr' => '0', 'May' => '0', 'Jun' => '0',
+                    'Total' => 0, 'Average' => '',
+                ],
             ],
         ];
 
-        $timeliness = [
-            'core' => ['Jan' => '0', 'Feb' => '0', 'Mar' => '0', 'Apr' => '0', 'May' => '0', 'Jun' => '0'],
-            'strategic' => ['Jan' => '0', 'Feb' => '0', 'Mar' => '0', 'Apr' => '0', 'May' => '0', 'Jun' => '0'],
-            'support' => ['Jan' => '0', 'Feb' => '0', 'Mar' => '0', 'Apr' => '0', 'May' => '0', 'Jun' => '0'],
+        $absenceByMonth = [
+            'Jan' => '0', 'Feb' => '0', 'Mar' => '0', 'Apr' => '0', 'May' => '0', 'Jun' => '0',
         ];
-
-        $manDaysLost = '0';
-        $manHoursLost = '0';
+        $absenceTotal = '0days';
+        $tardinessByMonth = [
+            'Jan' => '0', 'Feb' => '0', 'Mar' => '0', 'Apr' => '0', 'May' => '0', 'Jun' => '0',
+        ];
+        $tardinessTotal = '0mins';
 
         $pdf = Pdf::loadView('pdf.stage-two.smpor', [
             'employeeName'        => $employeeName,
@@ -87,9 +103,10 @@ class SmporExportController extends Controller
             'coreFunctions'       => $coreFunctions,
             'strategicObjectives' => $strategicObjectives,
             'supportFunctions'    => $supportFunctions,
-            'timeliness'          => $timeliness,
-            'manDaysLost'         => $manDaysLost,
-            'manHoursLost'        => $manHoursLost,
+            'absenceByMonth'      => $absenceByMonth,
+            'absenceTotal'        => $absenceTotal,
+            'tardinessByMonth'    => $tardinessByMonth,
+            'tardinessTotal'      => $tardinessTotal,
         ])->setPaper('a4', 'landscape');
 
         return $pdf->download('Employee_SMPOR_Jan-Jun_2026.pdf');
@@ -112,6 +129,10 @@ class SmporExportController extends Controller
                     'Jan' => '✓', 'Feb' => '0', 'Mar' => '0', 'Apr' => '0', 'May' => '0', 'Jun' => '0',
                     'Total' => 1, 'Average' => '',
                 ],
+                'timeliness' => [
+                    'Jan' => '✓', 'Feb' => '0', 'Mar' => '0', 'Apr' => '0', 'May' => '0', 'Jun' => '0',
+                    'Total' => 1, 'Average' => '',
+                ],
             ],
             [
                 'output' => 'Processing of Over-the-Counter Revenue Transactions',
@@ -120,6 +141,10 @@ class SmporExportController extends Controller
                     'Total' => 1, 'Average' => '',
                 ],
                 'quality' => [
+                    'Jan' => '✓', 'Feb' => '0', 'Mar' => '0', 'Apr' => '0', 'May' => '0', 'Jun' => '0',
+                    'Total' => 1, 'Average' => '',
+                ],
+                'timeliness' => [
                     'Jan' => '✓', 'Feb' => '0', 'Mar' => '0', 'Apr' => '0', 'May' => '0', 'Jun' => '0',
                     'Total' => 1, 'Average' => '',
                 ],
@@ -137,6 +162,10 @@ class SmporExportController extends Controller
                     'Jan' => '0', 'Feb' => '0', 'Mar' => '0', 'Apr' => '0', 'May' => '0', 'Jun' => '0',
                     'Total' => '', 'Average' => '',
                 ],
+                'timeliness' => [
+                    'Jan' => '0', 'Feb' => '0', 'Mar' => '0', 'Apr' => '0', 'May' => '0', 'Jun' => '0',
+                    'Total' => '', 'Average' => '',
+                ],
             ],
         ];
 
@@ -151,19 +180,23 @@ class SmporExportController extends Controller
                     'Jan' => '0', 'Feb' => '0', 'Mar' => '0', 'Apr' => '0', 'May' => '0', 'Jun' => '0',
                     'Total' => 0, 'Average' => '',
                 ],
+                'timeliness' => [
+                    'Jan' => '0', 'Feb' => '0', 'Mar' => '0', 'Apr' => '0', 'May' => '0', 'Jun' => '0',
+                    'Total' => 0, 'Average' => '',
+                ],
             ],
         ];
 
-        $timeliness = [
-            'core' => ['Jan' => '0', 'Feb' => '0', 'Mar' => '0', 'Apr' => '0', 'May' => '0', 'Jun' => '0'],
-            'strategic' => ['Jan' => '0', 'Feb' => '0', 'Mar' => '0', 'Apr' => '0', 'May' => '0', 'Jun' => '0'],
-            'support' => ['Jan' => '0', 'Feb' => '0', 'Mar' => '0', 'Apr' => '0', 'May' => '0', 'Jun' => '0'],
+        $absenceByMonth = [
+            'Jan' => '0', 'Feb' => '0', 'Mar' => '0', 'Apr' => '0', 'May' => '0', 'Jun' => '0',
         ];
+        $absenceTotal = '0days';
+        $tardinessByMonth = [
+            'Jan' => '0', 'Feb' => '0', 'Mar' => '0', 'Apr' => '0', 'May' => '0', 'Jun' => '0',
+        ];
+        $tardinessTotal = '0mins';
 
-        $manDaysLost = '0';
-        $manHoursLost = '0';
-
-       $pdf = Pdf::loadView(
+        $pdf = Pdf::loadView(
             'pdf.stage-two.smpor',
             compact(
                 'employeeName',
@@ -173,11 +206,12 @@ class SmporExportController extends Controller
                 'coreFunctions',
                 'strategicObjectives',
                 'supportFunctions',
-                'timeliness',
-                'manDaysLost',
-                'manHoursLost'
+                'absenceByMonth',
+                'absenceTotal',
+                'tardinessByMonth',
+                'tardinessTotal'
             )
-        )->setPaper('a4', 'portrait');
+        )->setPaper('a4', 'landscape');
 
         return $pdf->stream('SMPOR.pdf');
     }

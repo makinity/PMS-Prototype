@@ -22,15 +22,15 @@
             <div class="flex items-start justify-between gap-3">
                 <div>
                     <h2 class="text-lg font-semibold text-white">SMPOR &ndash; Monitoring Summary</h2>
-                    <p class="text-sm text-slate-400">System-generated summary based on validated MPOR. Read-only.</p>
+                    <p class="text-sm text-slate-400">System-generated summary based on MPOR (derived from submitted + rated ORS). Read-only.</p>
                 </div>
                 <div class="flex gap-2">
                     <!-- kani na button -->
-                    <button type="button"
-                            data-action="view-smpor"
-                            class="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-800 transition">
+                    <a href="#"
+                       data-open-modal="smpor-preview-modal"
+                       class="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-800 transition">
                         View SMPOR
-                    </button>
+                    </a>
                     <!-------------------->
 
                     <a href="{{ route('stage2.smpor.export.pdf') }}"
@@ -50,7 +50,7 @@
                 </div>
                 <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Data Source</p>
-                    <p class="mt-1 font-semibold">Validated MPOR (locked)</p>
+                    <p class="mt-1 font-semibold">MPOR (derived from submitted + rated ORS)</p>
                 </div>
             </div>
         </div>
@@ -60,15 +60,15 @@
             <div class="flex items-start justify-between gap-3">
                 <div>
                     <h2 class="text-lg font-semibold text-white">IPCR Accomplishment Report</h2>
-                    <p class="text-sm text-slate-400">System-generated accomplishments derived from SMPOR. Read-only.</p>
+                    <p class="text-sm text-slate-400">System-generated accomplishments derived from SMPOR consolidation. Read-only.</p>
                 </div>
                 <div class="flex gap-2">
                     <!-- kani na button -->
-                    <button type="button"
-                            data-action="view-ipcr-accomplishment"
-                            class="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-800 transition">
+                    <a href="#"
+                       data-open-modal="ipcr-preview-modal"
+                       class="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-800 transition">
                         View IPCR Accomplishment
-                    </button>
+                    </a>
                     <!-------------------->
 
                     <a href="{{ route('stage2.ipcr.export.pdf') }}"
@@ -89,7 +89,7 @@
                 </div>
                 <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Data Source</p>
-                    <p class="mt-1 font-semibold">SMPOR (locked)</p>
+                    <p class="mt-1 font-semibold">SMPOR (monitoring consolidation)</p>
                 </div>
             </div>
         </div>
@@ -127,7 +127,7 @@
         <div class="flex flex-wrap items-center justify-end gap-3 pt-2">
             <button type="button"
                     class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-800 transition">
-                Cancel
+                Back
             </button>
             <button type="button"
                     id="submit-accomplishments"
@@ -139,6 +139,163 @@
         </div>
 
     </section>
+
+    <!-- SMPOR Preview Modal -->
+    <div id="smpor-preview-modal"
+         data-preview-modal
+         class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 px-4 py-6">
+        <div class="w-full max-w-5xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
+            <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
+                <div>
+                    <p class="text-xs uppercase tracking-[0.2em] text-blue-300">SMPOR (Monitoring Summary)</p>
+                    <h3 class="text-lg font-semibold text-white">SMPOR Preview &mdash; January&ndash;June 2026</h3>
+                    <p class="text-sm text-slate-400 mt-1">System-generated, monitoring-only. Derived from MPOR (submitted + rated ORS).</p>
+                </div>
+                <button type="button" data-close-modal class="text-slate-400 hover:text-white">&times;</button>
+            </div>
+            <div class="mt-4 space-y-5 max-h-[65vh] overflow-y-auto text-sm text-slate-200">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                        <p class="text-[11px] uppercase text-slate-500">Employee</p>
+                        <p class="mt-1 font-semibold">Ramon Reyes</p>
+                    </div>
+                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                        <p class="text-[11px] uppercase text-slate-500">Office/Unit</p>
+                        <p class="mt-1 font-semibold">Revenue Collection Unit</p>
+                    </div>
+                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                        <p class="text-[11px] uppercase text-slate-500">Period</p>
+                        <p class="mt-1 font-semibold">January&ndash;June 2026</p>
+                    </div>
+                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                        <p class="text-[11px] uppercase text-slate-500">Source</p>
+                        <p class="mt-1 font-semibold">MPOR (submitted + rated ORS)</p>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-base font-semibold text-white">Monitoring Totals</h4>
+                        <span class="text-xs text-slate-400">Quality Points = Quantity &times; Quality Rating &middot; Timeliness Points = Quantity &times; Timeliness Rating</span>
+                    </div>
+                    <div class="overflow-x-auto rounded-xl border border-slate-800">
+                        <table class="min-w-full text-left text-sm text-slate-200">
+                            <thead class="bg-slate-950/70 text-xs uppercase text-slate-400">
+                                <tr>
+                                    <th class="px-4 py-3">MFO</th>
+                                    <th class="px-4 py-3 text-right">Total Quantity (Monitoring)</th>
+                                    <th class="px-4 py-3 text-right">Total Quality Points</th>
+                                    <th class="px-4 py-3 text-right">Total Timeliness Points</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800">
+                                <tr class="bg-slate-900/40">
+                                    <td class="px-4 py-3 font-semibold">E-Bank Scanning and Encoding of Revenue Transactions</td>
+                                    <td class="px-4 py-3 text-right">1</td>
+                                    <td class="px-4 py-3 text-right">5</td>
+                                    <td class="px-4 py-3 text-right">5</td>
+                                </tr>
+                                <tr class="bg-slate-900/30">
+                                    <td class="px-4 py-3 font-semibold">Processing of Over-the-Counter Revenue Transactions</td>
+                                    <td class="px-4 py-3 text-right">12</td>
+                                    <td class="px-4 py-3 text-right">60</td>
+                                    <td class="px-4 py-3 text-right">60</td>
+                                </tr>
+                            </tbody>
+                            <tfoot class="bg-slate-950/70">
+                                <tr>
+                                    <th class="px-4 py-3 text-left font-semibold text-slate-100">Grand Total</th>
+                                    <th class="px-4 py-3 text-right font-semibold text-slate-100">13</th>
+                                    <th class="px-4 py-3 text-right font-semibold text-slate-100">65</th>
+                                    <th class="px-4 py-3 text-right font-semibold text-slate-100">65</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center justify-end gap-3 border-t border-slate-800 pt-4 mt-4">
+                <button type="button"
+                        data-close-modal
+                        class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-800 transition">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- IPCR Preview Modal -->
+    <div id="ipcr-preview-modal"
+         data-preview-modal
+         class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 px-4 py-6">
+        <div class="w-full max-w-5xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
+            <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
+                <div>
+                    <p class="text-xs uppercase tracking-[0.2em] text-blue-300">IPCR Accomplishment Report</p>
+                    <h3 class="text-lg font-semibold text-white">IPCR Accomplishment Preview &mdash; January&ndash;June 2026</h3>
+                    <p class="text-sm text-slate-400 mt-1">System-generated accomplishments derived from SMPOR consolidation (Stage II).</p>
+                </div>
+                <button type="button" data-close-modal class="text-slate-400 hover:text-white">&times;</button>
+            </div>
+            <div class="mt-4 space-y-5 max-h-[65vh] overflow-y-auto text-sm text-slate-200">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                        <p class="text-[11px] uppercase text-slate-500">Employee</p>
+                        <p class="mt-1 font-semibold">Ramon Reyes</p>
+                    </div>
+                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                        <p class="text-[11px] uppercase text-slate-500">Office/Unit</p>
+                        <p class="mt-1 font-semibold">Revenue Collection Unit</p>
+                    </div>
+                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                        <p class="text-[11px] uppercase text-slate-500">Period</p>
+                        <p class="mt-1 font-semibold">January&ndash;June 2026</p>
+                    </div>
+                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                        <p class="text-[11px] uppercase text-slate-500">Source</p>
+                        <p class="mt-1 font-semibold">SMPOR (monitoring consolidation)</p>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <h4 class="text-base font-semibold text-white">Accomplishment Summary</h4>
+                    <div class="overflow-x-auto rounded-xl border border-slate-800">
+                        <table class="min-w-full text-left text-sm text-slate-200">
+                            <thead class="bg-slate-950/70 text-xs uppercase text-slate-400">
+                                <tr>
+                                    <th class="px-4 py-3">MFO</th>
+                                    <th class="px-4 py-3">Accomplishment Summary</th>
+                                    <th class="px-4 py-3">Evidence</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800">
+                                <tr class="bg-slate-900/40">
+                                    <td class="px-4 py-3 font-semibold">E-Bank Scanning and Encoding of Revenue Transactions</td>
+                                    <td class="px-4 py-3 text-slate-300">Completed 1 e-bank scanning and encoding transaction within the period; monitoring reflects full quality and timeliness compliance based on rated ORS.</td>
+                                    <td class="px-4 py-3 text-slate-300">Attached (reference)</td>
+                                </tr>
+                                <tr class="bg-slate-900/30">
+                                    <td class="px-4 py-3 font-semibold">Processing of Over-the-Counter Revenue Transactions</td>
+                                    <td class="px-4 py-3 text-slate-300">Processed 12 over-the-counter revenue transactions; monitoring indicates consistent quality and timeliness adherence across consolidated ORS entries.</td>
+                                    <td class="px-4 py-3 text-slate-300">Attached (reference)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3 text-xs text-slate-400">
+                        Final IPCR rating is completed in Stage III. This preview is monitoring-derived and read-only.
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center justify-end gap-3 border-t border-slate-800 pt-4 mt-4">
+                <button type="button"
+                        data-close-modal
+                        class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-800 transition">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Generic Modal -->
     <div id="action-modal"
@@ -164,7 +321,7 @@
                         id="modal-confirm"
                         class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500 transition">
                     <span data-modal-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"></span>
-                    <span data-modal-label>Proceed</span>
+                    <span data-modal-label>Submit Accomplishments</span>
                 </button>
             </div>
         </div>
@@ -174,6 +331,7 @@
         <script>
             document.addEventListener('DOMContentLoaded', () => {
                 const modal = document.getElementById('action-modal');
+                const previewModals = Array.from(document.querySelectorAll('[data-preview-modal]'));
                 const modalTitle = document.getElementById('modal-title');
                 const modalBody = document.getElementById('modal-body');
                 const modalConfirm = document.getElementById('modal-confirm');
@@ -190,16 +348,6 @@
                 let activeAction = null;
 
                 const modalContent = {
-                    'view-smpor': {
-                        title: 'System-Generated SMPOR',
-                        body: 'Read-only summary of validated MPOR data for January–June 2026. No edits or ratings are allowed at this stage.',
-                        showConfirm: false,
-                    },
-                    'view-ipcr-accomplishment': {
-                        title: 'IPCR Accomplishment (System-Generated)',
-                        body: 'Read-only accomplishments derived from SMPOR for January–June 2026. Targets and ratings are locked for Stage III evaluation.',
-                        showConfirm: false,
-                    },
                     'confirm-submission': {
                         title: 'Submit Accomplishments',
                         body: 'Confirm formal submission of SMPOR & IPCR accomplishments for Stage III evaluation. After submission, uploads and remarks become read-only.',
@@ -207,24 +355,39 @@
                     },
                 };
 
+                function isAnyModalOpen() {
+                    const actionOpen = modal && modal.classList.contains('flex');
+                    const previewOpen = previewModals.some((item) => item.classList.contains('flex'));
+                    return actionOpen || previewOpen;
+                }
+
+                function syncBodyScroll() {
+                    document.body.classList.toggle('overflow-hidden', isAnyModalOpen());
+                }
+
                 function setModalState(show) {
                     if (!modal) return;
                     modal.classList.toggle('hidden', !show);
                     modal.classList.toggle('flex', show);
-                    document.body.classList.toggle('overflow-hidden', show);
+                    syncBodyScroll();
                 }
 
                 function setSubmitState(submitted) {
                     if (statusBadge) {
-                        statusBadge.textContent = submitted ? 'Submitted for Stage III Evaluation' : 'Draft';
+                        statusBadge.textContent = submitted ? 'Submitted for supervisor approval' : 'Draft';
                         statusBadge.className = submitted
                             ? 'inline-flex items-center rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-200 border border-emerald-500/40'
                             : 'inline-flex items-center rounded-full bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-200 border border-amber-500/40';
                     }
-                    if (supportingFiles) supportingFiles.disabled = submitted;
+                    if (supportingFiles) {
+                        supportingFiles.disabled = submitted;
+                        supportingFiles.classList.toggle('opacity-60', submitted);
+                        supportingFiles.classList.toggle('cursor-not-allowed', submitted);
+                    }
                     if (remarks) {
                         remarks.disabled = submitted;
                         remarks.classList.toggle('opacity-70', submitted);
+                        remarks.classList.toggle('cursor-not-allowed', submitted);
                     }
                     if (submitBtn) {
                         submitBtn.disabled = submitted;
@@ -246,7 +409,33 @@
                     setModalState(false);
                     activeAction = null;
                     if (modalSpinner) modalSpinner.classList.add('hidden');
-                    if (modalLabel) modalLabel.textContent = 'Proceed';
+                    if (modalLabel) modalLabel.textContent = 'Submit Accomplishments';
+                }
+
+                function openPreviewModal(modalId) {
+                    if (!modalId) return;
+                    const target = document.getElementById(modalId);
+                    if (!target) return;
+                    previewModals.forEach((item) => {
+                        if (item !== target) {
+                            item.classList.add('hidden');
+                            item.classList.remove('flex');
+                        }
+                    });
+                    target.classList.remove('hidden');
+                    target.classList.add('flex');
+                    syncBodyScroll();
+                }
+
+                function closePreviewModal(modalEl) {
+                    if (!modalEl) return;
+                    modalEl.classList.add('hidden');
+                    modalEl.classList.remove('flex');
+                    syncBodyScroll();
+                }
+
+                function closeAllPreviewModals() {
+                    previewModals.forEach((item) => closePreviewModal(item));
                 }
 
                 function handleConfirm() {
@@ -274,6 +463,26 @@
                     btn.addEventListener('click', () => openModal(btn.dataset.action));
                 });
 
+                document.querySelectorAll('[data-open-modal]').forEach((trigger) => {
+                    trigger.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        openPreviewModal(trigger.getAttribute('data-open-modal'));
+                    });
+                });
+
+                document.querySelectorAll('[data-close-modal]').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        const modalEl = btn.closest('[data-preview-modal]');
+                        closePreviewModal(modalEl);
+                    });
+                });
+
+                previewModals.forEach((previewModal) => {
+                    previewModal.addEventListener('click', (e) => {
+                        if (e.target === previewModal) closePreviewModal(previewModal);
+                    });
+                });
+
                 modalConfirm?.addEventListener('click', handleConfirm);
                 modalClose?.addEventListener('click', closeModal);
                 modalCancel?.addEventListener('click', closeModal);
@@ -281,7 +490,10 @@
                     if (e.target === modal) closeModal();
                 });
                 document.addEventListener('keydown', (e) => {
-                    if (e.key === 'Escape') closeModal();
+                    if (e.key === 'Escape') {
+                        closeAllPreviewModals();
+                        closeModal();
+                    }
                 });
             });
         </script>

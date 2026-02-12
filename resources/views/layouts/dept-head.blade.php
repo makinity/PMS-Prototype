@@ -28,6 +28,7 @@
             $isOpcr = request()->routeIs('dept-head.opcr');
             $isQar = request()->routeIs('dept-head.qar');
             $isSMPOR = request()->routeIs('dept-head.smpor');
+            $isDeptHeadIPCRSMPORReview = request()->routeIs('dept-head.smpor-ipcr-review');
             $isIPCR = request()->routeIs('pmt.ipcr');
             $isIPCRTARGET = request()->routeIs('pmt.ipcr-target');
             $isIdp = request()->routeIs('dept-head.idp');
@@ -142,9 +143,9 @@
                             </li>
 
                             <li>
-                                <a href="{{ route('dept-head.smpor') }}" class="sidebar-link" @if($isSMPOR) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-layer-group"></i>
-                                    <span>SMPOR</span>
+                                <a href="{{ route('dept-head.smpor-ipcr-review') }}" class="sidebar-link" @if($isDeptHeadIPCRSMPORReview) aria-current="page" @endif>
+                                    <i class="sidebar-icon fa-solid fa-star-half-stroke"></i>
+                                    <span>SMPOR & IPCR Review</span>
                                 </a>
                             </li>
 

@@ -147,6 +147,7 @@
             $isSupervisorTeamTasks = request()->routeIs('supervisor.team-tasks');
             $isSupervisorUWP = request()->routeIs('supervisor.uwp-page');
             $isSupervisorIPCR = request()->routeIs('supervisor.ipcr');
+            $isSupervisorIPCRSMPORReview = request()->routeIs('supervisor.smpor-ipcr-review');
             $isSupervisorIPCRTARGET = request()->routeIs('supervisor.ipcr-target');
             $isSupervisorOPCR = request()->routeIs('supervisor.opcr');
             $isSupervisorMPOR = request()->routeIs('supervisor.mpor');
@@ -271,6 +272,12 @@
                                 <a href="{{ route('supervisor.ipcr') }}" class="sidebar-link" @if($isSupervisorIPCR) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-star-half-stroke"></i>
                                     <span>IPCR Review & Rating</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('supervisor.smpor-ipcr-review') }}" class="sidebar-link" @if($isSupervisorIPCRSMPORReview) aria-current="page" @endif>
+                                    <i class="sidebar-icon fa-solid fa-star-half-stroke"></i>
+                                    <span>SMPOR & IPCR Review</span>
                                 </a>
                             </li>
                             <li>

@@ -148,6 +148,7 @@
             $isPmtOpcrApproval = request()->routeIs('pmt.opcr');
             $isSMPOR = request()->routeIs('pmt.smpor');
             $isIPCR = request()->routeIs('pmt.ipcr');
+            $isDeptHeadIPCRSMPORReview = request()->routeIs('pmt.smpor-ipcr-review');
             $isRD = request()->routeIs('pmt.rewards');
             $isIPCRCalibOVR = request()->routeIs('pmt.ipcr-calib-overview');
             $isFinalCalib = request()->routeIs('pmt.final-calib');
@@ -259,6 +260,12 @@
                                 <a href="{{ route('pmt.ipcr') }}" class="sidebar-link" @if($isIPCR) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-user-check"></i>
                                     <span>IPCR Review</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('pmt.smpor-ipcr-review') }}" class="sidebar-link" @if($isDeptHeadIPCRSMPORReview) aria-current="page" @endif>
+                                    <i class="sidebar-icon fa-solid fa-star-half-stroke"></i>
+                                    <span>SMPOR & IPCR Review</span>
                                 </a>
                             </li>
                             <li>

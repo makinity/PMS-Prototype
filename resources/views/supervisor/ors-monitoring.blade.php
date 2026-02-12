@@ -235,10 +235,7 @@
 
                     <div class="border-t border-slate-800 bg-slate-900/80 px-6 py-4">
                         <div class="flex items-center justify-end gap-2">
-                            <a href="{{ route('supervisor.ors.export.pdf') }}"
-                               class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800">
-                                Export PDF
-                            </a>
+
 
                             <!-- Close removed here; Save is primary. Close still available via "x", ESC, and backdrop click -->
                             <button id="saveMonitoringRatingBtn"
@@ -420,7 +417,7 @@
                         duration: '2h 00m',
                         evidence: true,
                         requestId: 'REQ-2026-002',
-                        quantity: '18 transactions',
+                        quantity: '12 transactions',
                         status: 'submitted'
                     },
                     {
@@ -435,7 +432,7 @@
                         duration: '1h 30m',
                         evidence: true,
                         requestId: 'REQ-2026-004',
-                        quantity: '35 transactions',
+                        quantity: '1 Daily Batch',
                         status: 'submitted'
                     }
                 ];

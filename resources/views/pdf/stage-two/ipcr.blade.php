@@ -33,6 +33,7 @@
 <body>
     <div class="header">
         <h3 style="margin:2px 0;">INDIVIDUAL PERFORMANCE COMMITMENT AND REVIEW (IPCR)</h3>
+        <p class="small" style="margin:0;">Monitoring-only accomplishment report derived from SMPOR/ORS; ratings remain blank in Stage II.</p>
     </div>
 
     <table class="no-border" style="margin-bottom: 4px;">
