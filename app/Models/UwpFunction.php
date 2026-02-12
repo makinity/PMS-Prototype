@@ -6,14 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class UwpMfo extends Model
+class UwpFunction extends Model
 {
-    protected $table = 'uwp_mfos';
+    protected $table = 'uwp_functions';
 
     protected $fillable = [
-        'uwp_function_id',
-        'title',
-        'target_timeline',
+        'unit_work_plan_id',
+        'name',
+        'function_type',
         'weight_percent',
         'sort_order',
     ];
@@ -23,13 +23,13 @@ class UwpMfo extends Model
         'sort_order' => 'integer',
     ];
 
-    public function uwpFunction(): BelongsTo
+    public function unitWorkPlan(): BelongsTo
     {
-        return $this->belongsTo(UwpFunction::class, 'uwp_function_id');
+        return $this->belongsTo(UnitWorkPlan::class, 'unit_work_plan_id');
     }
 
-    public function successIndicators(): HasMany
+    public function mfos(): HasMany
     {
-        return $this->hasMany(UwpSuccessIndicator::class, 'uwp_mfo_id');
+        return $this->hasMany(UwpMfo::class, 'uwp_function_id');
     }
 }

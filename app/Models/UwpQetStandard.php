@@ -9,19 +9,19 @@ class UwpQetStandard extends Model
 {
     protected $table = 'uwp_qet_standards';
 
-    public const DIM_QUALITY = 'quality';
-    public const DIM_EFFICIENCY = 'efficiency';
-    public const DIM_TIMELINESS = 'timeliness';
+    public const DIM_QUALITY = 'q';
+    public const DIM_EFFICIENCY = 'e';
+    public const DIM_TIMELINESS = 't';
 
     protected $fillable = [
         'uwp_success_indicator_id',
         'dimension',
-        'rating_level',
-        'standard',
+        'rating',
+        'standard_text',
     ];
 
     protected $casts = [
-        'rating_level' => 'integer',
+        'rating' => 'integer',
     ];
 
     public function successIndicator(): BelongsTo

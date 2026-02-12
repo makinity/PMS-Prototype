@@ -28,15 +28,33 @@
             </div>
         </div>
 
-        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5 space-y-6">
+        <form id="uwp-form" method="POST">
+            @csrf
+            <input type="hidden" name="mfos_payload" id="mfos_payload">
+            <input type="hidden" name="assignments_payload" id="assignments_payload">
+            <input type="hidden" name="functions_payload" id="functions_payload">
+
+            <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5 space-y-6">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div class="space-y-1">
                     <p class="text-sm font-semibold text-white">Planning details</p>
                     <p class="text-xs text-slate-400">Define commitments for the period. Editing is allowed only while in Draft.</p>
                 </div>
-                <div class="flex items-center gap-2 text-[11px] text-slate-400">
-                    <span class="inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 font-semibold text-amber-200">Draft</span>
-                    <span class="inline-flex items-center gap-1 rounded-full border border-blue-500/30 bg-blue-500/10 px-2.5 py-1 font-semibold text-blue-200">Submitted for Approval</span>
+                <div class="flex flex-wrap items-start justify-end gap-3 text-[11px] text-slate-400">
+                    @if ($isDraft)
+                        <button type="button"
+                                id="uwp-add-function"
+                                class="inline-flex items-center gap-1 rounded-lg border border-blue-500/50 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-200 hover:bg-blue-500/20">
+                            <span class="fa-solid fa-plus text-[10px]"></span>
+                            <span>+ Add Function</span>
+                        </button>
+                    @endif
+                    <div class="flex flex-col items-end gap-1">
+                        <span class="inline-flex items-center gap-1 rounded-full border border-blue-500/30 bg-blue-500/10 px-2.5 py-1 font-semibold text-blue-200">
+                            Status: {{ $status }}
+                        </span>
+                        <span class="text-[10px] text-slate-500">Draft: editable · Submitted: read-only</span>
+                    </div>
                 </div>
             </div>
 
@@ -46,6 +64,7 @@
 
                     <select
                         id="uwp-office-unit"
+                        name="office_id"
                         class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2
                             text-sm text-slate-100 focus:border-blue-500
                             focus:ring-2 focus:ring-blue-500/40 focus:outline-none
@@ -53,12 +72,12 @@
                         style="background:#0f172a;color:#e5e7eb;"
                         {{ $isDraft ? '' : 'disabled' }}
                     >
-                        <option selected>Revenue Collection Unit</option>
-                        <option>Records Management Unit</option>
-                        <option>Administrative Services Unit</option>
-                        <option>Human Resource Management Unit</option>
-                        <option>General Services Unit</option>
-                        <option>Planning and Development Unit</option>
+                        <option value="1" selected>Revenue Collection Unit</option>
+                        <option value="2">Records Management Unit</option>
+                        <option value="3">Administrative Services Unit</option>
+                        <option value="4">Human Resource Management Unit</option>
+                        <option value="5">General Services Unit</option>
+                        <option value="6">Planning and Development Unit</option>
                     </select>
                 </label>
 
@@ -66,228 +85,53 @@
                     <span class="text-xs uppercase tracking-wide text-slate-400">Performance Period</span>
 
                     <select
+                        name="performance_period_id"
                         class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none
                                {{ $isDraft ? '' : 'opacity-60 pointer-events-none' }}"
                         style="background:#0f172a;color:#e5e7eb;"
                         {{ $isDraft ? '' : 'disabled' }}
                     >
-                        <option value="January - June 2026" selected>January – June 2026</option>
-                        <option value="July - December 2026">July – December 2026</option>
+                        <option value="1" selected>January – June 2026</option>
+                        <option value="2">July – December 2026</option>
                     </select>
                 </label>
             </div>
+            <div id="uwp-functions-wrapper" class="space-y-6"></div>
 
-            {{-- CORE FUNCTIONS --}}
-            <div class="space-y-4">
-                <div class="flex flex-wrap items-center justify-between gap-2">
-                    <div>
-                        <p class="text-sm font-semibold text-white">Core Functions (80%)</p>
-                        <p class="text-xs text-slate-400">Each row is a measurable, loggable core output. No scoring here; capture targets only.</p>
+            <div class="sticky bottom-0 z-30 -mx-5 mt-6 border-t border-slate-800 bg-slate-950/95 px-5 py-4 backdrop-blur">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div class="space-y-1">
+                        <p class="text-xs text-slate-400">Once submitted, this plan becomes read-only until reviewed.</p>
+                        <span class="text-[11px] text-slate-500">UWP remains editable only while in Draft.</span>
                     </div>
-                    <span class="text-[11px] text-slate-500">Actual ratings are calculated later from MPOR/IPCR.</span>
-                </div>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <button type="button"
+                                data-employee-action
+                                data-save-draft-btn
+                                data-action-title="Save UWP Draft"
+                                data-action-message="This will save the Unit Work Plan as a draft. You may continue editing until it is submitted for approval."
+                                data-action-confirm="Save draft"
+                                data-action-loading="Saving..."
+                                class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-800/80 {{ $isDraft ? '' : 'opacity-60 pointer-events-none' }}"
+                                {{ $isDraft ? '' : 'disabled' }}>
+                            <span data-button-label>Save as Draft</span>
+                            <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"></span>
+                        </button>
 
-                <div class="relative rounded-xl border border-slate-800 bg-slate-950/60">
-                    <div class="{{ $isDraft ? '' : 'opacity-60' }}">
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full text-sm">
-                                <thead class="bg-slate-900/70 text-slate-300">
-                                    <tr>
-                                        <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">PPA / MFO</th>
-                                        <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Success Indicators</th>
-                                        <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Target / Timeline</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-800 text-slate-100">
-                                    <tr class="hover:bg-slate-900/50">
-                                        <td class="px-4 py-3">
-                                            <input type="text"
-                                                value="E-Bank Scanning and Encoding of Revenue Transactions"
-                                                class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none"
-                                                style="background:#0f172a;color:#e5e7eb;"
-                                                placeholder="e.g., Records management and archiving"
-                                                {{ $isDraft ? '' : 'disabled' }}>
-                                        </td>
-
-                                        <td class="px-4 py-3 text-center">
-                                            <button
-                                                type="button"
-                                                class="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 transition justify-center"
-                                                data-uwp-indicators
-                                                data-title="E-Bank Scanning and Encoding of Revenue Transactions"
-                                                data-indicators='["All e-bank transactions scanned and encoded daily","Indexing complete with no missing pages","Audit trail maintained within 24 hours"]'
-                                                aria-label="View success indicators"
-                                            >
-                                                <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 14">
-                                                    <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5">
-                                                        <path d="M10 3c-3.5 0-6.5 2.3-8 5 1.5 2.7 4.5 5 8 5s6.5-2.3 8-5c-1.5-2.7-4.5-5-8-5Z"/>
-                                                        <path d="M10 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
-                                                    </g>
-                                                </svg>
-                                                <span class="text-xs">View (3)</span>
-                                            </button>
-                                        </td>
-
-                                        <td class="px-4 py-3 text-center">
-                                            <input type="text"
-                                                value="Daily; all e-bank transactions processed within the same working day"
-                                                class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none"
-                                                style="background:#0f172a;color:#e5e7eb;"
-                                                placeholder="e.g., Monthly; 1,200 files"
-                                                {{ $isDraft ? '' : 'disabled' }}>
-                                        </td>
-                                    </tr>
-
-                                    <tr class="hover:bg-slate-900/50">
-                                        <td class="px-4 py-3">
-                                            <input type="text"
-                                                value="Processing of Over-the-Counter Revenue Transactions"
-                                                class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none"
-                                                style="background:#0f172a;color:#e5e7eb;"
-                                                placeholder="e.g., Records management and archiving"
-                                                {{ $isDraft ? '' : 'disabled' }}>
-                                        </td>
-
-                                        <td class="px-4 py-3 text-center">
-                                            <button
-                                                type="button"
-                                                class="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 transition justify-center"
-                                                data-uwp-indicators
-                                                data-title="Processing of Over-the-Counter Revenue Transactions"
-                                                data-indicators='["Same-day verification of OTC transactions","95% encoded within the business day","OR validation completed daily"]'
-                                                aria-label="View success indicators"
-                                            >
-                                                <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 14">
-                                                    <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5">
-                                                        <path d="M10 3c-3.5 0-6.5 2.3-8 5 1.5 2.7 4.5 5 8 5s6.5-2.3 8-5c-1.5-2.7-4.5-5-8-5Z"/>
-                                                        <path d="M10 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
-                                                    </g>
-                                                </svg>
-
-                                                <span class="text-xs">View (3)</span>
-                                            </button>
-                                        </td>
-
-                                        <td class="px-4 py-3 text-center">
-                                            <input type="text"
-                                                value="Daily; 95% processed within the same working day"
-                                                class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none"
-                                                style="background:#0f172a;color:#e5e7eb;"
-                                                placeholder="e.g., Monthly; 1,200 files"
-                                                {{ $isDraft ? '' : 'disabled' }}>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                        <button type="button"
+                                data-employee-loading="true"
+                                data-loading-text="Submitting..."
+                                data-submit-uwp-btn
+                                class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-900/40 transition hover:bg-blue-500 {{ $isDraft ? '' : 'opacity-60 pointer-events-none' }}"
+                                {{ $isDraft ? '' : 'disabled' }}>
+                            <span data-button-label>Submit for Approval</span>
+                            <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                        </button>
                     </div>
-
-                    @unless ($isDraft)
-                        <div class="pointer-events-none absolute inset-0 rounded-xl border border-slate-700/60 bg-slate-950/50"></div>
-                    @endunless
                 </div>
             </div>
-
-            {{-- SUPPORT FUNCTIONS --}}
-            <div class="space-y-4">
-                <div class="flex flex-wrap items-center justify-between gap-2">
-                    <div>
-                        <p class="text-sm font-semibold text-white">Support Functions (20%)</p>
-                        <p class="text-xs text-slate-400">Log support outputs that enable the unit. Keep them measurable and planned.</p>
-                    </div>
-                    <span class="text-[11px] text-slate-500">No scoring fields here; only planned targets.</span>
-                </div>
-
-                <div class="relative rounded-xl border border-slate-800 bg-slate-950/60">
-                    <div class="{{ $isDraft ? '' : 'opacity-60' }}">
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full text-sm">
-                                <thead class="bg-slate-900/70 text-slate-300">
-                                    <tr>
-                                        <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">PPA / MFO</th>
-                                        <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Success Indicators</th>
-                                        <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Target / Timeline</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-800 text-slate-100">
-                                    <tr class="hover:bg-slate-900/50">
-                                        <td class="px-4 py-3">
-                                            <input type="text"
-                                                value="Maintenance of revenue records and filing system"
-                                                class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none"
-                                                style="background:#0f172a;color:#e5e7eb;"
-                                                placeholder="e.g., Staff training sessions"
-                                                {{ $isDraft ? '' : 'disabled' }}>
-                                        </td>
-
-                                        <td class="px-4 py-3 text-center">
-                                            <button
-                                                type="button"
-                                                class="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 transition justify-center"
-                                                data-uwp-indicators
-                                                data-title="Maintenance of revenue records and filing system"
-                                                data-indicators='["Weekly filing updated and retrievable","Digital backups synced monthly","Retrieval logs maintained for audits"]'
-                                                aria-label="View success indicators"
-                                            >
-                                                <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 14">
-                                                    <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5">
-                                                        <path d="M10 3c-3.5 0-6.5 2.3-8 5 1.5 2.7 4.5 5 8 5s6.5-2.3 8-5c-1.5-2.7-4.5-5-8-5Z"/>
-                                                        <path d="M10 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
-                                                    </g>
-                                                </svg>
-
-                                                <span class="text-xs">View (3)</span>
-                                            </button>
-                                        </td>
-
-                                        <td class="px-4 py-3 text-center">
-                                            <input value="Quarterly; records validated and properly filed"
-                                                type="text"
-                                                class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none"
-                                                style="background:#0f172a;color:#e5e7eb;"
-                                                placeholder="e.g., Quarterly; 4 sessions"
-                                                {{ $isDraft ? '' : 'disabled' }}>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    @unless ($isDraft)
-                        <div class="pointer-events-none absolute inset-0 rounded-xl border border-slate-700/60 bg-slate-950/50"></div>
-                    @endunless
-                </div>
             </div>
-
-            <div class="space-y-3">
-                <p class="text-xs text-slate-400">Once submitted, this plan becomes read-only until reviewed.</p>
-                <div class="flex flex-wrap items-center gap-3">
-                    <button type="button"
-                            data-employee-action
-                            data-action-title="Save UWP Draft"
-                            data-action-message="This will save the Unit Work Plan as a draft. You may continue editing until it is submitted for approval."
-                            data-action-confirm="Save draft"
-                            data-action-loading="Saving..."
-                            class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-800/80 {{ $isDraft ? '' : 'opacity-60 pointer-events-none' }}"
-                            {{ $isDraft ? '' : 'disabled' }}>
-                        <span data-button-label>Save as Draft</span>
-                        <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"></span>
-                    </button>
-
-                    <button type="button"
-                            data-employee-loading="true"
-                            data-loading-text="Submitting..."
-                            class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-900/40 transition hover:bg-blue-500 {{ $isDraft ? '' : 'opacity-60 pointer-events-none' }}"
-                            {{ $isDraft ? '' : 'disabled' }}>
-                        <span data-button-label>Submit for Approval</span>
-                        <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
-                    </button>
-
-                    <span class="text-[11px] text-slate-500">UWP remains editable only while in Draft.</span>
-                </div>
-            </div>
-        </div>
+        </form>
     </section>
 
     {{-- SUCCESS INDICATORS MODAL (now includes Assigned Employees per indicator) --}}
@@ -575,6 +419,14 @@
                 });
 
                 confirmBtn.addEventListener('click', function () {
+                    const isSaveDraft = activeTrigger && activeTrigger.hasAttribute('data-save-draft-btn');
+                    if (isSaveDraft) {
+                        setButtonLoading(confirmBtn, true, confirmBtn.dataset.actionLoading);
+                        setButtonLoading(activeTrigger, true, activeTrigger.dataset.actionLoading || confirmBtn.dataset.actionLoading);
+                        submitUwp(saveDraftUrl);
+                        return;
+                    }
+
                     setButtonLoading(confirmBtn, true, confirmBtn.dataset.actionLoading);
                     if (activeTrigger) {
                         setButtonLoading(activeTrigger, true, activeTrigger.dataset.actionLoading || confirmBtn.dataset.actionLoading);
@@ -618,12 +470,20 @@
                 const saveAssignmentsBtn = document.getElementById('uwp-save-assignments');
 
                 const unitSelect = document.getElementById('uwp-office-unit');
+                const uwpForm = document.getElementById('uwp-form');
+                const mfosPayloadInput = document.getElementById('mfos_payload');
+                const assignmentsPayloadInput = document.getElementById('assignments_payload');
+                const functionsPayloadInput = document.getElementById('functions_payload');
+                const functionsWrapper = document.getElementById('uwp-functions-wrapper');
+                const addFunctionBtn = document.getElementById('uwp-add-function');
+                const submitUwpBtn = document.querySelector('[data-submit-uwp-btn]');
 
+                const saveDraftUrl = @json(route('supervisor.uwp.saveDraftData'));
+                const submitUwpUrl = @json(route('supervisor.uwp.submitData'));
+
+                let activeFunctionIndex = null;
+                let activeMfoIndex = null;
                 let activeIndicators = [];
-                let standardsData = [];
-
-                // NEW: assignment per success indicator
-                let indicatorAssignments = {}; // { [indicatorText]: string[] }
                 let activeAssignIndicatorIndex = null;
 
                 const assignedData = {
@@ -638,6 +498,54 @@
                 };
 
                 const isDraft = {{ $isDraft ? 'true' : 'false' }};
+
+                const uwpState = {
+                    functions: [
+                        {
+                            title: 'Core Functions',
+                            type: 'core',
+                            weight: 80,
+                            isCustom: false,
+                            mfos: [
+                                {
+                                    title: 'E-Bank Scanning and Encoding of Revenue Transactions',
+                                    target: 'Daily; all e-bank transactions processed within the same working day',
+                                    indicators: [
+                                        { text: 'All e-bank transactions scanned and encoded daily', standards: [], assignees: [] },
+                                        { text: 'Indexing complete with no missing pages', standards: [], assignees: [] },
+                                        { text: 'Audit trail maintained within 24 hours', standards: [], assignees: [] },
+                                    ],
+                                },
+                                {
+                                    title: 'Processing of Over-the-Counter Revenue Transactions',
+                                    target: 'Daily; 95% processed within the same working day',
+                                    indicators: [
+                                        { text: 'Same-day verification of OTC transactions', standards: [], assignees: [] },
+                                        { text: '95% encoded within the business day', standards: [], assignees: [] },
+                                        { text: 'OR validation completed daily', standards: [], assignees: [] },
+                                    ],
+                                },
+                            ],
+                        },
+                        {
+                            title: 'Support Functions',
+                            type: 'support',
+                            weight: 20,
+                            isCustom: false,
+                            mfos: [
+                                {
+                                    title: 'Maintenance of revenue records and filing system',
+                                    target: 'Quarterly; records validated and properly filed',
+                                    indicators: [
+                                        { text: 'Weekly filing updated and retrievable', standards: [], assignees: [] },
+                                        { text: 'Digital backups synced monthly', standards: [], assignees: [] },
+                                        { text: 'Retrieval logs maintained for audits', standards: [], assignees: [] },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                };
 
                 const standardsSeedMap = {
                     'All e-bank transactions scanned and encoded daily': {
@@ -731,55 +639,299 @@
                     return base;
                 }
 
-                // Seed assignments (demo): first indicator gets Ramon Reyes if present
-                function seedAssignmentsForIndicators(list) {
-                    const next = {};
-                    list.forEach((text) => {
-                        const key = (text || '').trim();
-                        if (!key) return;
-                        const existing = indicatorAssignments[key];
-                        next[key] = Array.isArray(existing) ? [...existing] : [];
+                function escapeHtml(value) {
+                    const str = String(value ?? '');
+                    return str
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;')
+                        .replace(/\"/g, '&quot;')
+                        .replace(/'/g, '&#039;');
+                }
+
+                function clampNumber(value, min, max) {
+                    const num = Number(value);
+                    if (Number.isNaN(num)) return min;
+                    return Math.min(max, Math.max(min, num));
+                }
+
+                function getSelectedUnitLabel() {
+                    if (!unitSelect) return 'Revenue Collection Unit';
+                    const option = unitSelect.options[unitSelect.selectedIndex];
+                    return option ? option.text : 'Revenue Collection Unit';
+                }
+
+                function getFunctionDescription(func) {
+                    if (func.type === 'core') {
+                        return 'Each row is a measurable, loggable core output. No scoring here; capture targets only.';
+                    }
+                    if (func.type === 'support') {
+                        return 'Log support outputs that enable the unit. Keep them measurable and planned.';
+                    }
+                    return 'Define custom outputs for this function. Keep them measurable and planned.';
+                }
+
+                function standardsArrayToMatrix(standards) {
+                    const matrix = createEmptyStandards();
+                    (standards || []).forEach((item) => {
+                        const rating = Number(item.rating);
+                        if (!matrix[rating]) return;
+                        const dimKey = item.dimension === 'quality' ? 'q' : item.dimension === 'efficiency' ? 'e' : item.dimension === 'timeliness' ? 't' : item.dimension;
+                        if (!matrix[rating][dimKey]) return;
+                        matrix[rating][dimKey] = item.text || '';
                     });
-                    indicatorAssignments = next;
+                    return matrix;
                 }
 
-                function getAssignedEmployees(indicatorText) {
-                    const key = (indicatorText || '').trim();
-                    if (!key) return [];
-                    return Array.isArray(indicatorAssignments[key]) ? [...indicatorAssignments[key]] : [];
+                function standardsMatrixToArray(matrix) {
+                    const list = [];
+                    [5,4,3,2,1].forEach((rating) => {
+                        const row = matrix[rating] || {};
+                        ['q','e','t'].forEach((dimKey) => {
+                            const text = (row[dimKey] || '').trim();
+                            if (!text) return;
+                            const dimension = dimKey === 'q' ? 'quality' : dimKey === 'e' ? 'efficiency' : 'timeliness';
+                            list.push({ rating, dimension, text });
+                        });
+                    });
+                    return list;
                 }
 
-                function isEmployeeAssignedToIndicator(indicatorText, employeeName) {
-                    if (!employeeName) return false;
-                    const list = getAssignedEmployees(indicatorText);
-                    return list.includes(employeeName);
+                function ensureIndicatorMatrix(indicator) {
+                    if (indicator._matrix) return indicator._matrix;
+                    const hasStandards = Array.isArray(indicator.standards) && indicator.standards.length > 0;
+                    const matrix = hasStandards
+                        ? standardsArrayToMatrix(indicator.standards)
+                        : seedStandardsForIndicator(indicator.text || '');
+                    indicator._matrix = matrix;
+                    indicator.standards = standardsMatrixToArray(matrix);
+                    return matrix;
                 }
 
-                function assignEmployeeToIndicator(indicatorText, employeeName) {
-                    const key = (indicatorText || '').trim();
-                    if (!key || !employeeName) return;
-                    indicatorAssignments[key] = Array.isArray(indicatorAssignments[key]) ? indicatorAssignments[key] : [];
-                    if (!indicatorAssignments[key].includes(employeeName)) {
-                        indicatorAssignments[key].push(employeeName);
+                function getIndicatorStandardsArray(indicator) {
+                    if (!indicator) return [];
+                    if (!Array.isArray(indicator.standards) || indicator.standards.length === 0) {
+                        ensureIndicatorMatrix(indicator);
+                    }
+                    return Array.isArray(indicator.standards) ? indicator.standards : [];
+                }
+
+                function createIndicator(text) {
+                    return {
+                        text: text || 'New success indicator',
+                        standards: [],
+                        assignees: [],
+                    };
+                }
+
+                function createMfo(title, target, indicators) {
+                    return {
+                        title: title || '',
+                        target: target || '',
+                        indicators: Array.isArray(indicators) ? indicators : [],
+                    };
+                }
+
+                function createFunctionContainer() {
+                    return {
+                        title: 'Custom Function',
+                        type: 'custom',
+                        weight: 0,
+                        isCustom: true,
+                        mfos: [],
+                    };
+                }
+
+                function getAssignedEmployees(indicator) {
+                    if (!indicator) return [];
+                    return Array.isArray(indicator.assignees) ? [...indicator.assignees] : [];
+                }
+
+                function isEmployeeAssigned(indicator, employeeName) {
+                    if (!indicator || !employeeName) return false;
+                    return getAssignedEmployees(indicator).includes(employeeName);
+                }
+
+                function assignEmployee(indicator, employeeName) {
+                    if (!indicator || !employeeName) return;
+                    indicator.assignees = Array.isArray(indicator.assignees) ? indicator.assignees : [];
+                    if (!indicator.assignees.includes(employeeName)) {
+                        indicator.assignees.push(employeeName);
                     }
                 }
 
-                function unassignEmployeeFromIndicator(indicatorText, employeeName) {
-                    const key = (indicatorText || '').trim();
-                    if (!key || !employeeName) return;
-                    indicatorAssignments[key] = Array.isArray(indicatorAssignments[key]) ? indicatorAssignments[key] : [];
-                    const index = indicatorAssignments[key].indexOf(employeeName);
+                function unassignEmployee(indicator, employeeName) {
+                    if (!indicator || !employeeName) return;
+                    indicator.assignees = Array.isArray(indicator.assignees) ? indicator.assignees : [];
+                    const index = indicator.assignees.indexOf(employeeName);
                     if (index !== -1) {
-                        indicatorAssignments[key].splice(index, 1);
+                        indicator.assignees.splice(index, 1);
                     }
+                }
+
+                function renderFunctions() {
+                    if (!functionsWrapper) return;
+
+                    const html = uwpState.functions.map((func, funcIndex) => {
+                        const weightValue = Number(func.weight || 0);
+                        const description = getFunctionDescription(func);
+                        const inputDisabled = isDraft ? '' : 'disabled';
+                        const mutedClass = isDraft ? '' : 'opacity-60 pointer-events-none';
+
+                        const mfoRows = (func.mfos || []).map((mfo, mfoIndex) => {
+                            const indicatorCount = Array.isArray(mfo.indicators) ? mfo.indicators.length : 0;
+
+                            return `
+                                <tr class="hover:bg-slate-900/50">
+                                    <td class="px-4 py-3">
+                                        <input type="text"
+                                            data-mfo-title
+                                            data-function-index="${funcIndex}"
+                                            data-mfo-index="${mfoIndex}"
+                                            value="${escapeHtml(mfo.title)}"
+                                            class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none ${mutedClass}"
+                                            style="background:#0f172a;color:#e5e7eb;"
+                                            placeholder="e.g., Records management and archiving"
+                                            ${inputDisabled}>
+                                    </td>
+
+                                    <td class="px-4 py-3 text-center">
+                                        <button
+                                            type="button"
+                                            data-action="view-indicators"
+                                            data-function-index="${funcIndex}"
+                                            data-mfo-index="${mfoIndex}"
+                                            class="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 transition justify-center">
+                                            <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 14">
+                                                <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5">
+                                                    <path d="M10 3c-3.5 0-6.5 2.3-8 5 1.5 2.7 4.5 5 8 5s6.5-2.3 8-5c-1.5-2.7-4.5-5-8-5Z"/>
+                                                    <path d="M10 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
+                                                </g>
+                                            </svg>
+                                            <span class="text-xs">View (${indicatorCount})</span>
+                                        </button>
+                                        ${isDraft ? `
+                                            <button type="button"
+                                                data-action="remove-mfo"
+                                                data-function-index="${funcIndex}"
+                                                data-mfo-index="${mfoIndex}"
+                                                class="mt-2 block w-full text-[11px] text-slate-400 hover:text-slate-200 underline">
+                                                Remove MFO
+                                            </button>
+                                        ` : ''}
+                                    </td>
+
+                                    <td class="px-4 py-3 text-center">
+                                        <textarea
+                                            data-mfo-target
+                                            data-function-index="${funcIndex}"
+                                            data-mfo-index="${mfoIndex}"
+                                            rows="2"
+                                            class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none ${mutedClass}"
+                                            style="background:#0f172a;color:#e5e7eb;"
+                                            placeholder="e.g., Monthly; 1,200 files"
+                                            ${inputDisabled}>${escapeHtml(mfo.target)}</textarea>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('');
+
+                        const emptyRow = `
+                            <tr>
+                                <td colspan="3" class="px-4 py-6 text-center text-xs text-slate-500">
+                                    No MFOs yet. Use "+ Add MFO" to add entries.
+                                </td>
+                            </tr>
+                        `;
+
+                        return `
+                            <div data-function-card data-function-index="${funcIndex}" class="scroll-mt-24 rounded-2xl border border-slate-800 bg-slate-950/60 p-5 shadow-[0_20px_40px_-30px_rgba(15,23,42,0.8)] space-y-4">
+                                <div class="flex flex-wrap items-start justify-between gap-3">
+                                    <div class="space-y-1">
+                                        <div class="flex flex-wrap items-center gap-2">
+                                            <input type="text"
+                                                data-function-title
+                                                data-function-index="${funcIndex}"
+                                                value="${escapeHtml(func.title)}"
+                                                class="rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm font-semibold text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none ${mutedClass}"
+                                                style="background:#0f172a;color:#e5e7eb;"
+                                                ${inputDisabled}>
+                                            <span class="inline-flex items-center rounded-full border border-slate-700 bg-slate-900/60 px-2.5 py-1 text-[11px] font-semibold text-slate-300" data-function-weight-label="${funcIndex}">(${weightValue}%)</span>
+                                        </div>
+                                        <p class="text-xs text-slate-400">${description}</p>
+                                    </div>
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <select data-function-type data-function-index="${funcIndex}"
+                                            class="rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none ${mutedClass}"
+                                            style="background:#0f172a;color:#e5e7eb;"
+                                            ${inputDisabled}>
+                                            <option value="core" ${func.type === 'core' ? 'selected' : ''}>core</option>
+                                            <option value="support" ${func.type === 'support' ? 'selected' : ''}>support</option>
+                                            <option value="custom" ${func.type === 'custom' ? 'selected' : ''}>custom</option>
+                                        </select>
+
+                                        <input type="number" min="0" max="100"
+                                            data-function-weight
+                                            data-function-index="${funcIndex}"
+                                            value="${weightValue}"
+                                            class="w-24 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none ${mutedClass}"
+                                            style="background:#0f172a;color:#e5e7eb;"
+                                            ${inputDisabled}>
+
+                                        ${isDraft ? `
+                                            <button type="button"
+                                                data-action="add-mfo"
+                                                data-function-index="${funcIndex}"
+                                                class="inline-flex items-center gap-1 rounded-lg border border-blue-500/50 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-200 hover:bg-blue-500/20">
+                                                <span class="fa-solid fa-plus text-[10px]"></span>
+                                                <span>+ Add MFO</span>
+                                            </button>
+                                        ` : ''}
+
+                                        ${isDraft && func.isCustom ? `
+                                            <button type="button"
+                                                data-action="remove-function"
+                                                data-function-index="${funcIndex}"
+                                                class="text-[11px] text-rose-300 underline hover:text-rose-200">
+                                                Remove Function
+                                            </button>
+                                        ` : ''}
+                                    </div>
+                                </div>
+
+                                <div class="relative rounded-xl border border-slate-800 bg-slate-950/60">
+                                    <div class="${isDraft ? '' : 'opacity-60'}">
+                                        <div class="overflow-x-auto">
+                                            <table class="min-w-full text-sm">
+                                                <thead class="bg-slate-900/70 text-slate-300">
+                                                    <tr>
+                                                        <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">PPA / MFO</th>
+                                                        <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Success Indicators</th>
+                                                        <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Target / Timeline</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="divide-y divide-slate-800 text-slate-100">
+                                                    ${mfoRows || emptyRow}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    ${isDraft ? '' : '<div class="pointer-events-none absolute inset-0 rounded-xl border border-slate-700/60 bg-slate-950/50"></div>'}
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    functionsWrapper.innerHTML = html;
                 }
 
                 function renderIndicators(list) {
                     if (!indicatorsList) return;
                     indicatorsList.innerHTML = '';
 
-                    list.forEach((item, idx) => {
-                        const value = (item || '').trim();
+                    list.forEach((indicator, idx) => {
+                        const value = (indicator?.text || '').trim();
                         if (!value) return;
 
                         const tr = document.createElement('tr');
@@ -823,7 +975,7 @@
                         const assignedTd = document.createElement('td');
                         assignedTd.className = 'px-4 py-3 text-center align-top';
 
-                        const assignedCount = getAssignedEmployees(value).length;
+                        const assignedCount = getAssignedEmployees(indicator).length;
                         const assignBtn = document.createElement('button');
                         assignBtn.type = 'button';
                         assignBtn.className = 'inline-flex items-center gap-2 text-xs font-semibold text-blue-400 transition-colors hover:text-blue-300 focus:outline-none';
@@ -874,9 +1026,10 @@
                 function renderAssigned(unit) {
                     if (!assignedList || !assignedEmpty || !assignedUnit || !assignedIndicator) return;
 
-                    const indicatorText = activeIndicators[activeAssignIndicatorIndex] || '';
-                    assignedUnit.textContent = unit || '—';
-                    assignedIndicator.textContent = indicatorText || '—';
+                    const indicator = activeIndicators[activeAssignIndicatorIndex];
+                    const indicatorText = indicator ? indicator.text : '';
+                    assignedUnit.textContent = unit || '---';
+                    assignedIndicator.textContent = indicatorText || '---';
 
                     assignedList.innerHTML = '';
                     const rows = assignedData[unit] || [];
@@ -901,7 +1054,7 @@
                         const statusTd = document.createElement('td');
                         statusTd.className = 'px-4 py-2';
 
-                        const isAssigned = isEmployeeAssignedToIndicator(indicatorText, emp.name);
+                        const isAssigned = isEmployeeAssigned(indicator, emp.name);
                         const badge = document.createElement('span');
                         badge.className = `inline-flex items-center px-2 py-1 text-[11px] font-semibold rounded-full border ${
                             isAssigned ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-200' : 'border-slate-600 bg-slate-800 text-slate-300'
@@ -911,7 +1064,7 @@
 
                         const indicatorTd = document.createElement('td');
                         indicatorTd.className = 'px-4 py-2 text-slate-300';
-                        indicatorTd.textContent = indicatorText || '—';
+                        indicatorTd.textContent = indicatorText || '---';
 
                         tr.appendChild(nameTd);
                         tr.appendChild(unitTd);
@@ -928,16 +1081,13 @@
                             toggle.textContent = isAssigned ? 'Unassign' : 'Assign';
 
                             toggle.addEventListener('click', () => {
-                                const currentIndicator = activeIndicators[activeAssignIndicatorIndex] || '';
-                                if (!currentIndicator) return;
-                                const alreadyAssigned = isEmployeeAssignedToIndicator(currentIndicator, emp.name);
-                                if (alreadyAssigned) {
-                                    unassignEmployeeFromIndicator(currentIndicator, emp.name);
+                                if (!indicator) return;
+                                if (isEmployeeAssigned(indicator, emp.name)) {
+                                    unassignEmployee(indicator, emp.name);
                                 } else {
-                                    assignEmployeeToIndicator(currentIndicator, emp.name);
+                                    assignEmployee(indicator, emp.name);
                                 }
 
-                                // refresh both modals
                                 renderAssigned(unit);
                                 renderIndicators(activeIndicators);
                             });
@@ -954,7 +1104,7 @@
                     if (!assignedModal) return;
                     activeAssignIndicatorIndex = indicatorIdx;
 
-                    const unit = (unitSelect && unitSelect.value) || 'Revenue Collection Unit';
+                    const unit = getSelectedUnitLabel();
                     renderAssigned(unit);
 
                     assignedModal.classList.remove('hidden');
@@ -973,12 +1123,13 @@
                                                                                                                                                 // ===== Standards Modal (existing, unchanged behavior) =====
                 function openStandardsModal(idx) {
                     if (!standardsModal || !standardsList) return;
+                    const indicator = activeIndicators[idx];
+                    if (!indicator) return;
 
-                    const data = standardsData[idx] || seedStandardsForIndicator(activeIndicators[idx] || '');
-                    standardsData[idx] = data;
+                    const data = ensureIndicatorMatrix(indicator);
 
                     standardsList.innerHTML = '';
-                    if (standardsIndicatorLabel) standardsIndicatorLabel.textContent = activeIndicators[idx] || '';
+                    if (standardsIndicatorLabel) standardsIndicatorLabel.textContent = indicator.text || '';
 
                     const table = document.createElement('table');
                     table.className = 'w-full text-sm border border-slate-800';
@@ -1004,7 +1155,7 @@
 
                         const textEl = document.createElement('div');
                         textEl.className = 'text-slate-100';
-                        textEl.textContent = txt ? txt : '—';
+                        textEl.textContent = txt ? txt : '---';
                         td.appendChild(textEl);
 
                         if (isDraft) {
@@ -1029,19 +1180,19 @@
                             const clearBtn = document.createElement('button');
                             clearBtn.type = 'button';
                             clearBtn.className = 'mt-1 ml-3 text-[11px]';
-                            clearBtn.style.color = '#f87171'; // rose-400
+                            clearBtn.style.color = '#f87171';
                             clearBtn.textContent = 'Clear';
 
                             clearBtn.addEventListener('click', () => {
-                                standardsData[idx] = standardsData[idx] || createEmptyStandards();
-                                if (!standardsData[idx][String(lvl)]) {
-                                    standardsData[idx][String(lvl)] = { q:'', e:'', t:'' };
+                                const matrix = ensureIndicatorMatrix(indicator);
+                                if (!matrix[String(lvl)]) {
+                                    matrix[String(lvl)] = { q:'', e:'', t:'' };
                                 }
 
-                                // clear only this cell
-                                standardsData[idx][String(lvl)][dim] = '';
+                                matrix[String(lvl)][dim] = '';
+                                indicator._matrix = matrix;
+                                indicator.standards = standardsMatrixToArray(matrix);
 
-                                // reset editor if user was editing this same cell
                                 if (
                                     standardsEditTarget &&
                                     standardsEditTarget.rating === String(lvl) &&
@@ -1059,7 +1210,6 @@
 
                         return td;
                     };
-
 
                     [5,4,3,2,1].forEach((lvl) => {
                         const row = data[lvl] || { q:'', e:'', t:'' };
@@ -1096,24 +1246,26 @@
                     const idx = Number(standardsModal.dataset.currentIndex || 0);
                     if (!ratingSelectEl || !dimSelectEl) return;
 
+                    const indicator = activeIndicators[idx];
+                    if (!indicator) return;
+
                     const raw = standardsInput.value.trim();
                     if (!raw) return;
 
                     const rating = standardsEditTarget?.rating || ratingSelectEl.value;
-                    const dim = standardsEditTarget?.dim || dimSelectEl.value; // q|e|t
+                    const dim = standardsEditTarget?.dim || dimSelectEl.value;
 
-                    standardsData[idx] = standardsData[idx] || createEmptyStandards();
-                    if (!standardsData[idx][rating]) standardsData[idx][rating] = { q:'', e:'', t:'' };
-
-                    // overwrite single sentence
-                    standardsData[idx][rating][dim] = raw;
+                    const matrix = ensureIndicatorMatrix(indicator);
+                    if (!matrix[rating]) matrix[rating] = { q:'', e:'', t:'' };
+                    matrix[rating][dim] = raw;
+                    indicator._matrix = matrix;
+                    indicator.standards = standardsMatrixToArray(matrix);
 
                     standardsInput.value = '';
                     standardsEditTarget = null;
 
                     openStandardsModal(idx);
                 }
-
 
                 function closeStandardsModal() {
                     if (standardsModal) {
@@ -1130,6 +1282,9 @@
                     const targetRow = rows[idx];
                     if (!targetRow) return;
 
+                    const indicator = activeIndicators[idx];
+                    if (!indicator) return;
+
                     const firstTd = targetRow.querySelector('td');
                     if (!firstTd) return;
 
@@ -1143,9 +1298,7 @@
                     input.style.color = '#e5e7eb';
                     input.value = currentValue || '';
 
-                    // Keep assignment mapping when renaming:
-                    const prevKey = (activeIndicators[idx] || '').trim();
-                    const prevAssigned = Array.isArray(indicatorAssignments[prevKey]) ? [...indicatorAssignments[prevKey]] : [];
+                    const prevAssignees = Array.isArray(indicator.assignees) ? [...indicator.assignees] : [];
 
                     firstTd.innerHTML = '';
                     firstTd.appendChild(input);
@@ -1154,11 +1307,13 @@
 
                     const commit = () => {
                         const next = input.value.trim() || 'New success indicator';
-                        activeIndicators[idx] = next;
+                        indicator.text = next;
+                        indicator.assignees = prevAssignees;
 
-                        // move assignment to new key
-                        delete indicatorAssignments[prevKey];
-                        indicatorAssignments[next] = prevAssigned;
+                        if (!indicator._matrix) {
+                            indicator._matrix = seedStandardsForIndicator(next);
+                            indicator.standards = standardsMatrixToArray(indicator._matrix);
+                        }
 
                         renderIndicators(activeIndicators);
                     };
@@ -1173,33 +1328,32 @@
                 }
 
                 function deleteIndicator(idx) {
-                    const key = (activeIndicators[idx] || '').trim();
                     activeIndicators.splice(idx, 1);
-                    if (key) delete indicatorAssignments[key];
                     renderIndicators(activeIndicators);
                 }
 
                 function addIndicator() {
-                    activeIndicators.push('New success indicator');
-                    seedAssignmentsForIndicators(activeIndicators);
+                    activeIndicators.push(createIndicator('New success indicator'));
                     renderIndicators(activeIndicators);
                     startEditIndicator(activeIndicators.length - 1, 'New success indicator');
                 }
 
-                function openUwpIndicatorsModal(titleText, indicators) {
-                    if (indicatorsTitle) indicatorsTitle.textContent = titleText || '--';
-                    activeIndicators = Array.isArray(indicators) ? [...indicators] : [];
+                function openUwpIndicatorsModal(functionIndex, mfoIndex) {
+                    const func = uwpState.functions[functionIndex];
+                    const mfo = func?.mfos?.[mfoIndex];
+                    if (!mfo || !indicatorsModal) return;
 
-                    standardsData = activeIndicators.map((text) => seedStandardsForIndicator(text));
+                    activeFunctionIndex = functionIndex;
+                    activeMfoIndex = mfoIndex;
+                    if (!Array.isArray(mfo.indicators)) mfo.indicators = [];
+                    activeIndicators = mfo.indicators;
 
-                    seedAssignmentsForIndicators(activeIndicators);
+                    if (indicatorsTitle) indicatorsTitle.textContent = mfo.title || '--';
                     renderIndicators(activeIndicators);
 
-                    if (indicatorsModal) {
-                        indicatorsModal.classList.remove('hidden');
-                        indicatorsModal.classList.add('flex');
-                        document.body.classList.add('overflow-hidden');
-                    }
+                    indicatorsModal.classList.remove('hidden');
+                    indicatorsModal.classList.add('flex');
+                    document.body.classList.add('overflow-hidden');
                 }
 
                 window.closeUwpIndicatorsModal = function () {
@@ -1207,22 +1361,226 @@
                         indicatorsModal.classList.add('hidden');
                         indicatorsModal.classList.remove('flex');
                     }
+                    activeFunctionIndex = null;
+                    activeMfoIndex = null;
+                    activeIndicators = [];
+                    renderFunctions();
                     document.body.classList.remove('overflow-hidden');
                 };
 
-                // ===== Wire events =====
-                document.querySelectorAll('[data-uwp-indicators]').forEach((btn) => {
-                    btn.addEventListener('click', () => {
-                        let indicators = [];
-                        try {
-                            indicators = JSON.parse(btn.dataset.indicators || '[]');
-                        } catch (e) {
-                            indicators = [];
-                        }
-                        openUwpIndicatorsModal(btn.dataset.title || '--', indicators);
-                    });
-                });
+                // ===== Function Container Actions =====
+                function addFunction() {
+                    uwpState.functions.push(createFunctionContainer());
+                    renderFunctions();
 
+                    requestAnimationFrame(() => {
+                        const cards = functionsWrapper?.querySelectorAll('[data-function-card]');
+                        const lastCard = cards && cards.length ? cards[cards.length - 1] : null;
+                        if (!lastCard) return;
+
+                        lastCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                        const titleInput = lastCard.querySelector('[data-function-title]');
+                        if (titleInput && typeof titleInput.focus === 'function') {
+                            try {
+                                titleInput.focus({ preventScroll: true });
+                            } catch (error) {
+                                titleInput.focus();
+                            }
+                        }
+                    });
+                }
+
+                function addMfo(functionIndex) {
+                    const func = uwpState.functions[functionIndex];
+                    if (!func) return;
+                    func.mfos = Array.isArray(func.mfos) ? func.mfos : [];
+                    func.mfos.push(createMfo('', '', []));
+                    renderFunctions();
+                }
+
+                function removeMfo(functionIndex, mfoIndex) {
+                    const func = uwpState.functions[functionIndex];
+                    if (!func || !Array.isArray(func.mfos)) return;
+                    func.mfos.splice(mfoIndex, 1);
+                    renderFunctions();
+                }
+
+                function removeFunction(functionIndex) {
+                    uwpState.functions.splice(functionIndex, 1);
+                    renderFunctions();
+                }
+
+                function buildFunctionsPayload() {
+                    return uwpState.functions.map((func) => ({
+                        title: func.title,
+                        type: func.type,
+                        weight: func.weight,
+                        mfos: (func.mfos || []).map((mfo) => ({
+                            title: mfo.title,
+                            target: mfo.target,
+                            indicators: (mfo.indicators || []).map((indicator) => ({
+                                text: indicator.text,
+                                standards: getIndicatorStandardsArray(indicator),
+                                assignees: Array.isArray(indicator.assignees) ? [...indicator.assignees] : [],
+                            })),
+                        })),
+                    }));
+                }
+
+                function buildMfosPayloadFromState() {
+                    const payload = [];
+                    let sortOrder = 1;
+
+                    uwpState.functions.forEach((func) => {
+                        const functionCode = func.type === 'custom' ? 'support' : func.type;
+                        const weight = Number(func.weight || 0);
+
+                        (func.mfos || []).forEach((mfo) => {
+                            const titleText = (mfo.title || '').trim();
+                            if (!titleText) return;
+
+                            const successIndicators = (mfo.indicators || []).map((indicator) => {
+                                const description = (indicator.text || '').trim();
+                                if (!description) return null;
+
+                                const standards = getIndicatorStandardsArray(indicator).map((item) => ({
+                                    dimension: item.dimension,
+                                    rating_level: item.rating,
+                                    standard: item.text,
+                                }));
+
+                                return {
+                                    description,
+                                    target_timeline: null,
+                                    standards,
+                                };
+                            }).filter(Boolean);
+
+                            payload.push({
+                                function_code: functionCode,
+                                title: titleText,
+                                target_summary: (mfo.target || '').trim(),
+                                weight: weight,
+                                sort_order: sortOrder,
+                                success_indicators: successIndicators,
+                            });
+
+                            sortOrder += 1;
+                        });
+                    });
+
+                    return payload;
+                }
+
+                function buildAssignmentsPayloadMvp() {
+                    const unique = new Set();
+                    uwpState.functions.forEach((func) => {
+                        (func.mfos || []).forEach((mfo) => {
+                            (mfo.indicators || []).forEach((indicator) => {
+                                (indicator.assignees || []).forEach((entry) => {
+                                    if (entry) unique.add(entry);
+                                });
+                            });
+                        });
+                    });
+                    return Array.from(unique);
+                }
+
+                function submitUwp(actionUrl) {
+                    if (!uwpForm || !actionUrl) return;
+                    if (functionsPayloadInput) {
+                        functionsPayloadInput.value = JSON.stringify(buildFunctionsPayload());
+                    }
+                    if (mfosPayloadInput) {
+                        mfosPayloadInput.value = JSON.stringify(buildMfosPayloadFromState());
+                    }
+                    if (assignmentsPayloadInput) {
+                        assignmentsPayloadInput.value = JSON.stringify(buildAssignmentsPayloadMvp());
+                    }
+                    uwpForm.action = actionUrl;
+                    uwpForm.submit();
+                }
+
+                // ===== Wire events =====
+                if (functionsWrapper) {
+                    functionsWrapper.addEventListener('input', (event) => {
+                        const target = event.target;
+                        if (target.matches('[data-function-title]')) {
+                            const idx = Number(target.dataset.functionIndex);
+                            if (!Number.isNaN(idx) && uwpState.functions[idx]) {
+                                uwpState.functions[idx].title = target.value;
+                            }
+                        }
+
+                        if (target.matches('[data-function-weight]')) {
+                            const idx = Number(target.dataset.functionIndex);
+                            if (!Number.isNaN(idx) && uwpState.functions[idx]) {
+                                const weight = clampNumber(target.value, 0, 100);
+                                uwpState.functions[idx].weight = weight;
+                                const label = functionsWrapper.querySelector(`[data-function-weight-label="${idx}"]`);
+                                if (label) label.textContent = `(${weight}%)`;
+                            }
+                        }
+
+                        if (target.matches('[data-mfo-title]')) {
+                            const funcIdx = Number(target.dataset.functionIndex);
+                            const mfoIdx = Number(target.dataset.mfoIndex);
+                            const mfo = uwpState.functions[funcIdx]?.mfos?.[mfoIdx];
+                            if (mfo) mfo.title = target.value;
+                        }
+
+                        if (target.matches('[data-mfo-target]')) {
+                            const funcIdx = Number(target.dataset.functionIndex);
+                            const mfoIdx = Number(target.dataset.mfoIndex);
+                            const mfo = uwpState.functions[funcIdx]?.mfos?.[mfoIdx];
+                            if (mfo) mfo.target = target.value;
+                        }
+                    });
+
+                    functionsWrapper.addEventListener('change', (event) => {
+                        const target = event.target;
+                        if (target.matches('[data-function-type]')) {
+                            const idx = Number(target.dataset.functionIndex);
+                            if (!Number.isNaN(idx) && uwpState.functions[idx]) {
+                                uwpState.functions[idx].type = target.value;
+                            }
+                        }
+                    });
+
+                    functionsWrapper.addEventListener('click', (event) => {
+                        const viewBtn = event.target.closest('[data-action="view-indicators"]');
+                        if (viewBtn) {
+                            const funcIdx = Number(viewBtn.dataset.functionIndex);
+                            const mfoIdx = Number(viewBtn.dataset.mfoIndex);
+                            openUwpIndicatorsModal(funcIdx, mfoIdx);
+                            return;
+                        }
+
+                        const addMfoBtn = event.target.closest('[data-action="add-mfo"]');
+                        if (addMfoBtn) {
+                            const funcIdx = Number(addMfoBtn.dataset.functionIndex);
+                            addMfo(funcIdx);
+                            return;
+                        }
+
+                        const removeMfoBtn = event.target.closest('[data-action="remove-mfo"]');
+                        if (removeMfoBtn) {
+                            const funcIdx = Number(removeMfoBtn.dataset.functionIndex);
+                            const mfoIdx = Number(removeMfoBtn.dataset.mfoIndex);
+                            removeMfo(funcIdx, mfoIdx);
+                            return;
+                        }
+
+                        const removeFunctionBtn = event.target.closest('[data-action="remove-function"]');
+                        if (removeFunctionBtn) {
+                            const funcIdx = Number(removeFunctionBtn.dataset.functionIndex);
+                            removeFunction(funcIdx);
+                        }
+                    });
+                }
+
+                if (addFunctionBtn && isDraft) addFunctionBtn.addEventListener('click', addFunction);
                 if (addIndicatorBtn && isDraft) addIndicatorBtn.addEventListener('click', addIndicator);
                 if (addStandardBtn && isDraft) addStandardBtn.addEventListener('click', handleAddStandard);
 
@@ -1230,7 +1588,10 @@
                 if (resetStandardBtn && isDraft) {
                     resetStandardBtn.addEventListener('click', () => {
                         const idx = Number(standardsModal?.dataset.currentIndex || 0);
-                        standardsData[idx] = seedStandardsForIndicator(activeIndicators[idx] || '');
+                        const indicator = activeIndicators[idx];
+                        if (!indicator) return;
+                        indicator._matrix = seedStandardsForIndicator(indicator.text || '');
+                        indicator.standards = standardsMatrixToArray(indicator._matrix);
                         standardsEditTarget = null;
                         if (standardsInput) standardsInput.value = '';
                         openStandardsModal(idx);
@@ -1246,6 +1607,15 @@
                         }, 800);
                     });
                 }
+
+                if (submitUwpBtn && isDraft) {
+                    submitUwpBtn.addEventListener('click', () => {
+                        setButtonLoading(submitUwpBtn, true, submitUwpBtn.dataset.loadingText || 'Submitting...');
+                        submitUwp(submitUwpUrl);
+                    });
+                }
+
+                renderFunctions();
 
                 // ===== Close on backdrop + Escape =====
                 standardsModal?.addEventListener('click', (e) => {
@@ -1277,3 +1647,5 @@
         </script>
     @endpush
 @endsection
+
+

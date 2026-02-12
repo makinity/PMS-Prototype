@@ -12,8 +12,7 @@ return new class extends Migration {
 
             $table->foreignId('uwp_mfo_id')->constrained('uwp_mfos')->cascadeOnDelete();
 
-            $table->text('description');
-            $table->text('target_timeline')->nullable(); // if per-indicator target timeline
+            $table->text('indicator_text');
             $table->unsignedSmallInteger('sort_order')->default(0);
 
             $table->timestamps();

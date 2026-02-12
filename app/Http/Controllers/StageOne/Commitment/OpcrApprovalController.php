@@ -43,13 +43,13 @@ class OpcrApprovalController extends Controller
     {
         $this->ensureRole($request->user()->role, ['dept-head']);
 
-        $opcr = Opcr::with(['unitWorkPlan.assignments'])->findOrFail($id);
+        $opcr = Opcr::with(['unitWorkPlan.uwpFunctions.mfos.successIndicators.assignments.employee'])->findOrFail($id);
 
         if ($opcr->status !== Opcr::STATUS_FOR_REVIEW) {
             return back()->with('error', 'Only OPCR for review can be approved.');
         }
 
-        $uwp = UnitWorkPlan::with(['assignments'])->findOrFail($opcr->unit_work_plan_id);
+        $uwp = UnitWorkPlan::with(['uwpFunctions.mfos.successIndicators.assignments.employee'])->findOrFail($opcr->unit_work_plan_id);
 
         if ($uwp->status !== UnitWorkPlan::STATUS_PMT_APPROVED) {
             return back()->with('error', 'OPCR source UWP must be PMT approved.');

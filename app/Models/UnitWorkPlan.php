@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class UnitWorkPlan extends Model
@@ -48,14 +49,33 @@ class UnitWorkPlan extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function mfos(): HasMany
+    public function uwpFunctions(): HasMany
     {
-        return $this->hasMany(UwpMfo::class, 'unit_work_plan_id');
+        return $this->hasMany(UwpFunction::class, 'unit_work_plan_id');
     }
 
-    public function assignments(): HasMany
+    public function mfos(): HasManyThrough
     {
-        return $this->hasMany(UwpEmployeeAssignment::class, 'unit_work_plan_id');
+        return $this->hasManyThrough(
+            UwpMfo::class,
+            UwpFunction::class,
+            'unit_work_plan_id',
+            'uwp_function_id',
+            'id',
+            'id'
+        );
+    }
+
+    public function getAssignmentsAttribute()
+    {
+        $this->loadMissing('uwpFunctions.mfos.successIndicators.assignments.employee');
+
+        return $this->uwpFunctions
+            ->flatMap(fn ($function) => $function->mfos)
+            ->flatMap(fn ($mfo) => $mfo->successIndicators)
+            ->flatMap(fn ($indicator) => $indicator->assignments)
+            ->unique('employee_id')
+            ->values();
     }
 
     public function opcr(): HasOne

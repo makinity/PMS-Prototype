@@ -87,7 +87,7 @@
                                 <li><a href="#" class="block px-4 py-2 transition hover:bg-slate-800">Support</a></li>
                             </ul>
                             <div class="py-2">
-                                <a href="/" type="button" id="logoutBtn"class="flex w-full items-center gap-2 px-4 py-2 text-sm font-semibold text-rose-300 transition hover:bg-rose-500/10">
+                                <a href="{{ route('logout') }}" data-logout-url="{{ route('logout') }}" id="logoutBtn" class="flex w-full items-center gap-2 px-4 py-2 text-sm font-semibold text-rose-300 transition hover:bg-rose-500/10">
                                     <i class="fa-solid fa-arrow-right-from-bracket"></i>
                                     <span>Sign out</span>
                                 </a>

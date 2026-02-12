@@ -12,8 +12,7 @@ class UwpSuccessIndicator extends Model
 
     protected $fillable = [
         'uwp_mfo_id',
-        'description',
-        'target_timeline',
+        'indicator_text',
         'sort_order',
     ];
 
@@ -29,5 +28,10 @@ class UwpSuccessIndicator extends Model
     public function qetStandards(): HasMany
     {
         return $this->hasMany(UwpQetStandard::class, 'uwp_success_indicator_id');
+    }
+
+    public function assignments(): HasMany
+    {
+        return $this->hasMany(UwpIndicatorAssignment::class, 'uwp_success_indicator_id');
     }
 }

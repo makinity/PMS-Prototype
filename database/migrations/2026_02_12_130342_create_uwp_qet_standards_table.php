@@ -14,15 +14,13 @@ return new class extends Migration {
                 ->constrained('uwp_success_indicators')
                 ->cascadeOnDelete();
 
-            $table->enum('dimension', ['quality', 'efficiency', 'timeliness']);
-            $table->unsignedTinyInteger('rating_level'); // 1..5
-            $table->text('standard');
+            $table->enum('dimension', ['q', 'e', 't']);
+            $table->unsignedTinyInteger('rating'); // 1..5
+            $table->text('standard_text')->nullable();
 
             $table->timestamps();
 
-            // Prevent duplicates like (indicator + quality + rating 5)
-            $table->unique(['uwp_success_indicator_id', 'dimension', 'rating_level'], 'uq_indicator_dimension_level');
-
+            $table->unique(['uwp_success_indicator_id', 'dimension', 'rating'], 'uq_indicator_dimension_rating');
             $table->index(['uwp_success_indicator_id', 'dimension']);
         });
     }

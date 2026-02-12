@@ -289,19 +289,24 @@ if (loginForm && loginNameInput && loginPasswordInput && loginText && loginSpinn
 
         try {
             const csrf = getLoginCsrfToken();
+            const rememberInput = document.getElementById('remember');
+            const remember = rememberInput && rememberInput.checked ? 'on' : '';
+            const body = new URLSearchParams({
+                name,
+                password,
+                remember,
+            });
+
             const response = await fetch('/login', {
                 method: 'POST',
                 credentials: 'same-origin',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
                     'Accept': 'application/json',
                     'X-CSRF-TOKEN': csrf,
                     'X-Requested-With': 'XMLHttpRequest',
                 },
-                body: JSON.stringify({
-                    name,
-                    password,
-                }),
+                body,
             });
 
             const payload = await parseLoginJsonSafe(response);
@@ -309,6 +314,22 @@ if (loginForm && loginNameInput && loginPasswordInput && loginText && loginSpinn
             if (response.ok) {
                 if (loginModalInstance) {
                     loginModalInstance.hide();
+                }
+                try {
+                    const whoamiResponse = await fetch('/whoami', {
+                        method: 'GET',
+                        credentials: 'same-origin',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                    });
+                    const whoamiPayload = await parseLoginJsonSafe(whoamiResponse);
+                    if (whoamiResponse.ok && whoamiPayload) {
+                        console.log('whoami', whoamiPayload);
+                    }
+                } catch (error) {
+                    console.warn('whoami check failed', error);
                 }
                 window.location.href = '/dashboard';
                 return;

@@ -31,8 +31,8 @@ class UwpPmtReviewController extends Controller
             'office',
             'performancePeriod',
             'creator',
-            'mfos.successIndicators.qetStandards',
-            'assignments.employee',
+            'uwpFunctions.mfos.successIndicators.qetStandards',
+            'uwpFunctions.mfos.successIndicators.assignments.employee',
         ])->findOrFail($id);
 
         return view('stages.stage1.pmt_review.show', compact('uwp'));

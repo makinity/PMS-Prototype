@@ -5,6 +5,7 @@ use App\Http\Controllers\StageOne\Forms\IpcrExportController;
 use App\Http\Controllers\StageOne\Forms\OpcrExportController;
 use App\Http\Controllers\StageOne\Forms\UwpExportController;
 use App\Http\Controllers\StageOne\Forms\UwpExcelExportController;
+use App\Http\Controllers\StageOne\Planning\UnitWorkPlanController;
 use App\Http\Controllers\StageThree\Forms\IpcrExportController as StageThreeFormsIpcrExportController;
 use App\Http\Controllers\StageTwo\Forms\IpcrExportController as FormsIpcrExportController;
 use App\Http\Controllers\StageTwo\Forms\MporExportController;
@@ -13,11 +14,36 @@ use App\Http\Controllers\StageTwo\Forms\QarExportController;
 use App\Http\Controllers\StageTwo\Forms\SmporExportController;
 use App\Http\Controllers\StageOne\Forms\OpcrExcelExportController;
 use App\Http\Controllers\StageOne\Forms\IpcrExcelExportController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('landing');
 });
+
+Route::get('/login', function () {
+    return redirect('/');
+})->name('login');
+
+Route::get('/whoami', function (Request $request) {
+    $user = $request->user();
+
+    return response()->json([
+        'id' => $user?->id,
+        'name' => $user?->name,
+        'email' => $user?->email,
+        'role' => $user?->role,
+    ]);
+})->middleware('auth');
+
+Route::get('/logout', function (Request $request) {
+    Auth::logout();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+
+    return redirect('/');
+})->name('logout');
 
 Route::post('/activate/verify', [ActivationController::class, 'verify']);
 Route::post('/activate/complete', [ActivationController::class, 'complete']);
@@ -36,6 +62,10 @@ Route::get('/dashboard', function () {
     return match ($user->role) {
         'employee'   => redirect()->route('employee.dashboard'),
         'supervisor' => redirect()->route('supervisor.dashboard'),
+        'dept-head'  => redirect()->route('dept-head.dashboard'),
+        'pmt'        => redirect()->route('pmt.dashboard'),
+        'admin'      => redirect()->route('admin.dashboard'),
+        'manager'    => redirect()->route('manager.dashboard'),
         default      => abort(403, 'Unauthorized role'),
     };
 })->middleware('auth');
@@ -178,6 +208,12 @@ Route::prefix('supervisor')->group(function(){
     Route::get('/uwp', function () {
         return view('supervisor.uwp');
     })->name('supervisor.uwp');
+
+    Route::post('/stage1/uwp/save-draft', [UnitWorkPlanController::class, 'saveDraftData'])
+        ->name('supervisor.uwp.saveDraftData');
+
+    Route::post('/stage1/uwp/submit', [UnitWorkPlanController::class, 'submitData'])
+        ->name('supervisor.uwp.submitData');
 
     Route::get('/team-tasks', function () {
         return view('supervisor.team-tasks');

@@ -371,12 +371,12 @@
                         </div>
                         <div class="flex justify-between items-center">
                             <div class="flex items-center">
-                                <input id="remember" type="checkbox" class="w-4 h-4 rounded bg-gray-700 border-gray-600">
+                                <input id="remember" name="remember" type="checkbox" class="w-4 h-4 rounded bg-gray-700 border-gray-600">
                                 <label for="remember" class="ms-2 text-sm font-medium text-gray-300">Remember me</label>
                             </div>
                             <a href="#" id="openPasswordReset" class="text-sm text-purple-400 hover:text-purple-300">Forgot Password?</a>
                         </div>
-                        <button type="submit" id="loginToDashboardBtn" data-dashboard-url="{{ route('employee.dashboard') }}" class="btn-gradient w-full py-3 rounded-lg font-medium relative">
+                        <button type="submit" id="loginToDashboardBtn" data-dashboard-url="{{ url('/dashboard') }}" class="btn-gradient w-full py-3 rounded-lg font-medium relative">
                             <span id="loginText">Login to PMS Dashboard</span>
                             <div id="loginSpinner" class="hidden absolute inset-0 flex items-center justify-center">
                                 <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
