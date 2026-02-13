@@ -173,9 +173,13 @@
                         class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800">
                         Export Excel
                     </a>
-                    <button onclick="closeModal('uwpPreviewModal')"
-                            class="rounded-lg border border-slate-700 bg-slate-900 px-5 py-2 text-sm hover:bg-slate-800">
-                        Close
+                    <button type="submit"
+                            data-employee-loading="true"
+                            data-loading-text="Submitting..."
+                            data-submit-uwp-btn
+                            class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-900/40 transition hover:bg-blue-500">
+                        <span data-button-label>Submit for Approval</span>
+                        <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
                     </button>
                 </div>
             </div>
@@ -314,431 +318,517 @@
     </div>
 
     <script>
-        // Get the route pattern and replace the {id} placeholder
         window.uwpPreviewBaseUrl = "{{ route('supervisor.uwp.preview', ['id' => '__ID__']) }}";
+        window.uwpSubmitBaseUrl = "{{ route('supervisor.uwp.submit', ['id' => '__ID__']) }}";
     </script>
     @push('scripts')
-    <script>
-        // Standard ratings
-        const standardRatings = [5, 4, 3, 2, 1];
+        <script>
+            let currentUwpId = null;
+            function showUwpPreview(uwpId) {
+                currentUwpId = uwpId;
 
-        // Create list element for standards
-        function createListElement(items) {
-            const container = document.createElement('div');
-            if (!items || items.length === 0) {
-                container.textContent = '—';
-                return container;
+                document.getElementById('uwpPreviewModal').classList.remove('hidden');
+                document.getElementById('modalPPAsContainer').innerHTML = '<div class="p-6 text-center text-slate-400">Loading UWP data...</div>';
+
+                resetSubmitButton();
+
+                document.getElementById('modalOfficeUnit').textContent = 'Loading...';
+                document.getElementById('modalUwpSubtitle').textContent = 'Loading...';
+                document.getElementById('modalSupervisor').textContent = 'Loading...';
+                document.getElementById('modalDeptHead').textContent = 'Loading...';
+                document.getElementById('modalStatus').textContent = 'LOADING';
+
+                const url = window.uwpPreviewBaseUrl.replace('__ID__', uwpId);
+                console.log('Fetching UWP from:', url);
+
+                fetch(url)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(uwpData => {
+                        console.log('UWP Data loaded:', uwpData);
+                        populateUwpModal(uwpData);
+                    })
+                    .catch(error => {
+                        console.error('Error loading UWP:', error);
+                        document.getElementById('modalPPAsContainer').innerHTML =
+                            `<div class="p-6 text-center text-red-400">
+                                Error loading UWP data. Please try again.<br>
+                                (${error.message})
+                            </div>`;
+                    });
             }
 
-            if (!Array.isArray(items)) {
-                items = [items];
-            }
+            function populateUwpModal(uwpData) {
+                document.getElementById('modalOfficeUnit').textContent = uwpData.office?.name || 'N/A';
+                document.getElementById('modalUwpSubtitle').textContent =
+                    `${uwpData.office?.name || 'Unit'} • ${uwpData.performance_period?.name || 'Performance Period'}`;
 
-            const ul = document.createElement('ul');
-            ul.className = 'list-disc space-y-1 pl-4 text-slate-200';
-            items.forEach((item) => {
-                if (item) {
-                    const li = document.createElement('li');
-                    li.textContent = item;
-                    ul.appendChild(li);
-                }
-            });
-            container.appendChild(ul);
-            return container;
-        }
+                document.getElementById('modalSupervisor').textContent = uwpData.creator?.name || 'Not Assigned';
+                document.getElementById('modalDeptHead').textContent = uwpData.department_head?.name || 'Not Assigned';
 
-        // Render standards for an indicator from the database
-        function renderIndicatorStandards(qetStandards) {
-            const standardsBody = document.getElementById('indicatorStandardsBody');
-            if (!standardsBody) return;
+                const statusBadge = document.getElementById('modalStatus');
+                const status = uwpData.status || 'draft';
+                statusBadge.textContent = status.replace('_', ' ').toUpperCase();
 
-            standardsBody.innerHTML = '';
+                statusBadge.className = 'mt-2 inline-flex rounded-full border px-3 py-1 text-xs font-semibold';
 
-            console.log('QET Standards received:', qetStandards); // Debug log
+                const statusColors = {
+                    'draft': ['bg-yellow-500/15', 'text-yellow-400', 'border-yellow-500/30'],
+                    'submitted': ['bg-blue-500/15', 'text-blue-400', 'border-blue-500/30'],
+                    'endorsed': ['bg-indigo-500/15', 'text-indigo-400', 'border-indigo-500/30'],
+                    'pmt_approved': ['bg-purple-500/15', 'text-purple-400', 'border-purple-500/30']
+                };
 
-            if (!qetStandards || qetStandards.length === 0) {
-                standardsBody.innerHTML = `
-                    <tr>
-                        <td colspan="4" class="px-4 py-8 text-center text-slate-400">
-                            No Q/E/T standards defined for this indicator.
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
+                const classes = statusColors[status] || ['bg-gray-500/15', 'text-gray-400', 'border-gray-500/30'];
+                classes.forEach(cls => statusBadge.classList.add(cls));
 
-            // Group standards by rating and dimension
-            const standardsByRating = {};
-
-            qetStandards.forEach(standard => {
-                const rating = standard.rating;
-                const dimension = standard.dimension;
-                const text = standard.standard_text;
-
-                if (!standardsByRating[rating]) {
-                    standardsByRating[rating] = {
-                        q: [],
-                        e: [],
-                        t: []
-                    };
-                }
-
-                // Add to appropriate dimension
-                if (dimension === 'q') {
-                    standardsByRating[rating].q.push(text);
-                } else if (dimension === 'e') {
-                    standardsByRating[rating].e.push(text);
-                } else if (dimension === 't') {
-                    standardsByRating[rating].t.push(text);
-                }
-            });
-
-            // Render each rating level (5,4,3,2,1)
-            const allRatings = [5, 4, 3, 2, 1];
-
-            allRatings.forEach(rating => {
-                const rowData = standardsByRating[rating] || { q: [], e: [], t: [] };
-
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-900/40';
-
-                // Rating cell
-                const ratingTd = document.createElement('td');
-                ratingTd.className = 'px-4 py-3 font-semibold';
-                ratingTd.textContent = rating;
-
-                // Quality cell
-                const qualityTd = document.createElement('td');
-                qualityTd.className = 'px-4 py-3 align-top';
-                qualityTd.appendChild(createListElement(rowData.q));
-
-                // Efficiency cell
-                const efficiencyTd = document.createElement('td');
-                efficiencyTd.className = 'px-4 py-3 align-top';
-                efficiencyTd.appendChild(createListElement(rowData.e));
-
-                // Timeliness cell
-                const timelinessTd = document.createElement('td');
-                timelinessTd.className = 'px-4 py-3 align-top';
-                timelinessTd.appendChild(createListElement(rowData.t));
-
-                tr.appendChild(ratingTd);
-                tr.appendChild(qualityTd);
-                tr.appendChild(efficiencyTd);
-                tr.appendChild(timelinessTd);
-
-                standardsBody.appendChild(tr);
-            });
-        }
-
-        // Main function to show UWP preview
-        function showUwpPreview(uwpId) {
-            // Show loading state
-            document.getElementById('uwpPreviewModal').classList.remove('hidden');
-            document.getElementById('modalPPAsContainer').innerHTML = '<div class="p-6 text-center text-slate-400">Loading UWP data...</div>';
-
-            // Set default values while loading
-            document.getElementById('modalOfficeUnit').textContent = 'Loading...';
-            document.getElementById('modalUwpSubtitle').textContent = 'Loading...';
-            document.getElementById('modalSupervisor').textContent = 'Loading...';
-            document.getElementById('modalDeptHead').textContent = 'Loading...';
-            document.getElementById('modalStatus').textContent = 'LOADING';
-
-            // Replace the placeholder with the actual ID
-            const url = window.uwpPreviewBaseUrl.replace('__ID__', uwpId);
-            console.log('Fetching from:', url);
-
-            // Fetch UWP data from server
-            fetch(url)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                const submitButton = document.querySelector('[data-submit-uwp-btn]');
+                if (submitButton) {
+                    if (status === 'draft') {
+                        submitButton.classList.remove('hidden');
+                        submitButton.disabled = false;
+                        submitButton.querySelector('[data-button-label]').textContent = 'Submit for Approval';
+                    } else {
+                        submitButton.classList.add('hidden');
                     }
-                    return response.json();
-                })
-                .then(uwpData => {
-                    console.log('UWP Data loaded:', uwpData);
-                    populateUwpModal(uwpData);
-                })
-                .catch(error => {
-                    console.error('Error loading UWP:', error);
-                    document.getElementById('modalPPAsContainer').innerHTML =
-                        `<div class="p-6 text-center text-red-400">
-                            Error loading UWP data. Please try again.<br>
-                            (${error.message})
-                        </div>`;
-                });
-        }
+                }
 
-        // Populate UWP modal with data
-        function populateUwpModal(uwpData) {
-            // Populate header and summary
-            document.getElementById('modalOfficeUnit').textContent = uwpData.office?.name || 'N/A';
-            document.getElementById('modalUwpSubtitle').textContent =
-                `${uwpData.office?.name || 'Unit'} • ${uwpData.performance_period?.name || 'Performance Period'}`;
-            document.getElementById('modalSupervisor').textContent = uwpData.creator?.name || 'Not Assigned';
-            document.getElementById('modalDeptHead').textContent = uwpData.department_head?.name || 'Not Assigned';
+                const ppasContainer = document.getElementById('modalPPAsContainer');
 
-            // Update status badge - FIXED VERSION
-            const statusBadge = document.getElementById('modalStatus');
-            const status = uwpData.status || 'draft';
-            statusBadge.textContent = status.replace('_', ' ').toUpperCase();
-
-            // Reset classes
-            statusBadge.className = 'mt-2 inline-flex rounded-full border px-3 py-1 text-xs font-semibold';
-
-            // Add status-specific classes
-            const statusColors = {
-                'draft': ['bg-yellow-500/15', 'text-yellow-400', 'border-yellow-500/30'],
-                'submitted': ['bg-blue-500/15', 'text-blue-400', 'border-blue-500/30'],
-                'endorsed': ['bg-indigo-500/15', 'text-indigo-400', 'border-indigo-500/30'],
-                'pmt_approved': ['bg-purple-500/15', 'text-purple-400', 'border-purple-500/30']
-            };
-
-            const classes = statusColors[status] || ['bg-gray-500/15', 'text-gray-400', 'border-gray-500/30'];
-            classes.forEach(cls => statusBadge.classList.add(cls));
-
-            // Populate MFOs table
-            const ppasContainer = document.getElementById('modalPPAsContainer');
-
-            if (!uwpData.uwp_functions || uwpData.uwp_functions.length === 0) {
-                ppasContainer.innerHTML = '<div class="p-6 text-center text-slate-400">No functions/MFOs found for this UWP.</div>';
-                return;
-            }
-
-            let html = `
-                <table class="w-full border-collapse text-left text-sm text-slate-200">
-                    <thead class="bg-slate-900/60 text-xs uppercase tracking-widest text-slate-400">
-                        <tr>
-                            <th class="px-5 py-4">PPA / MFO</th>
-                            <th class="px-5 py-4 text-center">Success Indicators</th>
-                            <th class="px-5 py-4">Target / Timeline</th>
-                            <th class="px-5 py-4 text-center">Function</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-800 bg-slate-950">
-            `;
-
-            uwpData.uwp_functions.forEach(uwpFunction => {
-                if (uwpFunction.mfos && uwpFunction.mfos.length > 0) {
-                    uwpFunction.mfos.forEach(mfo => {
-                        const indicatorCount = mfo.success_indicators?.length || 0;
-                        const functionType = uwpFunction.function_type || 'Core';
-                        const functionColor = functionType.toLowerCase() === 'core' ? 'emerald' : 'indigo';
-
-                        html += `
-                            <tr>
-                                <td class="px-5 py-5 font-medium">
-                                    ${mfo.title || 'Untitled MFO'}
-                                </td>
-                                <td class="px-5 py-5 text-center">
-                                    <div class="flex justify-center">
-                                        <button
-                                            onclick='showIndicatorsModal(${JSON.stringify(mfo).replace(/'/g, "\\'")})'
-                                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[90px]">
-                                            <i class="fa-regular fa-eye text-sm"></i>
-                                            <span>(${indicatorCount})</span>
-                                        </button>
-                                    </div>
-                                </td>
-                                <td class="px-5 py-5 text-slate-300">
-                                    ${mfo.target_timeline || 'Not specified'}
-                                </td>
-                                <td class="px-5 py-5 text-center">
-                                    <span class="rounded-full border border-${functionColor}-500/40 px-3 py-1 text-xs font-semibold text-${functionColor}-400">
-                                        ${functionType}
-                                    </span>
-                                </td>
-                            </tr>
-                        `;
+                let mfos = [];
+                if (uwpData.uwp_functions && uwpData.uwp_functions.length > 0) {
+                    uwpData.uwp_functions.forEach(uwpFunction => {
+                        if (uwpFunction.mfos && uwpFunction.mfos.length > 0) {
+                            uwpFunction.mfos.forEach(mfo => {
+                                mfos.push({
+                                    ...mfo,
+                                    function_type: uwpFunction.function_type || 'Core',
+                                    function_name: uwpFunction.name
+                                });
+                            });
+                        }
                     });
                 }
-            });
 
-            html += `
-                    </tbody>
-                </table>
-            `;
+                if (mfos.length === 0) {
+                    ppasContainer.innerHTML = '<div class="p-6 text-center text-slate-400">No MFOs/PPAs found for this UWP.</div>';
+                    return;
+                }
 
-            ppasContainer.innerHTML = html;
-        }
-
-                // Show indicators modal
-        // Show indicators modal
-        function showIndicatorsModal(mfoData) {
-            console.log('MFO Data:', mfoData);
-
-            document.getElementById('modalPpaTitle').textContent = mfoData.title || 'Untitled MFO';
-
-            const indicatorsBody = document.getElementById('modalIndicatorsBody');
-
-            if (!mfoData.success_indicators || mfoData.success_indicators.length === 0) {
-                indicatorsBody.innerHTML = `
-                    <tr>
-                        <td colspan="3" class="px-4 py-8 text-center text-slate-400">
-                            No success indicators found for this MFO.
-                        </td>
-                    </tr>
+                let html = `
+                    <table class="w-full border-collapse text-left text-sm text-slate-200">
+                        <thead class="bg-slate-900/60 text-xs uppercase tracking-widest text-slate-400">
+                            <tr>
+                                <th class="px-5 py-4">PPA / MFO</th>
+                                <th class="px-5 py-4 text-center">Success Indicators</th>
+                                <th class="px-5 py-4">Target / Timeline</th>
+                                <th class="px-5 py-4 text-center">Function</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800 bg-slate-950">
                 `;
-            } else {
-                let html = '';
 
-                mfoData.success_indicators.forEach(indicator => {
-                    const assignments = indicator.assignments || [];
-                    const assignmentCount = assignments.length;
-
-                    // Get QET standards count
-                    const standardsCount = indicator.qet_standards?.length || 0;
+                mfos.forEach(mfo => {
+                    const indicatorCount = mfo.success_indicators?.length || 0;
+                    const functionType = mfo.function_type || 'Core';
+                    const functionColor = functionType.toLowerCase() === 'core' ? 'emerald' : 'indigo';
 
                     html += `
                         <tr>
-                            <td class="px-4 py-4 text-slate-100">
-                                ${indicator.indicator_text || 'Unnamed Indicator'}
+                            <td class="px-5 py-5 font-medium">
+                                ${mfo.title || 'Untitled MFO'}
                             </td>
-                            <td class="px-4 py-4 text-center">
-                                <button
-                                    onclick='showStandardsModal(${JSON.stringify({
-                                        mfoTitle: mfoData.title,
-                                        indicatorText: indicator.indicator_text,
-                                        qetStandards: indicator.qet_standards || []
-                                    }).replace(/'/g, "\\'")})'
-                                    class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[120px]">
-                                    <i class="fa-regular fa-eye text-sm"></i>
-                                    <span>View Standards (${standardsCount})</span>
-                                </button>
+                            <td class="px-5 py-5 text-center">
+                                <div class="flex justify-center">
+                                    <button
+                                        onclick='showIndicatorsModal(${JSON.stringify(mfo).replace(/'/g, "\\'")})'
+                                        class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[90px]">
+                                        <i class="fa-regular fa-eye text-sm"></i>
+                                        <span>(${indicatorCount})</span>
+                                    </button>
+                                </div>
                             </td>
-                            <td class="px-4 py-4 text-center">
-                    `;
-
-                    // Handle different assignment scenarios - ALL CASES show eye icon
-                    if (assignmentCount === 0) {
-                        // No assignments - show eye icon with 0
-                        html += `
-                            <button
-                                onclick='showAssignmentsModal(${JSON.stringify({
-                                    indicatorText: indicator.indicator_text,
-                                    mfoTitle: mfoData.title,
-                                    assignments: assignments
-                                }).replace(/'/g, "\\'")})'
-                                class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[90px]">
-                                <i class="fa-regular fa-eye text-sm"></i>
-                                <span>(0)</span>
-                            </button>
-                        `;
-                    } else {
-                        // One or more assignments - show eye icon with count
-                        html += `
-                            <button
-                                onclick='showAssignmentsModal(${JSON.stringify({
-                                    indicatorText: indicator.indicator_text,
-                                    mfoTitle: mfoData.title,
-                                    assignments: assignments
-                                }).replace(/'/g, "\\'")})'
-                                class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[90px]">
-                                <i class="fa-regular fa-eye text-sm"></i>
-                                <span>(${assignmentCount})</span>
-                            </button>
-                        `;
-                    }
-
-                    html += `
+                            <td class="px-5 py-5 text-slate-300">
+                                ${mfo.target_timeline || 'Not specified'}
                             </td>
-                        </tr>
-                    `;
-                });
-
-                indicatorsBody.innerHTML = html;
-            }
-
-            closeModal('uwpPreviewModal');
-            document.getElementById('successIndicatorsModal').classList.remove('hidden');
-        }
-
-        // Show standards modal
-        function showStandardsModal(data) {
-            document.getElementById('indicatorStandardsModalMfo').textContent = data.mfoTitle || '--';
-            document.getElementById('indicatorStandardsModalIndicator').textContent = data.indicatorText || '--';
-
-            // Render standards from database
-            renderIndicatorStandards(data.qetStandards);
-
-            document.getElementById('indicatorStandardsModal').classList.remove('hidden');
-        }
-
-        // Close modal function
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.add('hidden');
-        }
-
-        // Initialize event listeners
-        document.addEventListener('DOMContentLoaded', function() {
-            // Close modal when clicking outside
-            window.addEventListener('click', function(event) {
-                const modals = ['uwpPreviewModal', 'successIndicatorsModal', 'indicatorStandardsModal', 'assignmentsModal'];
-                modals.forEach(modalId => {
-                    const modal = document.getElementById(modalId);
-                    if (event.target === modal) {
-                        modal.classList.add('hidden');
-                    }
-                });
-            });
-        });
-
-                // Show assignments modal for multiple employees
-        function showAssignmentsModal(data) {
-            document.getElementById('assignmentsModalIndicator').textContent = data.indicatorText || 'Success Indicator';
-            document.getElementById('assignmentsModalMfo').textContent = data.mfoTitle || '--';
-
-            const assignmentsBody = document.getElementById('assignmentsModalBody');
-
-            if (!data.assignments || data.assignments.length === 0) {
-                assignmentsBody.innerHTML = `
-                    <tr>
-                        <td colspan="4" class="px-4 py-8 text-center text-slate-400">
-                            No employees assigned to this indicator.
-                        </td>
-                    </tr>
-                `;
-            } else {
-                let html = '';
-
-                data.assignments.forEach(assignment => {
-                    const employee = assignment.employee || {};
-                    const assignedDate = assignment.assigned_at
-                        ? new Date(assignment.assigned_at).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric'
-                        })
-                        : 'N/A';
-
-                    html += `
-                        <tr class="hover:bg-slate-900/40">
-                            <td class="px-4 py-3 font-medium">
-                                ${employee.name || 'Unknown Employee'}
-                            </td>
-                            <td class="px-4 py-3 text-slate-300">
-                                ${employee.office?.name || 'N/A'}
-                            </td>
-                            <td class="px-4 py-3 text-slate-300">
-                                ${assignedDate}
-                            </td>
-                            <td class="px-4 py-3">
-                                <span class="inline-flex rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300">
-                                    Assigned
+                            <td class="px-5 py-5 text-center">
+                                <span class="rounded-full border border-${functionColor}-500/40 px-3 py-1 text-xs font-semibold text-${functionColor}-400">
+                                    ${functionType}
                                 </span>
                             </td>
                         </tr>
                     `;
                 });
 
-                assignmentsBody.innerHTML = html;
+                html += `
+                        </tbody>
+                    </table>
+                `;
+
+                ppasContainer.innerHTML = html;
             }
 
-            // Close the indicators modal and open assignments modal
-            closeModal('successIndicatorsModal');
-            document.getElementById('assignmentsModal').classList.remove('hidden');
-        }
-    </script>
+            // ====================================
+            // SUBMIT FOR APPROVAL - FIXED VERSION
+            // ====================================
+            function submitUwpForApproval() {
+                if (!currentUwpId) {
+                    showNotification('No UWP selected to submit.', 'error');
+                    return;
+                }
+
+                const submitButton = document.querySelector('[data-submit-uwp-btn]');
+                const buttonLabel = submitButton.querySelector('[data-button-label]');
+                const buttonSpinner = submitButton.querySelector('[data-button-spinner]');
+
+                submitButton.disabled = true;
+                buttonLabel.textContent = 'Submitting...';
+                buttonSpinner.classList.remove('hidden');
+
+                const formData = new FormData();
+                formData.append('_token', document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}');
+
+                const submitUrl = `{{ route('supervisor.uwp.submit', ['id' => '__ID__']) }}`.replace('__ID__', currentUwpId);
+
+                console.log('Submitting to:', submitUrl);
+                console.log('UWP ID:', currentUwpId);
+
+                fetch(submitUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                })
+                .then(response => {
+                    console.log('Response status:', response.status);
+
+                    return response.json().then(data => {
+                        if (!response.ok) {
+                            throw new Error(data.error || data.message || `Server error: ${response.status}`);
+                        }
+                        return data;
+                    });
+                })
+                .then(data => {
+                    console.log('Success response:', data);
+
+                    if (data.success) {
+                        showNotification(data.message || 'UWP submitted successfully!', 'success');
+
+
+                        const statusBadge = document.getElementById('modalStatus');
+                        if (statusBadge) {
+                            statusBadge.textContent = 'SUBMITTED';
+                            statusBadge.className = 'mt-2 inline-flex rounded-full border px-3 py-1 text-xs font-semibold bg-blue-500/15 text-blue-400 border-blue-500/30';
+                        }
+
+                        submitButton.classList.add('hidden');
+
+                        setTimeout(() => {
+                            closeModal('uwpPreviewModal');
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        throw new Error(data.error || 'Failed to submit UWP');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error submitting UWP:', error);
+                    showNotification(error.message || 'Error submitting UWP. Please try again.', 'error');
+
+                    resetSubmitButton();
+                });
+            }
+
+            function resetSubmitButton() {
+                const submitButton = document.querySelector('[data-submit-uwp-btn]');
+                if (submitButton) {
+                    submitButton.disabled = false;
+                    const buttonLabel = submitButton.querySelector('[data-button-label]');
+                    const buttonSpinner = submitButton.querySelector('[data-button-spinner]');
+                    if (buttonLabel) buttonLabel.textContent = 'Submit for Approval';
+                    if (buttonSpinner) buttonSpinner.classList.add('hidden');
+                }
+            }
+
+            // ====================================
+            // MODAL FUNCTIONS
+            // ====================================
+
+            function showIndicatorsModal(mfoData) {
+                console.log('MFO Data:', mfoData);
+
+                document.getElementById('modalPpaTitle').textContent = mfoData.title || 'Untitled MFO';
+
+                const indicatorsBody = document.getElementById('modalIndicatorsBody');
+                const indicators = mfoData.success_indicators || [];
+
+                if (!indicators || indicators.length === 0) {
+                    indicatorsBody.innerHTML = `
+                        <tr>
+                            <td colspan="3" class="px-4 py-8 text-center text-slate-400">
+                                No success indicators found for this MFO.
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    let html = '';
+
+                    indicators.forEach(indicator => {
+                        const assignments = indicator.assignments || [];
+                        const assignmentCount = assignments.length;
+                        const standardsCount = indicator.qet_standards?.length || 0;
+
+                        html += `
+                            <tr>
+                                <td class="px-4 py-4 text-slate-100">
+                                    ${indicator.indicator_text || 'Unnamed Indicator'}
+                                </td>
+                                <td class="px-4 py-4 text-center">
+                                    <button
+                                        onclick='showStandardsModal(${JSON.stringify({
+                                            mfoTitle: mfoData.title,
+                                            indicatorText: indicator.indicator_text,
+                                            qetStandards: indicator.qet_standards || []
+                                        }).replace(/'/g, "\\'")})'
+                                        class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[120px]">
+                                        <i class="fa-regular fa-eye text-sm"></i>
+                                        <span>View Standards (${standardsCount})</span>
+                                    </button>
+                                </td>
+                                <td class="px-4 py-4 text-center">
+                                    <button
+                                        onclick='showAssignmentsModal(${JSON.stringify({
+                                            indicatorText: indicator.indicator_text,
+                                            mfoTitle: mfoData.title,
+                                            assignments: assignments
+                                        }).replace(/'/g, "\\'")})'
+                                        class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[90px]">
+                                        <i class="fa-regular fa-eye text-sm"></i>
+                                        <span>(${assignmentCount})</span>
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    indicatorsBody.innerHTML = html;
+                }
+
+                document.getElementById('successIndicatorsModal').classList.remove('hidden');
+            }
+
+            function showStandardsModal(data) {
+                document.getElementById('indicatorStandardsModalMfo').textContent = data.mfoTitle || '--';
+                document.getElementById('indicatorStandardsModalIndicator').textContent = data.indicatorText || '--';
+                renderIndicatorStandards(data.qetStandards);
+                document.getElementById('indicatorStandardsModal').classList.remove('hidden');
+            }
+
+            function showAssignmentsModal(data) {
+                document.getElementById('assignmentsModalIndicator').textContent = data.indicatorText || 'Success Indicator';
+                document.getElementById('assignmentsModalMfo').textContent = data.mfoTitle || '--';
+
+                const assignmentsBody = document.getElementById('assignmentsModalBody');
+
+                if (!data.assignments || data.assignments.length === 0) {
+                    assignmentsBody.innerHTML = `
+                        <tr>
+                            <td colspan="4" class="px-4 py-8 text-center text-slate-400">
+                                No employees assigned to this indicator.
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    let html = '';
+
+                    data.assignments.forEach(assignment => {
+                        const employee = assignment.employee || {};
+                        const assignedDate = assignment.assigned_at
+                            ? new Date(assignment.assigned_at).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric'
+                            })
+                            : 'N/A';
+
+                        html += `
+                            <tr class="hover:bg-slate-900/40">
+                                <td class="px-4 py-3 font-medium">
+                                    ${employee.name || 'Unknown Employee'}
+                                </td>
+                                <td class="px-4 py-3 text-slate-300">
+                                    ${employee.office?.name || 'N/A'}
+                                </td>
+                                <td class="px-4 py-3 text-slate-300">
+                                    ${assignedDate}
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span class="inline-flex rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300">
+                                        Assigned
+                                    </span>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    assignmentsBody.innerHTML = html;
+                }
+
+                document.getElementById('assignmentsModal').classList.remove('hidden');
+            }
+
+            function renderIndicatorStandards(qetStandards) {
+                const standardsBody = document.getElementById('indicatorStandardsBody');
+                if (!standardsBody) return;
+
+                standardsBody.innerHTML = '';
+
+                if (!qetStandards || qetStandards.length === 0) {
+                    standardsBody.innerHTML = `
+                        <tr>
+                            <td colspan="4" class="px-4 py-8 text-center text-slate-400">
+                                No Q/E/T standards defined for this indicator.
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                const standardsByRating = {};
+
+                qetStandards.forEach(standard => {
+                    const rating = standard.rating;
+                    const dimension = standard.dimension;
+                    const text = standard.standard_text;
+
+                    if (!standardsByRating[rating]) {
+                        standardsByRating[rating] = { q: [], e: [], t: [] };
+                    }
+
+                    if (dimension === 'quality' || dimension === 'q') {
+                        standardsByRating[rating].q.push(text);
+                    } else if (dimension === 'efficiency' || dimension === 'e') {
+                        standardsByRating[rating].e.push(text);
+                    } else if (dimension === 'timeliness' || dimension === 't') {
+                        standardsByRating[rating].t.push(text);
+                    }
+                });
+
+                [5, 4, 3, 2, 1].forEach(rating => {
+                    const rowData = standardsByRating[rating] || { q: [], e: [], t: [] };
+
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-900/40';
+
+                    tr.innerHTML = `
+                        <td class="px-4 py-3 font-semibold">${rating}</td>
+                        <td class="px-4 py-3 align-top">${createStandardsList(rowData.q)}</td>
+                        <td class="px-4 py-3 align-top">${createStandardsList(rowData.e)}</td>
+                        <td class="px-4 py-3 align-top">${createStandardsList(rowData.t)}</td>
+                    `;
+
+                    standardsBody.appendChild(tr);
+                });
+            }
+
+            function createStandardsList(items) {
+                if (!items || items.length === 0) return '—';
+
+                let html = '<ul class="list-disc space-y-1 pl-4 text-slate-200">';
+                items.forEach(item => {
+                    if (item) html += `<li>${item}</li>`;
+                });
+                html += '</ul>';
+                return html;
+            }
+
+            function closeModal(modalId) {
+                document.getElementById(modalId).classList.add('hidden');
+                if (modalId === 'uwpPreviewModal') {
+                    currentUwpId = null;
+                    resetSubmitButton();
+                }
+            }
+
+            function showNotification(message, type = 'success') {
+                const existingContainer = document.getElementById('notification-container');
+                if (existingContainer) {
+                    existingContainer.remove();
+                }
+
+                const container = document.createElement('div');
+                container.id = 'notification-container';
+                container.className = 'fixed top-4 right-4 z-50 flex flex-col gap-2';
+                document.body.appendChild(container);
+
+                const notification = document.createElement('div');
+                notification.className = `px-4 py-3 rounded-lg text-sm font-semibold shadow-lg flex items-center justify-between min-w-[300px] ${
+                    type === 'success'
+                        ? 'bg-emerald-500/20 border border-emerald-500/30 text-emerald-200'
+                        : 'bg-red-500/20 border border-red-500/30 text-red-200'
+                }`;
+
+                notification.innerHTML = `
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.remove()" class="ml-3 text-current opacity-70 hover:opacity-100">×</button>
+                `;
+
+                container.appendChild(notification);
+
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.remove();
+                        if (container.children.length === 0) {
+                            container.remove();
+                        }
+                    }
+                }, 5000);
+            }
+
+            // ====================================
+            // INITIALIZATION
+            // ====================================
+            document.addEventListener('DOMContentLoaded', function() {
+                const submitButton = document.querySelector('[data-submit-uwp-btn]');
+                if (submitButton) {
+                    submitButton.replaceWith(submitButton.cloneNode(true));
+                    const newSubmitButton = document.querySelector('[data-submit-uwp-btn]');
+                    newSubmitButton.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        submitUwpForApproval();
+                    });
+                }
+
+                window.addEventListener('click', function(event) {
+                    const modals = ['uwpPreviewModal', 'successIndicatorsModal', 'indicatorStandardsModal', 'assignmentsModal'];
+                    modals.forEach(modalId => {
+                        const modal = document.getElementById(modalId);
+                        if (event.target === modal) {
+                            closeModal(modalId);
+                        }
+                    });
+                });
+
+                window.addEventListener('keydown', function(event) {
+                    if (event.key === 'Escape') {
+                        const modals = ['uwpPreviewModal', 'successIndicatorsModal', 'indicatorStandardsModal', 'assignmentsModal'];
+                        modals.forEach(modalId => {
+                            const modal = document.getElementById(modalId);
+                            if (!modal.classList.contains('hidden')) {
+                                closeModal(modalId);
+                            }
+                        });
+                    }
+                });
+            });
+        </script>
     @endpush
 @endsection

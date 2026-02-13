@@ -12,29 +12,13 @@
             </a>
         </div>
 
-        <div class="flex flex-wrap items-start justify-between gap-4">
-            <div class="space-y-2">
-                <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">Unit Work Plan</p>
-                <h1 class="text-2xl font-bold text-white">Unit Work Plan (UWP) – Planning & Commitment</h1>
-                <p class="text-sm text-slate-400">Plan the unit's deliverables for the period. This is the commitment basis for OPCR/IPCR; no performance scoring occurs here.</p>
-                <p class="text-xs text-slate-500">One output may have multiple success indicators (measurement criteria). Actual ratings are system-generated later from MPOR/IPCR.</p>
-            </div>
-
-            <div class="flex flex-col items-end gap-2 text-right">
-                <span class="inline-flex items-center gap-2 rounded-full border border-blue-500/40 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-200">
-                    Status: {{ $status }}
-                </span>
-                <p class="text-[11px] text-slate-500">Department Head approval is required before this plan is locked.</p>
-            </div>
-        </div>
-
         <form id="uwp-form" method="POST">
             @csrf
             <input type="hidden" name="mfos_payload" id="mfos_payload">
             <input type="hidden" name="assignments_payload" id="assignments_payload">
             <input type="hidden" name="functions_payload" id="functions_payload">
 
-            <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5 space-y-6">
+            <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5 shadow-sm space-y-6">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div class="space-y-1">
                     <p class="text-sm font-semibold text-white">Planning details</p>
@@ -59,27 +43,35 @@
             </div>
 
             <div class="grid gap-4 sm:grid-cols-2">
-                <label class="space-y-1 text-sm text-slate-300">
+                <div class="space-y-1">
                     <span class="text-xs uppercase tracking-wide text-slate-400">Office / Unit</span>
 
-                    <select
-                        id="uwp-office-unit"
-                        name="office_id"
-                        class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2
-                            text-sm text-slate-100 focus:border-blue-500
-                            focus:ring-2 focus:ring-blue-500/40 focus:outline-none
-                            {{ $isDraft ? '' : 'opacity-60 pointer-events-none' }}"
-                        style="background:#0f172a;color:#e5e7eb;"
-                        {{ $isDraft ? '' : 'disabled' }}
-                    >
-                        @foreach($offices as $office)
-                            <option value="{{ $office->id }}"
-                                {{ old('office_id', 1) == $office->id ? 'selected' : '' }}>
-                                {{ $office->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </label>
+                    @if(auth()->user()->role === 'supervisor')
+                        <!-- Supervisors: Show their assigned office as plain text -->
+                        <div class="w-full rounded-lg border border-slate-800 bg-slate-950/50 px-3 py-2 text-sm text-slate-100">
+                            {{ auth()->user()->office->name ?? 'No office assigned' }}
+                        </div>
+                        <!-- Hidden field to submit the office_id -->
+                        <input type="hidden" name="office_id" value="{{ auth()->user()->office_id }}">
+                    @else
+                        <!-- Admins/Dept heads: Still show dropdown -->
+                        <select
+                            id="uwp-office-unit"
+                            name="office_id"
+                            class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2
+                                text-sm text-slate-100 focus:border-blue-500
+                                focus:ring-2 focus:ring-blue-500/40 focus:outline-none"
+                            style="background:#0f172a;color:#e5e7eb;"
+                        >
+                            @foreach($offices as $office)
+                                <option value="{{ $office->id }}"
+                                    {{ old('office_id', 1) == $office->id ? 'selected' : '' }}>
+                                    {{ $office->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    @endif
+                </div>
 
                 <label class="space-y-1 text-sm text-slate-300">
                     <span class="text-xs uppercase tracking-wide text-slate-400">Performance Period</span>
@@ -119,18 +111,8 @@
                                 data-action-loading="Saving..."
                                 class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-800/80 {{ $isDraft ? '' : 'opacity-60 pointer-events-none' }}"
                                 {{ $isDraft ? '' : 'disabled' }}>
-                            <span data-button-label>Save as Draft</span>
+                            <span data-button-label>Save to Draft</span>
                             <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"></span>
-                        </button>
-
-                        <button type="submit"
-                                data-employee-loading="true"
-                                data-loading-text="Submitting..."
-                                data-submit-uwp-btn
-                                class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-900/40 transition hover:bg-blue-500 {{ $isDraft ? '' : 'opacity-60 pointer-events-none' }}"
-                                {{ $isDraft ? '' : 'disabled' }}>
-                            <span data-button-label>Submit for Approval</span>
-                            <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
                         </button>
                     </div>
                 </div>
@@ -788,7 +770,7 @@
                             const indicatorCount = Array.isArray(mfo.indicators) ? mfo.indicators.length : 0;
 
                             return `
-                                <tr class="hover:bg-slate-900/50">
+                                <tr class="hover:bg-slate-800/40">
                                     <td class="px-4 py-3">
                                         <input type="text"
                                             data-mfo-title
@@ -816,27 +798,33 @@
                                             </svg>
                                             <span class="text-xs">View (${indicatorCount})</span>
                                         </button>
-                                        ${isDraft ? `
-                                            <button type="button"
-                                                data-action="remove-mfo"
-                                                data-function-index="${funcIndex}"
-                                                data-mfo-index="${mfoIndex}"
-                                                class="mt-2 block w-full text-[11px] text-slate-400 hover:text-slate-200 underline">
-                                                Remove MFO
-                                            </button>
-                                        ` : ''}
                                     </td>
 
-                                    <td class="px-4 py-3 text-center">
-                                        <textarea
-                                            data-mfo-target
-                                            data-function-index="${funcIndex}"
-                                            data-mfo-index="${mfoIndex}"
-                                            rows="2"
-                                            class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none ${mutedClass}"
-                                            style="background:#0f172a;color:#e5e7eb;"
-                                            placeholder="e.g., Monthly; 1,200 files"
-                                            ${inputDisabled}>${escapeHtml(mfo.target)}</textarea>
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-start justify-between gap-3">
+                                            <textarea
+                                                data-mfo-target
+                                                data-function-index="${funcIndex}"
+                                                data-mfo-index="${mfoIndex}"
+                                                rows="2"
+                                                class="flex-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none ${mutedClass}"
+                                                style="background:#0f172a;color:#e5e7eb;"
+                                                placeholder="e.g., Monthly; 1,200 files"
+                                                ${inputDisabled}>${escapeHtml(mfo.target)}</textarea>
+                                            ${isDraft ? `
+                                                <button type="button"
+                                                    data-action="remove-mfo"
+                                                    data-function-index="${funcIndex}"
+                                                    data-mfo-index="${mfoIndex}"
+                                                    aria-label="Remove MFO"
+                                                    title="Remove MFO"
+                                                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-red-500 transition hover:text-red-400 hover:bg-red-500/10 focus:outline-none focus:ring-2 focus:ring-red-500/40">
+                                                    <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-7 0h8m-9 3 1 9a1 1 0 0 0 1 .9h6a1 1 0 0 0 1-.9l1-9M10 11v6M14 11v6"/>
+                                                    </svg>
+                                                </button>
+                                            ` : ''}
+                                        </div>
                                     </td>
                                 </tr>
                             `;
@@ -851,7 +839,7 @@
                         `;
 
                         return `
-                            <div data-function-card data-function-index="${funcIndex}" class="scroll-mt-24 rounded-2xl border border-slate-800 bg-slate-950/60 p-5 shadow-[0_20px_40px_-30px_rgba(15,23,42,0.8)] space-y-4">
+                            <div data-function-card data-function-index="${funcIndex}" class="scroll-mt-24 rounded-2xl border border-slate-800 bg-slate-900/60 p-6 shadow-sm space-y-4">
                                 <div class="flex flex-wrap items-start justify-between gap-3">
                                     <div class="space-y-1">
                                         <div class="flex flex-wrap items-center gap-2">
@@ -859,14 +847,14 @@
                                                 data-function-title
                                                 data-function-index="${funcIndex}"
                                                 value="${escapeHtml(func.title)}"
-                                                class="rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm font-semibold text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none ${mutedClass}"
+                                                class="rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-lg font-semibold text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none ${mutedClass}"
                                                 style="background:#0f172a;color:#e5e7eb;"
                                                 ${inputDisabled}>
-                                            <span class="inline-flex items-center rounded-full border border-slate-700 bg-slate-900/60 px-2.5 py-1 text-[11px] font-semibold text-slate-300" data-function-weight-label="${funcIndex}">(${weightValue}%)</span>
+                                            <span class="inline-flex items-center rounded-full border border-slate-700 bg-slate-800 px-3 py-1 text-xs font-semibold text-slate-300" data-function-weight-label="${funcIndex}">(${weightValue}%)</span>
                                         </div>
-                                        <p class="text-xs text-slate-400">${description}</p>
+                                        <p class="text-sm text-slate-400">${description}</p>
                                     </div>
-                                    <div class="flex flex-wrap items-center gap-2">
+                                    <div class="flex flex-wrap items-center justify-end gap-2">
                                         <input type="number" min="0" max="100"
                                             data-function-weight
                                             data-function-index="${funcIndex}"
@@ -889,18 +877,22 @@
                                             <button type="button"
                                                 data-action="remove-function"
                                                 data-function-index="${funcIndex}"
-                                                class="text-[11px] text-rose-300 underline hover:text-rose-200">
-                                                Remove Function
+                                                aria-label="Remove Function"
+                                                title="Remove Function"
+                                                class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-red-500 transition hover:text-red-400 hover:bg-red-500/10 focus:outline-none focus:ring-2 focus:ring-red-500/40">
+                                                <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-7 0h8m-9 3 1 9a1 1 0 0 0 1 .9h6a1 1 0 0 0 1-.9l1-9M10 11v6M14 11v6"/>
+                                                </svg>
                                             </button>
                                         ` : ''}
                                     </div>
                                 </div>
 
-                                <div class="relative rounded-xl border border-slate-800 bg-slate-950/60">
+                                <div class="relative rounded-xl overflow-hidden border border-slate-800 bg-slate-950/60">
                                     <div class="${isDraft ? '' : 'opacity-60'}">
                                         <div class="overflow-x-auto">
                                             <table class="min-w-full text-sm">
-                                                <thead class="bg-slate-900/70 text-slate-300">
+                                                <thead class="bg-slate-800/60 text-slate-300">
                                                     <tr>
                                                         <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">PPA / MFO</th>
                                                         <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Success Indicators</th>
@@ -1657,5 +1649,3 @@
         </script>
     @endpush
 @endsection
-
-

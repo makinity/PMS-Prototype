@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             DemoUsersSeeder::class,
             DemoUwpReferenceSeeder::class,
             DemoUwpSeeder::class,
+            RevenueCollectionUnitSeeder::class,
         ]);
     }
 }

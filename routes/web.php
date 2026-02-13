@@ -211,6 +211,9 @@ Route::prefix('supervisor')->group(function(){
     Route::post('/stage1/uwp/submit', [UnitWorkPlanController::class, 'submitData'])
         ->name('supervisor.uwp.submitData');
 
+    Route::post('/stage1/uwp/{id}/submit', [UnitWorkPlanController::class, 'submitForApproval'])
+        ->name('supervisor.uwp.submit');
+
     Route::get('/supervisor/uwp/{id}/preview', [UnitWorkPlanController::class, 'preview'])->name('supervisor.uwp.preview');
 
     Route::get('/team-tasks', function () {

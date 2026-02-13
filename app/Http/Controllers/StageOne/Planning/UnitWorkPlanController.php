@@ -12,6 +12,7 @@ use App\Models\UwpIndicatorAssignment;
 use App\Models\UwpQetStandard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 
@@ -35,7 +36,6 @@ class UnitWorkPlanController extends Controller
     {
         $this->ensureRole($request->user()->role, ['supervisor']);
 
-        // Your blade will likely load offices/periods via dropdown
         return view('stages.stage1.uwp.create');
     }
 
@@ -62,32 +62,32 @@ class UnitWorkPlanController extends Controller
 
 
     public function preview($id)
-{
-    $uwp = UnitWorkPlan::with([
-        'office',
-        'performancePeriod',
-        'creator',
-        'departmentHead', // Add this!
-        'uwpFunctions' => function($query) {
-            $query->with([
-                'mfos' => function($query) {
-                    $query->with([
-                        'successIndicators' => function($query) {
-                            $query->with([
-                                'qetStandards',
-                                'assignments' => function($query) {
-                                    $query->with('employee');
-                                }
-                            ]);
-                        }
-                    ]);
-                }
-            ]);
-        }
-    ])->findOrFail($id);
+    {
+        $uwp = UnitWorkPlan::with([
+            'office',
+            'performancePeriod',
+            'creator',
+            'departmentHead',
+            'uwpFunctions' => function($query) {
+                $query->with([
+                    'mfos' => function($query) {
+                        $query->with([
+                            'successIndicators' => function($query) {
+                                $query->with([
+                                    'qetStandards',
+                                    'assignments' => function($query) {
+                                        $query->with('employee');
+                                    }
+                                ]);
+                            }
+                        ]);
+                    }
+                ]);
+            }
+        ])->findOrFail($id);
 
-    return response()->json($uwp);
-}
+        return response()->json($uwp);
+    }
 
     public function edit(Request $request, int $id)
     {
@@ -140,7 +140,7 @@ class UnitWorkPlanController extends Controller
             $assignmentsPayload
         );
 
-        return redirect()->back()->with('success', 'UWP draft saved.');
+        return redirect()->route('supervisor.uwp-page')->with('success', 'UWP draft saved.');
     }
 
 
@@ -159,15 +159,24 @@ class UnitWorkPlanController extends Controller
         );
 
         if (!$uwp->isDraft()) {
-            return back()->with('error', 'Only Draft UWP can be submitted.');
+            return response()->json([
+                'success' => false,
+                'error' => 'Only Draft UWP can be submitted.'
+            ], 422);
         }
 
         if ($uwp->mfos()->count() === 0) {
-            return back()->with('error', 'Cannot submit: no MFOs found.');
+            return response()->json([
+                'success' => false,
+                'error' => 'Cannot submit: no MFOs found.'
+            ], 422);
         }
 
         if ($this->countIndicatorAssignments($uwp) === 0) {
-            return back()->with('error', 'Cannot submit: no assigned employees.');
+            return response()->json([
+                'success' => false,
+                'error' => 'Cannot submit: no assigned employees.'
+            ], 422);
         }
 
         DB::transaction(function () use ($uwp) {
@@ -178,10 +187,128 @@ class UnitWorkPlanController extends Controller
             ]);
         });
 
-        return redirect()
-            ->back()
-            ->with('success', 'UWP submitted. Now read-only.');
+        return response()->json([
+            'success' => true,
+            'message' => 'UWP submitted successfully. Now read-only.'
+        ]);
     }
+
+    public function submitForApproval(Request $request, $id)
+    {
+        try {
+            $user = $this->resolveSupervisorUser($request);
+
+            // Find the UWP with its relationships
+            $uwp = UnitWorkPlan::with([
+                'mfos.successIndicators.assignments.employee',
+                'office',
+                'office.head',
+                'creator'
+            ])->findOrFail($id);
+
+            $isCreator = $uwp->creator_id === $user->id;
+            $isOfficeSupervisor = $uwp->office && $uwp->office->head_id === $user->id;
+            $isSameOffice = $uwp->office && $uwp->office->id === $user->office_id;
+            $isSupervisor = $user->role === 'supervisor';
+
+            $isAuthorized = $isCreator || $isOfficeSupervisor || ($isSupervisor && $isSameOffice);
+
+            Log::info('UWP Submission Permission Check', [
+                'uwp_id' => $uwp->id,
+                'uwp_office_id' => $uwp->office->id ?? null,
+                'user_id' => $user->id,
+                'user_name' => $user->name,
+                'user_role' => $user->role,
+                'user_office_id' => $user->office_id,
+                'office_head_id' => $uwp->office->head_id ?? null,
+                'is_creator' => $isCreator,
+                'is_office_supervisor' => $isOfficeSupervisor,
+                'is_same_office' => $isSameOffice,
+                'is_supervisor' => $isSupervisor,
+                'is_authorized' => $isAuthorized
+            ]);
+
+            if (!$isAuthorized) {
+                $errorMessage = 'You do not have permission to submit this UWP. ';
+
+                if ($user->role !== 'supervisor') {
+                    $errorMessage .= 'Only supervisors can submit UWPs.';
+                } else if (!$isSameOffice) {
+                    $errorMessage .= 'You must be assigned to the same office as this UWP.';
+                } else {
+                    $errorMessage .= 'Please contact your office supervisor.';
+                }
+
+                return response()->json([
+                    'success' => false,
+                    'error' => $errorMessage
+                ], 403);
+            }
+
+            // Check if UWP is in draft status
+            if (!$uwp->isDraft()) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Only Draft UWP can be submitted. Current status: ' . $uwp->status
+                ], 422);
+            }
+
+            if ($uwp->mfos()->count() === 0) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Cannot submit: No MFOs/PPAs found in this UWP.'
+                ], 422);
+            }
+
+            $assignmentCount = $this->countIndicatorAssignments($uwp);
+
+            if ($assignmentCount === 0) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Cannot submit: No employees assigned to success indicators.'
+                ], 422);
+            }
+
+            DB::transaction(function () use ($uwp) {
+                $uwp->update([
+                    'status' => UnitWorkPlan::STATUS_SUBMITTED,
+                    'submitted_at' => now(),
+                    'locked_at' => now(),
+                ]);
+
+                Log::info('UWP submitted for department head review', [
+                    'uwp_id' => $uwp->id,
+                    'submitted_by' => auth()->id(),
+                    'submitted_at' => now()
+                ]);
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'UWP submitted successfully for Department Head review. The plan is now locked.',
+                'status' => 'submitted',
+                'submitted_at' => now()->toDateTimeString()
+            ]);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'UWP not found.'
+            ], 404);
+        } catch (\Exception $e) {
+            Log::error('UWP Submission Error: ' . $e->getMessage(), [
+                'uwp_id' => $id ?? null,
+                'user_id' => auth()->id(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'An error occurred while submitting the UWP. Please try again.'
+            ], 500);
+        }
+    }
+
 
     private function parseUwpPayload(Request $request): array
     {
@@ -655,17 +782,19 @@ class UnitWorkPlanController extends Controller
         $user = $request->user();
 
         if ($user) {
-            $this->ensureRole($user->role, ['supervisor']);
+            // Allow supervisors, department heads, and admins
+            $this->ensureRole($user->role, ['supervisor', 'dept-head', 'admin', 'pmt']);
             return $user;
         }
 
+        // For development/demo - get the first supervisor
         $demoSupervisor = User::query()
             ->where('role', 'supervisor')
             ->orderBy('id')
             ->first();
 
         if (!$demoSupervisor) {
-            abort(403, 'Unauthorized.');
+            abort(403, 'Unauthorized - No supervisor found.');
         }
 
         return $demoSupervisor;
