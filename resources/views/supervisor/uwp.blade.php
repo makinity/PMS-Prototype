@@ -72,12 +72,12 @@
                         style="background:#0f172a;color:#e5e7eb;"
                         {{ $isDraft ? '' : 'disabled' }}
                     >
-                        <option value="1" selected>Revenue Collection Unit</option>
-                        <option value="2">Records Management Unit</option>
-                        <option value="3">Administrative Services Unit</option>
-                        <option value="4">Human Resource Management Unit</option>
-                        <option value="5">General Services Unit</option>
-                        <option value="6">Planning and Development Unit</option>
+                        @foreach($offices as $office)
+                            <option value="{{ $office->id }}"
+                                {{ old('office_id', 1) == $office->id ? 'selected' : '' }}>
+                                {{ $office->name }}
+                            </option>
+                        @endforeach
                     </select>
                 </label>
 
@@ -86,14 +86,19 @@
 
                     <select
                         name="performance_period_id"
-                        class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none
-                               {{ $isDraft ? '' : 'opacity-60 pointer-events-none' }}"
-                        style="background:#0f172a;color:#e5e7eb;"
-                        {{ $isDraft ? '' : 'disabled' }}
+                        class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2
+                            text-sm text-slate-100 focus:border-blue-500
+                            focus:ring-2 focus:ring-blue-500/40 focus:outline-none"
+                            style="background:#0f172a;color:#e5e7eb;"
                     >
-                        <option value="1" selected>January – June 2026</option>
-                        <option value="2">July – December 2026</option>
+                        @foreach($periods as $period)
+                            <option value="{{ $period->id }}"
+                                {{ $period->is_active ? 'selected' : '' }}>
+                                {{ $period->name }}
+                            </option>
+                        @endforeach
                     </select>
+
                 </label>
             </div>
             <div id="uwp-functions-wrapper" class="space-y-6"></div>
@@ -118,7 +123,7 @@
                             <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"></span>
                         </button>
 
-                        <button type="button"
+                        <button type="submit"
                                 data-employee-loading="true"
                                 data-loading-text="Submitting..."
                                 data-submit-uwp-btn
@@ -734,7 +739,8 @@
 
                 function createFunctionContainer() {
                     return {
-                        title: 'Custom Function',
+                        title: '',
+                        titlePlaceholder: 'Enter Function Title (e.g., Special Projects / Administrative Tasks)',
                         type: 'custom',
                         weight: 0,
                         isCustom: true,
@@ -861,15 +867,6 @@
                                         <p class="text-xs text-slate-400">${description}</p>
                                     </div>
                                     <div class="flex flex-wrap items-center gap-2">
-                                        <select data-function-type data-function-index="${funcIndex}"
-                                            class="rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none ${mutedClass}"
-                                            style="background:#0f172a;color:#e5e7eb;"
-                                            ${inputDisabled}>
-                                            <option value="core" ${func.type === 'core' ? 'selected' : ''}>core</option>
-                                            <option value="support" ${func.type === 'support' ? 'selected' : ''}>support</option>
-                                            <option value="custom" ${func.type === 'custom' ? 'selected' : ''}>custom</option>
-                                        </select>
-
                                         <input type="number" min="0" max="100"
                                             data-function-weight
                                             data-function-index="${funcIndex}"
@@ -888,7 +885,7 @@
                                             </button>
                                         ` : ''}
 
-                                        ${isDraft && func.isCustom ? `
+                                        ${isDraft ? `
                                             <button type="button"
                                                 data-action="remove-function"
                                                 data-function-index="${funcIndex}"
@@ -1489,17 +1486,30 @@
 
                 function submitUwp(actionUrl) {
                     if (!uwpForm || !actionUrl) return;
-                    if (functionsPayloadInput) {
-                        functionsPayloadInput.value = JSON.stringify(buildFunctionsPayload());
+                        if (functionsPayloadInput) {
+                            functionsPayloadInput.value = JSON.stringify(buildFunctionsPayload());
+                        }
+                        if (mfosPayloadInput) {
+                            mfosPayloadInput.value = JSON.stringify(buildMfosPayloadFromState());
+                        }
+                        if (assignmentsPayloadInput) {
+                            assignmentsPayloadInput.value = JSON.stringify(buildAssignmentsPayloadMvp());
+                        }
+                        uwpForm.action = actionUrl;
+                        uwpForm.submit();function submitUwp(actionUrl) {
+                        if (!uwpForm || !actionUrl) return;
+                        if (functionsPayloadInput) {
+                            functionsPayloadInput.value = JSON.stringify(buildFunctionsPayload());
+                        }
+                        if (mfosPayloadInput) {
+                            mfosPayloadInput.value = JSON.stringify(buildMfosPayloadFromState());
+                        }
+                        if (assignmentsPayloadInput) {
+                            assignmentsPayloadInput.value = JSON.stringify(buildAssignmentsPayloadMvp());
+                        }
+                        uwpForm.action = actionUrl;
+                        uwpForm.submit();
                     }
-                    if (mfosPayloadInput) {
-                        mfosPayloadInput.value = JSON.stringify(buildMfosPayloadFromState());
-                    }
-                    if (assignmentsPayloadInput) {
-                        assignmentsPayloadInput.value = JSON.stringify(buildAssignmentsPayloadMvp());
-                    }
-                    uwpForm.action = actionUrl;
-                    uwpForm.submit();
                 }
 
                 // ===== Wire events =====

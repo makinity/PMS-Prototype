@@ -49,6 +49,11 @@ class UnitWorkPlan extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function departmentHead(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'department_head_id'); // Adjust the foreign key as needed
+    }
+
     public function uwpFunctions(): HasMany
     {
         return $this->hasMany(UwpFunction::class, 'unit_work_plan_id');

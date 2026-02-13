@@ -201,19 +201,17 @@ Route::prefix('supervisor')->group(function(){
         return view('supervisor.dashboard');
     })->name('supervisor.dashboard');
 
-    Route::get('/uwp-page', function () {
-        return view('supervisor.uwp-list');
-    })->name('supervisor.uwp-page');
+    Route::get('/uwp-page', [UnitWorkPlanController::class, 'uwpList'])->name('supervisor.uwp-page');
 
-    Route::get('/uwp', function () {
-        return view('supervisor.uwp');
-    })->name('supervisor.uwp');
+    Route::get('/uwp', [UnitWorkPlanController::class, 'index'])->name('supervisor.uwp');
 
     Route::post('/stage1/uwp/save-draft', [UnitWorkPlanController::class, 'saveDraftData'])
         ->name('supervisor.uwp.saveDraftData');
 
     Route::post('/stage1/uwp/submit', [UnitWorkPlanController::class, 'submitData'])
         ->name('supervisor.uwp.submitData');
+
+    Route::get('/supervisor/uwp/{id}/preview', [UnitWorkPlanController::class, 'preview'])->name('supervisor.uwp.preview');
 
     Route::get('/team-tasks', function () {
         return view('supervisor.team-tasks');

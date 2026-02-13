@@ -5,6 +5,8 @@ namespace App\Http\Controllers\StageOne\Planning;
 use App\Http\Controllers\Controller;
 use App\Models\UnitWorkPlan;
 use App\Models\User;
+use App\Models\Office;
+use App\Models\PerformancePeriod;
 use App\Models\UwpFunction;
 use App\Models\UwpIndicatorAssignment;
 use App\Models\UwpQetStandard;
@@ -15,21 +17,18 @@ use Illuminate\Validation\ValidationException;
 
 class UnitWorkPlanController extends Controller
 {
+    public function uwpList(){
+        $lists = UnitWorkPlan::get();
+        $offices = Office::orderBy('name')->get();
+
+        return view('supervisor.uwp-list', compact('lists', 'offices'));
+    }
     public function index(Request $request)
     {
-        $user = $request->user();
+        $offices = Office::orderBy('name')->get();
+        $periods = PerformancePeriod::orderBy('start_date', 'desc')->get();
 
-        $query = UnitWorkPlan::query()
-            ->with(['office', 'performancePeriod'])
-            ->orderByDesc('id');
-
-        if ($user->role === 'supervisor') {
-            $query->where('created_by', $user->id);
-        }
-
-        $uwps = $query->paginate(10);
-
-        return view('stages.stage1.uwp.index', compact('uwps'));
+        return view('supervisor.uwp', compact('offices', 'periods'));
     }
 
     public function create(Request $request)
@@ -58,26 +57,37 @@ class UnitWorkPlanController extends Controller
             'status' => UnitWorkPlan::STATUS_DRAFT,
         ]);
 
-        return redirect()
-            ->route('stage1.uwp.show', $uwp->id)
-            ->with('success', 'UWP created (Draft).');
+        return redirect()->with('success', 'UWP created (Draft).');
     }
 
-    public function show(Request $request, int $id)
-    {
-        $uwp = UnitWorkPlan::with([
-            'office',
-            'performancePeriod',
-            'creator',
-            'uwpFunctions.mfos.successIndicators.qetStandards',
-            'uwpFunctions.mfos.successIndicators.assignments.employee',
-            'opcr',
-        ])->findOrFail($id);
 
-        $this->ensureCanViewUwp($request->user(), $uwp);
+    public function preview($id)
+{
+    $uwp = UnitWorkPlan::with([
+        'office',
+        'performancePeriod',
+        'creator',
+        'departmentHead', // Add this!
+        'uwpFunctions' => function($query) {
+            $query->with([
+                'mfos' => function($query) {
+                    $query->with([
+                        'successIndicators' => function($query) {
+                            $query->with([
+                                'qetStandards',
+                                'assignments' => function($query) {
+                                    $query->with('employee');
+                                }
+                            ]);
+                        }
+                    ]);
+                }
+            ]);
+        }
+    ])->findOrFail($id);
 
-        return view('stages.stage1.uwp.show', compact('uwp'));
-    }
+    return response()->json($uwp);
+}
 
     public function edit(Request $request, int $id)
     {
@@ -170,37 +180,6 @@ class UnitWorkPlanController extends Controller
 
         return redirect()
             ->back()
-            ->with('success', 'UWP submitted. Now read-only.');
-    }
-
-    public function submit(Request $request, int $id)
-    {
-        $this->ensureRole($request->user()->role, ['supervisor']);
-
-        $uwp = UnitWorkPlan::with(['uwpFunctions.mfos.successIndicators.assignments'])->findOrFail($id);
-        $this->ensureCanViewUwp($request->user(), $uwp);
-
-        if (!$uwp->isDraft()) {
-            return back()->with('error', 'Only Draft UWP can be submitted.');
-        }
-
-        if ($uwp->mfos()->count() === 0) {
-            return back()->with('error', 'Cannot submit: no MFOs found.');
-        }
-        if ($this->countIndicatorAssignments($uwp) === 0) {
-            return back()->with('error', 'Cannot submit: no assigned employees.');
-        }
-
-        DB::transaction(function () use ($uwp) {
-            $uwp->update([
-                'status' => UnitWorkPlan::STATUS_SUBMITTED,
-                'submitted_at' => now(),
-                'locked_at' => now(),
-            ]);
-        });
-
-        return redirect()
-            ->route('stage1.uwp.show', $uwp->id)
             ->with('success', 'UWP submitted. Now read-only.');
     }
 
