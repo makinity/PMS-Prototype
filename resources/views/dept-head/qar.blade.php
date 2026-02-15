@@ -2,253 +2,149 @@
 
 @section('main-content')
     @php
-        /**
-         * STAGE II — QAR (Dept Head)
-         * - Read-only
-         * - Derived from SUBMITTED + MONITORED (rated) ORS entries
-         * - Consolidation layer for quarterly monitoring summaries (NO evaluation)
-         */
-
-        // -------------------------
-        // LOCKED DEMO CONTEXT
-        // -------------------------
-        $performancePeriodLabel = 'January – June 2026';
-        $officeUnit = 'Revenue Collection Unit';
-
-        // -------------------------
-        // DUMMY SUBMITTED + RATED ORS (SOURCE)
-        // (Alignment target from your provided submitted ORS samples)
-        // -------------------------
-        $orsSubmittedRated = [
-            [
-                'employee' => 'Ramon Reyes',
-                'office' => $officeUnit,
-                'date_submitted' => 'January 4, 2026',
-                'month_key' => '2026-01',
-                'mfo' => 'E-Bank Scanning and Encoding of Revenue Transactions',
-                'function' => 'core',
-                'output_type' => 'Bank Statement Form (BSF-01)',
-                'indicator' => 'All e-bank transactions scanned and encoded daily',
-                'request_id' => 'REQ-2026-004',
-                'duration_label' => '1h 30m',
-                'evidence' => 'Evidence attached',
-                'quantity_label' => '1 Daily Batch',
-                'quantity_value' => 1, // numeric for point computation
-                'status' => 'Submitted (Locked)',
-                'quality_rating' => 5,
-                'timeliness_rating' => 5,
-                'remarks' => 'Goods',
+        $statusMeta = [
+            'draft' => [
+                'label' => 'Draft',
+                'badge' => 'border-violet-500/40 bg-violet-500/10 text-violet-200',
             ],
-            [
-                'employee' => 'Ramon Reyes',
-                'office' => $officeUnit,
-                'date_submitted' => 'January 2, 2026',
-                'month_key' => '2026-01',
-                'mfo' => 'Processing of Over-the-Counter Revenue Transactions',
-                'function' => 'core',
-                'output_type' => 'Official Receipt (OR)',
-                'indicator' => 'Same-day verification of OTC transactions',
-                'request_id' => 'REQ-2026-002',
-                'duration_label' => '2h 00m',
-                'evidence' => 'Evidence attached',
-                'quantity_label' => '12 transactions',
-                'quantity_value' => 12,
-                'status' => 'Submitted (Locked)',
-                'quality_rating' => 5,
-                'timeliness_rating' => 5,
-                'remarks' => 'Goods',
+            'dept_head_approved' => [
+                'label' => 'Dept Head Approved',
+                'badge' => 'border-emerald-500/40 bg-emerald-500/10 text-emerald-200',
             ],
         ];
 
-        // -------------------------
-        // QAR PERIOD (Quarterly)
-        // -------------------------
-        $qarPeriod = [
-            'key' => 'Q1-2026',
-            'label' => 'January – March 2026 (Q1 2026)',
-            'months' => [
-                ['key' => '2026-01', 'label' => 'January'],
-                ['key' => '2026-02', 'label' => 'February'],
-                ['key' => '2026-03', 'label' => 'March'],
-            ],
-        ];
-
-        // -------------------------
-        // LOCKED MFO LIST (for consistent row order + includes support row)
-        // -------------------------
-        $mfos = [
-            [
-                'mfo' => 'E-Bank Scanning and Encoding of Revenue Transactions',
-                'function' => 'core',
-            ],
-            [
-                'mfo' => 'Processing of Over-the-Counter Revenue Transactions',
-                'function' => 'core',
-            ],
-            [
-                'mfo' => 'Maintenance of Revenue Records Filing System',
-                'function' => 'support',
-            ],
-        ];
-
-        // -------------------------
-        // AGGREGATION — Derived from ORS -> monthly rollup (MPOR-like) -> quarterly view (QAR)
-        // NOTE: QAR is a consolidation layer. We show Quantity + Quality Points + Timeliness Points.
-        // -------------------------
-        $initMonthBucket = function () use ($qarPeriod) {
-            $bucket = [];
-            foreach ($qarPeriod['months'] as $m) {
-                $bucket[$m['key']] = [
-                    'qty' => 0,
-                    'q_points' => 0,
-                    't_points' => 0,
-                ];
-            }
-            return $bucket;
-        };
-
-        // Per MFO aggregates by month
-        $mfoAgg = [];
-        foreach ($mfos as $row) {
-            $mfoAgg[$row['mfo']] = [
-                'function' => $row['function'],
-                'months' => $initMonthBucket(),
-                'totals' => ['qty' => 0, 'q_points' => 0, 't_points' => 0],
-            ];
-        }
-
-        // Global aggregates
-        $totalEntries = count($orsSubmittedRated);
-        $monthsWithActivity = [];
-        $totalQty = 0;
-        $totalQPoints = 0;
-        $totalTPoints = 0;
-
-        foreach ($orsSubmittedRated as $e) {
-            $mfo = $e['mfo'];
-            $month = $e['month_key'];
-
-            // Only aggregate if within selected quarter months
-            $monthKeys = array_map(fn($x) => $x['key'], $qarPeriod['months']);
-            if (!in_array($month, $monthKeys, true)) {
-                continue;
-            }
-
-            $qty = (int) ($e['quantity_value'] ?? 0);
-            $qRating = (int) ($e['quality_rating'] ?? 0);
-            $tRating = (int) ($e['timeliness_rating'] ?? 0);
-
-            $qPoints = $qty * $qRating;
-            $tPoints = $qty * $tRating;
-
-            if (!isset($mfoAgg[$mfo])) {
-                // ignore unexpected rows (prototype safety)
-                continue;
-            }
-
-            $mfoAgg[$mfo]['months'][$month]['qty'] += $qty;
-            $mfoAgg[$mfo]['months'][$month]['q_points'] += $qPoints;
-            $mfoAgg[$mfo]['months'][$month]['t_points'] += $tPoints;
-
-            $mfoAgg[$mfo]['totals']['qty'] += $qty;
-            $mfoAgg[$mfo]['totals']['q_points'] += $qPoints;
-            $mfoAgg[$mfo]['totals']['t_points'] += $tPoints;
-
-            $monthsWithActivity[$month] = true;
-
-            $totalQty += $qty;
-            $totalQPoints += $qPoints;
-            $totalTPoints += $tPoints;
-        }
-
-        $monthsWithActivityLabels = [];
-        foreach ($qarPeriod['months'] as $m) {
-            if (!empty($monthsWithActivity[$m['key']])) {
-                $monthsWithActivityLabels[] = $m['label'] . ' 2026';
-            }
-        }
-        $monthsWithActivityText = count($monthsWithActivityLabels) ? implode(', ', $monthsWithActivityLabels) : '—';
-
-        // QAR list (single item demo)
-        $qarEntries = [
-            [
-                'period' => $qarPeriod['label'],
-                'office' => $officeUnit,
-                'source' => 'Derived from submitted + monitored ORS (Demo)',
-                'status' => 'Monitoring',
-            ],
-        ];
+        $currentStatusMeta = $statusMeta[$status] ?? $statusMeta['draft'];
+        $isApproved = $status === 'dept_head_approved';
+        $canGenerate = ! $isApproved;
+        $canApprove = ! $isApproved && !empty($generatedAt);
+        $approvedDateLabel = $isApproved && !empty($approvedAt) ? \Illuminate\Support\Carbon::parse($approvedAt)->format('M d, Y g:i A') : '—';
+        $generatedDateLabel = !empty($generatedAt) ? \Illuminate\Support\Carbon::parse($generatedAt)->format('M d, Y g:i A') : '—';
     @endphp
 
     <section class="space-y-6">
+        @if (session('success'))
+            <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+                {{ session('success') }}
+            </div>
+        @endif
 
-        <div class="flex items-start justify-between gap-3">
+        @if (session('info'))
+            <div class="rounded-xl border border-sky-500/30 bg-sky-500/10 px-4 py-3 text-sm text-sky-200">
+                {{ session('info') }}
+            </div>
+        @endif
+
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
-                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                    Quarterly Accomplishment Report (QAR)
-                </p>
-                <h1 class="text-2xl font-bold text-white">QAR Monitoring</h1>
-                <p class="text-sm text-slate-400">
-                    Quarterly consolidation of monitoring totals derived from submitted + monitored ORS (via MPOR rules). No validation or performance rating occurs in Stage II.
-                </p>
-                <p class="text-[11px] text-slate-500 mt-1">
-                    Read-only | Monitoring copy | Stage III handles evaluation and calibration
+                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Annex I - Office Quarterly Accomplishment Report</p>
+                <h1 class="mt-1 text-2xl font-bold text-white">Office Quarterly Accomplishment Report (QAR)</h1>
+                <p class="mt-1 text-sm text-slate-400">
+                    Derived from locked Stage II MPOR submissions (prototype: using SUBMITTED MPORs; later switch to ENDORSED-only)
                 </p>
             </div>
 
-            <div class="flex items-center gap-2">
+            <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
                 <button type="button"
-                        disabled
-                        class="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-xs font-semibold text-slate-500 bg-slate-800/60 cursor-not-allowed">
-                    Export QAR (Monitoring Copy)
+                    data-modal-target="qarGenerateConfirmModal"
+                    data-modal-toggle="qarGenerateConfirmModal"
+                    @disabled(!$canGenerate)
+                    class="rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60">
+                    Generate / Refresh
+                </button>
+                <button type="button"
+                    data-modal-target="qarApproveConfirmModal"
+                    data-modal-toggle="qarApproveConfirmModal"
+                    @disabled(!$canApprove)
+                    class="rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-200 transition hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-60">
+                    Approve QAR
+                </button>
+                <button type="button" disabled
+                    class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-400 opacity-70">
+                    Export Excel
                 </button>
             </div>
         </div>
 
-        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 space-y-3">
-            <div class="flex items-center justify-between">
+        <div class="grid gap-3 sm:grid-cols-3">
+            <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
+                <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Office</p>
+                <p class="mt-1 text-sm font-semibold text-white">{{ $office }}</p>
+            </div>
+            <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
+                <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Quarter</p>
+                <p class="mt-1 text-sm font-semibold text-white">{{ $quarter }}</p>
+            </div>
+            <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
+                <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Status</p>
+                <span class="{{ $currentStatusMeta['badge'] }} mt-1 inline-flex rounded-full border px-2 py-1 text-xs font-semibold">
+                    {{ $currentStatusMeta['label'] }}
+                </span>
+            </div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
+            <div class="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                    <h2 class="text-lg font-semibold text-white">QAR List</h2>
-                    <p class="text-xs text-slate-400">Stage II – Quarterly monitoring summary (Dept Head view only)</p>
+                    <h2 class="text-lg font-semibold text-white">Consolidation Summary</h2>
+                    <p class="text-xs text-slate-400">Using SUBMITTED MPORs (prototype)</p>
+                </div>
+                <p class="text-xs text-slate-500">Last generated: {{ $generatedDateLabel }}</p>
+            </div>
+
+            <div class="mt-4 grid gap-3 sm:grid-cols-4">
+                <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                    <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Included MPORs</p>
+                    <p class="mt-1 text-base font-semibold text-white">{{ $includedMporCount }}</p>
+                </div>
+                <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                    <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Included Employees</p>
+                    <p class="mt-1 text-base font-semibold text-white">{{ $includedEmployeeCount }}</p>
+                </div>
+                <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                    <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Included Months in Quarter</p>
+                    <p class="mt-1 text-base font-semibold text-white">{{ $includedMonthsCount }}/{{ $includedMonthsTotal }}</p>
+                </div>
+                <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                    <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Data Source</p>
+                    <p class="mt-1 text-sm font-semibold text-white">Submitted MPOR (Locked)</p>
                 </div>
             </div>
 
-            <div class="overflow-x-auto">
-                <table class="min-w-full text-sm text-slate-300">
-                    <thead class="bg-slate-950/60 text-slate-200">
-                        <tr>
-                            <th class="px-4 py-3 text-left">Period</th>
-                            <th class="px-4 py-3 text-left">Office / Unit</th>
-                            <th class="px-4 py-3 text-left">Source</th>
-                            <th class="px-4 py-3 text-left">Status</th>
-                            <th class="px-4 py-3 text-center">Action</th>
+            <div class="mt-4 rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Included MPOR Records</p>
+                <ul class="mt-2 space-y-1 text-sm text-slate-300">
+                    @foreach ($includedMpors as $mpor)
+                        <li>• {{ $mpor['employee'] }} — {{ $mpor['month'] }} — {{ $mpor['status'] }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
+            <h2 class="text-lg font-semibold text-white">Annex I Consolidated QAR</h2>
+            <div class="mt-3 overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-800 text-sm">
+                    <thead>
+                        <tr class="bg-slate-950/60 text-left text-xs uppercase tracking-[0.2em] text-slate-400">
+                            <th class="px-4 py-3">PPA Code</th>
+                            <th class="px-4 py-3">MFO/PPA</th>
+                            <th class="px-4 py-3">Performance Indicator</th>
+                            <th class="px-4 py-3 text-center">Target Output</th>
+                            <th class="px-4 py-3 text-center">Actual Performance</th>
+                            <th class="px-4 py-3 text-center">Variance</th>
+                            <th class="px-4 py-3">Remarks</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-800">
-                        @foreach ($qarEntries as $qar)
-                            <tr class="hover:bg-slate-900">
-                                <td class="px-4 py-3">{{ $qar['period'] }}</td>
-                                <td class="px-4 py-3 text-slate-200">{{ $qar['office'] }}</td>
-                                <td class="px-4 py-3 text-slate-300">{{ $qar['source'] }}</td>
-                                <td class="px-4 py-3">
-                                    <span class="rounded-full border border-blue-500/40 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-200">
-                                        Monitoring
-                                    </span>
-                                    <span class="rounded-full border border-slate-500/40 bg-slate-900/60 px-2 py-1 text-[11px] font-semibold text-slate-300 ml-1">
-                                        Read-only
-                                    </span>
-                                </td>
-                                <td class="px-4 py-3 text-center">
-                                    <button
-                                        type="button"
-                                        data-qar-view
-                                        data-period="{{ $qar['period'] }}"
-                                        data-office="{{ $qar['office'] }}"
-                                        data-source="{{ $qar['source'] }}"
-                                        class="text-blue-400 hover:text-blue-300 text-xs font-semibold">
-                                        View
-                                    </button>
-                                </td>
+                    <tbody class="divide-y divide-slate-800 text-slate-200">
+                        @foreach ($rows as $row)
+                            <tr>
+                                <td class="px-4 py-3">{{ $row['ppa_code'] }}</td>
+                                <td class="px-4 py-3">{{ $row['mfo'] }}</td>
+                                <td class="px-4 py-3">{{ $row['indicator'] }}</td>
+                                <td class="px-4 py-3 text-center">{{ $row['target_output'] }}</td>
+                                <td class="px-4 py-3 text-center font-semibold">{{ $row['actual_performance'] }}</td>
+                                <td class="px-4 py-3 text-center">{{ $row['variance'] }}</td>
+                                <td class="px-4 py-3">{{ $row['remarks'] }}</td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -256,341 +152,124 @@
             </div>
         </div>
 
+        <div class="grid gap-4 sm:grid-cols-2">
+            <div class="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Prepared/Approved by</p>
+                <p class="mt-2 text-sm font-semibold text-white">{{ $deptHeadName }}</p>
+                <p class="mt-2 text-xs text-slate-500">Date:</p>
+                <p class="text-sm text-slate-300">{{ $approvedDateLabel }}</p>
+            </div>
+            <div class="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Validated by</p>
+                <p class="mt-2 text-sm font-semibold text-white">PMT</p>
+                <p class="mt-2 text-sm text-amber-200">{{ $pmtStatusLabel }}</p>
+            </div>
+        </div>
     </section>
 
-    <div id="qar-view-modal"
-         class="fixed inset-0 z-[70] hidden items-center justify-center bg-black/60 px-4 py-6">
-        <div class="w-full max-w-5xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
-            <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
-                <div>
-                    <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Quarterly Accomplishment Report (QAR)</p>
-                    <h3 class="text-lg font-semibold text-white">Stage II – Performance Monitoring (Read-only)</h3>
-                    <p class="text-[11px] text-slate-500 mt-1">
-                        Derived from submitted ORS with monitoring ratings (Quality & Timeliness). No validation. No performance evaluation.
+    <div id="qarGenerateConfirmModal" tabindex="-1" aria-hidden="true"
+        class="fixed left-0 right-0 top-0 z-50 hidden h-[calc(100%-1rem)] max-h-full w-full items-center justify-center overflow-y-auto overflow-x-hidden md:inset-0">
+        <div class="relative max-h-full w-full max-w-lg p-4">
+            <div class="relative rounded-2xl border border-slate-800 bg-slate-900 shadow-lg">
+                <div class="flex items-start justify-between border-b border-slate-800 p-5">
+                    <h3 class="text-lg font-semibold text-white">Generate / Refresh QAR</h3>
+                    <button type="button" data-modal-hide="qarGenerateConfirmModal"
+                        class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-800 hover:text-white">
+                        <span class="sr-only">Close modal</span>
+                        <i class="fa-solid fa-xmark text-sm"></i>
+                    </button>
+                </div>
+                <div class="space-y-3 p-5 text-sm text-slate-300">
+                    <p>
+                        Generate/refresh QAR for Q1 2026 from available locked MPOR submissions?
+                    </p>
+                    <p>
+                        This will consolidate quantities by MFO + Indicator.
                     </p>
                 </div>
-                <button type="button" id="qar-modal-close" class="text-slate-400 hover:text-white">&times;</button>
+                <form id="qarGenerateForm" method="POST" action="{{ route('dept-head.qar.generate') }}"
+                    class="flex items-center justify-end gap-2 border-t border-slate-800 p-5">
+                    @csrf
+                    <button type="button" data-modal-hide="qarGenerateConfirmModal"
+                        class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 transition hover:bg-slate-800">
+                        Cancel
+                    </button>
+                    <button type="submit" id="qarGenerateProceedBtn"
+                        class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500">
+                        <span data-button-spinner
+                            class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                        <span data-button-label>Proceed Generate</span>
+                    </button>
+                </form>
             </div>
+        </div>
+    </div>
 
-            <div class="mt-4 space-y-4 max-h-[70vh] overflow-y-auto">
-                <div class="grid grid-cols-1 gap-3 sm:grid-cols-4 text-sm text-slate-200">
-                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-                        <p class="text-[11px] uppercase text-slate-500">Office / Unit</p>
-                        <p id="qar-office" class="mt-1 font-semibold">--</p>
-                    </div>
-                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-                        <p class="text-[11px] uppercase text-slate-500">Quarter Covered</p>
-                        <p id="qar-period" class="mt-1 font-semibold">--</p>
-                    </div>
-                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-                        <p class="text-[11px] uppercase text-slate-500">Performance Period</p>
-                        <p class="mt-1 font-semibold">{{ $performancePeriodLabel }}</p>
-                    </div>
-                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-                        <p class="text-[11px] uppercase text-slate-500">Source</p>
-                        <p id="qar-source" class="mt-1 font-semibold">--</p>
-                    </div>
+    <div id="qarApproveConfirmModal" tabindex="-1" aria-hidden="true"
+        class="fixed left-0 right-0 top-0 z-50 hidden h-[calc(100%-1rem)] max-h-full w-full items-center justify-center overflow-y-auto overflow-x-hidden md:inset-0">
+        <div class="relative max-h-full w-full max-w-lg p-4">
+            <div class="relative rounded-2xl border border-slate-800 bg-slate-900 shadow-lg">
+                <div class="flex items-start justify-between border-b border-slate-800 p-5">
+                    <h3 class="text-lg font-semibold text-white">Approve QAR</h3>
+                    <button type="button" data-modal-hide="qarApproveConfirmModal"
+                        class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-800 hover:text-white">
+                        <span class="sr-only">Close modal</span>
+                        <i class="fa-solid fa-xmark text-sm"></i>
+                    </button>
                 </div>
-
-                <div class="grid grid-cols-1 gap-3 sm:grid-cols-5 text-sm text-slate-200">
-                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-                        <p class="text-[11px] uppercase text-slate-500">Submitted + Rated ORS Entries</p>
-                        <p class="mt-1 font-semibold">{{ $totalEntries }}</p>
-                        <p class="text-[11px] text-slate-500 mt-1">Submitted (Locked) entries only</p>
-                    </div>
-                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-                        <p class="text-[11px] uppercase text-slate-500">Core Outputs Logged</p>
-                        <p class="mt-1 font-semibold">
-                            {{ collect($orsSubmittedRated)->where('function', 'core')->count() }}
-                        </p>
-                    </div>
-                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-                        <p class="text-[11px] uppercase text-slate-500">Support Outputs Logged</p>
-                        <p class="mt-1 font-semibold">
-                            {{ collect($orsSubmittedRated)->where('function', 'support')->count() }}
-                        </p>
-                    </div>
-                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-                        <p class="text-[11px] uppercase text-slate-500">Months with Activity</p>
-                        <p class="mt-1 font-semibold">{{ $monthsWithActivityText }}</p>
-                    </div>
-                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-                        <p class="text-[11px] uppercase text-slate-500">Quarter Totals (Monitoring)</p>
-                        <p class="mt-1 font-semibold text-white">Qty: {{ $totalQty }}</p>
-                        <p class="text-[11px] text-slate-400 mt-1">
-                            Quality Points: {{ $totalQPoints }} • Timeliness Points: {{ $totalTPoints }}
-                        </p>
-                    </div>
-                </div>
-
-                {{-- CORE FUNCTIONS --}}
-                <div class="space-y-2">
-                    <div class="flex items-center justify-between">
-                        <h4 class="text-sm font-semibold text-white">Core Functions (80%)</h4>
-                        <p class="text-[11px] text-slate-500">Monitoring totals derived from MPOR rules (Qty × Monitoring Rating)</p>
-                    </div>
-
-                    <div class="overflow-x-auto rounded-xl border border-slate-800">
-                        <table class="min-w-full text-sm text-slate-200">
-                            <thead class="bg-slate-950/50 text-slate-200">
-                                <tr>
-                                    <th class="px-3 py-2 text-left" rowspan="2">Major Output</th>
-                                    @foreach ($qarPeriod['months'] as $m)
-                                        <th class="px-3 py-2 text-center" colspan="3">{{ $m['label'] }}</th>
-                                    @endforeach
-                                    <th class="px-3 py-2 text-center" colspan="3">Quarter Total</th>
-                                </tr>
-                                <tr class="border-t border-slate-800">
-                                    @foreach ($qarPeriod['months'] as $m)
-                                        <th class="px-3 py-2 text-center text-[11px] text-slate-400">Qty</th>
-                                        <th class="px-3 py-2 text-center text-[11px] text-slate-400">Q Pts</th>
-                                        <th class="px-3 py-2 text-center text-[11px] text-slate-400">T Pts</th>
-                                    @endforeach
-                                    <th class="px-3 py-2 text-center text-[11px] text-slate-400">Qty</th>
-                                    <th class="px-3 py-2 text-center text-[11px] text-slate-400">Q Pts</th>
-                                    <th class="px-3 py-2 text-center text-[11px] text-slate-400">T Pts</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-800">
-                                @foreach ($mfos as $row)
-                                    @continue($row['function'] !== 'core')
-                                    @php
-                                        $a = $mfoAgg[$row['mfo']] ?? null;
-                                    @endphp
-                                    <tr class="hover:bg-slate-900/40">
-                                        <td class="px-3 py-2 text-slate-200">
-                                            {{ $row['mfo'] }}
-                                        </td>
-
-                                        @foreach ($qarPeriod['months'] as $m)
-                                            @php
-                                                $mm = $a ? ($a['months'][$m['key']] ?? ['qty'=>0,'q_points'=>0,'t_points'=>0]) : ['qty'=>0,'q_points'=>0,'t_points'=>0];
-                                            @endphp
-                                            <td class="px-3 py-2 text-center">{{ $mm['qty'] }}</td>
-                                            <td class="px-3 py-2 text-center">{{ $mm['q_points'] }}</td>
-                                            <td class="px-3 py-2 text-center">{{ $mm['t_points'] }}</td>
-                                        @endforeach
-
-                                        <td class="px-3 py-2 text-center font-semibold">{{ $a['totals']['qty'] ?? 0 }}</td>
-                                        <td class="px-3 py-2 text-center font-semibold">{{ $a['totals']['q_points'] ?? 0 }}</td>
-                                        <td class="px-3 py-2 text-center font-semibold">{{ $a['totals']['t_points'] ?? 0 }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                            <tfoot class="border-t border-slate-800 bg-slate-950/40">
-                                @php
-                                    $coreTotalsByMonth = [];
-                                    foreach ($qarPeriod['months'] as $m) {
-                                        $coreTotalsByMonth[$m['key']] = ['qty'=>0,'q_points'=>0,'t_points'=>0];
-                                    }
-                                    $coreGrand = ['qty'=>0,'q_points'=>0,'t_points'=>0];
-
-                                    foreach ($mfos as $row) {
-                                        if ($row['function'] !== 'core') continue;
-                                        $a = $mfoAgg[$row['mfo']] ?? null;
-                                        if (!$a) continue;
-
-                                        foreach ($qarPeriod['months'] as $m) {
-                                            $coreTotalsByMonth[$m['key']]['qty'] += $a['months'][$m['key']]['qty'] ?? 0;
-                                            $coreTotalsByMonth[$m['key']]['q_points'] += $a['months'][$m['key']]['q_points'] ?? 0;
-                                            $coreTotalsByMonth[$m['key']]['t_points'] += $a['months'][$m['key']]['t_points'] ?? 0;
-                                        }
-
-                                        $coreGrand['qty'] += $a['totals']['qty'] ?? 0;
-                                        $coreGrand['q_points'] += $a['totals']['q_points'] ?? 0;
-                                        $coreGrand['t_points'] += $a['totals']['t_points'] ?? 0;
-                                    }
-                                @endphp
-                                <tr>
-                                    <td class="px-3 py-2 text-left font-semibold text-slate-200">Core Totals</td>
-                                    @foreach ($qarPeriod['months'] as $m)
-                                        <td class="px-3 py-2 text-center font-semibold">{{ $coreTotalsByMonth[$m['key']]['qty'] }}</td>
-                                        <td class="px-3 py-2 text-center font-semibold">{{ $coreTotalsByMonth[$m['key']]['q_points'] }}</td>
-                                        <td class="px-3 py-2 text-center font-semibold">{{ $coreTotalsByMonth[$m['key']]['t_points'] }}</td>
-                                    @endforeach
-                                    <td class="px-3 py-2 text-center font-semibold text-white">{{ $coreGrand['qty'] }}</td>
-                                    <td class="px-3 py-2 text-center font-semibold text-white">{{ $coreGrand['q_points'] }}</td>
-                                    <td class="px-3 py-2 text-center font-semibold text-white">{{ $coreGrand['t_points'] }}</td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-
-                    <p class="text-[11px] text-slate-500">
-                        Note: Quantity is employee-declared at ORS submission and is locked. Supervisor does not rate Quantity. Quality & Timeliness are monitoring ratings only.
+                <div class="space-y-3 p-5 text-sm text-slate-300">
+                    <p>
+                        Approve this QAR for PMT validation?
+                    </p>
+                    <p>
+                        Once approved, QAR becomes read-only at Dept Head level.
                     </p>
                 </div>
-
-                {{-- SUPPORT FUNCTIONS --}}
-                <div class="space-y-2">
-                    <div class="flex items-center justify-between">
-                        <h4 class="text-sm font-semibold text-white">Support Functions (20%)</h4>
-                        <p class="text-[11px] text-slate-500">Included for completeness (may be zero for the quarter)</p>
-                    </div>
-
-                    <div class="overflow-x-auto rounded-xl border border-slate-800">
-                        <table class="min-w-full text-sm text-slate-200">
-                            <thead class="bg-slate-950/50 text-slate-200">
-                                <tr>
-                                    <th class="px-3 py-2 text-left" rowspan="2">Major Output</th>
-                                    @foreach ($qarPeriod['months'] as $m)
-                                        <th class="px-3 py-2 text-center" colspan="3">{{ $m['label'] }}</th>
-                                    @endforeach
-                                    <th class="px-3 py-2 text-center" colspan="3">Quarter Total</th>
-                                </tr>
-                                <tr class="border-t border-slate-800">
-                                    @foreach ($qarPeriod['months'] as $m)
-                                        <th class="px-3 py-2 text-center text-[11px] text-slate-400">Qty</th>
-                                        <th class="px-3 py-2 text-center text-[11px] text-slate-400">Q Pts</th>
-                                        <th class="px-3 py-2 text-center text-[11px] text-slate-400">T Pts</th>
-                                    @endforeach
-                                    <th class="px-3 py-2 text-center text-[11px] text-slate-400">Qty</th>
-                                    <th class="px-3 py-2 text-center text-[11px] text-slate-400">Q Pts</th>
-                                    <th class="px-3 py-2 text-center text-[11px] text-slate-400">T Pts</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-800">
-                                @foreach ($mfos as $row)
-                                    @continue($row['function'] !== 'support')
-                                    @php
-                                        $a = $mfoAgg[$row['mfo']] ?? null;
-                                    @endphp
-                                    <tr class="hover:bg-slate-900/40">
-                                        <td class="px-3 py-2 text-slate-200">
-                                            {{ $row['mfo'] }}
-                                        </td>
-
-                                        @foreach ($qarPeriod['months'] as $m)
-                                            @php
-                                                $mm = $a ? ($a['months'][$m['key']] ?? ['qty'=>0,'q_points'=>0,'t_points'=>0]) : ['qty'=>0,'q_points'=>0,'t_points'=>0];
-                                            @endphp
-                                            <td class="px-3 py-2 text-center">{{ $mm['qty'] }}</td>
-                                            <td class="px-3 py-2 text-center">{{ $mm['q_points'] }}</td>
-                                            <td class="px-3 py-2 text-center">{{ $mm['t_points'] }}</td>
-                                        @endforeach
-
-                                        <td class="px-3 py-2 text-center font-semibold">{{ $a['totals']['qty'] ?? 0 }}</td>
-                                        <td class="px-3 py-2 text-center font-semibold">{{ $a['totals']['q_points'] ?? 0 }}</td>
-                                        <td class="px-3 py-2 text-center font-semibold">{{ $a['totals']['t_points'] ?? 0 }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                {{-- SOURCE SNAPSHOT (read-only) --}}
-                <div class="space-y-2">
-                    <div class="flex items-center justify-between">
-                        <h4 class="text-sm font-semibold text-white">Source Snapshot: Submitted + Rated ORS (Read-only)</h4>
-                        <p class="text-[11px] text-slate-500">For traceability only (not validation, not approval)</p>
-                    </div>
-
-                    <div class="overflow-x-auto rounded-xl border border-slate-800">
-                        <table class="min-w-full text-sm text-slate-200">
-                            <thead class="bg-slate-950/50 text-slate-200">
-                                <tr>
-                                    <th class="px-3 py-2 text-left">Date Submitted</th>
-                                    <th class="px-3 py-2 text-left">Employee</th>
-                                    <th class="px-3 py-2 text-left">Major Output (MFO)</th>
-                                    <th class="px-3 py-2 text-left">Success Indicator</th>
-                                    <th class="px-3 py-2 text-left">ORS Ref</th>
-                                    <th class="px-3 py-2 text-left">Quantity (Locked)</th>
-                                    <th class="px-3 py-2 text-center">Quality</th>
-                                    <th class="px-3 py-2 text-center">Timeliness</th>
-                                    <th class="px-3 py-2 text-left">Remarks</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-800">
-                                @foreach ($orsSubmittedRated as $e)
-                                    <tr class="hover:bg-slate-900/40">
-                                        <td class="px-3 py-2">{{ $e['date_submitted'] }}</td>
-                                        <td class="px-3 py-2 text-slate-200">{{ $e['employee'] }}</td>
-                                        <td class="px-3 py-2">{{ $e['mfo'] }}</td>
-                                        <td class="px-3 py-2 text-slate-300">{{ $e['indicator'] }}</td>
-                                        <td class="px-3 py-2">{{ $e['request_id'] }}</td>
-                                        <td class="px-3 py-2">
-                                            <span class="rounded-md border border-slate-700 bg-slate-950/40 px-2 py-1 text-[11px] text-slate-200">
-                                                {{ $e['quantity_label'] }}
-                                            </span>
-                                        </td>
-                                        <td class="px-3 py-2 text-center font-semibold">{{ $e['quality_rating'] }}</td>
-                                        <td class="px-3 py-2 text-center font-semibold">{{ $e['timeliness_rating'] }}</td>
-                                        <td class="px-3 py-2 text-slate-300">{{ $e['remarks'] }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <p class="text-xs text-slate-400">
-                        This report is a monitoring-only consolidation for Stage II. Validation, SMPOR/IPCR accomplishment review, and performance rating occur in Stage III.
-                    </p>
-                </div>
-            </div>
-
-            <div class="flex items-center justify-end gap-3 border-t border-slate-800 pt-4 mt-4">
-                <a href="#"
-                   class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800">
-                    Export QAR (Monitoring Copy)
-                </a>
-
-                <button type="button"
-                        id="qar-modal-close-bottom"
-                        class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-800 transition">
-                    Close
-                </button>
+                <form id="qarApproveForm" method="POST" action="{{ route('dept-head.qar.approve') }}"
+                    class="flex items-center justify-end gap-2 border-t border-slate-800 p-5">
+                    @csrf
+                    <button type="button" data-modal-hide="qarApproveConfirmModal"
+                        class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 transition hover:bg-slate-800">
+                        Cancel
+                    </button>
+                    <button type="submit" id="qarApproveProceedBtn"
+                        class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500">
+                        <span data-button-spinner
+                            class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                        <span data-button-label>Proceed Approve</span>
+                    </button>
+                </form>
             </div>
         </div>
     </div>
 
     @push('scripts')
         <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                const modal = document.getElementById('qar-view-modal');
-                const closeButtons = [document.getElementById('qar-modal-close'), document.getElementById('qar-modal-close-bottom')];
-                const periodEl = document.getElementById('qar-period');
-                const officeEl = document.getElementById('qar-office');
-                const sourceEl = document.getElementById('qar-source');
-
-                function toggleModal(show) {
-                    if (!modal) return;
-                    if (show) {
-                        modal.classList.remove('hidden');
-                        modal.classList.add('flex');
-                        document.body.classList.add('overflow-hidden');
-                    } else {
-                        modal.classList.add('hidden');
-                        modal.classList.remove('flex');
-                        document.body.classList.remove('overflow-hidden');
+            document.addEventListener('DOMContentLoaded', function() {
+                const bindLoadingSubmit = (formId, buttonId, loadingLabel) => {
+                    const form = document.getElementById(formId);
+                    const button = document.getElementById(buttonId);
+                    if (!form || !button) {
+                        return;
                     }
-                }
 
-                document.querySelectorAll('[data-qar-view]').forEach((btn) => {
-                    btn.addEventListener('click', () => {
-                        if (periodEl) periodEl.textContent = btn.dataset.period || '--';
-                        if (officeEl) officeEl.textContent = btn.dataset.office || '--';
-                        if (sourceEl) sourceEl.textContent = btn.dataset.source || '--';
-                        toggleModal(true);
+                    const spinner = button.querySelector('[data-button-spinner]');
+                    const label = button.querySelector('[data-button-label]');
+
+                    form.addEventListener('submit', function() {
+                        button.disabled = true;
+                        button.classList.add('cursor-not-allowed', 'opacity-80');
+                        if (spinner) {
+                            spinner.classList.remove('hidden');
+                        }
+                        if (label) {
+                            label.textContent = loadingLabel;
+                        }
                     });
-                });
+                };
 
-                closeButtons.forEach((btn) => {
-                    if (!btn) return;
-                    btn.addEventListener('click', () => toggleModal(false));
-                });
-
-                modal?.addEventListener('click', (event) => {
-                    if (event.target === modal) {
-                        toggleModal(false);
-                    }
-                });
-
-                document.addEventListener('keydown', (event) => {
-                    if (event.key === 'Escape') {
-                        toggleModal(false);
-                    }
-                });
+                bindLoadingSubmit('qarGenerateForm', 'qarGenerateProceedBtn', 'Generating...');
+                bindLoadingSubmit('qarApproveForm', 'qarApproveProceedBtn', 'Approving...');
             });
         </script>
     @endpush

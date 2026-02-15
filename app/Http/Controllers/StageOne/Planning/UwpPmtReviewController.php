@@ -3,68 +3,125 @@
 namespace App\Http\Controllers\StageOne\Planning;
 
 use App\Http\Controllers\Controller;
+use App\Models\PerformancePeriod;
 use App\Models\UnitWorkPlan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class UwpPmtReviewController extends Controller
 {
-    // ✅ PMT screens: Stage I → PMT Review
-
     public function index(Request $request)
     {
-        $this->ensureRole($request->user()->role, ['pmt']);
-
-        $uwps = UnitWorkPlan::with(['office', 'performancePeriod', 'creator'])
-            ->where('status', UnitWorkPlan::STATUS_ENDORSED)
-            ->orderByDesc('endorsed_at')
-            ->paginate(10);
-
-        return view('stages.stage1.pmt_review.index', compact('uwps'));
-    }
-
-    public function show(Request $request, int $id)
-    {
-        $this->ensureRole($request->user()->role, ['pmt']);
-
-        $uwp = UnitWorkPlan::with([
-            'office',
-            'performancePeriod',
-            'creator',
-            'uwpFunctions.mfos.successIndicators.qetStandards',
-            'uwpFunctions.mfos.successIndicators.assignments.employee',
-        ])->findOrFail($id);
-
-        return view('stages.stage1.pmt_review.show', compact('uwp'));
-    }
-
-    public function approve(Request $request, int $id)
-    {
-        $this->ensureRole($request->user()->role, ['pmt']);
-
-        $uwp = UnitWorkPlan::findOrFail($id);
-
-        if ($uwp->status !== UnitWorkPlan::STATUS_ENDORSED) {
-            return back()->with('error', 'Only Endorsed UWPs can be PMT approved.');
-        }
-
-        DB::transaction(function () use ($uwp) {
-            $uwp->update([
-                'status' => UnitWorkPlan::STATUS_PMT_APPROVED,
-                'approved_at' => now(),
-                'locked_at' => $uwp->locked_at ?? now(),
-            ]);
-        });
-
-        return redirect()
-            ->route('stage1.pmt_review.index')
-            ->with('success', 'UWP approved by PMT. Eligible for OPCR generation.');
-    }
-
-    private function ensureRole(string $role, array $allowed): void
-    {
-        if (!in_array($role, $allowed, true)) {
+        $user = Auth::user();
+        if (!$user) {
             abort(403, 'Unauthorized.');
         }
+        if ($user->role !== 'pmt') {
+            abort(403, 'Unauthorized.');
+        }
+
+        $activePeriod = PerformancePeriod::query()
+            ->where('is_active', true)
+            ->orderByDesc('start_date')
+            ->first();
+
+        $status = strtolower(trim($request->string('status')->toString()));
+        $allowedStatuses = [
+            UnitWorkPlan::STATUS_DRAFT,
+            UnitWorkPlan::STATUS_SUBMITTED,
+            UnitWorkPlan::STATUS_ENDORSED,
+            UnitWorkPlan::STATUS_PMT_APPROVED,
+            UnitWorkPlan::STATUS_RETURNED,
+        ];
+
+        $uwpsQuery = UnitWorkPlan::query()
+            ->with([
+                'office.head',
+                'performancePeriod',
+                'creator',
+                'uwpFunctions' => function ($query) {
+                    $query->orderBy('sort_order')
+                        ->with([
+                            'mfos' => function ($mfoQuery) {
+                                $mfoQuery->orderBy('sort_order')
+                                    ->with([
+                                        'successIndicators' => function ($indicatorQuery) {
+                                            $indicatorQuery->orderBy('sort_order')
+                                                ->with([
+                                                    'qetStandards',
+                                                    'assignments.employee',
+                                                ]);
+                                        },
+                                    ]);
+                            },
+                        ]);
+                },
+            ]);
+
+        if (!$status) {
+            $uwpsQuery->where('status', UnitWorkPlan::STATUS_ENDORSED);
+        } elseif (in_array($status, $allowedStatuses, true)) {
+            $uwpsQuery->where('status', $status);
+        } else {
+            $uwpsQuery->where('status', UnitWorkPlan::STATUS_ENDORSED);
+        }
+
+        if ($activePeriod) {
+            $uwpsQuery->where('performance_period_id', $activePeriod->id);
+        }
+
+        $uwps = $uwpsQuery
+            ->orderByDesc('endorsed_at')
+            ->orderByDesc('id')
+            ->get();
+
+        return view('pmt.uwp', compact('uwps', 'activePeriod'));
+    }
+
+    public function approve(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            abort(403, 'Unauthorized.');
+        }
+        if ($user->role !== 'pmt') {
+            abort(403, 'Unauthorized.');
+        }
+
+        $validated = $request->validate([
+            'unit_work_plan_id' => ['required', 'integer', 'exists:unit_work_plans,id'],
+        ]);
+
+        $result = DB::transaction(function () use ($validated) {
+            $uwp = UnitWorkPlan::query()
+                ->where('id', $validated['unit_work_plan_id'])
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if ($uwp->status !== UnitWorkPlan::STATUS_ENDORSED) {
+                return [
+                    'ok' => false,
+                    'message' => 'Only Endorsed UWPs can be PMT approved.',
+                ];
+            }
+
+            $uwp->forceFill([
+                'status' => UnitWorkPlan::STATUS_PMT_APPROVED,
+                'approved_at' => now(),
+                'locked_at' => now(),
+            ])->save();
+
+            return [
+                'ok' => true,
+                'message' => 'UWP approved by PMT. Status is now PMT Approved.',
+            ];
+        });
+
+        if (!$result['ok']) {
+            return back()->with('error', $result['message']);
+        }
+
+        return back()->with('success', $result['message']);
     }
 }

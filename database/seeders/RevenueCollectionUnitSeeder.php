@@ -50,11 +50,19 @@ class RevenueCollectionUnitSeeder extends Seeder
 
         $this->command->info("✅ Updated/Created Carlo D. Beray (ID: {$carlo->id})");
 
-        // Make Carlo the head of Revenue Collection Unit
-        $revenueOffice->head_id = $carlo->id;
+        // Prefer the department head account as office head for Stage I review flow.
+        $deptHead = User::where('role', 'dept-head')->first();
+        $officeHead = $deptHead ?: $carlo;
+
+        $revenueOffice->head_id = $officeHead->id;
         $revenueOffice->save();
 
-        $this->command->info("✅ Made {$carlo->name} the head of {$revenueOffice->name}");
+        if (isset($deptHead) && $deptHead && !$deptHead->office_id) {
+            $deptHead->office_id = $revenueOffice->id;
+            $deptHead->save();
+        }
+
+        $this->command->info("✅ Made {$officeHead->name} the head of {$revenueOffice->name}");
 
         // Verify the setup
         $this->command->line('');

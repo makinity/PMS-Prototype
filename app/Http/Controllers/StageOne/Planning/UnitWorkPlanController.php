@@ -18,11 +18,30 @@ use Illuminate\Validation\ValidationException;
 
 class UnitWorkPlanController extends Controller
 {
-    public function uwpList(){
-        $lists = UnitWorkPlan::get();
-        $offices = Office::orderBy('name')->get();
+    public function uwpList(Request $request)
+    {
+        $user = $request->user();
+        if (!$user || $user->role !== 'supervisor') {
+            abort(403, 'Unauthorized.');
+        }
 
-        return view('supervisor.uwp-list', compact('lists', 'offices'));
+        $office = null;
+        if (!empty($user->office_id)) {
+            $office = Office::query()->find($user->office_id);
+        }
+
+        $lists = collect();
+        if ($office) {
+            $lists = UnitWorkPlan::query()
+                ->with(['office.head', 'performancePeriod', 'creator'])
+                ->where('office_id', $office->id)
+                ->where('created_by', $user->id)
+                ->orderByDesc('submitted_at')
+                ->orderByDesc('id')
+                ->get();
+        }
+
+        return view('supervisor.uwp-list', compact('lists', 'office'));
     }
     public function index(Request $request)
     {
@@ -61,32 +80,28 @@ class UnitWorkPlanController extends Controller
     }
 
 
-    public function preview($id)
+    public function show(Request $request, int $id)
     {
-        $uwp = UnitWorkPlan::with([
-            'office',
-            'performancePeriod',
-            'creator',
-            'departmentHead',
-            'uwpFunctions' => function($query) {
-                $query->with([
-                    'mfos' => function($query) {
-                        $query->with([
-                            'successIndicators' => function($query) {
-                                $query->with([
-                                    'qetStandards',
-                                    'assignments' => function($query) {
-                                        $query->with('employee');
-                                    }
-                                ]);
-                            }
-                        ]);
-                    }
-                ]);
-            }
-        ])->findOrFail($id);
+        $uwp = UnitWorkPlan::find($id);
+        if (!$uwp) {
+            return response()->json([
+                'message' => 'UWP not found.',
+            ], 404);
+        }
 
-        return response()->json($uwp);
+        return $this->buildUwpShowResponse($request, $uwp);
+    }
+
+    public function preview(Request $request, $id)
+    {
+        $uwp = UnitWorkPlan::find($id);
+        if (!$uwp) {
+            return response()->json([
+                'message' => 'UWP not found.',
+            ], 404);
+        }
+
+        return $this->buildUwpShowResponse($request, $uwp);
     }
 
     public function edit(Request $request, int $id)
@@ -96,8 +111,8 @@ class UnitWorkPlanController extends Controller
         $uwp = UnitWorkPlan::findOrFail($id);
         $this->ensureCanViewUwp($request->user(), $uwp);
 
-        if (!$uwp->isDraft()) {
-            return back()->with('error', 'UWP is read-only once submitted.');
+        if (!$uwp->isEditableBySupervisor()) {
+            return back()->with('error', 'UWP is read-only at this stage.');
         }
 
         return view('stages.stage1.uwp.edit', compact('uwp'));
@@ -110,8 +125,8 @@ class UnitWorkPlanController extends Controller
         $uwp = UnitWorkPlan::findOrFail($id);
         $this->ensureCanViewUwp($request->user(), $uwp);
 
-        if (!$uwp->isDraft()) {
-            return back()->with('error', 'UWP is read-only once submitted.');
+        if (!$uwp->isEditableBySupervisor()) {
+            return back()->with('error', 'UWP is read-only at this stage.');
         }
 
         $data = $request->validate([
@@ -158,10 +173,10 @@ class UnitWorkPlanController extends Controller
             $assignmentsPayload
         );
 
-        if (!$uwp->isDraft()) {
+        if ($uwp->isLocked() || !in_array($uwp->status, [UnitWorkPlan::STATUS_DRAFT, UnitWorkPlan::STATUS_RETURNED], true)) {
             return response()->json([
                 'success' => false,
-                'error' => 'Only Draft UWP can be submitted.'
+                'error' => 'Only editable Draft/Returned UWP can be submitted.'
             ], 422);
         }
 
@@ -206,67 +221,43 @@ class UnitWorkPlanController extends Controller
                 'creator'
             ])->findOrFail($id);
 
-            $isCreator = $uwp->creator_id === $user->id;
-            $isOfficeSupervisor = $uwp->office && $uwp->office->head_id === $user->id;
-            $isSameOffice = $uwp->office && $uwp->office->id === $user->office_id;
-            $isSupervisor = $user->role === 'supervisor';
-
-            $isAuthorized = $isCreator || $isOfficeSupervisor || ($isSupervisor && $isSameOffice);
-
-            Log::info('UWP Submission Permission Check', [
-                'uwp_id' => $uwp->id,
-                'uwp_office_id' => $uwp->office->id ?? null,
-                'user_id' => $user->id,
-                'user_name' => $user->name,
-                'user_role' => $user->role,
-                'user_office_id' => $user->office_id,
-                'office_head_id' => $uwp->office->head_id ?? null,
-                'is_creator' => $isCreator,
-                'is_office_supervisor' => $isOfficeSupervisor,
-                'is_same_office' => $isSameOffice,
-                'is_supervisor' => $isSupervisor,
-                'is_authorized' => $isAuthorized
-            ]);
-
-            if (!$isAuthorized) {
-                $errorMessage = 'You do not have permission to submit this UWP. ';
-
-                if ($user->role !== 'supervisor') {
-                    $errorMessage .= 'Only supervisors can submit UWPs.';
-                } else if (!$isSameOffice) {
-                    $errorMessage .= 'You must be assigned to the same office as this UWP.';
-                } else {
-                    $errorMessage .= 'Please contact your office supervisor.';
-                }
-
-                return response()->json([
-                    'success' => false,
-                    'error' => $errorMessage
-                ], 403);
+            $isCreator = (int) $uwp->created_by === (int) $user->id;
+            if (!$isCreator) {
+                return $this->respondSubmitForApproval(
+                    $request,
+                    false,
+                    'You do not have permission to submit this UWP.',
+                    403
+                );
             }
 
-            // Check if UWP is in draft status
-            if (!$uwp->isDraft()) {
-                return response()->json([
-                    'success' => false,
-                    'error' => 'Only Draft UWP can be submitted. Current status: ' . $uwp->status
-                ], 422);
+            if ($uwp->isLocked() || !in_array($uwp->status, [UnitWorkPlan::STATUS_DRAFT, UnitWorkPlan::STATUS_RETURNED], true)) {
+                return $this->respondSubmitForApproval(
+                    $request,
+                    false,
+                    'Only editable Draft/Returned UWP can be submitted. Current status: ' . $uwp->status,
+                    422
+                );
             }
 
             if ($uwp->mfos()->count() === 0) {
-                return response()->json([
-                    'success' => false,
-                    'error' => 'Cannot submit: No MFOs/PPAs found in this UWP.'
-                ], 422);
+                return $this->respondSubmitForApproval(
+                    $request,
+                    false,
+                    'Cannot submit: No MFOs/PPAs found in this UWP.',
+                    422
+                );
             }
 
             $assignmentCount = $this->countIndicatorAssignments($uwp);
 
             if ($assignmentCount === 0) {
-                return response()->json([
-                    'success' => false,
-                    'error' => 'Cannot submit: No employees assigned to success indicators.'
-                ], 422);
+                return $this->respondSubmitForApproval(
+                    $request,
+                    false,
+                    'Cannot submit: No employees assigned to success indicators.',
+                    422
+                );
             }
 
             DB::transaction(function () use ($uwp) {
@@ -283,18 +274,15 @@ class UnitWorkPlanController extends Controller
                 ]);
             });
 
-            return response()->json([
-                'success' => true,
-                'message' => 'UWP submitted successfully for Department Head review. The plan is now locked.',
-                'status' => 'submitted',
-                'submitted_at' => now()->toDateTimeString()
-            ]);
+            return $this->respondSubmitForApproval(
+                $request,
+                true,
+                'UWP submitted successfully for Department Head review. The plan is now locked.',
+                200
+            );
 
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json([
-                'success' => false,
-                'error' => 'UWP not found.'
-            ], 404);
+            return $this->respondSubmitForApproval($request, false, 'UWP not found.', 404);
         } catch (\Exception $e) {
             Log::error('UWP Submission Error: ' . $e->getMessage(), [
                 'uwp_id' => $id ?? null,
@@ -302,11 +290,38 @@ class UnitWorkPlanController extends Controller
                 'trace' => $e->getTraceAsString()
             ]);
 
+            return $this->respondSubmitForApproval(
+                $request,
+                false,
+                'An error occurred while submitting the UWP. Please try again.',
+                500
+            );
+        }
+    }
+
+    private function respondSubmitForApproval(Request $request, bool $success, string $message, int $statusCode)
+    {
+        if ($request->expectsJson() || $request->ajax()) {
+            if ($success) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message,
+                    'status' => UnitWorkPlan::STATUS_SUBMITTED,
+                    'submitted_at' => now()->toDateTimeString(),
+                ], $statusCode);
+            }
+
             return response()->json([
                 'success' => false,
-                'error' => 'An error occurred while submitting the UWP. Please try again.'
-            ], 500);
+                'error' => $message,
+            ], $statusCode);
         }
+
+        if ($success) {
+            return back()->with('success', $message);
+        }
+
+        return back()->with('error', $message);
     }
 
 
@@ -555,9 +570,9 @@ class UnitWorkPlanController extends Controller
                 ->where('created_by', $user->id)
                 ->first();
 
-            if ($uwp && (!$uwp->isDraft() || $uwp->locked_at)) {
+            if ($uwp && !$uwp->isEditableBySupervisor()) {
                 throw ValidationException::withMessages([
-                    'status' => 'UWP is read-only once submitted.',
+                    'status' => 'UWP is read-only at this stage.',
                 ]);
             }
 
@@ -781,23 +796,12 @@ class UnitWorkPlanController extends Controller
     {
         $user = $request->user();
 
-        if ($user) {
-            // Allow supervisors, department heads, and admins
-            $this->ensureRole($user->role, ['supervisor', 'dept-head', 'admin', 'pmt']);
-            return $user;
+        if (!$user) {
+            abort(403, 'Unauthorized.');
         }
 
-        // For development/demo - get the first supervisor
-        $demoSupervisor = User::query()
-            ->where('role', 'supervisor')
-            ->orderBy('id')
-            ->first();
-
-        if (!$demoSupervisor) {
-            abort(403, 'Unauthorized - No supervisor found.');
-        }
-
-        return $demoSupervisor;
+        $this->ensureRole($user->role, ['supervisor']);
+        return $user;
     }
 
     private function ensureRole(string $role, array $allowed): void
@@ -818,5 +822,126 @@ class UnitWorkPlanController extends Controller
         }
 
         abort(403, 'Unauthorized.');
+    }
+
+    private function buildUwpShowResponse(Request $request, UnitWorkPlan $uwp)
+    {
+        try {
+            $user = $request->user();
+            if (!$user) {
+                return response()->json([
+                    'message' => 'Unauthorized.',
+                ], 403);
+            }
+
+            $isPrivileged = in_array($user->role, ['admin', 'pmt', 'dept-head'], true);
+            $isOwner = (int) $uwp->created_by === (int) $user->id;
+            $isSupervisorSameOffice = $user->role === 'supervisor' && (int) $user->office_id === (int) $uwp->office_id;
+
+            if (!$isPrivileged && !$isOwner && !$isSupervisorSameOffice) {
+                return response()->json([
+                    'message' => 'You are not allowed to view this UWP.',
+                ], 403);
+            }
+
+            $uwp->load([
+                'office.head',
+                'performancePeriod',
+                'creator',
+                'uwpFunctions' => function ($query) {
+                    $query->orderBy('sort_order')->with([
+                        'mfos' => function ($mfoQuery) {
+                            $mfoQuery->orderBy('sort_order')->with([
+                                'successIndicators' => function ($siQuery) {
+                                    $siQuery->orderBy('sort_order')->with([
+                                        'qetStandards',
+                                        'assignments.employee.office',
+                                    ]);
+                                },
+                            ]);
+                        },
+                    ]);
+                },
+            ]);
+
+            $payload = [
+                'id' => $uwp->id,
+                'status' => $uwp->status,
+                'submitted_at' => optional($uwp->submitted_at)->toDateTimeString(),
+                'locked_at' => optional($uwp->locked_at)->toDateTimeString(),
+                'office' => [
+                    'id' => $uwp->office?->id,
+                    'name' => $uwp->office?->name,
+                ],
+                'performance_period' => [
+                    'id' => $uwp->performancePeriod?->id,
+                    'name' => $uwp->performancePeriod?->name,
+                ],
+                'creator' => [
+                    'id' => $uwp->creator?->id,
+                    'name' => $uwp->creator?->name,
+                ],
+                'department_head' => [
+                    'id' => $uwp->office?->head?->id,
+                    'name' => $uwp->office?->head?->name,
+                ],
+                'uwp_functions' => $uwp->uwpFunctions->map(function ($function) {
+                    return [
+                        'id' => $function->id,
+                        'name' => $function->name,
+                        'function_type' => $function->function_type,
+                        'weight_percent' => $function->weight_percent,
+                        'mfos' => $function->mfos->map(function ($mfo) {
+                            return [
+                                'id' => $mfo->id,
+                                'title' => $mfo->title,
+                                'target_timeline' => $mfo->target_timeline,
+                                'weight_percent' => $mfo->weight_percent,
+                                'success_indicators' => $mfo->successIndicators->map(function ($indicator) {
+                                    return [
+                                        'id' => $indicator->id,
+                                        'indicator_text' => $indicator->indicator_text,
+                                        'qet_standards' => $indicator->qetStandards->map(function ($standard) {
+                                            return [
+                                                'id' => $standard->id,
+                                                'dimension' => $standard->dimension,
+                                                'rating' => $standard->rating,
+                                                'standard_text' => $standard->standard_text,
+                                            ];
+                                        })->values()->all(),
+                                        'assignments' => $indicator->assignments->map(function ($assignment) {
+                                            return [
+                                                'id' => $assignment->id,
+                                                'assigned_at' => optional($assignment->assigned_at)->toDateTimeString(),
+                                                'employee' => [
+                                                    'id' => $assignment->employee?->id,
+                                                    'name' => $assignment->employee?->name,
+                                                    'office' => [
+                                                        'id' => $assignment->employee?->office?->id,
+                                                        'name' => $assignment->employee?->office?->name,
+                                                    ],
+                                                ],
+                                            ];
+                                        })->values()->all(),
+                                    ];
+                                })->values()->all(),
+                            ];
+                        })->values()->all(),
+                    ];
+                })->values()->all(),
+            ];
+
+            return response()->json($payload);
+        } catch (\Throwable $e) {
+            Log::error('Failed to load UWP preview data.', [
+                'uwp_id' => $uwp->id ?? null,
+                'user_id' => $request->user()?->id,
+                'message' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'message' => 'Unable to load UWP details right now.',
+            ], 500);
+        }
     }
 }

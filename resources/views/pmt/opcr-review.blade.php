@@ -1,12 +1,13 @@
-@extends('layouts.dept-head')
+
+@extends('layouts.pmt')
 
 @section('main-content')
 <section class="space-y-6">
     <div class="flex flex-wrap items-start justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-white">Office Performance Commitment and Review (OPCR)</h1>
+            <h1 class="text-2xl font-bold text-white">PMT Final OPCR Approval</h1>
             <p class="text-sm text-slate-400">Stage I - Performance Planning and Commitment</p>
-            <p class="text-xs text-slate-500">Review OPCRs submitted by Admin based on PMT-approved Unit Work Plans.</p>
+            <p class="text-xs text-slate-500">Review Department Head-endorsed OPCRs and issue final approval to proceed to Stage II.</p>
         </div>
     </div>
 
@@ -22,19 +23,20 @@
         <div class="mb-4 flex flex-wrap items-end justify-between gap-4">
             <div>
                 <p class="text-xs uppercase tracking-wide text-slate-500">Active Period</p>
-                <p class="text-sm font-semibold text-white">{{ $activePeriod?->name ?? '' }}</p>
+                <p class="text-sm font-semibold text-white">{{ $activePeriod?->name ?? '-' }}</p>
             </div>
 
-            <form method="GET" action="{{ route('dept-head.opcr.index') }}" class="flex items-center gap-2">
+            <form method="GET" action="{{ route('pmt.opcr.review.index') }}" class="flex items-center gap-2">
                 <label for="opcr-status" class="text-xs uppercase tracking-wide text-slate-500">Status</label>
                 <select id="opcr-status"
                         name="status"
                         onchange="this.form.submit()"
                         style="background:#0f172a;color:#e5e7eb;"
                         class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none">
-                    <option value="submitted" {{ $selectedStatus === 'submitted' ? 'selected' : '' }}>Submitted</option>
-                    <option value="endorsed" {{ $selectedStatus === 'endorsed' ? 'selected' : '' }}>Endorsed</option>
+                    <option value="endorsed" {{ $selectedStatus === 'endorsed' ? 'selected' : '' }}>For PMT Review</option>
+                    <option value="approved" {{ $selectedStatus === 'approved' ? 'selected' : '' }}>Final Approved</option>
                     <option value="returned" {{ $selectedStatus === 'returned' ? 'selected' : '' }}>Returned</option>
+                    <option value="submitted" {{ $selectedStatus === 'submitted' ? 'selected' : '' }}>Submitted</option>
                 </select>
             </form>
         </div>
@@ -54,18 +56,18 @@
                     @forelse($opcrs as $opcr)
                         @php
                             $payload = $opcrPayloads[$opcr->id] ?? null;
-                            $isSubmitted = in_array((string) $opcr->status, [\App\Models\Opcr::STATUS_SUBMITTED, \App\Models\Opcr::STATUS_FOR_REVIEW], true);
-                            $statusMeta = match ($opcr->status) {
-                                \App\Models\Opcr::STATUS_SUBMITTED, \App\Models\Opcr::STATUS_FOR_REVIEW => ['label' => 'Submitted', 'class' => 'border-amber-500/30 bg-amber-500/20 text-amber-300'],
-                                \App\Models\Opcr::STATUS_ENDORSED, \App\Models\Opcr::STATUS_APPROVED => ['label' => 'Endorsed', 'class' => 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'],
-                                \App\Models\Opcr::STATUS_RETURNED => ['label' => 'Returned', 'class' => 'border-rose-500/30 bg-rose-500/10 text-rose-300'],
-                                default => ['label' => ucwords(str_replace('_', ' ', (string) $opcr->status)), 'class' => 'border-slate-500/30 bg-slate-500/10 text-slate-300'],
+                            $isReviewable = in_array(strtolower((string) $opcr->status), ['endorsed', 'for_pmt_review'], true);
+                            $statusMeta = match (strtolower((string) $opcr->status)) {
+                                'endorsed', 'for_pmt_review' => ['label' => 'For PMT Review', 'class' => 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'],
+                                'approved' => ['label' => 'Final Approved', 'class' => 'border-cyan-500/30 bg-cyan-500/10 text-cyan-300'],
+                                'returned' => ['label' => 'Returned', 'class' => 'border-rose-500/30 bg-rose-500/10 text-rose-300'],
+                                default => ['label' => 'Submitted', 'class' => 'border-amber-500/30 bg-amber-500/20 text-amber-300'],
                             };
                         @endphp
                         <tr class="border-t border-slate-800">
-                            <td class="px-4 py-3 text-white">{{ $opcr->unitWorkPlan?->office?->name ?? '' }}</td>
-                            <td class="px-4 py-3">{{ $opcr->unitWorkPlan?->performancePeriod?->name ?? '' }}</td>
-                            <td class="px-4 py-3">UWP #{{ $opcr->unitWorkPlan?->id ?? '' }} ({{ ucwords(str_replace('_', ' ', (string) $opcr->unitWorkPlan?->status)) }})</td>
+                            <td class="px-4 py-3 text-white">{{ $opcr->unitWorkPlan?->office?->name ?? '-' }}</td>
+                            <td class="px-4 py-3">{{ $opcr->unitWorkPlan?->performancePeriod?->name ?? '-' }}</td>
+                            <td class="px-4 py-3">UWP #{{ $opcr->unit_work_plan_id ?? '-' }} ({{ ucwords(str_replace('_', ' ', (string) $opcr->unitWorkPlan?->status)) }})</td>
                             <td class="px-4 py-3">
                                 <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold {{ $statusMeta['class'] }}">{{ $statusMeta['label'] }}</span>
                             </td>
@@ -75,16 +77,16 @@
                                         data-opcr='@json($payload)'
                                         class="text-blue-400 hover:text-blue-300 {{ $payload ? '' : 'opacity-60 pointer-events-none' }}"
                                         {{ $payload ? '' : 'disabled' }}>
-                                    {{ $isSubmitted ? 'Review' : 'View' }}
+                                    {{ $isReviewable ? 'Review' : 'View' }}
                                 </button>
-                                @unless ($isSubmitted)
-                                    <span class="ml-2 inline-flex items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-300">Endorsed</span>
+                                @unless ($isReviewable)
+                                    <span class="ml-2 inline-flex items-center rounded-full border border-slate-600/60 bg-slate-700/30 px-2 py-0.5 text-[10px] font-semibold text-slate-300">Read-only</span>
                                 @endunless
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-4 py-8 text-center text-slate-400">No OPCR records found for review.</td>
+                            <td colspan="5" class="px-4 py-8 text-center text-slate-400">No OPCR records found for PMT review.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -97,10 +99,11 @@
             <div class="flex items-start justify-between gap-4 border-b border-slate-800 pb-4">
                 <div class="min-w-0">
                     <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Office Performance Commitment and Review</p>
-                    <h2 id="dh-opcr-modal-title" class="mt-1 truncate text-lg font-semibold text-white">Review OPCR</h2>
-                    <p class="text-sm text-slate-400">Derived from PMT-approved Unit Work Plan (Stage 1)</p>
-                    <div class="mt-2">
-                        <span id="dh-opcr-modal-status" class="inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold"></span>
+                    <h2 id="dh-opcr-modal-title" class="mt-1 truncate text-lg font-semibold text-white">PMT Review OPCR -</h2>
+                    <p class="text-sm text-slate-400">Derived from PMT-approved Unit Work Plan (Stage I)</p>
+                    <div class="mt-2 flex items-center gap-2">
+                        <span class="inline-flex items-center rounded-full border border-cyan-500/30 bg-cyan-500/10 px-2.5 py-1 text-[11px] font-semibold text-cyan-300">Final Approval</span>
+                        <span id="dh-opcr-modal-status" class="inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold">-</span>
                     </div>
                 </div>
                 <button type="button" data-close-modal class="shrink-0 rounded-lg border border-slate-800 bg-slate-950/50 px-2.5 py-2 text-slate-400 hover:bg-slate-950 hover:text-white">&times;</button>
@@ -109,15 +112,15 @@
             <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
                     <p class="text-[11px] uppercase tracking-wide text-slate-500">Office / Unit</p>
-                    <p id="dh-opcr-modal-office" class="mt-1 text-sm font-semibold text-white"></p>
+                    <p id="dh-opcr-modal-office" class="mt-1 text-sm font-semibold text-white">-</p>
                 </div>
                 <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
                     <p class="text-[11px] uppercase tracking-wide text-slate-500">Period</p>
-                    <p id="dh-opcr-modal-period" class="mt-1 text-sm font-semibold text-white"></p>
+                    <p id="dh-opcr-modal-period" class="mt-1 text-sm font-semibold text-white">-</p>
                 </div>
                 <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
                     <p class="text-[11px] uppercase tracking-wide text-slate-500">Referenced UWP</p>
-                    <p id="dh-opcr-modal-uwp" class="mt-1 text-sm font-semibold text-white"></p>
+                    <p id="dh-opcr-modal-uwp" class="mt-1 text-sm font-semibold text-white">-</p>
                 </div>
             </div>
 
@@ -129,49 +132,48 @@
                                 <th class="w-[30%] px-4 py-3 text-left">Output</th>
                                 <th class="w-[12%] px-4 py-3 text-center">Success Indicators</th>
                                 <th class="w-[26%] px-4 py-3 text-left">Target Summary</th>
-                                <th class="w-[4%] px-4 py-3 text-left">Weight</th>
-                                <th class="w-[4%] px-4 py-3 text-left">Function</th>
+                                <th class="w-[8%] px-4 py-3 text-left">Weight</th>
+                                <th class="w-[12%] px-4 py-3 text-left">Function</th>
                             </tr>
                         </thead>
                         <tbody id="dh-opcr-outputs-tbody" class="divide-y divide-slate-800"></tbody>
                     </table>
                 </div>
             </div>
-
-            <form id="dh-opcr-review-form" method="POST" action="{{ route('dept-head.opcr.review') }}" class="mt-5">
+            <form id="dh-opcr-review-form" method="POST" action="{{ route('pmt.opcr.review.action') }}" class="mt-5">
                 @csrf
                 <input type="hidden" name="opcr_id" id="dh-opcr-id">
                 <input type="hidden" name="action" id="dh-opcr-action">
 
                 <div>
-                    <label for="dh-opcr-remarks" class="mb-1 block text-sm text-slate-300">Remarks (required if returning)</label>
+                    <label for="dh-opcr-remarks" class="mb-1 block text-sm text-slate-300">Remarks (required when returning)</label>
                     <textarea id="dh-opcr-remarks"
                               name="remarks"
                               rows="3"
                               style="background:#0f172a;color:#e5e7eb;"
                               class="w-full rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-2 text-sm text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40"></textarea>
                     <p id="dh-opcr-remarks-error" class="mt-2 hidden text-[11px] text-rose-300">Remarks are required when returning the OPCR.</p>
-                    <p class="mt-2 text-[11px] text-slate-500">Ensure targets and weights match the PMT-approved Unit Work Plan before endorsing.</p>
+                    <p class="mt-2 text-[11px] text-slate-500">Verify targets, weights, and indicator standards align with the PMT-approved UWP.</p>
                 </div>
 
                 <div class="mt-6 flex flex-col-reverse gap-3 border-t border-slate-800 pt-4 sm:flex-row sm:items-center sm:justify-between">
-                    <p class="text-[11px] text-slate-500">Endorse to proceed to PMT review; return sends it back to Admin.</p>
+                    <p class="text-[11px] text-slate-500">Approve to finalize OPCR and proceed to Stage II; return sends it back for correction.</p>
                     <div class="flex flex-wrap justify-end gap-3">
-                        <button type="button" data-close-modal class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">Close</button>
+                        <button type="button" data-close-modal class="rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">Close</button>
 
                         <button type="button"
                                 data-review-action="return"
                                 data-loading-text="Returning..."
                                 class="inline-flex items-center gap-2 rounded-lg border border-amber-600 px-4 py-2 text-sm font-semibold text-amber-300 hover:bg-amber-600/10">
-                            <span data-button-label>Return to Admin</span>
+                            <span data-button-label>Return</span>
                             <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
                         </button>
 
                         <button type="button"
-                                data-review-action="endorse"
-                                data-loading-text="Endorsing..."
+                                data-review-action="approve"
+                                data-loading-text="Approving..."
                                 class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500">
-                            <span data-button-label>Endorse OPCR</span>
+                            <span data-button-label>Approve OPCR</span>
                             <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
                         </button>
                     </div>
@@ -179,6 +181,7 @@
             </form>
         </div>
     </div>
+
     <div id="dh-indicators-modal" data-modal-container class="fixed inset-0 z-[90] hidden items-center justify-center bg-black/70 px-4 py-6">
         <div class="w-full max-w-5xl rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl">
             <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-4">
@@ -312,10 +315,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const opcrStatusMeta = (status) => {
         const key = String(status || '').toLowerCase();
-        if (key === 'submitted' || key === 'for_dept_head_review') return { label: 'Submitted', cls: 'border-amber-500/30 bg-amber-500/20 text-amber-300' };
-        if (key === 'endorsed' || key === 'approved') return { label: 'Endorsed', cls: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300' };
+        if (key === 'endorsed' || key === 'for_pmt_review') return { label: 'For PMT Review', cls: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300' };
+        if (key === 'approved') return { label: 'Final Approved', cls: 'border-cyan-500/30 bg-cyan-500/10 text-cyan-300' };
         if (key === 'returned') return { label: 'Returned', cls: 'border-rose-500/30 bg-rose-500/10 text-rose-300' };
-        return { label: key.replaceAll('_', ' ').replace(/\b\w/g, (char) => char.toUpperCase()), cls: 'border-slate-500/30 bg-slate-500/10 text-slate-300' };
+        return { label: 'Submitted', cls: 'border-amber-500/30 bg-amber-500/20 text-amber-300' };
     };
 
     const functionBadge = (functionType) => {
@@ -350,6 +353,7 @@ document.addEventListener('DOMContentLoaded', function () {
         button.disabled = false;
         button.classList.remove('opacity-70', 'cursor-wait');
     };
+
     const renderOutputs = (outputs) => {
         const tbody = document.getElementById('dh-opcr-outputs-tbody');
         if (!tbody) return;
@@ -360,7 +364,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const tr = document.createElement('tr');
             tr.className = 'hover:bg-slate-900/40';
             tr.innerHTML = `
-                <td class="px-4 py-3 align-top text-white">${escapeHtml(output.title || '')}</td>
+                <td class="px-4 py-3 align-top text-white">${escapeHtml(output.title || '-')}</td>
                 <td class="px-4 py-3 align-top text-center">
                     <button type="button" class="inline-flex items-center justify-center gap-2 text-blue-300 hover:text-blue-200" data-indicators-btn>
                         <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
@@ -370,8 +374,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         <span class="text-xs">(${indicators.length})</span>
                     </button>
                 </td>
-                <td class="px-4 py-3 align-top text-slate-200">${escapeHtml(output.target_summary || '')}</td>
-                <td class="px-4 py-3 align-top text-slate-200">${output.weight_percent !== null && output.weight_percent !== undefined && output.weight_percent !== '' ? escapeHtml(String(output.weight_percent) + '%') : ''}</td>
+                <td class="px-4 py-3 align-top text-slate-200">${escapeHtml(output.target_summary || '-')}</td>
+                <td class="px-4 py-3 align-top text-slate-200">${output.weight_percent !== null && output.weight_percent !== undefined && output.weight_percent !== '' ? escapeHtml(String(output.weight_percent) + '%') : '-'}</td>
                 <td class="px-4 py-3 align-top">${functionBadge(output.function_type)}</td>
             `;
 
@@ -397,7 +401,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const renderCell = (items) => {
             const values = Array.isArray(items) ? items : [];
-            if (!values.length) return '';
+            if (!values.length) return '-';
             return '<ul class="list-disc space-y-1 pl-4">' + values.map((item) => '<li>' + escapeHtml(item) + '</li>').join('') + '</ul>';
         };
 
@@ -429,7 +433,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!tbody) return;
         tbody.innerHTML = '';
 
-        const unitName = selectedOpcr?.opcr?.office?.name || '';
+        const unitName = selectedOpcr?.opcr?.office?.name || '-';
         const names = Array.isArray(assignees) ? assignees : [];
 
         if (!names.length) {
@@ -460,7 +464,7 @@ document.addEventListener('DOMContentLoaded', function () {
         tbody.innerHTML = '';
 
         (Array.isArray(indicators) ? indicators : []).forEach((indicator) => {
-            const indicatorText = indicator?.indicator_text || '';
+            const indicatorText = indicator?.indicator_text || '-';
             const standards = indicator?.standards_by_rating || {};
             const assignees = Array.isArray(indicator?.assignees) ? indicator.assignees : [];
 
@@ -505,16 +509,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
         openModal('dh-indicators-modal');
     };
+
     const hydrateReviewModal = (payload) => {
         selectedOpcr = payload;
 
-        const office = payload?.opcr?.office?.name || '';
-        const period = payload?.opcr?.period?.name || '';
+        const office = payload?.opcr?.office?.name || '-';
+        const period = payload?.opcr?.period?.name || '-';
         const opcrStatus = String(payload?.opcr?.status || '').toLowerCase();
-        const sourceUwpId = payload?.opcr?.source_uwp?.id || '';
-        const sourceUwpStatus = payload?.opcr?.source_uwp?.status || '';
+        const sourceUwpId = payload?.opcr?.source_uwp?.id || '-';
+        const sourceUwpStatus = payload?.opcr?.source_uwp?.status || '-';
 
-        document.getElementById('dh-opcr-modal-title').textContent = `Review OPCR - ${office}`;
+        document.getElementById('dh-opcr-modal-title').textContent = `PMT Review OPCR - ${office}`;
         document.getElementById('dh-opcr-modal-office').textContent = office;
         document.getElementById('dh-opcr-modal-period').textContent = period;
         document.getElementById('dh-opcr-modal-uwp').textContent = `UWP #${sourceUwpId} (${String(sourceUwpStatus).replaceAll('_', ' ')})`;
@@ -534,26 +539,17 @@ document.addEventListener('DOMContentLoaded', function () {
         if (opcrId) opcrId.value = payload?.opcr?.id || '';
         if (actionInput) actionInput.value = '';
 
-        const canEndorse = opcrStatus === 'submitted' || opcrStatus === 'for_dept_head_review';
+        const canReview = opcrStatus === 'endorsed' || opcrStatus === 'for_pmt_review';
 
         document.querySelectorAll('[data-review-action]').forEach((btn) => {
             setButtonLoading(btn, false);
             btn.classList.remove('opacity-70', 'cursor-wait');
+            btn.disabled = !canReview;
 
-            if (btn.getAttribute('data-review-action') === 'endorse') {
-                btn.disabled = !canEndorse;
-                if (!canEndorse) {
-                    btn.classList.add('opacity-60', 'pointer-events-none');
-                } else {
-                    btn.classList.remove('opacity-60', 'pointer-events-none');
-                }
+            if (!canReview) {
+                btn.classList.add('opacity-60', 'pointer-events-none');
             } else {
-                btn.disabled = !canEndorse;
-                if (!canEndorse) {
-                    btn.classList.add('opacity-60', 'pointer-events-none');
-                } else {
-                    btn.classList.remove('opacity-60', 'pointer-events-none');
-                }
+                btn.classList.remove('opacity-60', 'pointer-events-none');
             }
         });
 

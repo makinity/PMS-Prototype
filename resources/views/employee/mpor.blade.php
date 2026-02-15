@@ -1,7 +1,25 @@
 @extends('layouts.employee')
 
 @section('main-content')
+    @php
+        $mporMonthYear = 'January 2026';
+        $mporStatusKey = 'mpor_status_' . (auth()->id() ?? 'guest') . '_' . \Illuminate\Support\Str::slug($mporMonthYear, '_');
+        $mporStatus = (string) data_get(session($mporStatusKey, []), 'status', 'draft');
+        $isMporLocked = in_array($mporStatus, ['submitted', 'endorsed'], true);
+    @endphp
+
     <section class="space-y-6">
+        @if (session('success'))
+            <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if (session('info'))
+            <div class="rounded-xl border border-sky-500/30 bg-sky-500/10 px-4 py-3 text-sm text-sky-200">
+                {{ session('info') }}
+            </div>
+        @endif
 
         {{-- Header --}}
         <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
@@ -28,9 +46,20 @@
                 </div>
             </div>
 
-            <div class="flex w-full flex-col gap-2 md:w-auto md:items-end">
-                <a href="{{ route('employee.mpor.export.pdf') }}"
-                    class="w-full rounded-lg border border-slate-700 px-4 py-2 text-center text-xs text-slate-300 hover:bg-slate-800 md:w-auto">
+            <div class="flex w-full flex-row gap-2 md:w-auto md:items-center">
+                @if (! $isMporLocked)
+                    <button type="button" data-modal-target="mporSubmitConfirmModal" data-modal-toggle="mporSubmitConfirmModal"
+                        class="flex-1 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-center text-xs font-semibold text-white transition hover:bg-slate-700 md:flex-none">
+                        Submit MPOR
+                    </button>
+                @else
+                    <button type="button" disabled
+                        class="flex-1 cursor-not-allowed rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-center text-xs font-semibold text-emerald-200 opacity-80 md:flex-none">
+                        Submitted
+                    </button>
+                @endif
+                <a href="{{ route('employee.mpor.export.excel') }}"
+                    class="flex-1 rounded-lg border border-slate-700 px-4 py-2 text-center text-xs text-slate-300 hover:bg-slate-800 md:flex-none">
                     Export PDF
                 </a>
             </div>
@@ -225,10 +254,6 @@
 
                 {{-- TOTAL SUPPORT --}}
                 <div class="mt-4 rounded-xl border border-slate-700 bg-slate-900/60 p-3">
-                    <div class="flex items-start justify-between gap-3">
-                        <p class="text-sm font-semibold text-white">TOTAL — SUPPORT</p>
-                        <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Totals</p>
-                    </div>
 
                     <div class="mt-3 grid gap-3">
                         @php($zero = '0')
@@ -381,13 +406,6 @@
                             <td class="px-2 py-1 border-l border-slate-800">0</td><td class="px-2 py-1">0</td><td class="px-2 py-1">0</td><td class="px-2 py-1">0</td><td class="px-2 py-1">0</td>
                             <td class="px-2 py-1 border-l border-slate-800">0</td><td class="px-2 py-1">0</td><td class="px-2 py-1">0</td><td class="px-2 py-1">0</td><td class="px-2 py-1">0</td>
                         </tr>
-
-                        <tr class="border-t border-dashed border-slate-700 text-slate-300">
-                            <td class="px-3 py-2 font-semibold">GRAND TOTAL</td>
-                            <td class="px-2 py-1">13</td><td class="px-2 py-1">0</td><td class="px-2 py-1">0</td><td class="px-2 py-1">0</td><td class="px-2 py-1">13</td>
-                            <td class="px-2 py-1 border-l border-slate-800">65</td><td class="px-2 py-1">0</td><td class="px-2 py-1">0</td><td class="px-2 py-1">0</td><td class="px-2 py-1">65</td>
-                            <td class="px-2 py-1 border-l border-slate-800">65</td><td class="px-2 py-1">0</td><td class="px-2 py-1">0</td><td class="px-2 py-1">0</td><td class="px-2 py-1">65</td>
-                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -436,5 +454,78 @@
                 </div>
             </div>
         </div>
+
+        <div id="mporSubmitConfirmModal" tabindex="-1" aria-hidden="true"
+            class="fixed left-0 right-0 top-0 z-50 hidden h-[calc(100%-1rem)] max-h-full w-full items-center justify-center overflow-y-auto overflow-x-hidden md:inset-0">
+            <div class="relative max-h-full w-full max-w-lg p-4">
+                <div class="relative rounded-2xl border border-slate-800 bg-slate-900 shadow-lg">
+                    <div class="flex items-start justify-between border-b border-slate-800 p-5">
+                        <h3 class="text-lg font-semibold text-white">Submit MPOR</h3>
+                        <button type="button" data-modal-hide="mporSubmitConfirmModal"
+                            class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-800 hover:text-white">
+                            <span class="sr-only">Close modal</span>
+                            <i class="fa-solid fa-xmark text-sm"></i>
+                        </button>
+                    </div>
+
+                    <div class="space-y-3 p-5 text-sm text-slate-300">
+                        <p>
+                            You are about to submit your Monthly Performance Output Report (MPOR) for January 2026.
+                        </p>
+                        <p>
+                            Once submitted, this report will be locked and forwarded for supervisor/department review.
+                        </p>
+                        <p class="font-medium text-white">Proceed?</p>
+                    </div>
+
+                    <form id="mporSubmitForm" method="POST" action="{{ route('employee.mpor.submit') }}"
+                        class="flex items-center justify-end gap-2 border-t border-slate-800 p-5">
+                        @csrf
+                        <input type="hidden" name="month_year" value="January 2026">
+
+                        <button type="button" data-modal-hide="mporSubmitConfirmModal"
+                            class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 transition hover:bg-slate-800">
+                            Cancel
+                        </button>
+
+                        <button type="submit" id="mporProceedSubmissionBtn"
+                            class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500">
+                            <span data-button-spinner
+                                class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                            <span data-button-label>Proceed Submission</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </section>
 @endsection
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const submitForm = document.getElementById('mporSubmitForm');
+            const proceedButton = document.getElementById('mporProceedSubmissionBtn');
+
+            if (!submitForm || !proceedButton) {
+                return;
+            }
+
+            submitForm.addEventListener('submit', function() {
+                const label = proceedButton.querySelector('[data-button-label]');
+                const spinner = proceedButton.querySelector('[data-button-spinner]');
+
+                proceedButton.disabled = true;
+                proceedButton.classList.add('cursor-not-allowed', 'opacity-80');
+
+                if (label) {
+                    label.textContent = 'Submitting...';
+                }
+
+                if (spinner) {
+                    spinner.classList.remove('hidden');
+                }
+            });
+        });
+    </script>
+@endpush

@@ -145,9 +145,11 @@
         @php
             $isPmtDashboard = request()->routeIs('pmt.dashboard');
             $isPmtUwp = request()->routeIs('pmt.uwp');
+            $isOpcr = request()->routeIs('pmt.opcr.review.index');
             $isPmtOpcrApproval = request()->routeIs('pmt.opcr');
             $isSMPOR = request()->routeIs('pmt.smpor');
             $isIPCR = request()->routeIs('pmt.ipcr');
+            $isQAR = request()->routeIs('pmt.qar.index');
             $isDeptHeadIPCRSMPORReview = request()->routeIs('pmt.smpor-ipcr-review');
             $isRD = request()->routeIs('pmt.rewards');
             $isIPCRCalibOVR = request()->routeIs('pmt.ipcr-calib-overview');
@@ -251,6 +253,12 @@
                                 </a>
                             </li>
                             <li>
+                                <a href="{{ route('pmt.opcr.review.index') }}" class="sidebar-link" @if($isOpcr) aria-current="page" @endif>
+                                    <i class="sidebar-icon fa-solid fa-user-check"></i>
+                                    <span>OPCR Review</span>
+                                </a>
+                            </li>
+                            <li>
                                 <a href="{{ route('pmt.opcr') }}" class="sidebar-link" @if($isPmtOpcrApproval) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-building-circle-check"></i>
                                     <span>OPCR Validation</span>
@@ -262,6 +270,13 @@
                                     <span>IPCR Review</span>
                                 </a>
                             </li>
+                            <li>
+                                <a href="{{ route('pmt.qar.index') }}" class="sidebar-link" @if($isQAR) aria-current="page" @endif>
+                                    <i class="sidebar-icon fa-solid fa-user-check"></i>
+                                    <span>QAR validation</span>
+                                </a>
+                            </li>
+
                             <li>
                                 <a href="{{ route('pmt.smpor-ipcr-review') }}" class="sidebar-link" @if($isDeptHeadIPCRSMPORReview) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-star-half-stroke"></i>

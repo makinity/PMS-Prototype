@@ -1,341 +1,236 @@
-@extends('layouts.pmt')
+﻿@extends('layouts.pmt')
 
 @section('main-content')
-    {{-- Page Header --}}
-    <div class="mb-6">
-        <h1>Unit Work Plan Approval</h1>
-        <p>Final review and approval of Unit Work Plans for standards compliance and alignment.</p>
-    </div>
+<div class="mb-6">
+    <h1 class="text-2xl font-semibold text-slate-100">PMT Review / UWP Final Approval</h1>
+    <p class="mt-1 text-sm text-slate-400">Final Stage I review of endorsed Unit Work Plans. Approval sets permanent lock.</p>
+</div>
 
-    {{-- Performance Period --}}
-    <div class="mb-6 rounded-2xl border border-slate-800 bg-slate-950 p-5">
-        <p class="text-xs uppercase tracking-wide text-slate-400">Performance Period</p>
-        <p class="font-medium text-slate-100">January – June 2026</p>
-    </div>
+@if (session('success'))
+    <div class="mb-4 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">{{ session('success') }}</div>
+@endif
+@if (session('error'))
+    <div class="mb-4 rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">{{ session('error') }}</div>
+@endif
 
-    {{-- UWP List --}}
-    <div class="rounded-2xl border border-slate-800 bg-slate-950 overflow-hidden">
-        <div class="border-b border-slate-800 p-5">
-            <h2 class="text-lg font-medium text-white">Unit Work Plans</h2>
+<div class="mb-6 rounded-2xl border border-slate-800 bg-slate-900/80 p-5">
+    <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+            <p class="text-xs uppercase tracking-wide text-slate-400">Performance Period</p>
+            <p class="font-medium text-slate-100">{{ $activePeriod->name ?? '—' }}</p>
         </div>
-
-        <div class="overflow-x-auto">
-            <table class="min-w-full">
-                <thead class="bg-slate-900">
-                    <tr>
-                        <th class="px-4 py-3 text-left text-xs uppercase text-slate-400">Office / Unit</th>
-                        <th class="px-4 py-3 text-left text-xs uppercase text-slate-400">Supervisor</th>
-                        <th class="px-4 py-3 text-left text-xs uppercase text-slate-400">Dept Head</th>
-                        <th class="px-4 py-3 text-center text-xs uppercase text-slate-400">Status</th>
-                        <th class="px-4 py-3 text-center text-xs uppercase text-slate-400">Action</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-800">
-                    <tr class="hover:bg-slate-900/60 transition">
-                        <td class="px-4 py-3 text-sm font-semibold text-slate-100">
-                            Revenue Collection Unit
-                        </td>
-                        <td class="px-4 py-3 text-sm text-slate-300">
-                            Carlo D. Beray
-                        </td>
-                        <td class="px-4 py-3 text-sm text-slate-300">
-                            Dept-head
-                        </td>
-                        <td class="px-4 py-3 text-sm text-center">
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
-                                bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
-                                For PMT Approval
-                            </span>
-                        </td>
-                        <td class="px-4 py-3 text-sm text-center">
-                            <button
-                                type="button"
-                                data-modal-target="pmt-view-uwp-modal"
-                                data-modal-toggle="pmt-view-uwp-modal"
-                                class="rounded-lg border border-blue-500 px-3 py-2 text-blue-400
-                                hover:bg-blue-500/10 transition">
-                                View UWP
-                            </button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+        <form method="GET" action="{{ route('pmt.uwp.index') }}" class="flex items-center gap-3">
+            <label for="pmt-status-filter" class="text-xs uppercase tracking-wide text-slate-400">Status</label>
+            <select id="pmt-status-filter" name="status" onchange="this.form.submit()" style="background:#0f172a;color:#e5e7eb;" class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none">
+                <option value="" {{ request('status') === null || request('status') === '' ? 'selected' : '' }}>Endorsed (Default)</option>
+                <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>Draft</option>
+                <option value="submitted" {{ request('status') === 'submitted' ? 'selected' : '' }}>Submitted</option>
+                <option value="endorsed" {{ request('status') === 'endorsed' ? 'selected' : '' }}>Endorsed</option>
+                <option value="pmt_approved" {{ request('status') === 'pmt_approved' ? 'selected' : '' }}>PMT Approved</option>
+                <option value="returned" {{ request('status') === 'returned' ? 'selected' : '' }}>Returned</option>
+            </select>
+        </form>
     </div>
+</div>
 
-    {{-- ========================= --}}
-    {{-- PMT VIEW UWP MODAL --}}
-    {{-- ========================= --}}
-    <div
-        id="pmt-view-uwp-modal"
-        data-modal-container
-        tabindex="-1"
-        aria-hidden="true"
-        class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60 backdrop-blur"
-    >
-        <div class="w-full max-w-5xl px-4">
-            <div class="rounded-2xl border border-slate-800 bg-slate-950 shadow-2xl">
-
-                {{-- Modal Header --}}
-                <div class="flex items-start justify-between border-b border-slate-800 px-6 py-4">
-                    <div>
-                        <p class="text-xs uppercase tracking-[0.2em] text-indigo-300">
-                            Unit Work Plan
-                        </p>
-                        <h3 class="text-lg font-semibold text-white">
-                            Revenue Collection Unit
-                        </h3>
-                        <p class="mt-1 text-sm text-slate-400">
-                            Jan – June 2026 • Supervisor: Carlo D. Beray
-                        </p>
-                    </div>
-
-                    <div class="flex items-center gap-2">
-                        <a href="{{ route('stage1.uwp.export.excel') }}"
-                            class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800">
-                            Export Excel
-                        </a>
-
-                        <button
-                            type="button"
-                            data-modal-close
-                            data-modal-hide="pmt-view-uwp-modal"
-                            class="text-slate-400 hover:text-white"
-                        >
-                            <i class="fa-solid fa-xmark text-lg"></i>
-                        </button>
+<div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/80">
+    <div class="border-b border-slate-800 px-5 py-4">
+        <h2 class="text-lg font-medium text-white">Unit Work Plans</h2>
+        <p class="mt-1 text-sm text-slate-400">Only endorsed UWPs should be approved at this step.</p>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="min-w-full text-sm">
+            <thead class="bg-slate-800/60">
+                <tr>
+                    <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-400">Office / Unit</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-400">Supervisor</th>
+                    <th class="px-4 py-3 text-center text-xs font-medium uppercase tracking-wide text-slate-400">Status</th>
+                    <th class="px-4 py-3 text-center text-xs font-medium uppercase tracking-wide text-slate-400">Action</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800">
+                @forelse($uwps as $uwp)
+                    @php
+                        $payload = [
+                            'id' => $uwp->id,
+                            'status' => $uwp->status,
+                            'office' => ['id' => $uwp->office?->id, 'name' => $uwp->office?->name],
+                            'period' => ['id' => $uwp->performancePeriod?->id, 'name' => $uwp->performancePeriod?->name],
+                            'supervisor' => ['id' => $uwp->creator?->id, 'name' => $uwp->creator?->name],
+                            'department_head' => ['id' => $uwp->office?->head?->id, 'name' => $uwp->office?->head?->name],
+                            'functions' => $uwp->uwpFunctions->map(function ($fn) {
+                                return [
+                                    'id' => $fn->id,
+                                    'name' => $fn->name,
+                                    'function_type' => $fn->function_type,
+                                    'weight_percent' => (string) ($fn->weight_percent ?? ''),
+                                    'mfos' => $fn->mfos->map(function ($mfo) {
+                                        return [
+                                            'id' => $mfo->id,
+                                            'title' => $mfo->title,
+                                            'target_timeline' => $mfo->target_timeline,
+                                            'weight_percent' => (string) ($mfo->weight_percent ?? ''),
+                                            'success_indicators' => $mfo->successIndicators->map(function ($si) {
+                                                $standardsByRating = [];
+                                                foreach ([5, 4, 3, 2, 1] as $r) {
+                                                    $standardsByRating[(string) $r] = ['Q' => [], 'E' => [], 'T' => []];
+                                                }
+                                                foreach ($si->qetStandards as $st) {
+                                                    $dim = strtolower((string) $st->dimension);
+                                                    $rating = (string) $st->rating;
+                                                    if (!isset($standardsByRating[$rating])) continue;
+                                                    if (in_array($dim, ['q', 'quality'], true)) $standardsByRating[$rating]['Q'][] = $st->standard_text;
+                                                    if (in_array($dim, ['e', 'efficiency'], true)) $standardsByRating[$rating]['E'][] = $st->standard_text;
+                                                    if (in_array($dim, ['t', 'timeliness'], true)) $standardsByRating[$rating]['T'][] = $st->standard_text;
+                                                }
+                                                $assignees = $si->assignments->map(fn ($a) => $a->employee?->name)->filter()->values()->all();
+                                                return [
+                                                    'id' => $si->id,
+                                                    'indicator_text' => $si->indicator_text,
+                                                    'assignees' => $assignees,
+                                                    'standards_by_rating' => $standardsByRating,
+                                                ];
+                                            })->values()->all(),
+                                        ];
+                                    })->values()->all(),
+                                ];
+                            })->values()->all(),
+                        ];
+                        $badge = match($uwp->status) {
+                            'draft' => ['bg' => 'bg-slate-500/10', 'text' => 'text-slate-200', 'border' => 'border-slate-500/20', 'label' => 'Draft'],
+                            'submitted' => ['bg' => 'bg-blue-500/10', 'text' => 'text-blue-300', 'border' => 'border-blue-500/20', 'label' => 'Submitted'],
+                            'endorsed' => ['bg' => 'bg-emerald-500/10', 'text' => 'text-emerald-300', 'border' => 'border-emerald-500/20', 'label' => 'Endorsed'],
+                            'pmt_approved' => ['bg' => 'bg-teal-500/10', 'text' => 'text-teal-300', 'border' => 'border-teal-500/20', 'label' => 'PMT Approved'],
+                            'returned' => ['bg' => 'bg-amber-500/10', 'text' => 'text-amber-300', 'border' => 'border-amber-500/20', 'label' => 'Returned'],
+                            default => ['bg' => 'bg-slate-500/10', 'text' => 'text-slate-200', 'border' => 'border-slate-500/20', 'label' => ucwords(str_replace('_', ' ', (string) $uwp->status))],
+                        };
+                    @endphp
+                    <tr class="transition hover:bg-slate-800/40">
+                        <td class="px-4 py-3 text-slate-100">{{ $uwp->office?->name ?? '—' }}</td>
+                        <td class="px-4 py-3 text-slate-300">{{ $uwp->creator?->name ?? '—' }}</td>
+                        <td class="px-4 py-3 text-center"><span class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium {{ $badge['bg'] }} {{ $badge['text'] }} {{ $badge['border'] }}">{{ $badge['label'] }}</span></td>
+                        <td class="px-4 py-3 text-center">
+                            <button type="button" data-modal-target="pmt-review-modal" data-modal-toggle="pmt-review-modal" data-uwp='@json($payload)' class="inline-flex items-center justify-center rounded-lg border border-blue-500 px-3 py-2 text-sm font-medium text-blue-300 transition hover:bg-blue-500/10">Review UWP</button>
+                        </td>
+                    </tr>
+                @empty
+                    <tr><td colspan="4" class="px-4 py-8 text-center text-sm text-slate-400">No Unit Work Plans found.</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
+<div id="pmt-review-modal" data-modal-container tabindex="-1" aria-hidden="true" class="fixed inset-0 z-50 hidden items-center justify-center">
+    <div class="absolute inset-0 bg-slate-950/80 backdrop-blur" data-modal-hide="pmt-review-modal"></div>
+    <div class="relative z-10 w-full max-w-5xl px-4">
+        <div class="w-full overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl">
+            <div class="flex items-start justify-between gap-4 border-b border-slate-800 px-6 py-4">
+                <div class="space-y-2">
+                    <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Unit Work Plan</p>
+                    <h3 class="text-lg font-semibold text-white">PMT Final Approval</h3>
+                    <div class="grid grid-cols-1 gap-3 text-sm text-slate-300 sm:grid-cols-2">
+                        <div><p class="text-xs uppercase tracking-wide text-slate-500">Office / Unit</p><p id="pmt-modal-office" class="font-medium text-slate-100">—</p></div>
+                        <div><p class="text-xs uppercase tracking-wide text-slate-500">Supervisor</p><p id="pmt-modal-supervisor" class="font-medium text-slate-100">—</p></div>
+                        <div><p class="text-xs uppercase tracking-wide text-slate-500">Performance Period</p><p id="pmt-modal-period" class="font-medium text-slate-100">—</p></div>
+                        <div><p class="text-xs uppercase tracking-wide text-slate-500">Department Head</p><p id="pmt-modal-dept-head" class="font-medium text-slate-100">—</p></div>
                     </div>
                 </div>
-
-                {{-- Modal Body --}}
-                <div class="max-h-[65vh] overflow-y-auto px-6 py-5 space-y-6">
-
-                    {{-- Metadata --}}
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
-                            <p class="text-xs uppercase text-slate-500">Office / Unit</p>
-                            <p class="mt-1 text-sm font-semibold text-white">Revenue Collection Unit</p>
-                        </div>
-                        <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
-                            <p class="text-xs uppercase text-slate-500">Department Head</p>
-                            <p class="mt-1 text-sm font-semibold text-white">Dept-head</p>
-                        </div>
-                        <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
-                            <p class="text-xs uppercase text-slate-500">Status</p>
-                            <p class="mt-1 text-sm font-semibold text-emerald-300">For PMT Approval</p>
-                        </div>
+                <button type="button" data-modal-hide="pmt-review-modal" class="text-slate-400 transition hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="px-6 py-5">
+                <div class="mb-4 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs uppercase tracking-wide text-slate-500">UWP Status</p>
+                        <span id="pmt-modal-status" class="mt-1 inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold">—</span>
                     </div>
-
-                    {{-- Planned Outputs --}}
-                    <div class="rounded-xl border border-slate-800 bg-slate-900 overflow-hidden">
-                        <div class="border-b border-slate-800 p-4">
-                            <h4 class="text-sm font-semibold text-white">Planned Outputs</h4>
-                        </div>
-
-                        <table class="min-w-full">
-                            <thead class="bg-slate-800/60">
+                </div>
+                <div class="rounded-xl border border-slate-800 bg-slate-900/70">
+                    <div class="border-b border-slate-800 px-4 py-3">
+                        <h4 class="text-sm font-medium text-slate-100">Planned Outputs</h4>
+                        <p class="mt-1 text-xs text-slate-400">Read-only reference for PMT validation.</p>
+                    </div>
+                    <div class="max-h-[52vh] overflow-y-auto overflow-x-auto">
+                        <table class="min-w-full text-sm">
+                            <thead class="bg-slate-800/50">
                                 <tr>
-                                    <th class="px-4 py-3 text-left text-xs uppercase text-slate-400">PPA / MFO</th>
-                                    <th class="px-4 py-3 text-center text-xs uppercase text-slate-400">Success Indicators</th>
-                                    {{-- REMOVED: Assigned Employees --}}
-                                    <th class="px-4 py-3 text-center text-xs uppercase text-slate-400">Target / Timeline</th>
-                                    <th class="px-4 py-3 text-center text-xs uppercase text-slate-400">Function</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-400">PPA / MFO</th>
+                                    <th class="px-4 py-3 text-center text-xs font-medium uppercase text-slate-400">Success Indicators</th>
+                                    <th class="px-4 py-3 text-center text-xs font-medium uppercase text-slate-400">Timeline / Target</th>
+                                    <th class="px-4 py-3 text-center text-xs font-medium uppercase text-slate-400">Function</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-800">
-                                <tr>
-                                    <td class="px-4 py-3 text-sm text-white">E-Bank Scanning and Encoding of Revenue Transactions</td>
-                                    <td class="px-4 py-3 text-sm text-center">
-                                        <div class="flex justify-center">
-                                            <button
-                                                type="button"
-                                                data-uwp-view-indicators
-                                                data-title="E-Bank Scanning and Encoding of Revenue Transactions"
-                                                data-indicators='["All e-bank transactions scanned and encoded daily","Indexing complete with no missing pages","Audit trail maintained within 24 hours"]'
-                                                class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[90px]">
-                                                <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12Z" />
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                                                </svg>
-                                                <span>(3)</span>
-                                            </button>
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-3 text-sm text-center text-white">Daily; all e-bank transactions processed within the same working day</td>
-                                    <td class="px-4 py-3 text-sm text-center">
-                                        <span class="rounded-md bg-emerald-500/10 px-2 py-1 text-xs font-medium
-                                            text-emerald-400 border border-emerald-500/20">
-                                            Core
-                                        </span>
-                                    </td>
-                                </tr>
-
-                                <tr class="hover:bg-slate-800/40 transition">
-                                    <td class="px-4 py-3 text-sm text-slate-100">Processing of over-the-counter revenue transactions</td>
-                                    <td class="px-4 py-3 text-sm text-center">
-                                        <div class="flex justify-center">
-                                            <button
-                                                type="button"
-                                                data-uwp-view-indicators
-                                                data-title="Processing of over-the-counter revenue transactions"
-                                                data-indicators='["Same-day verification of OTC transactions","95% encoded within the business day","OR validation completed daily"]'
-                                                class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[90px]">
-                                                <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12Z" />
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                                                </svg>
-                                                <span>(3)</span>
-                                            </button>
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-3 text-sm text-center text-slate-100">Daily; 95% processed within the same working day</td>
-                                    <td class="px-4 py-3 text-sm text-center">
-                                        <span class="px-2 py-1 rounded-md text-xs font-medium bg-blue-500/10 text-blue-300 border border-blue-400/30">
-                                            Core
-                                        </span>
-                                    </td>
-                                </tr>
-
-                                <tr class="hover:bg-slate-800/40 transition">
-                                    <td class="px-4 py-3 text-sm text-slate-100">Maintenance of Revenue Records Filing System</td>
-                                    <td class="px-4 py-3 text-sm text-center">
-                                        <div class="flex justify-center">
-                                            <button
-                                                type="button"
-                                                data-uwp-view-indicators
-                                                data-title="Maintenance of Revenue Records Filing System"
-                                                data-indicators='["Weekly filing updated and retrievable","Digital backups synced monthly","Retrieval logs maintained for audits"]'
-                                                class="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[90px]">
-                                                <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12Z" />
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                                                </svg>
-                                                <span>(3)</span>
-                                            </button>
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-3 text-sm text-center text-slate-100">Quarterly validation and update</td>
-                                    <td class="px-4 py-3 text-sm text-center">
-                                        <span class="px-2 py-1 rounded-md text-xs font-medium bg-blue-500/10 text-blue-300 border border-blue-400/30">
-                                            Support
-                                        </span>
-                                    </td>
-                                </tr>
-
-                            </tbody>
+                            <tbody id="pmt-outputs-tbody" class="divide-y divide-slate-800"></tbody>
                         </table>
                     </div>
-
                 </div>
-
-                <div class="flex flex-wrap items-center justify-between border-t border-slate-800 px-6 py-4">
-                    <p class="text-xs text-slate-500">
-                        PMT decision is final and will lock the Unit Work Plan.
-                    </p>
-
-                    <div class="flex items-center gap-3">
-                        <button
-                            type="button"
-                            onclick="openPmtReturnModal()"
-                            class="inline-flex items-center gap-2
-                                rounded-lg border border-rose-500/30 bg-rose-600/10 px-4 py-2
-                                text-sm font-semibold text-rose-300
-                                hover:bg-rose-600/20 transition">
-                            <span>Return to Dept Head</span>
+            </div>
+            <div class="flex items-center justify-between border-t border-slate-800 px-6 py-4">
+                <p class="text-xs text-slate-500">Final approval permanently locks this UWP.</p>
+                <div class="flex items-center gap-3">
+                    <button type="button" data-modal-hide="pmt-review-modal" class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-slate-800/80">Close</button>
+                    <form id="pmt-approve-form" method="POST" action="{{ route('pmt.uwp.approve') }}">
+                        @csrf
+                        <input type="hidden" name="unit_work_plan_id" id="pmt-modal-uwp-id" value="">
+                        <button type="submit" id="btn-approve-uwp" data-loading-text="Approving..." class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500">
+                            <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                            <span data-button-label>Approve UWP</span>
                         </button>
-
-                        <button
-                            type="button"
-                            data-admin-loading="true"
-                            data-loading-text="Approving..."
-                            class="inline-flex items-center gap-2
-                                rounded-lg bg-emerald-600 px-4 py-2
-                                text-sm font-semibold text-white
-                                hover:bg-emerald-500 transition">
-                            <span data-button-spinner
-                                class="hidden h-4 w-4 animate-spin rounded-full
-                                        border-2 border-white/40 border-t-white"></span>
-                            <span data-button-label>Approve (Final)</span>
-                        </button>
-                    </div>
-
+                    </form>
                 </div>
-
             </div>
         </div>
     </div>
+</div>
 
-    {{-- ========================= --}}
-    {{-- SUCCESS INDICATORS MODAL (NOW INCLUDES ASSIGNEES) --}}
-    {{-- ========================= --}}
-    <div id="uwp-indicators-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 px-4 py-6">
-        <div class="w-full max-w-3xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
-            <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
+<div id="pmt-indicators-modal" data-modal-container tabindex="-1" aria-hidden="true" class="fixed inset-0 z-50 hidden items-center justify-center">
+    <div class="absolute inset-0 bg-slate-950/80 backdrop-blur" data-modal-hide="pmt-indicators-modal"></div>
+    <div class="relative z-10 w-full max-w-4xl px-4">
+        <div class="rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl">
+            <div class="flex items-start justify-between gap-3 border-b border-slate-800 px-6 py-4">
                 <div>
                     <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Success Indicators</p>
-                    <h3 id="uwp-indicators-title" class="text-lg font-semibold text-white">--</h3>
-                    <p class="text-xs text-slate-400 mt-1">Read-only list of indicators for this output.</p>
+                    <h3 id="pmt-indicators-title" class="text-lg font-semibold text-white">--</h3>
+                    <p class="mt-1 text-xs text-slate-400">Read-only indicator details for this MFO.</p>
                 </div>
-                <button type="button" onclick="closePmtIndicatorsModal()" class="text-slate-400 hover:text-white">
-                    <span class="sr-only">Close</span>
-                    &times;
-                </button>
+                <button type="button" data-modal-hide="pmt-indicators-modal" class="text-slate-400 hover:text-white">&times;</button>
             </div>
-
-            <div class="mt-4 max-h-64 overflow-y-auto rounded-lg border border-slate-800 bg-slate-950/70 p-3">
-                <table class="w-full text-sm text-slate-100">
-                    <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.2em] text-slate-400">
-                        <tr>
-                            <th class="px-4 py-3 text-left">Success Indicator</th>
-                            <th class="px-4 py-3 text-center">Standards</th>
-                            <th class="px-4 py-3 text-center">Assigned Employees</th>
-                        </tr>
-                    </thead>
-                    <tbody id="uwp-indicators-table-body" class="divide-y divide-slate-800"></tbody>
-                </table>
-            </div>
-
-            <div class="mt-5 flex justify-end">
-                <button type="button"
-                        class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800"
-                        onclick="closePmtIndicatorsModal()">
-                    Close
-                </button>
+            <div class="px-6 py-5">
+                <div class="overflow-hidden rounded-xl border border-slate-800 bg-slate-950/70">
+                    <div class="max-h-[380px] overflow-y-auto">
+                        <table class="w-full text-sm text-slate-100">
+                            <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.2em] text-slate-400">
+                                <tr>
+                                    <th class="px-4 py-3 text-left">Success Indicator</th>
+                                    <th class="px-4 py-3 text-center">Standards</th>
+                                    <th class="px-4 py-3 text-center">Assigned Employee</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pmt-indicators-table-body" class="divide-y divide-slate-800"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="mt-4 flex justify-end"><button type="button" data-modal-hide="pmt-indicators-modal" class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">Close</button></div>
             </div>
         </div>
     </div>
-
-    {{-- ========================= --}}
-    {{-- STANDARDS MODAL --}}
-    {{-- ========================= --}}
-    <div id="pmt-standards-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 px-4 py-6">
-        <div class="w-full max-w-3xl rounded-2xl border border-slate-800 bg-slate-950 p-5 shadow-2xl">
-            <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
+</div>
+<div id="pmt-standards-modal" data-modal-container tabindex="-1" aria-hidden="true" class="fixed inset-0 z-50 hidden items-center justify-center">
+    <div class="absolute inset-0 bg-slate-950/80 backdrop-blur" data-modal-hide="pmt-standards-modal"></div>
+    <div class="relative z-10 w-full max-w-4xl px-4">
+        <div class="rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl">
+            <div class="flex items-start justify-between gap-3 border-b border-slate-800 px-6 py-4">
                 <div>
                     <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Standards (Q/E/T)</p>
-                    <h3 class="text-lg font-semibold text-white">Standards (Q/E/T)</h3>
-                    <p class="text-xs text-slate-400 mt-1">View target difficulty per success indicator.</p>
+                    <h3 class="text-lg font-semibold text-white">Target Difficulty / Standards</h3>
+                    <p class="mt-1 text-xs text-slate-400">MFO: <span id="pmt-standards-mfo" class="font-semibold text-slate-100">--</span></p>
+                    <p class="mt-1 text-xs text-slate-400">Indicator: <span id="pmt-standards-indicator" class="font-semibold text-slate-100">--</span></p>
                 </div>
-                <button type="button" onclick="closePmtStandardsModal()" class="text-slate-400 hover:text-white">
-                    <span class="sr-only">Close</span>
-                    &times;
-                </button>
+                <button type="button" data-modal-hide="pmt-standards-modal" class="text-slate-400 hover:text-white">&times;</button>
             </div>
-
-            <div class="mt-5 space-y-4">
-                <div>
-                    <p class="text-xs uppercase tracking-[0.2em] text-slate-500">MFO</p>
-                    <p class="text-sm font-semibold text-white" data-standards-mfo>--</p>
-                </div>
-
-                <div>
-                    <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Indicator</p>
-                    <p class="text-sm font-semibold text-white" data-standards-indicator>--</p>
-                </div>
-
-                <div class="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/40">
-                    <table class="min-w-full text-sm text-slate-100">
-                        <thead class="bg-slate-900/80 text-xs uppercase tracking-[0.2em] text-slate-400">
+            <div class="px-6 py-5">
+                <div class="overflow-hidden rounded-xl border border-slate-800 bg-slate-950/70">
+                    <table class="w-full text-sm text-slate-100">
+                        <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.2em] text-slate-400">
                             <tr>
                                 <th class="px-4 py-3 text-left">Rating</th>
                                 <th class="px-4 py-3 text-left">Quality (Q)</th>
@@ -343,455 +238,294 @@
                                 <th class="px-4 py-3 text-left">Timeliness (T)</th>
                             </tr>
                         </thead>
-                        <tbody data-standards-body class="divide-y divide-slate-800">
-                        </tbody>
+                        <tbody id="pmt-standards-table-body" class="divide-y divide-slate-800"></tbody>
                     </table>
                 </div>
-            </div>
-
-            <div class="mt-5 flex justify-end">
-                <button type="button"
-                        class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800"
-                        onclick="closePmtStandardsModal()">
-                    Close
-                </button>
+                <div class="mt-4 flex justify-end"><button type="button" data-modal-hide="pmt-standards-modal" class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">Close</button></div>
             </div>
         </div>
     </div>
+</div>
 
-    {{-- ========================= --}}
-    {{-- ASSIGNEES MODAL (NOW PER INDICATOR) --}}
-    {{-- ========================= --}}
-    <div id="pmt-assignees-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 px-4 py-6">
-        <div class="w-full max-w-2xl rounded-2xl border border-slate-800 bg-slate-950 p-5 shadow-2xl">
-            <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
+<div id="pmt-assignees-modal" data-modal-container tabindex="-1" aria-hidden="true" class="fixed inset-0 z-50 hidden items-center justify-center">
+    <div class="absolute inset-0 bg-slate-950/80 backdrop-blur" data-modal-hide="pmt-assignees-modal"></div>
+    <div class="relative z-10 w-full max-w-3xl px-4">
+        <div class="rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl">
+            <div class="flex items-start justify-between gap-3 border-b border-slate-800 px-6 py-4">
                 <div>
                     <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Assigned Employees</p>
-                    <h3 class="text-lg font-semibold text-white">Employees assigned to the selected indicator</h3>
-                    <p class="text-xs text-slate-400 mt-1">
-                        MFO: <span data-assignees-mfo class="font-semibold text-slate-100">--</span>
-                    </p>
-                    <p class="text-xs text-slate-400 mt-1">
-                        Indicator: <span data-assignees-indicator class="font-semibold text-slate-100">--</span>
-                    </p>
+                    <h3 class="text-lg font-semibold text-white">Indicator Assignments</h3>
+                    <p class="mt-1 text-xs text-slate-400">MFO: <span id="pmt-assignees-mfo" class="font-semibold text-slate-100">--</span></p>
+                    <p class="mt-1 text-xs text-slate-400">Indicator: <span id="pmt-assignees-indicator" class="font-semibold text-slate-100">--</span></p>
                 </div>
-                <button type="button" onclick="closePmtAssigneesModal()" class="text-slate-400 hover:text-white">
-                    <span class="sr-only">Close</span>
-                    &times;
-                </button>
+                <button type="button" data-modal-hide="pmt-assignees-modal" class="text-slate-400 hover:text-white">&times;</button>
             </div>
-
-            <div class="mt-4 overflow-hidden rounded-xl border border-slate-800 bg-slate-900/40">
-                <table class="min-w-full text-sm text-slate-100">
-                    <thead class="bg-slate-900/80 text-xs uppercase tracking-[0.2em] text-slate-400">
-                        <tr>
-                            <th class="px-4 py-3 text-left">Employee Name</th>
-                            <th class="px-4 py-3 text-left">Office / Unit</th>
-                            <th class="px-4 py-3 text-left">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody data-assignees-body class="divide-y divide-slate-800"></tbody>
-                </table>
-            </div>
-
-            <div class="mt-5 flex justify-end">
-                <button type="button"
-                        class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800"
-                        onclick="closePmtAssigneesModal()">
-                    Close
-                </button>
+            <div class="px-6 py-5">
+                <div class="overflow-hidden rounded-xl border border-slate-800 bg-slate-950/70">
+                    <table class="w-full text-sm text-slate-100">
+                        <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.2em] text-slate-400">
+                            <tr>
+                                <th class="px-4 py-3 text-left">Employee Name</th>
+                                <th class="px-4 py-3 text-left">Office / Unit</th>
+                                <th class="px-4 py-3 text-left">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pmt-assignees-table-body" class="divide-y divide-slate-800"></tbody>
+                    </table>
+                </div>
+                <div class="mt-4 flex justify-end"><button type="button" data-modal-hide="pmt-assignees-modal" class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">Close</button></div>
             </div>
         </div>
     </div>
+</div>
 
-    <div id="pmt-return-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 px-4 py-6">
-        <div class="w-full max-w-lg rounded-2xl border border-slate-800 bg-slate-950 p-5 shadow-2xl">
-            <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
-                <div>
-                    <p class="text-xs uppercase tracking-[0.2em] text-rose-300">Return to Dept Head</p>
-                    <h3 class="text-lg font-semibold text-white">Provide Return Remarks</h3>
-                    <p class="text-xs text-slate-400 mt-1">This will send the UWP back to the Department Head for revision.</p>
-                </div>
-                <button type="button" onclick="closePmtReturnModal()" class="text-slate-400 hover:text-white">
-                    <span class="sr-only">Close</span>
-                    &times;
-                </button>
-            </div>
+@push('scripts')
+<script>
+    let selectedUwp = null;
+    const ratingLevels = [5, 4, 3, 2, 1];
 
-            <div class="mt-4 space-y-3">
-                <label class="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                    Remarks <span class="text-rose-300">*</span>
-                </label>
-                <textarea
-                    id="pmt-return-remarks"
-                    rows="4"
-                    style="background:#0f172a;color:#e5e7eb;"
-                    required
-                    class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:ring-2 focus:ring-rose-500 focus:outline-none"
-                    placeholder="State the reason for return and required revisions."></textarea>
-            </div>
+    function escapeHtml(str) {
+        return String(str ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;');
+    }
+    function labelStatus(status) {
+        const s = String(status || '').toLowerCase();
+        if (!s) return '—';
+        return s.replaceAll('_', ' ').replace(/\b\w/g, (char) => char.toUpperCase());
+    }
+    function statusBadgeClass(status) {
+        return {
+            draft: 'border-slate-500/30 bg-slate-500/10 text-slate-200',
+            submitted: 'border-blue-500/30 bg-blue-500/10 text-blue-300',
+            endorsed: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300',
+            pmt_approved: 'border-teal-500/30 bg-teal-500/10 text-teal-300',
+            returned: 'border-amber-500/30 bg-amber-500/10 text-amber-300',
+        }[String(status || '').toLowerCase()] || 'border-slate-500/30 bg-slate-500/10 text-slate-200';
+    }
+    function functionBadge(type) {
+        const t = String(type || '').toLowerCase();
+        if (t === 'core') return '<span class="inline-flex rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-xs font-semibold text-emerald-300">Core</span>';
+        if (t === 'support') return '<span class="inline-flex rounded-md border border-blue-500/30 bg-blue-500/10 px-2 py-1 text-xs font-semibold text-blue-300">Support</span>';
+        return '<span class="inline-flex rounded-md border border-slate-500/30 bg-slate-500/10 px-2 py-1 text-xs font-semibold text-slate-200">' + escapeHtml(labelStatus(type)) + '</span>';
+    }
+    function openModalById(id) { const modal = document.getElementById(id); if (!modal) return; modal.classList.remove('hidden'); modal.classList.add('flex'); document.body.classList.add('overflow-hidden'); }
+    function closeModalById(id) { const modal = document.getElementById(id); if (!modal) return; modal.classList.add('hidden'); modal.classList.remove('flex'); if (!document.querySelector('[data-modal-container].flex')) document.body.classList.remove('overflow-hidden'); }
+    function openReviewModal(uwp) {
+        selectedUwp = uwp || null;
+        const office = selectedUwp?.office?.name || '—';
+        const supervisor = selectedUwp?.supervisor?.name || '—';
+        const period = selectedUwp?.period?.name || '—';
+        const deptHead = selectedUwp?.department_head?.name || '—';
+        const status = selectedUwp?.status || '';
 
-            <div class="mt-5 flex items-center justify-end gap-3">
-                <button type="button"
-                        class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800"
-                        onclick="closePmtReturnModal()">
-                    Cancel
-                </button>
-                <button type="button"
-                        data-admin-loading="true"
-                        data-loading-text="Returning..."
-                        class="inline-flex items-center gap-2 rounded-lg border border-rose-500/30 bg-rose-600/10 px-4 py-2 text-sm font-semibold text-rose-200 transition hover:bg-rose-600/20"
-                        onclick="submitPmtReturn()">
-                    <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-rose-200/40 border-t-rose-200"></span>
-                    <span data-button-label>Confirm Return</span>
-                </button>
-            </div>
-        </div>
-    </div>
+        document.getElementById('pmt-modal-office').textContent = office;
+        document.getElementById('pmt-modal-supervisor').textContent = supervisor;
+        document.getElementById('pmt-modal-period').textContent = period;
+        document.getElementById('pmt-modal-dept-head').textContent = deptHead;
 
-    @push('scripts')
-        <script>
-            (function initPmtIndicatorsModal() {
-                const modal = document.getElementById('uwp-indicators-modal');
-                const titleEl = document.getElementById('uwp-indicators-title');
-                const tableBody = document.getElementById('uwp-indicators-table-body');
+        const statusEl = document.getElementById('pmt-modal-status');
+        statusEl.textContent = labelStatus(status);
+        statusEl.className = 'mt-1 inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ' + statusBadgeClass(status);
 
-                // DEMO: all indicators have 1 assignee (Ramon Reyes)
-                const DEMO_ASSIGNEES = ['Ramon Reyes'];
-                const DEMO_UNIT = 'Revenue Collection Unit';
+        const idInput = document.getElementById('pmt-modal-uwp-id');
+        if (idInput) idInput.value = selectedUwp?.id || '';
 
-                window.closePmtIndicatorsModal = function () {
-                    if (!modal) return;
-                    modal.classList.add('hidden');
-                    modal.classList.remove('flex');
-                    document.body.classList.remove('overflow-hidden');
-                };
+        const approveBtn = document.getElementById('btn-approve-uwp');
+        if (approveBtn) {
+            const canApprove = String(status).toLowerCase() === 'endorsed';
+            approveBtn.classList.toggle('hidden', !canApprove);
+            approveBtn.disabled = !canApprove;
+        }
 
-                function openIndicatorsModal(title, mfoTitle, indicators) {
-                    if (!modal || !titleEl || !tableBody) return;
+        renderOutputsTable(selectedUwp?.functions || []);
+        openModalById('pmt-review-modal');
+    }
 
-                    titleEl.textContent = title || '--';
-                    tableBody.innerHTML = '';
+    function renderOutputsTable(functions) {
+        const tbody = document.getElementById('pmt-outputs-tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
 
-                    (indicators || []).forEach((text) => {
-                        const value = (text || '').trim();
-                        if (!value) return;
+        (Array.isArray(functions) ? functions : []).forEach((fn) => {
+            const mfos = Array.isArray(fn.mfos) ? fn.mfos : [];
+            mfos.forEach((mfo) => {
+                const indicators = Array.isArray(mfo.success_indicators) ? mfo.success_indicators : [];
 
-                        const tr = document.createElement('tr');
-                        tr.className = 'hover:bg-slate-900/40';
+                const tr = document.createElement('tr');
+                tr.className = 'transition hover:bg-slate-800/40';
 
-                        // Indicator text
-                        const indicatorTd = document.createElement('td');
-                        indicatorTd.className = 'px-4 py-3 text-sm text-slate-100';
-                        indicatorTd.textContent = value;
+                const tdTitle = document.createElement('td');
+                tdTitle.className = 'px-4 py-3 text-slate-100';
+                tdTitle.textContent = mfo.title || '—';
 
-                        // Standards button
-                        const standardsTd = document.createElement('td');
-                        standardsTd.className = 'px-4 py-3 text-center';
+                const tdIndicators = document.createElement('td');
+                tdIndicators.className = 'px-4 py-3 text-center';
+                const indicatorsBtn = document.createElement('button');
+                indicatorsBtn.type = 'button';
+                indicatorsBtn.className = 'inline-flex items-center gap-1.5 text-blue-300 transition hover:text-blue-200';
+                indicatorsBtn.innerHTML = '<i class="fa-regular fa-eye text-sm"></i><span>(' + indicators.length + ')</span>';
+                indicatorsBtn.addEventListener('click', () => openIndicatorsModal(mfo.title || '--', selectedUwp?.office?.name || '—', indicators));
+                tdIndicators.appendChild(indicatorsBtn);
 
-                        const standardsBtn = document.createElement('button');
-                        standardsBtn.type = 'button';
-                        standardsBtn.className = 'inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[120px]';
-                        standardsBtn.innerHTML = '<i class="fa-regular fa-eye text-sm"></i><span>View Standards</span>';
-                        standardsBtn.dataset.mfoTitle = mfoTitle || '';
-                        standardsBtn.dataset.indicator = value;
-                        standardsBtn.addEventListener('click', () => {
-                            if (window.openPmtStandardsModal) {
-                                window.openPmtStandardsModal(standardsBtn.dataset.mfoTitle, standardsBtn.dataset.indicator);
-                            }
-                        });
-                        standardsTd.appendChild(standardsBtn);
+                const tdTimeline = document.createElement('td');
+                tdTimeline.className = 'px-4 py-3 text-center text-slate-200';
+                tdTimeline.textContent = mfo.target_timeline || '—';
 
-                        // Assignees button (per indicator)
-                        const assigneesTd = document.createElement('td');
-                        assigneesTd.className = 'px-4 py-3 text-center';
+                const tdFn = document.createElement('td');
+                tdFn.className = 'px-4 py-3 text-center';
+                tdFn.innerHTML = functionBadge(fn.function_type);
 
-                        const assigneesBtn = document.createElement('button');
-                        assigneesBtn.type = 'button';
-                        assigneesBtn.className = 'inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[110px]';
-                        assigneesBtn.innerHTML = '<i class="fa-regular fa-eye text-sm"></i><span>View (' + (DEMO_ASSIGNEES.length) + ')</span>';
-                        assigneesBtn.addEventListener('click', () => {
-                            if (window.openPmtAssigneesModal) {
-                                window.openPmtAssigneesModal(mfoTitle || '', value, DEMO_UNIT, DEMO_ASSIGNEES);
-                            }
-                        });
-                        assigneesTd.appendChild(assigneesBtn);
+                tr.append(tdTitle, tdIndicators, tdTimeline, tdFn);
+                tbody.appendChild(tr);
+            });
+        });
+    }
 
-                        tr.append(indicatorTd, standardsTd, assigneesTd);
-                        tableBody.appendChild(tr);
-                    });
+    function openIndicatorsModal(mfoTitle, unitName, indicators) {
+        const titleEl = document.getElementById('pmt-indicators-title');
+        const tbody = document.getElementById('pmt-indicators-table-body');
+        if (!titleEl || !tbody) return;
 
-                    modal.classList.remove('hidden');
-                    modal.classList.add('flex');
-                    document.body.classList.add('overflow-hidden');
-                }
+        titleEl.textContent = mfoTitle || '--';
+        tbody.innerHTML = '';
 
-                document.querySelectorAll('[data-uwp-view-indicators]').forEach((btn) => {
-                    btn.addEventListener('click', () => {
-                        let indicators = [];
-                        try {
-                            indicators = JSON.parse(btn.dataset.indicators || '[]');
-                        } catch (e) {
-                            indicators = [];
-                        }
-                        openIndicatorsModal(btn.dataset.title || '--', btn.dataset.title || '', indicators);
-                    });
-                });
-            })();
+        (Array.isArray(indicators) ? indicators : []).forEach((indicator) => {
+            const text = indicator?.indicator_text || '—';
+            const assignees = Array.isArray(indicator?.assignees) ? indicator.assignees : [];
+            const standardsByRating = indicator?.standards_by_rating || {};
 
-            (function initPmtReturnModal() {
-                const modal = document.getElementById('pmt-return-modal');
-                const remarks = document.getElementById('pmt-return-remarks');
+            const tr = document.createElement('tr');
+            tr.className = 'transition hover:bg-slate-900/40';
 
-                window.openPmtReturnModal = function () {
-                    if (!modal) return;
-                    modal.classList.remove('hidden');
-                    modal.classList.add('flex');
-                    document.body.classList.add('overflow-hidden');
-                    if (remarks) {
-                        remarks.value = '';
-                        setTimeout(() => remarks.focus(), 50);
-                    }
-                };
+            const tdText = document.createElement('td');
+            tdText.className = 'px-4 py-3 text-slate-100';
+            tdText.textContent = text;
 
-                window.closePmtReturnModal = function () {
-                    if (!modal) return;
-                    modal.classList.add('hidden');
-                    modal.classList.remove('flex');
-                    document.body.classList.remove('overflow-hidden');
-                };
+            const tdStandards = document.createElement('td');
+            tdStandards.className = 'px-4 py-3 text-center';
+            const standardsBtn = document.createElement('button');
+            standardsBtn.type = 'button';
+            standardsBtn.className = 'inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:bg-slate-800';
+            standardsBtn.innerHTML = '<i class="fa-regular fa-eye text-sm"></i><span>View Standards</span>';
+            standardsBtn.addEventListener('click', () => openStandardsModal(mfoTitle, text, standardsByRating));
+            tdStandards.appendChild(standardsBtn);
 
-                window.submitPmtReturn = function () {
-                    if (!modal || !remarks) return;
-                    if (!remarks.value.trim()) {
-                        remarks.focus();
-                        return;
-                    }
-                    const confirmBtn = modal.querySelector('[onclick="submitPmtReturn()"]');
-                    if (confirmBtn && confirmBtn.dataset.adminLoading) {
-                        const label = confirmBtn.querySelector('[data-button-label]');
-                        const spinner = confirmBtn.querySelector('[data-button-spinner]');
-                        confirmBtn.disabled = true;
-                        confirmBtn.classList.add('opacity-70', 'cursor-wait');
-                        if (spinner) spinner.classList.remove('hidden');
-                        if (label && confirmBtn.dataset.loadingText) label.textContent = confirmBtn.dataset.loadingText;
-                        setTimeout(() => {
-                            if (spinner) spinner.classList.add('hidden');
-                            if (label && confirmBtn.dataset.loadingText) label.textContent = 'Confirm Return';
-                            confirmBtn.disabled = false;
-                            confirmBtn.classList.remove('opacity-70', 'cursor-wait');
-                            closePmtReturnModal();
-                        }, 900);
-                    } else {
-                        closePmtReturnModal();
-                    }
-                };
-            })();
+            const tdAssignees = document.createElement('td');
+            tdAssignees.className = 'px-4 py-3 text-center';
+            const assigneesBtn = document.createElement('button');
+            assigneesBtn.type = 'button';
+            assigneesBtn.className = 'inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:bg-slate-800';
+            assigneesBtn.innerHTML = '<i class="fa-regular fa-eye text-sm"></i><span>View (' + assignees.length + ')</span>';
+            assigneesBtn.addEventListener('click', () => openAssigneesModal(mfoTitle, text, unitName, assignees));
+            tdAssignees.appendChild(assigneesBtn);
 
-            (function initPmtStandardsModal() {
-                const modal = document.getElementById('pmt-standards-modal');
-                const mfoEl = modal?.querySelector('[data-standards-mfo]');
-                const indicatorEl = modal?.querySelector('[data-standards-indicator]');
-                const bodyEl = modal?.querySelector('[data-standards-body]');
-                const ratings = [5, 4, 3, 2, 1];
+            tr.append(tdText, tdStandards, tdAssignees);
+            tbody.appendChild(tr);
+        });
 
-                const standardsSeedMap = {
-                    'All e-bank transactions scanned and encoded daily': {
-                        '5': { q: ['No errors; accurate encoding'], e: ['100% processed'], t: ['Same working day'] },
-                        '4': { q: ['1–2 minor errors'], e: ['100% processed'], t: ['Same working day'] },
-                        '3': { q: ['3–4 minor errors'], e: ['95–99% processed'], t: ['By end of working day'] },
-                        '2': { q: ['Major errors'], e: ['<95% processed'], t: ['Beyond working day'] },
-                        '1': { q: ['Unacceptable / not done'], e: ['Majority unprocessed'], t: ['Not within acceptable time'] },
-                    },
-                    'Indexing complete with no missing pages': {
-                        '5': { q: ['Indexing fully verified, zero gaps'], e: ['100% pages indexed'], t: ['Same day'] },
-                        '4': { q: ['Minor indexing rechecks'], e: ['100% pages indexed'], t: ['Same day'] },
-                        '3': { q: ['Occasional missing indexes fixed'], e: ['95–99% indexed'], t: ['Within 24 hours'] },
-                        '2': { q: ['Frequent missing pages'], e: ['<95% indexed'], t: ['Beyond 24 hours'] },
-                        '1': { q: ['Indexing largely incomplete'], e: ['Major gaps'], t: ['Unacceptable'] },
-                    },
-                    'Audit trail maintained within 24 hours': {
-                        '5': { q: ['Complete trail, no errors'], e: ['100% entries captured'], t: ['Within 24 hours'] },
-                        '4': { q: ['Minor corrections only'], e: ['100% entries captured'], t: ['Within 24 hours'] },
-                        '3': { q: ['Some gaps corrected'], e: ['95–99% entries captured'], t: ['Within 48 hours'] },
-                        '2': { q: ['Multiple missing logs'], e: ['<95% captured'], t: ['Beyond 48 hours'] },
-                        '1': { q: ['Trail missing'], e: ['Majority uncaptured'], t: ['Unacceptable'] },
-                    },
-                    'Same-day verification of OTC transactions': {
-                        '5': { q: ['Verified without discrepancies'], e: ['100% OTC verified'], t: ['Same working day'] },
-                        '4': { q: ['Minor verifications pending'], e: ['100% OTC verified'], t: ['Same working day'] },
-                        '3': { q: ['Few pending verifications'], e: ['95–99% verified'], t: ['End of working day'] },
-                        '2': { q: ['Several unverified'], e: ['<95% verified'], t: ['Beyond working day'] },
-                        '1': { q: ['Verification not done'], e: ['Majority unverified'], t: ['Unacceptable'] },
-                    },
-                    '95% encoded within the business day': {
-                        '5': { q: ['Encodings error-free'], e: ['100% encoded'], t: ['Same business day'] },
-                        '4': { q: ['Minor corrections'], e: ['100% encoded'], t: ['Same business day'] },
-                        '3': { q: ['Few delays'], e: ['95–99% encoded'], t: ['By end of day'] },
-                        '2': { q: ['Multiple delays'], e: ['<95% encoded'], t: ['Next day'] },
-                        '1': { q: ['Encoding largely incomplete'], e: ['Major backlog'], t: ['Unacceptable'] },
-                    },
-                    'OR validation completed daily': {
-                        '5': { q: ['All ORs validated error-free'], e: ['100% validated'], t: ['Daily'] },
-                        '4': { q: ['Minor issues corrected same day'], e: ['100% validated'], t: ['Daily'] },
-                        '3': { q: ['Some validations late'], e: ['95–99% validated'], t: ['Within 48 hours'] },
-                        '2': { q: ['Frequent late validations'], e: ['<95% validated'], t: ['Beyond 48 hours'] },
-                        '1': { q: ['Validations mostly missing'], e: ['Majority unvalidated'], t: ['Unacceptable'] },
-                    },
-                    'Weekly filing updated and retrievable': {
-                        '5': { q: ['Zero retrieval issues'], e: ['100% weekly updates'], t: ['Within week'] },
-                        '4': { q: ['Minor retrieval fixes'], e: ['100% weekly updates'], t: ['Within week'] },
-                        '3': { q: ['Some items late'], e: ['95–99% updates'], t: ['Within next week'] },
-                        '2': { q: ['Many late updates'], e: ['<95% updates'], t: ['Beyond next week'] },
-                        '1': { q: ['Updates not done'], e: ['Major gaps'], t: ['Unacceptable'] },
-                    },
-                    'Digital backups synced monthly': {
-                        '5': { q: ['Backups verified'], e: ['100% synced'], t: ['Within month'] },
-                        '4': { q: ['Minor sync corrections'], e: ['100% synced'], t: ['Within month'] },
-                        '3': { q: ['Some delays'], e: ['95–99% synced'], t: ['Within following week'] },
-                        '2': { q: ['Frequent delays'], e: ['<95% synced'], t: ['Beyond following week'] },
-                        '1': { q: ['Backups largely missing'], e: ['Major gaps'], t: ['Unacceptable'] },
-                    },
-                    'Retrieval logs maintained for audits': {
-                        '5': { q: ['Logs complete and audit-ready'], e: ['100% requests logged'], t: ['Same day'] },
-                        '4': { q: ['Minor log gaps corrected'], e: ['100% requests logged'], t: ['Same day'] },
-                        '3': { q: ['Some gaps'], e: ['95–99% logged'], t: ['Within 48 hours'] },
-                        '2': { q: ['Many gaps'], e: ['<95% logged'], t: ['Beyond 48 hours'] },
-                        '1': { q: ['Logs largely missing'], e: ['Majority unlogged'], t: ['Unacceptable'] },
-                    },
-                };
+        openModalById('pmt-indicators-modal');
+    }
 
-                function closeModal() {
-                    if (!modal) return;
-                    modal.classList.add('hidden');
-                    modal.classList.remove('flex');
-                    document.body.classList.remove('overflow-hidden');
-                }
+    function renderStandardList(items) {
+        const values = Array.isArray(items) ? items : [];
+        if (!values.length) return '—';
+        const ul = document.createElement('ul');
+        ul.className = 'list-disc space-y-1 pl-4 text-slate-200';
+        values.forEach((item) => { const li = document.createElement('li'); li.textContent = item; ul.appendChild(li); });
+        const wrapper = document.createElement('div'); wrapper.appendChild(ul); return wrapper.innerHTML;
+    }
 
-                function showModal() {
-                    if (!modal) return;
-                    modal.classList.remove('hidden');
-                    modal.classList.add('flex');
-                    document.body.classList.add('overflow-hidden');
-                }
+    function openStandardsModal(mfoTitle, indicatorText, standardsByRating) {
+        document.getElementById('pmt-standards-mfo').textContent = mfoTitle || '--';
+        document.getElementById('pmt-standards-indicator').textContent = indicatorText || '--';
+        const tbody = document.getElementById('pmt-standards-table-body');
+        if (!tbody) return;
+        tbody.innerHTML = '';
 
-                function renderStandards(indicator) {
-                    if (!bodyEl) return;
-                    indicatorEl && (indicatorEl.textContent = indicator || '--');
-                    bodyEl.innerHTML = '';
+        ratingLevels.forEach((level) => {
+            const row = standardsByRating?.[String(level)] || { Q: [], E: [], T: [] };
+            const tr = document.createElement('tr');
+            tr.className = 'transition hover:bg-slate-900/40';
+            tr.innerHTML = `
+                <td class="px-4 py-3 font-semibold">${level}</td>
+                <td class="px-4 py-3 align-top">${renderStandardList(row.Q || row.q || [])}</td>
+                <td class="px-4 py-3 align-top">${renderStandardList(row.E || row.e || [])}</td>
+                <td class="px-4 py-3 align-top">${renderStandardList(row.T || row.t || [])}</td>
+            `;
+            tbody.appendChild(tr);
+        });
 
-                    ratings.forEach((level) => {
-                        const data = standardsSeedMap[indicator]?.[String(level)] || {};
+        openModalById('pmt-standards-modal');
+    }
 
-                        const row = document.createElement('tr');
-                        row.className = 'hover:bg-slate-900/40';
+    function openAssigneesModal(mfoTitle, indicatorText, unitName, assignees) {
+        document.getElementById('pmt-assignees-mfo').textContent = mfoTitle || '--';
+        document.getElementById('pmt-assignees-indicator').textContent = indicatorText || '--';
+        const tbody = document.getElementById('pmt-assignees-table-body');
+        if (!tbody) return;
+        tbody.innerHTML = '';
 
-                        const ratingCell = document.createElement('td');
-                        ratingCell.className = 'px-4 py-3 font-semibold';
-                        ratingCell.textContent = level;
+        const list = Array.isArray(assignees) ? assignees : [];
+        if (!list.length) {
+            tbody.innerHTML = '<tr><td colspan="3" class="px-4 py-6 text-slate-400">No assigned employees.</td></tr>';
+            openModalById('pmt-assignees-modal');
+            return;
+        }
 
-                        const makeList = (items) => {
-                            const td = document.createElement('td');
-                            td.className = 'px-4 py-3 align-top';
-                            const listItems = Array.isArray(items) ? items : [];
-                            if (!listItems.length) {
-                                td.textContent = '—';
-                                return td;
-                            }
-                            const ul = document.createElement('ul');
-                            ul.className = 'list-disc space-y-1 pl-4 text-slate-200';
-                            listItems.forEach((value) => {
-                                const li = document.createElement('li');
-                                li.textContent = value;
-                                ul.appendChild(li);
-                            });
-                            td.appendChild(ul);
-                            return td;
-                        };
+        list.forEach((name) => {
+            const tr = document.createElement('tr');
+            tr.className = 'transition hover:bg-slate-900/40';
+            tr.innerHTML = `<td class="px-4 py-3 text-slate-100">${escapeHtml(name)}</td><td class="px-4 py-3 text-slate-300">${escapeHtml(unitName || '—')}</td><td class="px-4 py-3"><span class="inline-flex rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300">Assigned</span></td>`;
+            tbody.appendChild(tr);
+        });
 
-                        row.append(
-                            ratingCell,
-                            makeList(data.q),
-                            makeList(data.e),
-                            makeList(data.t)
-                        );
+        openModalById('pmt-assignees-modal');
+    }
 
-                        bodyEl.appendChild(row);
-                    });
-                }
+    function initReviewTriggers() {
+        document.querySelectorAll('[data-modal-target="pmt-review-modal"][data-uwp]').forEach((button) => {
+            button.addEventListener('click', () => {
+                let uwp = null;
+                try { uwp = JSON.parse(button.getAttribute('data-uwp') || 'null'); } catch (error) { uwp = null; }
+                openReviewModal(uwp);
+            });
+        });
+    }
 
-                window.closePmtStandardsModal = closeModal;
+    function initModalHideHandlers() {
+        document.querySelectorAll('[data-modal-hide]').forEach((button) => {
+            button.addEventListener('click', () => {
+                const target = button.getAttribute('data-modal-hide');
+                if (target) closeModalById(target);
+            });
+        });
+        window.addEventListener('keydown', (event) => {
+            if (event.key !== 'Escape') return;
+            document.querySelectorAll('[data-modal-container].flex').forEach((modal) => closeModalById(modal.id));
+        });
+    }
 
-                function openStandardsModal(mfoTitle, indicator) {
-                    if (!modal) return;
-                    mfoEl && (mfoEl.textContent = mfoTitle || '--');
-                    renderStandards(indicator);
-                    showModal();
-                }
+    function initApproveLoading() {
+        const form = document.getElementById('pmt-approve-form');
+        const button = document.getElementById('btn-approve-uwp');
+        const idInput = document.getElementById('pmt-modal-uwp-id');
+        if (!form || !button) return;
+        form.addEventListener('submit', (event) => {
+            if (!idInput || !idInput.value) {
+                event.preventDefault();
+                alert('Please select a UWP from the list before approving.');
+                return;
+            }
+            const label = button.querySelector('[data-button-label]');
+            const spinner = button.querySelector('[data-button-spinner]');
+            button.disabled = true;
+            if (label) label.textContent = button.dataset.loadingText || 'Approving...';
+            if (spinner) spinner.classList.remove('hidden');
+        });
+    }
 
-                window.openPmtStandardsModal = openStandardsModal;
-            })();
-
-            (function initPmtAssigneesModal() {
-                const modal = document.getElementById('pmt-assignees-modal');
-                const mfoEl = modal?.querySelector('[data-assignees-mfo]');
-                const indicatorEl = modal?.querySelector('[data-assignees-indicator]');
-                const bodyEl = modal?.querySelector('[data-assignees-body]');
-
-                function closeModal() {
-                    if (!modal) return;
-                    modal.classList.add('hidden');
-                    modal.classList.remove('flex');
-                    document.body.classList.remove('overflow-hidden');
-                }
-
-                function showModal() {
-                    if (!modal) return;
-                    modal.classList.remove('hidden');
-                    modal.classList.add('flex');
-                    document.body.classList.add('overflow-hidden');
-                }
-
-                window.closePmtAssigneesModal = closeModal;
-
-                window.openPmtAssigneesModal = function (mfoTitle, indicator, unit, employees) {
-                    if (!modal || !bodyEl) return;
-
-                    mfoEl && (mfoEl.textContent = mfoTitle || '--');
-                    indicatorEl && (indicatorEl.textContent = indicator || '--');
-
-                    const list = Array.isArray(employees) ? employees : [];
-                    bodyEl.innerHTML = '';
-
-                    if (!list.length) {
-                        const tr = document.createElement('tr');
-                        tr.className = 'hover:bg-slate-900/40';
-                        tr.innerHTML = `
-                            <td class="px-4 py-3 text-slate-300" colspan="3">No assigned employees.</td>
-                        `;
-                        bodyEl.appendChild(tr);
-                        showModal();
-                        return;
-                    }
-
-                    list.forEach((name) => {
-                        const tr = document.createElement('tr');
-                        tr.className = 'hover:bg-slate-900/40';
-                        tr.innerHTML = `
-                            <td class="px-4 py-3">${name}</td>
-                            <td class="px-4 py-3">${unit || '—'}</td>
-                            <td class="px-4 py-3">
-                                <span class="inline-flex rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300">
-                                    Assigned
-                                </span>
-                            </td>
-                        `;
-                        bodyEl.appendChild(tr);
-                    });
-
-                    showModal();
-                };
-            })();
-        </script>
-    @endpush
+    function boot() { initReviewTriggers(); initModalHideHandlers(); initApproveLoading(); }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+</script>
+@endpush
 @endsection
+

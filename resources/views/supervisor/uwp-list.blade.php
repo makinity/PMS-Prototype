@@ -26,31 +26,16 @@
                     <span class="block text-xs uppercase tracking-widest text-slate-400">
                         Office / Unit
                     </span>
-
-                        <select
-                            id="uwp-office-unit"
-                            name="office_id"
-                            onchange="this.form.submit()"
-                            class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2
-                                text-sm text-slate-100 focus:border-blue-500
-                                focus:ring-2 focus:ring-blue-500/40 focus:outline-none"
-                                style="background:#0f172a;color:#e5e7eb;"
-                        >
-                            <option value="">All Offices</option>
-                            @foreach($offices as $office)
-                                <option value="{{ $office->id }}"
-                                    {{ request('office_id') == $office->id ? 'selected' : '' }}>
-                                    {{ $office->name }}
-                                </option>
-                            @endforeach
-                        </select>
+                    <p class="text-sm font-medium text-slate-200">
+                        Office / Unit: {{ $office?->name ?? '—' }}
+                    </p>
                 </div>
             </div>
 
             <!-- Table -->
             @if($lists->isEmpty())
                 <div class="text-center py-8 text-slate-400">
-                    No Unit Work Plans found for the selected office.
+                    {{ $office ? 'No Unit Work Plans found for your assigned office.' : 'No assigned office found for your account.' }}
                 </div>
             @else
                 <div class="overflow-x-auto rounded-xl border border-slate-800">
@@ -68,11 +53,11 @@
                             @foreach ($lists as $list)
                                 <tr class="hover:bg-slate-900/50 transition">
                                     <td class="px-4 py-3">
-                                        {{ $list->office->name }}
+                                        {{ $list->office?->name ?? '—' }}
                                     </td>
 
                                     <td class="px-4 py-3">
-                                        {{ $list->performancePeriod->name }}
+                                        {{ $list->performancePeriod?->name ?? '—' }}
                                     </td>
 
                                     <td class="px-4 py-3">
@@ -82,6 +67,7 @@
                                                 'submitted' => 'border-blue-500/30 bg-blue-500/10 text-blue-300',
                                                 'endorsed' => 'border-indigo-500/30 bg-indigo-500/10 text-indigo-300',
                                                 'pmt_approved' => 'border-purple-500/30 bg-purple-500/10 text-purple-300',
+                                                'returned' => 'border-rose-500/30 bg-rose-500/10 text-rose-300',
                                             ];
                                             $statusClass = $statusColors[strtolower($list->status)] ?? 'border-gray-500/30 bg-gray-500/10 text-gray-300';
                                         @endphp
@@ -93,6 +79,10 @@
                                     </td>
 
                                     <td class="px-4 py-3 text-center">
+                                        @php
+                                            $isDraftAndUnlocked = strtolower((string) $list->status) === 'draft' && is_null($list->locked_at);
+                                        @endphp
+
                                         <button type="button"
                                                 aria-label="View Unit Work Plan"
                                                 title="View Unit Work Plan"
@@ -102,6 +92,22 @@
                                                     hover:bg-slate-800 transition">
                                             <i class="fa-regular fa-eye text-sm"></i>
                                         </button>
+
+                                        @if ($isDraftAndUnlocked)
+                                            <form method="POST"
+                                                  action="{{ route('supervisor.uwp.submit', ['id' => $list->id]) }}"
+                                                  class="inline-flex"
+                                                  onsubmit="return submitRowUwp(this);">
+                                                @csrf
+                                                <button type="submit"
+                                                        data-admin-loading="true"
+                                                        data-loading-text="Submitting..."
+                                                        class="ml-2 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-blue-500">
+                                                    <span data-button-label>Submit for Approval</span>
+                                                    <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                                                </button>
+                                            </form>
+                                        @endif
                                     </td>
                                 </tr>
                             @endforeach
@@ -169,7 +175,7 @@
 
                 <!-- FOOTER -->
                 <div class="flex gap-4 justify-end border-t border-slate-800 px-8 py-5">
-                    <a href="{{ route('stage1.uwp.export.excel') }}"
+                    <a id="modalExportExcelLink" href="#"
                         class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800">
                         Export Excel
                     </a>
@@ -318,14 +324,16 @@
     </div>
 
     <script>
-        window.uwpPreviewBaseUrl = "{{ route('supervisor.uwp.preview', ['id' => '__ID__']) }}";
+        window.uwpPreviewBaseUrl = "{{ route('supervisor.uwp.show', ['id' => '__ID__']) }}";
         window.uwpSubmitBaseUrl = "{{ route('supervisor.uwp.submit', ['id' => '__ID__']) }}";
+        window.uwpExportBaseUrl = "{{ route('uwp.export', ['uwp' => '__ID__']) }}";
     </script>
     @push('scripts')
         <script>
             let currentUwpId = null;
             function showUwpPreview(uwpId) {
                 currentUwpId = uwpId;
+                updateExportLink(uwpId);
 
                 document.getElementById('uwpPreviewModal').classList.remove('hidden');
                 document.getElementById('modalPPAsContainer').innerHTML = '<div class="p-6 text-center text-slate-400">Loading UWP data...</div>';
@@ -341,12 +349,18 @@
                 const url = window.uwpPreviewBaseUrl.replace('__ID__', uwpId);
                 console.log('Fetching UWP from:', url);
 
-                fetch(url)
-                    .then(response => {
+                fetch(url, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                })
+                    .then(async response => {
+                        const payload = await response.json().catch(() => ({}));
                         if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
+                            throw new Error(payload.message || `HTTP error! status: ${response.status}`);
                         }
-                        return response.json();
+                        return payload;
                     })
                     .then(uwpData => {
                         console.log('UWP Data loaded:', uwpData);
@@ -363,6 +377,10 @@
             }
 
             function populateUwpModal(uwpData) {
+                if (uwpData.id) {
+                    updateExportLink(uwpData.id);
+                }
+
                 document.getElementById('modalOfficeUnit').textContent = uwpData.office?.name || 'N/A';
                 document.getElementById('modalUwpSubtitle').textContent =
                     `${uwpData.office?.name || 'Unit'} • ${uwpData.performance_period?.name || 'Performance Period'}`;
@@ -372,6 +390,7 @@
 
                 const statusBadge = document.getElementById('modalStatus');
                 const status = uwpData.status || 'draft';
+                const isLocked = !!uwpData.locked_at;
                 statusBadge.textContent = status.replace('_', ' ').toUpperCase();
 
                 statusBadge.className = 'mt-2 inline-flex rounded-full border px-3 py-1 text-xs font-semibold';
@@ -380,7 +399,8 @@
                     'draft': ['bg-yellow-500/15', 'text-yellow-400', 'border-yellow-500/30'],
                     'submitted': ['bg-blue-500/15', 'text-blue-400', 'border-blue-500/30'],
                     'endorsed': ['bg-indigo-500/15', 'text-indigo-400', 'border-indigo-500/30'],
-                    'pmt_approved': ['bg-purple-500/15', 'text-purple-400', 'border-purple-500/30']
+                    'pmt_approved': ['bg-purple-500/15', 'text-purple-400', 'border-purple-500/30'],
+                    'returned': ['bg-rose-500/15', 'text-rose-400', 'border-rose-500/30']
                 };
 
                 const classes = statusColors[status] || ['bg-gray-500/15', 'text-gray-400', 'border-gray-500/30'];
@@ -388,7 +408,7 @@
 
                 const submitButton = document.querySelector('[data-submit-uwp-btn]');
                 if (submitButton) {
-                    if (status === 'draft') {
+                    if (status === 'draft' && !isLocked) {
                         submitButton.classList.remove('hidden');
                         submitButton.disabled = false;
                         submitButton.querySelector('[data-button-label]').textContent = 'Submit for Approval';
@@ -556,6 +576,26 @@
                     if (buttonLabel) buttonLabel.textContent = 'Submit for Approval';
                     if (buttonSpinner) buttonSpinner.classList.add('hidden');
                 }
+            }
+
+            function submitRowUwp(formElement) {
+                if (!formElement) return true;
+
+                const button = formElement.querySelector('[data-admin-loading="true"]');
+                if (!button) return true;
+
+                const label = button.querySelector('[data-button-label]');
+                const spinner = button.querySelector('[data-button-spinner]');
+
+                button.disabled = true;
+                if (label) {
+                    label.textContent = button.dataset.loadingText || 'Submitting...';
+                }
+                if (spinner) {
+                    spinner.classList.remove('hidden');
+                }
+
+                return true;
             }
 
             // ====================================
@@ -748,6 +788,18 @@
                 });
                 html += '</ul>';
                 return html;
+            }
+
+            function updateExportLink(uwpId) {
+                const exportLink = document.getElementById('modalExportExcelLink');
+                if (!exportLink) return;
+
+                if (!uwpId) {
+                    exportLink.setAttribute('href', '#');
+                    return;
+                }
+
+                exportLink.setAttribute('href', window.uwpExportBaseUrl.replace('__ID__', uwpId));
             }
 
             function closeModal(modalId) {

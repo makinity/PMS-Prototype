@@ -10,8 +10,11 @@ class Opcr extends Model
 {
     protected $table = 'opcrs';
 
+    public const STATUS_SUBMITTED = 'submitted';
+    public const STATUS_ENDORSED = 'endorsed';
     public const STATUS_FOR_REVIEW = 'for_dept_head_review';
     public const STATUS_APPROVED = 'approved';
+    public const STATUS_RETURNED = 'returned';
 
     protected $fillable = [
         'unit_work_plan_id',
@@ -19,11 +22,14 @@ class Opcr extends Model
         'status',
         'approved_by',
         'approved_at',
+        'returned_at',
+        'remarks',
         'locked_at',
     ];
 
     protected $casts = [
         'approved_at' => 'datetime',
+        'returned_at' => 'datetime',
         'locked_at' => 'datetime',
     ];
 

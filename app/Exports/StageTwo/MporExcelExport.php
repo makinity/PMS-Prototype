@@ -2,8 +2,6 @@
 
 namespace App\Exports\StageTwo;
 
-use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
@@ -14,37 +12,48 @@ use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class MporExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTitle, WithEvents
 {
     use Exportable;
-     private const RATINGS = [5, 4, 3, 2, 1];
 
-    private const STANDARDS_COLUMNS = [
-        5 => 'D',
-        4 => 'E',
-        3 => 'F',
-        2 => 'G',
-        1 => 'H',
-    ];
+    private const WEEK_KEYS = [1, 2, 3, 4, 'total'];
 
-    private const TABLE_HEADER_ROW = 17;
-    private const TABLE_RATING_ROW = 18;
-    private const TABLE_START_ROW = self::TABLE_RATING_ROW + 1;
+    private const TABLE_HEADER_ROW = 10;
+    private const TABLE_SUBHEADER_ROW = 11;
+    private const TABLE_START_ROW = 12;
 
-    // Match the IPCR “approach” (auto height + vertical-only gridlines + group separators)
     private const BASE_ROW_HEIGHT = 22;
     private const LINE_HEIGHT = 14;
-    private const CHARS_PER_LINE = 55;
+    private const CHARS_PER_LINE = 48;
 
-    private array $uwp;
-    private array $standards;
+    private const BAND_COLUMNS = [
+        'qty' => ['B', 'C', 'D', 'E', 'F'],
+        'quality' => ['G', 'H', 'I', 'J', 'K'],
+        'timeliness' => ['L', 'M', 'N', 'O', 'P'],
+    ];
 
-    public function __construct(array $uwp, array $standards)
+    private array $payload;
+    private array $coreRows = [];
+    private array $supportRows = [];
+    private array $totals = [];
+
+    public function __construct(array $payload)
     {
-        $this->uwp = $uwp;
-        $this->standards = $standards;
+        $this->payload = $payload;
+        $this->coreRows = $this->normalizeRows($payload['core'] ?? []);
+        $this->supportRows = $this->normalizeRows($payload['support'] ?? []);
+
+        $coreTotals = $this->calculateSectionTotals($this->coreRows);
+        $supportTotals = $this->calculateSectionTotals($this->supportRows);
+
+        $this->totals = [
+            'core' => $coreTotals,
+            'support' => $supportTotals,
+            'grand' => $this->sumTotals($coreTotals, $supportTotals),
+        ];
     }
 
     public function array(): array
@@ -62,116 +71,150 @@ class MporExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
     public function columnWidths(): array
     {
         return [
-            'A' => 32,
-            'B' => 40,
-            'C' => 18,
-            'D' => 30,
-            'E' => 30,
-            'F' => 30,
-            'G' => 30,
-            'H' => 30,
+            'A' => 52,
+            'B' => 8,
+            'C' => 8,
+            'D' => 8,
+            'E' => 8,
+            'F' => 9,
+            'G' => 8,
+            'H' => 8,
+            'I' => 8,
+            'J' => 8,
+            'K' => 9,
+            'L' => 8,
+            'M' => 8,
+            'N' => 8,
+            'O' => 8,
+            'P' => 9,
         ];
     }
 
     public function title(): string
     {
-        return 'Unit Work Plan';
+        return 'MPOR';
     }
 
     public function registerEvents(): array
     {
         return [
             AfterSheet::class => function (AfterSheet $event) {
-                $sheet = $event->sheet->getDelegate();
-                $this->populateTemplate($sheet);
+                $this->populateTemplate($event->sheet->getDelegate());
             },
         ];
     }
 
     private function populateTemplate(Worksheet $sheet): void
     {
-        $this->writeManualHeader($sheet);
+        $this->setupPage($sheet);
+        $sheet->setShowGridlines(true);
+
+        $this->writeTopHeader($sheet);
+        $this->writeIdentityBlock($sheet);
         $this->writeTableHeader($sheet);
 
-        $currentRow = self::TABLE_START_ROW;
-        $currentRow = $this->writeSection($sheet, 'core', 'A. CORE FUNCTIONS (80%)', $currentRow);
-        $currentRow = $this->writeSection($sheet, 'support', 'B. SUPPORT FUNCTIONS (20%)', $currentRow);
+        $row = self::TABLE_START_ROW;
+        $row = $this->writeSectionHeader($sheet, $row, 'CORE FUNCTIONS (80%)');
+        $row = $this->writeOutputRows($sheet, $row, $this->coreRows);
 
-        $lastRow = max($currentRow - 1, self::TABLE_RATING_ROW);
+        $row = $this->writeSectionHeader($sheet, $row, 'SUPPORT FUNCTIONS (20%)');
+        $row = $this->writeOutputRows($sheet, $row, $this->supportRows);
+        $lastDataRow = max($row - 1, self::TABLE_START_ROW);
+        $this->applyTableClosingBorder($sheet, $lastDataRow);
 
-        $tableRange = 'A' . self::TABLE_HEADER_ROW . ":H{$lastRow}";
-        $sheet->getStyle($tableRange)->getAlignment()
-            ->setWrapText(true)
-            ->setVertical(Alignment::VERTICAL_TOP);
-
-        $sheet->getStyle('A' . self::TABLE_HEADER_ROW . ':H' . self::TABLE_RATING_ROW)
-            ->getBorders()
-            ->getAllBorders()
-            ->setBorderStyle(Border::BORDER_THIN);
-
-        // - Data rows: vertical borders only (no per-row horizontal lines)
-        $this->applyVerticalBordersOnly($sheet, self::TABLE_START_ROW, $lastRow);
-
-        // - Section label rows: keep bottom separator line
-        $this->applySectionRowBorders($sheet, self::TABLE_START_ROW, $lastRow);
+        $row = $this->writeAttendanceBlock($sheet, $row + 1);
+        $this->writeSignatureBlock($sheet, $row + 1);
     }
 
-    private function writeManualHeader(Worksheet $sheet): void
+    private function setupPage(Worksheet $sheet): void
     {
-        $sheet->mergeCells('A1:H1');
-        $sheet->setCellValue('A1', 'UNIT WORK PLAN (UWP)');
-        $sheet->getStyle('A1')->getFont()->setBold(true);
-        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_LEGAL);
+        $sheet->getPageSetup()->setOrientation(PageSetup::ORIENTATION_LANDSCAPE);
+        $sheet->getPageSetup()->setFitToWidth(1);
+        $sheet->getPageSetup()->setFitToHeight(0);
+    }
 
-        $period = $this->uwp['period'] ?? '';
-        $period = preg_replace('/\s*[-–—]+\s*/u', ' ' . "\u{2013}" . ' ', $period);
-        $sheet->setCellValue('D3', 'Period:');
-        $sheet->getStyle('D3')->getFont()->setBold(true);
-        $sheet->setCellValue('E3', trim($period));
-        $sheet->getStyle('E3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+    private function writeTopHeader(Worksheet $sheet): void
+    {
+        $sheet->mergeCells('A1:P1');
+        $sheet->setCellValue('A1', 'REPUBLIC OF THE PHILIPPINES');
 
-        $sheet->setCellValue('A5', 'Office / Unit:');
-        $sheet->getStyle('A5')->getFont()->setBold(true);
-        $sheet->setCellValue('B5', $this->uwp['office'] ?? '');
+        $sheet->mergeCells('A2:P2');
+        $sheet->setCellValue('A2', 'PROVINCE OF DAVAO DEL SUR');
 
-        $sheet->setCellValue('F5', 'Supervisor:');
-        $sheet->getStyle('F5')->getFont()->setBold(true);$sheet->getStyle('F5')->getFont()->setBold(true);
-        $sheet->setCellValue('G5', $this->uwp['supervisor'] ?? '');
+        $sheet->mergeCells('A3:P3');
+        $sheet->setCellValue('A3', 'PROVINCIAL HUMAN RESOURCE MANAGEMENT OFFICE');
 
-        $sheet->setCellValue('A6', 'Department Head:');
-        $sheet->getStyle('A6')->getFont()->setBold(true);
-        $sheet->setCellValue('B6', $this->uwp['dept_head'] ?? '');
+        $sheet->mergeCells('A4:P4');
+        $sheet->setCellValue('A4', 'MONTHLY PERFORMANCE OUTPUT REPORT (MPOR)');
 
-        $sheet->getStyle('A5:H6')->getAlignment()
-            ->setWrapText(true)
+        $sheet->mergeCells('A5:P5');
+        $sheet->setCellValue('A5', '(Stage II - Monitoring Copy | Read-only)');
+
+        $sheet->getStyle('A1:P5')->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
             ->setVertical(Alignment::VERTICAL_CENTER);
+
+        $sheet->getStyle('A1:P4')->getFont()->setBold(true);
+        $sheet->getStyle('A5:P5')->getFont()->setSize(10);
+    }
+
+    private function writeIdentityBlock(Worksheet $sheet): void
+    {
+        $employee = (string) ($this->payload['employee'] ?? '');
+        $office = (string) ($this->payload['office'] ?? '');
+        $monthYear = (string) ($this->payload['month_year'] ?? '');
+
+        $sheet->mergeCells('A7:C7');
+        $sheet->setCellValue('A7', 'Employee Name:');
+        $sheet->mergeCells('D7:I7');
+        $sheet->setCellValue('D7', $employee);
+
+        $sheet->mergeCells('J7:L7');
+        $sheet->setCellValue('J7', 'Month & Year:');
+        $sheet->mergeCells('M7:P7');
+        $sheet->setCellValue('M7', $monthYear);
+
+        $sheet->mergeCells('A8:C8');
+        $sheet->setCellValue('A8', 'Office / Unit:');
+        $sheet->mergeCells('D8:I8');
+        $sheet->setCellValue('D8', $office);
+
+        $sheet->getStyle('A7:C8')->getFont()->setBold(true);
+        $sheet->getStyle('J7:L7')->getFont()->setBold(true);
+
+        $sheet->getStyle('A7:P8')->getAlignment()
+            ->setVertical(Alignment::VERTICAL_CENTER)
+            ->setWrapText(true);
+
+        $sheet->getStyle('D7:I7')->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
+        $sheet->getStyle('M7:P7')->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
+        $sheet->getStyle('D8:I8')->getBorders()->getBottom()->setBorderStyle(Border::BORDER_THIN);
     }
 
     private function writeTableHeader(Worksheet $sheet): void
     {
-        $headers = [
-            'A' => 'PPA / MFO',
-            'B' => 'Success Indicators',
-            'C' => 'Allotted Budget',
-        ];
+        $sheet->mergeCells('A10:A11');
+        $sheet->setCellValue('A10', 'EXPECTED OUTPUTS');
 
-        foreach ($headers as $column => $text) {
-            $cell = "{$column}" . self::TABLE_HEADER_ROW;
-            $sheet->setCellValue($cell, $text);
+        $sheet->mergeCells('B10:F10');
+        $sheet->setCellValue('B10', 'EFFICIENCY / QUANTITY');
+
+        $sheet->mergeCells('G10:K10');
+        $sheet->setCellValue('G10', 'QUALITY / EFFECTIVENESS');
+
+        $sheet->mergeCells('L10:P10');
+        $sheet->setCellValue('L10', 'TIMELINESS');
+
+        $weekLabels = ['W1', 'W2', 'W3', 'W4', 'TOTAL'];
+
+        foreach (self::BAND_COLUMNS as $columns) {
+            foreach ($columns as $index => $column) {
+                $sheet->setCellValue($column . self::TABLE_SUBHEADER_ROW, $weekLabels[$index]);
+            }
         }
 
-        $sheet->setCellValue('D' . self::TABLE_HEADER_ROW, 'Standards per Success Indicator');
-        $sheet->mergeCells('D' . self::TABLE_HEADER_ROW . ':H' . self::TABLE_HEADER_ROW);
-
-        // Ratings row
-        foreach (self::RATINGS as $rating) {
-            $column = self::STANDARDS_COLUMNS[$rating];
-            $sheet->setCellValue("{$column}" . self::TABLE_RATING_ROW, (string) $rating);
-        }
-
-        // ✅ Style header like IPCR (gray fill, centered, bold)
-        $headerRange = 'A' . self::TABLE_HEADER_ROW . ':H' . self::TABLE_RATING_ROW;
-
+        $headerRange = 'A' . self::TABLE_HEADER_ROW . ':P' . self::TABLE_SUBHEADER_ROW;
         $sheet->getStyle($headerRange)->getFont()->setBold(true);
         $sheet->getStyle($headerRange)->getAlignment()
             ->setHorizontal(Alignment::HORIZONTAL_CENTER)
@@ -183,169 +226,284 @@ class MporExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
             ->getStartColor()
             ->setRGB('D9D9D9');
 
-        $sheet->getRowDimension(self::TABLE_HEADER_ROW)->setRowHeight(28);
-        $sheet->getRowDimension(self::TABLE_RATING_ROW)->setRowHeight(20);
+        $sheet->getStyle($headerRange)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
     }
 
-    private function writeSection(Worksheet $sheet, string $type, string $label, int $startRow): int
+    private function writeSectionHeader(Worksheet $sheet, int $row, string $label): int
     {
-        $sheet->setCellValue("A{$startRow}", $label);
-        $sheet->mergeCells("A{$startRow}:H{$startRow}");
+        $sheet->mergeCells("A{$row}:P{$row}");
+        $sheet->setCellValue("A{$row}", $label);
 
-        $sheet->getStyle("A{$startRow}:H{$startRow}")->getFont()->setBold(true);
-        $sheet->getStyle("A{$startRow}:H{$startRow}")->getFill()
+        $sheet->getStyle("A{$row}:P{$row}")->getFont()->setBold(true);
+        $sheet->getStyle("A{$row}:P{$row}")->getFill()
             ->setFillType(Fill::FILL_SOLID)
             ->getStartColor()
             ->setRGB('E2E8F0');
 
-        $sheet->getStyle("A{$startRow}:H{$startRow}")->getAlignment()
+        $sheet->getStyle("A{$row}:P{$row}")->getAlignment()
             ->setHorizontal(Alignment::HORIZONTAL_LEFT)
             ->setVertical(Alignment::VERTICAL_CENTER);
 
-        // Section separator (keep)
-        $sheet->getStyle("A{$startRow}:H{$startRow}")
-            ->getBorders()
-            ->getBottom()
-            ->setBorderStyle(Border::BORDER_THIN);
+        $sheet->getStyle("A{$row}:P{$row}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 
-        $row = $startRow + 1;
+        return $row + 1;
+    }
 
-        $outputs = Arr::where(
-            $this->uwp['outputs'] ?? [],
-            fn ($r) => Str::contains(Str::lower($r['function'] ?? ''), $type)
-        );
+    private function writeOutputRows(Worksheet $sheet, int $startRow, array $rows): int
+    {
+        $row = $startRow;
 
-        foreach ($outputs as $output) {
-            $indicators = $output['success_indicators'] ?? [];
-            if (empty($indicators)) {
-                continue;
-            }
+        foreach ($rows as $item) {
+            $sheet->setCellValue("A{$row}", $item['label']);
+            $this->writeBandValues($sheet, $row, 'qty', $item['qty']);
+            $this->writeBandValues($sheet, $row, 'quality', $item['quality']);
+            $this->writeBandValues($sheet, $row, 'timeliness', $item['timeliness']);
 
-            $mfoStart = $row;
+            $sheet->getStyle("A{$row}")->getAlignment()
+                ->setHorizontal(Alignment::HORIZONTAL_LEFT)
+                ->setVertical(Alignment::VERTICAL_TOP)
+                ->setWrapText(true);
 
-            foreach ($indicators as $indicator) {
-                // PPA/MFO only on first row (merge later)
-                $sheet->setCellValue("A{$row}", '');
-                $sheet->setCellValue("B{$row}", $indicator);
+            $sheet->getStyle("B{$row}:P{$row}")->getAlignment()
+                ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+                ->setVertical(Alignment::VERTICAL_CENTER);
 
-                // Allotted Budget blank (locked demo)
-                $sheet->setCellValue("C{$row}", '');
+            $this->applyRowVerticalBorders($sheet, $row);
+            $sheet->getRowDimension($row)->setRowHeight($this->estimateRowHeight((string) $item['label']));
 
-                // Standards (D..H)
-                $stdTexts = [];
-                foreach (self::RATINGS as $rating) {
-                    $col = self::STANDARDS_COLUMNS[$rating];
-                    $text = (string) ($this->formatStandards($indicator, $rating) ?? '');
-                    $sheet->setCellValue("{$col}{$row}", $text);
-                    $sheet->getStyle("{$col}{$row}")->getAlignment()->setWrapText(true);
-                    $stdTexts[] = $text;
-                }
-
-                $sheet->getStyle("B{$row}")->getAlignment()->setWrapText(true);
-
-                // Vertical borders only (IPCR approach)
-                $this->applyRowVerticalBorders($sheet, $row);
-
-                // Auto row height (IPCR approach)
-                $sheet->getRowDimension($row)->setRowHeight(
-                    $this->estimateRowHeight($indicator, ...$stdTexts)
-                );
-
-                $row++;
-            }
-
-            $mfoEnd = $row - 1;
-
-            // ✅ Merge A for MFO group + set value once
-            if ($mfoEnd >= $mfoStart) {
-                if ($mfoEnd > $mfoStart) {
-                    $sheet->mergeCells("A{$mfoStart}:A{$mfoEnd}");
-                }
-                $sheet->setCellValue("A{$mfoStart}", (string) ($output['mfo'] ?? ''));
-
-                $sheet->getStyle("A{$mfoStart}:A{$mfoEnd}")->getAlignment()
-                    ->setHorizontal(Alignment::HORIZONTAL_LEFT)
-                    ->setVertical(Alignment::VERTICAL_TOP)
-                    ->setWrapText(true);
-
-                // Ensure A column also has vertical borders for all rows in the group
-                for ($r = $mfoStart; $r <= $mfoEnd; $r++) {
-                    $this->applyRowVerticalBorders($sheet, $r);
-                }
-
-                // ✅ Group separator line at bottom only (keep “green line feel”)
-                $sheet->getStyle("A{$mfoEnd}:H{$mfoEnd}")
-                    ->getBorders()
-                    ->getBottom()
-                    ->setBorderStyle(Border::BORDER_THIN);
-            }
+            $row++;
         }
 
         return $row;
     }
 
-    private function formatStandards(string $indicator, int $rating): ?string
+    private function writeTotalRow(Worksheet $sheet, int $row, string $label, array $totals, bool $grand = false): int
     {
-        $lines = [];
-        foreach (['q' => 'Q', 'e' => 'E', 't' => 'T'] as $key => $label) {
-            $values = Arr::wrap($this->standards[$indicator][$rating][$key] ?? []);
-            $values = array_filter($values, fn ($value) => $value !== '' && $value !== null);
-            if (empty($values)) {
-                continue;
-            }
-            $lines[] = "{$label}: " . implode('; ', $values);
-        }
+        $sheet->setCellValue("A{$row}", $label);
+        $this->writeBandValues($sheet, $row, 'qty', $totals['qty']);
+        $this->writeBandValues($sheet, $row, 'quality', $totals['quality']);
+        $this->writeBandValues($sheet, $row, 'timeliness', $totals['timeliness']);
 
-        return empty($lines) ? null : implode("\n", $lines);
+        $sheet->getStyle("A{$row}:P{$row}")->getFont()->setBold(true);
+        $sheet->getStyle("A{$row}:P{$row}")->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+            ->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle("A{$row}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+
+        $fillColor = $grand ? 'CBD5E1' : 'EEF2F7';
+        $sheet->getStyle("A{$row}:P{$row}")->getFill()
+            ->setFillType(Fill::FILL_SOLID)
+            ->getStartColor()
+            ->setRGB($fillColor);
+
+        $sheet->getStyle("A{$row}:P{$row}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+
+        return $row + 1;
     }
 
-    private function estimateRowHeight(string ...$cells): float
+    private function writeAttendanceBlock(Worksheet $sheet, int $startRow): int
     {
-        $maxLines = 1;
+        $absence = $this->normalizeAttendanceBand($this->payload['attendance']['absence'] ?? []);
+        $tardiness = $this->normalizeAttendanceBand($this->payload['attendance']['tardiness'] ?? []);
 
-        foreach ($cells as $text) {
-            $text = trim((string) $text);
-            if ($text === '') {
-                continue;
-            }
+        $headerRow = $startRow;
+        $sheet->mergeCells("A{$headerRow}:E{$headerRow}");
+        $sheet->setCellValue("A{$headerRow}", '');
+        $sheet->setCellValue("F{$headerRow}", 'WEEK 1');
+        $sheet->setCellValue("G{$headerRow}", 'WEEK 2');
+        $sheet->setCellValue("H{$headerRow}", 'WEEK 3');
+        $sheet->setCellValue("I{$headerRow}", 'WEEK 4');
+        $sheet->setCellValue("J{$headerRow}", 'TOTAL');
 
-            $lines = substr_count($text, "\n") + 1;
-            $wrapped = (int) ceil(mb_strlen($text) / self::CHARS_PER_LINE);
+        $sheet->mergeCells("A" . ($headerRow + 1) . ":E" . ($headerRow + 1));
+        $sheet->setCellValue("A" . ($headerRow + 1), 'MAN DAY(S) LOST THRU ABSENCE');
+        $sheet->setCellValue("F" . ($headerRow + 1), $absence[1]);
+        $sheet->setCellValue("G" . ($headerRow + 1), $absence[2]);
+        $sheet->setCellValue("H" . ($headerRow + 1), $absence[3]);
+        $sheet->setCellValue("I" . ($headerRow + 1), $absence[4]);
+        $sheet->setCellValue("J" . ($headerRow + 1), $absence['total']);
 
-            $maxLines = max($maxLines, $lines, $wrapped);
-        }
+        $sheet->mergeCells("A" . ($headerRow + 2) . ":E" . ($headerRow + 2));
+        $sheet->setCellValue("A" . ($headerRow + 2), 'MAN HRS./MINUTES LOST THRU TARDINESS / UNDERTIME');
+        $sheet->setCellValue("F" . ($headerRow + 2), $tardiness[1]);
+        $sheet->setCellValue("G" . ($headerRow + 2), $tardiness[2]);
+        $sheet->setCellValue("H" . ($headerRow + 2), $tardiness[3]);
+        $sheet->setCellValue("I" . ($headerRow + 2), $tardiness[4]);
+        $sheet->setCellValue("J" . ($headerRow + 2), $tardiness['total']);
 
-        return self::BASE_ROW_HEIGHT + ($maxLines - 1) * self::LINE_HEIGHT;
+        $sheet->getStyle("A{$headerRow}:J" . ($headerRow + 2))->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $sheet->getStyle("A{$headerRow}:J{$headerRow}")->getFont()->setBold(true);
+        $sheet->getStyle("A{$headerRow}:J" . ($headerRow + 2))->getAlignment()
+            ->setVertical(Alignment::VERTICAL_CENTER)
+            ->setWrapText(true);
+        $sheet->getStyle("F{$headerRow}:J" . ($headerRow + 2))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle("A" . ($headerRow + 1) . ":A" . ($headerRow + 2))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+
+        return $headerRow + 3;
     }
 
-    private function applyVerticalBordersOnly(Worksheet $sheet, int $fromRow, int $toRow): void
+    private function writeSignatureBlock(Worksheet $sheet, int $startRow): void
     {
-        for ($r = $fromRow; $r <= $toRow; $r++) {
-            $this->applyRowVerticalBorders($sheet, $r);
+        $supervisor = (string) ($this->payload['supervisor'] ?? '');
+        $employee = (string) ($this->payload['employee'] ?? '');
+
+        $sheet->mergeCells("A{$startRow}:G{$startRow}");
+        $sheet->mergeCells("J{$startRow}:P{$startRow}");
+        $sheet->setCellValue("A{$startRow}", 'CONFIRMED:');
+        $sheet->setCellValue("J{$startRow}", 'Above information are true and correct:');
+
+        $lineRow = $startRow + 2;
+        $sheet->mergeCells("A{$lineRow}:G{$lineRow}");
+        $sheet->mergeCells("J{$lineRow}:P{$lineRow}");
+        $sheet->getStyle("A{$lineRow}:G{$lineRow}")->getBorders()->getTop()->setBorderStyle(Border::BORDER_THIN);
+        $sheet->getStyle("J{$lineRow}:P{$lineRow}")->getBorders()->getTop()->setBorderStyle(Border::BORDER_THIN);
+
+        $sheet->mergeCells("A" . ($lineRow + 1) . ":G" . ($lineRow + 1));
+        $sheet->mergeCells("J" . ($lineRow + 1) . ":P" . ($lineRow + 1));
+        $sheet->setCellValue("A" . ($lineRow + 1), "Supervisor: {$supervisor}");
+        $sheet->setCellValue("J" . ($lineRow + 1), "Employee: {$employee}");
+
+        $sheet->getStyle("A{$startRow}:P" . ($lineRow + 1))->getAlignment()
+            ->setVertical(Alignment::VERTICAL_CENTER)
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle("A{$startRow}:P{$startRow}")->getFont()->setBold(true);
+    }
+
+    private function writeBandValues(Worksheet $sheet, int $row, string $band, array $values): void
+    {
+        $columns = self::BAND_COLUMNS[$band];
+
+        foreach (self::WEEK_KEYS as $index => $key) {
+            $column = $columns[$index];
+            $sheet->setCellValue("{$column}{$row}", (int) ($values[$key] ?? 0));
         }
     }
 
     private function applyRowVerticalBorders(Worksheet $sheet, int $row): void
     {
-        foreach (range('A', 'H') as $col) {
-            $style = $sheet->getStyle("{$col}{$row}")->getBorders();
-
-            $style->getLeft()->setBorderStyle(Border::BORDER_THIN);
-            $style->getRight()->setBorderStyle(Border::BORDER_THIN);
-
+        foreach (range('A', 'P') as $column) {
+            $borders = $sheet->getStyle("{$column}{$row}")->getBorders();
+            $borders->getLeft()->setBorderStyle(Border::BORDER_THIN);
+            $borders->getRight()->setBorderStyle(Border::BORDER_THIN);
         }
     }
 
-    private function applySectionRowBorders(Worksheet $sheet, int $fromRow, int $toRow): void
+    private function applyTableClosingBorder(Worksheet $sheet, int $row): void
     {
-        for ($r = $fromRow; $r <= $toRow; $r++) {
-            $value = trim((string) $sheet->getCell("A{$r}")->getValue());
-            if (in_array($value, ['A. CORE FUNCTIONS (80%)', 'B. SUPPORT FUNCTIONS (20%)'], true)) {
-                $sheet->getStyle("A{$r}:H{$r}")
-                    ->getBorders()
-                    ->getBottom()
-                    ->setBorderStyle(Border::BORDER_THIN);
+        $sheet->getStyle("A{$row}:P{$row}")
+            ->getBorders()
+            ->getBottom()
+            ->setBorderStyle(Border::BORDER_MEDIUM);
+    }
+
+    private function normalizeRows(array $rows): array
+    {
+        $normalized = [];
+
+        foreach ($rows as $row) {
+            $weeks = $this->normalizeWeeks($row['weeks'] ?? []);
+
+            $normalized[] = [
+                'label' => (string) ($row['label'] ?? ''),
+                'qty' => $this->extractBand($weeks, 'qty'),
+                'quality' => $this->extractBand($weeks, 'q_points'),
+                'timeliness' => $this->extractBand($weeks, 't_points'),
+            ];
+        }
+
+        return $normalized;
+    }
+
+    private function normalizeWeeks(array $weeks): array
+    {
+        $normalized = [];
+
+        foreach ([1, 2, 3, 4] as $week) {
+            $normalized[$week] = [
+                'qty' => (int) ($weeks[$week]['qty'] ?? 0),
+                'q_points' => (int) ($weeks[$week]['q_points'] ?? 0),
+                't_points' => (int) ($weeks[$week]['t_points'] ?? 0),
+            ];
+        }
+
+        return $normalized;
+    }
+
+    private function extractBand(array $weeks, string $field): array
+    {
+        $band = [];
+        $total = 0;
+
+        foreach ([1, 2, 3, 4] as $week) {
+            $value = (int) ($weeks[$week][$field] ?? 0);
+            $band[$week] = $value;
+            $total += $value;
+        }
+
+        $band['total'] = $total;
+
+        return $band;
+    }
+
+    private function calculateSectionTotals(array $rows): array
+    {
+        $totals = [
+            'qty' => [1 => 0, 2 => 0, 3 => 0, 4 => 0, 'total' => 0],
+            'quality' => [1 => 0, 2 => 0, 3 => 0, 4 => 0, 'total' => 0],
+            'timeliness' => [1 => 0, 2 => 0, 3 => 0, 4 => 0, 'total' => 0],
+        ];
+
+        foreach ($rows as $row) {
+            foreach (['qty', 'quality', 'timeliness'] as $band) {
+                foreach (self::WEEK_KEYS as $key) {
+                    $totals[$band][$key] += (int) ($row[$band][$key] ?? 0);
+                }
             }
         }
+
+        return $totals;
+    }
+
+    private function sumTotals(array $core, array $support): array
+    {
+        $result = [
+            'qty' => [1 => 0, 2 => 0, 3 => 0, 4 => 0, 'total' => 0],
+            'quality' => [1 => 0, 2 => 0, 3 => 0, 4 => 0, 'total' => 0],
+            'timeliness' => [1 => 0, 2 => 0, 3 => 0, 4 => 0, 'total' => 0],
+        ];
+
+        foreach (['qty', 'quality', 'timeliness'] as $band) {
+            foreach (self::WEEK_KEYS as $key) {
+                $result[$band][$key] = (int) ($core[$band][$key] ?? 0) + (int) ($support[$band][$key] ?? 0);
+            }
+        }
+
+        return $result;
+    }
+
+    private function normalizeAttendanceBand(array $values): array
+    {
+        $band = [
+            1 => (int) ($values[1] ?? $values['week1'] ?? 0),
+            2 => (int) ($values[2] ?? $values['week2'] ?? 0),
+            3 => (int) ($values[3] ?? $values['week3'] ?? 0),
+            4 => (int) ($values[4] ?? $values['week4'] ?? 0),
+        ];
+
+        $band['total'] = (int) ($values['total'] ?? array_sum($band));
+
+        return $band;
+    }
+
+    private function estimateRowHeight(string $label): float
+    {
+        $label = trim($label);
+        if ($label === '') {
+            return self::BASE_ROW_HEIGHT;
+        }
+
+        $lines = (int) ceil(mb_strlen($label) / self::CHARS_PER_LINE);
+
+        return self::BASE_ROW_HEIGHT + max(0, $lines - 1) * self::LINE_HEIGHT;
     }
 }

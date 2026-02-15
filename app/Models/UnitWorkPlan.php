@@ -15,6 +15,7 @@ class UnitWorkPlan extends Model
     public const STATUS_SUBMITTED = 'submitted';
     public const STATUS_ENDORSED = 'endorsed';
     public const STATUS_PMT_APPROVED = 'pmt_approved';
+    public const STATUS_RETURNED = 'returned';
 
     protected $fillable = [
         'office_id',
@@ -49,9 +50,9 @@ class UnitWorkPlan extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function departmentHead(): BelongsTo
+    public function getDepartmentHeadAttribute(): ?User
     {
-        return $this->belongsTo(User::class, 'department_head_id'); // Adjust the foreign key as needed
+        return $this->office?->head;
     }
 
     public function uwpFunctions(): HasMany
@@ -96,5 +97,16 @@ class UnitWorkPlan extends Model
     public function isDraft(): bool
     {
         return $this->status === self::STATUS_DRAFT;
+    }
+
+    public function isReturned(): bool
+    {
+        return $this->status === self::STATUS_RETURNED;
+    }
+
+    public function isEditableBySupervisor(): bool
+    {
+        return in_array($this->status, [self::STATUS_DRAFT, self::STATUS_RETURNED], true)
+            && !$this->isLocked();
     }
 }

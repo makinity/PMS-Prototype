@@ -2,6 +2,7 @@
 
 namespace App\Exports\StageOne;
 
+use App\Models\Opcr;
 use Illuminate\Support\Arr;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromArray;
@@ -10,10 +11,10 @@ use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Events\AfterSheet;
-use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTitle, WithEvents
@@ -34,18 +35,23 @@ class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
     private const TABLE_SUBHEADER_ROW = 10;
     private const TABLE_START_ROW = 11;
 
-    // ✅ Same “approach” as UWP (auto height + vertical-only borders + group separators)
     private const BASE_ROW_HEIGHT = 22;
     private const LINE_HEIGHT = 14;
     private const CHARS_PER_LINE = 42;
 
-    private array $opcr;
-    private array $standards;
+    private Opcr $opcrModel;
 
-    public function __construct(array $opcr, array $standards)
+    private array $opcrData = [
+        'core' => [],
+        'support' => [],
+    ];
+
+    private array $standards = [];
+
+    public function __construct(Opcr $opcr)
     {
-        $this->opcr = $opcr;
-        $this->standards = $standards;
+        $this->opcrModel = $opcr;
+        $this->hydrateFromModel();
     }
 
     public function array(): array
@@ -62,7 +68,6 @@ class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
 
     public function columnWidths(): array
     {
-        // ✅ Make standards columns wider (match UWP “feel”)
         return [
             'A' => 35,
             'B' => 40,
@@ -91,18 +96,78 @@ class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
     {
         return [
             AfterSheet::class => function (AfterSheet $event) {
-                $sheet = $event->sheet->getDelegate();
-                $this->populateTemplate($sheet);
+                $this->populateTemplate($event->sheet->getDelegate());
             },
         ];
+    }
+
+    private function hydrateFromModel(): void
+    {
+        $uwp = $this->opcrModel->unitWorkPlan;
+        if (!$uwp) {
+            return;
+        }
+
+        foreach ($uwp->uwpFunctions as $function) {
+            $functionType = strtolower((string) ($function->function_type ?? ''));
+            $bucket = $functionType === 'support' ? 'support' : 'core';
+
+            foreach ($function->mfos as $mfo) {
+                $indicatorRows = [];
+
+                foreach ($mfo->successIndicators as $indicator) {
+                    $indicatorText = (string) ($indicator->indicator_text ?? '');
+                    $assigneeNames = $indicator->assignments
+                        ->map(fn ($assignment) => $assignment->employee?->name)
+                        ->filter()
+                        ->values()
+                        ->all();
+
+                    $indicatorRows[] = [
+                        'text' => $indicatorText,
+                        'employee' => implode(', ', $assigneeNames),
+                    ];
+
+                    foreach (self::RATINGS as $rating) {
+                        $this->standards[$indicatorText][$rating] = ['q' => [], 'e' => [], 't' => []];
+                    }
+
+                    foreach ($indicator->qetStandards as $standard) {
+                        $rating = (int) $standard->rating;
+                        if (!in_array($rating, self::RATINGS, true)) {
+                            continue;
+                        }
+
+                        $dimension = strtolower((string) $standard->dimension);
+                        $dimension = match ($dimension) {
+                            'q', 'quality' => 'q',
+                            'e', 'efficiency' => 'e',
+                            't', 'timeliness' => 't',
+                            default => null,
+                        };
+
+                        if ($dimension === null) {
+                            continue;
+                        }
+
+                        $text = trim((string) ($standard->standard_text ?? ''));
+                        if ($text !== '') {
+                            $this->standards[$indicatorText][$rating][$dimension][] = $text;
+                        }
+                    }
+                }
+
+                $this->opcrData[$bucket][] = [
+                    'mfo' => (string) ($mfo->title ?? ''),
+                    'indicators' => $indicatorRows,
+                ];
+            }
+        }
     }
 
     private function populateTemplate(Worksheet $sheet): void
     {
         $this->setupPage($sheet);
-
-        // ✅ UWP look: these “horizontal lines” come from Excel gridlines
-        // (and merged MFO cells hide gridlines inside)
         $sheet->setShowGridlines(true);
 
         $this->writeManualHeader($sheet);
@@ -114,30 +179,22 @@ class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
 
         $lastRow = max($currentRow - 1, self::TABLE_SUBHEADER_ROW);
 
-        // Global wrap + top vertical align (same as UWP)
-        $range = "A" . self::TABLE_HEADER_ROW . ":O{$lastRow}";
+        $range = 'A' . self::TABLE_HEADER_ROW . ":O{$lastRow}";
         $sheet->getStyle($range)->getAlignment()
             ->setWrapText(true)
             ->setVertical(Alignment::VERTICAL_TOP);
 
-        // ✅ Header block boxed (ONLY header rows)
-        $sheet->getStyle("A" . self::TABLE_HEADER_ROW . ":O" . self::TABLE_SUBHEADER_ROW)
+        $sheet->getStyle('A' . self::TABLE_HEADER_ROW . ':O' . self::TABLE_SUBHEADER_ROW)
             ->getBorders()
             ->getAllBorders()
             ->setBorderStyle(Border::BORDER_THIN);
 
-        // ✅ Data rows: vertical borders only (NO per-row horizontal lines)
         $this->applyVerticalBordersOnly($sheet, self::TABLE_START_ROW, $lastRow);
-
-        // ✅ Section label rows: keep bottom separator line
         $this->applySectionRowBorders($sheet, self::TABLE_START_ROW, $lastRow);
     }
 
     private function setupPage(Worksheet $sheet): void
     {
-        // ❌ This was breaking the UWP look (you want gridlines)
-        // $sheet->setShowGridlines(false);
-
         $sheet->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_LEGAL);
         $sheet->getPageSetup()->setOrientation(PageSetup::ORIENTATION_LANDSCAPE);
         $sheet->getPageSetup()->setFitToWidth(1);
@@ -146,20 +203,26 @@ class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
 
     private function writeManualHeader(Worksheet $sheet): void
     {
+        $uwp = $this->opcrModel->unitWorkPlan;
+        $periodName = $uwp?->performancePeriod?->name ?? '';
+        $officeName = $uwp?->office?->name ?? '';
+        $officeHead = $uwp?->creator?->name ?? '';
+        $departmentHead = $uwp?->office?->head?->name ?? '';
+
         $sheet->mergeCells('A1:O1');
         $sheet->setCellValue('A1', 'OFFICE PERFORMANCE COMMITMENT AND REVIEW (OPCR)');
 
         $sheet->mergeCells('A2:O2');
-        $sheet->setCellValue('A2', 'January – June 2026');
+        $sheet->setCellValue('A2', $periodName);
 
         $sheet->setCellValue('A4', 'Office / Unit:');
-        $sheet->setCellValue('B4', 'Revenue Collection Unit');
+        $sheet->setCellValue('B4', $officeName);
 
         $sheet->setCellValue('A5', 'Office Head:');
-        $sheet->setCellValue('B5', 'Carlo D. Beray');
+        $sheet->setCellValue('B5', $officeHead);
 
         $sheet->setCellValue('A6', 'Department Head:');
-        $sheet->setCellValue('B6', 'Dept-head');
+        $sheet->setCellValue('B6', $departmentHead);
 
         $sheet->getStyle('A1:O2')->getFont()->setBold(true);
         $sheet->getStyle('A1:O2')->getAlignment()
@@ -252,21 +315,18 @@ class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
         if ($includeRevenueRow) {
             $sheet->setCellValue("A{$row}", 'REVENUE');
             $sheet->mergeCells("A{$row}:O{$row}");
-
             $sheet->getStyle("A{$row}:O{$row}")->getFont()->setBold(true);
             $sheet->getStyle("A{$row}:O{$row}")->getAlignment()
                 ->setHorizontal(Alignment::HORIZONTAL_LEFT)
                 ->setVertical(Alignment::VERTICAL_CENTER);
-
             $sheet->getStyle("A{$row}:O{$row}")
                 ->getBorders()
                 ->getBottom()
                 ->setBorderStyle(Border::BORDER_THIN);
-
             $row++;
         }
 
-        return $this->writeIndicatorsLikeUwp($sheet, $row, $this->opcr[$type] ?? []);
+        return $this->writeIndicatorsLikeUwp($sheet, $row, $this->opcrData[$type] ?? []);
     }
 
     private function writeIndicatorsLikeUwp(Worksheet $sheet, int $row, array $items): int
@@ -280,22 +340,13 @@ class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
             $mfoStart = $row;
 
             foreach ($indicators as $indicator) {
-
-                // ✅ Support both formats:
-                // - old: 'indicator string'
-                // - new: ['text' => '...', 'employee' => '...']
-                $indicatorText = is_array($indicator)
-                    ? (string) ($indicator['text'] ?? '')
-                    : (string) $indicator;
-
-                $employee = is_array($indicator)
-                    ? (string) ($indicator['employee'] ?? '')
-                    : (string) ($item['employee'] ?? ''); // fallback if you ever keep MFO-level employee
+                $indicatorText = (string) ($indicator['text'] ?? '');
+                $employee = (string) ($indicator['employee'] ?? '');
 
                 $sheet->setCellValue("A{$row}", '');
                 $sheet->setCellValue("B{$row}", $indicatorText);
                 $sheet->setCellValue("C{$row}", '');
-                $sheet->setCellValue("D{$row}", $employee); // ✅ NOW PER INDICATOR
+                $sheet->setCellValue("D{$row}", $employee);
                 $sheet->setCellValue("E{$row}", '');
 
                 foreach (range('F', 'I') as $col) {
@@ -307,18 +358,15 @@ class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
                 $stdTexts = [];
                 foreach (self::RATINGS as $rating) {
                     $col = self::STANDARDS_COLUMNS[$rating];
-                    $text = $this->formatStdBlock($indicatorText, $rating); // ✅ use text for standards lookup
+                    $text = $this->formatStdBlock($indicatorText, $rating);
                     $sheet->setCellValue("{$col}{$row}", $text);
                     $sheet->getStyle("{$col}{$row}")->getAlignment()->setWrapText(true);
                     $stdTexts[] = $text;
                 }
 
                 $sheet->getStyle("B{$row}")->getAlignment()->setWrapText(true);
-
-                // ✅ vertical borders only (A..O), NO top/bottom
                 $this->applyRowVerticalBorders($sheet, $row);
 
-                // Auto row height
                 $sheet->getRowDimension($row)->setRowHeight(
                     $this->estimateRowHeight($indicatorText, ...$stdTexts)
                 );
@@ -327,26 +375,21 @@ class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
             }
 
             $mfoEnd = $row - 1;
-
             if ($mfoEnd >= $mfoStart) {
                 if ($mfoEnd > $mfoStart) {
                     $sheet->mergeCells("A{$mfoStart}:A{$mfoEnd}");
                 }
 
                 $sheet->setCellValue("A{$mfoStart}", (string) ($item['mfo'] ?? ''));
-
                 $sheet->getStyle("A{$mfoStart}:A{$mfoEnd}")->getAlignment()
                     ->setHorizontal(Alignment::HORIZONTAL_LEFT)
                     ->setVertical(Alignment::VERTICAL_TOP)
                     ->setWrapText(true);
-
-                // ✅ still no bottom border in A (keeps MFO clean)
             }
         }
 
         return $row;
     }
-
 
     private function formatStdBlock(string $indicator, int $rating): string
     {
@@ -365,8 +408,8 @@ class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
 
     private function formatDimension(array $values): string
     {
-        $values = array_filter($values, fn ($v) => $v !== null && $v !== '');
-        return empty($values) ? '—' : implode('; ', array_map(fn ($v) => trim((string) $v), $values));
+        $values = array_filter($values, fn ($v) => $v !== null && trim((string) $v) !== '');
+        return empty($values) ? '-' : implode('; ', array_map(fn ($v) => trim((string) $v), $values));
     }
 
     private function estimateRowHeight(string ...$texts): float
@@ -381,7 +424,6 @@ class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
 
             $explicit = substr_count($text, "\n") + 1;
             $wrapped = (int) ceil(mb_strlen($text) / self::CHARS_PER_LINE);
-
             $maxLines = max($maxLines, $explicit, $wrapped);
         }
 
@@ -398,10 +440,9 @@ class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
     private function applyRowVerticalBorders(Worksheet $sheet, int $row): void
     {
         foreach (range('A', 'O') as $col) {
-            $b = $sheet->getStyle("{$col}{$row}")->getBorders();
-            $b->getLeft()->setBorderStyle(Border::BORDER_THIN);
-            $b->getRight()->setBorderStyle(Border::BORDER_THIN);
-            // IMPORTANT: don't touch top/bottom (same as UWP)
+            $borders = $sheet->getStyle("{$col}{$row}")->getBorders();
+            $borders->getLeft()->setBorderStyle(Border::BORDER_THIN);
+            $borders->getRight()->setBorderStyle(Border::BORDER_THIN);
         }
     }
 

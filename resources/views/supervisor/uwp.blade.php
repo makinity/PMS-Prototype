@@ -1,7 +1,10 @@
 @extends('layouts.supervisor')
     @php
         $status = $status ?? 'Draft';
-        $isDraft = $status === 'Draft';
+        $statusKey = strtolower((string) $status);
+        $isDraft = $statusKey === 'draft';
+        $isLocked = (bool) ($locked_at ?? $lockedAt ?? false);
+        $canEdit = $isDraft && !$isLocked;
     @endphp
 @section('main-content')
     <section class="space-y-6">
@@ -23,16 +26,13 @@
                 <div class="space-y-1">
                     <p class="text-sm font-semibold text-white">Planning details</p>
                     <p class="text-xs text-slate-400">Define commitments for the period. Editing is allowed only while in Draft.</p>
+                    @if ($canEdit)
+                        <p class="text-xs text-emerald-300/90">Draft mode: you can add/remove MFOs.</p>
+                    @else
+                        <span class="inline-flex items-center rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[11px] font-semibold text-amber-200">Locked: read-only after submission.</span>
+                    @endif
                 </div>
                 <div class="flex flex-wrap items-start justify-end gap-3 text-[11px] text-slate-400">
-                    @if ($isDraft)
-                        <button type="button"
-                                id="uwp-add-function"
-                                class="inline-flex items-center gap-1 rounded-lg border border-blue-500/50 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-200 hover:bg-blue-500/20">
-                            <span class="fa-solid fa-plus text-[10px]"></span>
-                            <span>+ Add Function</span>
-                        </button>
-                    @endif
                     <div class="flex flex-col items-end gap-1">
                         <span class="inline-flex items-center gap-1 rounded-full border border-blue-500/30 bg-blue-500/10 px-2.5 py-1 font-semibold text-blue-200">
                             Status: {{ $status }}
@@ -94,6 +94,18 @@
                 </label>
             </div>
             <div id="uwp-functions-wrapper" class="space-y-6"></div>
+            @if ($canEdit)
+                <div class="mt-8 flex justify-center">
+                    <button type="button"
+                            id="uwp-add-function"
+                            class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-600/70 bg-gradient-to-b from-cyan-500/15 to-slate-800/80 px-5 py-3 text-sm font-semibold text-slate-100 shadow-sm transition hover:-translate-y-0.5 hover:border-cyan-400/60 hover:from-cyan-400/20 hover:to-slate-700/80 hover:shadow focus:outline-none focus:ring-2 focus:ring-cyan-500/60 md:w-auto">
+                        <svg class="h-4 w-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M10 4v12m6-6H4" />
+                        </svg>
+                        <span>Add Function</span>
+                    </button>
+                </div>
+            @endif
 
             <div class="sticky bottom-0 z-30 -mx-5 mt-6 border-t border-slate-800 bg-slate-950/95 px-5 py-4 backdrop-blur">
                 <div class="flex flex-wrap items-center justify-between gap-3">
@@ -109,8 +121,8 @@
                                 data-action-message="This will save the Unit Work Plan as a draft. You may continue editing until it is submitted for approval."
                                 data-action-confirm="Save draft"
                                 data-action-loading="Saving..."
-                                class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-800/80 {{ $isDraft ? '' : 'opacity-60 pointer-events-none' }}"
-                                {{ $isDraft ? '' : 'disabled' }}>
+                                class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-800/80 {{ $canEdit ? '' : 'opacity-60 pointer-events-none' }}"
+                                {{ $canEdit ? '' : 'disabled' }}>
                             <span data-button-label>Save to Draft</span>
                             <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"></span>
                         </button>
@@ -137,7 +149,7 @@
             </div>
 
             <div class="mt-4 space-y-3">
-                @if ($isDraft)
+                @if ($canEdit)
                     <div class="flex flex-wrap items-center justify-between gap-2">
                         <span class="text-xs text-slate-400">Manage success indicators (one per line, scalable list).</span>
                         <button type="button" id="uwp-add-indicator"
@@ -156,7 +168,7 @@
                                     <th class="px-4 py-3 text-left text-[11px] uppercase tracking-[0.2em] text-slate-400">Success Indicator</th>
                                     <th class="px-4 py-3 text-center text-[11px] uppercase tracking-[0.2em] text-slate-400">Standards</th>
                                     <th class="px-4 py-3 text-center text-[11px] uppercase tracking-[0.2em] text-slate-400">Assign Employee</th>
-                                    @if ($isDraft)
+                                    @if ($canEdit)
                                         <th class="px-4 py-3 text-center text-[11px] uppercase tracking-[0.2em] text-slate-400">Actions</th>
                                     @endif
                                 </tr>
@@ -166,7 +178,7 @@
                     </div>
                 </div>
 
-                @unless ($isDraft)
+                @unless ($canEdit)
                     <p class="text-[11px] text-slate-500">Read-only view. Indicators were finalized at submission.</p>
                 @endunless
             </div>
@@ -199,7 +211,7 @@
             <div class="mt-4 space-y-4 text-sm text-slate-200 max-h-[70vh] overflow-y-auto">
                 <div id="uwp-standards-list" class="w-full"></div>
 
-                @if ($isDraft)
+                @if ($canEdit)
                     <div class="space-y-3 rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                         <p class="text-xs text-slate-400">Add a standard to a specific Rating × Dimension cell.</p>
                         <div class="grid grid-cols-1 gap-2 sm:grid-cols-4">
@@ -293,7 +305,7 @@
                                 <th class="px-4 py-2 text-left">Office / Unit</th>
                                 <th class="px-4 py-2 text-left">Status</th>
                                 <th class="px-4 py-2 text-left">Success Indicator</th>
-                                @if ($isDraft)
+                                @if ($canEdit)
                                     <th class="px-4 py-2 text-center">Action</th>
                                 @endif
                             </tr>
@@ -306,7 +318,7 @@
             </div>
 
             <div class="mt-4 flex items-center justify-end gap-3 border-t border-slate-800 pt-3">
-                @if ($isDraft)
+                @if ($canEdit)
                     <button type="button"
                             id="uwp-save-assignments"
                             class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500">
@@ -472,6 +484,8 @@
                 let activeMfoIndex = null;
                 let activeIndicators = [];
                 let activeAssignIndicatorIndex = null;
+                let activeRowConfirmId = null;
+                let activeFunctionConfirmId = null;
 
                 const assignedData = {
                     'Revenue Collection Unit': [
@@ -484,7 +498,7 @@
                     'Planning and Development Unit': [],
                 };
 
-                const isDraft = {{ $isDraft ? 'true' : 'false' }};
+                const isDraft = {{ $canEdit ? 'true' : 'false' }};
 
                 const uwpState = {
                     functions: [
@@ -765,13 +779,17 @@
                         const description = getFunctionDescription(func);
                         const inputDisabled = isDraft ? '' : 'disabled';
                         const mutedClass = isDraft ? '' : 'opacity-60 pointer-events-none';
+                        const canDeleteFunction = isDraft;
+                        const isFunctionConfirmOpen = activeFunctionConfirmId === funcIndex;
 
                         const mfoRows = (func.mfos || []).map((mfo, mfoIndex) => {
                             const indicatorCount = Array.isArray(mfo.indicators) ? mfo.indicators.length : 0;
+                            const rowId = `${funcIndex}-${mfoIndex}`;
+                            const isConfirmOpen = activeRowConfirmId === rowId;
 
                             return `
-                                <tr class="hover:bg-slate-800/40">
-                                    <td class="px-4 py-3">
+                                <tr class="group hover:bg-slate-800/40 transition-colors" data-mfo-row-id="${rowId}">
+                                    <td class="px-4 py-4">
                                         <input type="text"
                                             data-mfo-title
                                             data-function-index="${funcIndex}"
@@ -783,46 +801,63 @@
                                             ${inputDisabled}>
                                     </td>
 
-                                    <td class="px-4 py-3 text-center">
+                                    <td class="px-4 py-4 text-center">
                                         <button
                                             type="button"
                                             data-action="view-indicators"
                                             data-function-index="${funcIndex}"
                                             data-mfo-index="${mfoIndex}"
-                                            class="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 transition justify-center">
-                                            <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 14">
-                                                <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5">
-                                                    <path d="M10 3c-3.5 0-6.5 2.3-8 5 1.5 2.7 4.5 5 8 5s6.5-2.3 8-5c-1.5-2.7-4.5-5-8-5Z"/>
-                                                    <path d="M10 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
-                                                </g>
-                                            </svg>
-                                            <span class="text-xs">View (${indicatorCount})</span>
+                                            class="inline-flex items-center rounded-full border border-slate-700 bg-slate-900 px-3 py-1 text-xs font-semibold text-slate-300 transition hover:bg-slate-700/40 hover:border-slate-400/60 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 cursor-pointer">
+                                            ${indicatorCount} indicator${indicatorCount === 1 ? '' : 's'}
                                         </button>
                                     </td>
 
-                                    <td class="px-4 py-3">
-                                        <div class="flex items-start justify-between gap-3">
-                                            <textarea
-                                                data-mfo-target
-                                                data-function-index="${funcIndex}"
-                                                data-mfo-index="${mfoIndex}"
-                                                rows="2"
-                                                class="flex-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none ${mutedClass}"
-                                                style="background:#0f172a;color:#e5e7eb;"
-                                                placeholder="e.g., Monthly; 1,200 files"
-                                                ${inputDisabled}>${escapeHtml(mfo.target)}</textarea>
+                                    <td class="px-4 py-4">
+                                        <textarea
+                                            data-mfo-target
+                                            data-function-index="${funcIndex}"
+                                            data-mfo-index="${mfoIndex}"
+                                            rows="2"
+                                            class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none ${mutedClass}"
+                                            style="background:#0f172a;color:#e5e7eb;"
+                                            placeholder="e.g., Monthly; 1,200 files"
+                                            ${inputDisabled}>${escapeHtml(mfo.target)}</textarea>
+                                    </td>
+
+                                    <td class="px-4 py-4 text-right">
+                                        <div class="inline-flex items-center justify-end gap-2">
                                             ${isDraft ? `
                                                 <button type="button"
-                                                    data-action="remove-mfo"
+                                                    data-action="trigger-remove-mfo"
+                                                    data-delete-trigger="true"
+                                                    data-row-id="${rowId}"
                                                     data-function-index="${funcIndex}"
                                                     data-mfo-index="${mfoIndex}"
                                                     aria-label="Remove MFO"
                                                     title="Remove MFO"
-                                                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-red-500 transition hover:text-red-400 hover:bg-red-500/10 focus:outline-none focus:ring-2 focus:ring-red-500/40">
-                                                    <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    class="${isConfirmOpen ? 'hidden' : 'inline-flex'} h-8 w-8 items-center justify-center rounded-lg text-red-400 opacity-0 transition hover:bg-red-500/10 hover:text-red-300 focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:opacity-100 group-hover:opacity-100">
+                                                    <svg class="h-4 w-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-7 0h8m-9 3 1 9a1 1 0 0 0 1 .9h6a1 1 0 0 0 1-.9l1-9M10 11v6M14 11v6"/>
                                                     </svg>
                                                 </button>
+                                                <div data-delete-confirm="${rowId}" class="${isConfirmOpen ? 'inline-flex' : 'hidden'} items-center gap-1">
+                                                    <button
+                                                        type="button"
+                                                        data-action="cancel-remove-mfo"
+                                                        data-row-id="${rowId}"
+                                                        class="rounded-full border border-slate-600 px-2.5 py-1 text-[11px] font-semibold text-slate-300 transition hover:bg-slate-800">
+                                                        Cancel
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        data-action="confirm-remove-mfo"
+                                                        data-row-id="${rowId}"
+                                                        data-function-index="${funcIndex}"
+                                                        data-mfo-index="${mfoIndex}"
+                                                        class="rounded-full border border-red-500/40 bg-red-500/10 px-2.5 py-1 text-[11px] font-semibold text-red-300 transition hover:bg-red-500/20 hover:text-red-200 focus:outline-none focus:ring-2 focus:ring-red-500/40">
+                                                        Remove
+                                                    </button>
+                                                </div>
                                             ` : ''}
                                         </div>
                                     </td>
@@ -832,14 +867,14 @@
 
                         const emptyRow = `
                             <tr>
-                                <td colspan="3" class="px-4 py-6 text-center text-xs text-slate-500">
+                                <td colspan="4" class="px-4 py-6 text-center text-xs text-slate-500">
                                     No MFOs yet. Use "+ Add MFO" to add entries.
                                 </td>
                             </tr>
                         `;
 
                         return `
-                            <div data-function-card data-function-index="${funcIndex}" class="scroll-mt-24 rounded-2xl border border-slate-800 bg-slate-900/60 p-6 shadow-sm space-y-4">
+                            <div data-function-card data-function-index="${funcIndex}" class="group scroll-mt-24 rounded-2xl border border-slate-800 bg-slate-900/60 p-6 shadow-sm space-y-4">
                                 <div class="flex flex-wrap items-start justify-between gap-3">
                                     <div class="space-y-1">
                                         <div class="flex flex-wrap items-center gap-2">
@@ -853,6 +888,10 @@
                                             <span class="inline-flex items-center rounded-full border border-slate-700 bg-slate-800 px-3 py-1 text-xs font-semibold text-slate-300" data-function-weight-label="${funcIndex}">(${weightValue}%)</span>
                                         </div>
                                         <p class="text-sm text-slate-400">${description}</p>
+                                        ${isDraft
+                                            ? '<p class="text-xs text-emerald-300/90">Draft mode: you can add/remove MFOs.</p>'
+                                            : '<span class="inline-flex items-center rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[11px] font-semibold text-amber-200">Locked: read-only after submission.</span>'
+                                        }
                                     </div>
                                     <div class="flex flex-wrap items-center justify-end gap-2">
                                         <input type="number" min="0" max="100"
@@ -873,18 +912,34 @@
                                             </button>
                                         ` : ''}
 
-                                        ${isDraft ? `
+                                        ${canDeleteFunction ? `
                                             <button type="button"
-                                                data-action="remove-function"
+                                                data-action="trigger-remove-function"
                                                 data-function-index="${funcIndex}"
                                                 aria-label="Remove Function"
                                                 title="Remove Function"
-                                                class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-red-500 transition hover:text-red-400 hover:bg-red-500/10 focus:outline-none focus:ring-2 focus:ring-red-500/40">
-                                                <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                class="${isFunctionConfirmOpen ? 'hidden' : 'inline-flex'} h-8 w-8 items-center justify-center rounded-lg text-red-400 opacity-0 transition hover:bg-red-500/10 hover:text-red-300 focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:opacity-100 group-hover:opacity-100">
+                                                <svg class="h-4 w-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-7 0h8m-9 3 1 9a1 1 0 0 0 1 .9h6a1 1 0 0 0 1-.9l1-9M10 11v6M14 11v6"/>
                                                 </svg>
                                             </button>
+                                            <div data-function-delete-confirm="${funcIndex}" class="${isFunctionConfirmOpen ? 'inline-flex' : 'hidden'} items-center gap-1">
+                                                <button
+                                                    type="button"
+                                                    data-action="cancel-remove-function"
+                                                    class="rounded-full border border-slate-600 px-2.5 py-1 text-[11px] font-semibold text-slate-300 transition hover:bg-slate-800">
+                                                    Cancel
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    data-action="confirm-remove-function"
+                                                    data-function-index="${funcIndex}"
+                                                    class="rounded-full border border-red-500/40 bg-red-500/10 px-2.5 py-1 text-[11px] font-semibold text-red-300 transition hover:bg-red-500/20 hover:text-red-200 focus:outline-none focus:ring-2 focus:ring-red-500/40">
+                                                    Remove
+                                                </button>
+                                            </div>
                                         ` : ''}
+
                                     </div>
                                 </div>
 
@@ -897,6 +952,7 @@
                                                         <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">PPA / MFO</th>
                                                         <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Success Indicators</th>
                                                         <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Target / Timeline</th>
+                                                        <th class="px-4 py-3 text-right font-semibold uppercase text-[11px] tracking-wide">Actions</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody class="divide-y divide-slate-800 text-slate-100">
@@ -1388,15 +1444,45 @@
                     renderFunctions();
                 }
 
+                function enterRowConfirm(rowId) {
+                    if (!isDraft) return;
+                    activeFunctionConfirmId = null;
+                    activeRowConfirmId = rowId;
+                    renderFunctions();
+                }
+
+                function exitRowConfirm() {
+                    if (activeRowConfirmId === null) return;
+                    activeRowConfirmId = null;
+                    renderFunctions();
+                }
+
+                function enterFunctionConfirm(functionIndex) {
+                    if (!isDraft) return;
+                    activeRowConfirmId = null;
+                    activeFunctionConfirmId = functionIndex;
+                    renderFunctions();
+                }
+
+                function exitFunctionConfirm() {
+                    if (activeFunctionConfirmId === null) return;
+                    activeFunctionConfirmId = null;
+                    renderFunctions();
+                }
+
                 function removeMfo(functionIndex, mfoIndex) {
                     const func = uwpState.functions[functionIndex];
                     if (!func || !Array.isArray(func.mfos)) return;
                     func.mfos.splice(mfoIndex, 1);
+                    activeRowConfirmId = null;
                     renderFunctions();
                 }
 
                 function removeFunction(functionIndex) {
+                    if (!isDraft) return;
                     uwpState.functions.splice(functionIndex, 1);
+                    activeFunctionConfirmId = null;
+                    activeRowConfirmId = null;
                     renderFunctions();
                 }
 
@@ -1478,30 +1564,17 @@
 
                 function submitUwp(actionUrl) {
                     if (!uwpForm || !actionUrl) return;
-                        if (functionsPayloadInput) {
-                            functionsPayloadInput.value = JSON.stringify(buildFunctionsPayload());
-                        }
-                        if (mfosPayloadInput) {
-                            mfosPayloadInput.value = JSON.stringify(buildMfosPayloadFromState());
-                        }
-                        if (assignmentsPayloadInput) {
-                            assignmentsPayloadInput.value = JSON.stringify(buildAssignmentsPayloadMvp());
-                        }
-                        uwpForm.action = actionUrl;
-                        uwpForm.submit();function submitUwp(actionUrl) {
-                        if (!uwpForm || !actionUrl) return;
-                        if (functionsPayloadInput) {
-                            functionsPayloadInput.value = JSON.stringify(buildFunctionsPayload());
-                        }
-                        if (mfosPayloadInput) {
-                            mfosPayloadInput.value = JSON.stringify(buildMfosPayloadFromState());
-                        }
-                        if (assignmentsPayloadInput) {
-                            assignmentsPayloadInput.value = JSON.stringify(buildAssignmentsPayloadMvp());
-                        }
-                        uwpForm.action = actionUrl;
-                        uwpForm.submit();
+                    if (functionsPayloadInput) {
+                        functionsPayloadInput.value = JSON.stringify(buildFunctionsPayload());
                     }
+                    if (mfosPayloadInput) {
+                        mfosPayloadInput.value = JSON.stringify(buildMfosPayloadFromState());
+                    }
+                    if (assignmentsPayloadInput) {
+                        assignmentsPayloadInput.value = JSON.stringify(buildAssignmentsPayloadMvp());
+                    }
+                    uwpForm.action = actionUrl;
+                    uwpForm.submit();
                 }
 
                 // ===== Wire events =====
@@ -1566,17 +1639,49 @@
                             return;
                         }
 
-                        const removeMfoBtn = event.target.closest('[data-action="remove-mfo"]');
-                        if (removeMfoBtn) {
-                            const funcIdx = Number(removeMfoBtn.dataset.functionIndex);
-                            const mfoIdx = Number(removeMfoBtn.dataset.mfoIndex);
+                        const triggerRemoveBtn = event.target.closest('[data-action="trigger-remove-mfo"]');
+                        if (triggerRemoveBtn) {
+                            if (!isDraft) return;
+                            const rowId = triggerRemoveBtn.dataset.rowId;
+                            enterRowConfirm(rowId);
+                            return;
+                        }
+
+                        const cancelRemoveBtn = event.target.closest('[data-action="cancel-remove-mfo"]');
+                        if (cancelRemoveBtn) {
+                            if (!isDraft) return;
+                            exitRowConfirm();
+                            return;
+                        }
+
+                        const confirmRemoveBtn = event.target.closest('[data-action="confirm-remove-mfo"]');
+                        if (confirmRemoveBtn) {
+                            if (!isDraft) return;
+                            const funcIdx = Number(confirmRemoveBtn.dataset.functionIndex);
+                            const mfoIdx = Number(confirmRemoveBtn.dataset.mfoIndex);
                             removeMfo(funcIdx, mfoIdx);
                             return;
                         }
 
-                        const removeFunctionBtn = event.target.closest('[data-action="remove-function"]');
-                        if (removeFunctionBtn) {
-                            const funcIdx = Number(removeFunctionBtn.dataset.functionIndex);
+                        const triggerRemoveFunctionBtn = event.target.closest('[data-action="trigger-remove-function"]');
+                        if (triggerRemoveFunctionBtn) {
+                            if (!isDraft) return;
+                            const funcIdx = Number(triggerRemoveFunctionBtn.dataset.functionIndex);
+                            enterFunctionConfirm(funcIdx);
+                            return;
+                        }
+
+                        const cancelRemoveFunctionBtn = event.target.closest('[data-action="cancel-remove-function"]');
+                        if (cancelRemoveFunctionBtn) {
+                            if (!isDraft) return;
+                            exitFunctionConfirm();
+                            return;
+                        }
+
+                        const confirmRemoveFunctionBtn = event.target.closest('[data-action="confirm-remove-function"]');
+                        if (confirmRemoveFunctionBtn) {
+                            if (!isDraft) return;
+                            const funcIdx = Number(confirmRemoveFunctionBtn.dataset.functionIndex);
                             removeFunction(funcIdx);
                         }
                     });
@@ -1619,6 +1724,33 @@
 
                 renderFunctions();
 
+                document.addEventListener('click', (event) => {
+                    if (!isDraft) return;
+
+                    let shouldRender = false;
+
+                    if (activeRowConfirmId !== null) {
+                        const row = event.target.closest('[data-mfo-row-id]');
+                        if (!(row && row.dataset.mfoRowId === activeRowConfirmId)) {
+                            activeRowConfirmId = null;
+                            shouldRender = true;
+                        }
+                    }
+
+                    if (activeFunctionConfirmId !== null) {
+                        const card = event.target.closest('[data-function-card]');
+                        const cardIndex = card ? Number(card.dataset.functionIndex) : null;
+                        if (cardIndex !== activeFunctionConfirmId) {
+                            activeFunctionConfirmId = null;
+                            shouldRender = true;
+                        }
+                    }
+
+                    if (shouldRender) {
+                        renderFunctions();
+                    }
+                });
+
                 // ===== Close on backdrop + Escape =====
                 standardsModal?.addEventListener('click', (e) => {
                     if (e.target === standardsModal) closeStandardsModal();
@@ -1630,7 +1762,11 @@
 
                 document.addEventListener('keydown', (e) => {
                     if (e.key === 'Escape') {
-                        if (standardsModal && !standardsModal.classList.contains('hidden')) {
+                        if (isDraft && (activeRowConfirmId !== null || activeFunctionConfirmId !== null)) {
+                            activeRowConfirmId = null;
+                            activeFunctionConfirmId = null;
+                            renderFunctions();
+                        } else if (standardsModal && !standardsModal.classList.contains('hidden')) {
                             closeStandardsModal();
                         } else if (assignedModal && !assignedModal.classList.contains('hidden')) {
                             closeAssignedModal();
