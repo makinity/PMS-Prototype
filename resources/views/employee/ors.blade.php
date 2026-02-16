@@ -342,26 +342,29 @@
         role="dialog"
         aria-modal="true"
         class="ors-modal fixed inset-0 z-[60] hidden flex items-start justify-center overflow-y-auto bg-black/60 px-4 py-6 sm:px-6">
-        <div class="w-full max-w-md max-h-[calc(100vh-3rem)] overflow-y-auto rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
-            <div class="mb-3 flex items-start justify-between">
-                <div>
-                    <h2 class="text-lg font-semibold text-white" id="taskDetailTitle">Task Details</h2>
-                    <p class="text-xs text-slate-400" id="taskDetailDate">Date: --</p>
+        <div class="w-full max-w-[95vw] sm:max-w-xl md:max-w-2xl lg:max-w-3xl max-h-[calc(100vh-3rem)] overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-xl">
+            <div class="sticky top-0 z-10 border-b border-slate-800 bg-slate-900/95 p-5 backdrop-blur">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <h2 class="text-lg font-semibold text-white" id="taskDetailTitle">Task Details</h2>
+                        <p class="text-xs text-slate-400" id="taskDetailDate">Date: --</p>
+                    </div>
+                    <button onclick="closeOrsModal('taskDetailsModal')"
+                            class="text-slate-400 hover:text-white">
+                        x
+                    </button>
                 </div>
-                <button onclick="closeOrsModal('taskDetailsModal')"
-                        class="text-slate-400 hover:text-white">
-                    x
-                </button>
+
+                <div class="mt-3 flex flex-wrap gap-2 text-xs">
+                    <span id="taskDetailStatusBadge" class="status-chip border-slate-700 bg-slate-800 text-slate-200">--</span>
+                    <span id="taskDetailLockBadge" class="hidden status-chip border-emerald-500/60 bg-emerald-500/10 text-emerald-100">
+                        Submitted (Locked)
+                    </span>
+                </div>
             </div>
 
-            <div class="flex flex-wrap gap-2 text-xs">
-                <span id="taskDetailStatusBadge" class="status-chip border-slate-700 bg-slate-800 text-slate-200">--</span>
-                <span id="taskDetailLockBadge" class="hidden status-chip border-emerald-500/60 bg-emerald-500/10 text-emerald-100">
-                    Submitted (Locked)
-                </span>
-            </div>
-
-                <div class="mt-4 grid grid-cols-1 gap-3 text-sm">
+            <div class="max-h-[calc(100vh-12rem)] overflow-y-auto p-5">
+                <div class="grid grid-cols-1 gap-3 text-sm md:grid-cols-2">
                     <div>
                         <p class="text-xs text-slate-400">Supervisor</p>
                         <p class="text-slate-200" id="taskDetailClient">--</p>
@@ -386,74 +389,97 @@
                     </div>
                     <div>
                         <p class="text-xs text-slate-400">Status</p>
-                    <p class="text-slate-200" id="taskDetailStatusText">--</p>
+                        <p class="text-slate-200" id="taskDetailStatusText">--</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400">Duration</p>
+                        <p class="text-slate-200" id="taskDetailDuration">--</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400">Performance Rating</p>
+                        <p class="text-slate-200" id="taskDetailRating">--</p>
+                    </div>
+                    <div class="md:col-span-2">
+                        <p class="text-xs text-slate-400">Notes</p>
+                        <p class="text-slate-200" id="taskDetailNotes">--</p>
+                    </div>
                 </div>
-                <div>
-                    <p class="text-xs text-slate-400">Duration</p>
-                    <p class="text-slate-200" id="taskDetailDuration">--</p>
-                </div>
-                <div>
-                    <p class="text-xs text-slate-400">Performance Rating</p>
-                    <p class="text-slate-200" id="taskDetailRating">--</p>
-                </div>
-                <div>
-                    <p class="text-xs text-slate-400">Notes</p>
-                    <p class="text-slate-200" id="taskDetailNotes">--</p>
-                </div>
-            </div>
 
-            <div class="mt-4 rounded-xl border border-slate-800 bg-slate-950/60 p-3 text-sm">
-                <p class="text-[11px] uppercase text-slate-400">Submission & Output</p>
+                <div class="mt-4 rounded-xl border border-slate-800 bg-slate-950/60 p-3 text-sm">
+                    <p class="text-[11px] uppercase text-slate-400">Submission & Output</p>
 
-                <div class="mt-2 space-y-2">
-                    <label class="text-xs text-slate-300">Output Upload (part of ORS submission)</label>
-                    <input id="taskDetailUpload"
-                        type="file"
-                        class="block w-full rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-xs text-slate-200 file:mr-3 file:rounded-md file:border-0 file:bg-slate-800 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-slate-200">
-                    <p class="text-[11px] text-slate-400">
-                        Submission occurs once inside ORS. After submit, the entry is locked and visible in My Tasks (read-only) and MPOR/SMPOR.
+                    <div class="mt-3 grid grid-cols-1 gap-3 md:grid-cols-3">
+                        <div>
+                            <p class="text-xs text-slate-400">Output State</p>
+                            <span id="taskDetailOutputState"
+                                class="mt-1 inline-flex rounded-full border border-slate-700 bg-slate-800 px-2 py-1 text-xs text-slate-200">
+                                No output yet
+                            </span>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400">Evidence</p>
+                            <span id="taskDetailEvidenceState"
+                                class="mt-1 inline-flex rounded-full border border-slate-700 bg-slate-800 px-2 py-1 text-xs text-slate-200">
+                                None
+                            </span>
+                            <p id="taskDetailEvidenceFile" class="mt-1 text-[11px] text-slate-400">--</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400">Submitted At</p>
+                            <p class="text-slate-200" id="taskDetailSubmittedAt">--</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-3 space-y-2">
+                        <label class="text-xs text-slate-300">Output Upload (part of ORS submission)</label>
+                        <input id="taskDetailUpload"
+                            type="file"
+                            class="block w-full rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-xs text-slate-200 file:mr-3 file:rounded-md file:border-0 file:bg-slate-800 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-slate-200">
+                        <p class="text-[11px] text-slate-400">
+                            Submission occurs once inside ORS. After submit, the entry is locked and visible in My Tasks (read-only) and MPOR/SMPOR.
+                        </p>
+                    </div>
+
+                    <div class="mt-3 flex flex-wrap gap-2" id="taskDetailActions">
+                        <button id="taskDetailStartBtn"
+                                type="button"
+                                class="inline-flex items-center gap-2 rounded-lg border border-blue-500/60 bg-blue-500/10 px-3 py-1.5 text-xs font-semibold text-blue-100 hover:bg-blue-500/20">
+                            <span data-button-label>Start Task</span>
+                            <span data-button-spinner class="hidden h-3 w-3 animate-spin rounded-full border-2 border-blue-200/40 border-t-blue-200"></span>
+                        </button>
+                        <button id="taskDetailPauseBtn"
+                                type="button"
+                                class="hidden rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-slate-800">
+                            Pause
+                        </button>
+                        <button id="taskDetailResumeBtn"
+                                type="button"
+                                class="hidden rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-100 hover:bg-amber-500/20">
+                            Resume
+                        </button>
+                        <button id="taskDetailStopBtn"
+                                type="button"
+                                class="hidden rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-100 hover:bg-amber-500/20">
+                            Stop (Draft)
+                        </button>
+                        <button id="taskDetailSubmitBtn"
+                                type="button"
+                                class="hidden inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-slate-900 hover:bg-emerald-600">
+                            <span data-button-label>Submit for Review</span>
+                            <span data-button-spinner class="hidden h-3 w-3 animate-spin rounded-full border-2 border-emerald-900/30 border-t-emerald-900"></span>
+                        </button>
+                    </div>
+
+                    <p id="taskDetailLockMessage" class="mt-2 hidden text-[11px] text-emerald-300">
+                        Submitted (Locked) — visible in MPOR monthly summary. SMPOR is system-generated after validation.
+                    </p>
+                    <p id="taskDetailDraftMessage" class="mt-2 text-[11px] text-slate-400">
+                        Stop ends timing and keeps Draft editable. Submit for Review locks the entry and prevents duplicate submissions.
                     </p>
                 </div>
-
-                <div class="mt-3 flex flex-wrap gap-2" id="taskDetailActions">
-                    <button id="taskDetailStartBtn"
-                            type="button"
-                            class="inline-flex items-center gap-2 rounded-lg border border-blue-500/60 bg-blue-500/10 px-3 py-1.5 text-xs font-semibold text-blue-100 hover:bg-blue-500/20">
-                        <span data-button-label>Start Task</span>
-                        <span data-button-spinner class="hidden h-3 w-3 animate-spin rounded-full border-2 border-blue-200/40 border-t-blue-200"></span>
-                    </button>
-                    <button id="taskDetailPauseBtn"
-                            type="button"
-                            class="hidden rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-slate-800">
-                        Pause
-                    </button>
-                    <button id="taskDetailResumeBtn"
-                            type="button"
-                            class="hidden rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-100 hover:bg-amber-500/20">
-                        Resume
-                    </button>
-                    <button id="taskDetailStopBtn"
-                            type="button"
-                            class="hidden rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-100 hover:bg-amber-500/20">
-                        Stop (Draft)
-                    </button>
-                    <button id="taskDetailSubmitBtn"
-                            type="button"
-                            class="hidden inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-slate-900 hover:bg-emerald-600">
-                        <span data-button-label>Submit for Review</span>
-                        <span data-button-spinner class="hidden h-3 w-3 animate-spin rounded-full border-2 border-emerald-900/30 border-t-emerald-900"></span>
-                    </button>
-                </div>
-
-                <p id="taskDetailLockMessage" class="mt-2 hidden text-[11px] text-emerald-300">
-                    Submitted (Locked) — visible in MPOR monthly summary. SMPOR is system-generated after validation.
-                </p>
-                <p id="taskDetailDraftMessage" class="mt-2 text-[11px] text-slate-400">
-                    Stop ends timing and keeps Draft editable. Submit for Review locks the entry and prevents duplicate submissions.
-                </p>
             </div>
 
-            <div class="mt-6 flex justify-end">
+            <div class="sticky bottom-0 z-10 flex justify-end gap-2 border-t border-slate-800 bg-slate-900/95 p-4 backdrop-blur">
                 <button onclick="closeOrsModal('taskDetailsModal')"
                         class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800">
                     Close
@@ -513,6 +539,12 @@
                     quantity: '12 transactions',
                     rating: '--',
                     state: 'submitted',
+                    output_state: 'submitted',
+                    submittedAt: new Date('2026-01-02T10:15:00'),
+                    evidenceRequired: true,
+                    evidenceAttached: true,
+                    evidenceFileName: 'REQ-2026-002_OR.pdf',
+                    evidenceUploadedAt: new Date('2026-01-02T10:15:00'),
                     startTime: null,
                     durationMs: 2 * 60 * 60 * 1000
                 },
@@ -527,6 +559,12 @@
                     quantity: '1 daily batch',
                     rating: '--',
                     state: 'submitted',
+                    output_state: 'submitted',
+                    submittedAt: new Date('2026-01-04T15:20:00'),
+                    evidenceRequired: true,
+                    evidenceAttached: true,
+                    evidenceFileName: 'REQ-2026-004_BSF-01.pdf',
+                    evidenceUploadedAt: new Date('2026-01-04T15:20:00'),
                     startTime: null,
                     durationMs: 90 * 60 * 1000
                 },
@@ -541,6 +579,12 @@
                     quantity: '6 receipts validated',
                     rating: '--',
                     state: 'recording',
+                    output_state: 'none',
+                    submittedAt: null,
+                    evidenceRequired: true,
+                    evidenceAttached: false,
+                    evidenceFileName: null,
+                    evidenceUploadedAt: null,
                     // make it look active without depending on user clock too much
                     startTime: new Date(Date.now() - (18 * 60 * 1000)), // started 18 minutes ago
                     durationMs: 0
@@ -556,10 +600,32 @@
                     quantity: '',
                     rating: '--',
                     state: 'missing',
+                    output_state: 'none',
+                    submittedAt: null,
+                    evidenceRequired: true,
+                    evidenceAttached: false,
+                    evidenceFileName: null,
+                    evidenceUploadedAt: null,
                     startTime: null,
                     durationMs: 0
                 },
             ];
+
+            const TASK_DEFAULTS = {
+                output_state: 'none',
+                submittedAt: null,
+                evidenceRequired: true,
+                evidenceAttached: false,
+                evidenceFileName: null,
+                evidenceUploadedAt: null,
+            };
+
+            tasks = tasks.map((task) => ({
+                ...TASK_DEFAULTS,
+                ...task,
+                submittedAt: task.submittedAt ? new Date(task.submittedAt) : null,
+                evidenceUploadedAt: task.evidenceUploadedAt ? new Date(task.evidenceUploadedAt) : null,
+            }));
 
             const uwpSelect = document.getElementById('orsUwpOutput');
             const taskSelect = document.getElementById('orsTaskType');
@@ -732,6 +798,19 @@
                 return dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             }
 
+            function formatDateTime(dateObj) {
+                if (!dateObj) return '--';
+                const value = dateObj instanceof Date ? dateObj : new Date(dateObj);
+                if (Number.isNaN(value.getTime())) return '--';
+                return value.toLocaleString([], {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                });
+            }
+
             function computeElapsed(task) {
                 const base = task.durationMs || 0;
                 if (task.state === 'recording' && task.startTime) {
@@ -780,6 +859,12 @@
                 if (!task) return;
                 detailTaskId = taskId;
 
+                if (!task.output_state) task.output_state = 'none';
+                if (typeof task.evidenceRequired !== 'boolean') task.evidenceRequired = true;
+                if (typeof task.evidenceAttached !== 'boolean') task.evidenceAttached = false;
+                if (!('evidenceFileName' in task)) task.evidenceFileName = null;
+                if (!('evidenceUploadedAt' in task)) task.evidenceUploadedAt = null;
+
                 document.getElementById('taskDetailTitle').textContent = task.title || '--';
                 document.getElementById('taskDetailDate').textContent = `Date: ${task.date || '--'}`;
                 document.getElementById('taskDetailClient').textContent = task.client || '--';
@@ -789,6 +874,46 @@
                 document.getElementById('taskDetailDuration').textContent = formatDuration(computeElapsed(task));
                 document.getElementById('taskDetailRating').textContent = task.rating || '--';
                 document.getElementById('taskDetailNotes').textContent = task.notes || '--';
+
+                const outputStateEl = document.getElementById('taskDetailOutputState');
+                if (outputStateEl) {
+                    let outputLabel = 'No output yet';
+                    let outputClass = 'border-slate-700 bg-slate-800 text-slate-200';
+                    if (task.output_state === 'submitted') {
+                        outputLabel = 'Output submitted';
+                        outputClass = 'border-blue-500/60 bg-blue-500/10 text-blue-200';
+                    } else if (task.output_state === 'validated') {
+                        outputLabel = 'Output validated';
+                        outputClass = 'border-emerald-500/60 bg-emerald-500/10 text-emerald-200';
+                    }
+                    outputStateEl.textContent = outputLabel;
+                    outputStateEl.className = `mt-1 inline-flex rounded-full border px-2 py-1 text-xs ${outputClass}`;
+                }
+
+                const evidenceStateEl = document.getElementById('taskDetailEvidenceState');
+                if (evidenceStateEl) {
+                    evidenceStateEl.textContent = task.evidenceAttached ? 'Attached' : 'None';
+                    evidenceStateEl.className = `mt-1 inline-flex rounded-full border px-2 py-1 text-xs ${
+                        task.evidenceAttached
+                            ? 'border-emerald-500/60 bg-emerald-500/10 text-emerald-200'
+                            : 'border-slate-700 bg-slate-800 text-slate-200'
+                    }`;
+                }
+
+                const evidenceFileEl = document.getElementById('taskDetailEvidenceFile');
+                if (evidenceFileEl) {
+                    if (task.evidenceAttached && task.evidenceFileName) {
+                        const uploadedAtText = task.evidenceUploadedAt
+                            ? ` (${formatDateTime(task.evidenceUploadedAt)})`
+                            : '';
+                        evidenceFileEl.textContent = `${task.evidenceFileName}${uploadedAtText}`;
+                    } else {
+                        evidenceFileEl.textContent = '--';
+                    }
+                }
+
+                document.getElementById('taskDetailSubmittedAt').textContent = formatDateTime(task.submittedAt);
+
                 const quantityInput = document.getElementById('taskDetailQuantity');
                 if (quantityInput) {
                     quantityInput.value = task.quantity || '';
@@ -798,7 +923,26 @@
                 }
 
                 const isMissing = task.state === 'missing';
-                document.getElementById('taskDetailUpload').disabled = isLockedState(task.state) && !isMissing;
+                const uploadInput = document.getElementById('taskDetailUpload');
+                if (uploadInput) {
+                    const uploadDisabled = isLockedState(task.state);
+                    uploadInput.disabled = uploadDisabled;
+                    uploadInput.classList.toggle('opacity-70', uploadDisabled);
+                    uploadInput.onchange = function () {
+                        if (uploadDisabled) return;
+                        const file = this.files && this.files[0] ? this.files[0] : null;
+                        if (file) {
+                            task.evidenceAttached = true;
+                            task.evidenceFileName = file.name;
+                            task.evidenceUploadedAt = new Date();
+                        } else {
+                            task.evidenceAttached = false;
+                            task.evidenceFileName = null;
+                            task.evidenceUploadedAt = null;
+                        }
+                        openTaskDetails(task.id);
+                    };
+                }
 
                 setStatusBadge(document.getElementById('taskDetailStatusBadge'), task.state);
 
@@ -917,8 +1061,14 @@
                     alert('Quantity is required before submitting an ORS entry.');
                     return false;
                 }
+                if (task.evidenceRequired && !task.evidenceAttached) {
+                    alert('Evidence attachment is required before submitting an ORS entry.');
+                    return false;
+                }
 
                 task.state = 'submitted';
+                task.output_state = 'submitted';
+                task.submittedAt = new Date();
                 task.startTime = null;
 
                 if (activeTaskId === taskId) activeTaskId = null;
@@ -1031,6 +1181,12 @@
                             quantity: '',
                             rating: '--',
                             state: 'recording',
+                            output_state: 'none',
+                            submittedAt: null,
+                            evidenceRequired: true,
+                            evidenceAttached: false,
+                            evidenceFileName: null,
+                            evidenceUploadedAt: null,
                             startTime: new Date(),
                             durationMs: 0
                         };
