@@ -49,24 +49,31 @@
         </div>
 
         <div class="flex items-center rounded-lg border border-gray-700 bg-gray-800 p-4 text-sm text-gray-400">
-            <svg class="mr-3 inline h-4 w-4 flex-shrink-0 text-blue-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 0 0 1 0 2Z" />
+            <svg class="mr-3 inline h-4 w-4 flex-shrink-0 text-blue-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor" viewBox="0 0 20 20">
+                <path
+                    d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 0 0 1 0 2Z" />
             </svg>
             <span>My Tasks mirrors ORS activity and declared quantity. Tasks are created and submitted in ORS.</span>
         </div>
 
-        <div id="task-view-modal" tabindex="-1" aria-hidden="true" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 px-4 py-6">
+        <div id="task-view-modal" tabindex="-1" aria-hidden="true"
+            class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 px-4 py-6">
             <div class="relative w-full max-w-4xl">
-                <div class="relative flex max-h-[85vh] flex-col overflow-hidden rounded-2xl border border-gray-700 bg-gray-900 shadow-lg">
+                <div
+                    class="relative flex max-h-[85vh] flex-col overflow-hidden rounded-2xl border border-gray-700 bg-gray-900 shadow-lg">
                     <div class="flex items-start justify-between border-b border-gray-700 px-6 py-4">
                         <div>
                             <h3 class="text-lg font-semibold text-white">Task Details</h3>
                             <p class="text-xs text-gray-400">My Tasks mirrors ORS activity (read-only).</p>
                         </div>
-                        <button type="button" id="closeTaskViewTop" class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-800 hover:text-white">
+                        <button type="button" id="closeTaskViewTop"
+                            class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-800 hover:text-white">
                             <span class="sr-only">Close modal</span>
-                            <svg class="h-4 w-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 12 12M13 1 1 13" />
+                            <svg class="h-4 w-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                viewBox="0 0 14 14">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="m1 1 12 12M13 1 1 13" />
                             </svg>
                         </button>
                     </div>
@@ -82,20 +89,28 @@
                                 <p id="mvTask" class="text-sm font-medium text-white">--</p>
                             </div>
                             <div>
+                                <p class="text-xs uppercase tracking-wide text-gray-500">MFO / UWP Output</p>
+                                <p id="mvMfo" class="text-sm font-medium text-white">--</p>
+                            </div>
+                            <div>
                                 <p class="text-xs uppercase tracking-wide text-gray-500">Date</p>
                                 <p id="mvDate" class="text-sm font-medium text-white">--</p>
+                            </div>
+                            <div>
+                                <p class="text-xs uppercase tracking-wide text-gray-500">Client Request ID</p>
+                                <p id="mvRequestId" class="text-sm font-medium text-white">--</p>
                             </div>
                             <div>
                                 <p class="text-xs uppercase tracking-wide text-gray-500">Status</p>
                                 <p id="mvStatus" class="text-sm font-medium text-white">--</p>
                             </div>
                             <div>
-                                <p class="text-xs uppercase tracking-wide text-gray-500">Output Type</p>
-                                <p id="mvOutputType" class="text-sm font-medium text-white">--</p>
-                            </div>
-                            <div>
                                 <p class="text-xs uppercase tracking-wide text-gray-500">Output State</p>
                                 <p id="mvOutputState" class="text-sm font-medium text-white">--</p>
+                            </div>
+                            <div>
+                                <p class="text-xs uppercase tracking-wide text-gray-500">Output Type</p>
+                                <p id="mvOutputType" class="text-sm font-medium text-white">--</p>
                             </div>
                             <div>
                                 <p class="text-xs uppercase tracking-wide text-gray-500">Quantity (ORS)</p>
@@ -120,7 +135,8 @@
                             </div>
                         </div>
 
-                        <div id="mvSupervisorMonitoringSection" class="mt-6 hidden rounded-2xl border border-gray-700 bg-gray-900/60 p-5 shadow-inner shadow-black/40">
+                        <div id="mvSupervisorMonitoringSection"
+                            class="mt-6 hidden rounded-2xl border border-gray-700 bg-gray-900/60 p-5 shadow-inner shadow-black/40">
                             <div class="flex items-center justify-between">
                                 <p class="text-xs uppercase tracking-wide text-gray-500">Supervisor Monitoring</p>
                                 <span class="text-[0.65rem] font-semibold uppercase tracking-wider text-gray-500">Stage II</span>
@@ -128,20 +144,25 @@
                             <div class="mt-4 space-y-4">
                                 <div>
                                     <p class="text-xs uppercase tracking-wide text-gray-500">Supervisor Name</p>
-                                    <p id="mvSupName" class="text-sm font-medium text-white">—</p>
+                                    <p id="mvSupName" class="text-sm font-medium text-white">--</p>
                                 </div>
                                 <div class="grid gap-4 md:grid-cols-3">
                                     <div>
                                         <p class="text-xs uppercase tracking-wide text-gray-500">Quality</p>
-                                        <span id="mvSupQuality" class="mt-1 inline-flex items-center justify-center rounded-full border border-gray-700 bg-gray-800 px-3 py-1 text-xs font-semibold text-gray-200">—</span>
+                                        <span id="mvSupQuality"
+                                            class="mt-1 inline-flex items-center justify-center rounded-full border border-gray-700 bg-gray-800 px-3 py-1 text-xs font-semibold text-gray-200">--</span>
                                     </div>
                                     <div>
                                         <p class="text-xs uppercase tracking-wide text-gray-500">Timeliness</p>
-                                        <span id="mvSupTimeliness" class="mt-1 inline-flex items-center justify-center rounded-full border border-gray-700 bg-gray-800 px-3 py-1 text-xs font-semibold text-gray-200">—</span>
+                                        <span id="mvSupTimeliness"
+                                            class="mt-1 inline-flex items-center justify-center rounded-full border border-gray-700 bg-gray-800 px-3 py-1 text-xs font-semibold text-gray-200">--</span>
                                     </div>
                                     <div class="md:col-span-3">
                                         <p class="text-xs uppercase tracking-wide text-gray-500">Remarks</p>
-                                        <div id="mvSupRemarks" class="mt-1 min-h-[48px] rounded-xl border border-gray-700 bg-gray-800 px-3 py-2 text-sm leading-relaxed text-gray-300">—</div>
+                                        <div id="mvSupRemarks"
+                                            class="mt-1 min-h-[48px] rounded-xl border border-gray-700 bg-gray-800 px-3 py-2 text-sm leading-relaxed text-gray-300">
+                                            --
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -149,13 +170,18 @@
                     </div>
 
                     <div class="flex flex-wrap items-center justify-end gap-2 border-t border-gray-700 px-6 py-3">
-                        <button type="button" id="closeTaskViewBottom" class="rounded-lg border border-gray-600 px-4 py-2 text-sm font-medium text-gray-200 transition hover:bg-gray-800">
+                        <button type="button" id="closeTaskViewBottom"
+                            class="rounded-lg border border-gray-600 px-4 py-2 text-sm font-medium text-gray-200 transition hover:bg-gray-800">
                             Close
                         </button>
-                        <a href="{{ route('employee.ors.export.pdf') }}" id="exportOrsBtn" title="Export available only after supervisor validation" class="cursor-not-allowed rounded-lg border border-gray-600 px-4 py-2 text-sm font-medium text-gray-200 opacity-50 pointer-events-none" aria-disabled="true">
+                        <a href="{{ route('employee.ors.export.pdf') }}" id="exportOrsBtn"
+                            title="Export available only after supervisor validation"
+                            class="pointer-events-none cursor-not-allowed rounded-lg border border-gray-600 px-4 py-2 text-sm font-medium text-gray-200 opacity-50"
+                            aria-disabled="true">
                             Export ORS
                         </a>
-                        <a href="{{ route('employee.ors') }}" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-500">
+                        <a href="{{ route('employee.ors') }}"
+                            class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-500">
                             View in ORS
                         </a>
                     </div>
@@ -171,6 +197,8 @@
                         title: 'Same-day verification of OTC transactions',
                         date: '2026-01-02',
                         requestId: 'REQ-2026-002',
+                        uwpOutputId: 'otc_processing',
+                        uwpOutputLabel: 'Processing of Over-the-Counter Revenue Transactions',
                         output: 'Official Receipt (OR)',
                         quantity: '12 transactions',
                         state: 'submitted',
@@ -193,6 +221,8 @@
                         title: 'All e-bank transactions scanned and encoded daily',
                         date: '2026-01-04',
                         requestId: 'REQ-2026-004',
+                        uwpOutputId: 'ebank_scanning',
+                        uwpOutputLabel: 'E-Bank Scanning and Encoding of Revenue Transactions',
                         output: 'Bank Statement Form (BSF-01)',
                         quantity: '1 daily batch',
                         state: 'submitted',
@@ -215,6 +245,8 @@
                         title: 'OR validation completed daily',
                         date: '2026-01-05',
                         requestId: 'REQ-2026-005',
+                        uwpOutputId: 'otc_processing',
+                        uwpOutputLabel: 'Processing of Over-the-Counter Revenue Transactions',
                         output: 'Official Receipt (OR)',
                         quantity: '6 receipts validated',
                         state: 'recording',
@@ -237,6 +269,8 @@
                         title: 'Retrieval logs maintained for audit purposes',
                         date: '2026-01-06',
                         requestId: 'REQ-2026-006',
+                        uwpOutputId: 'records_maintenance',
+                        uwpOutputLabel: 'Maintenance of revenue records and filing system',
                         output: 'Records Inventory Checklist',
                         quantity: '--',
                         state: 'missing',
@@ -266,7 +300,9 @@
 
                 const fields = {
                     task: document.getElementById('mvTask'),
+                    mfo: document.getElementById('mvMfo'),
                     date: document.getElementById('mvDate'),
+                    requestId: document.getElementById('mvRequestId'),
                     status: document.getElementById('mvStatus'),
                     outputType: document.getElementById('mvOutputType'),
                     outputState: document.getElementById('mvOutputState'),
@@ -428,10 +464,10 @@
                     if (fields.supervisorSection) {
                         fields.supervisorSection.classList.add('hidden');
                     }
-                    if (fields.supName) fields.supName.textContent = '—';
-                    if (fields.supQuality) fields.supQuality.textContent = '—';
-                    if (fields.supTimeliness) fields.supTimeliness.textContent = '—';
-                    if (fields.supRemarks) fields.supRemarks.textContent = '—';
+                    if (fields.supName) fields.supName.textContent = '--';
+                    if (fields.supQuality) fields.supQuality.textContent = '--';
+                    if (fields.supTimeliness) fields.supTimeliness.textContent = '--';
+                    if (fields.supRemarks) fields.supRemarks.textContent = '--';
                 }
 
                 function openTaskViewModal(taskId) {
@@ -439,7 +475,9 @@
                     if (!task || !modal) return;
 
                     fields.task.textContent = task.title || '--';
+                    fields.mfo.textContent = task.uwpOutputLabel || '--';
                     fields.date.textContent = formatDateHuman(task.date);
+                    fields.requestId.textContent = task.requestId && String(task.requestId).trim() ? task.requestId : '--';
                     fields.status.textContent = statusLabel(task.state);
                     fields.outputType.textContent = task.output || '--';
                     fields.outputState.textContent = outputStateLabel(task);
@@ -457,16 +495,16 @@
                     fields.duration.textContent = task.durationMs || task.startTime ? formatDuration(computeElapsed(task)) : '--';
                     fields.notes.textContent = task.notes || '--';
 
-                    const isSubmitted = statusLabel(task.state) === 'Submitted (Locked)' || task.state === 'submitted';
+                    const isSubmitted = task.state === 'submitted';
                     if (fields.supervisorSection) {
                         fields.supervisorSection.classList.toggle('hidden', !isSubmitted);
                     }
 
                     if (isSubmitted) {
-                        if (fields.supName) fields.supName.textContent = task.supervisorName || '—';
-                        if (fields.supQuality) fields.supQuality.textContent = task.supervisorQuality ?? '—';
-                        if (fields.supTimeliness) fields.supTimeliness.textContent = task.supervisorTimeliness ?? '—';
-                        if (fields.supRemarks) fields.supRemarks.textContent = task.supervisorRemarks || '—';
+                        if (fields.supName) fields.supName.textContent = task.supervisorName || '--';
+                        if (fields.supQuality) fields.supQuality.textContent = task.supervisorQuality ?? '--';
+                        if (fields.supTimeliness) fields.supTimeliness.textContent = task.supervisorTimeliness ?? '--';
+                        if (fields.supRemarks) fields.supRemarks.textContent = task.supervisorRemarks || '--';
                     } else {
                         resetSupervisorMonitoring();
                     }
@@ -479,6 +517,8 @@
                 function closeTaskViewModal() {
                     if (!modal) return;
                     resetSupervisorMonitoring();
+                    if (fields.mfo) fields.mfo.textContent = '--';
+                    if (fields.requestId) fields.requestId.textContent = '--';
                     modal.classList.add('hidden');
                     modal.classList.remove('flex');
                     document.body.classList.remove('overflow-hidden');

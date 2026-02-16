@@ -373,7 +373,11 @@
                         <p class="text-xs text-slate-400">Request ID</p>
                         <p class="text-slate-200" id="taskDetailRequest">--</p>
                     </div>
-                    <div>
+                    <div class="md:col-span-2">
+                        <p class="text-xs text-slate-400">MFO / UWP Output</p>
+                        <p class="text-slate-200" id="taskDetailMfo">--</p>
+                    </div>
+                    <div class="md:col-span-2">
                         <p class="text-xs text-slate-400">Quantity (employee-declared)</p>
                         <input id="taskDetailQuantity"
                                type="text"
@@ -534,6 +538,8 @@
                     date: '2026-01-02',
                     client: 'Revenue Collection Unit',
                     requestId: 'REQ-2026-002',
+                    uwpOutputId: 'otc_processing',
+                    uwpOutputLabel: 'Processing of Over-the-Counter Revenue Transactions',
                     output: 'Official Receipt (OR)',
                     notes: 'Demo: Same-day OTC verification completed and submitted.',
                     quantity: '12 transactions',
@@ -554,6 +560,8 @@
                     date: '2026-01-04',
                     client: 'Revenue Collection Unit',
                     requestId: 'REQ-2026-004',
+                    uwpOutputId: 'ebank_scanning',
+                    uwpOutputLabel: 'E-Bank Scanning and Encoding of Revenue Transactions',
                     output: 'Bank Statement Form (BSF-01)',
                     notes: 'Demo: E-bank scanning submitted with evidence (BSF-01).',
                     quantity: '1 daily batch',
@@ -574,6 +582,8 @@
                     date: '2026-01-05',
                     client: 'Revenue Collection Unit',
                     requestId: 'REQ-2026-005',
+                    uwpOutputId: 'otc_processing',
+                    uwpOutputLabel: 'Processing of Over-the-Counter Revenue Transactions',
                     output: 'Official Receipt (OR)',
                     notes: 'Demo: OR validation is currently in progress.',
                     quantity: '6 receipts validated',
@@ -595,6 +605,8 @@
                     date: '2026-01-06',
                     client: 'Revenue Collection Unit',
                     requestId: 'REQ-2026-006',
+                    uwpOutputId: 'records_maintenance',
+                    uwpOutputLabel: 'Maintenance of revenue records and filing system',
                     output: 'Records Inventory Checklist',
                     notes: 'Demo: No ORS entry submitted — flagged as Missing / Overdue.',
                     quantity: '',
@@ -869,6 +881,7 @@
                 document.getElementById('taskDetailDate').textContent = `Date: ${task.date || '--'}`;
                 document.getElementById('taskDetailClient').textContent = task.client || '--';
                 document.getElementById('taskDetailRequest').textContent = task.requestId || '--';
+                document.getElementById('taskDetailMfo').textContent = task.uwpOutputLabel || '--';
                 document.getElementById('taskDetailOutput').textContent = task.output || '--';
                 document.getElementById('taskDetailStatusText').textContent = (STATE_META[task.state] || STATE_META.draft).label;
                 document.getElementById('taskDetailDuration').textContent = formatDuration(computeElapsed(task));
@@ -1176,7 +1189,7 @@
                             requestId: requestId,
                             output: outputSelect.options[outputSelect.selectedIndex].text,
                             uwpOutputId: uwpOutputKey,
-                            uwpOutput: uwpOutputLabel,
+                            uwpOutputLabel: uwpOutputLabel,
                             notes: notesInput && notesInput.value ? notesInput.value : 'No notes',
                             quantity: '',
                             rating: '--',

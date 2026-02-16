@@ -250,52 +250,97 @@
             </div>
         </div>
 
-        <!-- Rating Basis Sub-Modal (centered + filter: Quality/Efficiency/Timeliness) -->
-        <div id="ratingBasisModal"
-             class="fixed inset-0 z-[70] hidden items-center justify-center bg-black/70 px-4 py-6"
-             role="dialog"
-             aria-modal="true">
-            <div class="w-full max-w-4xl overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl">
-                <div class="flex max-h-[75vh] flex-col">
-                    <div class="flex flex-wrap items-start justify-between gap-4 border-b border-slate-800 px-6 py-4">
-                        <div>
-                            <h3 class="text-lg font-semibold text-white">Rating Basis</h3>
-                            <p id="basisModalIndicator" class="mt-1 text-xs text-slate-400">--</p>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <label class="text-[11px] uppercase tracking-wide text-slate-400" for="basisFilter">Show</label>
+        <!-- Rating Basis Sub-Modal (Performance Standards Q/E/T) -->
+<div id="ratingBasisModal"
+     class="fixed inset-0 z-[70] hidden flex items-center justify-center bg-black/80 px-4 py-6 sm:px-6"
+     role="dialog"
+     aria-modal="true">
+
+    <!-- Outer modal card -->
+    <div class="w-full max-w-5xl overflow-hidden rounded-3xl border border-slate-700/60 bg-slate-950 shadow-2xl">
+
+        <div class="flex max-h-[85vh] flex-col">
+
+            <!-- Header (sticky-like look) -->
+            <div class="flex flex-wrap items-start justify-between gap-4 border-b border-slate-800/70 bg-slate-950 px-6 py-5">
+
+                <div class="space-y-1">
+                    <p class="text-[11px] uppercase tracking-[0.18em] text-slate-400">Standards (Q/E/T)</p>
+                    <h3 class="text-xl font-semibold text-white">Performance Standards</h3>
+
+                    <div class="pt-1 space-y-1">
+                        <p id="basisModalMfo" class="text-sm text-slate-300">
+                            <span class="text-slate-400">MFO:</span> --
+                        </p>
+                        <p id="basisModalIndicator" class="text-sm text-slate-300">
+                            <span class="text-slate-400">Indicator:</span> --
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex items-start gap-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-[11px] uppercase tracking-wide text-slate-400">Show</span>
+                        <div class="relative">
                             <select id="basisFilter"
-                                    style="background:#0f172a;color:#e5e7eb;"
-                                    class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-sm text-slate-200">
+                            style="background:#0f172a;color:#e5e7eb;"
+                                    class="h-10 min-w-[200px] rounded-xl border border-slate-700/70 bg-slate-950/40 px-4 pr-10 text-sm font-medium text-slate-100 shadow-inner shadow-black/40 focus:border-blue-500/60 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
                                 <option value="qual">Quality (Q)</option>
                                 <option value="eff">Efficiency (E)</option>
                                 <option value="time">Timeliness (T)</option>
                             </select>
                         </div>
-                        <button type="button"
-                                id="closeRatingBasisBtn"
-                                class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white">
-                            <span class="sr-only">Close rating basis</span>
-                            <svg class="h-4 w-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 12 12M13 1 1 13"/>
-                            </svg>
-                        </button>
                     </div>
-                    <div id="basisModalBody" class="flex-1 overflow-y-auto px-6 py-5 text-sm text-slate-200"></div>
-                    <div class="border-t border-slate-800 bg-slate-900/80 px-6 py-3 text-[11px] text-slate-400">
-                        <div class="flex items-center justify-between gap-3">
-                            <p>Stage I standards are reference-only. Efficiency is advisory; supervisors rate Quality & Timeliness.</p>
-                            <button type="button"
-                                    id="basisDoneBtn"
-                                    class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-200 hover:bg-slate-800"
-                                    onclick="closeBasis();">
-                                Done
-                            </button>
-                        </div>
-                    </div>
+
+                    <button type="button"
+                            id="closeRatingBasisBtn"
+                            class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-700/70 bg-slate-950/30 text-slate-300 transition hover:bg-slate-800/70 hover:text-white">
+                        <span class="sr-only">Close rating basis</span>
+                        <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 12 12M13 1 1 13"/>
+                        </svg>
+                    </button>
                 </div>
             </div>
+
+            <!-- Body -->
+            <div class="flex-1 overflow-y-auto px-6 py-6 text-sm text-slate-200">
+
+                <div class="overflow-hidden rounded-3xl border border-slate-700/60 bg-slate-950 shadow-inner shadow-black/50">
+                    <table class="w-full text-sm text-slate-200">
+                        <thead class="bg-slate-900 text-xs uppercase tracking-wide text-slate-400">
+                            <tr>
+                                <th class="w-20 px-6 py-4 text-left">Rating</th>
+                                <th class="px-6 py-4 text-left">Quality (Q)</th>
+                                <th class="px-6 py-4 text-left">Efficiency (E)</th>
+                                <th class="px-6 py-4 text-left">Timeliness (T)</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="basisModalBody" class="divide-y divide-slate-800">
+                            <!-- JS will inject <tr> rows here -->
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+            <!-- Footer -->
+            <div class="border-t border-slate-800/70 bg-slate-950 px-6 py-4 text-[11px] text-slate-400">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <p>Stage I standards are reference-only. Efficiency is advisory; supervisors rate Quality & Timeliness.</p>
+                    <button type="button"
+                            id="basisDoneBtn"
+                            class="rounded-xl border border-slate-700/70 bg-slate-950/30 px-5 py-2.5 text-xs font-semibold text-slate-100 transition hover:bg-slate-800/70">
+                        Done
+                    </button>
+                </div>
+            </div>
+
         </div>
+    </div>
+</div>
+
     </section>
 
     @push('scripts')
@@ -326,6 +371,7 @@
                 // Basis sub-modal
                 const basisModal = document.getElementById('ratingBasisModal');
                 const basisBody = document.getElementById('basisModalBody');
+                const basisMfo = document.getElementById('basisModalMfo');
                 const basisIndicator = document.getElementById('basisModalIndicator');
                 const basisFilter = document.getElementById('basisFilter');
                 const openBasisBtn = document.getElementById('openRatingBasisBtn');
@@ -348,54 +394,51 @@
                     }
                 };
 
-                // Stage I standards (Q/E/T reference). Supervisor rates Q + T only (Efficiency advisory only).
-                const INDICATOR_STANDARDS = {
+                const STANDARDS_BY_INDICATOR = {
                     'Same-day verification of OTC transactions': {
-                        qual: {
-                            5: 'No errors / no rework',
-                            4: 'Minor errors, no rework needed',
-                            3: 'Some errors, minimal rework',
-                            2: 'Frequent errors, rework required',
-                            1: 'Major errors, output unacceptable'
-                        },
-                        eff: {
-                            5: 'Finished within expected duration; smooth workflow',
-                            4: 'Minor delays but within expected duration',
-                            3: 'Some delays; slightly exceeds expected duration',
-                            2: 'Frequent delays; exceeds expected duration',
-                            1: 'Severe delays; far beyond expected duration'
-                        },
-                        time: {
-                            5: 'Completed within same working day',
-                            4: 'Completed same day with minor delay',
-                            3: 'Completed end-of-day / near cutoff',
-                            2: 'Completed next working day',
-                            1: 'Beyond next working day'
-                        }
+                        mfo: 'Processing of Over-the-Counter Revenue Transactions',
+                        indicator: 'Same-day verification of OTC transactions',
+                        rows: [
+                            { rating: 5, q: 'Verified without discrepancies', e: '100% OTC verified', t: 'Same working day' },
+                            { rating: 4, q: 'Minor verifications pending', e: '100% OTC verified', t: 'Same working day' },
+                            { rating: 3, q: 'Few pending verifications', e: '95–99% verified', t: 'End of working day' },
+                            { rating: 2, q: 'Several unverified', e: '<95% verified', t: 'Beyond working day' },
+                            { rating: 1, q: 'Verification not done', e: 'Majority unverified', t: 'Unacceptable' },
+                        ],
                     },
                     'All e-bank transactions scanned and encoded daily': {
-                        qual: {
-                            5: 'Clear scans + accurate encoding + complete indexing',
-                            4: 'Minor scan/encoding issues, still acceptable',
-                            3: 'Some missing/unclear pages, needs minor correction',
-                            2: 'Frequent missing/unclear pages, rework required',
-                            1: 'Poor quality, cannot be validated'
-                        },
-                        eff: {
-                            5: 'Finished within expected duration; smooth workflow',
-                            4: 'Minor delays but within expected duration',
-                            3: 'Some delays; slightly exceeds expected duration',
-                            2: 'Frequent delays; exceeds expected duration',
-                            1: 'Severe delays; far beyond expected duration'
-                        },
-                        time: {
-                            5: 'Completed same working day',
-                            4: 'Completed same day with minor delay',
-                            3: 'Completed end-of-day / near cutoff',
-                            2: 'Completed next working day',
-                            1: 'Beyond next working day'
-                        }
-                    }
+                        mfo: 'E-Bank Scanning and Encoding of Revenue Transactions',
+                        indicator: 'All e-bank transactions scanned and encoded daily',
+                        rows: [
+                            { rating: 5, q: 'Scanned/encoded with zero errors', e: '100% encoded same batch', t: 'Same working day' },
+                            { rating: 4, q: 'Minor errors, no rework', e: '100% encoded', t: 'Same working day' },
+                            { rating: 3, q: 'Some errors, minimal rework', e: '95–99% encoded', t: 'End of working day' },
+                            { rating: 2, q: 'Frequent errors, rework needed', e: '<95% encoded', t: 'Beyond working day' },
+                            { rating: 1, q: 'Major errors, unacceptable', e: 'Majority not encoded', t: 'Unacceptable' },
+                        ],
+                    },
+                    'OR validation completed daily': {
+                        mfo: 'Processing of Over-the-Counter Revenue Transactions',
+                        indicator: 'OR validation completed daily',
+                        rows: [
+                            { rating: 5, q: 'Validated with zero variance', e: '100% ORs validated', t: 'Same working day' },
+                            { rating: 4, q: 'Minor variance corrected', e: '100% ORs validated', t: 'Same working day' },
+                            { rating: 3, q: 'Some corrections required', e: '95–99% ORs validated', t: 'End of working day' },
+                            { rating: 2, q: 'Frequent corrections required', e: '<95% ORs validated', t: 'Beyond working day' },
+                            { rating: 1, q: 'Validation incomplete', e: 'Majority not validated', t: 'Unacceptable' },
+                        ],
+                    },
+                    'Retrieval logs maintained for audit purposes': {
+                        mfo: 'Maintenance of revenue records and filing system',
+                        indicator: 'Retrieval logs maintained for audit purposes',
+                        rows: [
+                            { rating: 5, q: 'Logs complete and audit-ready', e: '100% requests logged', t: 'Within set turnaround' },
+                            { rating: 4, q: 'Minor omissions corrected', e: '100% requests logged', t: 'Within set turnaround' },
+                            { rating: 3, q: 'Some omissions', e: '95–99% requests logged', t: 'Slight delay' },
+                            { rating: 2, q: 'Frequent omissions', e: '<95% requests logged', t: 'Delayed' },
+                            { rating: 1, q: 'Logs unreliable', e: 'Majority not logged', t: 'Unacceptable' },
+                        ],
+                    },
                 };
 
                 /**
@@ -520,48 +563,71 @@
                 });
                 calendar.render();
 
-                // Basis rendering
-                const BASIS_FILTERS = {
-                    qual: { label: 'QUALITY (Q)', hint: 'Supervisor rates Quality.' },
-                    eff:  { label: 'EFFICIENCY (E)', hint: 'Advisory reference only.' },
-                    time: { label: 'TIMELINESS (T)', hint: 'Supervisor rates Timeliness.' }
-                };
+                function applyBasisColumnFilter(selected) {
+                    if (!basisBody) return;
 
-                function renderBasisRows(entries) {
-                    return Object.entries(entries || {})
-                        .sort((a, b) => Number(b[0]) - Number(a[0]))
-                        .map(([score, desc]) => `
-                            <div class="flex items-start gap-3 rounded-lg border border-slate-800 bg-slate-950/40 p-3">
-                                <span class="min-w-[28px] h-7 inline-flex items-center justify-center rounded-full border border-slate-700 bg-slate-950/60 text-xs font-semibold text-white">${score}</span>
-                                <p class="text-sm leading-relaxed text-slate-300">${desc}</p>
-                            </div>
-                        `).join('');
+                    const valid = ['qual', 'eff', 'time'];
+                    const active = valid.includes(selected) ? selected : 'qual';
+                    const highlightClasses = ['bg-slate-900/50', 'text-slate-100', 'border-emerald-500/30'];
+                    const dimClasses = ['text-slate-400'];
+
+                    basisBody.querySelectorAll('[data-col]').forEach((cell) => {
+                        const col = cell.getAttribute('data-col');
+                        cell.classList.remove(...highlightClasses, ...dimClasses);
+                        if (col === active) {
+                            cell.classList.add(...highlightClasses);
+                        } else {
+                            cell.classList.add(...dimClasses);
+                        }
+                    });
                 }
 
-                function renderBasisSingle(indicatorText, filterKey) {
-                    const standards = INDICATOR_STANDARDS[indicatorText];
-                    if (!standards) {
-                        return `<p class="text-sm text-slate-500">No Stage I standards found for this indicator in the demo dataset.</p>`;
+                function renderBasisTable(basis) {
+                    if (!basis || !Array.isArray(basis.rows) || basis.rows.length === 0) {
+                        basisBody.innerHTML = `
+                            <tr>
+                                <td colspan="4" class="px-6 py-4 text-sm text-slate-300">No locked standards found for this indicator.</td>
+                            </tr>
+                        `;
+                        return;
                     }
 
-                    const entries = standards[filterKey];
-                    const meta = BASIS_FILTERS[filterKey] || { label: 'Standards', hint: '' };
-                    if (!entries) {
-                        return `<p class="text-sm text-slate-500">${meta.label} standards are not available for this indicator.</p>`;
+                    const rowsHtml = [...basis.rows]
+                        .sort((a, b) => Number(b.rating) - Number(a.rating))
+                        .map((row) => `
+                            <tr>
+                                <td class="px-6 py-4 font-semibold text-white">${row.rating ?? '--'}</td>
+                                <td class="px-6 py-4 align-top" data-col="qual">${row.q || '--'}</td>
+                                <td class="px-6 py-4 align-top" data-col="eff">${row.e || '--'}</td>
+                                <td class="px-6 py-4 align-top" data-col="time">${row.t || '--'}</td>
+                            </tr>
+                        `).join('');
+
+                    basisBody.innerHTML = rowsHtml;
+                }
+
+                function openRatingBasisModal(indicatorText) {
+                    const indicator = indicatorText || '';
+                    const basis = STANDARDS_BY_INDICATOR[indicator];
+
+                    if (basisMfo) {
+                        basisMfo.textContent = `MFO: ${basis?.mfo || '--'}`;
+                    }
+                    if (basisIndicator) {
+                        basisIndicator.textContent = `Indicator: ${indicator || '--'}`;
                     }
 
-                    const rows = renderBasisRows(entries);
-                    return `
-                        <div class="rounded-2xl border border-slate-800 bg-slate-900/50 p-4">
-                            <div class="mb-3">
-                                <p class="text-[11px] uppercase tracking-wide text-slate-400">${meta.label}</p>
-                                <p class="mt-1 text-[11px] text-slate-500">${meta.hint}</p>
-                            </div>
-                            <div class="space-y-3">
-                                ${rows}
-                            </div>
-                        </div>
-                    `;
+                    if (basisFilter) {
+                        if (!['qual', 'eff', 'time'].includes(basisFilter.value)) {
+                            basisFilter.value = 'qual';
+                        }
+                    }
+
+                    renderBasisTable(basis);
+                    applyBasisColumnFilter(basisFilter?.value || 'qual');
+
+                    basisModal?.classList.remove('hidden');
+                    basisModal?.classList.add('flex');
                 }
 
                 let currentModalData = null;
@@ -573,11 +639,11 @@
 
                     ratingBasisIndicatorEl.textContent = indicator;
 
-                    const hasStandards = data.status === 'submitted' && !!INDICATOR_STANDARDS[indicator];
+                    const canOpenBasis = data.status === 'submitted';
                     if (openBasisBtn) {
-                        openBasisBtn.disabled = !hasStandards;
-                        openBasisBtn.classList.toggle('opacity-60', !hasStandards);
-                        openBasisBtn.classList.toggle('cursor-not-allowed', !hasStandards);
+                        openBasisBtn.disabled = !canOpenBasis;
+                        openBasisBtn.classList.toggle('opacity-60', !canOpenBasis);
+                        openBasisBtn.classList.toggle('cursor-not-allowed', !canOpenBasis);
                     }
                 }
 
@@ -647,21 +713,9 @@
                     }
                 });
 
-                function renderBasis(indicatorText, filterKey = 'qual') {
-                    basisBody.innerHTML = renderBasisSingle(indicatorText, filterKey);
-                }
-
                 function openBasis() {
                     if (!currentModalData) return;
-                    const indicator = currentModalData.accomplishment || '';
-                    if (!INDICATOR_STANDARDS[indicator]) return;
-
-                    basisIndicator.textContent = indicator;
-                    if (basisFilter) basisFilter.value = 'qual';
-                    renderBasis(indicator, 'qual');
-
-                    basisModal?.classList.remove('hidden');
-                    basisModal?.classList.add('flex');
+                    openRatingBasisModal(currentModalData.accomplishment || '');
                 }
 
                 function closeBasis() {
@@ -678,8 +732,7 @@
                 });
 
                 basisFilter?.addEventListener('change', () => {
-                    const indicator = basisIndicator.textContent || '';
-                    renderBasis(indicator, basisFilter.value);
+                    applyBasisColumnFilter(basisFilter.value);
                 });
 
                 // Demo-only: Save rating (blue, with loading spinner)
