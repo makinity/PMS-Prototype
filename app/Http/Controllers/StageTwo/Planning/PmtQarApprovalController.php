@@ -78,6 +78,23 @@ class PmtQarApprovalController extends Controller
 
     private function defaultQar(): array
     {
+        $rows = $this->applyTargetTimeline([
+            [
+                'ppa_code' => 'QAR-001',
+                'mfo' => 'E-Bank Scanning and Encoding of Revenue Transactions',
+                'indicator' => 'All e-bank transactions scanned and encoded daily',
+                'actual_performance' => 1,
+                'remarks' => 'From submitted MPOR (Jan 2026)',
+            ],
+            [
+                'ppa_code' => 'QAR-002',
+                'mfo' => 'Processing of Over-the-Counter Revenue Transactions',
+                'indicator' => 'Same-day verification of OTC transactions',
+                'actual_performance' => 12,
+                'remarks' => 'From submitted MPOR (Jan 2026)',
+            ],
+        ]);
+
         return [
             'id' => 1,
             'office' => 'Revenue Collection Unit',
@@ -87,26 +104,7 @@ class PmtQarApprovalController extends Controller
             'prepared_date' => now()->subDay()->toDateTimeString(),
             'validated_by' => null,
             'validated_at' => null,
-            'rows' => [
-                [
-                    'ppa_code' => 'QAR-001',
-                    'mfo' => 'E-Bank Scanning and Encoding of Revenue Transactions',
-                    'indicator' => 'All e-bank transactions scanned and encoded daily',
-                    'target_output' => '-',
-                    'actual_performance' => 1,
-                    'variance' => '-',
-                    'remarks' => 'From submitted MPOR (Jan 2026)',
-                ],
-                [
-                    'ppa_code' => 'QAR-002',
-                    'mfo' => 'Processing of Over-the-Counter Revenue Transactions',
-                    'indicator' => 'Same-day verification of OTC transactions',
-                    'target_output' => '-',
-                    'actual_performance' => 12,
-                    'variance' => '-',
-                    'remarks' => 'From submitted MPOR (Jan 2026)',
-                ],
-            ],
+            'rows' => $rows,
         ];
     }
 
@@ -119,6 +117,19 @@ class PmtQarApprovalController extends Controller
         }
 
         $rows = is_array($record['rows'] ?? null) ? $record['rows'] : [];
+        $rows = array_values(array_map(static function ($row) {
+            $row = is_array($row) ? $row : [];
+
+            return array_merge([
+                'ppa_code' => '-',
+                'mfo' => '-',
+                'indicator' => '-',
+                'actual_performance' => '-',
+                'remarks' => '-',
+                'target_timeline' => '-',
+            ], $row);
+        }, $rows));
+        $rows = $this->applyTargetTimeline($rows);
 
         return [
             'id' => (int) ($record['id'] ?? 0),
@@ -129,7 +140,29 @@ class PmtQarApprovalController extends Controller
             'prepared_date' => $record['prepared_date'] ?? null,
             'validated_by' => $record['validated_by'] ?? null,
             'validated_at' => $record['validated_at'] ?? null,
-            'rows' => array_values($rows),
+            'rows' => $rows,
         ];
+    }
+
+    private function getUwpTargetTimelineMap(): array
+    {
+        return [
+            'QAR-001' => 'Daily; all e-bank transactions processed within the same working day',
+            'QAR-002' => 'Daily; 95% processed within the same working day',
+            'QAR-003' => 'Quarterly; records validated and properly filed',
+        ];
+    }
+
+    private function applyTargetTimeline(array $rows): array
+    {
+        $map = $this->getUwpTargetTimelineMap();
+
+        return array_values(array_map(static function ($row) use ($map) {
+            $row = is_array($row) ? $row : [];
+            $code = (string) ($row['ppa_code'] ?? '');
+            $row['target_timeline'] = $map[$code] ?? '-';
+
+            return $row;
+        }, $rows));
     }
 }

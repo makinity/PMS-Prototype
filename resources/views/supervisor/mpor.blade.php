@@ -83,22 +83,93 @@
                             @php
                                 $status = strtolower((string) ($mpor['status'] ?? 'submitted'));
                                 $meta = $statusMeta[$status] ?? $statusMeta['submitted'];
+                                $preview = is_array($mpor['preview'] ?? null) ? $mpor['preview'] : ['outputs' => []];
+                                $outputs = is_array($preview['outputs'] ?? null) ? $preview['outputs'] : [];
+                                $groups = is_array($preview['groups'] ?? null) ? $preview['groups'] : [];
+
+                                if (empty($groups)) {
+                                    $coreRows = [];
+                                    $supportRows = [];
+
+                                    foreach ($outputs as $output) {
+                                        $title = (string) ($output['title'] ?? $output['task_title'] ?? '-');
+                                        $row = [
+                                            'title' => $title,
+                                            'qty' => is_array($output['qty'] ?? null) ? $output['qty'] : [],
+                                            'quality' => is_array($output['quality'] ?? null) ? $output['quality'] : [],
+                                            'timeliness' => is_array($output['timeliness'] ?? null) ? $output['timeliness'] : [],
+                                        ];
+
+                                        if (str_contains(strtolower($title), 'maintenance')) {
+                                            $supportRows[] = $row;
+                                        } else {
+                                            $coreRows[] = $row;
+                                        }
+                                    }
+
+                                    if (empty($supportRows)) {
+                                        $supportRows[] = [
+                                            'title' => 'Maintenance of Revenue Records Filing System',
+                                            'qty' => ['w1' => 0, 'w2' => 0, 'w3' => 0, 'w4' => 0, 'total' => 0],
+                                            'quality' => ['w1' => 0, 'w2' => 0, 'w3' => 0, 'w4' => 0, 'total' => 0],
+                                            'timeliness' => ['w1' => 0, 'w2' => 0, 'w3' => 0, 'w4' => 0, 'total' => 0],
+                                        ];
+                                    }
+
+                                    $groups = [
+                                        [
+                                            'label' => 'CORE FUNCTIONS',
+                                            'weight_label' => '80%',
+                                            'rows' => $coreRows,
+                                        ],
+                                        [
+                                            'label' => 'SUPPORT FUNCTIONS',
+                                            'weight_label' => '20%',
+                                            'rows' => $supportRows,
+                                        ],
+                                    ];
+                                }
+
+                                $week1Total = array_sum(array_map(static fn($row) => (int) ($row['qty']['w1'] ?? 0), $outputs));
+                                $week2Total = array_sum(array_map(static fn($row) => (int) ($row['qty']['w2'] ?? 0), $outputs));
+                                $week3Total = array_sum(array_map(static fn($row) => (int) ($row['qty']['w3'] ?? 0), $outputs));
+                                $week4Total = array_sum(array_map(static fn($row) => (int) ($row['qty']['w4'] ?? 0), $outputs));
+                                $grandTotal = array_sum(array_map(static fn($row) => (int) ($row['qty']['total'] ?? 0), $outputs));
+
+                                $summary = is_array($mpor['summary'] ?? null) ? $mpor['summary'] : [
+                                    'week1_total' => $week1Total,
+                                    'week2_total' => $week2Total,
+                                    'week3_total' => $week3Total,
+                                    'week4_total' => $week4Total,
+                                    'grand_total' => $grandTotal,
+                                    'included_entries' => 2,
+                                    'excluded_entries' => 3,
+                                ];
+
+                                $statusBadgeLabel = match ($status) {
+                                    'approved' => 'Approved',
+                                    'endorsed' => 'Endorsed',
+                                    default => 'Submitted (Locked)',
+                                };
+
                                 $payload = [
                                     'id' => $mpor['id'],
                                     'employee' => $mpor['employee'],
                                     'supervisor' => auth()->user()?->name ?? 'Carlo D. Beray',
                                     'office' => $mpor['office'],
+                                    'office_division' => $mpor['office'],
                                     'month' => $mpor['month'],
                                     'status' => $meta['label'],
+                                    'status_badge_label' => $statusBadgeLabel,
                                     'status_key' => $status,
                                     'submitted_at' => $mpor['submitted_at'] ?? null,
                                     'approved_at' => $mpor['approved_at'] ?? null,
                                     'endorsed_at' => $mpor['endorsed_at'] ?? null,
-                                    'attendance' => [
-                                        'absence' => ['w1' => 0, 'w2' => 0, 'w3' => 0, 'w4' => 0, 'total' => 0, 'unit' => 'days'],
-                                        'tardiness' => ['w1' => 185, 'w2' => 0, 'w3' => 1, 'w4' => 0, 'total' => 186, 'unit' => 'mins'],
+                                    'preview' => [
+                                        'outputs' => $outputs,
+                                        'groups' => $groups,
                                     ],
-                                    'preview' => $mpor['preview'] ?? ['outputs' => []],
+                                    'summary' => $summary,
                                 ];
                             @endphp
                             <tr class="text-slate-200 hover:bg-slate-900/60">
@@ -143,124 +214,136 @@
 
     <div id="mporViewModal" tabindex="-1" aria-hidden="true"
         class="fixed left-0 right-0 top-0 z-50 hidden h-[calc(100%-1rem)] max-h-full w-full items-center justify-center overflow-y-auto overflow-x-hidden md:inset-0">
-        <div class="relative max-h-full w-full max-w-5xl p-4">
+        <div class="relative max-h-full w-full max-w-6xl p-4">
             <div class="relative flex max-h-[90vh] flex-col rounded-2xl border border-slate-800 bg-slate-900 shadow-lg">
-                <div class="flex items-start justify-between border-b border-slate-800 p-5">
+                <div class="flex items-start justify-between gap-3 border-b border-slate-800 p-5">
                     <div>
-                        <h3 class="text-lg font-semibold text-white">View MPOR (Read-only)</h3>
-                        <p class="mt-1 text-sm text-slate-400">Submitted employee MPOR details for supervisor review.</p>
+                        <h3 class="text-lg font-semibold text-white">Monthly Performance Output Report</h3>
+                        <p class="mt-1 text-xs text-slate-400">Read-only mirror of locked ORS entries with supervisor ratings.</p>
+                        <p class="mt-2 text-xs text-slate-500">
+                            Submitted at:
+                            <span id="mpor-view-submitted-at" class="text-slate-300">-</span>
+                        </p>
                     </div>
-                    <button type="button" data-modal-hide="mporViewModal"
-                        class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-800 hover:text-white">
-                        <span class="sr-only">Close modal</span>
-                        <i class="fa-solid fa-xmark text-sm"></i>
-                    </button>
+                    <div class="flex items-start gap-2">
+                        <span id="mpor-view-status-pill"
+                            class="inline-flex rounded-full border border-slate-700 bg-slate-950/40 px-2 py-1 text-xs font-semibold text-slate-200">
+                            Submitted (Locked)
+                        </span>
+                        <button type="button" data-modal-hide="mporViewModal"
+                            class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-800 hover:text-white">
+                            <span class="sr-only">Close modal</span>
+                            <i class="fa-solid fa-xmark text-sm"></i>
+                        </button>
+                    </div>
                 </div>
 
-                <div class="min-h-0 space-y-4 overflow-y-auto p-5">
-                    <div class="grid gap-3 text-sm text-slate-300 md:grid-cols-4">
-                        <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-                            <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Employee</p>
+                <div class="min-h-0 space-y-5 overflow-y-auto p-5">
+                    <div class="grid gap-3 text-sm text-slate-300 md:grid-cols-3">
+                        <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                            <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Name</p>
                             <p id="mpor-view-employee" class="mt-1 font-semibold text-white">-</p>
                         </div>
-                        <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-                            <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Office / Unit</p>
+                        <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                            <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Office / Division</p>
                             <p id="mpor-view-office" class="mt-1 font-semibold text-white">-</p>
                         </div>
-                        <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                        <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
                             <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Month</p>
                             <p id="mpor-view-month" class="mt-1 font-semibold text-white">-</p>
                         </div>
-                        <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-                            <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Status</p>
-                            <p id="mpor-view-status" class="mt-1 font-semibold text-white">-</p>
-                        </div>
                     </div>
 
-                    <div class="overflow-x-auto rounded-xl border border-slate-800">
-                        <table class="min-w-full divide-y divide-slate-800 text-sm">
-                            <thead>
-                                <tr class="bg-slate-950/60 text-left text-xs uppercase tracking-[0.2em] text-slate-400">
-                                    <th rowspan="2" class="px-4 py-3 text-left align-middle">Output / Task</th>
-                                    <th colspan="5" class="px-4 py-3 text-center">Efficiency / Quantity</th>
-                                    <th colspan="5" class="px-4 py-3 text-center">Quality / Effectiveness</th>
-                                    <th colspan="5" class="px-4 py-3 text-center">Timeliness</th>
-                                </tr>
-                                <tr class="bg-slate-950/60 text-center text-[11px] uppercase tracking-[0.2em] text-slate-500">
-                                    <th class="px-2 py-2">W1</th>
-                                    <th class="px-2 py-2">W2</th>
-                                    <th class="px-2 py-2">W3</th>
-                                    <th class="px-2 py-2">W4</th>
-                                    <th class="px-2 py-2 font-semibold">Total</th>
-                                    <th class="px-2 py-2">W1</th>
-                                    <th class="px-2 py-2">W2</th>
-                                    <th class="px-2 py-2">W3</th>
-                                    <th class="px-2 py-2">W4</th>
-                                    <th class="px-2 py-2 font-semibold">Total</th>
-                                    <th class="px-2 py-2">W1</th>
-                                    <th class="px-2 py-2">W2</th>
-                                    <th class="px-2 py-2">W3</th>
-                                    <th class="px-2 py-2">W4</th>
-                                    <th class="px-2 py-2 font-semibold">Total</th>
-                                </tr>
-                            </thead>
-                            <tbody id="mpor-view-outputs" class="divide-y divide-slate-800 text-slate-200"></tbody>
-                        </table>
-                    </div>
+                    <div>
+                        <div>
+                            <div class="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-950/60">
+                                <table class="min-w-full text-[0.75rem] text-slate-200">
+                                    <thead>
+                                        <tr class="text-left text-[0.65rem] uppercase tracking-[0.3em] text-slate-500">
+                                            <th class="whitespace-nowrap px-3 py-2 align-bottom" rowspan="2">Output / Task</th>
+                                            <th class="border-l border-slate-800 px-3 py-2 text-center" colspan="5">Efficiency / Quantity</th>
+                                            <th class="border-l border-slate-800 px-3 py-2 text-center" colspan="5">Quality / Effectiveness</th>
+                                            <th class="border-l border-slate-800 px-3 py-2 text-center" colspan="5">Timeliness</th>
+                                        </tr>
+                                        <tr class="text-[0.6rem] uppercase tracking-[0.3em] text-slate-500">
+                                            <th class="border-l border-slate-800 px-2 py-1 text-right">W1</th>
+                                            <th class="px-2 py-1 text-right">W2</th>
+                                            <th class="px-2 py-1 text-right">W3</th>
+                                            <th class="px-2 py-1 text-right">W4</th>
+                                            <th class="px-2 py-1 text-right font-semibold">Total</th>
+                                            <th class="border-l border-slate-800 px-2 py-1 text-right">W1</th>
+                                            <th class="px-2 py-1 text-right">W2</th>
+                                            <th class="px-2 py-1 text-right">W3</th>
+                                            <th class="px-2 py-1 text-right">W4</th>
+                                            <th class="px-2 py-1 text-right font-semibold">Total</th>
+                                            <th class="border-l border-slate-800 px-2 py-1 text-right">W1</th>
+                                            <th class="px-2 py-1 text-right">W2</th>
+                                            <th class="px-2 py-1 text-right">W3</th>
+                                            <th class="px-2 py-1 text-right">W4</th>
+                                            <th class="px-2 py-1 text-right font-semibold">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="mpor-view-outputs" class="divide-y divide-slate-800"></tbody>
+                                </table>
+                            </div>
 
-                    <div class="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
-                        <h4 class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Attendance Impact (Read-only)</h4>
-                        <div class="mt-3 overflow-x-auto">
-                            <table class="min-w-full divide-y divide-slate-800 text-sm">
-                                <thead>
-                                    <tr class="bg-slate-950/60 text-center text-[11px] uppercase tracking-[0.2em] text-slate-400">
-                                        <th class="px-3 py-2 text-left">Label</th>
-                                        <th class="px-3 py-2">Week 1</th>
-                                        <th class="px-3 py-2">Week 2</th>
-                                        <th class="px-3 py-2">Week 3</th>
-                                        <th class="px-3 py-2">Week 4</th>
-                                        <th class="px-3 py-2 font-semibold">Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-800 text-slate-200">
-                                    <tr>
-                                        <td class="px-3 py-2 text-left">Man day(s) lost thru absence</td>
-                                        <td id="mpor-att-absence-w1" class="px-3 py-2 text-center">0</td>
-                                        <td id="mpor-att-absence-w2" class="px-3 py-2 text-center">0</td>
-                                        <td id="mpor-att-absence-w3" class="px-3 py-2 text-center">0</td>
-                                        <td id="mpor-att-absence-w4" class="px-3 py-2 text-center">0</td>
-                                        <td id="mpor-att-absence-total" class="px-3 py-2 text-center font-semibold">0 days</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="px-3 py-2 text-left">Man hrs./minutes lost thru tardiness / undertime</td>
-                                        <td id="mpor-att-tardy-w1" class="px-3 py-2 text-center">185</td>
-                                        <td id="mpor-att-tardy-w2" class="px-3 py-2 text-center">0</td>
-                                        <td id="mpor-att-tardy-w3" class="px-3 py-2 text-center">1</td>
-                                        <td id="mpor-att-tardy-w4" class="px-3 py-2 text-center">0</td>
-                                        <td id="mpor-att-tardy-total" class="px-3 py-2 text-center font-semibold">186 mins</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                            <p class="mt-3 text-xs text-slate-400">
+                                Stage II demo: MPOR points = Quantity &times; Supervisor Rating (Q/T). Batch quantities are treated as single units.
+                            </p>
 
-                    <div class="grid gap-4 sm:grid-cols-2">
-                        <div class="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
-                            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">CONFIRMED:</p>
-                            <p id="mpor-cert-supervisor-name" class="mt-3 text-sm font-semibold text-white">Carlo D. Beray</p>
-                            <p class="mt-2 text-xs text-slate-500">Date:</p>
-                            <p id="mpor-cert-supervisor-date" class="text-sm text-slate-300">Pending approval</p>
-                        </div>
-                        <div class="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
-                            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Above information are true and correct:</p>
-                            <p id="mpor-cert-employee-name" class="mt-3 text-sm font-semibold text-white">Ramon Reyes</p>
-                            <p class="mt-2 text-xs text-slate-500">Date:</p>
-                            <p id="mpor-cert-employee-date" class="text-sm text-slate-300">-</p>
+                            <div class="mt-4 grid gap-4 lg:grid-cols-2">
+                                <div class="rounded-2xl border border-slate-800 bg-slate-950/60 p-4 text-xs uppercase tracking-[0.3em] text-slate-400">
+                                    <div class="flex items-center justify-between text-[0.6rem] tracking-[0.3em] text-slate-500">
+                                        <span>Week 1</span><span>Week 2</span><span>Week 3</span><span>Week 4</span><span>Total</span>
+                                    </div>
+                                    <div class="mt-2 grid grid-cols-5 text-center text-sm font-semibold text-white">
+                                        <span id="mpor-summary-w1">0</span>
+                                        <span id="mpor-summary-w2">0</span>
+                                        <span id="mpor-summary-w3">0</span>
+                                        <span id="mpor-summary-w4">0</span>
+                                        <span id="mpor-summary-total">0</span>
+                                    </div>
+                                    <div class="my-5 border-t border-slate-700/70"></div>
+                                    <div class="space-y-2 text-[0.65rem] tracking-[0.2em] text-slate-500">
+                                        <div class="flex items-center justify-between gap-3">
+                                            <span class="min-w-0">Included ORS Entries (Rated)</span>
+                                            <span id="mpor-summary-included" class="shrink-0 font-semibold text-white">0</span>
+                                        </div>
+                                        <div class="flex items-center justify-between gap-3">
+                                            <span class="min-w-0">Excluded Entries (Unrated/Draft/Missing)</span>
+                                            <span id="mpor-summary-excluded" class="shrink-0 font-semibold text-white">0</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="rounded-2xl border border-slate-800 bg-slate-950/60 p-4 text-[0.65rem] uppercase tracking-[0.3em] text-slate-400">
+                                    <div class="flex items-center justify-between text-sm font-semibold text-white">
+                                        <span>Confirmed:</span>
+                                        <span class="text-slate-500">Stage II</span>
+                                    </div>
+                                    <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                                        <div class="space-y-1 rounded-xl border border-slate-800 bg-slate-900/40 p-3 text-center">
+                                            <p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">Supervisor</p>
+                                            <p id="mpor-cert-supervisor-name" class="text-sm font-semibold text-white normal-case tracking-normal">-</p>
+                                            <p class="text-[0.6rem] text-slate-500 normal-case tracking-normal">Signature over printed name</p>
+                                        </div>
+                                        <div class="space-y-1 rounded-xl border border-slate-800 bg-slate-900/40 p-3 text-center">
+                                            <p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">Employee</p>
+                                            <p id="mpor-cert-employee-name" class="text-sm font-semibold text-white normal-case tracking-normal">-</p>
+                                            <p class="text-[0.6rem] text-slate-500 normal-case tracking-normal">Signature over printed name</p>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3 grid gap-2 text-[0.6rem] normal-case tracking-normal text-slate-400 sm:grid-cols-2">
+                                        <p>Supervisor Date: <span id="mpor-cert-supervisor-date" class="text-slate-200">-</span></p>
+                                        <p>Employee Date: <span id="mpor-cert-employee-date" class="text-slate-200">-</span></p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex justify-end border-t border-slate-800 p-5">
+                <div class="flex items-center justify-end border-t border-slate-800 p-5">
                     <button type="button" id="mpor-view-approve-btn"
                         data-open-mpor-approve
                         data-modal-hide="mporViewModal"
@@ -386,26 +469,108 @@
                 const viewEmployee = document.getElementById('mpor-view-employee');
                 const viewOffice = document.getElementById('mpor-view-office');
                 const viewMonth = document.getElementById('mpor-view-month');
-                const viewStatus = document.getElementById('mpor-view-status');
+                const viewStatusPill = document.getElementById('mpor-view-status-pill');
+                const viewSubmittedAt = document.getElementById('mpor-view-submitted-at');
                 const viewOutputs = document.getElementById('mpor-view-outputs');
                 const viewApproveBtn = document.getElementById('mpor-view-approve-btn');
                 const viewEndorseBtn = document.getElementById('mpor-view-endorse-btn');
+                const summaryW1 = document.getElementById('mpor-summary-w1');
+                const summaryW2 = document.getElementById('mpor-summary-w2');
+                const summaryW3 = document.getElementById('mpor-summary-w3');
+                const summaryW4 = document.getElementById('mpor-summary-w4');
+                const summaryTotal = document.getElementById('mpor-summary-total');
+                const summaryIncluded = document.getElementById('mpor-summary-included');
+                const summaryExcluded = document.getElementById('mpor-summary-excluded');
                 const certSupervisorName = document.getElementById('mpor-cert-supervisor-name');
                 const certSupervisorDate = document.getElementById('mpor-cert-supervisor-date');
                 const certEmployeeName = document.getElementById('mpor-cert-employee-name');
                 const certEmployeeDate = document.getElementById('mpor-cert-employee-date');
 
-                const absenceW1 = document.getElementById('mpor-att-absence-w1');
-                const absenceW2 = document.getElementById('mpor-att-absence-w2');
-                const absenceW3 = document.getElementById('mpor-att-absence-w3');
-                const absenceW4 = document.getElementById('mpor-att-absence-w4');
-                const absenceTotal = document.getElementById('mpor-att-absence-total');
+                const escapeHtml = (value) => String(value ?? '')
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;');
 
-                const tardyW1 = document.getElementById('mpor-att-tardy-w1');
-                const tardyW2 = document.getElementById('mpor-att-tardy-w2');
-                const tardyW3 = document.getElementById('mpor-att-tardy-w3');
-                const tardyW4 = document.getElementById('mpor-att-tardy-w4');
-                const tardyTotal = document.getElementById('mpor-att-tardy-total');
+                const metricCells = (metric, withLeftBorder) => {
+                    const safeMetric = metric || {};
+                    const keys = ['w1', 'w2', 'w3', 'w4', 'total'];
+                    return keys.map((key, index) => {
+                        const classes = ['px-2', 'py-2', 'text-right', 'tabular-nums'];
+                        if (index === 0 && withLeftBorder) {
+                            classes.push('border-l', 'border-slate-800');
+                        }
+                        if (key === 'total') {
+                            classes.push('font-semibold', 'text-white');
+                        } else {
+                            classes.push('text-slate-200');
+                        }
+                        return `<td class="${classes.join(' ')}">${escapeHtml(safeMetric[key] ?? 0)}</td>`;
+                    }).join('');
+                };
+
+                const renderGroupedOutputs = (preview) => {
+                    if (!viewOutputs) {
+                        return;
+                    }
+
+                    const groups = Array.isArray(preview?.groups) ? preview.groups : [];
+                    const fallbackRows = Array.isArray(preview?.outputs) ? preview.outputs : [];
+                    viewOutputs.innerHTML = '';
+
+                    if (groups.length) {
+                        const html = [];
+
+                        groups.forEach((group) => {
+                            const rows = Array.isArray(group?.rows) ? group.rows : [];
+                            const label = `${group?.label || 'GROUP'}${group?.weight_label ? ` (${group.weight_label})` : ''}`;
+
+                            html.push(`
+                                <tr class="bg-slate-900/60 text-[0.65rem] uppercase tracking-[0.3em] text-slate-400">
+                                    <td class="px-3 py-2 font-semibold text-slate-200" colspan="16">${escapeHtml(label)}</td>
+                                </tr>
+                            `);
+
+                            rows.forEach((row) => {
+                                const title = row?.title || row?.task_title || '-';
+                                const qty = row?.qty || row?.eff || {};
+                                const quality = row?.quality || row?.qual || {};
+                                const timeliness = row?.timeliness || row?.time || {};
+
+                                html.push(`
+                                    <tr class="text-slate-200">
+                                        <td class="px-3 py-2 font-medium text-white">${escapeHtml(title)}</td>
+                                        ${metricCells(qty, true)}
+                                        ${metricCells(quality, true)}
+                                        ${metricCells(timeliness, true)}
+                                    </tr>
+                                `);
+                            });
+                        });
+
+                        viewOutputs.innerHTML = html.join('');
+                        return;
+                    }
+
+                    if (!fallbackRows.length) {
+                        viewOutputs.innerHTML =
+                            '<tr><td colspan="16" class="px-4 py-6 text-center text-slate-400">No output rows available.</td></tr>';
+                        return;
+                    }
+
+                    fallbackRows.forEach((row) => {
+                        const tr = document.createElement('tr');
+                        tr.className = 'text-slate-200';
+                        tr.innerHTML = `
+                            <td class="px-3 py-2 font-medium text-white">${escapeHtml(row?.title || row?.task_title || '-')}</td>
+                            ${metricCells(row?.qty || row?.eff || {}, true)}
+                            ${metricCells(row?.quality || row?.qual || {}, true)}
+                            ${metricCells(row?.timeliness || row?.time || {}, true)}
+                        `;
+                        viewOutputs.appendChild(tr);
+                    });
+                };
 
                 document.querySelectorAll('[data-open-mpor-view]').forEach((button) => {
                     button.addEventListener('click', function() {
@@ -417,9 +582,10 @@
                         }
 
                         viewEmployee.textContent = payload.employee || '-';
-                        viewOffice.textContent = payload.office || '-';
+                        viewOffice.textContent = payload.office_division || payload.office || '-';
                         viewMonth.textContent = payload.month || '-';
-                        viewStatus.textContent = payload.status || '-';
+                        viewStatusPill.textContent = payload.status_badge_label || payload.status || '-';
+                        viewSubmittedAt.textContent = payload.submitted_at || '-';
                         const statusKey = (payload.status_key || payload.status || '').toString().toLowerCase();
 
                         if (viewApproveBtn) {
@@ -445,22 +611,6 @@
                             viewEndorseBtn?.classList.add('hidden');
                         }
 
-                        const attendance = payload.attendance || {};
-                        const absence = attendance.absence || {};
-                        const tardiness = attendance.tardiness || {};
-
-                        absenceW1.textContent = absence.w1 ?? 0;
-                        absenceW2.textContent = absence.w2 ?? 0;
-                        absenceW3.textContent = absence.w3 ?? 0;
-                        absenceW4.textContent = absence.w4 ?? 0;
-                        absenceTotal.textContent = `${absence.total ?? 0} ${absence.unit || 'days'}`;
-
-                        tardyW1.textContent = tardiness.w1 ?? 185;
-                        tardyW2.textContent = tardiness.w2 ?? 0;
-                        tardyW3.textContent = tardiness.w3 ?? 1;
-                        tardyW4.textContent = tardiness.w4 ?? 0;
-                        tardyTotal.textContent = `${tardiness.total ?? 186} ${tardiness.unit || 'mins'}`;
-
                         certSupervisorName.textContent = payload.supervisor || 'Carlo D. Beray';
                         certEmployeeName.textContent = payload.employee || 'Ramon Reyes';
 
@@ -478,37 +628,15 @@
                             certSupervisorDate.textContent = '-';
                         }
 
-                        const rows = payload.preview?.outputs || [];
-                        viewOutputs.innerHTML = '';
+                        summaryW1.textContent = String(payload.summary?.week1_total ?? 0);
+                        summaryW2.textContent = String(payload.summary?.week2_total ?? 0);
+                        summaryW3.textContent = String(payload.summary?.week3_total ?? 0);
+                        summaryW4.textContent = String(payload.summary?.week4_total ?? 0);
+                        summaryTotal.textContent = String(payload.summary?.grand_total ?? 0);
+                        summaryIncluded.textContent = String(payload.summary?.included_entries ?? 0);
+                        summaryExcluded.textContent = String(payload.summary?.excluded_entries ?? 0);
 
-                        if (!rows.length) {
-                            viewOutputs.innerHTML =
-                                '<tr><td colspan="16" class="px-4 py-6 text-center text-slate-400">No output rows available.</td></tr>';
-                            return;
-                        }
-
-                        rows.forEach((row) => {
-                            const tr = document.createElement('tr');
-                            tr.innerHTML = `
-                                <td class="px-4 py-3 text-left">${row.title || '-'}</td>
-                                <td class="px-2 py-3 text-center">${row.qty?.w1 ?? 0}</td>
-                                <td class="px-2 py-3 text-center">${row.qty?.w2 ?? 0}</td>
-                                <td class="px-2 py-3 text-center">${row.qty?.w3 ?? 0}</td>
-                                <td class="px-2 py-3 text-center">${row.qty?.w4 ?? 0}</td>
-                                <td class="px-2 py-3 text-center font-semibold">${row.qty?.total ?? 0}</td>
-                                <td class="px-2 py-3 text-center">${row.quality?.w1 ?? 0}</td>
-                                <td class="px-2 py-3 text-center">${row.quality?.w2 ?? 0}</td>
-                                <td class="px-2 py-3 text-center">${row.quality?.w3 ?? 0}</td>
-                                <td class="px-2 py-3 text-center">${row.quality?.w4 ?? 0}</td>
-                                <td class="px-2 py-3 text-center font-semibold">${row.quality?.total ?? 0}</td>
-                                <td class="px-2 py-3 text-center">${row.timeliness?.w1 ?? 0}</td>
-                                <td class="px-2 py-3 text-center">${row.timeliness?.w2 ?? 0}</td>
-                                <td class="px-2 py-3 text-center">${row.timeliness?.w3 ?? 0}</td>
-                                <td class="px-2 py-3 text-center">${row.timeliness?.w4 ?? 0}</td>
-                                <td class="px-2 py-3 text-center font-semibold">${row.timeliness?.total ?? 0}</td>
-                            `;
-                            viewOutputs.appendChild(tr);
-                        });
+                        renderGroupedOutputs(payload.preview || {});
                     });
                 });
 

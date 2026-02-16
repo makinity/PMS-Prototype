@@ -142,9 +142,8 @@
                                     <th class="px-4 py-3">PPA Code</th>
                                     <th class="px-4 py-3">MFO/PPA</th>
                                     <th class="px-4 py-3">Performance Indicator</th>
-                                    <th class="px-4 py-3 text-center">Target Output</th>
+                                    <th class="px-4 py-3 text-center">Target / Timeline</th>
                                     <th class="px-4 py-3 text-center">Actual Performance</th>
-                                    <th class="px-4 py-3 text-center">Variance</th>
                                     <th class="px-4 py-3">Remarks</th>
                                 </tr>
                             </thead>
@@ -299,16 +298,15 @@
                             <td class="px-4 py-3">${escapeHtml(row.ppa_code ?? '-')}</td>
                             <td class="px-4 py-3">${escapeHtml(row.mfo ?? '-')}</td>
                             <td class="px-4 py-3">${escapeHtml(row.indicator ?? '-')}</td>
-                            <td class="px-4 py-3 text-center">${escapeHtml(row.target_output ?? '-')}</td>
+                            <td class="px-4 py-3 text-center">${escapeHtml(row.target_timeline ?? '-')}</td>
                             <td class="px-4 py-3 text-center font-semibold">${escapeHtml(row.actual_performance ?? '-')}</td>
-                            <td class="px-4 py-3 text-center">${escapeHtml(row.variance ?? '-')}</td>
                             <td class="px-4 py-3">${escapeHtml(row.remarks ?? '-')}</td>
                         `;
                         body.appendChild(tr);
                     });
 
                     if (!body.children.length) {
-                        body.innerHTML = '<tr><td colspan="7" class="px-4 py-6 text-center text-slate-400">No QAR rows found.</td></tr>';
+                        body.innerHTML = '<tr><td colspan="6" class="px-4 py-6 text-center text-slate-400">No QAR rows found.</td></tr>';
                     }
                 };
 

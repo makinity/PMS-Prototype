@@ -4,6 +4,7 @@ namespace App\Http\Controllers\StageTwo\Planning;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class DeptHeadQarController extends Controller
 {
@@ -30,6 +31,9 @@ class DeptHeadQarController extends Controller
             $request->session()->put(self::SESSION_KEY, $state);
         }
 
+        $office = 'Revenue Collection Unit';
+        $quarter = 'Q1 2026 (Jan-Mar)';
+
         $status = (string) ($state['status'] ?? 'draft');
         if (! in_array($status, ['draft', 'dept_head_approved'], true)) {
             $status = 'draft';
@@ -38,6 +42,13 @@ class DeptHeadQarController extends Controller
         $incomingMpors = array_values($state['incoming_mpors'] ?? []);
         $consolidatedMpors = array_values($state['consolidated_mpors'] ?? []);
         $rows = array_values($state['qar_rows'] ?? []);
+        $uwpTargetTimelineMap = $this->getUwpTargetTimelineMap();
+
+        if ($rows !== []) {
+            $rows = $this->applyUwpTargetsToRows($rows, $uwpTargetTimelineMap);
+        }
+
+        $mporDummyDetails = $this->buildMporDummyDetails($incomingMpors, $office);
 
         $includedEmployeeCount = count(array_unique(array_filter(array_map(
             static fn (array $mpor): string => (string) ($mpor['employee'] ?? ''),
@@ -50,14 +61,16 @@ class DeptHeadQarController extends Controller
         ))));
 
         return view('dept-head.qar', [
-            'office' => 'Revenue Collection Unit',
-            'quarter' => 'Q1 2026 (Jan-Mar)',
+            'office' => $office,
+            'quarter' => $quarter,
             'status' => $status,
             'generatedAt' => $state['generated_at'] ?? null,
             'approvedAt' => $state['approved_at'] ?? null,
             'incomingMpors' => $incomingMpors,
             'consolidatedMpors' => $consolidatedMpors,
             'rows' => $rows,
+            'uwpTargetTimelineMap' => $uwpTargetTimelineMap,
+            'mporDummyDetails' => $mporDummyDetails,
             'includedMporCount' => count($consolidatedMpors),
             'includedEmployeeCount' => $includedEmployeeCount,
             'includedMonthsCount' => $includedMonthsCount,
@@ -93,26 +106,10 @@ class DeptHeadQarController extends Controller
         $incomingBefore = count($incomingMpors);
         $state['consolidated_mpors'] = $incomingMpors;
         $state['incoming_mpors'] = [];
-        $state['qar_rows'] = [
-            [
-                'ppa_code' => 'QAR-001',
-                'mfo' => 'E-Bank Scanning and Encoding of Revenue Transactions',
-                'indicator' => 'All e-bank transactions scanned and encoded daily',
-                'target_output' => '-',
-                'actual_performance' => 1,
-                'variance' => '-',
-                'remarks' => 'From consolidated MPOR (Jan 2026)',
-            ],
-            [
-                'ppa_code' => 'QAR-002',
-                'mfo' => 'Processing of Over-the-Counter Revenue Transactions',
-                'indicator' => 'Same-day verification of OTC transactions',
-                'target_output' => '-',
-                'actual_performance' => 12,
-                'variance' => '-',
-                'remarks' => 'From consolidated MPOR (Jan 2026)',
-            ],
-        ];
+
+        $uwpTargetTimelineMap = $this->getUwpTargetTimelineMap();
+        $rows = $this->buildDummyQarRows('Q1 2026 (Jan-Mar)');
+        $state['qar_rows'] = $this->applyUwpTargetsToRows($rows, $uwpTargetTimelineMap);
         $state['generated_at'] = now()->toDateTimeString();
         $state['status'] = 'draft';
         $state['approved_at'] = null;
@@ -195,4 +192,158 @@ class DeptHeadQarController extends Controller
 
         return $state;
     }
+
+    private function getUwpTargetTimelineMap(): array
+    {
+        return [
+            'QAR-001' => 'Daily; all e-bank transactions processed within the same working day',
+            'QAR-002' => 'Daily; 95% processed within the same working day',
+            'QAR-003' => 'Quarterly; records validated and properly filed',
+        ];
+    }
+
+    private function getBaseDummyMpor(string $office): array
+    {
+        return [
+            'employee_name' => 'Ramon Reyes',
+            'office_division' => $office,
+            'month_label' => 'January 2026',
+            'status' => 'Submitted (Locked)',
+            'submitted_at' => 'Jan 31, 2026 5:12 PM',
+            'groups' => [
+                [
+                    'label' => 'CORE FUNCTIONS',
+                    'weight_label' => '80%',
+                    'rows' => [
+                        [
+                            'task_title' => 'Processing of Over-the-Counter Revenue Transactions',
+                            'eff' => ['w1' => 12, 'w2' => 0, 'w3' => 0, 'w4' => 0, 'total' => 12],
+                            'qual' => ['w1' => 60, 'w2' => 0, 'w3' => 0, 'w4' => 0, 'total' => 60],
+                            'time' => ['w1' => 60, 'w2' => 0, 'w3' => 0, 'w4' => 0, 'total' => 60],
+                        ],
+                        [
+                            'task_title' => 'E-Bank Scanning and Encoding of Revenue Transactions',
+                            'eff' => ['w1' => 1, 'w2' => 0, 'w3' => 0, 'w4' => 0, 'total' => 1],
+                            'qual' => ['w1' => 5, 'w2' => 0, 'w3' => 0, 'w4' => 0, 'total' => 5],
+                            'time' => ['w1' => 5, 'w2' => 0, 'w3' => 0, 'w4' => 0, 'total' => 5],
+                        ],
+                    ],
+                ],
+                [
+                    'label' => 'SUPPORT FUNCTIONS',
+                    'weight_label' => '20%',
+                    'rows' => [
+                        [
+                            'task_title' => 'Maintenance of Revenue Records Filing System',
+                            'eff' => ['w1' => 0, 'w2' => 0, 'w3' => 0, 'w4' => 0, 'total' => 0],
+                            'qual' => ['w1' => 0, 'w2' => 0, 'w3' => 0, 'w4' => 0, 'total' => 0],
+                            'time' => ['w1' => 0, 'w2' => 0, 'w3' => 0, 'w4' => 0, 'total' => 0],
+                        ],
+                    ],
+                ],
+            ],
+            'summary' => [
+                'week1_total' => 13,
+                'week2_total' => 0,
+                'week3_total' => 0,
+                'week4_total' => 0,
+                'grand_total' => 13,
+                'included_entries' => 2,
+                'excluded_entries' => 3,
+            ],
+            'confirmed' => [
+                'supervisor_name' => 'Carlo D. Beray',
+                'employee_name' => 'Ramon Reyes',
+            ],
+            'evidence' => [
+                [
+                    'task_title' => 'Processing of Over-the-Counter Revenue Transactions',
+                    'items' => [
+                        ['label' => 'Screenshot - ORS Log W1', 'type' => 'image', 'note' => 'placeholder'],
+                        ['label' => 'Monthly summary PDF', 'type' => 'pdf', 'note' => 'placeholder'],
+                    ],
+                ],
+                [
+                    'task_title' => 'E-Bank Scanning and Encoding of Revenue Transactions',
+                    'items' => [
+                        ['label' => 'Scanned e-bank bundle', 'type' => 'image', 'note' => 'placeholder'],
+                        ['label' => 'BSF verification sheet', 'type' => 'xlsx', 'note' => 'placeholder'],
+                    ],
+                ],
+                [
+                    'task_title' => 'Maintenance of Revenue Records Filing System',
+                    'items' => [
+                        ['label' => 'Records inventory checklist', 'type' => 'pdf', 'note' => 'placeholder'],
+                    ],
+                ],
+            ],
+            'employee_remarks' => 'Submitted all month-end documents and reconciled variances.',
+        ];
+    }
+
+    private function buildMporKey(array $mpor): string
+    {
+        return Str::slug((string) ($mpor['employee'] ?? 'unknown') . '-' . (string) ($mpor['month'] ?? 'unknown'));
+    }
+
+    private function buildMporDummyDetails(array $incomingMpors, string $office): array
+    {
+        $baseDummy = $this->getBaseDummyMpor($office);
+        $details = [];
+
+        foreach ($incomingMpors as $mpor) {
+            if (! is_array($mpor)) {
+                continue;
+            }
+
+            $key = $this->buildMporKey($mpor);
+            $details[$key] = array_merge($baseDummy, [
+                'employee_name' => $mpor['employee'] ?? 'Unknown Employee',
+                'office_division' => $office,
+                'month_label' => $mpor['month'] ?? 'Unknown Month',
+                'status' => $mpor['status'] ?? 'Submitted (Locked)',
+            ]);
+        }
+
+        if ($details === []) {
+            $details['ramon-reyes-january-2026'] = $baseDummy;
+        }
+
+        return $details;
+    }
+
+    private function buildDummyQarRows(string $quarter): array
+    {
+        return [
+            [
+                'ppa_code' => 'QAR-001',
+                'mfo' => 'E-Bank Scanning and Encoding of Revenue Transactions',
+                'indicator' => 'All e-bank transactions scanned and encoded daily',
+                'actual_performance' => 1,
+                'remarks' => 'From consolidated MPOR (Jan 2026)',
+            ],
+            [
+                'ppa_code' => 'QAR-002',
+                'mfo' => 'Processing of Over-the-Counter Revenue Transactions',
+                'indicator' => 'Same-day verification of OTC transactions',
+                'actual_performance' => 12,
+                'remarks' => 'From consolidated MPOR (Jan 2026)',
+            ],
+        ];
+    }
+
+    private function applyUwpTargetsToRows(array $rows, array $uwpTargetTimelineMap): array
+    {
+        return array_map(static function ($row) use ($uwpTargetTimelineMap) {
+            if (! is_array($row)) {
+                return $row;
+            }
+
+            $code = (string) ($row['ppa_code'] ?? '');
+            $row['target_timeline'] = $uwpTargetTimelineMap[$code] ?? '-';
+
+            return $row;
+        }, $rows);
+    }
 }
+
