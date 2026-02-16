@@ -1,7 +1,31 @@
 @extends('layouts.employee')
 
 @section('main-content')
+    @php
+        $isSubmitted = ($submissionStatus ?? 'draft') === 'submitted';
+        $statusBadgeClasses = $isSubmitted
+            ? 'inline-flex items-center rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-200 border border-emerald-500/40'
+            : 'inline-flex items-center rounded-full bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-200 border border-amber-500/40';
+    @endphp
+
     <section class="space-y-6">
+        @if (session('success'))
+            <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if (session('info'))
+            <div class="rounded-xl border border-sky-500/30 bg-sky-500/10 px-4 py-3 text-sm text-sky-200">
+                {{ session('info') }}
+            </div>
+        @endif
+
+        @if ($errors->any())
+            <div class="rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+                {{ $errors->first() }}
+            </div>
+        @endif
 
         <!-- Page Header -->
         <div class="flex flex-wrap items-start justify-between gap-3">
@@ -10,10 +34,13 @@
                 <p class="text-sm text-slate-400">Formal end-of-period submission of accomplishments</p>
                 <p class="text-xs text-slate-500 mt-1">Performance Period: January&ndash;June 2026</p>
             </div>
-            <div class="flex items-center gap-2">
-                <span id="status-badge" class="inline-flex items-center rounded-full bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-200 border border-amber-500/40">
-                    Draft
+            <div class="flex flex-col items-end gap-1">
+                <span id="status-badge" class="{{ $statusBadgeClasses }}">
+                    {{ $isSubmitted ? 'Submitted to Supervisor & Dept Head' : 'Draft' }}
                 </span>
+                @if ($isSubmitted)
+                    <p class="text-xs text-slate-400">Submitted: {{ $submittedAtLabel ?? '--' }}</p>
+                @endif
             </div>
         </div>
 
@@ -22,16 +49,14 @@
             <div class="flex items-start justify-between gap-3">
                 <div>
                     <h2 class="text-lg font-semibold text-white">SMPOR &ndash; Monitoring Summary</h2>
-                    <p class="text-sm text-slate-400">System-generated summary based on MPOR (derived from submitted + rated ORS). Read-only.</p>
+                    <p class="text-sm text-slate-400">System-generated summary based on submitted MPORs. Read-only.</p>
                 </div>
                 <div class="flex gap-2">
-                    <!-- kani na button -->
                     <a href="#"
                        data-open-modal="smpor-preview-modal"
                        class="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-800 transition">
                         View SMPOR
                     </a>
-                    <!-------------------->
 
                     <a href="{{ route('stage2.smpor.export.pdf') }}"
                         class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800">
@@ -42,7 +67,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-slate-200">
                 <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Period</p>
-                    <p class="mt-1 font-semibold">January&ndash;June 2026</p>
+                    <p class="mt-1 font-semibold">{{ $periodLabel ?? 'January-June 2026' }}</p>
                 </div>
                 <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Status</p>
@@ -50,7 +75,7 @@
                 </div>
                 <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Data Source</p>
-                    <p class="mt-1 font-semibold">MPOR (derived from submitted + rated ORS)</p>
+                    <p class="mt-1 font-semibold">Submitted MPORs</p>
                 </div>
             </div>
         </div>
@@ -60,16 +85,14 @@
             <div class="flex items-start justify-between gap-3">
                 <div>
                     <h2 class="text-lg font-semibold text-white">IPCR Accomplishment Report</h2>
-                    <p class="text-sm text-slate-400">System-generated accomplishments derived from SMPOR consolidation. Read-only.</p>
+                    <p class="text-sm text-slate-400">System-generated accomplishments derived from SMPOR totals. Read-only.</p>
                 </div>
                 <div class="flex gap-2">
-                    <!-- kani na button -->
                     <a href="#"
                        data-open-modal="ipcr-preview-modal"
                        class="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-800 transition">
                         View IPCR Accomplishment
                     </a>
-                    <!-------------------->
 
                     <a href="{{ route('stage2.ipcr.export.pdf') }}"
                         class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800">
@@ -81,7 +104,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-slate-200">
                 <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Rating Period</p>
-                    <p class="mt-1 font-semibold">January&ndash;June 2026</p>
+                    <p class="mt-1 font-semibold">{{ $periodLabel ?? 'January-June 2026' }}</p>
                 </div>
                 <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Status</p>
@@ -89,54 +112,78 @@
                 </div>
                 <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Data Source</p>
-                    <p class="mt-1 font-semibold">SMPOR (monitoring consolidation)</p>
+                    <p class="mt-1 font-semibold">SMPOR totals (derived from submitted MPORs)</p>
                 </div>
             </div>
         </div>
 
-        <!-- Supporting Documents -->
-        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 space-y-3">
-            <div class="flex items-start justify-between">
-                <div>
-                    <h2 class="text-lg font-semibold text-white">Supporting Documents (Optional)</h2>
-                    <p class="text-sm text-slate-400">Uploads are optional and disabled after submission.</p>
-                </div>
-            </div>
-            <input id="supporting-files"
-                   type="file"
-                   multiple
-                   class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200 file:mr-3 file:rounded-md file:border-0 file:bg-slate-800 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-slate-200">
-        </div>
+        <form id="accomplishment-submission-form"
+              method="POST"
+              action="{{ route('stage2.employee.accomplishment.submit') }}"
+              enctype="multipart/form-data"
+              class="space-y-6">
+            @csrf
 
-        <!-- Remarks -->
-        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 space-y-3">
-            <div class="flex items-start justify-between">
-                <div>
-                    <h2 class="text-lg font-semibold text-white">Employee Remarks (Optional)</h2>
-                    <p class="text-sm text-slate-400">Remarks become read-only after submission.</p>
+            <!-- Supporting Documents -->
+            <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 space-y-3">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <h2 class="text-lg font-semibold text-white">Supporting Documents (Optional)</h2>
+                        <p class="text-sm text-slate-400">Uploads are optional and disabled after submission.</p>
+                    </div>
                 </div>
-            </div>
-            <textarea id="employee-remarks"
-                        style="background:#0f172a;color:#e5e7eb;"
-                      rows="3"
-                      class="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500"
-                      placeholder="Add clarifications or context (optional)"></textarea>
-        </div>
+                <input id="supporting-files"
+                       name="supporting_files[]"
+                       type="file"
+                       multiple
+                       @disabled($isSubmitted)
+                       class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200 file:mr-3 file:rounded-md file:border-0 file:bg-slate-800 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-slate-200 disabled:cursor-not-allowed disabled:opacity-60">
 
-        <!-- Actions -->
-        <div class="flex flex-wrap items-center justify-end gap-3 pt-2">
-            <button type="button"
-                    class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-800 transition">
-                Back
-            </button>
-            <button type="button"
-                    id="submit-accomplishments"
-                    data-action="confirm-submission"
-                    class="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-emerald-600 transition">
-                <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-emerald-900/30 border-t-emerald-900"></span>
-                <span data-button-label>Submit Accomplishments</span>
-            </button>
-        </div>
+                @if (!empty($attachmentNames ?? []))
+                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                        <p class="text-xs uppercase text-slate-500">Submitted Attachments (Prototype)</p>
+                        <ul class="mt-2 space-y-1 text-sm text-slate-300">
+                            @foreach ($attachmentNames as $attachmentName)
+                                <li>{{ $attachmentName }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+            </div>
+
+            <!-- Remarks -->
+            <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 space-y-3">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <h2 class="text-lg font-semibold text-white">Employee Remarks (Optional)</h2>
+                        <p class="text-sm text-slate-400">Remarks become read-only after submission.</p>
+                    </div>
+                </div>
+                <textarea id="employee-remarks"
+                          name="remarks"
+                          style="background:#0f172a;color:#e5e7eb;"
+                          rows="3"
+                          @disabled($isSubmitted)
+                          class="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500 disabled:cursor-not-allowed disabled:opacity-70"
+                          placeholder="Add clarifications or context (optional)">{{ old('remarks', $remarksValue ?? '') }}</textarea>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex flex-wrap items-center justify-end gap-3 pt-2">
+                <button type="button"
+                        class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-800 transition">
+                    Back
+                </button>
+                <button type="button"
+                        id="submit-accomplishments"
+                        data-action="confirm-submission"
+                        @disabled($isSubmitted)
+                        class="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-emerald-600 transition disabled:cursor-not-allowed disabled:opacity-70">
+                    <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-emerald-900/30 border-t-emerald-900"></span>
+                    <span data-button-label>{{ $isSubmitted ? 'Already Submitted' : 'Submit Accomplishments' }}</span>
+                </button>
+            </div>
+        </form>
 
     </section>
 
@@ -149,7 +196,7 @@
                 <div>
                     <p class="text-xs uppercase tracking-[0.2em] text-blue-300">SMPOR (Monitoring Summary)</p>
                     <h3 class="text-lg font-semibold text-white">SMPOR Preview &mdash; January&ndash;June 2026</h3>
-                    <p class="text-sm text-slate-400 mt-1">System-generated, monitoring-only. Derived from MPOR (submitted + rated ORS).</p>
+                    <p class="text-sm text-slate-400 mt-1">System-generated, monitoring-only. Derived from submitted MPORs.</p>
                 </div>
                 <button type="button" data-close-modal class="text-slate-400 hover:text-white">&times;</button>
             </div>
@@ -157,19 +204,19 @@
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
                     <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                         <p class="text-[11px] uppercase text-slate-500">Employee</p>
-                        <p class="mt-1 font-semibold">Ramon Reyes</p>
+                        <p class="mt-1 font-semibold">{{ $employeeName ?? 'Ramon Reyes' }}</p>
                     </div>
                     <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                         <p class="text-[11px] uppercase text-slate-500">Office/Unit</p>
-                        <p class="mt-1 font-semibold">Revenue Collection Unit</p>
+                        <p class="mt-1 font-semibold">{{ $officeName ?? 'Revenue Collection Unit' }}</p>
                     </div>
                     <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                         <p class="text-[11px] uppercase text-slate-500">Period</p>
-                        <p class="mt-1 font-semibold">January&ndash;June 2026</p>
+                        <p class="mt-1 font-semibold">{{ $periodLabel ?? 'January-June 2026' }}</p>
                     </div>
                     <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                         <p class="text-[11px] uppercase text-slate-500">Source</p>
-                        <p class="mt-1 font-semibold">MPOR (submitted + rated ORS)</p>
+                        <p class="mt-1 font-semibold">Submitted MPORs</p>
                     </div>
                 </div>
 
@@ -189,25 +236,25 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-800">
-                                <tr class="bg-slate-900/40">
-                                    <td class="px-4 py-3 font-semibold">E-Bank Scanning and Encoding of Revenue Transactions</td>
-                                    <td class="px-4 py-3 text-right">1</td>
-                                    <td class="px-4 py-3 text-right">5</td>
-                                    <td class="px-4 py-3 text-right">5</td>
-                                </tr>
-                                <tr class="bg-slate-900/30">
-                                    <td class="px-4 py-3 font-semibold">Processing of Over-the-Counter Revenue Transactions</td>
-                                    <td class="px-4 py-3 text-right">12</td>
-                                    <td class="px-4 py-3 text-right">60</td>
-                                    <td class="px-4 py-3 text-right">60</td>
-                                </tr>
+                                @forelse ($smporRows as $smporRow)
+                                    <tr class="bg-slate-900/40">
+                                        <td class="px-4 py-3 font-semibold">{{ $smporRow['mfo'] }}</td>
+                                        <td class="px-4 py-3 text-right">{{ $smporRow['total_quantity'] }}</td>
+                                        <td class="px-4 py-3 text-right">{{ $smporRow['total_quality_points'] }}</td>
+                                        <td class="px-4 py-3 text-right">{{ $smporRow['total_timeliness_points'] }}</td>
+                                    </tr>
+                                @empty
+                                    <tr class="bg-slate-900/40">
+                                        <td colspan="4" class="px-4 py-3 text-center text-slate-400">No submitted MPOR data available.</td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                             <tfoot class="bg-slate-950/70">
                                 <tr>
                                     <th class="px-4 py-3 text-left font-semibold text-slate-100">Grand Total</th>
-                                    <th class="px-4 py-3 text-right font-semibold text-slate-100">13</th>
-                                    <th class="px-4 py-3 text-right font-semibold text-slate-100">65</th>
-                                    <th class="px-4 py-3 text-right font-semibold text-slate-100">65</th>
+                                    <th class="px-4 py-3 text-right font-semibold text-slate-100">{{ $smporTotals['quantity'] ?? 0 }}</th>
+                                    <th class="px-4 py-3 text-right font-semibold text-slate-100">{{ $smporTotals['quality_points'] ?? 0 }}</th>
+                                    <th class="px-4 py-3 text-right font-semibold text-slate-100">{{ $smporTotals['timeliness_points'] ?? 0 }}</th>
                                 </tr>
                             </tfoot>
                         </table>
@@ -233,7 +280,7 @@
                 <div>
                     <p class="text-xs uppercase tracking-[0.2em] text-blue-300">IPCR Accomplishment Report</p>
                     <h3 class="text-lg font-semibold text-white">IPCR Accomplishment Preview &mdash; January&ndash;June 2026</h3>
-                    <p class="text-sm text-slate-400 mt-1">System-generated accomplishments derived from SMPOR consolidation (Stage II).</p>
+                    <p class="text-sm text-slate-400 mt-1">System-generated accomplishments derived from SMPOR totals (Stage II).</p>
                 </div>
                 <button type="button" data-close-modal class="text-slate-400 hover:text-white">&times;</button>
             </div>
@@ -241,19 +288,19 @@
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
                     <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                         <p class="text-[11px] uppercase text-slate-500">Employee</p>
-                        <p class="mt-1 font-semibold">Ramon Reyes</p>
+                        <p class="mt-1 font-semibold">{{ $employeeName ?? 'Ramon Reyes' }}</p>
                     </div>
                     <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                         <p class="text-[11px] uppercase text-slate-500">Office/Unit</p>
-                        <p class="mt-1 font-semibold">Revenue Collection Unit</p>
+                        <p class="mt-1 font-semibold">{{ $officeName ?? 'Revenue Collection Unit' }}</p>
                     </div>
                     <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                         <p class="text-[11px] uppercase text-slate-500">Period</p>
-                        <p class="mt-1 font-semibold">January&ndash;June 2026</p>
+                        <p class="mt-1 font-semibold">{{ $periodLabel ?? 'January-June 2026' }}</p>
                     </div>
                     <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                         <p class="text-[11px] uppercase text-slate-500">Source</p>
-                        <p class="mt-1 font-semibold">SMPOR (monitoring consolidation)</p>
+                        <p class="mt-1 font-semibold">SMPOR totals</p>
                     </div>
                 </div>
 
@@ -269,16 +316,17 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-800">
-                                <tr class="bg-slate-900/40">
-                                    <td class="px-4 py-3 font-semibold">E-Bank Scanning and Encoding of Revenue Transactions</td>
-                                    <td class="px-4 py-3 text-slate-300">Completed 1 e-bank scanning and encoding transaction within the period; monitoring reflects full quality and timeliness compliance based on rated ORS.</td>
-                                    <td class="px-4 py-3 text-slate-300">Attached (reference)</td>
-                                </tr>
-                                <tr class="bg-slate-900/30">
-                                    <td class="px-4 py-3 font-semibold">Processing of Over-the-Counter Revenue Transactions</td>
-                                    <td class="px-4 py-3 text-slate-300">Processed 12 over-the-counter revenue transactions; monitoring indicates consistent quality and timeliness adherence across consolidated ORS entries.</td>
-                                    <td class="px-4 py-3 text-slate-300">Attached (reference)</td>
-                                </tr>
+                                @forelse ($ipcrRows as $ipcrRow)
+                                    <tr class="bg-slate-900/40">
+                                        <td class="px-4 py-3 font-semibold">{{ $ipcrRow['mfo'] }}</td>
+                                        <td class="px-4 py-3 text-slate-300">{{ $ipcrRow['accomplishment_summary'] }}</td>
+                                        <td class="px-4 py-3 text-slate-300">{{ $ipcrRow['evidence_label'] }}</td>
+                                    </tr>
+                                @empty
+                                    <tr class="bg-slate-900/40">
+                                        <td colspan="3" class="px-4 py-3 text-center text-slate-400">No SMPOR totals available for IPCR preview.</td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
@@ -317,11 +365,13 @@
                         class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-800 transition">
                     Close
                 </button>
-                <button type="button"
+                <button type="submit"
+                        form="accomplishment-submission-form"
                         id="modal-confirm"
-                        class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500 transition">
+                        @disabled($isSubmitted)
+                        class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500 transition disabled:cursor-not-allowed disabled:opacity-70">
                     <span data-modal-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"></span>
-                    <span data-modal-label>Submit Accomplishments</span>
+                    <span data-modal-label>{{ $isSubmitted ? 'Already Submitted' : 'Submit Accomplishments' }}</span>
                 </button>
             </div>
         </div>
@@ -339,18 +389,14 @@
                 const modalClose = document.getElementById('modal-close');
                 const modalSpinner = modalConfirm?.querySelector('[data-modal-spinner]');
                 const modalLabel = modalConfirm?.querySelector('[data-modal-label]');
-                const statusBadge = document.getElementById('status-badge');
+                const submissionForm = document.getElementById('accomplishment-submission-form');
                 const submitBtn = document.getElementById('submit-accomplishments');
-                const submitSpinner = submitBtn?.querySelector('[data-button-spinner]');
-                const submitLabel = submitBtn?.querySelector('[data-button-label]');
-                const supportingFiles = document.getElementById('supporting-files');
-                const remarks = document.getElementById('employee-remarks');
                 let activeAction = null;
 
                 const modalContent = {
                     'confirm-submission': {
                         title: 'Submit Accomplishments',
-                        body: 'Confirm formal submission of SMPOR & IPCR accomplishments for Stage III evaluation. After submission, uploads and remarks become read-only.',
+                        body: 'Confirm formal submission of SMPOR and IPCR accomplishments for Stage III evaluation. After submission, uploads and remarks become read-only.',
                         showConfirm: true,
                     },
                 };
@@ -372,30 +418,6 @@
                     syncBodyScroll();
                 }
 
-                function setSubmitState(submitted) {
-                    if (statusBadge) {
-                        statusBadge.textContent = submitted ? 'Submitted for supervisor approval' : 'Draft';
-                        statusBadge.className = submitted
-                            ? 'inline-flex items-center rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-200 border border-emerald-500/40'
-                            : 'inline-flex items-center rounded-full bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-200 border border-amber-500/40';
-                    }
-                    if (supportingFiles) {
-                        supportingFiles.disabled = submitted;
-                        supportingFiles.classList.toggle('opacity-60', submitted);
-                        supportingFiles.classList.toggle('cursor-not-allowed', submitted);
-                    }
-                    if (remarks) {
-                        remarks.disabled = submitted;
-                        remarks.classList.toggle('opacity-70', submitted);
-                        remarks.classList.toggle('cursor-not-allowed', submitted);
-                    }
-                    if (submitBtn) {
-                        submitBtn.disabled = submitted;
-                        submitBtn.classList.toggle('opacity-70', submitted);
-                        submitBtn.classList.toggle('cursor-not-allowed', submitted);
-                    }
-                }
-
                 function openModal(action) {
                     const content = modalContent[action] || modalContent['confirm-submission'];
                     activeAction = action;
@@ -408,8 +430,6 @@
                 function closeModal() {
                     setModalState(false);
                     activeAction = null;
-                    if (modalSpinner) modalSpinner.classList.add('hidden');
-                    if (modalLabel) modalLabel.textContent = 'Submit Accomplishments';
                 }
 
                 function openPreviewModal(modalId) {
@@ -438,25 +458,19 @@
                     previewModals.forEach((item) => closePreviewModal(item));
                 }
 
-                function handleConfirm() {
-                    if (activeAction !== 'confirm-submission' || !submitBtn) {
+                function handleConfirm(event) {
+                    if (activeAction !== 'confirm-submission' || !submissionForm || !modalConfirm) {
                         closeModal();
                         return;
                     }
+
+                    event.preventDefault();
                     if (modalSpinner) modalSpinner.classList.remove('hidden');
                     if (modalLabel) modalLabel.textContent = 'Submitting...';
-                    if (submitSpinner) submitSpinner.classList.remove('hidden');
-                    if (submitLabel) submitLabel.textContent = 'Submitting...';
-                    submitBtn.disabled = true;
-                    submitBtn.classList.add('opacity-70', 'cursor-wait');
+                    modalConfirm.disabled = true;
+                    modalConfirm.classList.add('opacity-70', 'cursor-not-allowed');
 
-                    setTimeout(() => {
-                        setSubmitState(true);
-                        if (submitSpinner) submitSpinner.classList.add('hidden');
-                        if (submitLabel) submitLabel.textContent = 'Submit Accomplishments';
-                        submitBtn.classList.remove('cursor-wait');
-                        closeModal();
-                    }, 900);
+                    submissionForm.requestSubmit();
                 }
 
                 document.querySelectorAll('[data-action]').forEach((btn) => {
@@ -481,6 +495,19 @@
                     previewModal.addEventListener('click', (e) => {
                         if (e.target === previewModal) closePreviewModal(previewModal);
                     });
+                });
+
+                submissionForm?.addEventListener('submit', () => {
+                    if (modalSpinner) modalSpinner.classList.remove('hidden');
+                    if (modalLabel) modalLabel.textContent = 'Submitting...';
+                    if (modalConfirm) {
+                        modalConfirm.disabled = true;
+                        modalConfirm.classList.add('opacity-70', 'cursor-not-allowed');
+                    }
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.classList.add('opacity-70', 'cursor-not-allowed');
+                    }
                 });
 
                 modalConfirm?.addEventListener('click', handleConfirm);

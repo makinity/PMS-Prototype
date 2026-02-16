@@ -7,6 +7,10 @@
                 'label' => 'Submitted',
                 'badge' => 'border-blue-500/40 bg-blue-500/10 text-blue-200',
             ],
+            'approved' => [
+                'label' => 'Approved',
+                'badge' => 'border-amber-500/40 bg-amber-500/10 text-amber-200',
+            ],
             'endorsed' => [
                 'label' => 'Endorsed',
                 'badge' => 'border-emerald-500/40 bg-emerald-500/10 text-emerald-200',
@@ -37,19 +41,29 @@
             <div>
                 <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Stage II - Supervisor Review</p>
                 <h1 class="mt-1 text-2xl font-bold text-white">MPOR for Review</h1>
-                <p class="mt-1 text-sm text-slate-400">Submitted MPORs awaiting endorsement (Stage II)</p>
+                <p class="mt-1 text-sm text-slate-400">Submitted MPORs require approval before endorsement (Stage II)</p>
             </div>
 
-            <div class="flex items-center gap-2">
-                <a href="{{ route('supervisor.mpor.index', ['status' => 'submitted']) }}"
-                    class="{{ $selectedStatus === 'submitted' ? 'border-blue-500/50 bg-blue-500/10 text-blue-200' : 'border-slate-700 bg-slate-900/70 text-slate-300' }} rounded-full border px-3 py-1 text-xs font-semibold transition hover:bg-slate-800">
-                    Submitted ({{ $counts['submitted'] ?? 0 }})
-                </a>
-                <a href="{{ route('supervisor.mpor.index', ['status' => 'endorsed']) }}"
-                    class="{{ $selectedStatus === 'endorsed' ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-200' : 'border-slate-700 bg-slate-900/70 text-slate-300' }} rounded-full border px-3 py-1 text-xs font-semibold transition hover:bg-slate-800">
-                    Endorsed ({{ $counts['endorsed'] ?? 0 }})
-                </a>
-            </div>
+            <form method="GET" action="{{ route('supervisor.mpor.index') }}" class="flex items-center gap-2">
+                <label for="mpor-status-filter" class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                    Filter
+                </label>
+                <select id="mpor-status-filter"
+                    name="status"
+                    onchange="this.form.submit()"
+                    style="background:#0f172a;color:#e5e7eb;"
+                    class="rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-xs font-semibold text-slate-200 transition focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                    <option value="submitted" @selected($selectedStatus === 'submitted')>
+                        Submitted ({{ $counts['submitted'] ?? 0 }})
+                    </option>
+                    <option value="approved" @selected($selectedStatus === 'approved')>
+                        Approved ({{ $counts['approved'] ?? 0 }})
+                    </option>
+                    <option value="endorsed" @selected($selectedStatus === 'endorsed')>
+                        Endorsed ({{ $counts['endorsed'] ?? 0 }})
+                    </option>
+                </select>
+            </form>
         </div>
 
         <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
@@ -78,6 +92,7 @@
                                     'status' => $meta['label'],
                                     'status_key' => $status,
                                     'submitted_at' => $mpor['submitted_at'] ?? null,
+                                    'approved_at' => $mpor['approved_at'] ?? null,
                                     'endorsed_at' => $mpor['endorsed_at'] ?? null,
                                     'attendance' => [
                                         'absence' => ['w1' => 0, 'w2' => 0, 'w3' => 0, 'w4' => 0, 'total' => 0, 'unit' => 'days'],
@@ -234,18 +249,26 @@
                             <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">CONFIRMED:</p>
                             <p id="mpor-cert-supervisor-name" class="mt-3 text-sm font-semibold text-white">Carlo D. Beray</p>
                             <p class="mt-2 text-xs text-slate-500">Date:</p>
-                            <p id="mpor-cert-supervisor-date" class="text-sm text-slate-300">Pending endorsement</p>
+                            <p id="mpor-cert-supervisor-date" class="text-sm text-slate-300">Pending approval</p>
                         </div>
                         <div class="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
                             <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Above information are true and correct:</p>
                             <p id="mpor-cert-employee-name" class="mt-3 text-sm font-semibold text-white">Ramon Reyes</p>
                             <p class="mt-2 text-xs text-slate-500">Date:</p>
-                            <p id="mpor-cert-employee-date" class="text-sm text-slate-300">—</p>
+                            <p id="mpor-cert-employee-date" class="text-sm text-slate-300">-</p>
                         </div>
                     </div>
                 </div>
 
                 <div class="flex justify-end border-t border-slate-800 p-5">
+                    <button type="button" id="mpor-view-approve-btn"
+                        data-open-mpor-approve
+                        data-modal-hide="mporViewModal"
+                        data-modal-target="mporApproveConfirmModal"
+                        data-modal-toggle="mporApproveConfirmModal"
+                        class="mr-2 hidden rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-sm font-semibold text-amber-200 transition hover:bg-amber-500/20">
+                        Approve
+                    </button>
                     <button type="button" id="mpor-view-endorse-btn"
                         data-open-mpor-endorse
                         data-modal-hide="mporViewModal"
@@ -259,6 +282,53 @@
                         Close
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="mporApproveConfirmModal" tabindex="-1" aria-hidden="true"
+        class="fixed left-0 right-0 top-0 z-50 hidden h-[calc(100%-1rem)] max-h-full w-full items-center justify-center overflow-y-auto overflow-x-hidden md:inset-0">
+        <div class="relative max-h-full w-full max-w-lg p-4">
+            <div class="relative rounded-2xl border border-slate-800 bg-slate-900 shadow-lg">
+                <div class="flex items-start justify-between border-b border-slate-800 p-5">
+                    <h3 class="text-lg font-semibold text-white">Approve MPOR</h3>
+                    <button type="button" data-modal-hide="mporApproveConfirmModal"
+                        class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-800 hover:text-white">
+                        <span class="sr-only">Close modal</span>
+                        <i class="fa-solid fa-xmark text-sm"></i>
+                    </button>
+                </div>
+
+                <div class="space-y-3 p-5 text-sm text-slate-300">
+                    <p>
+                        You are about to approve this MPOR.
+                    </p>
+                    <p>
+                        Approval must be completed before endorsement to the Department Head.
+                    </p>
+                    <p class="font-medium text-white">Proceed?</p>
+
+                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3 text-xs text-slate-400">
+                        <p>Employee: <span id="approve-mpor-employee" class="text-slate-200">-</span></p>
+                        <p class="mt-1">Month: <span id="approve-mpor-month" class="text-slate-200">-</span></p>
+                    </div>
+                </div>
+
+                <form id="mporApproveForm" method="POST" action=""
+                    data-action-template="{{ url('/supervisor/mpor/__ID__/approve') }}"
+                    class="flex items-center justify-end gap-2 border-t border-slate-800 p-5">
+                    @csrf
+                    <button type="button" data-modal-hide="mporApproveConfirmModal"
+                        class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 transition hover:bg-slate-800">
+                        Cancel
+                    </button>
+                    <button type="submit" id="mporProceedApproveBtn"
+                        class="inline-flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-amber-400">
+                        <span data-button-spinner
+                            class="hidden h-4 w-4 animate-spin rounded-full border-2 border-slate-900/30 border-t-slate-900"></span>
+                        <span data-button-label>Proceed Approval</span>
+                    </button>
+                </form>
             </div>
         </div>
     </div>
@@ -318,6 +388,7 @@
                 const viewMonth = document.getElementById('mpor-view-month');
                 const viewStatus = document.getElementById('mpor-view-status');
                 const viewOutputs = document.getElementById('mpor-view-outputs');
+                const viewApproveBtn = document.getElementById('mpor-view-approve-btn');
                 const viewEndorseBtn = document.getElementById('mpor-view-endorse-btn');
                 const certSupervisorName = document.getElementById('mpor-cert-supervisor-name');
                 const certSupervisorDate = document.getElementById('mpor-cert-supervisor-date');
@@ -351,16 +422,27 @@
                         viewStatus.textContent = payload.status || '-';
                         const statusKey = (payload.status_key || payload.status || '').toString().toLowerCase();
 
+                        if (viewApproveBtn) {
+                            viewApproveBtn.dataset.mporId = payload.id ?? '';
+                            viewApproveBtn.dataset.mporEmployee = payload.employee ?? '-';
+                            viewApproveBtn.dataset.mporMonth = payload.month ?? '-';
+                        }
+
                         if (viewEndorseBtn) {
                             viewEndorseBtn.dataset.mporId = payload.id ?? '';
                             viewEndorseBtn.dataset.mporEmployee = payload.employee ?? '-';
                             viewEndorseBtn.dataset.mporMonth = payload.month ?? '-';
+                        }
 
-                            if (statusKey === 'submitted') {
-                                viewEndorseBtn.classList.remove('hidden');
-                            } else {
-                                viewEndorseBtn.classList.add('hidden');
-                            }
+                        if (statusKey === 'submitted') {
+                            viewApproveBtn?.classList.remove('hidden');
+                            viewEndorseBtn?.classList.add('hidden');
+                        } else if (statusKey === 'approved') {
+                            viewApproveBtn?.classList.add('hidden');
+                            viewEndorseBtn?.classList.remove('hidden');
+                        } else {
+                            viewApproveBtn?.classList.add('hidden');
+                            viewEndorseBtn?.classList.add('hidden');
                         }
 
                         const attendance = payload.attendance || {};
@@ -383,14 +465,17 @@
                         certEmployeeName.textContent = payload.employee || 'Ramon Reyes';
 
                         if (statusKey === 'endorsed') {
-                            certEmployeeDate.textContent = payload.submitted_at || '—';
-                            certSupervisorDate.textContent = payload.endorsed_at || '—';
+                            certEmployeeDate.textContent = payload.submitted_at || '-';
+                            certSupervisorDate.textContent = payload.endorsed_at || payload.approved_at || '-';
+                        } else if (statusKey === 'approved') {
+                            certEmployeeDate.textContent = payload.submitted_at || '-';
+                            certSupervisorDate.textContent = payload.approved_at || '-';
                         } else if (statusKey === 'submitted') {
-                            certEmployeeDate.textContent = payload.submitted_at || '—';
-                            certSupervisorDate.textContent = payload.endorsed_at ? payload.endorsed_at : 'Pending endorsement';
+                            certEmployeeDate.textContent = payload.submitted_at || '-';
+                            certSupervisorDate.textContent = 'Pending approval';
                         } else {
-                            certEmployeeDate.textContent = '—';
-                            certSupervisorDate.textContent = '—';
+                            certEmployeeDate.textContent = '-';
+                            certSupervisorDate.textContent = '-';
                         }
 
                         const rows = payload.preview?.outputs || [];
@@ -427,49 +512,88 @@
                     });
                 });
 
-                const endorseForm = document.getElementById('mporEndorseForm');
-                const endorseEmployee = document.getElementById('endorse-mpor-employee');
-                const endorseMonth = document.getElementById('endorse-mpor-month');
-                const endorseBtn = document.getElementById('mporProceedEndorseBtn');
-                const endorseSpinner = endorseBtn?.querySelector('[data-button-spinner]');
-                const endorseLabel = endorseBtn?.querySelector('[data-button-label]');
-                const endorseActionTemplate = endorseForm?.dataset.actionTemplate || '';
-
-                const resetEndorseButton = () => {
-                    if (!endorseBtn || !endorseLabel || !endorseSpinner) {
+                const bindActionModal = ({
+                    triggerSelector,
+                    formId,
+                    employeeId,
+                    monthId,
+                    buttonId,
+                    loadingText,
+                    defaultText,
+                    modalHideSelector,
+                }) => {
+                    const form = document.getElementById(formId);
+                    if (!form) {
                         return;
                     }
-                    endorseBtn.disabled = false;
-                    endorseBtn.classList.remove('cursor-not-allowed', 'opacity-80');
-                    endorseSpinner.classList.add('hidden');
-                    endorseLabel.textContent = 'Proceed Endorsement';
-                };
 
-                document.querySelectorAll('[data-open-mpor-endorse]').forEach((button) => {
-                    button.addEventListener('click', function() {
-                        if (!endorseForm) {
+                    const employee = document.getElementById(employeeId);
+                    const month = document.getElementById(monthId);
+                    const button = document.getElementById(buttonId);
+                    const spinner = button?.querySelector('[data-button-spinner]');
+                    const label = button?.querySelector('[data-button-label]');
+                    const actionTemplate = form.dataset.actionTemplate || '';
+
+                    const resetButton = () => {
+                        if (!button || !spinner || !label) {
                             return;
                         }
-                        const mporId = this.dataset.mporId || '';
-                        endorseForm.action = endorseActionTemplate.replace('__ID__', mporId);
-                        endorseEmployee.textContent = this.dataset.mporEmployee || '-';
-                        endorseMonth.textContent = this.dataset.mporMonth || '-';
-                        resetEndorseButton();
+
+                        button.disabled = false;
+                        button.classList.remove('cursor-not-allowed', 'opacity-80');
+                        spinner.classList.add('hidden');
+                        label.textContent = defaultText;
+                    };
+
+                    document.querySelectorAll(triggerSelector).forEach((trigger) => {
+                        trigger.addEventListener('click', function() {
+                            const mporId = this.dataset.mporId || '';
+                            form.action = actionTemplate.replace('__ID__', mporId);
+                            if (employee) {
+                                employee.textContent = this.dataset.mporEmployee || '-';
+                            }
+                            if (month) {
+                                month.textContent = this.dataset.mporMonth || '-';
+                            }
+                            resetButton();
+                        });
                     });
+
+                    document.querySelectorAll(modalHideSelector).forEach((hideBtn) => {
+                        hideBtn.addEventListener('click', resetButton);
+                    });
+
+                    if (button && spinner && label) {
+                        form.addEventListener('submit', function() {
+                            button.disabled = true;
+                            button.classList.add('cursor-not-allowed', 'opacity-80');
+                            spinner.classList.remove('hidden');
+                            label.textContent = loadingText;
+                        });
+                    }
+                };
+
+                bindActionModal({
+                    triggerSelector: '[data-open-mpor-approve]',
+                    formId: 'mporApproveForm',
+                    employeeId: 'approve-mpor-employee',
+                    monthId: 'approve-mpor-month',
+                    buttonId: 'mporProceedApproveBtn',
+                    loadingText: 'Approving...',
+                    defaultText: 'Proceed Approval',
+                    modalHideSelector: '[data-modal-hide="mporApproveConfirmModal"]',
                 });
 
-                document.querySelectorAll('[data-modal-hide="mporEndorseConfirmModal"]').forEach((button) => {
-                    button.addEventListener('click', resetEndorseButton);
+                bindActionModal({
+                    triggerSelector: '[data-open-mpor-endorse]',
+                    formId: 'mporEndorseForm',
+                    employeeId: 'endorse-mpor-employee',
+                    monthId: 'endorse-mpor-month',
+                    buttonId: 'mporProceedEndorseBtn',
+                    loadingText: 'Endorsing...',
+                    defaultText: 'Proceed Endorsement',
+                    modalHideSelector: '[data-modal-hide="mporEndorseConfirmModal"]',
                 });
-
-                if (endorseForm && endorseBtn && endorseLabel && endorseSpinner) {
-                    endorseForm.addEventListener('submit', function() {
-                        endorseBtn.disabled = true;
-                        endorseBtn.classList.add('cursor-not-allowed', 'opacity-80');
-                        endorseSpinner.classList.remove('hidden');
-                        endorseLabel.textContent = 'Endorsing...';
-                    });
-                }
             });
         </script>
     @endpush

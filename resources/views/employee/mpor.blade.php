@@ -166,47 +166,7 @@
                     </div>
                 </div>
 
-                {{-- TOTAL CORE --}}
-                <div class="mt-4 rounded-xl border border-slate-700 bg-slate-900/60 p-3">
-                    <div class="flex items-start justify-between gap-3">
-                        <p class="text-sm font-semibold text-white">TOTAL — CORE</p>
-                        <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Totals</p>
-                    </div>
-                    <div class="mt-3 grid gap-3">
-                        <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-3">
-                            <p class="text-[0.6rem] uppercase tracking-[0.3em] text-slate-500">Efficiency / Quantity</p>
-                            <div class="mt-2 grid grid-cols-5 gap-2 text-center">
-                                <div><p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">W1</p><p class="text-sm font-semibold text-white">13</p></div>
-                                <div><p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">W2</p><p class="text-sm font-semibold text-white">0</p></div>
-                                <div><p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">W3</p><p class="text-sm font-semibold text-white">0</p></div>
-                                <div><p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">W4</p><p class="text-sm font-semibold text-white">0</p></div>
-                                <div><p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">Total</p><p class="text-sm font-semibold text-white">13</p></div>
-                            </div>
-                        </div>
-
-                        <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-3">
-                            <p class="text-[0.6rem] uppercase tracking-[0.3em] text-slate-500">Quality / Effectiveness</p>
-                            <div class="mt-2 grid grid-cols-5 gap-2 text-center">
-                                <div><p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">W1</p><p class="text-sm font-semibold text-white">65</p></div>
-                                <div><p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">W2</p><p class="text-sm font-semibold text-white">0</p></div>
-                                <div><p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">W3</p><p class="text-sm font-semibold text-white">0</p></div>
-                                <div><p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">W4</p><p class="text-sm font-semibold text-white">0</p></div>
-                                <div><p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">Total</p><p class="text-sm font-semibold text-white">65</p></div>
-                            </div>
-                        </div>
-
-                        <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-3">
-                            <p class="text-[0.6rem] uppercase tracking-[0.3em] text-slate-500">Timeliness</p>
-                            <div class="mt-2 grid grid-cols-5 gap-2 text-center">
-                                <div><p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">W1</p><p class="text-sm font-semibold text-white">65</p></div>
-                                <div><p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">W2</p><p class="text-sm font-semibold text-white">0</p></div>
-                                <div><p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">W3</p><p class="text-sm font-semibold text-white">0</p></div>
-                                <div><p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">W4</p><p class="text-sm font-semibold text-white">0</p></div>
-                                <div><p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">Total</p><p class="text-sm font-semibold text-white">65</p></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                {{-- ✅ TOTAL — CORE removed --}}
             </div>
 
             {{-- Support --}}
@@ -252,45 +212,7 @@
                     </div>
                 </div>
 
-                {{-- TOTAL SUPPORT --}}
-                <div class="mt-4 rounded-xl border border-slate-700 bg-slate-900/60 p-3">
-
-                    <div class="mt-3 grid gap-3">
-                        @php($zero = '0')
-                        <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-3">
-                            <p class="text-[0.6rem] uppercase tracking-[0.3em] text-slate-500">Efficiency / Quantity</p>
-                            <div class="mt-2 grid grid-cols-5 gap-2 text-center">
-                                <div><p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">W1</p><p class="text-sm font-semibold text-white">{{ $zero }}</p></div>
-                                <div><p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">W2</p><p class="text-sm font-semibold text-white">{{ $zero }}</p></div>
-                                <div><p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">W3</p><p class="text-sm font-semibold text-white">{{ $zero }}</p></div>
-                                <div><p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">W4</p><p class="text-sm font-semibold text-white">{{ $zero }}</p></div>
-                                <div><p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">Total</p><p class="text-sm font-semibold text-white">{{ $zero }}</p></div>
-                            </div>
-                        </div>
-
-                        <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-3">
-                            <p class="text-[0.6rem] uppercase tracking-[0.3em] text-slate-500">Quality / Effectiveness</p>
-                            <div class="mt-2 grid grid-cols-5 gap-2 text-center">
-                                <div><p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">W1</p><p class="text-sm font-semibold text-white">{{ $zero }}</p></div>
-                                <div><p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">W2</p><p class="text-sm font-semibold text-white">{{ $zero }}</p></div>
-                                <div><p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">W3</p><p class="text-sm font-semibold text-white">{{ $zero }}</p></div>
-                                <div><p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">W4</p><p class="text-sm font-semibold text-white">{{ $zero }}</p></div>
-                                <div><p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">Total</p><p class="text-sm font-semibold text-white">{{ $zero }}</p></div>
-                            </div>
-                        </div>
-
-                        <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-3">
-                            <p class="text-[0.6rem] uppercase tracking-[0.3em] text-slate-500">Timeliness</p>
-                            <div class="mt-2 grid grid-cols-5 gap-2 text-center">
-                                <div><p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">W1</p><p class="text-sm font-semibold text-white">{{ $zero }}</p></div>
-                                <div><p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">W2</p><p class="text-sm font-semibold text-white">{{ $zero }}</p></div>
-                                <div><p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">W3</p><p class="text-sm font-semibold text-white">{{ $zero }}</p></div>
-                                <div><p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">W4</p><p class="text-sm font-semibold text-white">{{ $zero }}</p></div>
-                                <div><p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">Total</p><p class="text-sm font-semibold text-white">{{ $zero }}</p></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                {{-- ✅ TOTAL — SUPPORT removed --}}
 
                 {{-- GRAND TOTAL --}}
                 <div class="mt-4 rounded-xl border border-dashed border-slate-700 bg-slate-900/40 p-3">
@@ -382,12 +304,7 @@
                             <td class="px-2 py-1 border-l border-slate-800">5</td><td class="px-2 py-1">0</td><td class="px-2 py-1">0</td><td class="px-2 py-1">0</td><td class="px-2 py-1">5</td>
                         </tr>
 
-                        <tr class="border-t border-slate-700 bg-slate-900/60 font-semibold text-slate-100">
-                            <td class="px-3 py-2">TOTAL — CORE</td>
-                            <td class="px-2 py-1">13</td><td class="px-2 py-1">0</td><td class="px-2 py-1">0</td><td class="px-2 py-1">0</td><td class="px-2 py-1">13</td>
-                            <td class="px-2 py-1 border-l border-slate-800">65</td><td class="px-2 py-1">0</td><td class="px-2 py-1">0</td><td class="px-2 py-1">0</td><td class="px-2 py-1">65</td>
-                            <td class="px-2 py-1 border-l border-slate-800">65</td><td class="px-2 py-1">0</td><td class="px-2 py-1">0</td><td class="px-2 py-1">0</td><td class="px-2 py-1">65</td>
-                        </tr>
+                        {{-- ✅ TOTAL — CORE row removed --}}
 
                         <tr class="bg-slate-800/40 text-[0.65rem] uppercase tracking-[0.3em] text-slate-400">
                             <td class="px-3 py-2 font-semibold text-slate-200" colspan="16">Support Functions (20%)</td>
@@ -400,12 +317,7 @@
                             <td class="px-2 py-1 border-l border-slate-800">0</td><td class="px-2 py-1">0</td><td class="px-2 py-1">0</td><td class="px-2 py-1">0</td><td class="px-2 py-1">0</td>
                         </tr>
 
-                        <tr class="border-t border-slate-700 bg-slate-900/60 font-semibold text-slate-100">
-                            <td class="px-3 py-2">TOTAL — SUPPORT</td>
-                            <td class="px-2 py-1">0</td><td class="px-2 py-1">0</td><td class="px-2 py-1">0</td><td class="px-2 py-1">0</td><td class="px-2 py-1">0</td>
-                            <td class="px-2 py-1 border-l border-slate-800">0</td><td class="px-2 py-1">0</td><td class="px-2 py-1">0</td><td class="px-2 py-1">0</td><td class="px-2 py-1">0</td>
-                            <td class="px-2 py-1 border-l border-slate-800">0</td><td class="px-2 py-1">0</td><td class="px-2 py-1">0</td><td class="px-2 py-1">0</td><td class="px-2 py-1">0</td>
-                        </tr>
+                        {{-- ✅ TOTAL — SUPPORT row removed --}}
                     </tbody>
                 </table>
             </div>

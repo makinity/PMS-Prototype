@@ -12,6 +12,7 @@ use App\Http\Controllers\StageTwo\Forms\MporExportController;
 use App\Http\Controllers\StageTwo\Forms\OrsExportController;
 use App\Http\Controllers\StageTwo\Forms\QarExportController;
 use App\Http\Controllers\StageTwo\Forms\SmporExportController;
+use App\Http\Controllers\StageTwo\Monitoring\EmployeeAccomplishmentController;
 use App\Http\Controllers\StageTwo\Planning\MporSubmissionController;
 use App\Http\Controllers\StageTwo\Planning\MporExcelExportController;
 use App\Http\Controllers\StageTwo\Planning\DeptHeadQarController;
@@ -95,9 +96,10 @@ Route::prefix('employee')->group(function(){
         return view('employee.my-task');
     })->name('employee.my-task');
 
-    Route::get('/accomplishment-submission', function () {
-        return view('employee.accomplishment-submission');
-    })->name('employee.accomplishment-submission');
+    Route::get('/accomplishment-submission', [EmployeeAccomplishmentController::class, 'index'])
+        ->name('employee.accomplishment-submission');
+    Route::post('/accomplishment/submit', [EmployeeAccomplishmentController::class, 'submit'])
+        ->name('stage2.employee.accomplishment.submit');
 
     Route::get('/submit-output', function () {
         return view('employee.submit-output');
@@ -181,8 +183,10 @@ Route::prefix('dept-head')->group(function(){
         ->name('stage2.qar.export.pdf');
 
     Route::get('/qar', [DeptHeadQarController::class, 'index'])->name('dept-head.qar');
+
     Route::post('/qar/generate', [DeptHeadQarController::class, 'generate'])->name('dept-head.qar.generate');
     Route::post('/qar/approve', [DeptHeadQarController::class, 'approve'])->name('dept-head.qar.approve');
+    Route::post('/qar/reset', [DeptHeadQarController::class, 'reset'])->name('dept-head.qar.reset');
 
     Route::get('/smpor', function () {
         return view('dept-head.smpor');
@@ -263,6 +267,7 @@ Route::prefix('supervisor')->group(function(){
 
     Route::get('/mpor', [SupervisorMporController::class, 'index'])->name('supervisor.mpor');
     Route::get('/mpor/index', [SupervisorMporController::class, 'index'])->name('supervisor.mpor.index');
+    Route::post('/mpor/{mpor}/approve', [SupervisorMporEndorseController::class, 'approve'])->name('supervisor.mpor.approve');
     Route::post('/mpor/{mpor}/endorse', [SupervisorMporEndorseController::class, 'endorse'])->name('supervisor.mpor.endorse');
 
     Route::get('/mpor-validation', function () {
@@ -380,6 +385,7 @@ Route::prefix('pmt')->group(function(){
     Route::get('/qar', [PmtQarApprovalController::class, 'index'])
         ->middleware('auth')
         ->name('pmt.qar.index');
+
     Route::post('/qar/{qar}/validate', [PmtQarApprovalController::class, 'validateQar'])
         ->middleware('auth')
         ->name('pmt.qar.validate');
