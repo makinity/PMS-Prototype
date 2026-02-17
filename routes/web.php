@@ -2,41 +2,44 @@
 
 use App\Http\Controllers\Auth\ActivationController;
 use App\Http\Controllers\StageOne\Forms\IpcrExportController;
+use App\Http\Controllers\StageOne\Forms\IpcrExcelExportController;
 use App\Http\Controllers\StageOne\Forms\OpcrExportController;
+use App\Http\Controllers\StageOne\Forms\OpcrExcelExportController;
 use App\Http\Controllers\StageOne\Forms\UwpExportController;
 use App\Http\Controllers\StageOne\Forms\UwpExcelExportController;
+use App\Http\Controllers\StageOne\Planning\DeptHeadOpcrReviewController;
+use App\Http\Controllers\StageOne\Planning\OpcrPmtReviewController;
+use App\Http\Controllers\StageOne\Planning\SuperVisorOpcrController;
 use App\Http\Controllers\StageOne\Planning\UnitWorkPlanController;
+use App\Http\Controllers\StageOne\Planning\UwpDeptHeadReviewController;
+use App\Http\Controllers\StageOne\Planning\UwpPmtReviewController;
 use App\Http\Controllers\StageThree\Forms\IpcrExportController as StageThreeFormsIpcrExportController;
 use App\Http\Controllers\StageTwo\Forms\IpcrExportController as FormsIpcrExportController;
 use App\Http\Controllers\StageTwo\Forms\MporExportController;
 use App\Http\Controllers\StageTwo\Forms\OrsExportController;
 use App\Http\Controllers\StageTwo\Forms\QarExportController;
 use App\Http\Controllers\StageTwo\Forms\SmporExportController;
+use App\Http\Controllers\StageTwo\Forms\SmporExcelExportController;
 use App\Http\Controllers\StageTwo\Monitoring\EmployeeAccomplishmentController;
-use App\Http\Controllers\StageTwo\Planning\MporSubmissionController;
-use App\Http\Controllers\StageTwo\Planning\MporExcelExportController;
 use App\Http\Controllers\StageTwo\Planning\DeptHeadQarController;
+use App\Http\Controllers\StageTwo\Planning\MporExcelExportController;
+use App\Http\Controllers\StageTwo\Planning\MporSubmissionController;
 use App\Http\Controllers\StageTwo\Planning\PmtQarApprovalController;
 use App\Http\Controllers\StageTwo\Planning\SupervisorMporController;
 use App\Http\Controllers\StageTwo\Planning\SupervisorMporEndorseController;
-use App\Http\Controllers\StageOne\Forms\OpcrExcelExportController;
-use App\Http\Controllers\StageOne\Forms\IpcrExcelExportController;
-use App\Http\Controllers\StageOne\Planning\DeptHeadOpcrReviewController;
-use App\Http\Controllers\StageOne\Planning\OpcrPmtReviewController;
-use App\Http\Controllers\StageOne\Planning\UwpDeptHeadReviewController;
-use App\Http\Controllers\StageOne\Planning\UwpPmtReviewController;
-use App\Http\Controllers\StageOne\Planning\SuperVisorOpcrController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('landing');
-});
+/*
+|--------------------------------------------------------------------------
+| Public / Auth
+|--------------------------------------------------------------------------
+*/
 
-Route::get('/login', function () {
-    return redirect('/');
-})->name('login');
+Route::get('/', fn () => view('landing'));
+
+Route::get('/login', fn () => redirect('/'))->name('login');
 
 Route::get('/whoami', function (Request $request) {
     $user = $request->user();
@@ -60,13 +63,14 @@ Route::get('/logout', function (Request $request) {
 Route::post('/activate/verify', [ActivationController::class, 'verify']);
 Route::post('/activate/complete', [ActivationController::class, 'complete']);
 
-Route::fallback(function(){
-    return view('no-page');
-});
+/*
+|--------------------------------------------------------------------------
+| Dashboard Role Router
+|--------------------------------------------------------------------------
+*/
 
 Route::get('/dashboard', function () {
     $user = auth()->user();
-
     if (! $user) {
         return redirect()->route('login');
     }
@@ -82,324 +86,207 @@ Route::get('/dashboard', function () {
     };
 })->middleware('auth');
 
+/*
+|--------------------------------------------------------------------------
+| Employee Routes
+|--------------------------------------------------------------------------
+*/
 
-Route::prefix('employee')->group(function(){
-    Route::get('/dashboard', function () {
-        return view('employee.dashboard');
-    })->name('employee.dashboard');
+Route::prefix('employee')->middleware('auth')->group(function () {
+    // Views
+    Route::get('/dashboard', fn () => view('employee.dashboard'))->name('employee.dashboard');
+    Route::get('/task', fn () => view('employee.my-task'))->name('employee.my-task');
+    Route::get('/submit-output', fn () => view('employee.submit-output'))->name('employee.submit-output');
+    Route::get('/ORS', fn () => view('employee.ors'))->name('employee.ors');
+    Route::get('/MPOR', fn () => view('employee.mpor'))->name('employee.mpor');
+    Route::get('/SMPOR', fn () => view('employee.smpor'))->name('employee.smpor');
+    Route::get('/IPCR-Target', fn () => view('employee.ipcr-target'))->name('employee.ipcr-target');
+    Route::get('/IPCR', fn () => view('employee.ipcr'))->name('employee.ipcr');
+    Route::get('/final-ratings', fn () => view('employee.final-ratings'))->name('employee.final-ratings');
+    Route::get('/IDP', fn () => view('employee.idp'))->name('employee.idp');
+    Route::get('/Profile', fn () => view('employee.profile'))->name('employee.profile');
 
-    // Route::get('/employee-UWP', function () {
-    //     return view('employee.uwp');
-    // })->name('employee.uwp');
-
-    Route::get('/task', function () {
-        return view('employee.my-task');
-    })->name('employee.my-task');
-
+    // Stage II - Accomplishment Submission
     Route::get('/accomplishment-submission', [EmployeeAccomplishmentController::class, 'index'])
         ->name('employee.accomplishment-submission');
     Route::post('/accomplishment/submit', [EmployeeAccomplishmentController::class, 'submit'])
         ->name('stage2.employee.accomplishment.submit');
 
-    Route::get('/submit-output', function () {
-        return view('employee.submit-output');
-    })->name('employee.submit-output');
-
-    Route::get('/ORS', function () {
-        return view('employee.ors');
-    })->name('employee.ors');
-
-    Route::get('/MPOR', function () {
-        return view('employee.mpor');
-    })->name('employee.mpor');
-
-    Route::get('/SMPOR', function () {
-        return view('employee.smpor');
-    })->name('employee.smpor');
-
-    Route::get('/IPCR-Target', function () {
-        return view('employee.ipcr-target');
-    })->name('employee.ipcr-target');
-
-    Route::get('/IPCR', function () {
-        return view('employee.ipcr');
-    })->name('employee.ipcr');
-
-    Route::get('/final-ratings', function () {
-        return view('employee.final-ratings');
-    })->name('employee.final-ratings');
-
-    Route::get('/IDP', function () {
-        return view('employee.idp');
-    })->name('employee.idp');
-
-    Route::get('/Profile', function () {
-        return view('employee.profile');
-    })->name('employee.profile');
-
-    Route::get('/smpor/export/pdf', [SmporExportController::class, 'exportPdf'])
-        ->name('stage2.smpor.export.pdf');
-
-    Route::get('/ors/export/pdf', [OrsExportController::class, 'exportPdf'])
-        ->name('employee.ors.export.pdf');
-
-    Route::get('/employee/mpor/export/pdf', [MporExportController::class, 'exportPdf'])
-        ->name('employee.mpor.export.pdf');
-
-    Route::get('/mpor/export/excel', [MporExcelExportController::class, 'exportExcel'])
-        ->name('employee.mpor.export.excel');
-
-    Route::get('/mpor/preview/excel', [MporExcelExportController::class, 'previewExcel'])
-        ->name('employee.mpor.preview.excel');
-
+    // Stage II - MPOR Submit
     Route::post('/mpor/submit', [MporSubmissionController::class, 'submit'])
         ->name('employee.mpor.submit');
 
+    // Exports - SMPOR Excel
+    Route::get('/stage-two/forms/smpor/export-excel', [SmporExcelExportController::class, 'exportExcel'])
+        ->name('stage2.smpor.export.excel');
+    Route::get('/stage-two/forms/smpor/preview-excel', [SmporExcelExportController::class, 'previewExcel'])
+        ->name('stage2.smpor.preview.excel');
+
+    // Exports - ORS PDF
+    Route::get('/ors/export/pdf', [OrsExportController::class, 'exportPdf'])
+        ->name('employee.ors.export.pdf');
+
+    // Exports - MPOR Excel
+    Route::get('/mpor/export/excel', [MporExcelExportController::class, 'exportExcel'])
+        ->name('employee.mpor.export.excel');
+    Route::get('/mpor/preview/excel', [MporExcelExportController::class, 'previewExcel'])
+        ->name('employee.mpor.preview.excel');
+
+    // Exports - IPCR PDF (Stage II Forms)
     Route::get('/ipcr/export/pdf', [FormsIpcrExportController::class, 'exportPdf'])
         ->name('stage2.ipcr.export.pdf');
 
+    // Exports - IPCR Excel (Stage I Forms) - kept as-is
     Route::get('/ipcr/export/excel', [IpcrExcelExportController::class, 'exportExcel'])
         ->name('stage1.ipcr.export.excel');
 });
 
+/*
+|--------------------------------------------------------------------------
+| Dept Head Routes
+|--------------------------------------------------------------------------
+*/
 
+Route::prefix('dept-head')->middleware('auth')->group(function () {
+    // Views
+    Route::get('/dashboard', fn () => view('dept-head.dashboard'))->name('dept-head.dashboard');
+    Route::get('/smpor', fn () => view('dept-head.smpor'))->name('dept-head.smpor');
+    Route::get('/smpor-ipcr-review', fn () => view('dept-head.smpor-ipcr-review'))->name('dept-head.smpor-ipcr-review');
+    Route::get('/IPCR', fn () => view('dept-head.ipcr'))->name('dept-head.ipcr');
+    Route::get('/IPCRTARGET', fn () => view('dept-head.ipcr-target'))->name('dept-head.ipcr-target');
+    Route::get('/idp', fn () => view('dept-head.idp'))->name('dept-head.idp');
+    Route::get('/profile', fn () => view('dept-head.profile'))->name('dept-head.profile');
 
-
-
-Route::prefix('dept-head')->group(function(){
-    Route::get('/dashboard', function(){
-        return view('dept-head.dashboard');
-    })->name('dept-head.dashboard');
-
+    // Stage I - UWP Review
     Route::get('/uwp', [UwpDeptHeadReviewController::class, 'index'])->name('dept-head.uwp');
     Route::get('/uwp/index', [UwpDeptHeadReviewController::class, 'index'])->name('dept-head.uwp.index');
     Route::post('/uwp/review', [UwpDeptHeadReviewController::class, 'review'])->name('dept-head.uwp.review');
 
+    // Stage I - OPCR Review
     Route::get('/opcr', [DeptHeadOpcrReviewController::class, 'index'])->name('dept-head.opcr');
     Route::get('/opcr/index', [DeptHeadOpcrReviewController::class, 'index'])->name('dept-head.opcr.index');
     Route::post('/opcr/review', [DeptHeadOpcrReviewController::class, 'review'])->name('dept-head.opcr.review');
 
-    Route::get('/qar/export/pdf', [QarExportController::class, 'exportPdf'])
-        ->name('stage2.qar.export.pdf');
-
+    // Stage II - QAR
     Route::get('/qar', [DeptHeadQarController::class, 'index'])->name('dept-head.qar');
-
     Route::post('/qar/generate', [DeptHeadQarController::class, 'generate'])->name('dept-head.qar.generate');
     Route::post('/qar/approve', [DeptHeadQarController::class, 'approve'])->name('dept-head.qar.approve');
     Route::post('/qar/reset', [DeptHeadQarController::class, 'reset'])->name('dept-head.qar.reset');
 
-    Route::get('/smpor', function () {
-        return view('dept-head.smpor');
-    })->name('dept-head.smpor');
-
-    Route::get('/smpor-ipcr-review', function () {
-        return view('dept-head.smpor-ipcr-review');
-    })->name('dept-head.smpor-ipcr-review');
-
-    Route::get('/IPCR', function () {
-        return view('dept-head.ipcr');
-    })->name('dept-head.ipcr');
-
-    Route::get('/IPCRTARGET', function () {
-        return view('dept-head.ipcr-target');
-    })->name('dept-head.ipcr-target');
+    // Exports
+    Route::get('/qar/export/pdf', [QarExportController::class, 'exportPdf'])
+        ->name('stage2.qar.export.pdf');
 
     Route::get('/ipcr/export/pdf', [IpcrExportController::class, 'exportPdf'])
         ->name('stage1.ipcr.export.pdf');
-
-    Route::get('/idp', function () {
-        return view('dept-head.idp');
-    })->name('dept-head.idp');
-
-    Route::get('/profile', function () {
-        return view('dept-head.profile');
-    })->name('dept-head.profile');
 });
 
+/*
+|--------------------------------------------------------------------------
+| Supervisor Routes
+|--------------------------------------------------------------------------
+*/
 
+Route::prefix('supervisor')->middleware('auth')->group(function () {
+    // Views
+    Route::get('/dashboard', fn () => view('supervisor.dashboard'))->name('supervisor.dashboard');
+    Route::get('/team-tasks', fn () => view('supervisor.team-tasks'))->name('supervisor.team-tasks');
+    Route::get('/ipcr', fn () => view('supervisor.ipcr'))->name('supervisor.ipcr');
+    Route::get('/smpor-ipcr-review', fn () => view('supervisor.smpor-ipcr-review'))->name('supervisor.smpor-ipcr-review');
+    Route::get('/ipcr-target', fn () => view('supervisor.ipcr-target'))->name('supervisor.ipcr-target');
 
+    Route::get('/mpor-validation', fn () => view('supervisor.mpor-validation'))->name('supervisor.mpor-validation');
+    Route::get('/ors-monitoring', fn () => view('supervisor.ors-monitoring'))->name('supervisor.ors-monitoring');
+    Route::get('/overdue-alerts', fn () => view('supervisor.overdue-alerts'))->name('supervisor.overdue-alerts');
+    Route::get('/task-validation', fn () => view('supervisor.task-validation'))->name('supervisor.task-validation');
+    Route::get('/team-productivity', fn () => view('supervisor.team-productivity'))->name('supervisor.team-productivity');
+    Route::get('/bottleneck-reports', fn () => view('supervisor.bottleneck-reports'))->name('supervisor.bottleneck-reports');
+    Route::get('/recommendations', fn () => view('supervisor.recommendations'))->name('supervisor.recommendations');
+    Route::get('/reports', fn () => view('supervisor.reports'))->name('supervisor.reports');
+    Route::get('/profile', fn () => view('supervisor.profile'))->name('supervisor.profile');
 
-
-Route::prefix('supervisor')->group(function(){
-    Route::get('/dashboard', function () {
-        return view('supervisor.dashboard');
-    })->name('supervisor.dashboard');
-
+    // Stage I - UWP
     Route::get('/uwp-page', [UnitWorkPlanController::class, 'uwpList'])->name('supervisor.uwp-page');
     Route::get('/stage-one/planning/uwp', [UnitWorkPlanController::class, 'uwpList'])->name('supervisor.uwp.index');
     Route::get('/stage-one/planning/uwp/{id}', [UnitWorkPlanController::class, 'show'])->name('supervisor.uwp.show');
-
     Route::get('/uwp', [UnitWorkPlanController::class, 'index'])->name('supervisor.uwp');
 
     Route::post('/stage1/uwp/save-draft', [UnitWorkPlanController::class, 'saveDraftData'])
         ->name('supervisor.uwp.saveDraftData');
-
     Route::post('/stage1/uwp/submit', [UnitWorkPlanController::class, 'submitData'])
         ->name('supervisor.uwp.submitData');
 
     Route::post('/stage-one/planning/uwp/{id}/submit', [UnitWorkPlanController::class, 'submitForApproval'])
         ->name('supervisor.uwp.submit');
-
     Route::post('/stage1/uwp/{id}/submit', [UnitWorkPlanController::class, 'submitForApproval'])
         ->name('supervisor.uwp.submit.legacy');
 
-    Route::get('/supervisor/uwp/{id}/preview', [UnitWorkPlanController::class, 'preview'])->name('supervisor.uwp.preview');
+    Route::get('/supervisor/uwp/{id}/preview', [UnitWorkPlanController::class, 'preview'])
+        ->name('supervisor.uwp.preview');
 
-    Route::get('/team-tasks', function () {
-        return view('supervisor.team-tasks');
-    })->name('supervisor.team-tasks');
-
-    Route::get('/ipcr', function () {
-        return view('supervisor.ipcr');
-    })->name('supervisor.ipcr');
-
-    Route::get('/smpor-ipcr-review', function () {
-        return view('supervisor.smpor-ipcr-review');
-    })->name('supervisor.smpor-ipcr-review');
-
-    Route::get('/ipcr-target', function () {
-        return view('supervisor.ipcr-target');
-    })->name('supervisor.ipcr-target');
-
+    // Stage I - OPCR
     Route::get('/opcr', [SuperVisorOpcrController::class, 'index'])->name('supervisor.opcr');
     Route::get('/stage-one/planning/opcr', [SuperVisorOpcrController::class, 'index'])->name('stage1.opcr.index');
     Route::post('/stage-one/planning/opcr/generate', [SuperVisorOpcrController::class, 'generate'])->name('stage1.opcr.generate');
 
+    // Stage II - MPOR Review
     Route::get('/mpor', [SupervisorMporController::class, 'index'])->name('supervisor.mpor');
     Route::get('/mpor/index', [SupervisorMporController::class, 'index'])->name('supervisor.mpor.index');
     Route::post('/mpor/{mpor}/approve', [SupervisorMporEndorseController::class, 'approve'])->name('supervisor.mpor.approve');
     Route::post('/mpor/{mpor}/endorse', [SupervisorMporEndorseController::class, 'endorse'])->name('supervisor.mpor.endorse');
 
-    Route::get('/mpor-validation', function () {
-        return view('supervisor.mpor-validation');
-    })->name('supervisor.mpor-validation');
-
-    Route::get('/ors-monitoring', function () {
-        return view('supervisor.ors-monitoring');
-    })->name('supervisor.ors-monitoring');
-
-    Route::get('/overdue-alerts', function () {
-        return view('supervisor.overdue-alerts');
-    })->name('supervisor.overdue-alerts');
-
-    Route::get('/task-validation', function () {
-        return view('supervisor.task-validation');
-    })->name('supervisor.task-validation');
-
-    Route::get('/team-productivity', function () {
-        return view('supervisor.team-productivity');
-    })->name('supervisor.team-productivity');
-
-    Route::get('/bottleneck-reports', function () {
-        return view('supervisor.bottleneck-reports');
-    })->name('supervisor.bottleneck-reports');
-
-    Route::get('/recommendations', function () {
-        return view('supervisor.recommendations');
-    })->name('supervisor.recommendations');
-
-    Route::get('/reports', function () {
-        return view('supervisor.reports');
-    })->name('supervisor.reports');
-
-    Route::get('/profile', function () {
-        return view('supervisor.profile');
-    })->name('supervisor.profile');
-
-
+    // Exports - OPCR
     Route::get('/opcr/export/pdf', [OpcrExportController::class, 'exportPdf'])
         ->name('stage1.opcr.export.pdf');
-
     Route::get('/opcr/export/excel', [OpcrExcelExportController::class, 'exportExcel'])
         ->name('stage1.opcr.export.excel');
-
 });
 
+/*
+|--------------------------------------------------------------------------
+| PMT Routes
+|--------------------------------------------------------------------------
+*/
 
+Route::prefix('pmt')->middleware('auth')->group(function () {
+    // Views
+    Route::get('/dashboard', fn () => view('pmt.dashboard'))->name('pmt.dashboard');
+    Route::get('/OPCR', fn () => view('pmt.opcr'))->name('pmt.opcr');
+    Route::get('/OPCR/approval', fn () => view('pmt.opcr-app-view'))->name('pmt.opcr-app-view');
+    Route::get('/ipcr', fn () => view('pmt.ipcr'))->name('pmt.ipcr');
+    Route::get('/smpor-ipcr-review', fn () => view('pmt.smpor-ipcr-review'))->name('pmt.smpor-ipcr-review');
+    Route::get('/ipcr-overview', fn () => view('pmt.ipcr-calib-overview'))->name('pmt.ipcr-calib-overview');
+    Route::get('/ipcr-calibration', fn () => view('pmt.ipcr-calib'))->name('pmt.ipcr-calib');
+    Route::get('/final-calibration', fn () => view('pmt.final-calibration'))->name('pmt.final-calib');
+    Route::get('/final-calibration/office', fn () => view('pmt.final-calibration-office'))->name('pmt.final-calibration-office');
+    Route::get('/rewards-development', fn () => view('pmt.rewards'))->name('pmt.rewards');
+    Route::get('/smpor', fn () => view('pmt.smpor'))->name('pmt.smpor');
+    Route::get('/performance-reports', fn () => view('pmt.pr'))->name('pmt.pr');
+    Route::get('/profile', fn () => view('pmt.profile'))->name('pmt.profile');
 
-
-
-
-
-Route::prefix('pmt')->group(function(){
-    Route::get('/dashboard', function () {
-        return view('pmt.dashboard');
-    })->name('pmt.dashboard');
-
+    // Stage I - UWP / OPCR
     Route::get('/UWP', [UwpPmtReviewController::class, 'index'])->name('pmt.uwp');
 
-    Route::get('/OPCR', function () {
-        return view('pmt.opcr');
-    })->name('pmt.opcr');
-
     Route::get('/opcr-review', [OpcrPmtReviewController::class, 'index'])
-        ->middleware('auth')
         ->name('pmt.opcr.review.index');
     Route::post('/opcr-review/action', [OpcrPmtReviewController::class, 'review'])
-        ->middleware('auth')
         ->name('pmt.opcr.review.action');
     Route::get('/opcr-review/{opcr}/export', [OpcrPmtReviewController::class, 'export'])
-        ->middleware('auth')
         ->name('pmt.opcr.review.export');
 
-    Route::get('/OPCR/approval', function () {
-        return view('pmt.opcr-app-view');
-    })->name('pmt.opcr-app-view');
-
-    Route::get('/ipcr', function () {
-        return view('pmt.ipcr');
-    })->name('pmt.ipcr');
-
-    Route::get('/smpor-ipcr-review', function () {
-        return view('pmt.smpor-ipcr-review');
-    })->name('pmt.smpor-ipcr-review');
-
-    Route::get('/ipcr-overview', function () {
-        return view('pmt.ipcr-calib-overview');
-    })->name('pmt.ipcr-calib-overview');
-
-    Route::get('/ipcr-calibration', function () {
-        return view('pmt.ipcr-calib');
-    })->name('pmt.ipcr-calib');
-
-    Route::get('/final-calibration', function () {
-        return view('pmt.final-calibration');
-    })->name('pmt.final-calib');
-
-    Route::get('/final-calibration/office', function () {
-        return view('pmt.final-calibration-office');
-    })->name('pmt.final-calibration-office');
-
-    Route::get('/rewards-development', function () {
-        return view('pmt.rewards');
-    })->name('pmt.rewards');
-
-    Route::get('/smpor', function () {
-        return view('pmt.smpor');
-    })->name('pmt.smpor');
-
-    Route::get('/performance-reports', function () {
-        return view('pmt.pr');
-    })->name('pmt.pr');
-
+    // Stage II - QAR
     Route::get('/qar', [PmtQarApprovalController::class, 'index'])
-        ->middleware('auth')
         ->name('pmt.qar.index');
-
     Route::post('/qar/{qar}/validate', [PmtQarApprovalController::class, 'validateQar'])
-        ->middleware('auth')
         ->name('pmt.qar.validate');
 
-    Route::get('/profile', function () {
-        return view('pmt.profile');
-    })->name('pmt.profile');
-
+    // Exports - UWP
     Route::get('/uwp/export/pdf', [UwpExportController::class, 'exportPdf'])
         ->name('stage1.uwp.export.pdf');
-
     Route::get('/uwp/preview/pdf', [UwpExportController::class, 'preview'])
         ->name('stage1.uwp.preview.pdf');
 
+    // Legacy excel route redirect kept as-is
     Route::get('/uwp/export/excel', function (Request $request) {
         $uwpId = (int) $request->query('uwp');
         if ($uwpId <= 0) {
@@ -409,9 +296,16 @@ Route::prefix('pmt')->group(function(){
         return redirect()->route('uwp.export', ['uwp' => $uwpId]);
     })->name('stage1.uwp.export.excel');
 
+    // Exports - Stage III IPCR PDF
     Route::get('/ipcr/export/pdf', [StageThreeFormsIpcrExportController::class, 'exportPdf'])
-    ->name('stage3.ipcr.export.pdf');
+        ->name('stage3.ipcr.export.pdf');
 });
+
+/*
+|--------------------------------------------------------------------------
+| Shared Auth Routes (kept)
+|--------------------------------------------------------------------------
+*/
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/stage-one/pmt/uwp', [UwpPmtReviewController::class, 'index'])->name('pmt.uwp.index');
@@ -419,114 +313,54 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/stage-one/uwp/{uwp}/export', [UwpExcelExportController::class, 'exportExcel'])->name('uwp.export');
 });
 
+/*
+|--------------------------------------------------------------------------
+| Administrator Routes
+|--------------------------------------------------------------------------
+*/
 
-
-
-
-
-Route::prefix('administrator')->group(function(){
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('admin.dashboard');
-
-    Route::get('/users', function () {
-        return view('admin.users');
-    })->name('admin.users');
-
-    Route::get('/roles', function () {
-        return view('admin.roles');
-    })->name('admin.roles');
-
-    Route::get('/opcr', function () {
-        return view('admin.opcr');
-    })->name('admin.opcr');
-
-    Route::get('/opcr-accomplishment', function () {
-        return view('admin.opcr-acc');
-    })->name('admin.opcr-acc');
-
-    Route::get('/opcr-accomplishment/show', function () {
-        return view('admin.opcr-acc-view');
-    })->name('admin.opcr-acc-view');
-
-    Route::get('/task-configuration', function () {
-        return view('admin.task-config');
-    })->name('admin.task-config');
-
-    Route::get('/uwp-monitoring', function () {
-        return view('admin.uwp-monitoring');
-    })->name('admin.uwp-monitoring');
-
-    Route::get('/performance-metrics', function () {
-        return view('admin.performance-metrics');
-    })->name('admin.performance-metrics');
-
-    Route::get('/system-settings', function () {
-        return view('admin.system');
-    })->name('admin.system');
-
-    Route::get('/HRIS-integration', function () {
-        return view('admin.hris');
-    })->name('admin.hris');
-
-    Route::get('/data-export', function () {
-        return view('admin.data');
-    })->name('admin.data');
-
-    Route::get('/semestral-pr', function () {
-        return view('admin.semestral-pr');
-    })->name('admin.semestral-pr');
-
-    Route::get('/audit-trails', function () {
-        return view('admin.audit-trail');
-    })->name('admin.audit-trail');
-
-    Route::get('/system-logs', function () {
-        return view('admin.system-logs');
-    })->name('admin.system-logs');
-
-    Route::get('/profile', function () {
-        return view('admin.profile');
-    })->name('admin.profile');
+Route::prefix('administrator')->middleware('auth')->group(function () {
+    // Views
+    Route::get('/dashboard', fn () => view('admin.dashboard'))->name('admin.dashboard');
+    Route::get('/users', fn () => view('admin.users'))->name('admin.users');
+    Route::get('/roles', fn () => view('admin.roles'))->name('admin.roles');
+    Route::get('/opcr', fn () => view('admin.opcr'))->name('admin.opcr');
+    Route::get('/opcr-accomplishment', fn () => view('admin.opcr-acc'))->name('admin.opcr-acc');
+    Route::get('/opcr-accomplishment/show', fn () => view('admin.opcr-acc-view'))->name('admin.opcr-acc-view');
+    Route::get('/task-configuration', fn () => view('admin.task-config'))->name('admin.task-config');
+    Route::get('/uwp-monitoring', fn () => view('admin.uwp-monitoring'))->name('admin.uwp-monitoring');
+    Route::get('/performance-metrics', fn () => view('admin.performance-metrics'))->name('admin.performance-metrics');
+    Route::get('/system-settings', fn () => view('admin.system'))->name('admin.system');
+    Route::get('/HRIS-integration', fn () => view('admin.hris'))->name('admin.hris');
+    Route::get('/data-export', fn () => view('admin.data'))->name('admin.data');
+    Route::get('/semestral-pr', fn () => view('admin.semestral-pr'))->name('admin.semestral-pr');
+    Route::get('/audit-trails', fn () => view('admin.audit-trail'))->name('admin.audit-trail');
+    Route::get('/system-logs', fn () => view('admin.system-logs'))->name('admin.system-logs');
+    Route::get('/profile', fn () => view('admin.profile'))->name('admin.profile');
 });
 
+/*
+|--------------------------------------------------------------------------
+| Manager Routes
+|--------------------------------------------------------------------------
+*/
 
+Route::prefix('manager')->middleware('auth')->group(function () {
+    Route::get('/dashboard', fn () => view('manager.dashboard'))->name('manager.dashboard');
+    Route::get('/team', fn () => view('manager.my-team'))->name('manager.my-team');
+    Route::get('/task-monitoring', fn () => view('manager.task-monitoring'))->name('manager.task-monitoring');
+    Route::get('/productivity-analysis', fn () => view('manager.productivity'))->name('manager.productivity');
+    Route::get('/bottleneck-analysis', fn () => view('manager.bottleneck'))->name('manager.bottleneck');
+    Route::get('/predictive-analytics', fn () => view('manager.predictive-analytics'))->name('manager.predictive-analytics');
+    Route::get('/performance-rating', fn () => view('manager.performance-rate'))->name('manager.performance-rate');
+    Route::get('/ipcr-reports', fn () => view('manager.ipcr-reports'))->name('manager.ipcr-reports');
+    Route::get('/profile', fn () => view('manager.profile'))->name('manager.profile');
+});
 
+/*
+|--------------------------------------------------------------------------
+| Fallback (keep last)
+|--------------------------------------------------------------------------
+*/
 
-
-
-Route::get('/manager-dashboard', function () {
-    return view('manager.dashboard');
-})->name('manager.dashboard');
-
-Route::get('/manager-team', function () {
-    return view('manager.my-team');
-})->name('manager.my-team');
-
-Route::get('/manager-task-monitoring', function () {
-    return view('manager.task-monitoring');
-})->name('manager.task-monitoring');
-
-Route::get('/manager-productivity-analysis', function () {
-    return view('manager.productivity');
-})->name('manager.productivity');
-
-Route::get('/manager-bottleneck-analysis', function () {
-    return view('manager.bottleneck');
-})->name('manager.bottleneck');
-
-Route::get('/manager-predictive-analytics', function () {
-    return view('manager.predictive-analytics');
-})->name('manager.predictive-analytics');
-
-Route::get('/manager-performance-rating', function () {
-    return view('manager.performance-rate');
-})->name('manager.performance-rate');
-
-Route::get('/manager/ipcr-reports', function () {
-    return view('manager.ipcr-reports');
-})->name('manager.ipcr-reports');
-
-Route::get('/manager-Profile', function () {
-    return view('manager.profile');
-})->name('manager.profile');
+Route::fallback(fn () => view('no-page'));

@@ -12,23 +12,23 @@
 
         $orsTasks = [
             [
-                'id' => 'task-jan-02',
-                'date' => '2026-01-02',
-                'uwpOutputId' => 'otc_processing',
-                'uwpOutputLabel' => 'Processing of Over-the-Counter Revenue Transactions',
-                'quantityValue' => 12,
-                'quantityLabel' => '12 transactions',
-                'state' => 'submitted',
-                'supervisorQuality' => 5,
-                'supervisorTimeliness' => 5,
-            ],
-            [
                 'id' => 'task-jan-04',
                 'date' => '2026-01-04',
                 'uwpOutputId' => 'ebank_scanning',
                 'uwpOutputLabel' => 'E-Bank Scanning and Encoding of Revenue Transactions',
                 'quantityValue' => 1,
                 'quantityLabel' => '1 daily batch',
+                'state' => 'submitted',
+                'supervisorQuality' => 5,
+                'supervisorTimeliness' => 5,
+            ],
+            [
+                'id' => 'task-jan-02',
+                'date' => '2026-01-02',
+                'uwpOutputId' => 'otc_processing',
+                'uwpOutputLabel' => 'Processing of Over-the-Counter Revenue Transactions',
+                'quantityValue' => 12,
+                'quantityLabel' => '12 transactions',
                 'state' => 'submitted',
                 'supervisorQuality' => 5,
                 'supervisorTimeliness' => 5,
@@ -70,8 +70,8 @@
 
         $mfoCatalog = [
             'core' => [
-                ['id' => 'otc_processing', 'label' => 'Processing of Over-the-Counter Revenue Transactions'],
                 ['id' => 'ebank_scanning', 'label' => 'E-Bank Scanning and Encoding of Revenue Transactions'],
+                ['id' => 'otc_processing', 'label' => 'Processing of Over-the-Counter Revenue Transactions'],
             ],
             'support' => [
                 ['id' => 'records_maintenance', 'label' => 'Maintenance of Revenue Records Filing System'],

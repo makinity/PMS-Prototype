@@ -58,7 +58,7 @@
                         View SMPOR
                     </a>
 
-                    <a href="{{ route('stage2.smpor.export.pdf') }}"
+                    <a href="{{ route('stage2.smpor.export.excel') }}"
                         class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800">
                             Export PDF
                     </a>
