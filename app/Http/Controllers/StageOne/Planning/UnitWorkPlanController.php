@@ -241,12 +241,13 @@ class UnitWorkPlanController extends Controller
             return redirect()->route('supervisor.uwp-page')->with('error', 'You do not have permission to delete this UWP.');
         }
 
-        if (strtolower((string) $uwp->status) !== UnitWorkPlan::STATUS_DRAFT || !is_null($uwp->locked_at)) {
+        $status = strtolower((string) $uwp->status);
+        if (!in_array($status, [UnitWorkPlan::STATUS_DRAFT, UnitWorkPlan::STATUS_RETURNED], true) || !is_null($uwp->locked_at)) {
             if ($request->expectsJson()) {
-                return response()->json(['success' => false, 'error' => 'Only Draft & unlocked UWP can be deleted.'], 422);
+                return response()->json(['success' => false, 'error' => 'Only Draft/Returned & unlocked UWP can be deleted.'], 422);
             }
 
-            return redirect()->route('supervisor.uwp-page')->with('error', 'Only Draft & unlocked UWP can be deleted.');
+            return redirect()->route('supervisor.uwp-page')->with('error', 'Only Draft/Returned & unlocked UWP can be deleted.');
         }
 
         DB::transaction(function () use ($uwp) {
@@ -804,6 +805,7 @@ class UnitWorkPlanController extends Controller
     {
         return DB::transaction(function () use ($user, $officeId, $periodId, $functionsPayload, $assignmentsPayload, $uwpId) {
             $uwp = null;
+            $wasCreated = false;
 
             if ($uwpId) {
                 $uwp = UnitWorkPlan::query()->find($uwpId);
@@ -853,6 +855,7 @@ class UnitWorkPlanController extends Controller
                     'submitted_at' => null,
                     'locked_at' => null,
                 ]);
+                $wasCreated = true;
             }
 
             $conflict = UnitWorkPlan::query()
@@ -869,18 +872,21 @@ class UnitWorkPlanController extends Controller
                 }
             }
 
-            $uwp->update([
+            $payloadUpdate = [
                 'created_by' => $user->id,
                 'office_id' => $officeId,
                 'performance_period_id' => $periodId,
-                'status' => UnitWorkPlan::STATUS_DRAFT,
                 'submitted_at' => null,
                 'locked_at' => null,
-            ]);
+            ];
+
+            if ($wasCreated) {
+                $payloadUpdate['status'] = UnitWorkPlan::STATUS_DRAFT;
+            }
+
+            $uwp->update($payloadUpdate);
 
             $uwp->uwpFunctions()->delete();
-
-            $fallbackAssignmentIds = $this->resolveAssignmentEmployeeIds($assignmentsPayload, $officeId);
 
             $functionOrder = 1;
             foreach ($functionsPayload as $functionPayload) {
@@ -977,9 +983,6 @@ class UnitWorkPlanController extends Controller
 
                         $assignees = $indicatorPayload['assignees'] ?? [];
                         $employeeIds = $this->resolveAssignmentEmployeeIds(is_array($assignees) ? $assignees : [$assignees], $officeId);
-                        if (empty($employeeIds) && !empty($fallbackAssignmentIds)) {
-                            $employeeIds = $fallbackAssignmentIds;
-                        }
 
                         foreach (array_unique($employeeIds) as $employeeId) {
                             $indicator->assignments()->create([

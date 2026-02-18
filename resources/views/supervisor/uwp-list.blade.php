@@ -80,12 +80,12 @@
 
                                     <td class="px-4 py-3 text-center">
                                         @php
-                                            $isDraftAndUnlocked = strtolower((string) $list->status) === 'draft' && is_null($list->locked_at);
+                                            $isEditable = in_array(strtolower((string) $list->status), ['draft', 'returned'], true) && is_null($list->locked_at);
                                         @endphp
 
                                         <a href="{{ route('supervisor.uwp', ['uwp_id' => $list->id]) }}"
                                            aria-label="Open Unit Work Plan"
-                                           title="{{ $isDraftAndUnlocked ? 'Open for editing' : 'Open read-only' }}"
+                                           title="{{ $isEditable ? 'Open for editing' : 'Open read-only' }}"
                                            class="inline-flex items-center justify-center rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-white">
                                             <i class="fa-regular fa-pen-to-square text-sm"></i>
                                         </a>
@@ -100,7 +100,7 @@
                                             <i class="fa-regular fa-eye text-sm"></i>
                                         </button>
 
-                                        @if ($isDraftAndUnlocked)
+                                        @if ($isEditable)
                                             <button type="button"
                                                     aria-label="Delete Unit Work Plan"
                                                     title="Delete Unit Work Plan"
@@ -117,7 +117,7 @@
                                         @else
                                             <button type="button"
                                                     aria-label="Delete Unit Work Plan"
-                                                    title="Only Draft & unlocked can be deleted"
+                                                    title="Only Draft/Returned & unlocked can be deleted"
                                                     disabled
                                                     class="inline-flex cursor-not-allowed items-center justify-center rounded-lg p-2 text-slate-500 opacity-40">
                                                 <i class="fa-regular fa-trash-can text-sm"></i>
@@ -344,7 +344,7 @@
             <div class="rounded-2xl border border-slate-800 bg-slate-950 text-slate-100">
                 <div class="border-b border-slate-800 px-6 py-5">
                     <p class="text-xs uppercase tracking-[0.2em] text-rose-300">Delete Unit Work Plan</p>
-                    <h3 class="text-lg font-semibold">Delete this draft UWP?</h3>
+                    <h3 class="text-lg font-semibold">Delete this UWP?</h3>
                     <p class="mt-1 text-sm text-slate-400">This action is permanent and cannot be undone.</p>
                 </div>
 
@@ -354,7 +354,7 @@
                         <p class="mt-1"><span class="text-slate-400">Performance Period:</span> <span id="deleteUwpPeriod">--</span></p>
                         <p class="mt-1"><span class="text-slate-400">Status:</span> <span id="deleteUwpStatus">--</span></p>
                     </div>
-                    <p class="text-xs text-rose-300/90">Only Draft and unlocked UWP records can be deleted.</p>
+                    <p class="text-xs text-rose-300/90">Only Draft/Returned and unlocked UWP records can be deleted.</p>
                 </div>
 
                 <form id="delete-uwp-form" method="POST" action="" class="flex items-center justify-end gap-3 border-t border-slate-800 px-6 py-4">
@@ -446,6 +446,7 @@
 
                 const statusBadge = document.getElementById('modalStatus');
                 const status = uwpData.status || 'draft';
+                const normalizedStatus = String(status).toLowerCase();
                 const isLocked = !!uwpData.locked_at;
                 statusBadge.textContent = status.replace('_', ' ').toUpperCase();
 
@@ -459,12 +460,12 @@
                     'returned': ['bg-rose-500/15', 'text-rose-400', 'border-rose-500/30']
                 };
 
-                const classes = statusColors[status] || ['bg-gray-500/15', 'text-gray-400', 'border-gray-500/30'];
+                const classes = statusColors[normalizedStatus] || ['bg-gray-500/15', 'text-gray-400', 'border-gray-500/30'];
                 classes.forEach(cls => statusBadge.classList.add(cls));
 
                 const submitButton = document.querySelector('[data-submit-uwp-btn]');
                 if (submitButton) {
-                    if (status === 'draft' && !isLocked) {
+                    if ((normalizedStatus === 'draft' || normalizedStatus === 'returned') && !isLocked) {
                         submitButton.classList.remove('hidden');
                         submitButton.disabled = false;
                         submitButton.querySelector('[data-button-label]').textContent = 'Submit for Approval';
@@ -672,10 +673,10 @@
             function openDeleteUwpModal(uwpId, officeName, periodName, status, isLocked) {
                 const normalizedStatus = String(status || '').toLowerCase();
                 const locked = isLocked === true || isLocked === 'true' || isLocked === 1 || isLocked === '1';
-                const deletable = normalizedStatus === 'draft' && !locked;
+                const deletable = (normalizedStatus === 'draft' || normalizedStatus === 'returned') && !locked;
 
                 if (!deletable) {
-                    alert('Only Draft & unlocked UWP can be deleted.');
+                    alert('Only Draft/Returned & unlocked UWP can be deleted.');
                     return;
                 }
 

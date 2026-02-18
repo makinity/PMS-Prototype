@@ -3,8 +3,9 @@
         $status = $status ?? 'Draft';
         $statusKey = strtolower((string) $status);
         $isDraft = $statusKey === 'draft';
+        $isReturned = $statusKey === 'returned';
         $isLocked = (bool) ($locked_at ?? $lockedAt ?? false);
-        $canEdit = $isDraft && !$isLocked;
+        $canEdit = ($isDraft || $isReturned) && !$isLocked;
         $selectedUwpId = $uwp->id ?? null;
         $selectedOfficeId = old('office_id', $selectedOfficeId ?? auth()->user()->office_id);
         $activePeriod = $periods->firstWhere('is_active', true);
@@ -30,7 +31,7 @@
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div class="space-y-1">
                     <p class="text-sm font-semibold text-white">Planning details</p>
-                    <p class="text-xs text-slate-400">Define commitments for the period. Editing is allowed only while in Draft.</p>
+                    <p class="text-xs text-slate-400">Define commitments for the period. Editing is allowed only while in Draft/Returned.</p>
                     @if ($canEdit)
                         <p class="text-xs text-emerald-300/90">Draft mode: you can add/remove MFOs.</p>
                     @else
@@ -42,7 +43,7 @@
                         <span class="inline-flex items-center gap-1 rounded-full border border-blue-500/30 bg-blue-500/10 px-2.5 py-1 font-semibold text-blue-200">
                             Status: {{ $status }}
                         </span>
-                        <span class="text-[10px] text-slate-500">Draft: editable · Submitted: read-only</span>
+                        <span class="text-[10px] text-slate-500">Draft/Returned: editable · Submitted: read-only</span>
                     </div>
                 </div>
             </div>
@@ -116,7 +117,7 @@
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <div class="space-y-1">
                         <p class="text-xs text-slate-400">Once submitted, this plan becomes read-only until reviewed.</p>
-                        <span class="text-[11px] text-slate-500">UWP remains editable only while in Draft.</span>
+                        <span class="text-[11px] text-slate-500">UWP remains editable only while in Draft/Returned.</span>
                     </div>
                     <div class="flex flex-wrap items-center gap-3">
                         <button type="button"

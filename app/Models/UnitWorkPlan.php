@@ -106,7 +106,14 @@ class UnitWorkPlan extends Model
 
     public function isEditableBySupervisor(): bool
     {
-        return in_array($this->status, [self::STATUS_DRAFT, self::STATUS_RETURNED], true)
-            && !$this->isLocked();
+        if ($this->isLocked()) {
+            return false;
+        }
+
+        return in_array(
+            strtolower((string) $this->status),
+            [self::STATUS_DRAFT, self::STATUS_RETURNED],
+            true
+        );
     }
 }
