@@ -16,10 +16,6 @@
                 <p class="text-sm text-gray-400 mt-1">
                     Stage I – Performance Planning and Commitment
                 </p>
-                <p class="text-sm text-gray-400">
-                    Targets are system-generated from the approved Unit Work Plan (UWP) and OPCR.
-                    Editing is not allowed. Employee action is acknowledgment only.
-                </p>
                 <p class="text-[11px] text-gray-500 mt-2">Read-only | No edits or validation by employee.</p>
             </div>
 
@@ -33,7 +29,6 @@
             <div class="flex items-start justify-between gap-4">
                 <div>
                     <h2 class="text-lg font-semibold text-white">Status & Context</h2>
-                    <p class="text-sm text-gray-400">IPCR is auto-filled from approved UWP and OPCR (PMT-approved) and OPCR (Department Head–approved).</p>
                 </div>
 
                 <div class="shrink-0">
@@ -187,19 +182,7 @@
 
         <!-- ACTIONS -->
         <div class="flex flex-col gap-2 items-end">
-            <p class="text-[11px] text-gray-500">Commitment acknowledgment only; targets remain system-generated from approved UWP and OPCR.</p>
             <div class="flex justify-end gap-3 w-full">
-                <button type="button"
-                        data-employee-action
-                        data-action-title="Save commitment draft"
-                        data-action-message="Save this IPCR commitment draft. Targets remain system-generated from approved UWP and OPCR."
-                        data-action-confirm="Save draft"
-                        data-action-loading="Saving..."
-                        @disabled(!$ipcr)
-                        class="inline-flex items-center gap-2 px-5 py-2.5 border border-gray-600 text-gray-300 rounded-lg transition-colors duration-200 {{ $ipcr ? 'hover:bg-gray-700' : 'opacity-60 cursor-not-allowed' }}">
-                    <span data-button-label>Save Commitment Draft</span>
-                    <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
-                </button>
 
                 <button type="button"
                         id="commit-targets-btn"
@@ -225,12 +208,6 @@
                     <h2 id="ipcr-indicators-title" class="mt-1 text-lg font-semibold text-white truncate">
                         Success Indicators
                     </h2>
-                    <p class="text-sm text-slate-400">Read-only | Derived from PMT-approved UWP</p>
-                    <div class="mt-2">
-                        <span class="inline-flex items-center rounded-full bg-blue-500/15 px-2.5 py-1 text-[11px] font-semibold text-blue-200 border border-blue-500/30">
-                            Modal-only indicators
-                        </span>
-                    </div>
                 </div>
                 <button type="button" data-close-modal
                         class="shrink-0 rounded-lg border border-slate-800 bg-slate-950/50 px-2.5 py-2 text-slate-400 hover:text-white hover:bg-slate-950">
@@ -321,26 +298,6 @@
         </div>
     </div>
 
-    <!-- EXISTING GENERIC MODAL (kept for save draft preview consistency) -->
-    <div id="employee-action-modal" role="dialog" aria-modal="true" class="fixed inset-0 z-[60] hidden flex items-center justify-center bg-black/60 px-4 py-6">
-        <div class="w-full max-w-md rounded-2xl border border-gray-700 bg-gray-900 p-5 shadow-xl">
-            <div class="flex items-start justify-between">
-                <div>
-                    <h2 id="employee-action-title" class="text-lg font-semibold text-white">Action</h2>
-                    <p id="employee-action-body" class="mt-1 text-sm text-gray-400">Prototype action preview.</p>
-                </div>
-                <button type="button" data-employee-modal-close class="text-gray-400 hover:text-white">x</button>
-            </div>
-            <div class="mt-6 flex justify-end gap-2">
-                <button type="button" data-employee-modal-close class="rounded-lg border border-gray-600 px-4 py-2 text-xs text-gray-300 hover:bg-gray-800">Close</button>
-                <button type="button" id="employee-action-confirm" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500">
-                    <span data-button-label>Proceed</span>
-                    <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
-                </button>
-            </div>
-        </div>
-    </div>
-
     @push('scripts')
     <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -378,14 +335,6 @@
             closeModal(open[open.length - 1]);
         }
 
-        function closeAllModals() {
-            document.querySelectorAll('[data-modal-container]').forEach(m => {
-                m.classList.add('hidden');
-                m.classList.remove('flex');
-            });
-            document.body.classList.remove('overflow-hidden');
-        }
-
         // Close buttons
         document.querySelectorAll('[data-close-modal]').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -407,13 +356,6 @@
                 const open = getOpenModals();
                 if (open.length) {
                     closeTopMostModal();
-                } else {
-                    // also close the generic modal if open
-                    const legacy = document.getElementById('employee-action-modal');
-                    if (legacy && !legacy.classList.contains('hidden')) {
-                        legacy.classList.add('hidden');
-                        document.body.classList.remove('overflow-hidden');
-                    }
                 }
             }
         });
@@ -459,7 +401,6 @@
                     <tr class="hover:bg-slate-900/40">
                         <td class="px-4 py-3 align-top">
                             <p class="text-white">${escapeHtml(text)}</p>
-                            <p class="mt-1 text-[11px] text-slate-500">Derived from approved UWP (locked)</p>
                         </td>
                         <td class="px-4 py-3 align-top">
                             <button type="button"
@@ -551,7 +492,6 @@
                             </svg>
                             <span>View (${indicatorCount})</span>
                         </button>
-                        <span class="block text-[11px] text-gray-500 mt-1">Derived from approved UWP</span>
                     </td>
                     <td class="border border-gray-700 px-4 py-3 text-gray-300">${escapeHtml(row.target_summary || '--')}</td>
                     <td class="border border-gray-700 px-4 py-3 text-gray-300">${escapeHtml(row.timeline || '--')}</td>
@@ -566,13 +506,6 @@
 
         renderTableRows(payload.core || [], 'ipcr-core-tbody');
         renderTableRows(payload.support || [], 'ipcr-support-tbody');
-
-        // --------- LEGACY GENERIC MODAL (for Save Draft only) ----------
-        const legacyModal = document.getElementById('employee-action-modal');
-        const legacyTitle = document.getElementById('employee-action-title');
-        const legacyBody = document.getElementById('employee-action-body');
-        const legacyConfirmBtn = document.getElementById('employee-action-confirm');
-        let legacyActiveTrigger = null;
 
         function setButtonLoading(button, isLoading, loadingText) {
             if (!button) return;
@@ -594,54 +527,6 @@
                 if (label && button.dataset.originalLabel) label.textContent = button.dataset.originalLabel;
             }
         }
-
-        function openLegacyModal(trigger) {
-            legacyActiveTrigger = trigger;
-            legacyTitle.textContent = trigger.dataset.actionTitle || 'Action';
-            legacyBody.textContent = trigger.dataset.actionMessage || 'Prototype action preview.';
-            legacyConfirmBtn.dataset.actionLoading = trigger.dataset.actionLoading || 'Working...';
-            legacyModal.classList.remove('hidden');
-            document.body.classList.add('overflow-hidden');
-        }
-
-        function closeLegacyModal() {
-            legacyModal.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
-            legacyActiveTrigger = null;
-            setButtonLoading(legacyConfirmBtn, false);
-        }
-
-        // Only keep legacy for Save Draft action (prevent indicators from using it)
-        document.querySelectorAll('[data-employee-action]').forEach((button) => {
-            const title = (button.dataset.actionTitle || '').toLowerCase();
-            if (!title.includes('save')) return;
-
-            button.addEventListener('click', function (event) {
-                event.preventDefault();
-                openLegacyModal(button);
-            });
-        });
-
-        legacyConfirmBtn?.addEventListener('click', function () {
-            setButtonLoading(legacyConfirmBtn, true, legacyConfirmBtn.dataset.actionLoading);
-            if (legacyActiveTrigger) {
-                setButtonLoading(legacyActiveTrigger, true, legacyActiveTrigger.dataset.actionLoading || legacyConfirmBtn.dataset.actionLoading);
-            }
-
-            setTimeout(() => {
-                setButtonLoading(legacyConfirmBtn, false);
-                if (legacyActiveTrigger) setButtonLoading(legacyActiveTrigger, false);
-                closeLegacyModal();
-            }, 1200);
-        });
-
-        legacyModal?.addEventListener('click', function (event) {
-            if (event.target === legacyModal) closeLegacyModal();
-        });
-
-        legacyModal?.querySelectorAll('[data-employee-modal-close]').forEach((button) => {
-            button.addEventListener('click', closeLegacyModal);
-        });
 
         // --------- COMMIT BUTTON DEMO (status updates + disable after commit) ----------
         const statusBadge = document.getElementById('ipcr-status-badge');
