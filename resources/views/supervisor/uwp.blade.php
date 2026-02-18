@@ -20,6 +20,19 @@
             </a>
         </div>
 
+        @if($uwp && $uwp->status === 'returned' && $uwp->return_remarks)
+            <div class="mb-4 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-amber-200">
+                <p class="text-sm font-semibold">
+                    Returned by {{ $uwp->returned_by_role === 'pmt' ? 'PMT' : 'Department Head' }}
+                </p>
+                <p class="mt-1 text-xs text-amber-200/80">
+                    {{ optional($uwp->returned_at)->format('M d, Y h:i A') }}
+                    @if($uwp->returnedByUser) &bull; {{ $uwp->returnedByUser->name }} @endif
+                </p>
+                <div class="mt-2 whitespace-pre-line text-sm text-amber-100">{{ $uwp->return_remarks }}</div>
+            </div>
+        @endif
+
         <form id="uwp-form" method="POST">
             @csrf
             <input type="hidden" name="uwp_id" id="uwp_id" value="{{ old('uwp_id', $selectedUwpId) }}">
@@ -33,7 +46,11 @@
                     <p class="text-sm font-semibold text-white">Planning details</p>
                     <p class="text-xs text-slate-400">Define commitments for the period. Editing is allowed only while in Draft/Returned.</p>
                     @if ($canEdit)
-                        <p class="text-xs text-emerald-300/90">Draft mode: you can add/remove MFOs.</p>
+                        @if ($isReturned)
+                            <p class="text-xs text-amber-300/90">Returned: revise required before re-submission.</p>
+                        @else
+                            <p class="text-xs text-emerald-300/90">Draft mode: you can add/remove MFOs.</p>
+                        @endif
                     @else
                         <span class="inline-flex items-center rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[11px] font-semibold text-amber-200">Locked: read-only after submission.</span>
                     @endif

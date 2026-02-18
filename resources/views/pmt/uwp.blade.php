@@ -21,13 +21,15 @@
         </div>
         <form method="GET" action="{{ route('pmt.uwp.index') }}" class="flex items-center gap-3">
             <label for="pmt-status-filter" class="text-xs uppercase tracking-wide text-slate-400">Status</label>
+            @php
+                $statusFilter = strtolower((string) ($selectedStatus ?? request('status', '')));
+            @endphp
             <select id="pmt-status-filter" name="status" onchange="this.form.submit()" style="background:#0f172a;color:#e5e7eb;" class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none">
-                <option value="" {{ request('status') === null || request('status') === '' ? 'selected' : '' }}>Endorsed (Default)</option>
-                <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>Draft</option>
-                <option value="submitted" {{ request('status') === 'submitted' ? 'selected' : '' }}>Submitted</option>
-                <option value="endorsed" {{ request('status') === 'endorsed' ? 'selected' : '' }}>Endorsed</option>
-                <option value="pmt_approved" {{ request('status') === 'pmt_approved' ? 'selected' : '' }}>PMT Approved</option>
-                <option value="returned" {{ request('status') === 'returned' ? 'selected' : '' }}>Returned</option>
+                <option value="" {{ $statusFilter === '' ? 'selected' : '' }}>All Status</option>
+                <option value="submitted" {{ $statusFilter === 'submitted' ? 'selected' : '' }}>Submitted</option>
+                <option value="endorsed" {{ $statusFilter === 'endorsed' ? 'selected' : '' }}>Endorsed</option>
+                <option value="pmt_approved" {{ $statusFilter === 'pmt_approved' ? 'selected' : '' }}>PMT Approved</option>
+                <option value="returned" {{ $statusFilter === 'returned' ? 'selected' : '' }}>Returned</option>
             </select>
         </form>
     </div>
@@ -120,58 +122,97 @@
         </table>
     </div>
 </div>
-<div id="pmt-review-modal" data-modal-container tabindex="-1" aria-hidden="true" class="fixed inset-0 z-50 hidden items-center justify-center">
-    <div class="absolute inset-0 bg-slate-950/80 backdrop-blur" data-modal-hide="pmt-review-modal"></div>
-    <div class="relative z-10 w-full max-w-5xl px-4">
-        <div class="w-full overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl">
-            <div class="flex items-start justify-between gap-4 border-b border-slate-800 px-6 py-4">
-                <div class="space-y-2">
-                    <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Unit Work Plan</p>
-                    <h3 class="text-lg font-semibold text-white">PMT Final Approval</h3>
-                    <div class="grid grid-cols-1 gap-3 text-sm text-slate-300 sm:grid-cols-2">
-                        <div><p class="text-xs uppercase tracking-wide text-slate-500">Office / Unit</p><p id="pmt-modal-office" class="font-medium text-slate-100">—</p></div>
-                        <div><p class="text-xs uppercase tracking-wide text-slate-500">Supervisor</p><p id="pmt-modal-supervisor" class="font-medium text-slate-100">—</p></div>
-                        <div><p class="text-xs uppercase tracking-wide text-slate-500">Performance Period</p><p id="pmt-modal-period" class="font-medium text-slate-100">—</p></div>
-                        <div><p class="text-xs uppercase tracking-wide text-slate-500">Department Head</p><p id="pmt-modal-dept-head" class="font-medium text-slate-100">—</p></div>
-                    </div>
+<div id="pmt-review-modal" data-modal-container tabindex="-1" aria-hidden="true" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/70 backdrop-blur-sm overflow-y-auto">
+    <div class="w-full max-w-5xl px-6">
+        <div class="rounded-2xl border border-slate-800 bg-slate-950 text-slate-100">
+            <div class="flex items-start justify-between gap-4 border-b border-slate-800 px-8 py-6">
+                <div>
+                    <h2 class="text-xl font-semibold">Unit Work Plan</h2>
+                    <p id="pmt-modal-subtitle" class="mt-1 text-sm text-slate-400">Select a UWP to view details</p>
+                    <span id="pmt-modal-period" class="hidden">—</span>
                 </div>
-                <button type="button" data-modal-hide="pmt-review-modal" class="text-slate-400 transition hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <button type="button" data-modal-hide="pmt-review-modal" class="inline-flex items-center justify-center rounded-lg border border-slate-800 bg-slate-950/60 px-2.5 py-2 text-slate-400 transition hover:bg-slate-900 hover:text-white">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
             </div>
-            <div class="px-6 py-5">
-                <div class="mb-4 flex items-center justify-between">
-                    <div>
-                        <p class="text-xs uppercase tracking-wide text-slate-500">UWP Status</p>
-                        <span id="pmt-modal-status" class="mt-1 inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold">—</span>
-                    </div>
+
+            <div class="flex items-stretch gap-10 border-b border-slate-800 px-8 py-6">
+                <div class="w-1/4">
+                    <p class="text-xs uppercase tracking-widest text-slate-500">Office / Unit</p>
+                    <p id="pmt-modal-office" class="mt-1 font-medium">-</p>
                 </div>
-                <div class="rounded-xl border border-slate-800 bg-slate-900/70">
-                    <div class="border-b border-slate-800 px-4 py-3">
-                        <h4 class="text-sm font-medium text-slate-100">Planned Outputs</h4>
-                        <p class="mt-1 text-xs text-slate-400">Read-only reference for PMT validation.</p>
-                    </div>
-                    <div class="max-h-[52vh] overflow-y-auto overflow-x-auto">
-                        <table class="min-w-full text-sm">
-                            <thead class="bg-slate-800/50">
+
+                <div class="w-1/4">
+                    <p class="text-xs uppercase tracking-widest text-slate-500">Supervisor</p>
+                    <p id="pmt-modal-supervisor" class="mt-1 font-medium">-</p>
+                </div>
+
+                <div class="w-1/4">
+                    <p class="text-xs uppercase tracking-widest text-slate-500">Department Head</p>
+                    <p id="pmt-modal-dept-head" class="mt-1 font-medium">-</p>
+                </div>
+
+                <div class="w-1/4">
+                    <p class="text-xs uppercase tracking-widest text-slate-500">Status</p>
+                    <span id="pmt-modal-status" class="mt-2 inline-flex rounded-full px-3 py-1 text-xs font-semibold">
+                        -
+                    </span>
+                </div>
+            </div>
+
+            <div class="px-8 py-6">
+                <h3 class="mb-4 text-sm font-semibold uppercase tracking-widest text-slate-400">Planned Outputs</h3>
+
+                <div class="overflow-hidden rounded-xl border border-slate-800">
+                    <div class="max-h-[42vh] overflow-y-auto overflow-x-auto">
+                        <table class="min-w-full text-sm text-slate-200">
+                            <thead class="bg-slate-900/60 text-xs uppercase tracking-widest text-slate-400">
                                 <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-400">PPA / MFO</th>
-                                    <th class="px-4 py-3 text-center text-xs font-medium uppercase text-slate-400">Success Indicators</th>
-                                    <th class="px-4 py-3 text-center text-xs font-medium uppercase text-slate-400">Timeline / Target</th>
-                                    <th class="px-4 py-3 text-center text-xs font-medium uppercase text-slate-400">Function</th>
+                                    <th class="px-5 py-4 text-left">PPA / MFO</th>
+                                    <th class="px-5 py-4 text-center">Success Indicators</th>
+                                    <th class="px-5 py-4 text-center">Timeline / Target</th>
+                                    <th class="px-5 py-4 text-center">Function</th>
                                 </tr>
                             </thead>
-                            <tbody id="pmt-outputs-tbody" class="divide-y divide-slate-800"></tbody>
+                            <tbody id="pmt-outputs-tbody" class="divide-y divide-slate-800 bg-slate-950"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
-            <div class="flex items-center justify-between border-t border-slate-800 px-6 py-4">
-                <p class="text-xs text-slate-500">Final approval permanently locks this UWP.</p>
-                <div class="flex items-center gap-3">
-                    <button type="button" data-modal-hide="pmt-review-modal" class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-slate-800/80">Close</button>
+
+            <div class="px-8 pb-6">
+                <form id="pmt-return-form" method="POST" action="{{ route('pmt.uwp.return') }}" class="space-y-2">
+                    @csrf
+                    <input type="hidden" name="unit_work_plan_id" id="pmt-modal-return-uwp-id" value="">
+                    <label class="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                        Review Remarks (required if returning)
+                    </label>
+                    <textarea name="remarks"
+                              id="pmt-modal-remarks"
+                              rows="3"
+                              style="background:#0f172a;color:#e5e7eb;"
+                              class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                              placeholder="Required when returning..."></textarea>
+                    <p id="pmt-modal-remarks-error" class="hidden text-[11px] text-rose-300">Remarks are required when returning a UWP.</p>
+                    <p class="text-[11px] text-slate-500">Note: remarks are required for return.</p>
+                </form>
+            </div>
+
+            <div class="flex items-center justify-between border-t border-slate-800 px-8 py-5">
+                <p class="text-xs text-slate-500">PMT can approve or return endorsed UWPs only.</p>
+                <div class="flex gap-3 justify-end">
+                    <button type="button" data-modal-hide="pmt-review-modal" class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">Close</button>
+                    <button type="button"
+                            id="btn-pmt-return"
+                            data-loading-text="Returning..."
+                            class="inline-flex items-center gap-2 rounded-lg border border-amber-600 px-4 py-2 text-sm font-semibold text-amber-300 transition hover:bg-amber-600/10">
+                        <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                        <span data-button-label>Return to Supervisor</span>
+                    </button>
                     <form id="pmt-approve-form" method="POST" action="{{ route('pmt.uwp.approve') }}">
                         @csrf
                         <input type="hidden" name="unit_work_plan_id" id="pmt-modal-uwp-id" value="">
-                        <button type="submit" id="btn-approve-uwp" data-loading-text="Approving..." class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500">
+                        <button type="submit" id="btn-pmt-approve" data-loading-text="Approving..." class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500">
                             <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
                             <span data-button-label>Approve UWP</span>
                         </button>
@@ -307,6 +348,31 @@
         if (t === 'support') return '<span class="inline-flex rounded-md border border-blue-500/30 bg-blue-500/10 px-2 py-1 text-xs font-semibold text-blue-300">Support</span>';
         return '<span class="inline-flex rounded-md border border-slate-500/30 bg-slate-500/10 px-2 py-1 text-xs font-semibold text-slate-200">' + escapeHtml(labelStatus(type)) + '</span>';
     }
+    function setButtonLoading(button, loading, loadingText) {
+        if (!button) return;
+        const label = button.querySelector('[data-button-label]');
+        const spinner = button.querySelector('[data-button-spinner]');
+
+        if (loading) {
+            if (label) {
+                if (!button.dataset.originalLabel) {
+                    button.dataset.originalLabel = label.textContent || '';
+                }
+                label.textContent = loadingText || 'Processing...';
+            }
+            if (spinner) spinner.classList.remove('hidden');
+            button.disabled = true;
+            button.classList.add('opacity-70', 'cursor-wait');
+            return;
+        }
+
+        if (label && button.dataset.originalLabel) {
+            label.textContent = button.dataset.originalLabel;
+        }
+        if (spinner) spinner.classList.add('hidden');
+        button.disabled = false;
+        button.classList.remove('opacity-70', 'cursor-wait');
+    }
     function openModalById(id) { const modal = document.getElementById(id); if (!modal) return; modal.classList.remove('hidden'); modal.classList.add('flex'); document.body.classList.add('overflow-hidden'); }
     function closeModalById(id) { const modal = document.getElementById(id); if (!modal) return; modal.classList.add('hidden'); modal.classList.remove('flex'); if (!document.querySelector('[data-modal-container].flex')) document.body.classList.remove('overflow-hidden'); }
     function openReviewModal(uwp) {
@@ -321,20 +387,38 @@
         document.getElementById('pmt-modal-supervisor').textContent = supervisor;
         document.getElementById('pmt-modal-period').textContent = period;
         document.getElementById('pmt-modal-dept-head').textContent = deptHead;
+        const subtitle = document.getElementById('pmt-modal-subtitle');
+        if (subtitle) {
+            subtitle.textContent = `${office} • ${period}`;
+        }
 
         const statusEl = document.getElementById('pmt-modal-status');
         statusEl.textContent = labelStatus(status);
         statusEl.className = 'mt-1 inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ' + statusBadgeClass(status);
 
-        const idInput = document.getElementById('pmt-modal-uwp-id');
-        if (idInput) idInput.value = selectedUwp?.id || '';
+        const remarksInput = document.getElementById('pmt-modal-remarks');
+        if (remarksInput) remarksInput.value = '';
+        const remarksError = document.getElementById('pmt-modal-remarks-error');
+        if (remarksError) remarksError.classList.add('hidden');
 
-        const approveBtn = document.getElementById('btn-approve-uwp');
-        if (approveBtn) {
-            const canApprove = String(status).toLowerCase() === 'endorsed';
-            approveBtn.classList.toggle('hidden', !canApprove);
-            approveBtn.disabled = !canApprove;
-        }
+        const canReview = String(status).toLowerCase() === 'endorsed';
+        const approveIdInput = document.getElementById('pmt-modal-uwp-id');
+        const returnIdInput = document.getElementById('pmt-modal-return-uwp-id');
+        if (approveIdInput) approveIdInput.value = selectedUwp?.id || '';
+        if (returnIdInput) returnIdInput.value = selectedUwp?.id || '';
+
+        const returnBtn = document.getElementById('btn-pmt-return');
+        const approveBtn = document.getElementById('btn-pmt-approve');
+        [returnBtn, approveBtn].forEach((button) => {
+            if (!button) return;
+            setButtonLoading(button, false);
+            button.disabled = !canReview;
+            if (!canReview) {
+                button.classList.add('opacity-60', 'pointer-events-none');
+            } else {
+                button.classList.remove('opacity-60', 'pointer-events-none');
+            }
+        });
 
         renderOutputsTable(selectedUwp?.functions || []);
         openModalById('pmt-review-modal');
@@ -506,26 +590,62 @@
 
     function initApproveLoading() {
         const form = document.getElementById('pmt-approve-form');
-        const button = document.getElementById('btn-approve-uwp');
+        const button = document.getElementById('btn-pmt-approve');
         const idInput = document.getElementById('pmt-modal-uwp-id');
         if (!form || !button) return;
+
         form.addEventListener('submit', (event) => {
             if (!idInput || !idInput.value) {
                 event.preventDefault();
                 alert('Please select a UWP from the list before approving.');
                 return;
             }
-            const label = button.querySelector('[data-button-label]');
-            const spinner = button.querySelector('[data-button-spinner]');
-            button.disabled = true;
-            if (label) label.textContent = button.dataset.loadingText || 'Approving...';
-            if (spinner) spinner.classList.remove('hidden');
+
+            setButtonLoading(button, true, button.dataset.loadingText || 'Approving...');
+            const returnButton = document.getElementById('btn-pmt-return');
+            if (returnButton) {
+                returnButton.disabled = true;
+                returnButton.classList.add('opacity-70', 'cursor-wait');
+            }
         });
     }
 
-    function boot() { initReviewTriggers(); initModalHideHandlers(); initApproveLoading(); }
+    function initReturnAction() {
+        const form = document.getElementById('pmt-return-form');
+        const button = document.getElementById('btn-pmt-return');
+        const idInput = document.getElementById('pmt-modal-return-uwp-id');
+        const remarksInput = document.getElementById('pmt-modal-remarks');
+        const remarksError = document.getElementById('pmt-modal-remarks-error');
+        if (!form || !button) return;
+
+        button.addEventListener('click', () => {
+            if (!idInput || !idInput.value) {
+                alert('Please select a UWP from the list before returning.');
+                return;
+            }
+
+            const remarks = (remarksInput?.value || '').trim();
+            if (!remarks) {
+                if (remarksError) remarksError.classList.remove('hidden');
+                remarksInput?.focus();
+                return;
+            }
+
+            if (remarksError) remarksError.classList.add('hidden');
+            setButtonLoading(button, true, button.dataset.loadingText || 'Returning...');
+
+            const approveButton = document.getElementById('btn-pmt-approve');
+            if (approveButton) {
+                approveButton.disabled = true;
+                approveButton.classList.add('opacity-70', 'cursor-wait');
+            }
+
+            form.submit();
+        });
+    }
+
+    function boot() { initReviewTriggers(); initModalHideHandlers(); initApproveLoading(); initReturnAction(); }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 </script>
 @endpush
 @endsection
-

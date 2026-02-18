@@ -81,6 +81,12 @@
                                     <td class="px-4 py-3 text-center">
                                         @php
                                             $isEditable = in_array(strtolower((string) $list->status), ['draft', 'returned'], true) && is_null($list->locked_at);
+                                            $previewPayload = [
+                                                'id' => (int) $list->id,
+                                                'status' => (string) $list->status,
+                                                'return_remarks' => (string) ($list->return_remarks ?? ''),
+                                                'returned_at' => optional($list->returned_at)->toDateTimeString(),
+                                            ];
                                         @endphp
 
                                         <a href="{{ route('supervisor.uwp', ['uwp_id' => $list->id]) }}"
@@ -93,7 +99,8 @@
                                         <button type="button"
                                                 aria-label="View Unit Work Plan"
                                                 title="View Unit Work Plan"
-                                                onclick="showUwpPreview({{ $list->id }})"
+                                                data-uwp='@json($previewPayload)'
+                                                onclick="showUwpPreview({{ $list->id }}, this)"
                                                 class="inline-flex items-center justify-center rounded-lg
                                                     p-2 text-slate-400 hover:text-white
                                                     hover:bg-slate-800 transition">
@@ -175,6 +182,12 @@
                             -
                         </span>
                     </div>
+                </div>
+
+                <div id="uwp-return-remarks-wrap" class="hidden mx-8 mt-6 rounded-xl border border-rose-500/20 bg-rose-500/5 p-4">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-rose-200">Returned Remarks</p>
+                    <p id="uwp-return-remarks-text" class="mt-2 whitespace-pre-wrap text-sm text-slate-100">—</p>
+                    <p id="uwp-return-remarks-meta" class="mt-2 text-[11px] text-slate-400"></p>
                 </div>
 
                 <!-- PLANNED OUTPUTS -->
@@ -387,8 +400,18 @@
     @push('scripts')
         <script>
             let currentUwpId = null;
-            function showUwpPreview(uwpId) {
+            let selectedUwp = null;
+
+            function showUwpPreview(uwpId, trigger = null) {
                 currentUwpId = uwpId;
+                selectedUwp = null;
+                if (trigger) {
+                    try {
+                        selectedUwp = JSON.parse(trigger.getAttribute('data-uwp') || 'null');
+                    } catch (error) {
+                        selectedUwp = null;
+                    }
+                }
                 updateExportLink(uwpId);
 
                 document.getElementById('uwpPreviewModal').classList.remove('hidden');
@@ -401,6 +424,12 @@
                 document.getElementById('modalSupervisor').textContent = 'Loading...';
                 document.getElementById('modalDeptHead').textContent = 'Loading...';
                 document.getElementById('modalStatus').textContent = 'LOADING';
+                const remarksWrap = document.getElementById('uwp-return-remarks-wrap');
+                const remarksText = document.getElementById('uwp-return-remarks-text');
+                const remarksMeta = document.getElementById('uwp-return-remarks-meta');
+                if (remarksWrap) remarksWrap.classList.add('hidden');
+                if (remarksText) remarksText.textContent = '—';
+                if (remarksMeta) remarksMeta.textContent = '';
 
                 const url = window.uwpPreviewBaseUrl.replace('__ID__', uwpId);
                 console.log('Fetching UWP from:', url);
@@ -445,7 +474,7 @@
                 document.getElementById('modalDeptHead').textContent = uwpData.department_head?.name || 'Not Assigned';
 
                 const statusBadge = document.getElementById('modalStatus');
-                const status = uwpData.status || 'draft';
+                const status = uwpData.status || selectedUwp?.status || 'draft';
                 const normalizedStatus = String(status).toLowerCase();
                 const isLocked = !!uwpData.locked_at;
                 statusBadge.textContent = status.replace('_', ' ').toUpperCase();
@@ -471,6 +500,24 @@
                         submitButton.querySelector('[data-button-label]').textContent = 'Submit for Approval';
                     } else {
                         submitButton.classList.add('hidden');
+                    }
+                }
+
+                const wrap = document.getElementById('uwp-return-remarks-wrap');
+                const txt = document.getElementById('uwp-return-remarks-text');
+                const meta = document.getElementById('uwp-return-remarks-meta');
+                const remarks = String(uwpData.return_remarks ?? selectedUwp?.return_remarks ?? '').trim();
+                const returnedAt = String(uwpData.returned_at ?? selectedUwp?.returned_at ?? '').trim();
+
+                if (wrap && txt && meta) {
+                    if (normalizedStatus === 'returned' && remarks) {
+                        wrap.classList.remove('hidden');
+                        txt.textContent = remarks;
+                        meta.textContent = returnedAt ? ('Returned at: ' + returnedAt) : '';
+                    } else {
+                        wrap.classList.add('hidden');
+                        txt.textContent = '—';
+                        meta.textContent = '';
                     }
                 }
 

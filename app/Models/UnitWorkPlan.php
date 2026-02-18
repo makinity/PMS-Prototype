@@ -32,6 +32,7 @@ class UnitWorkPlan extends Model
         'submitted_at' => 'datetime',
         'endorsed_at'  => 'datetime',
         'approved_at'  => 'datetime',
+        'returned_at'  => 'datetime',
         'locked_at'    => 'datetime',
     ];
 
@@ -48,6 +49,11 @@ class UnitWorkPlan extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function returnedByUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'returned_by');
     }
 
     public function getDepartmentHeadAttribute(): ?User
@@ -96,12 +102,12 @@ class UnitWorkPlan extends Model
 
     public function isDraft(): bool
     {
-        return $this->status === self::STATUS_DRAFT;
+        return strtolower((string) $this->status) === self::STATUS_DRAFT;
     }
 
     public function isReturned(): bool
     {
-        return $this->status === self::STATUS_RETURNED;
+        return strtolower((string) $this->status) === self::STATUS_RETURNED;
     }
 
     public function isEditableBySupervisor(): bool

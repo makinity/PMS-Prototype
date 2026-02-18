@@ -9,6 +9,7 @@ use App\Models\UnitWorkPlan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class SuperVisorOpcrController extends Controller
 {
@@ -109,7 +110,9 @@ class SuperVisorOpcrController extends Controller
             }
 
             $payload = $this->buildUwpPayload($uwp);
-            $payload['opcr_status'] = $opcr->status;
+            $payload['opcr_id'] = $opcr->id;
+            $payload['opcr_status'] = strtolower((string) $opcr->status);
+            $payload['submitted_at'] = optional($opcr->submitted_at)->toDateTimeString();
 
             return [$opcr->id => $payload];
         });
@@ -155,17 +158,119 @@ class SuperVisorOpcrController extends Controller
             return back()->with('error', 'Selected UWP is not eligible for OPCR generation.');
         }
 
-        DB::transaction(function () use ($uwp, $user) {
-            Opcr::query()->firstOrCreate(
-                ['unit_work_plan_id' => $uwp->id],
-                [
-                    'generated_by' => $user->id,
-                    'status' => Opcr::STATUS_FOR_REVIEW,
-                ]
-            );
-        });
+        try {
+            $result = DB::transaction(function () use ($uwp, $user) {
+                /** @var Opcr|null $existing */
+                $existing = Opcr::query()
+                    ->where('unit_work_plan_id', $uwp->id)
+                    ->lockForUpdate()
+                    ->first();
 
-        return back()->with('success', 'OPCR generated from PMT-approved UWP.');
+                if (!$existing) {
+                    $created = Opcr::query()->create([
+                        'unit_work_plan_id' => $uwp->id,
+                        'office_id' => $uwp->office_id,
+                        'performance_period_id' => $uwp->performance_period_id,
+                        'generated_by' => $user->id,
+                        'status' => Opcr::STATUS_DRAFT,
+                        'submitted_at' => null,
+                        'approved_at' => null,
+                        'returned_at' => null,
+                        'remarks' => null,
+                        'locked_at' => null,
+                    ]);
+
+                    return ['opcr' => $created, 'message' => 'OPCR generated as Draft.'];
+                }
+
+                $currentStatus = strtolower((string) $existing->status);
+                if (in_array($currentStatus, [Opcr::STATUS_SUBMITTED, Opcr::STATUS_APPROVED], true)) {
+                    throw ValidationException::withMessages([
+                        'unit_work_plan_id' => 'Only draft/returned OPCR can be regenerated.',
+                    ]);
+                }
+
+                if ($currentStatus === Opcr::STATUS_RETURNED || $existing->isLocked()) {
+                    $existing->forceFill([
+                        'status' => Opcr::STATUS_DRAFT,
+                        'submitted_at' => null,
+                        'approved_at' => null,
+                        'returned_at' => null,
+                        'remarks' => null,
+                        'locked_at' => null,
+                        'generated_by' => $user->id,
+                        'office_id' => $uwp->office_id,
+                        'performance_period_id' => $uwp->performance_period_id,
+                    ])->save();
+
+                    return ['opcr' => $existing, 'message' => 'Returned OPCR regenerated to Draft.'];
+                }
+
+                return ['opcr' => $existing, 'message' => 'OPCR is already in Draft.'];
+            });
+        } catch (ValidationException $e) {
+            $message = (string) ($e->validator->errors()->first() ?? 'Invalid OPCR transition.');
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $message], 422);
+            }
+
+            return back()->with('error', $message);
+        }
+
+        return back()->with('success', (string) $result['message']);
+    }
+
+    public function submit(Request $request, int $opcr)
+    {
+        $user = Auth::user();
+        if (!$user || $user->role !== 'supervisor') {
+            abort(403, 'Unauthorized.');
+        }
+
+        /** @var Opcr|null $opcrModel */
+        $opcrModel = Opcr::query()
+            ->whereKey($opcr)
+            ->whereHas('unitWorkPlan', function ($query) use ($user) {
+                $query->where('created_by', $user->id);
+            })
+            ->first();
+
+        if (!$opcrModel) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'OPCR not found.'], 404);
+            }
+
+            return back()->with('error', 'OPCR not found.');
+        }
+
+        $status = strtolower((string) $opcrModel->status);
+        if ($opcrModel->isLocked() || $status !== Opcr::STATUS_DRAFT) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Only draft OPCR can be submitted.',
+                ], 422);
+            }
+
+            return back()->with('error', 'Only draft OPCR can be submitted.');
+        }
+
+        $opcrModel->forceFill([
+            'status' => Opcr::STATUS_SUBMITTED,
+            'submitted_at' => now(),
+            'approved_at' => null,
+            'returned_at' => null,
+            'remarks' => null,
+            'locked_at' => now(),
+        ])->save();
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'OPCR submitted to Department Head.',
+            ]);
+        }
+
+        return back()->with('success', 'OPCR submitted to Department Head.');
     }
 
     private function buildUwpPayload(UnitWorkPlan $uwp): array

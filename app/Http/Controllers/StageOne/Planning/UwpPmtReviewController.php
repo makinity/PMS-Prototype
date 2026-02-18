@@ -8,6 +8,7 @@ use App\Models\UnitWorkPlan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class UwpPmtReviewController extends Controller
 {
@@ -26,9 +27,10 @@ class UwpPmtReviewController extends Controller
             ->orderByDesc('start_date')
             ->first();
 
-        $status = strtolower(trim($request->string('status')->toString()));
+        $statusRaw = $request->get('status', null);
+        $hasStatusParam = $request->has('status');
+        $status = strtolower(trim((string) $statusRaw));
         $allowedStatuses = [
-            UnitWorkPlan::STATUS_DRAFT,
             UnitWorkPlan::STATUS_SUBMITTED,
             UnitWorkPlan::STATUS_ENDORSED,
             UnitWorkPlan::STATUS_PMT_APPROVED,
@@ -59,12 +61,14 @@ class UwpPmtReviewController extends Controller
                 },
             ]);
 
-        if (!$status) {
+        $uwpsQuery->where('status', '!=', UnitWorkPlan::STATUS_DRAFT);
+
+        if (!$hasStatusParam) {
             $uwpsQuery->where('status', UnitWorkPlan::STATUS_ENDORSED);
-        } elseif (in_array($status, $allowedStatuses, true)) {
+        } elseif ($status === UnitWorkPlan::STATUS_DRAFT) {
+            $uwpsQuery->where('status', UnitWorkPlan::STATUS_ENDORSED);
+        } elseif ($status !== '' && in_array($status, $allowedStatuses, true)) {
             $uwpsQuery->where('status', $status);
-        } else {
-            $uwpsQuery->where('status', UnitWorkPlan::STATUS_ENDORSED);
         }
 
         if ($activePeriod) {
@@ -76,7 +80,67 @@ class UwpPmtReviewController extends Controller
             ->orderByDesc('id')
             ->get();
 
-        return view('pmt.uwp', compact('uwps', 'activePeriod'));
+        return view('pmt.uwp', [
+            'uwps' => $uwps,
+            'activePeriod' => $activePeriod,
+            'selectedStatus' => ($hasStatusParam && $status !== '' && in_array($status, $allowedStatuses, true)) ? $status : '',
+        ]);
+    }
+
+    public function review(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user || $user->role !== 'pmt') {
+            abort(403, 'Unauthorized.');
+        }
+
+        $validated = $request->validate([
+            'unit_work_plan_id' => ['required', 'integer', 'exists:unit_work_plans,id'],
+            'action' => ['required', Rule::in(['approve', 'return'])],
+            'remarks' => ['nullable', 'string'],
+        ]);
+
+        $result = DB::transaction(function () use ($validated) {
+            $uwp = UnitWorkPlan::query()
+                ->where('id', $validated['unit_work_plan_id'])
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if ($uwp->status !== UnitWorkPlan::STATUS_ENDORSED) {
+                return ['ok' => false, 'message' => 'Only Endorsed UWPs can be reviewed by PMT.'];
+            }
+
+            if ($validated['action'] === 'return') {
+                $remarks = trim((string) ($validated['remarks'] ?? ''));
+                if ($remarks === '') {
+                    return ['ok' => false, 'message' => 'Remarks are required when returning a UWP.'];
+                }
+
+                $uwp->forceFill([
+                    'status' => UnitWorkPlan::STATUS_RETURNED,
+                    'endorsed_at' => null,
+                    'approved_at' => null,
+                    'locked_at' => null,
+                    'submitted_at' => null,
+                ])->save();
+
+                return ['ok' => true, 'message' => 'UWP returned to Supervisor for revision.'];
+            }
+
+            $uwp->forceFill([
+                'status' => UnitWorkPlan::STATUS_PMT_APPROVED,
+                'approved_at' => now(),
+                'locked_at' => now(),
+            ])->save();
+
+            return ['ok' => true, 'message' => 'UWP approved by PMT. Status is now PMT Approved.'];
+        });
+
+        if (!$result['ok']) {
+            return back()->with('error', $result['message']);
+        }
+
+        return back()->with('success', $result['message']);
     }
 
     public function approve(Request $request)
@@ -115,6 +179,60 @@ class UwpPmtReviewController extends Controller
             return [
                 'ok' => true,
                 'message' => 'UWP approved by PMT. Status is now PMT Approved.',
+            ];
+        });
+
+        if (!$result['ok']) {
+            return back()->with('error', $result['message']);
+        }
+
+        return back()->with('success', $result['message']);
+    }
+
+    public function returnUwp(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user || $user->role !== 'pmt') {
+            abort(403, 'Unauthorized.');
+        }
+
+        $validated = $request->validate([
+            'unit_work_plan_id' => ['required', 'integer', 'exists:unit_work_plans,id'],
+            'remarks' => ['required', 'string', 'max:5000'],
+        ]);
+
+        $remarks = trim((string) $validated['remarks']);
+        if ($remarks === '') {
+            return back()->with('error', 'Remarks are required when returning a UWP.');
+        }
+
+        $result = DB::transaction(function () use ($validated, $user, $remarks) {
+            $uwp = UnitWorkPlan::query()
+                ->whereKey($validated['unit_work_plan_id'])
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if ($uwp->status !== UnitWorkPlan::STATUS_ENDORSED) {
+                return [
+                    'ok' => false,
+                    'message' => 'Only Endorsed UWPs can be returned by PMT.',
+                ];
+            }
+
+            $uwp->forceFill([
+                'status' => UnitWorkPlan::STATUS_RETURNED,
+                'returned_at' => now(),
+                'returned_by' => $user->id,
+                'returned_by_role' => 'pmt',
+                'return_remarks' => $remarks,
+                'approved_at' => null,
+                'locked_at' => null,
+                'submitted_at' => null,
+            ])->save();
+
+            return [
+                'ok' => true,
+                'message' => 'UWP returned to Supervisor for revision.',
             ];
         });
 

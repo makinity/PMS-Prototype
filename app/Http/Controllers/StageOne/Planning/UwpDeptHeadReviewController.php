@@ -26,12 +26,12 @@ class UwpDeptHeadReviewController extends Controller
 
         $status = strtolower(trim($request->string('status')->toString()));
         $allowedStatuses = [
-            UnitWorkPlan::STATUS_DRAFT,
             UnitWorkPlan::STATUS_SUBMITTED,
             UnitWorkPlan::STATUS_ENDORSED,
             UnitWorkPlan::STATUS_PMT_APPROVED,
             UnitWorkPlan::STATUS_RETURNED,
         ];
+        $hasValidStatus = $status !== '' && in_array($status, $allowedStatuses, true);
 
         $uwpsQuery = UnitWorkPlan::query()
             ->with([
@@ -58,12 +58,10 @@ class UwpDeptHeadReviewController extends Controller
             ])
             ->whereHas('office.head', fn ($q) => $q->whereKey($user->id));
 
-        if (!$status) {
-            $uwpsQuery->where('status', UnitWorkPlan::STATUS_SUBMITTED);
-        } elseif (in_array($status, $allowedStatuses, true)) {
+        $uwpsQuery->where('status', '!=', UnitWorkPlan::STATUS_DRAFT);
+
+        if ($hasValidStatus) {
             $uwpsQuery->where('status', $status);
-        } else {
-            $uwpsQuery->where('status', UnitWorkPlan::STATUS_SUBMITTED);
         }
 
         if ($activePeriod) {
@@ -78,6 +76,7 @@ class UwpDeptHeadReviewController extends Controller
         return view('dept-head.uwp', [
             'uwps' => $uwps,
             'activePeriod' => $activePeriod,
+            'selectedStatus' => $hasValidStatus ? $status : '',
         ]);
     }
 
@@ -92,62 +91,124 @@ class UwpDeptHeadReviewController extends Controller
         }
 
         $validated = $request->validate([
-            'unit_work_plan_id' => ['required', 'integer', 'exists:unit_work_plans,id'],
+            'unit_work_plan_id' => ['required', 'exists:unit_work_plans,id'],
             'action' => ['required', Rule::in(['endorse', 'return'])],
-            'remarks' => ['nullable', 'string', 'max:5000'],
+            'remarks' => ['nullable', 'string'],
         ]);
 
-        return DB::transaction(function () use ($validated, $user) {
-            /** @var UnitWorkPlan $uwp */
+        $uwp = UnitWorkPlan::with('office.head')
+            ->findOrFail($validated['unit_work_plan_id']);
+
+        if (!$uwp->office || !$uwp->office->head || (int) $uwp->office->head->id !== (int) $user->id) {
+            return back()->with('error', 'You are not authorized to review this Unit Work Plan.');
+        }
+
+        $reviewable = in_array($uwp->status, [
+            UnitWorkPlan::STATUS_SUBMITTED,
+            UnitWorkPlan::STATUS_ENDORSED,
+        ], true);
+
+        if (!$reviewable) {
+            return back()->with('error', 'Only submitted or endorsed Unit Work Plans can be reviewed.');
+        }
+
+        if ($validated['action'] === 'endorse' && $uwp->status !== UnitWorkPlan::STATUS_SUBMITTED) {
+            return back()->with('error', 'Only submitted Unit Work Plans can be endorsed.');
+        }
+
+        if ($validated['action'] === 'return' && empty(trim((string) ($validated['remarks'] ?? '')))) {
+            return back()->with('error', 'Remarks are required when returning a Unit Work Plan.');
+        }
+
+        DB::transaction(function () use ($uwp, $validated, $user) {
+            if ($validated['action'] === 'endorse') {
+                $uwp->status = UnitWorkPlan::STATUS_ENDORSED;
+                $uwp->endorsed_at = now();
+                $uwp->returned_at = null;
+                $uwp->returned_by = null;
+                $uwp->returned_by_role = null;
+                $uwp->return_remarks = null;
+            }
+
+            if ($validated['action'] === 'return') {
+                $uwp->status = UnitWorkPlan::STATUS_RETURNED;
+                $uwp->returned_at = now();
+                $uwp->returned_by = $user->id;
+                $uwp->returned_by_role = 'dept-head';
+                $uwp->return_remarks = trim((string) ($validated['remarks'] ?? ''));
+                $uwp->endorsed_at = null;
+                $uwp->approved_at = null;
+                $uwp->locked_at = null;
+                $uwp->submitted_at = null;
+            }
+
+            $uwp->save();
+        });
+
+        return redirect()
+            ->route('dept-head.uwp.index', $request->only('status'))
+            ->with('success', 'Unit Work Plan successfully reviewed.');
+    }
+
+    public function returnUwp(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            abort(403, 'Unauthorized.');
+        }
+
+        $validated = $request->validate([
+            'unit_work_plan_id' => ['required', 'integer', 'exists:unit_work_plans,id'],
+            'remarks' => ['required', 'string', 'max:5000'],
+        ]);
+
+        $remarks = trim((string) $validated['remarks']);
+        if ($remarks === '') {
+            return back()->with('error', 'Remarks are required when returning a Unit Work Plan.');
+        }
+
+        $result = DB::transaction(function () use ($validated, $user) {
             $uwp = UnitWorkPlan::query()
-                ->where('id', $validated['unit_work_plan_id'])
-                ->whereHas('office.head', fn ($q) => $q->whereKey($user->id))
+                ->with('office.head')
+                ->whereKey($validated['unit_work_plan_id'])
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            // Only allow actions when UWP is currently submitted
+            if (!$uwp->office || !$uwp->office->head || (int) $uwp->office->head->id !== (int) $user->id) {
+                return [
+                    'ok' => false,
+                    'message' => 'You are not authorized to review this Unit Work Plan.',
+                ];
+            }
+
             if ($uwp->status !== UnitWorkPlan::STATUS_SUBMITTED) {
-                return back()->with('error', 'This UWP is not in a reviewable status.');
+                return [
+                    'ok' => false,
+                    'message' => 'Only submitted Unit Work Plans can be returned.',
+                ];
             }
 
-            if ($validated['action'] === 'endorse') {
-                $uwp->forceFill([
-                    'status' => UnitWorkPlan::STATUS_ENDORSED,
-                    'endorsed_at' => now(),
-                    // optional: lock after endorse if your flow requires
-                    // 'locked_at' => now(),
-                ])->save();
-
-                // Optional: persist remarks to audit log or separate table
-                // e.g. UwpReviewLog::create([...])
-
-                return back()->with('success', 'UWP endorsed and forwarded to PMT.');
-            }
-
-            // action === return
-            $remarks = trim((string) ($validated['remarks'] ?? ''));
-
-            if ($remarks === '') {
-                return back()->with('error', 'Remarks are required when returning the UWP.');
-            }
-
-            // If you have a STATUS_RETURNED constant, use it.
-            // If not, keep 'returned' as string or add constant in model.
             $uwp->forceFill([
                 'status' => UnitWorkPlan::STATUS_RETURNED,
+                'returned_at' => now(),
+                'returned_by' => $user->id,
+                'returned_by_role' => 'dept-head',
+                'return_remarks' => trim((string) $validated['remarks']),
+                'submitted_at' => null,
                 'endorsed_at' => null,
+                'approved_at' => null,
                 'locked_at' => null,
             ])->save();
 
-            // Optional: store remarks somewhere (recommended)
-            // e.g. UwpReviewLog::create([
-            //   'unit_work_plan_id' => $uwp->id,
-            //   'reviewed_by' => $user->id,
-            //   'action' => 'returned',
-            //   'remarks' => $remarks,
-            // ]);
-
-            return back()->with('success', 'UWP returned to supervisor for revision.');
+            return ['ok' => true];
         });
+
+        if (!($result['ok'] ?? false)) {
+            return back()->with('error', $result['message'] ?? 'Unable to return Unit Work Plan.');
+        }
+
+        return redirect()
+            ->route('dept-head.uwp.index', $request->only('status'))
+            ->with('success', 'Unit Work Plan returned to Supervisor.');
     }
 }

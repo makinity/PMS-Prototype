@@ -6,7 +6,7 @@
         <div>
             <h1 class="text-2xl font-bold text-white">Office Performance Commitment and Review (OPCR)</h1>
             <p class="text-sm text-slate-400">Stage I - Performance Planning and Commitment</p>
-            <p class="text-xs text-slate-500">Review OPCRs submitted by Admin based on PMT-approved Unit Work Plans.</p>
+            <p class="text-xs text-slate-500">Review OPCRs submitted by Supervisors based on PMT-approved Unit Work Plans.</p>
         </div>
     </div>
 
@@ -32,8 +32,10 @@
                         onchange="this.form.submit()"
                         style="background:#0f172a;color:#e5e7eb;"
                         class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none">
+                    <option value="all" {{ $selectedStatus === 'all' ? 'selected' : '' }}>All Status</option>
                     <option value="submitted" {{ $selectedStatus === 'submitted' ? 'selected' : '' }}>Submitted</option>
                     <option value="endorsed" {{ $selectedStatus === 'endorsed' ? 'selected' : '' }}>Endorsed</option>
+                    <option value="approved" {{ $selectedStatus === 'approved' ? 'selected' : '' }}>Approved</option>
                     <option value="returned" {{ $selectedStatus === 'returned' ? 'selected' : '' }}>Returned</option>
                 </select>
             </form>
@@ -54,10 +56,11 @@
                     @forelse($opcrs as $opcr)
                         @php
                             $payload = $opcrPayloads[$opcr->id] ?? null;
-                            $isSubmitted = in_array((string) $opcr->status, [\App\Models\Opcr::STATUS_SUBMITTED, \App\Models\Opcr::STATUS_FOR_REVIEW], true);
+                            $isSubmitted = strtolower((string) $opcr->status) === \App\Models\Opcr::STATUS_SUBMITTED;
                             $statusMeta = match ($opcr->status) {
-                                \App\Models\Opcr::STATUS_SUBMITTED, \App\Models\Opcr::STATUS_FOR_REVIEW => ['label' => 'Submitted', 'class' => 'border-amber-500/30 bg-amber-500/20 text-amber-300'],
-                                \App\Models\Opcr::STATUS_ENDORSED, \App\Models\Opcr::STATUS_APPROVED => ['label' => 'Endorsed', 'class' => 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'],
+                                \App\Models\Opcr::STATUS_SUBMITTED => ['label' => 'Submitted', 'class' => 'border-amber-500/30 bg-amber-500/20 text-amber-300'],
+                                \App\Models\Opcr::STATUS_ENDORSED => ['label' => 'Endorsed', 'class' => 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'],
+                                \App\Models\Opcr::STATUS_APPROVED => ['label' => 'Approved', 'class' => 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'],
                                 \App\Models\Opcr::STATUS_RETURNED => ['label' => 'Returned', 'class' => 'border-rose-500/30 bg-rose-500/10 text-rose-300'],
                                 default => ['label' => ucwords(str_replace('_', ' ', (string) $opcr->status)), 'class' => 'border-slate-500/30 bg-slate-500/10 text-slate-300'],
                             };
@@ -75,10 +78,10 @@
                                         data-opcr='@json($payload)'
                                         class="text-blue-400 hover:text-blue-300 {{ $payload ? '' : 'opacity-60 pointer-events-none' }}"
                                         {{ $payload ? '' : 'disabled' }}>
-                                    {{ $isSubmitted ? 'Review' : 'View' }}
+                                    {{ $isSubmitted ? 'Endorse / Return' : 'View' }}
                                 </button>
                                 @unless ($isSubmitted)
-                                    <span class="ml-2 inline-flex items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-300">Endorsed</span>
+                                    <span class="ml-2 inline-flex items-center rounded-full border border-slate-500/30 bg-slate-500/10 px-2 py-0.5 text-[10px] font-semibold text-slate-300">Read-only</span>
                                 @endunless
                             </td>
                         </tr>
@@ -155,7 +158,7 @@
                 </div>
 
                 <div class="mt-6 flex flex-col-reverse gap-3 border-t border-slate-800 pt-4 sm:flex-row sm:items-center sm:justify-between">
-                    <p class="text-[11px] text-slate-500">Endorse to proceed to PMT review; return sends it back to Admin.</p>
+                    <p class="text-[11px] text-slate-500">Endorse to forward OPCR to PMT; return sends it back to Supervisor for regeneration.</p>
                     <div class="flex flex-wrap justify-end gap-3">
                         <button type="button" data-close-modal class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">Close</button>
 
@@ -163,7 +166,7 @@
                                 data-review-action="return"
                                 data-loading-text="Returning..."
                                 class="inline-flex items-center gap-2 rounded-lg border border-amber-600 px-4 py-2 text-sm font-semibold text-amber-300 hover:bg-amber-600/10">
-                            <span data-button-label>Return to Admin</span>
+                            <span data-button-label>Return to Supervisor</span>
                             <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
                         </button>
 
@@ -312,9 +315,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const opcrStatusMeta = (status) => {
         const key = String(status || '').toLowerCase();
-        if (key === 'submitted' || key === 'for_dept_head_review') return { label: 'Submitted', cls: 'border-amber-500/30 bg-amber-500/20 text-amber-300' };
-        if (key === 'endorsed' || key === 'approved') return { label: 'Endorsed', cls: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300' };
+        if (key === 'submitted') return { label: 'Submitted', cls: 'border-amber-500/30 bg-amber-500/20 text-amber-300' };
+        if (key === 'endorsed') return { label: 'Endorsed', cls: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300' };
+        if (key === 'approved') return { label: 'Approved', cls: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300' };
         if (key === 'returned') return { label: 'Returned', cls: 'border-rose-500/30 bg-rose-500/10 text-rose-300' };
+        if (key === 'draft') return { label: 'Draft', cls: 'border-slate-500/30 bg-slate-500/10 text-slate-300' };
         return { label: key.replaceAll('_', ' ').replace(/\b\w/g, (char) => char.toUpperCase()), cls: 'border-slate-500/30 bg-slate-500/10 text-slate-300' };
     };
 
@@ -534,26 +539,17 @@ document.addEventListener('DOMContentLoaded', function () {
         if (opcrId) opcrId.value = payload?.opcr?.id || '';
         if (actionInput) actionInput.value = '';
 
-        const canEndorse = opcrStatus === 'submitted' || opcrStatus === 'for_dept_head_review';
+        const canReview = opcrStatus === 'submitted';
 
         document.querySelectorAll('[data-review-action]').forEach((btn) => {
             setButtonLoading(btn, false);
             btn.classList.remove('opacity-70', 'cursor-wait');
 
-            if (btn.getAttribute('data-review-action') === 'endorse') {
-                btn.disabled = !canEndorse;
-                if (!canEndorse) {
-                    btn.classList.add('opacity-60', 'pointer-events-none');
-                } else {
-                    btn.classList.remove('opacity-60', 'pointer-events-none');
-                }
+            btn.disabled = !canReview;
+            if (!canReview) {
+                btn.classList.add('opacity-60', 'pointer-events-none');
             } else {
-                btn.disabled = !canEndorse;
-                if (!canEndorse) {
-                    btn.classList.add('opacity-60', 'pointer-events-none');
-                } else {
-                    btn.classList.remove('opacity-60', 'pointer-events-none');
-                }
+                btn.classList.remove('opacity-60', 'pointer-events-none');
             }
         });
 
@@ -594,6 +590,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const remarksEl = document.getElementById('dh-opcr-remarks');
     const remarksErrorEl = document.getElementById('dh-opcr-remarks-error');
     const actionInput = document.getElementById('dh-opcr-action');
+    const endorseUrlTemplate = @json(route('dept-head.opcr.endorse', ['opcr' => '__ID__']));
+    const returnUrlTemplate = @json(route('dept-head.opcr.return', ['opcr' => '__ID__']));
 
     document.querySelectorAll('[data-review-action]').forEach((button) => {
         button.addEventListener('click', () => {
@@ -604,6 +602,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const opcrId = document.getElementById('dh-opcr-id')?.value || '';
             if (!opcrId) return;
+
+            if (action === 'endorse') {
+                reviewForm.action = endorseUrlTemplate.replace('__ID__', opcrId);
+            } else if (action === 'return') {
+                reviewForm.action = returnUrlTemplate.replace('__ID__', opcrId);
+            }
 
             if (remarksErrorEl) remarksErrorEl.classList.add('hidden');
 

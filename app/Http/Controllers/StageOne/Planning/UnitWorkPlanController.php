@@ -61,6 +61,7 @@ class UnitWorkPlanController extends Controller
         if ($selectedUwpId > 0) {
             $uwp = UnitWorkPlan::query()
                 ->with([
+                    'returnedByUser',
                     'uwpFunctions' => function ($query) {
                         $query->orderBy('sort_order')->with([
                             'mfos' => function ($mfoQuery) {

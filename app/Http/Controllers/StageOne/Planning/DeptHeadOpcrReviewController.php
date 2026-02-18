@@ -5,17 +5,17 @@ namespace App\Http\Controllers\StageOne\Planning;
 use App\Http\Controllers\Controller;
 use App\Models\Opcr;
 use App\Models\PerformancePeriod;
+use App\Models\UnitWorkPlan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 
 class DeptHeadOpcrReviewController extends Controller
 {
     public function index(Request $request)
     {
         $user = Auth::user();
-        if (!$user) {
+        if (!$user || $user->role !== 'dept-head') {
             abort(403, 'Unauthorized.');
         }
 
@@ -27,14 +27,15 @@ class DeptHeadOpcrReviewController extends Controller
         $allowedStatuses = [
             Opcr::STATUS_SUBMITTED,
             Opcr::STATUS_ENDORSED,
-            Opcr::STATUS_FOR_REVIEW,
             Opcr::STATUS_APPROVED,
             Opcr::STATUS_RETURNED,
         ];
 
-        $status = strtolower(trim($request->string('status')->toString()));
-        $status = in_array($status, $allowedStatuses, true)
-            ? $status
+        $rawStatus = strtolower(trim($request->string('status')->toString()));
+        $isAll = ($rawStatus === 'all');
+
+        $status = in_array($rawStatus, $allowedStatuses, true)
+            ? $rawStatus
             : Opcr::STATUS_SUBMITTED;
 
         $opcrs = Opcr::query()
@@ -61,9 +62,7 @@ class DeptHeadOpcrReviewController extends Controller
             ->when($activePeriod, function ($q) use ($activePeriod) {
                 $q->whereHas('unitWorkPlan', fn ($uq) => $uq->where('performance_period_id', $activePeriod->id));
             })
-            ->when($status === Opcr::STATUS_SUBMITTED, function ($q) {
-                $q->whereIn('status', [Opcr::STATUS_SUBMITTED, Opcr::STATUS_FOR_REVIEW]);
-            }, function ($q) use ($status) {
+            ->when(!$isAll, function ($q) use ($status) {
                 $q->where('status', $status);
             })
             ->orderByDesc('id')
@@ -77,65 +76,134 @@ class DeptHeadOpcrReviewController extends Controller
             'activePeriod' => $activePeriod,
             'opcrs' => $opcrs,
             'opcrPayloads' => $opcrPayloads,
-            'selectedStatus' => $status,
+            'selectedStatus' => $isAll ? 'all' : $status,
         ]);
     }
 
     public function review(Request $request)
     {
+        $validated = $request->validate([
+            'opcr_id' => ['required', 'integer', 'exists:opcrs,id'],
+            'action' => ['required', 'in:endorse,return'],
+            'remarks' => ['nullable', 'string', 'max:5000'],
+        ]);
+
+        if ($validated['action'] === 'endorse') {
+            return $this->endorse($request, (int) $validated['opcr_id']);
+        }
+
+        $request->merge(['remarks' => $validated['remarks'] ?? null]);
+        return $this->returnOpcr($request, (int) $validated['opcr_id']);
+    }
+
+    public function endorse(Request $request, int $opcr)
+    {
         $user = Auth::user();
-        if (!$user) {
+        if (!$user || $user->role !== 'dept-head') {
+            abort(403, 'Unauthorized.');
+        }
+
+        /** @var Opcr|null $model */
+        $model = Opcr::query()
+            ->whereKey($opcr)
+            ->whereHas('unitWorkPlan.office.head', fn ($q) => $q->whereKey($user->id))
+            ->lockForUpdate()
+            ->first();
+
+        if (!$model) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'OPCR not found.'], 404);
+            }
+
+            return back()->with('error', 'OPCR not found.');
+        }
+
+        $status = strtolower((string) $model->status);
+        if ($status !== Opcr::STATUS_SUBMITTED) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Only submitted OPCR can be endorsed.'], 422);
+            }
+
+            return back()->with('error', 'Only submitted OPCR can be endorsed.');
+        }
+
+        DB::transaction(function () use ($model, $user) {
+            $model->forceFill([
+                'status' => Opcr::STATUS_ENDORSED,
+                'approved_by' => $user->id,
+                'approved_at' => now(),
+                'returned_at' => null,
+                'remarks' => null,
+                'locked_at' => now(),
+            ])->save();
+        });
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'OPCR endorsed.']);
+        }
+
+        return back()->with('success', 'OPCR endorsed.');
+    }
+
+    public function returnOpcr(Request $request, int $opcr)
+    {
+        $user = Auth::user();
+        if (!$user || $user->role !== 'dept-head') {
             abort(403, 'Unauthorized.');
         }
 
         $validated = $request->validate([
-            'opcr_id' => ['required', 'integer', 'exists:opcrs,id'],
-            'action' => ['required', Rule::in(['endorse', 'approve', 'return'])],
-            'remarks' => ['nullable', 'string', 'max:5000'],
+            'remarks' => ['required', 'string', 'max:5000'],
         ]);
 
-        return DB::transaction(function () use ($validated, $user) {
-            /** @var Opcr $opcr */
-            $opcr = Opcr::query()
-                ->whereKey($validated['opcr_id'])
-                ->whereHas('unitWorkPlan.office.head', fn ($q) => $q->whereKey($user->id))
-                ->lockForUpdate()
-                ->firstOrFail();
+        /** @var Opcr|null $model */
+        $model = Opcr::query()
+            ->whereKey($opcr)
+            ->whereHas('unitWorkPlan.office.head', fn ($q) => $q->whereKey($user->id))
+            ->lockForUpdate()
+            ->first();
 
-            $reviewableStatuses = [Opcr::STATUS_SUBMITTED, Opcr::STATUS_FOR_REVIEW];
-            if (!in_array($opcr->status, $reviewableStatuses, true)) {
-                return back()->with('error', 'Only submitted OPCRs can be endorsed.');
+        if (!$model) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'OPCR not found.'], 404);
             }
 
-            if (in_array($validated['action'], ['endorse', 'approve'], true)) {
-                $opcr->forceFill([
-                    'status' => Opcr::STATUS_ENDORSED,
-                    'approved_by' => $user->id,
-                    'approved_at' => now(),
-                    'returned_at' => null,
-                    'remarks' => null,
-                    'locked_at' => now(),
-                ])->save();
+            return back()->with('error', 'OPCR not found.');
+        }
 
-                return back()->with('success', 'OPCR endorsed.');
+        $status = strtolower((string) $model->status);
+        if ($status !== Opcr::STATUS_SUBMITTED) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Only submitted OPCR can be returned.'], 422);
             }
 
-            $remarks = trim((string) ($validated['remarks'] ?? ''));
-            if ($remarks === '') {
-                return back()->with('error', 'Remarks are required when returning the OPCR.');
-            }
+            return back()->with('error', 'Only submitted OPCR can be returned.');
+        }
 
-            $opcr->forceFill([
+        DB::transaction(function () use ($model, $validated) {
+            $model->forceFill([
                 'status' => Opcr::STATUS_RETURNED,
                 'approved_by' => null,
                 'approved_at' => null,
                 'returned_at' => now(),
-                'remarks' => $remarks,
+                'remarks' => trim((string) $validated['remarks']),
                 'locked_at' => null,
             ])->save();
 
-            return back()->with('success', 'OPCR returned to Admin for revision.');
+            $sourceUwp = $model->unitWorkPlan()->lockForUpdate()->first();
+            if ($sourceUwp) {
+                $sourceUwp->forceFill([
+                    'status' => UnitWorkPlan::STATUS_RETURNED,
+                    'locked_at' => null,
+                ])->save();
+            }
         });
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'OPCR returned to Supervisor.']);
+        }
+
+        return back()->with('success', 'OPCR returned to Supervisor.');
     }
 
     private function buildPayload(Opcr $opcr): array

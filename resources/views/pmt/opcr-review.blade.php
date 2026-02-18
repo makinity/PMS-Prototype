@@ -33,10 +33,12 @@
                         onchange="this.form.submit()"
                         style="background:#0f172a;color:#e5e7eb;"
                         class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none">
-                    <option value="endorsed" {{ $selectedStatus === 'endorsed' ? 'selected' : '' }}>For PMT Review</option>
-                    <option value="approved" {{ $selectedStatus === 'approved' ? 'selected' : '' }}>Final Approved</option>
-                    <option value="returned" {{ $selectedStatus === 'returned' ? 'selected' : '' }}>Returned</option>
+                    <option value="" {{ $selectedStatus === '' ? 'selected' : '' }}>All Status</option>
                     <option value="submitted" {{ $selectedStatus === 'submitted' ? 'selected' : '' }}>Submitted</option>
+                    <option value="endorsed" {{ $selectedStatus === 'endorsed' ? 'selected' : '' }}>Endorsed</option>
+                    <option value="approved" {{ $selectedStatus === 'approved' ? 'selected' : '' }}>Approved</option>
+                    <option value="returned" {{ $selectedStatus === 'returned' ? 'selected' : '' }}>Returned</option>
+
                 </select>
             </form>
         </div>
@@ -58,8 +60,8 @@
                             $payload = $opcrPayloads[$opcr->id] ?? null;
                             $isReviewable = in_array(strtolower((string) $opcr->status), ['endorsed', 'for_pmt_review'], true);
                             $statusMeta = match (strtolower((string) $opcr->status)) {
-                                'endorsed', 'for_pmt_review' => ['label' => 'For PMT Review', 'class' => 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'],
-                                'approved' => ['label' => 'Final Approved', 'class' => 'border-cyan-500/30 bg-cyan-500/10 text-cyan-300'],
+                                'endorsed', 'for_pmt_review' => ['label' => 'Endorsed', 'class' => 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'],
+                                'approved' => ['label' => 'Approved', 'class' => 'border-cyan-500/30 bg-cyan-500/10 text-cyan-300'],
                                 'returned' => ['label' => 'Returned', 'class' => 'border-rose-500/30 bg-rose-500/10 text-rose-300'],
                                 default => ['label' => 'Submitted', 'class' => 'border-amber-500/30 bg-amber-500/20 text-amber-300'],
                             };

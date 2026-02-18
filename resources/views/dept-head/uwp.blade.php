@@ -8,6 +8,18 @@
     </p>
 </div>
 
+@if (session('success'))
+    <div class="mb-4 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+        {{ session('success') }}
+    </div>
+@endif
+
+@if (session('error'))
+    <div class="mb-4 rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+        {{ session('error') }}
+    </div>
+@endif
+
 {{-- Filters / Meta (Optional but useful) --}}
 <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-5 mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
     <div>
@@ -27,6 +39,9 @@
                 focus:ring-2 focus:ring-blue-500/40 focus:outline-none"
             style="background:#0f172a;color:#e5e7eb;"
         />
+        @php
+            $statusFilter = strtolower((string) ($selectedStatus ?? request('status', '')));
+        @endphp
         <form method="GET" action="{{ route('dept-head.uwp.index') }}">
             <select
                 name="status"
@@ -34,11 +49,11 @@
                 style="background:#0f172a;color:#e5e7eb;"
                 class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2
                 text-sm text-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                <option value="" {{ request('status') === null || request('status') === '' ? 'selected' : '' }}>All Status</option>
-                <option value="submitted" {{ request('status') === 'submitted' ? 'selected' : '' }}>Submitted</option>
-                <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>Draft</option>
-                <option value="endorsed" {{ request('status') === 'endorsed' ? 'selected' : '' }}>Endorsed</option>
-                <option value="returned" {{ request('status') === 'returned' ? 'selected' : '' }}>Returned</option>
+                <option value="" {{ $statusFilter === '' ? 'selected' : '' }}>All Status</option>
+                <option value="submitted" {{ $statusFilter === 'submitted' ? 'selected' : '' }}>Submitted</option>
+                <option value="endorsed" {{ $statusFilter === 'endorsed' ? 'selected' : '' }}>Endorsed</option>
+                <option value="pmt_approved" {{ $statusFilter === 'pmt_approved' ? 'selected' : '' }}>PMT Approved</option>
+                <option value="returned" {{ $statusFilter === 'returned' ? 'selected' : '' }}>Returned</option>
             </select>
         </form>
     </div>
@@ -71,6 +86,9 @@
                         $payload = [
                             'id' => $uwp->id,
                             'status' => $uwp->status,
+                            'return_remarks' => (string) ($uwp->return_remarks ?? ''),
+                            'returned_at' => optional($uwp->returned_at)->toDateTimeString(),
+                            'returned_by_role' => (string) ($uwp->returned_by_role ?? ''),
                             'office' => [
                                 'id' => $uwp->office?->id,
                                 'name' => $uwp->office?->name,
@@ -182,84 +200,105 @@
 
 {{-- Review UWP Modal (Flowbite-style) --}}
 <div id="uwp-review-modal" data-modal-container tabindex="-1" aria-hidden="true"
-     class="fixed inset-0 z-50 hidden flex items-center justify-center">
-    <div class="absolute inset-0 bg-slate-950/80 backdrop-blur" data-modal-hide="uwp-review-modal"></div>
-    <div class="relative z-10 w-full max-w-5xl px-4">
-        <div class="w-full overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl">
-            <div class="flex items-start justify-between gap-4 border-b border-slate-800 px-6 py-4">
-                <div class="space-y-2">
-                    <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Unit Work Plan</p>
-                    <h3 class="text-lg font-semibold text-white">Review UWP</h3>
-                    <div class="grid grid-cols-1 gap-3 text-sm text-slate-300 sm:grid-cols-2">
-                        <div>
-                            <p class="text-xs uppercase tracking-wide text-slate-500">Office / Unit</p>
-                            <p id="uwp-modal-office" class="font-medium text-slate-100">—</p>
-                        </div>
-                        <div>
-                            <p class="text-xs uppercase tracking-wide text-slate-500">Supervisor</p>
-                            <p id="uwp-modal-supervisor" class="font-medium text-slate-100">—</p>
-                        </div>
-                        <div>
-                            <p class="text-xs uppercase tracking-wide text-slate-500">Performance Period</p>
-                            <p id="uwp-modal-period" class="font-medium text-slate-100">—</p>
-                        </div>
-                        <div>
-                            <p class="text-xs uppercase tracking-wide text-slate-500">UWP Status</p>
-                            <p id="uwp-modal-status" class="font-medium text-slate-100">—</p>
-                        </div>
-                    </div>
+     class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/70 backdrop-blur-sm overflow-y-auto">
+    <div class="w-full max-w-5xl px-6">
+        <div class="rounded-2xl border border-slate-800 bg-slate-950 text-slate-100">
+            <div class="flex items-start justify-between gap-4 border-b border-slate-800 px-8 py-6">
+                <div>
+                    <h2 class="text-xl font-semibold">Unit Work Plan</h2>
+                    <p id="uwp-modal-subtitle" class="mt-1 text-sm text-slate-400">Select a UWP to view details</p>
+                    <span id="uwp-modal-period" class="hidden">-</span>
                 </div>
                 <button type="button" data-modal-hide="uwp-review-modal"
-                        class="text-slate-400 transition hover:text-white">
-                    <i class="fa-solid fa-xmark text-lg"></i>
+                        class="inline-flex items-center justify-center rounded-lg border border-slate-800 bg-slate-950/60 px-2.5 py-2 text-slate-400 transition hover:bg-slate-900 hover:text-white">
+                    <i class="fa-solid fa-xmark text-sm"></i>
                 </button>
             </div>
 
-            <div class="px-6 py-5 space-y-5 max-h-[70vh] overflow-y-auto">
-                <div class="rounded-xl border border-slate-800 bg-slate-900/70">
-                    <div class="border-b border-slate-800 px-4 py-3">
-                        <h4 class="text-sm font-medium text-slate-100">Planned Outputs</h4>
-                        <p class="text-xs text-slate-400 mt-1">Read-only reference for review.</p>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full">
-                            <thead class="bg-slate-800/50">
+            <div class="flex items-stretch gap-10 border-b border-slate-800 px-8 py-6">
+                <div class="w-1/4">
+                    <p class="text-xs uppercase tracking-widest text-slate-500">Office / Unit</p>
+                    <p id="uwp-modal-office" class="mt-1 font-medium">-</p>
+                </div>
+
+                <div class="w-1/4">
+                    <p class="text-xs uppercase tracking-widest text-slate-500">Supervisor</p>
+                    <p id="uwp-modal-supervisor" class="mt-1 font-medium">-</p>
+                </div>
+
+                <div class="w-1/4">
+                    <p class="text-xs uppercase tracking-widest text-slate-500">Department Head</p>
+                    <p id="uwp-modal-dept-head" class="mt-1 font-medium">-</p>
+                </div>
+
+                <div class="w-1/4">
+                    <p class="text-xs uppercase tracking-widest text-slate-500">Status</p>
+                    <span id="uwp-modal-status" class="mt-2 inline-flex rounded-full border px-3 py-1 text-xs font-semibold">-</span>
+                </div>
+            </div>
+
+            <div id="uwp-return-remarks-wrap" class="hidden mx-8 mt-6 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-amber-200">
+                <p class="text-sm font-semibold">Returned Remarks</p>
+                <p id="uwp-return-remarks-meta" class="mt-1 text-xs text-amber-200/80"></p>
+                <div id="uwp-return-remarks-text" class="mt-2 whitespace-pre-line text-sm text-amber-100">-</div>
+            </div>
+
+            <div class="px-8 py-6">
+                <h3 class="mb-4 text-sm font-semibold uppercase tracking-widest text-slate-400">Planned Outputs</h3>
+                <div class="overflow-hidden rounded-xl border border-slate-800">
+                    <div class="max-h-[42vh] overflow-y-auto overflow-x-auto">
+                        <table class="min-w-full text-sm text-slate-200">
+                            <thead class="bg-slate-900/60 text-xs uppercase tracking-widest text-slate-400">
                             <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-400">PPA / MFO</th>
-                                <th class="px-4 py-3 text-center text-xs font-medium uppercase text-slate-400">Success Indicators</th>
-                                <th class="px-4 py-3 text-center text-xs font-medium uppercase text-slate-400">Timeline / Target</th>
-                                <th class="px-4 py-3 text-center text-xs font-medium uppercase text-slate-400">Function</th>
+                                <th class="px-5 py-4 text-left">PPA / MFO</th>
+                                <th class="px-5 py-4 text-center">Success Indicators</th>
+                                <th class="px-5 py-4 text-center">Timeline / Target</th>
+                                <th class="px-5 py-4 text-center">Function</th>
                             </tr>
                             </thead>
-                            <tbody id="uwp-outputs-tbody" class="divide-y divide-slate-800"></tbody>
+                            <tbody id="uwp-outputs-tbody" class="divide-y divide-slate-800 bg-slate-950"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <div class="flex flex-col gap-4 border-t border-slate-800 px-6 py-4">
-                <form id="uwp-review-form" method="POST" action="{{ route('dept-head.uwp.review') }}">
-                    @csrf
-                    <input type="hidden" name="unit_work_plan_id" id="uwp-modal-uwp-id" value="">
-                    <input type="hidden" name="action" id="uwp-modal-action" value="">
+            <form id="uwp-review-form"
+                  method="POST"
+                  action="{{ route('dept-head.uwp.review') }}"
+                  data-endorse-action="{{ route('dept-head.uwp.review') }}"
+                  data-return-action="{{ route('dept-head.uwp.return') }}">
+                @csrf
+                <input type="hidden" name="unit_work_plan_id" id="uwp-modal-uwp-id" value="">
+                <input type="hidden" name="action" id="uwp-modal-action" value="">
 
-                    <div class="space-y-2">
-                        <label class="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                            Review Remarks <span class="text-slate-500">(required if returning)</span>
-                        </label>
-                        <textarea
-                            name="remarks"
-                            id="uwp-modal-remarks"
-                            rows="3"
-                            class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                            style="background:#0f172a;color:#e5e7eb;"
-                            placeholder="Add clear instructions or justification for your decision..."></textarea>
-                    </div>
+                <div class="px-8 pb-6 space-y-2">
+                    <label class="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                        Review Remarks (required if returning)
+                    </label>
+                    <textarea
+                        name="remarks"
+                        id="uwp-modal-remarks"
+                        rows="3"
+                        class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        style="background:#0f172a;color:#e5e7eb;"
+                        placeholder="Add clear instructions or justification for your decision..."></textarea>
+                    <p class="text-[11px] text-slate-500 mt-2">
+                        Ensure targets, indicators, and weights are correct before endorsing to PMT.
+                    </p>
+                </div>
 
-                    <div class="flex flex-wrap items-center justify-end gap-3">
-                        <button type="button" data-modal-hide="uwp-review-modal"
-                                class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-slate-800/80">
-                            Cancel
+                <div class="flex items-center justify-between border-t border-slate-800 px-8 py-5">
+                    <p class="text-xs text-slate-500">Department Head can endorse or return submitted UWPs only.</p>
+                    <div class="flex items-center gap-3">
+                        <button type="button" data-modal-hide="uwp-review-modal" class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">Close</button>
+
+                        <button type="button"
+                            id="btn-return-uwp"
+                            data-admin-loading="true"
+                            data-loading-text="Returning..."
+                            class="inline-flex items-center gap-2 rounded-lg border border-rose-500/30 bg-rose-600/10 px-4 py-2 text-sm font-semibold text-rose-200 transition hover:bg-rose-600/20">
+                            <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-rose-200/40 border-t-rose-200"></span>
+                            <span data-button-label>Return to Supervisor</span>
                         </button>
 
                         <button type="button"
@@ -268,21 +307,11 @@
                                 data-loading-text="Processing..."
                                 class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-emerald-900/40 transition hover:bg-emerald-500">
                             <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"></span>
-                            <span data-button-label>Endorse & Forward to PMT</span>
-                        </button>
-
-                        <button type="button"
-                                id="btn-return-uwp"
-                                data-admin-loading="true"
-                                data-loading-text="Returning..."
-                                class="inline-flex items-center gap-2 rounded-lg border border-rose-500/30 bg-rose-600/10 px-4 py-2 text-sm font-semibold text-rose-200 transition hover:bg-rose-600/20">
-                            <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-rose-200/40 border-t-rose-200"></span>
-                            <span data-button-label>Return for Revision</span>
+                            <span data-button-label>Endorse to PMT</span>
                         </button>
                     </div>
-                </form>
-            </div>
-
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -623,8 +652,29 @@
 
     function labelStatus(status) {
         const s = String(status || '').toLowerCase();
-        if (!s) return '—';
+        if (!s) return '-';
         return s.replaceAll('_', ' ').replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+    function statusBadgeClass(status) {
+        const s = String(status || '').toLowerCase();
+        if (s === 'submitted') {
+            return 'border-blue-500/30 bg-blue-500/10 text-blue-300';
+        }
+        if (s === 'endorsed') {
+            return 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300';
+        }
+        if (s === 'pmt_approved') {
+            return 'border-violet-500/30 bg-violet-500/10 text-violet-300';
+        }
+        if (s === 'returned') {
+            return 'border-amber-500/30 bg-amber-500/10 text-amber-300';
+        }
+        if (s === 'draft') {
+            return 'border-slate-500/30 bg-slate-500/10 text-slate-200';
+        }
+
+        return 'border-slate-500/30 bg-slate-500/10 text-slate-200';
     }
 
     function buildFunctionBadge(fnType) {
@@ -705,17 +755,57 @@
         const idEl = document.getElementById('uwp-modal-uwp-id');
         if (idEl) idEl.value = selectedUwp?.id || '';
 
+        const officeName = selectedUwp?.office?.name || '-';
+        const supervisorName = selectedUwp?.supervisor?.name || '-';
+        const periodName = selectedUwp?.period?.name || '-';
+        const deptHeadName = selectedUwp?.department_head?.name || '-';
+        const statusKey = String(selectedUwp?.status || '').toLowerCase();
+
         const officeEl = document.getElementById('uwp-modal-office');
-        if (officeEl) officeEl.textContent = selectedUwp?.office?.name || '—';
+        if (officeEl) officeEl.textContent = officeName;
 
         const supEl = document.getElementById('uwp-modal-supervisor');
-        if (supEl) supEl.textContent = selectedUwp?.supervisor?.name || '—';
+        if (supEl) supEl.textContent = supervisorName;
 
         const periodEl = document.getElementById('uwp-modal-period');
-        if (periodEl) periodEl.textContent = selectedUwp?.period?.name || '—';
+        if (periodEl) periodEl.textContent = periodName;
+
+        const subtitleEl = document.getElementById('uwp-modal-subtitle');
+        if (subtitleEl) subtitleEl.textContent = `${officeName} \u2022 ${periodName}`;
+
+        const deptHeadEl = document.getElementById('uwp-modal-dept-head');
+        if (deptHeadEl) deptHeadEl.textContent = deptHeadName;
 
         const statusEl = document.getElementById('uwp-modal-status');
-        if (statusEl) statusEl.textContent = labelStatus(selectedUwp?.status);
+        if (statusEl) {
+            statusEl.className = `mt-2 inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${statusBadgeClass(statusKey)}`;
+            statusEl.textContent = labelStatus(statusKey);
+        }
+
+        const returnWrap = document.getElementById('uwp-return-remarks-wrap');
+        const returnText = document.getElementById('uwp-return-remarks-text');
+        const returnMeta = document.getElementById('uwp-return-remarks-meta');
+        const returnRemarks = String(selectedUwp?.return_remarks || '').trim();
+        const returnedAt = String(selectedUwp?.returned_at || '').trim();
+        const returnedByRole = String(selectedUwp?.returned_by_role || '').trim().toLowerCase();
+
+        if (returnWrap && returnText && returnMeta) {
+            if (statusKey === 'returned' && returnRemarks !== '') {
+                const roleLabel = returnedByRole === 'pmt'
+                    ? 'Returned by PMT'
+                    : returnedByRole === 'dept-head'
+                        ? 'Returned by Department Head'
+                        : 'Returned for Revision';
+
+                returnWrap.classList.remove('hidden');
+                returnText.textContent = returnRemarks;
+                returnMeta.textContent = returnedAt ? `${roleLabel} \u2022 ${returnedAt}` : roleLabel;
+            } else {
+                returnWrap.classList.add('hidden');
+                returnText.textContent = '-';
+                returnMeta.textContent = '';
+            }
+        }
 
         const outputsTbody = document.getElementById('uwp-outputs-tbody');
         if (!outputsTbody) return;
@@ -803,6 +893,9 @@
 
         btnEndorse?.addEventListener('click', () => {
             if (!form) return;
+            if (form.dataset.endorseAction) {
+                form.action = form.dataset.endorseAction;
+            }
             if (actionInput) actionInput.value = 'endorse';
             form.submit();
         });
@@ -814,7 +907,10 @@
                 remarks?.focus();
                 return;
             }
-            if (actionInput) actionInput.value = 'return';
+            if (form.dataset.returnAction) {
+                form.action = form.dataset.returnAction;
+            }
+            if (actionInput) actionInput.value = '';
             form.submit();
         });
     }

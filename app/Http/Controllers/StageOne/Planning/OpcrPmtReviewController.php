@@ -27,19 +27,21 @@ class OpcrPmtReviewController extends Controller
             ->orderByDesc('start_date')
             ->first();
 
+        $status = strtolower(trim($request->string('status')->toString()));
         $allowedStatuses = [
             Opcr::STATUS_ENDORSED,
+            'for_pmt_review',
             Opcr::STATUS_APPROVED,
             Opcr::STATUS_RETURNED,
             Opcr::STATUS_SUBMITTED,
         ];
+        $selectedStatus = $status;
+        $forPmtReviewStatuses = [
+            Opcr::STATUS_ENDORSED,
+            'for_pmt_review',
+        ];
 
-        $status = strtolower(trim($request->string('status')->toString()));
-        $status = in_array($status, $allowedStatuses, true)
-            ? $status
-            : Opcr::STATUS_ENDORSED;
-
-        $opcrs = Opcr::query()
+        $opcrsQuery = Opcr::query()
             ->with([
                 'unitWorkPlan.office',
                 'unitWorkPlan.performancePeriod',
@@ -60,12 +62,23 @@ class OpcrPmtReviewController extends Controller
             ])
             ->when($activePeriod, function ($query) use ($activePeriod) {
                 $query->whereHas('unitWorkPlan', fn ($uwpQuery) => $uwpQuery->where('performance_period_id', $activePeriod->id));
-            })
-            ->when($status === Opcr::STATUS_SUBMITTED, function ($query) {
-                $query->whereIn('status', [Opcr::STATUS_SUBMITTED, Opcr::STATUS_FOR_REVIEW]);
-            }, function ($query) use ($status) {
-                $query->where('status', $status);
-            })
+            });
+
+        if ($status !== '' && in_array($status, $allowedStatuses, true)) {
+            if ($status === Opcr::STATUS_ENDORSED || $status === 'for_pmt_review') {
+                $opcrsQuery->whereIn('status', $forPmtReviewStatuses);
+                $selectedStatus = Opcr::STATUS_ENDORSED;
+            } elseif ($status === Opcr::STATUS_SUBMITTED) {
+                $opcrsQuery->whereIn('status', [Opcr::STATUS_SUBMITTED, Opcr::STATUS_FOR_REVIEW]);
+            } else {
+                $opcrsQuery->where('status', $status);
+            }
+        } elseif ($status !== '') {
+            $selectedStatus = Opcr::STATUS_ENDORSED;
+            $opcrsQuery->whereIn('status', $forPmtReviewStatuses);
+        }
+
+        $opcrs = $opcrsQuery
             ->orderByDesc('updated_at')
             ->orderByDesc('id')
             ->get();
@@ -78,7 +91,7 @@ class OpcrPmtReviewController extends Controller
             'activePeriod' => $activePeriod,
             'opcrs' => $opcrs,
             'opcrPayloads' => $opcrPayloads,
-            'selectedStatus' => $status,
+            'selectedStatus' => $selectedStatus,
         ]);
     }
 

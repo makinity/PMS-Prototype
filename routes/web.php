@@ -164,10 +164,13 @@ Route::prefix('dept-head')->middleware('auth')->group(function () {
     Route::get('/uwp', [UwpDeptHeadReviewController::class, 'index'])->name('dept-head.uwp');
     Route::get('/uwp/index', [UwpDeptHeadReviewController::class, 'index'])->name('dept-head.uwp.index');
     Route::post('/uwp/review', [UwpDeptHeadReviewController::class, 'review'])->name('dept-head.uwp.review');
+    Route::post('/uwp/return', [UwpDeptHeadReviewController::class, 'returnUwp'])->name('dept-head.uwp.return');
 
     // Stage I - OPCR Review
     Route::get('/opcr', [DeptHeadOpcrReviewController::class, 'index'])->name('dept-head.opcr');
     Route::get('/opcr/index', [DeptHeadOpcrReviewController::class, 'index'])->name('dept-head.opcr.index');
+    Route::post('/opcr/{opcr}/endorse', [DeptHeadOpcrReviewController::class, 'endorse'])->name('dept-head.opcr.endorse');
+    Route::post('/opcr/{opcr}/return', [DeptHeadOpcrReviewController::class, 'returnOpcr'])->name('dept-head.opcr.return');
     Route::post('/opcr/review', [DeptHeadOpcrReviewController::class, 'review'])->name('dept-head.opcr.review');
 
     // Stage II - QAR
@@ -237,6 +240,7 @@ Route::prefix('supervisor')->middleware('auth')->group(function () {
     Route::get('/opcr', [SuperVisorOpcrController::class, 'index'])->name('supervisor.opcr');
     Route::get('/stage-one/planning/opcr', [SuperVisorOpcrController::class, 'index'])->name('stage1.opcr.index');
     Route::post('/stage-one/planning/opcr/generate', [SuperVisorOpcrController::class, 'generate'])->name('stage1.opcr.generate');
+    Route::post('/stage-one/planning/opcr/{opcr}/submit', [SuperVisorOpcrController::class, 'submit'])->name('stage1.opcr.submit');
 
     // Stage II - MPOR Review
     Route::get('/mpor', [SupervisorMporController::class, 'index'])->name('supervisor.mpor');
@@ -275,6 +279,8 @@ Route::prefix('pmt')->middleware('auth')->group(function () {
 
     // Stage I - UWP / OPCR
     Route::get('/UWP', [UwpPmtReviewController::class, 'index'])->name('pmt.uwp');
+    Route::post('/uwp/review', [UwpPmtReviewController::class, 'review'])->name('pmt.uwp.review');
+    Route::post('/uwp/return', [UwpPmtReviewController::class, 'returnUwp'])->name('pmt.uwp.return');
 
     Route::get('/opcr-review', [OpcrPmtReviewController::class, 'index'])
         ->name('pmt.opcr.review.index');
