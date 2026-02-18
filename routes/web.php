@@ -8,6 +8,7 @@ use App\Http\Controllers\StageOne\Forms\OpcrExcelExportController;
 use App\Http\Controllers\StageOne\Forms\UwpExportController;
 use App\Http\Controllers\StageOne\Forms\UwpExcelExportController;
 use App\Http\Controllers\StageOne\Planning\DeptHeadOpcrReviewController;
+use App\Http\Controllers\StageOne\Planning\IpcrTargetController;
 use App\Http\Controllers\StageOne\Planning\OpcrPmtReviewController;
 use App\Http\Controllers\StageOne\Planning\SuperVisorOpcrController;
 use App\Http\Controllers\StageOne\Planning\UnitWorkPlanController;
@@ -98,7 +99,8 @@ Route::prefix('employee')->middleware('auth')->group(function () {
     Route::get('/ORS', fn () => view('employee.ors'))->name('employee.ors');
     Route::get('/MPOR', fn () => view('employee.mpor'))->name('employee.mpor');
     Route::get('/SMPOR', fn () => view('employee.smpor'))->name('employee.smpor');
-    Route::get('/IPCR-Target', fn () => view('employee.ipcr-target'))->name('employee.ipcr-target');
+    Route::get('/IPCR-Target', [IpcrTargetController::class, 'index'])
+        ->name('employee.ipcr-target');
     Route::get('/IPCR', fn () => view('employee.ipcr'))->name('employee.ipcr');
     Route::get('/final-ratings', fn () => view('employee.final-ratings'))->name('employee.final-ratings');
     Route::get('/IDP', fn () => view('employee.idp'))->name('employee.idp');

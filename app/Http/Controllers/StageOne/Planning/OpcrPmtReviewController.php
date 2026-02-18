@@ -6,6 +6,7 @@ use App\Exports\StageOne\OpcrExcelExport;
 use App\Http\Controllers\Controller;
 use App\Models\Opcr;
 use App\Models\PerformancePeriod;
+use App\Services\IpcrGeneratorService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -124,6 +125,8 @@ class OpcrPmtReviewController extends Controller
             }
 
             if ($validated['action'] === 'approve') {
+                $wasApproved = ($opcr->status === Opcr::STATUS_APPROVED);
+
                 $opcr->status = Opcr::STATUS_APPROVED;
 
                 if (array_key_exists('remarks', $opcr->getAttributes())) {
@@ -131,6 +134,10 @@ class OpcrPmtReviewController extends Controller
                 }
 
                 $opcr->save();
+
+                if (!$wasApproved) {
+                    app(IpcrGeneratorService::class)->generateFromOpcr($opcr);
+                }
 
                 return back()->with('success', 'OPCR final approved.');
             }
