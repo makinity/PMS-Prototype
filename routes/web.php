@@ -15,10 +15,8 @@ use App\Http\Controllers\StageOne\Planning\UwpDeptHeadReviewController;
 use App\Http\Controllers\StageOne\Planning\UwpPmtReviewController;
 use App\Http\Controllers\StageThree\Forms\IpcrExportController as StageThreeFormsIpcrExportController;
 use App\Http\Controllers\StageTwo\Forms\IpcrExportController as FormsIpcrExportController;
-use App\Http\Controllers\StageTwo\Forms\MporExportController;
 use App\Http\Controllers\StageTwo\Forms\OrsExportController;
 use App\Http\Controllers\StageTwo\Forms\QarExportController;
-use App\Http\Controllers\StageTwo\Forms\SmporExportController;
 use App\Http\Controllers\StageTwo\Forms\SmporExcelExportController;
 use App\Http\Controllers\StageTwo\Monitoring\EmployeeAccomplishmentController;
 use App\Http\Controllers\StageTwo\Planning\DeptHeadQarController;
@@ -135,6 +133,11 @@ Route::prefix('employee')->middleware('auth')->group(function () {
     // Exports - IPCR PDF (Stage II Forms)
     Route::get('/ipcr/export/pdf', [FormsIpcrExportController::class, 'exportPdf'])
         ->name('stage2.ipcr.export.pdf');
+
+    Route::get('/stage-two/forms/ipcr/export-excel', [\App\Http\Controllers\StageTwo\Forms\IpcrExcelExportController::class, 'exportExcel'])
+        ->name('stage2.ipcr.export.excel');
+    Route::get('/stage-two/forms/ipcr/preview-excel', [\App\Http\Controllers\StageTwo\Forms\IpcrExcelExportController::class, 'previewExcel'])
+        ->name('stage2.ipcr.preview.excel');
 
     // Exports - IPCR Excel (Stage I Forms) - kept as-is
     Route::get('/ipcr/export/excel', [IpcrExcelExportController::class, 'exportExcel'])

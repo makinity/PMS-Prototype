@@ -94,9 +94,9 @@
                         View IPCR Accomplishment
                     </a>
 
-                    <a href="{{ route('stage2.ipcr.export.pdf') }}"
+                    <a href="{{ route('stage2.ipcr.export.excel') }}"
                         class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800">
-                            Export PDF
+                            Export
                     </a>
 
                 </div>

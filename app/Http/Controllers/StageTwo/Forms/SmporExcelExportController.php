@@ -15,7 +15,7 @@ class SmporExcelExportController extends Controller
         $payload = $this->buildPayload();
 
         return Excel::download(
-            new SmporExcelExport($payload),
+            new SmporExcelExportController($payload),
             $this->buildFilename($payload, false)
         );
     }
