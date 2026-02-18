@@ -222,6 +222,8 @@ Route::prefix('supervisor')->middleware('auth')->group(function () {
         ->name('supervisor.uwp.submitData');
     Route::post('/uwp/{id}/submit', [UnitWorkPlanController::class, 'submitDataForUwp'])
         ->name('supervisor.uwp.submitData.byId');
+    Route::delete('/uwp/{id}', [UnitWorkPlanController::class, 'destroy'])
+        ->name('supervisor.uwp.destroy');
 
     Route::post('/stage-one/planning/uwp/{id}/submit', [UnitWorkPlanController::class, 'submitForApproval'])
         ->name('supervisor.uwp.submit');

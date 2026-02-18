@@ -213,6 +213,66 @@ class UnitWorkPlanController extends Controller
             ->with('success', 'UWP updated.');
     }
 
+    public function destroy(Request $request, int $id)
+    {
+        $user = $this->resolveSupervisorUser($request);
+
+        $uwp = UnitWorkPlan::query()
+            ->with([
+                'uwpFunctions.mfos.successIndicators.assignments',
+                'uwpFunctions.mfos.successIndicators.qetStandards',
+            ])
+            ->find($id);
+
+        if (!$uwp) {
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'error' => 'UWP not found.'], 404);
+            }
+
+            return redirect()->route('supervisor.uwp-page')->with('error', 'UWP not found.');
+        }
+
+        $sameOffice = (int) ($user->office_id ?? 0) === 0 || (int) $uwp->office_id === (int) $user->office_id;
+        if ((int) $uwp->created_by !== (int) $user->id || !$sameOffice) {
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'error' => 'You do not have permission to delete this UWP.'], 403);
+            }
+
+            return redirect()->route('supervisor.uwp-page')->with('error', 'You do not have permission to delete this UWP.');
+        }
+
+        if (strtolower((string) $uwp->status) !== UnitWorkPlan::STATUS_DRAFT || !is_null($uwp->locked_at)) {
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'error' => 'Only Draft & unlocked UWP can be deleted.'], 422);
+            }
+
+            return redirect()->route('supervisor.uwp-page')->with('error', 'Only Draft & unlocked UWP can be deleted.');
+        }
+
+        DB::transaction(function () use ($uwp) {
+            foreach ($uwp->uwpFunctions as $function) {
+                foreach ($function->mfos as $mfo) {
+                    foreach ($mfo->successIndicators as $indicator) {
+                        $indicator->assignments()->delete();
+                        $indicator->qetStandards()->delete();
+                    }
+                    $mfo->successIndicators()->delete();
+                }
+                $function->mfos()->delete();
+            }
+
+            $uwp->uwpFunctions()->delete();
+            $uwp->delete();
+        });
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'UWP deleted successfully.']);
+        }
+
+        return redirect()->route('supervisor.uwp-page')->with('success', 'UWP deleted successfully.');
+    }
+
+
     public function saveDraftData(Request $request)
     {
         return $this->handleSaveDraftData($request, null);

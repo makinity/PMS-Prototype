@@ -17,12 +17,6 @@
             </a>
         </div>
 
-        @if (session('success'))
-            <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
-                {{ session('success') }}
-            </div>
-        @endif
-
         <!-- UWP List -->
         <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5 space-y-4">
 
@@ -107,19 +101,27 @@
                                         </button>
 
                                         @if ($isDraftAndUnlocked)
-                                            <form method="POST"
-                                                  action="{{ route('supervisor.uwp.submit', ['id' => $list->id]) }}"
-                                                  class="inline-flex"
-                                                  onsubmit="return submitRowUwp(this);">
-                                                @csrf
-                                                <button type="submit"
-                                                        data-admin-loading="true"
-                                                        data-loading-text="Submitting..."
-                                                        class="ml-2 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-blue-500">
-                                                    <span data-button-label>Submit for Approval</span>
-                                                    <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
-                                                </button>
-                                            </form>
+                                            <button type="button"
+                                                    aria-label="Delete Unit Work Plan"
+                                                    title="Delete Unit Work Plan"
+                                                    onclick='openDeleteUwpModal(
+                                                        {{ (int) $list->id }},
+                                                        @json($list->office?->name ?? "--"),
+                                                        @json($list->performancePeriod?->name ?? "--"),
+                                                        @json(ucfirst(str_replace("_", " ", (string) $list->status))),
+                                                        {{ is_null($list->locked_at) ? 'false' : 'true' }}
+                                                    )'
+                                                    class="inline-flex items-center justify-center rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-rose-300">
+                                                <i class="fa-regular fa-trash-can text-sm"></i>
+                                            </button>
+                                        @else
+                                            <button type="button"
+                                                    aria-label="Delete Unit Work Plan"
+                                                    title="Only Draft & unlocked can be deleted"
+                                                    disabled
+                                                    class="inline-flex cursor-not-allowed items-center justify-center rounded-lg p-2 text-slate-500 opacity-40">
+                                                <i class="fa-regular fa-trash-can text-sm"></i>
+                                            </button>
                                         @endif
                                     </td>
                                 </tr>
@@ -138,8 +140,8 @@
     ===================================== --}}
 
     <!-- UWP Preview Modal -->
-    <div id="uwpPreviewModal" class="fixed inset-0 z-50 hidden bg-black/70 backdrop-blur-sm overflow-y-auto">
-        <div class="mx-auto my-10 w-full max-w-5xl px-6">
+    <div id="uwpPreviewModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/70 backdrop-blur-sm overflow-y-auto">
+        <div class="w-full max-w-5xl px-6">
             <div class="rounded-2xl border border-slate-800 bg-slate-950 text-slate-100">
 
                 <!-- HEADER -->
@@ -206,8 +208,8 @@
     </div>
 
     <!-- Success Indicators Modal -->
-    <div id="successIndicatorsModal" class="fixed inset-0 z-50 hidden bg-black/70 backdrop-blur-sm overflow-y-auto">
-        <div class="mx-auto my-16 w-full max-w-5xl px-6">
+    <div id="successIndicatorsModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/70 backdrop-blur-sm overflow-y-auto">
+        <div class="w-full max-w-5xl px-6">
             <div class="rounded-2xl border border-slate-800 bg-slate-950 text-slate-100">
 
                 <!-- HEADER -->
@@ -250,8 +252,8 @@
     </div>
 
     <!-- Assignments Modal (for multiple employees) -->
-<div id="assignmentsModal" class="fixed inset-0 z-50 hidden bg-black/70 backdrop-blur-sm overflow-y-auto">
-    <div class="mx-auto my-16 w-full max-w-2xl px-6">
+<div id="assignmentsModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/70 backdrop-blur-sm overflow-y-auto">
+    <div class="w-full max-w-2xl px-6">
         <div class="rounded-2xl border border-slate-800 bg-slate-950 text-slate-100">
 
             <!-- HEADER -->
@@ -296,8 +298,8 @@
 </div>
 
     <!-- Standards Modal -->
-    <div id="indicatorStandardsModal" class="fixed inset-0 z-50 hidden bg-black/70 backdrop-blur-sm overflow-y-auto">
-        <div class="mx-auto my-16 w-full max-w-3xl px-6">
+    <div id="indicatorStandardsModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/70 backdrop-blur-sm overflow-y-auto">
+        <div class="w-full max-w-3xl px-6">
             <div class="rounded-2xl border border-slate-800 bg-slate-950 text-slate-100">
                 <div class="border-b border-slate-800 px-6 py-5">
                     <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Standards (Q/E/T)</p>
@@ -336,10 +338,51 @@
         </div>
     </div>
 
+    <!-- Delete UWP Confirmation Modal -->
+    <div id="deleteUwpModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/70 backdrop-blur-sm overflow-y-auto">
+        <div class="w-full max-w-xl px-6">
+            <div class="rounded-2xl border border-slate-800 bg-slate-950 text-slate-100">
+                <div class="border-b border-slate-800 px-6 py-5">
+                    <p class="text-xs uppercase tracking-[0.2em] text-rose-300">Delete Unit Work Plan</p>
+                    <h3 class="text-lg font-semibold">Delete this draft UWP?</h3>
+                    <p class="mt-1 text-sm text-slate-400">This action is permanent and cannot be undone.</p>
+                </div>
+
+                <div class="space-y-3 px-6 py-5 text-sm text-slate-200">
+                    <div class="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+                        <p><span class="text-slate-400">Office / Unit:</span> <span id="deleteUwpOffice">--</span></p>
+                        <p class="mt-1"><span class="text-slate-400">Performance Period:</span> <span id="deleteUwpPeriod">--</span></p>
+                        <p class="mt-1"><span class="text-slate-400">Status:</span> <span id="deleteUwpStatus">--</span></p>
+                    </div>
+                    <p class="text-xs text-rose-300/90">Only Draft and unlocked UWP records can be deleted.</p>
+                </div>
+
+                <form id="delete-uwp-form" method="POST" action="" class="flex items-center justify-end gap-3 border-t border-slate-800 px-6 py-4">
+                    @csrf
+                    @method('DELETE')
+                    <button type="button"
+                            onclick="closeDeleteUwpModal()"
+                            class="rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-slate-200 hover:bg-slate-800">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                            id="deleteUwpConfirmBtn"
+                            data-delete-loading="true"
+                            data-loading-text="Deleting..."
+                            class="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-500">
+                        <span data-button-label>Delete</span>
+                        <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script>
         window.uwpPreviewBaseUrl = "{{ route('supervisor.uwp.show', ['id' => '__ID__']) }}";
         window.uwpSubmitBaseUrl = "{{ route('supervisor.uwp.submit', ['id' => '__ID__']) }}";
         window.uwpExportBaseUrl = "{{ route('uwp.export', ['uwp' => '__ID__']) }}";
+        window.uwpDeleteBaseUrl = "{{ route('supervisor.uwp.destroy', ['id' => '__ID__']) }}";
     </script>
     @push('scripts')
         <script>
@@ -510,7 +553,7 @@
             // ====================================
             function submitUwpForApproval() {
                 if (!currentUwpId) {
-                    showNotification('No UWP selected to submit.', 'error');
+                    alert('No UWP selected to submit.');
                     return;
                 }
 
@@ -553,8 +596,6 @@
                     console.log('Success response:', data);
 
                     if (data.success) {
-                        showNotification(data.message || 'UWP submitted successfully!', 'success');
-
 
                         const statusBadge = document.getElementById('modalStatus');
                         if (statusBadge) {
@@ -574,7 +615,7 @@
                 })
                 .catch(error => {
                     console.error('Error submitting UWP:', error);
-                    showNotification(error.message || 'Error submitting UWP. Please try again.', 'error');
+                    alert(error.message || 'Error submitting UWP. Please try again.');
 
                     resetSubmitButton();
                 });
@@ -609,6 +650,60 @@
                 }
 
                 return true;
+            }
+
+            function setDeleteButtonLoading(isLoading) {
+                const button = document.getElementById('deleteUwpConfirmBtn');
+                if (!button) return;
+
+                const label = button.querySelector('[data-button-label]');
+                const spinner = button.querySelector('[data-button-spinner]');
+                const loadingText = button.dataset.loadingText || 'Deleting...';
+
+                button.disabled = !!isLoading;
+                if (label) {
+                    label.textContent = isLoading ? loadingText : 'Delete';
+                }
+                if (spinner) {
+                    spinner.classList.toggle('hidden', !isLoading);
+                }
+            }
+
+            function openDeleteUwpModal(uwpId, officeName, periodName, status, isLocked) {
+                const normalizedStatus = String(status || '').toLowerCase();
+                const locked = isLocked === true || isLocked === 'true' || isLocked === 1 || isLocked === '1';
+                const deletable = normalizedStatus === 'draft' && !locked;
+
+                if (!deletable) {
+                    alert('Only Draft & unlocked UWP can be deleted.');
+                    return;
+                }
+
+                document.getElementById('deleteUwpOffice').textContent = officeName || '--';
+                document.getElementById('deleteUwpPeriod').textContent = periodName || '--';
+                document.getElementById('deleteUwpStatus').textContent = status || '--';
+                const deleteForm = document.getElementById('delete-uwp-form');
+                if (deleteForm) {
+                    deleteForm.action = window.uwpDeleteBaseUrl.replace('__ID__', String(uwpId));
+                }
+                setDeleteButtonLoading(false);
+
+                const modal = document.getElementById('deleteUwpModal');
+                if (modal) {
+                    modal.classList.remove('hidden');
+                }
+            }
+
+            function closeDeleteUwpModal() {
+                setDeleteButtonLoading(false);
+                const deleteForm = document.getElementById('delete-uwp-form');
+                if (deleteForm) {
+                    deleteForm.action = '';
+                }
+                const modal = document.getElementById('deleteUwpModal');
+                if (modal) {
+                    modal.classList.add('hidden');
+                }
             }
 
             // ====================================
@@ -823,41 +918,6 @@
                 }
             }
 
-            function showNotification(message, type = 'success') {
-                const existingContainer = document.getElementById('notification-container');
-                if (existingContainer) {
-                    existingContainer.remove();
-                }
-
-                const container = document.createElement('div');
-                container.id = 'notification-container';
-                container.className = 'fixed top-4 right-4 z-50 flex flex-col gap-2';
-                document.body.appendChild(container);
-
-                const notification = document.createElement('div');
-                notification.className = `px-4 py-3 rounded-lg text-sm font-semibold shadow-lg flex items-center justify-between min-w-[300px] ${
-                    type === 'success'
-                        ? 'bg-emerald-500/20 border border-emerald-500/30 text-emerald-200'
-                        : 'bg-red-500/20 border border-red-500/30 text-red-200'
-                }`;
-
-                notification.innerHTML = `
-                    <span>${message}</span>
-                    <button onclick="this.parentElement.remove()" class="ml-3 text-current opacity-70 hover:opacity-100">×</button>
-                `;
-
-                container.appendChild(notification);
-
-                setTimeout(() => {
-                    if (notification.parentNode) {
-                        notification.remove();
-                        if (container.children.length === 0) {
-                            container.remove();
-                        }
-                    }
-                }, 5000);
-            }
-
             // ====================================
             // INITIALIZATION
             // ====================================
@@ -872,23 +932,38 @@
                     });
                 }
 
+                const deleteForm = document.getElementById('delete-uwp-form');
+                if (deleteForm) {
+                    deleteForm.addEventListener('submit', function() {
+                        setDeleteButtonLoading(true);
+                    });
+                }
+
                 window.addEventListener('click', function(event) {
-                    const modals = ['uwpPreviewModal', 'successIndicatorsModal', 'indicatorStandardsModal', 'assignmentsModal'];
+                    const modals = ['uwpPreviewModal', 'successIndicatorsModal', 'indicatorStandardsModal', 'assignmentsModal', 'deleteUwpModal'];
                     modals.forEach(modalId => {
                         const modal = document.getElementById(modalId);
                         if (event.target === modal) {
-                            closeModal(modalId);
+                            if (modalId === 'deleteUwpModal') {
+                                closeDeleteUwpModal();
+                            } else {
+                                closeModal(modalId);
+                            }
                         }
                     });
                 });
 
                 window.addEventListener('keydown', function(event) {
                     if (event.key === 'Escape') {
-                        const modals = ['uwpPreviewModal', 'successIndicatorsModal', 'indicatorStandardsModal', 'assignmentsModal'];
+                        const modals = ['uwpPreviewModal', 'successIndicatorsModal', 'indicatorStandardsModal', 'assignmentsModal', 'deleteUwpModal'];
                         modals.forEach(modalId => {
                             const modal = document.getElementById(modalId);
                             if (!modal.classList.contains('hidden')) {
-                                closeModal(modalId);
+                                if (modalId === 'deleteUwpModal') {
+                                    closeDeleteUwpModal();
+                                } else {
+                                    closeModal(modalId);
+                                }
                             }
                         });
                     }

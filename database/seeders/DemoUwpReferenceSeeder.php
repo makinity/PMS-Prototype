@@ -45,7 +45,7 @@ class DemoUwpReferenceSeeder extends Seeder
                 'name' => 'July - December 2026',
                 'start_date' => '2026-07-01',
                 'end_date' => '2026-12-31',
-                'is_active' => true,
+                'is_active' => false,
                 'created_at' => $now,
                 'updated_at' => $now,
             ]
