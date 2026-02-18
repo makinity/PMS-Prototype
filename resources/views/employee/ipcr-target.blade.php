@@ -184,15 +184,21 @@
         <div class="flex flex-col gap-2 items-end">
             <div class="flex justify-end gap-3 w-full">
 
-                <button type="button"
-                        id="commit-targets-btn"
-                        data-employee-loading="true"
-                        data-loading-text="Committing..."
-                        @disabled(!$ipcr)
-                        class="inline-flex items-center gap-2 px-5 py-2.5 text-white font-medium rounded-lg focus:ring-4 focus:ring-blue-800 transition-colors duration-200 {{ $ipcr ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-600 opacity-60 cursor-not-allowed' }}">
-                    <span data-button-label>Commit Targets</span>
-                    <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
-                </button>
+                <form method="POST" action="{{ route('stage1.ipcr.commit') }}">
+                    @csrf
+                    <button type="submit"
+                            id="commit-targets-btn"
+                            data-employee-loading="true"
+                            data-loading-text="Committing..."
+                            @disabled(!$ipcr || strtolower($ipcr->status ?? '') === 'committed')
+                            class="inline-flex items-center gap-2 px-5 py-2.5 text-white font-medium rounded-lg focus:ring-4 focus:ring-blue-800 transition-colors duration-200
+                                {{ $ipcr ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-600 opacity-60 cursor-not-allowed' }}">
+                        <span data-button-label>
+                            {{ strtolower($ipcr->status ?? '') === 'committed' ? 'Committed' : 'Commit Targets' }}
+                        </span>
+                        <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                    </button>
+                </form>
             </div>
         </div>
 
@@ -557,30 +563,19 @@
 
         applyStatusUi(ipcr?.status || payload.status);
 
-        document.querySelectorAll('[data-employee-loading="true"]').forEach((button) => {
-            button.addEventListener('click', function () {
-                if (button.dataset.loadingActive === 'true') return;
+        const commitForm = document.querySelector('form[action="{{ route('stage1.ipcr.commit') }}"]');
+        const commitBtn = commitForm?.querySelector('[data-employee-loading="true"]');
 
-                if (button.id === 'commit-targets-btn' && button.dataset.committed === 'true') return;
+        commitForm?.addEventListener('submit', (e) => {
+            if (!commitBtn) return;
 
-                button.dataset.loadingActive = 'true';
-                setButtonLoading(button, true, button.dataset.loadingText || 'Loading...');
+            if (commitBtn.dataset.loadingActive === 'true') {
+                e.preventDefault();
+                return;
+            }
 
-                const duration = Number.parseInt(button.dataset.loadingDuration || '1200', 10);
-                const delay = Number.isNaN(duration) ? 1200 : duration;
-
-                setTimeout(() => {
-                    setButtonLoading(button, false);
-                    button.dataset.loadingActive = 'false';
-
-                    if (button.id === 'commit-targets-btn') {
-                        button.dataset.committed = 'true';
-                        button.disabled = true;
-                        button.classList.add('opacity-70', 'cursor-not-allowed');
-                        applyStatusUi('committed');
-                    }
-                }, delay);
-            });
+            commitBtn.dataset.loadingActive = 'true';
+            setButtonLoading(commitBtn, true, commitBtn.dataset.loadingText || 'Loading...');
         });
     });
     </script>

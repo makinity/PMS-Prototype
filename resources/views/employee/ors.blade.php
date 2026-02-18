@@ -1,6 +1,10 @@
 @extends('layouts.employee')
 
 @section('main-content')
+    @php
+        $orsGate = $orsGate ?? ['blocked' => true, 'reason' => 'ORS unavailable.'];
+        $orsOptions = $orsOptions ?? [];
+    @endphp
 
     <style>
         #ors-calendar .fc-col-header-cell {
@@ -217,7 +221,12 @@
                 </p>
             </div>
 
+            @php
+                $orsModalBlocked = (bool) ($orsGate['blocked'] ?? false) || empty($orsOptions);
+            @endphp
             <form class="space-y-3">
+                <input type="hidden" name="ipcr_id" value="{{ $ipcr?->id }}">
+                <input type="hidden" name="ipcr_item_id" id="orsIpcrItemIdHidden" value="">
 
                 <!-- DATE -->
                 <div>
@@ -235,18 +244,18 @@
                     </label>
                     <select id="orsUwpOutput"
                         class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200"
+                        @disabled($orsModalBlocked)
                         required>
                         <option value="">Select approved UWP output</option>
-                        <option value="ebank_scanning">
-                            E-Bank Scanning and Encoding of Revenue Transactions
-                        </option>
-                        <option value="otc_processing">
-                            Processing of Over-the-Counter Revenue Transactions
-                        </option>
-                        <option value="records_maintenance">
-                            Maintenance of revenue records and filing system
-                        </option>
+                        @foreach($orsOptions as $opt)
+                            <option value="{{ $opt['output_key'] ?? '' }}">
+                                {{ $opt['output_title'] ?? 'Untitled Output' }}
+                            </option>
+                        @endforeach
                     </select>
+                    <p id="orsModalGateNote" class="mt-1 text-[11px] text-amber-300 {{ $orsModalBlocked ? '' : 'hidden' }}">
+                        ORS locked: {{ $orsGate['reason'] ?? 'No committed IPCR targets available.' }}
+                    </p>
 
                 </div>
 
@@ -257,6 +266,7 @@
                     </label>
                     <select id="orsTaskType"
                         class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200"
+                        @disabled($orsModalBlocked)
                         required>
                         <option value="">Select task / activity</option>
                     </select>
@@ -505,23 +515,15 @@
                 missing: { label: 'Missing / Overdue', color: '#ef4444', badge: 'border-red-500/60 bg-red-500/10 text-red-100', editable: false },
             };
 
-            const UWP_INDICATORS = {
-                ebank_scanning: [
-                    'All e-bank transactions scanned and encoded daily',
-                    'Indexing complete with no missing pages',
-                    'Audit trail maintained within 24 hours',
-                ],
-                otc_processing: [
-                    'Same-day verification of OTC transactions',
-                    '95% encoded within the business day',
-                    'OR validation completed daily',
-                ],
-                records_maintenance: [
-                    'Weekly filing updated and retrievable',
-                    'Digital backups synced monthly',
-                    'Retrieval logs maintained for audit purposes',
-                ],
-            };
+            const orsGate = @json($orsGate);
+            const orsOptions = @json($orsOptions);
+            const orsOptionsByKey = Array.isArray(orsOptions)
+                ? orsOptions.reduce((carry, option) => {
+                    const key = String(option?.output_key || '').trim();
+                    if (key) carry[key] = option;
+                    return carry;
+                }, {})
+                : {};
 
             /**
              * DEMO LOCKED DATASET (Stage II) — Employee Assigned: Ramon Reyes ONLY
@@ -641,28 +643,69 @@
 
             const uwpSelect = document.getElementById('orsUwpOutput');
             const taskSelect = document.getElementById('orsTaskType');
+            const ipcrItemHidden = document.getElementById('orsIpcrItemIdHidden');
+            const gateNote = document.getElementById('orsModalGateNote');
 
-            function resetTaskOptions() {
+            function resetTaskOptions(placeholder = 'Select task / activity') {
                 if (!taskSelect) return;
-                taskSelect.innerHTML = '<option value="">Select task / activity</option>';
+                taskSelect.innerHTML = '';
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.textContent = placeholder;
+                taskSelect.appendChild(opt);
+                taskSelect.value = '';
+                if (ipcrItemHidden) ipcrItemHidden.value = '';
             }
 
             function populateTaskOptions(outputKey) {
-                resetTaskOptions();
-                const indicators = UWP_INDICATORS[outputKey] || [];
+                if (!taskSelect) return;
+                resetTaskOptions('Select task / activity');
+
+                const selectedOutput = orsOptionsByKey[String(outputKey || '').trim()] || null;
+                const indicators = Array.isArray(selectedOutput?.indicators) ? selectedOutput.indicators : [];
+
                 indicators.forEach((indicator) => {
+                    const indicatorId = String(indicator?.ipcr_item_id || '').trim();
+                    const indicatorLabel = String(indicator?.indicator_text || '').trim();
+                    if (!indicatorId || !indicatorLabel) return;
+
                     const opt = document.createElement('option');
-                    opt.value = indicator;
-                    opt.textContent = indicator;
+                    opt.value = indicatorId;
+                    opt.textContent = indicatorLabel;
                     taskSelect.appendChild(opt);
                 });
             }
 
             if (uwpSelect && taskSelect) {
                 resetTaskOptions();
-                uwpSelect.addEventListener('change', () => {
-                    populateTaskOptions(uwpSelect.value);
-                });
+
+                const shouldDisable = Boolean(orsGate?.blocked) || !Array.isArray(orsOptions) || orsOptions.length === 0;
+                if (shouldDisable) {
+                    const reason = String(orsGate?.reason || 'No committed IPCR targets available.');
+                    uwpSelect.disabled = true;
+                    taskSelect.disabled = true;
+                    if (gateNote) {
+                        gateNote.textContent = `ORS locked: ${reason}`;
+                        gateNote.classList.remove('hidden');
+                    }
+                    if (uwpSelect.options.length > 0) {
+                        uwpSelect.options[0].textContent = `ORS locked: ${reason}`;
+                    }
+                    resetTaskOptions('Task selection unavailable');
+                } else {
+                    if (gateNote) {
+                        gateNote.classList.add('hidden');
+                    }
+
+                    uwpSelect.addEventListener('change', () => {
+                        populateTaskOptions(uwpSelect.value);
+                    });
+                    taskSelect.addEventListener('change', () => {
+                        if (ipcrItemHidden) {
+                            ipcrItemHidden.value = taskSelect.value || '';
+                        }
+                    });
+                }
             }
 
             // DEMO: exactly one active timer -> Jan 5 recording
@@ -1149,21 +1192,31 @@
                     const requestInput = document.getElementById('orsRequestId');
                     const notesInput = document.getElementById('orsNotes');
                     const submitBtn = taskForm.querySelector('button[type="submit"]');
+                    const ipcrIdInput = taskForm.querySelector('input[name="ipcr_id"]');
+                    const ipcrItemIdInput = document.getElementById('orsIpcrItemIdHidden');
 
                     const uwpOutputKey = uwpOutputSelect ? uwpOutputSelect.value : '';
                     const uwpOutputLabel = (uwpOutputSelect && uwpOutputSelect.selectedIndex > -1)
                         ? uwpOutputSelect.options[uwpOutputSelect.selectedIndex].text
                         : '';
-                    const taskType = taskTypeSelect ? taskTypeSelect.value : '';
+                    const selectedIpcrItemId = ipcrItemIdInput ? ipcrItemIdInput.value : '';
                     const outputType = outputSelect ? outputSelect.value : '';
                     const requestId = requestInput ? requestInput.value.trim() : '';
-                    const validIndicators = UWP_INDICATORS[uwpOutputKey] || [];
+                    const selectedOutput = orsOptionsByKey[String(uwpOutputKey || '').trim()] || null;
+                    const validIndicators = Array.isArray(selectedOutput?.indicators) ? selectedOutput.indicators : [];
+                    const selectedIndicator = validIndicators.find((indicator) => {
+                        return String(indicator?.ipcr_item_id || '') === String(selectedIpcrItemId || '');
+                    }) || null;
 
-                    if (!uwpOutputKey || !taskType || !selectedDate || !outputType) {
+                    if (orsGate?.blocked) {
+                        alert(String(orsGate.reason || 'ORS is currently locked.'));
+                        return;
+                    }
+                    if (!uwpOutputKey || !selectedIpcrItemId || !selectedDate || !outputType) {
                         alert('Select a valid UWP output and task / activity.');
                         return;
                     }
-                    if (!validIndicators.includes(taskType)) {
+                    if (!selectedIndicator) {
                         alert('Task / activity must match the selected UWP output.');
                         return;
                     }
@@ -1183,7 +1236,7 @@
 
                         const newTask = {
                             id: `task-${Date.now()}`,
-                            title: taskTypeSelect.options[taskTypeSelect.selectedIndex].text,
+                            title: taskTypeSelect.options[taskTypeSelect.selectedIndex]?.text || selectedIndicator.indicator_text || '--',
                             date: selectedDate,
                             client: 'Revenue Collection Unit',
                             requestId: requestId,
@@ -1203,6 +1256,15 @@
                             startTime: new Date(),
                             durationMs: 0
                         };
+
+                        console.log('ORS log payload (prototype)', {
+                            ipcr_id: ipcrIdInput ? ipcrIdInput.value : '',
+                            ipcr_item_id: selectedIpcrItemId,
+                            work_date: selectedDate,
+                            output_type: outputType,
+                            request_id: requestId,
+                            notes: notesInput && notesInput.value ? notesInput.value : '',
+                        });
 
                         tasks.push(newTask);
                         activeTaskId = newTask.id;

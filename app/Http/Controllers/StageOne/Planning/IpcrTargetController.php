@@ -7,6 +7,7 @@ use App\Models\Ipcr;
 use App\Models\PerformancePeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class IpcrTargetController extends Controller
 {
@@ -152,5 +153,55 @@ class IpcrTargetController extends Controller
             'supervisorName' => '',
             'employeePosition' => (string) ($ipcr?->employee?->position ?? ''),
         ]);
+    }
+
+    public function commit(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user || $user->role !== 'employee') {
+            abort(403, 'Unauthorized.');
+        }
+
+        $activePeriod = PerformancePeriod::query()
+            ->where('is_active', true)
+            ->orderByDesc('start_date')
+            ->first();
+
+        $ipcrQuery = Ipcr::query()
+            ->withCount('ipcrItems')
+            ->where('employee_id', $user->id)
+            ->orderByDesc('id');
+
+        if ($activePeriod) {
+            $ipcrQuery->where('performance_period_id', $activePeriod->id);
+        }
+
+        $ipcr = $ipcrQuery->first();
+        if (!$ipcr) {
+            return back()->with('error', 'No generated IPCR found for this period.');
+        }
+
+        // Already committed => treat as success (idempotent)
+        if (strtolower((string) $ipcr->status) === Ipcr::STATUS_COMMITTED) {
+            return back()->with('success', 'IPCR already committed.');
+        }
+
+        if (strtolower((string) $ipcr->status) !== Ipcr::STATUS_FOR_COMMITMENT) {
+            return back()->with('error', 'IPCR is not in a commit-ready state.');
+        }
+
+        if ((int) $ipcr->ipcr_items_count <= 0) {
+            return back()->with('error', 'Cannot commit: IPCR has no items.');
+        }
+
+        DB::transaction(function () use ($ipcr) {
+            $now = now();
+            $ipcr->status = Ipcr::STATUS_COMMITTED;
+            $ipcr->committed_at = $now;
+            $ipcr->locked_at = $now; // freeze targets for ORS reference
+            $ipcr->save();
+        });
+
+        return back()->with('success', 'IPCR committed. ORS is now available.');
     }
 }

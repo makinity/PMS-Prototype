@@ -15,6 +15,7 @@ use App\Http\Controllers\StageOne\Planning\UnitWorkPlanController;
 use App\Http\Controllers\StageOne\Planning\UwpDeptHeadReviewController;
 use App\Http\Controllers\StageOne\Planning\UwpPmtReviewController;
 use App\Http\Controllers\StageThree\Forms\IpcrExportController as StageThreeFormsIpcrExportController;
+use App\Http\Controllers\StageTwo\Commitement\OrsController;
 use App\Http\Controllers\StageTwo\Forms\IpcrExportController as FormsIpcrExportController;
 use App\Http\Controllers\StageTwo\Forms\OrsExportController;
 use App\Http\Controllers\StageTwo\Forms\QarExportController;
@@ -96,11 +97,14 @@ Route::prefix('employee')->middleware('auth')->group(function () {
     Route::get('/dashboard', fn () => view('employee.dashboard'))->name('employee.dashboard');
     Route::get('/task', fn () => view('employee.my-task'))->name('employee.my-task');
     Route::get('/submit-output', fn () => view('employee.submit-output'))->name('employee.submit-output');
-    Route::get('/ORS', fn () => view('employee.ors'))->name('employee.ors');
+    Route::get('/ors', [OrsController::class, 'index'])->name('employee.ors');
     Route::get('/MPOR', fn () => view('employee.mpor'))->name('employee.mpor');
     Route::get('/SMPOR', fn () => view('employee.smpor'))->name('employee.smpor');
     Route::get('/IPCR-Target', [IpcrTargetController::class, 'index'])
         ->name('employee.ipcr-target');
+    Route::post('/stage1/ipcr/commit', [IpcrTargetController::class, 'commit'])
+    ->name('stage1.ipcr.commit');
+
     Route::get('/IPCR', fn () => view('employee.ipcr'))->name('employee.ipcr');
     Route::get('/final-ratings', fn () => view('employee.final-ratings'))->name('employee.final-ratings');
     Route::get('/IDP', fn () => view('employee.idp'))->name('employee.idp');
