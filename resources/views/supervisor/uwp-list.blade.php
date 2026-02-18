@@ -17,6 +17,12 @@
             </a>
         </div>
 
+        @if (session('success'))
+            <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+                {{ session('success') }}
+            </div>
+        @endif
+
         <!-- UWP List -->
         <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5 space-y-4">
 
@@ -82,6 +88,13 @@
                                         @php
                                             $isDraftAndUnlocked = strtolower((string) $list->status) === 'draft' && is_null($list->locked_at);
                                         @endphp
+
+                                        <a href="{{ route('supervisor.uwp', ['uwp_id' => $list->id]) }}"
+                                           aria-label="Open Unit Work Plan"
+                                           title="{{ $isDraftAndUnlocked ? 'Open for editing' : 'Open read-only' }}"
+                                           class="inline-flex items-center justify-center rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-white">
+                                            <i class="fa-regular fa-pen-to-square text-sm"></i>
+                                        </a>
 
                                         <button type="button"
                                                 aria-label="View Unit Work Plan"

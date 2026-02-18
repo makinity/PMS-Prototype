@@ -214,14 +214,18 @@ Route::prefix('supervisor')->middleware('auth')->group(function () {
     Route::get('/stage-one/planning/uwp/{id}', [UnitWorkPlanController::class, 'show'])->name('supervisor.uwp.show');
     Route::get('/uwp', [UnitWorkPlanController::class, 'index'])->name('supervisor.uwp');
 
-    Route::post('/stage1/uwp/save-draft', [UnitWorkPlanController::class, 'saveDraftData'])
+    Route::post('/uwp/save-draft', [UnitWorkPlanController::class, 'saveDraftData'])
         ->name('supervisor.uwp.saveDraftData');
-    Route::post('/stage1/uwp/submit', [UnitWorkPlanController::class, 'submitData'])
+    Route::post('/uwp/{id}/save-draft', [UnitWorkPlanController::class, 'saveDraftDataById'])
+        ->name('supervisor.uwp.saveDraftData.byId');
+    Route::post('/uwp/submit', [UnitWorkPlanController::class, 'submitData'])
         ->name('supervisor.uwp.submitData');
+    Route::post('/uwp/{id}/submit', [UnitWorkPlanController::class, 'submitDataForUwp'])
+        ->name('supervisor.uwp.submitData.byId');
 
     Route::post('/stage-one/planning/uwp/{id}/submit', [UnitWorkPlanController::class, 'submitForApproval'])
         ->name('supervisor.uwp.submit');
-    Route::post('/stage1/uwp/{id}/submit', [UnitWorkPlanController::class, 'submitForApproval'])
+    Route::post('/stage1/uwp/{id}/submit-legacy', [UnitWorkPlanController::class, 'submitForApproval'])
         ->name('supervisor.uwp.submit.legacy');
 
     Route::get('/supervisor/uwp/{id}/preview', [UnitWorkPlanController::class, 'preview'])

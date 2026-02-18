@@ -45,10 +45,61 @@ class UnitWorkPlanController extends Controller
     }
     public function index(Request $request)
     {
+        $user = $this->resolveSupervisorUser($request);
+
         $offices = Office::orderBy('name')->get();
         $periods = PerformancePeriod::orderBy('start_date', 'desc')->get();
 
-        return view('supervisor.uwp', compact('offices', 'periods'));
+        $selectedUwpId = (int) $request->query('uwp_id', 0);
+        $uwp = null;
+        $status = UnitWorkPlan::STATUS_DRAFT;
+        $locked_at = null;
+        $selectedPerformancePeriodId = null;
+        $selectedOfficeId = (int) ($user->office_id ?? 0);
+        $initialFunctions = null;
+
+        if ($selectedUwpId > 0) {
+            $uwp = UnitWorkPlan::query()
+                ->with([
+                    'uwpFunctions' => function ($query) {
+                        $query->orderBy('sort_order')->with([
+                            'mfos' => function ($mfoQuery) {
+                                $mfoQuery->orderBy('sort_order')->with([
+                                    'successIndicators' => function ($indicatorQuery) {
+                                        $indicatorQuery->orderBy('sort_order')->with([
+                                            'qetStandards',
+                                            'assignments.employee',
+                                        ]);
+                                    },
+                                ]);
+                            },
+                        ]);
+                    },
+                ])
+                ->findOrFail($selectedUwpId);
+
+            $this->ensureCanViewUwp($user, $uwp);
+            if ((int) $uwp->created_by !== (int) $user->id) {
+                abort(403, 'Unauthorized.');
+            }
+
+            $status = (string) $uwp->status;
+            $locked_at = $uwp->locked_at;
+            $selectedPerformancePeriodId = (int) $uwp->performance_period_id;
+            $selectedOfficeId = (int) $uwp->office_id;
+            $initialFunctions = $this->mapUwpToEditorFunctions($uwp);
+        }
+
+        return view('supervisor.uwp', compact(
+            'offices',
+            'periods',
+            'uwp',
+            'status',
+            'locked_at',
+            'selectedOfficeId',
+            'selectedPerformancePeriodId',
+            'initialFunctions'
+        ));
     }
 
     public function create(Request $request)
@@ -69,14 +120,35 @@ class UnitWorkPlanController extends Controller
 
         $user = $request->user();
 
+        $existing = UnitWorkPlan::query()
+            ->where('office_id', $data['office_id'])
+            ->where('performance_period_id', $data['performance_period_id'])
+            ->first();
+
+        if ($existing) {
+            if ((int) $existing->created_by !== (int) $user->id) {
+                return back()->with('error', 'A Unit Work Plan already exists for the selected Office/Unit and Performance Period.');
+            }
+
+            if (!$existing->isEditableBySupervisor()) {
+                return back()->with('error', 'UWP is read-only at this stage.');
+            }
+
+            return redirect()->route('supervisor.uwp', ['uwp_id' => $existing->id]);
+        }
+
         $uwp = UnitWorkPlan::create([
             'office_id' => $data['office_id'],
             'performance_period_id' => $data['performance_period_id'],
             'created_by' => $user->id,
             'status' => UnitWorkPlan::STATUS_DRAFT,
+            'submitted_at' => null,
+            'locked_at' => null,
         ]);
 
-        return redirect()->with('success', 'UWP created (Draft).');
+        return redirect()
+            ->route('supervisor.uwp', ['uwp_id' => $uwp->id])
+            ->with('success', 'UWP created (Draft).');
     }
 
 
@@ -143,37 +215,84 @@ class UnitWorkPlanController extends Controller
 
     public function saveDraftData(Request $request)
     {
-        $user = $this->resolveSupervisorUser($request);
-
-        [$data, $functionsPayload, $assignmentsPayload] = $this->parseUwpPayload($request);
-
-        $this->persistUwpFromPayload(
-            $user,
-            (int) $data['office_id'],
-            (int) $data['performance_period_id'],
-            $functionsPayload,
-            $assignmentsPayload
-        );
-
-        return redirect()->route('supervisor.uwp-page')->with('success', 'UWP draft saved.');
+        return $this->handleSaveDraftData($request, null);
     }
 
+    public function saveDraftDataById(Request $request, int $id)
+    {
+        return $this->handleSaveDraftData($request, $id);
+    }
+
+    public function saveDraftDataForUwp(Request $request, int $id)
+    {
+        return $this->handleSaveDraftData($request, $id);
+    }
 
     public function submitData(Request $request)
     {
+        return $this->handleSubmitData($request, null);
+    }
+
+    public function submitDataForUwp(Request $request, int $id)
+    {
+        if (!$request->filled('functions_payload') && !$request->filled('mfos_payload')) {
+            return $this->submitForApproval($request, $id);
+        }
+
+        return $this->handleSubmitData($request, $id);
+    }
+
+    private function handleSaveDraftData(Request $request, ?int $forcedUwpId)
+    {
         $user = $this->resolveSupervisorUser($request);
 
-        [$data, $functionsPayload, $assignmentsPayload] = $this->parseUwpPayload($request);
+        [$data, $functionsPayload, $assignmentsPayload] = $this->parseDraftPayload($request);
+        $uwpId = $forcedUwpId ?? (isset($data['uwp_id']) ? (int) $data['uwp_id'] : null);
 
         $uwp = $this->persistUwpFromPayload(
             $user,
             (int) $data['office_id'],
             (int) $data['performance_period_id'],
             $functionsPayload,
-            $assignmentsPayload
+            $assignmentsPayload,
+            $uwpId
+        );
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'uwp_id' => $uwp->id,
+                'status' => $uwp->status,
+                'message' => 'UWP draft saved.',
+            ]);
+        }
+
+        return redirect()
+            ->route('supervisor.uwp-page')
+            ->with('success', 'Draft saved.');
+    }
+
+    private function handleSubmitData(Request $request, ?int $forcedUwpId)
+    {
+        $user = $this->resolveSupervisorUser($request);
+
+        [$data, $functionsPayload, $assignmentsPayload] = $this->parseUwpPayload($request);
+        $uwpId = $forcedUwpId ?? (isset($data['uwp_id']) ? (int) $data['uwp_id'] : null);
+
+        $uwp = $this->persistUwpFromPayload(
+            $user,
+            (int) $data['office_id'],
+            (int) $data['performance_period_id'],
+            $functionsPayload,
+            $assignmentsPayload,
+            $uwpId
         );
 
         if ($uwp->isLocked() || !in_array($uwp->status, [UnitWorkPlan::STATUS_DRAFT, UnitWorkPlan::STATUS_RETURNED], true)) {
+            if (!($request->expectsJson() || $request->ajax())) {
+                return back()->with('error', 'Only editable Draft/Returned UWP can be submitted.');
+            }
+
             return response()->json([
                 'success' => false,
                 'error' => 'Only editable Draft/Returned UWP can be submitted.'
@@ -181,6 +300,10 @@ class UnitWorkPlanController extends Controller
         }
 
         if ($uwp->mfos()->count() === 0) {
+            if (!($request->expectsJson() || $request->ajax())) {
+                return back()->with('error', 'Cannot submit: no MFOs found.');
+            }
+
             return response()->json([
                 'success' => false,
                 'error' => 'Cannot submit: no MFOs found.'
@@ -188,6 +311,10 @@ class UnitWorkPlanController extends Controller
         }
 
         if ($this->countIndicatorAssignments($uwp) === 0) {
+            if (!($request->expectsJson() || $request->ajax())) {
+                return back()->with('error', 'Cannot submit: no assigned employees.');
+            }
+
             return response()->json([
                 'success' => false,
                 'error' => 'Cannot submit: no assigned employees.'
@@ -201,6 +328,12 @@ class UnitWorkPlanController extends Controller
                 'locked_at' => now(),
             ]);
         });
+
+        if (!($request->expectsJson() || $request->ajax())) {
+            return redirect()
+                ->route('supervisor.uwp-page')
+                ->with('success', 'UWP submitted successfully. Now read-only.');
+        }
 
         return response()->json([
             'success' => true,
@@ -328,6 +461,7 @@ class UnitWorkPlanController extends Controller
     private function parseUwpPayload(Request $request): array
     {
         $data = $request->validate([
+            'uwp_id' => ['nullable', 'integer', 'exists:unit_work_plans,id'],
             'office_id' => ['required', 'integer', 'exists:offices,id'],
             'performance_period_id' => ['required', 'integer', 'exists:performance_periods,id'],
             'functions_payload' => ['nullable', 'string'],
@@ -357,6 +491,44 @@ class UnitWorkPlanController extends Controller
         }
 
         return [$data, $functionsPayload, $assignmentsPayload];
+    }
+
+    private function parseDraftPayload(Request $request): array
+    {
+        $data = $request->validate([
+            'uwp_id' => ['nullable', 'integer', 'exists:unit_work_plans,id'],
+            'office_id' => ['required', 'integer', 'exists:offices,id'],
+            'performance_period_id' => ['required', 'integer', 'exists:performance_periods,id'],
+            'functions_payload' => ['nullable', 'string'],
+            'mfos_payload' => ['nullable', 'string'],
+            'assignments_payload' => ['nullable', 'string'],
+        ]);
+
+        $functionsPayload = [];
+        if (!empty($data['functions_payload'])) {
+            $rawFunctions = $this->safeJsonDecode($data['functions_payload'], []);
+            $functionsPayload = $this->normalizeFunctionsPayload($rawFunctions);
+        } elseif (!empty($data['mfos_payload'])) {
+            $rawMfos = $this->safeJsonDecode($data['mfos_payload'], []);
+            $functionsPayload = $this->normalizeFunctionsPayload($rawMfos);
+        }
+
+        $assignmentsPayload = [];
+        if (!empty($data['assignments_payload'])) {
+            $assignmentsPayload = $this->safeJsonDecode($data['assignments_payload'], []);
+        }
+
+        return [$data, $functionsPayload, $assignmentsPayload];
+    }
+
+    private function safeJsonDecode(?string $payload, array $default = []): array
+    {
+        if (!is_string($payload) || trim($payload) === '') {
+            return $default;
+        }
+
+        $decoded = json_decode($payload, true);
+        return is_array($decoded) ? $decoded : $default;
     }
 
     private function decodeJsonPayload(string $payload, string $field): array
@@ -561,19 +733,55 @@ class UnitWorkPlanController extends Controller
         return $standards;
     }
 
-    private function persistUwpFromPayload(User $user, int $officeId, int $periodId, array $functionsPayload, array $assignmentsPayload): UnitWorkPlan
+    private function persistUwpFromPayload(
+        User $user,
+        int $officeId,
+        int $periodId,
+        array $functionsPayload,
+        array $assignmentsPayload,
+        ?int $uwpId = null
+    ): UnitWorkPlan
     {
-        return DB::transaction(function () use ($user, $officeId, $periodId, $functionsPayload, $assignmentsPayload) {
-            $uwp = UnitWorkPlan::query()
-                ->where('office_id', $officeId)
-                ->where('performance_period_id', $periodId)
-                ->where('created_by', $user->id)
-                ->first();
+        return DB::transaction(function () use ($user, $officeId, $periodId, $functionsPayload, $assignmentsPayload, $uwpId) {
+            $uwp = null;
 
-            if ($uwp && !$uwp->isEditableBySupervisor()) {
-                throw ValidationException::withMessages([
-                    'status' => 'UWP is read-only at this stage.',
-                ]);
+            if ($uwpId) {
+                $uwp = UnitWorkPlan::query()->find($uwpId);
+
+                if (!$uwp) {
+                    throw ValidationException::withMessages([
+                        'uwp_id' => 'Selected UWP was not found.',
+                    ]);
+                }
+
+                if ((int) $uwp->created_by !== (int) $user->id) {
+                    abort(403, 'Unauthorized.');
+                }
+
+                if (!$uwp->isEditableBySupervisor()) {
+                    throw ValidationException::withMessages([
+                        'status' => 'UWP is read-only at this stage.',
+                    ]);
+                }
+            } else {
+                $uwp = UnitWorkPlan::query()
+                    ->where('office_id', $officeId)
+                    ->where('performance_period_id', $periodId)
+                    ->first();
+
+                if ($uwp) {
+                    if ((int) $uwp->created_by !== (int) $user->id) {
+                        throw ValidationException::withMessages([
+                            'office_id' => 'A Unit Work Plan already exists for the selected Office/Unit and Performance Period.',
+                        ]);
+                    }
+
+                    if (!$uwp->isEditableBySupervisor()) {
+                        throw ValidationException::withMessages([
+                            'status' => 'UWP is read-only at this stage.',
+                        ]);
+                    }
+                }
             }
 
             if (!$uwp) {
@@ -582,8 +790,33 @@ class UnitWorkPlanController extends Controller
                     'performance_period_id' => $periodId,
                     'created_by' => $user->id,
                     'status' => UnitWorkPlan::STATUS_DRAFT,
+                    'submitted_at' => null,
+                    'locked_at' => null,
                 ]);
             }
+
+            $conflict = UnitWorkPlan::query()
+                ->where('office_id', $officeId)
+                ->where('performance_period_id', $periodId)
+                ->where('id', '!=', $uwp->id)
+                ->first();
+
+            if ($conflict) {
+                if ((int) $conflict->created_by !== (int) $user->id) {
+                    throw ValidationException::withMessages([
+                        'office_id' => 'A Unit Work Plan already exists for the selected Office/Unit and Performance Period.',
+                    ]);
+                }
+            }
+
+            $uwp->update([
+                'created_by' => $user->id,
+                'office_id' => $officeId,
+                'performance_period_id' => $periodId,
+                'status' => UnitWorkPlan::STATUS_DRAFT,
+                'submitted_at' => null,
+                'locked_at' => null,
+            ]);
 
             $uwp->uwpFunctions()->delete();
 
@@ -710,6 +943,57 @@ class UnitWorkPlanController extends Controller
                 $query->where('unit_work_plan_id', $uwp->id);
             })
             ->count();
+    }
+
+    private function mapUwpToEditorFunctions(UnitWorkPlan $uwp): array
+    {
+        return $uwp->uwpFunctions
+            ->sortBy('sort_order')
+            ->values()
+            ->map(function (UwpFunction $function) {
+                return [
+                    'title' => (string) $function->name,
+                    'type' => (string) $function->function_type,
+                    'weight' => (float) ($function->weight_percent ?? 0),
+                    'isCustom' => $function->function_type === 'custom',
+                    'mfos' => $function->mfos
+                        ->sortBy('sort_order')
+                        ->values()
+                        ->map(function ($mfo) {
+                            return [
+                                'title' => (string) $mfo->title,
+                                'target' => (string) ($mfo->target_timeline ?? ''),
+                                'indicators' => $mfo->successIndicators
+                                    ->sortBy('sort_order')
+                                    ->values()
+                                    ->map(function ($indicator) {
+                                        return [
+                                            'text' => (string) $indicator->indicator_text,
+                                            'standards' => $indicator->qetStandards
+                                                ->sortBy([['rating', 'desc'], ['dimension', 'asc']])
+                                                ->values()
+                                                ->map(function ($standard) {
+                                                    return [
+                                                        'rating' => (int) $standard->rating,
+                                                        'dimension' => (string) $standard->dimension,
+                                                        'text' => (string) $standard->standard_text,
+                                                    ];
+                                                })
+                                                ->all(),
+                                            'assignees' => $indicator->assignments
+                                                ->map(fn ($assignment) => $assignment->employee?->name)
+                                                ->filter()
+                                                ->values()
+                                                ->all(),
+                                        ];
+                                    })
+                                    ->all(),
+                            ];
+                        })
+                        ->all(),
+                ];
+            })
+            ->all();
     }
 
     private function resolveAssignmentEmployeeIds(array $assignmentsPayload, int $officeId): array

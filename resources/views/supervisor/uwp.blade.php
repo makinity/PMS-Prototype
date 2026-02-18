@@ -5,6 +5,10 @@
         $isDraft = $statusKey === 'draft';
         $isLocked = (bool) ($locked_at ?? $lockedAt ?? false);
         $canEdit = $isDraft && !$isLocked;
+        $selectedUwpId = $uwp->id ?? null;
+        $selectedOfficeId = old('office_id', $selectedOfficeId ?? auth()->user()->office_id);
+        $activePeriod = $periods->firstWhere('is_active', true);
+        $selectedPerformancePeriodId = old('performance_period_id', $selectedPerformancePeriodId ?? optional($activePeriod)->id);
     @endphp
 @section('main-content')
     <section class="space-y-6">
@@ -17,6 +21,7 @@
 
         <form id="uwp-form" method="POST">
             @csrf
+            <input type="hidden" name="uwp_id" id="uwp_id" value="{{ old('uwp_id', $selectedUwpId) }}">
             <input type="hidden" name="mfos_payload" id="mfos_payload">
             <input type="hidden" name="assignments_payload" id="assignments_payload">
             <input type="hidden" name="functions_payload" id="functions_payload">
@@ -52,7 +57,7 @@
                             {{ auth()->user()->office->name ?? 'No office assigned' }}
                         </div>
                         <!-- Hidden field to submit the office_id -->
-                        <input type="hidden" name="office_id" value="{{ auth()->user()->office_id }}">
+                        <input type="hidden" name="office_id" value="{{ $selectedOfficeId }}">
                     @else
                         <!-- Admins/Dept heads: Still show dropdown -->
                         <select
@@ -85,7 +90,7 @@
                     >
                         @foreach($periods as $period)
                             <option value="{{ $period->id }}"
-                                {{ $period->is_active ? 'selected' : '' }}>
+                                {{ (int) $selectedPerformancePeriodId === (int) $period->id ? 'selected' : '' }}>
                                 {{ $period->name }}
                             </option>
                         @endforeach
@@ -470,6 +475,7 @@
 
                 const unitSelect = document.getElementById('uwp-office-unit');
                 const uwpForm = document.getElementById('uwp-form');
+                const uwpIdInput = document.getElementById('uwp_id');
                 const mfosPayloadInput = document.getElementById('mfos_payload');
                 const assignmentsPayloadInput = document.getElementById('assignments_payload');
                 const functionsPayloadInput = document.getElementById('functions_payload');
@@ -477,8 +483,13 @@
                 const addFunctionBtn = document.getElementById('uwp-add-function');
                 const submitUwpBtn = document.querySelector('[data-submit-uwp-btn]');
 
-                const saveDraftUrl = @json(route('supervisor.uwp.saveDraftData'));
-                const submitUwpUrl = @json(route('supervisor.uwp.submitData'));
+                const selectedUwpId = @json($selectedUwpId);
+                const saveDraftUrl = selectedUwpId
+                    ? @json(route('supervisor.uwp.saveDraftData.byId', ['id' => '__ID__'])).replace('__ID__', String(selectedUwpId))
+                    : @json(route('supervisor.uwp.saveDraftData'));
+                const submitUwpUrl = selectedUwpId
+                    ? @json(route('supervisor.uwp.submitData.byId', ['id' => '__ID__'])).replace('__ID__', String(selectedUwpId))
+                    : @json(route('supervisor.uwp.submitData'));
 
                 let activeFunctionIndex = null;
                 let activeMfoIndex = null;
@@ -500,8 +511,7 @@
 
                 const isDraft = {{ $canEdit ? 'true' : 'false' }};
 
-                const uwpState = {
-                    functions: [
+                const seededFunctions = [
                         {
                             title: 'Core Functions',
                             type: 'core',
@@ -545,7 +555,13 @@
                                 },
                             ],
                         },
-                    ],
+                    ];
+
+                const serverFunctions = @json($initialFunctions ?? null);
+                const uwpState = {
+                    functions: Array.isArray(serverFunctions) && serverFunctions.length > 0
+                        ? serverFunctions
+                        : (selectedUwpId ? seededFunctions : []),
                 };
 
                 const standardsSeedMap = {
@@ -1508,7 +1524,7 @@
                     let sortOrder = 1;
 
                     uwpState.functions.forEach((func) => {
-                        const functionCode = func.type === 'custom' ? 'support' : func.type;
+                        const functionCode = ['core', 'support', 'custom'].includes(func.type) ? func.type : 'custom';
                         const weight = Number(func.weight || 0);
 
                         (func.mfos || []).forEach((mfo) => {
@@ -1564,6 +1580,9 @@
 
                 function submitUwp(actionUrl) {
                     if (!uwpForm || !actionUrl) return;
+                    if (uwpIdInput && selectedUwpId && !uwpIdInput.value) {
+                        uwpIdInput.value = String(selectedUwpId);
+                    }
                     if (functionsPayloadInput) {
                         functionsPayloadInput.value = JSON.stringify(buildFunctionsPayload());
                     }
