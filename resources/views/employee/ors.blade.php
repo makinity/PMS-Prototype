@@ -543,6 +543,7 @@
                 paused: { label: 'Paused', color: '#f59e0b', badge: 'border-amber-500/60 bg-amber-500/10 text-amber-200', editable: false },
                 draft: { label: 'Draft (Stopped)', color: '#fbbf24', badge: 'border-amber-300/60 bg-amber-300/10 text-amber-100', editable: true },
                 submitted: { label: 'Submitted (Locked)', color: '#3b82f6', badge: 'border-blue-500/60 bg-blue-500/10 text-blue-100', editable: false },
+                rated: { label: 'Rated (Locked)', color: '#06b6d4', badge: 'border-cyan-500/60 bg-cyan-500/10 text-cyan-100', editable: false },
                 locked: { label: 'Submitted (Locked)', color: '#10b981', badge: 'border-emerald-500/60 bg-emerald-500/10 text-emerald-100', editable: false },
                 missing: { label: 'Missing / Overdue', color: '#ef4444', badge: 'border-red-500/60 bg-red-500/10 text-red-100', editable: false },
             };
@@ -731,7 +732,7 @@
                         quantity: String(entry?.quantity || ''),
                         rating: '--',
                         state: state,
-                        output_state: (state === 'submitted' || state === 'locked') ? 'submitted' : 'none',
+                        output_state: (state === 'submitted' || state === 'rated' || state === 'locked') ? 'submitted' : 'none',
                         submittedAt: submittedAt,
                         evidenceRequired: true,
                         evidenceAttached: Boolean(entry?.evidenceAttached),
@@ -846,6 +847,7 @@
                 recording: 'Recording',
                 paused: 'Paused',
                 submitted: 'Submitted',
+                rated: 'Rated',
                 locked: 'Submitted',
             };
 
@@ -1062,7 +1064,7 @@
             }
 
             function isLockedState(state) {
-                return state === 'submitted' || state === 'locked';
+                return state === 'submitted' || state === 'rated' || state === 'locked';
             }
 
             function syncQuantityFromInput(task) {
@@ -1129,7 +1131,7 @@
                 rebuildCalendarBuckets();
                 calendar.removeAllEvents();
 
-                const stateOrder = ['recording', 'paused', 'draft', 'submitted', 'locked'];
+                const stateOrder = ['recording', 'paused', 'draft', 'submitted', 'rated', 'locked'];
                 const stateIndex = (state) => {
                     const idx = stateOrder.indexOf(state);
                     return idx === -1 ? Number.MAX_SAFE_INTEGER : idx;
@@ -1180,7 +1182,7 @@
                 daySummaryListEl.innerHTML = '';
 
                 const statusMap = byDateStatus[dateKey] || {};
-                const stateOrder = ['recording', 'paused', 'draft', 'submitted', 'locked'];
+                const stateOrder = ['recording', 'paused', 'draft', 'submitted', 'rated', 'locked'];
                 let statusKeys = filterKey ? [filterKey] : Object.keys(statusMap);
                 statusKeys = statusKeys
                     .filter((stateKey) => Array.isArray(statusMap[stateKey]) && statusMap[stateKey].length > 0)

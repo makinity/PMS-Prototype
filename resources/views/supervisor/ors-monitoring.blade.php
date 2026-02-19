@@ -8,7 +8,7 @@
         }
 
         $calendarTasks = $submittedEntries
-            ->filter(fn ($entry) => strtolower((string) ($entry->status ?? '')) === 'submitted')
+            ->filter(fn ($entry) => in_array(strtolower((string) ($entry->status ?? '')), ['submitted', 'rated'], true))
             ->map(function ($entry) {
                 $workDate = $entry->work_date;
                 $dateValue = null;
@@ -64,7 +64,7 @@
                     'started_at' => optional($entry->started_at)->toIso8601String(),
                     'stopped_at' => optional($entry->stopped_at)->toIso8601String(),
                     'evidences' => $evidences,
-                    'status' => 'submitted',
+                    'status' => strtolower((string) ($entry->status ?? 'submitted')),
                     'quality_rating' => optional($entry->monitoring)->quality_rating,
                     'timeliness_rating' => optional($entry->monitoring)->timeliness_rating,
                     'remarks' => optional($entry->monitoring)->remarks,
@@ -87,10 +87,16 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        #ors-calendar .fc-daygrid-event.ors-summary-event {
+        #ors-calendar .fc-daygrid-event.ors-summary-event { color: #dbeafe; }
+        #ors-calendar .fc-daygrid-event.ors-submitted-event {
             background: rgba(59, 130, 246, 0.18);
             border: 1px solid rgba(59, 130, 246, 0.45);
             color: #dbeafe;
+        }
+        #ors-calendar .fc-daygrid-event.ors-rated-event {
+            background: rgba(6, 182, 212, 0.18);
+            border: 1px solid rgba(6, 182, 212, 0.45);
+            color: #cffafe;
         }
 
         .status-chip{
@@ -117,13 +123,13 @@
             <h1 class="text-2xl font-semibold text-white">Daily ORS Monitoring</h1>
         </div>
 
-        <!-- Legend (submitted + missing only, aligned with manual ORS) -->
+        <!-- Legend (submitted/rated + missing only, aligned with manual ORS) -->
         <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <div>
                     <p class="text-xs font-semibold text-slate-400">ORS Monitoring Legend</p>
                     <p class="text-[11px] text-slate-500">
-                        Visibility: submitted outputs only · Rating: submitted only
+                        Visibility: submitted/rated outputs only · Rating: submitted/rated only
                     </p>
                 </div>
 
@@ -131,6 +137,11 @@
                     <span class="status-chip border-blue-500/60 bg-blue-500/10 text-blue-100">
                         <span class="status-dot bg-blue-500"></span>
                         Submitted (Locked)
+                    </span>
+
+                    <span class="status-chip border-cyan-500/60 bg-cyan-500/10 text-cyan-100">
+                        <span class="status-dot bg-cyan-500"></span>
+                        Rated (Locked)
                     </span>
 
                     <span class="status-chip border-red-500/60 bg-red-500/10 text-red-100">
@@ -269,7 +280,7 @@
                     </div>
                 </div>
                 <div class="px-5 py-4 text-sm text-slate-300">
-                    No submitted entries for this date.
+                    No submitted or rated entries for this date.
                 </div>
                 <div class="border-t border-slate-800 bg-slate-900/80 px-5 py-3 text-right">
                     <button id="closeEmptyDateBottomBtn"
@@ -462,7 +473,10 @@
 
                     <div class="border-t border-slate-800 bg-slate-900/80 px-6 py-4">
                         <div class="flex items-center justify-end gap-2">
-                            <form id="saveMonitoringForm" method="POST" class="hidden">
+                            <form id="saveMonitoringForm"
+                                  method="POST"
+                                  class="hidden"
+                                  data-action-template="{{ route('supervisor.ors-monitoring.store', ['orsEntry' => '__ID__']) }}">
                                 @csrf
                                 <input type="hidden" name="quality_rating" id="formQualityRating">
                                 <input type="hidden" name="timeliness_rating" id="formTimelinessRating">
@@ -642,16 +656,21 @@
                         color: '#3b82f6',
                         badge: 'border-blue-500/60 bg-blue-500/10 text-blue-100'
                     },
+                    rated: {
+                        label: 'Rated (Locked)',
+                        detail: 'Supervisor monitoring rating has been saved. You may update it.',
+                        color: '#06b6d4',
+                        badge: 'border-cyan-500/60 bg-cyan-500/10 text-cyan-100'
+                    },
                     missing: {
                         label: 'Missing / Overdue',
-                        detail: 'No submitted ORS entry for this date.',
+                        detail: 'No submitted or rated ORS entry for this date.',
                         color: '#ef4444',
                         badge: 'border-red-500/60 bg-red-500/10 text-red-100',
                         muted: true
                     }
                 };
                 const tasks = @json($calendarTasks);
-                const monitorBaseUrl = @json(url('/supervisor/team-tasks'));
                 const byDate = tasks.reduce((carry, task) => {
                     if (!task || !task.date) return carry;
                     if (!carry[task.date]) {
@@ -675,17 +694,44 @@
                     return carry;
                 }, {});
 
-                const summaryEvents = Object.keys(byDate).map((date) => ({
-                    id: `sum-${date}`,
-                    start: date,
-                    allDay: true,
-                    title: `${byDate[date].length} submitted`,
-                    classNames: ['ors-summary-event'],
-                    extendedProps: {
-                        date,
-                        count: byDate[date].length,
-                    },
-                }));
+                const summaryEvents = Object.keys(byDate).flatMap((date) => {
+                    const entries = Array.isArray(byDate[date]) ? byDate[date] : [];
+                    const submittedCount = entries.filter((entry) => String(entry?.status || '').toLowerCase() === 'submitted').length;
+                    const ratedCount = entries.filter((entry) => String(entry?.status || '').toLowerCase() === 'rated').length;
+                    const events = [];
+
+                    if (submittedCount > 0) {
+                        events.push({
+                            id: `sum-${date}-submitted`,
+                            start: date,
+                            allDay: true,
+                            title: `${submittedCount} submitted`,
+                            classNames: ['ors-summary-event', 'ors-submitted-event'],
+                            extendedProps: {
+                                date,
+                                status: 'submitted',
+                                count: submittedCount,
+                            },
+                        });
+                    }
+
+                    if (ratedCount > 0) {
+                        events.push({
+                            id: `sum-${date}-rated`,
+                            start: date,
+                            allDay: true,
+                            title: `${ratedCount} rated`,
+                            classNames: ['ors-summary-event', 'ors-rated-event'],
+                            extendedProps: {
+                                date,
+                                status: 'rated',
+                                count: ratedCount,
+                            },
+                        });
+                    }
+
+                    return events;
+                });
 
                 function setButtonLoading(button, isLoading, loadingText) {
                     if (!button) return;
@@ -812,7 +858,7 @@
                     height: 'auto',
                     headerToolbar: { left: 'prev,next today', center: 'title', right: '' },
                     dayMaxEvents: true,
-                    dayMaxEventRows: 1,
+                    dayMaxEventRows: 2,
                     moreLinkClick: 'popover',
                     eventDisplay: 'block',
                     editable: false,
@@ -973,13 +1019,14 @@
                 let currentEvidenceEntryId = null;
 
                 function updateRatingBasis(data) {
-                    const indicator = data.status === 'submitted'
-                        ? (data.indicator_text || data.accomplishment || 'No submitted ORS entry')
-                        : 'No submitted ORS entry';
+                    const isRateableStatus = data.status === 'submitted' || data.status === 'rated';
+                    const indicator = isRateableStatus
+                        ? (data.indicator_text || data.accomplishment || 'No submitted/rated ORS entry')
+                        : 'No submitted/rated ORS entry';
 
                     ratingBasisIndicatorEl.textContent = indicator;
 
-                    const canOpenBasis = data.status === 'submitted';
+                    const canOpenBasis = isRateableStatus;
                     if (openBasisBtn) {
                         openBasisBtn.disabled = !canOpenBasis;
                         openBasisBtn.classList.toggle('opacity-60', !canOpenBasis);
@@ -1192,7 +1239,7 @@
                     if (entries.length === 0) {
                         const empty = document.createElement('p');
                         empty.className = 'rounded-lg border border-slate-800 bg-slate-950/50 px-4 py-3 text-sm text-slate-400';
-                        empty.textContent = 'No submitted entries found for this date.';
+                        empty.textContent = 'No submitted or rated entries found for this date.';
                         dayListEntries.appendChild(empty);
                     } else {
                         entries.forEach((entry) => {
@@ -1292,8 +1339,8 @@
 
                     updateRatingBasis(data);
 
-                    // Rateable only if submitted
-                    const rateable = data.status === 'submitted';
+                    // Rateable only if submitted or rated
+                    const rateable = data.status === 'submitted' || data.status === 'rated';
                     ratingLockedNote.classList.toggle('hidden', rateable);
                     ratingControls.classList.toggle('hidden', !rateable);
 
@@ -1322,7 +1369,8 @@
                     }
                     if (saveForm) {
                         if (rateable && data.id) {
-                            saveForm.action = `${monitorBaseUrl}/${encodeURIComponent(data.id)}/monitor`;
+                            const tpl = saveForm.dataset.actionTemplate;
+                            saveForm.action = tpl.replace('__ID__', encodeURIComponent(data.id));
                         } else {
                             saveForm.removeAttribute('action');
                         }
@@ -1420,8 +1468,8 @@
 
                 // Save rating to backend
                 saveBtn?.addEventListener('click', () => {
-                    if (!currentModalData || currentModalData.status !== 'submitted') {
-                        alert('Rating is available only for Submitted (Locked) entries.');
+                    if (!currentModalData || !['submitted', 'rated'].includes(currentModalData.status)) {
+                        alert('Rating is available only for Submitted or Rated (Locked) entries.');
                         return;
                     }
 

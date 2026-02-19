@@ -228,6 +228,7 @@ Route::prefix('supervisor')->middleware('auth')->group(function () {
 
     Route::get('/mpor-validation', fn () => view('supervisor.mpor-validation'))->name('supervisor.mpor-validation');
     Route::get('/ors-monitoring', [OrsMonitoringController::class, 'index'])->name('supervisor.ors-monitoring');
+    Route::post('/ors-monitoring/{orsEntry}/monitor', [OrsMonitoringController::class, 'store'])->name('supervisor.ors-monitoring.store');
     Route::get('/overdue-alerts', fn () => view('supervisor.overdue-alerts'))->name('supervisor.overdue-alerts');
     Route::get('/task-validation', fn () => view('supervisor.task-validation'))->name('supervisor.task-validation');
     Route::get('/team-productivity', fn () => view('supervisor.team-productivity'))->name('supervisor.team-productivity');

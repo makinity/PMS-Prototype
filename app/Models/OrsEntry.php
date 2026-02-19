@@ -79,7 +79,7 @@ class OrsEntry extends Model
 
     public function isSubmitted(): bool
     {
-        return strtolower((string) $this->status) === 'submitted';
+        return in_array(strtolower((string) $this->status), ['submitted', 'rated'], true);
     }
 
     public function isDraft(): bool

@@ -27,6 +27,8 @@ class MyTasksController extends Controller
             ->with([
                 'ipcrItem:id,output_title,indicator_text',
                 'evidences:id,ors_entry_id,file_name,file_path,mime_type,file_size,uploaded_at',
+                'monitoring:id,ors_entry_id,supervisor_id,quality_rating,timeliness_rating,remarks,rated_at',
+                'monitoring.supervisor:id,name',
             ])
             ->where('employee_id', $user->id)
             ->orderByDesc('work_date')

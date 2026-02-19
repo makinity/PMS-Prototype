@@ -14,6 +14,7 @@
                 <option value="draft" class="bg-gray-700">Draft</option>
                 <option value="recording" class="bg-gray-700">Recording</option>
                 <option value="submitted" class="bg-gray-700">Submitted</option>
+                <option value="rated" class="bg-gray-700">Rated</option>
                 <option value="missing" class="bg-gray-700">Missing / Overdue</option>
                 <option value="returned" class="bg-gray-700">Returned</option>
             </select>
@@ -312,7 +313,7 @@
                             durationMs: Number(entry?.total_seconds || 0) * 1000,
                             startTime: startedAt && !Number.isNaN(startedAt.getTime()) ? startedAt : null,
                             stoppedAt: stoppedAt && !Number.isNaN(stoppedAt.getTime()) ? stoppedAt : null,
-                            output_state: status === 'submitted' ? 'submitted' : 'none',
+                            output_state: (status === 'submitted' || status === 'rated') ? 'submitted' : 'none',
                             hasEvidence: evidences.length > 0,
                             evidenceCount: evidences.length,
                             evidenceFileName: firstEvidence?.file_name || null,
@@ -323,6 +324,13 @@
                                 : null,
                             submittedAt: submittedAt && !Number.isNaN(submittedAt.getTime()) ? submittedAt : null,
                             notes: entry?.notes || '--',
+                            monitoring: entry?.monitoring ? {
+                                supervisor_name: entry.monitoring?.supervisor?.name || '--',
+                                quality_rating: entry.monitoring?.quality_rating ?? null,
+                                timeliness_rating: entry.monitoring?.timeliness_rating ?? null,
+                                remarks: entry.monitoring?.remarks || null,
+                                rated_at: entry.monitoring?.rated_at || null,
+                            } : null,
                         };
                     })
                     : [];
@@ -478,6 +486,8 @@
                     switch (state) {
                         case 'submitted':
                             return 'Submitted (Locked)';
+                        case 'rated':
+                            return 'Rated (Locked)';
                         case 'draft':
                             return 'Draft (Stopped)';
                         case 'recording':
@@ -500,6 +510,8 @@
                     switch (state) {
                         case 'submitted':
                             return 'bg-blue-900 text-blue-300';
+                        case 'rated':
+                            return 'bg-cyan-900 text-cyan-300';
                         case 'recording':
                         case 'paused':
                             return 'bg-amber-900 text-amber-300';
@@ -632,6 +644,14 @@
                     fields.duration.textContent = task.durationMs || task.startTime ? formatDuration(computeElapsed(task)) : '--';
                     fields.notes.textContent = task.notes || '--';
                     resetSupervisorMonitoring();
+                    const mon = task.monitoring;
+                    if (mon && (mon.quality_rating || mon.timeliness_rating || mon.remarks || mon.rated_at)) {
+                        if (fields.supervisorSection) fields.supervisorSection.classList.remove('hidden');
+                        if (fields.supName) fields.supName.textContent = mon.supervisor_name || '--';
+                        if (fields.supQuality) fields.supQuality.textContent = mon.quality_rating ? String(mon.quality_rating) : '--';
+                        if (fields.supTimeliness) fields.supTimeliness.textContent = mon.timeliness_rating ? String(mon.timeliness_rating) : '--';
+                        if (fields.supRemarks) fields.supRemarks.textContent = (mon.remarks && String(mon.remarks).trim()) ? mon.remarks : '--';
+                    }
 
                     modal.classList.remove('hidden');
                     modal.classList.add('flex');

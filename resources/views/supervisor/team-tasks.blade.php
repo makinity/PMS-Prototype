@@ -8,12 +8,13 @@
         $dateFrom = (string) request('date_from', '');
         $dateTo = (string) request('date_to', '');
 
-        $statusOptions = collect(['all', 'draft', 'recording', 'submitted']);
+        $statusOptions = collect(['all', 'draft', 'recording', 'submitted', 'rated']);
 
         $statusMeta = [
             'draft' => 'bg-amber-900/40 border border-amber-700/40 text-amber-200',
             'recording' => 'bg-blue-900/40 border border-blue-700/40 text-blue-200',
             'submitted' => 'bg-emerald-900/40 border border-emerald-700/40 text-emerald-300',
+            'rated' => 'bg-cyan-900/40 border border-cyan-700/40 text-cyan-300',
         ];
     @endphp
 

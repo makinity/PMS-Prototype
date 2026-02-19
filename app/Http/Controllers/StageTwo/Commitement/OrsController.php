@@ -70,7 +70,7 @@ class OrsController extends Controller
                     ->where('status', 'submitted')
                     ->count();
                 $orsStats['validated'] = (clone $statsBaseQuery)
-                    ->whereIn('status', ['validated', 'locked'])
+                    ->whereIn('status', ['validated', 'locked', 'rated'])
                     ->count();
             }
         }
@@ -992,7 +992,7 @@ class OrsController extends Controller
 
     private function isEntryLocked(OrsEntry $orsEntry): bool
     {
-        return strtolower((string) $orsEntry->status) === 'submitted'
+        return in_array(strtolower((string) $orsEntry->status), ['submitted', 'rated'], true)
             || !is_null($orsEntry->locked_at);
     }
 
