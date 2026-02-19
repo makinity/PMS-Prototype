@@ -16,6 +16,7 @@ use App\Http\Controllers\StageOne\Planning\UwpDeptHeadReviewController;
 use App\Http\Controllers\StageOne\Planning\UwpPmtReviewController;
 use App\Http\Controllers\StageThree\Forms\IpcrExportController as StageThreeFormsIpcrExportController;
 use App\Http\Controllers\StageTwo\Commitement\OrsController;
+use App\Http\Controllers\StageTwo\Commitement\MyTasksController;
 use App\Http\Controllers\StageTwo\Forms\IpcrExportController as FormsIpcrExportController;
 use App\Http\Controllers\StageTwo\Forms\OrsExportController;
 use App\Http\Controllers\StageTwo\Forms\QarExportController;
@@ -95,9 +96,17 @@ Route::get('/dashboard', function () {
 Route::prefix('employee')->middleware('auth')->group(function () {
     // Views
     Route::get('/dashboard', fn () => view('employee.dashboard'))->name('employee.dashboard');
-    Route::get('/task', fn () => view('employee.my-task'))->name('employee.my-task');
+    Route::get('/task', [MyTasksController::class, 'index'])->name('employee.my-task');
     Route::get('/submit-output', fn () => view('employee.submit-output'))->name('employee.submit-output');
     Route::get('/ors', [OrsController::class, 'index'])->name('employee.ors');
+    Route::post('/ors', [OrsController::class, 'store'])->name('stage2.ors.store');
+    Route::post('/ors/{orsEntry}/start', [OrsController::class, 'start'])->name('stage2.ors.start');
+    Route::post('/ors/{orsEntry}/pause', [OrsController::class, 'pause'])->name('stage2.ors.pause');
+    Route::post('/ors/{orsEntry}/resume', [OrsController::class, 'resume'])->name('stage2.ors.resume');
+    Route::post('/ors/{orsEntry}/stop', [OrsController::class, 'stop'])->name('stage2.ors.stop');
+    Route::post('/ors/{orsEntry}/submit', [OrsController::class, 'submit'])->name('stage2.ors.submit');
+    Route::post('/ors/{orsEntry}/evidence', [OrsController::class, 'uploadEvidence'])->name('stage2.ors.evidence.store');
+    Route::delete('/ors/{orsEntry}/evidence/{evidence}', [OrsController::class, 'destroyEvidence'])->name('stage2.ors.evidence.destroy');
     Route::get('/MPOR', fn () => view('employee.mpor'))->name('employee.mpor');
     Route::get('/SMPOR', fn () => view('employee.smpor'))->name('employee.smpor');
     Route::get('/IPCR-Target', [IpcrTargetController::class, 'index'])

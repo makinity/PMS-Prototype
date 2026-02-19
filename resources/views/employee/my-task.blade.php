@@ -37,8 +37,9 @@
                         <tr>
                             <th class="px-4 py-3 text-left font-medium text-white">Task</th>
                             <th class="px-4 py-3 text-left font-medium text-white">Date</th>
+                            <th class="px-4 py-3 text-left font-medium text-white">Output Type</th>
                             <th class="px-4 py-3 text-left font-medium text-white">Status</th>
-                            <th class="px-4 py-3 text-left font-medium text-white">Output State</th>
+                            <th class="px-4 py-3 text-left font-medium text-white">Evidence</th>
                             <th class="px-4 py-3 text-left font-medium text-white">Quantity (ORS)</th>
                             <th class="px-4 py-3 text-left font-medium text-white">Action</th>
                         </tr>
@@ -82,7 +83,7 @@
                         <div class="grid gap-4 md:grid-cols-2">
                             <div>
                                 <p class="text-xs uppercase tracking-wide text-gray-500">Employee</p>
-                                <p class="text-sm font-medium text-white">Ramon Reyes</p>
+                                <p class="text-sm font-medium text-white">{{ $employeeName ?? 'Ramon Reyes' }}</p>
                             </div>
                             <div>
                                 <p class="text-xs uppercase tracking-wide text-gray-500">Task / Indicator</p>
@@ -191,104 +192,43 @@
 
         <script>
             (function () {
-                const tasks = [
-                    {
-                        id: 'task-jan-02',
-                        title: 'Same-day verification of OTC transactions',
-                        date: '2026-01-02',
-                        requestId: 'REQ-2026-002',
-                        uwpOutputId: 'otc_processing',
-                        uwpOutputLabel: 'Processing of Over-the-Counter Revenue Transactions',
-                        output: 'Official Receipt (OR)',
-                        quantity: '12 transactions',
-                        state: 'submitted',
-                        durationMs: 2 * 60 * 60 * 1000,
-                        startTime: null,
-                        output_state: 'submitted',
-                        evidenceRequired: true,
-                        evidenceAttached: true,
-                        evidenceFileName: 'REQ-2026-002_OR.pdf',
-                        evidenceUploadedAt: new Date('2026-01-02T10:15:00'),
-                        submittedAt: new Date('2026-01-02T10:15:00'),
-                        supervisorName: 'Carlo D. Beray',
-                        supervisorQuality: '5',
-                        supervisorTimeliness: '5',
-                        supervisorRemarks: 'All Goods',
-                        notes: '--',
-                    },
-                    {
-                        id: 'task-jan-04',
-                        title: 'All e-bank transactions scanned and encoded daily',
-                        date: '2026-01-04',
-                        requestId: 'REQ-2026-004',
-                        uwpOutputId: 'ebank_scanning',
-                        uwpOutputLabel: 'E-Bank Scanning and Encoding of Revenue Transactions',
-                        output: 'Bank Statement Form (BSF-01)',
-                        quantity: '1 daily batch',
-                        state: 'submitted',
-                        durationMs: 90 * 60 * 1000,
-                        startTime: null,
-                        output_state: 'submitted',
-                        evidenceRequired: true,
-                        evidenceAttached: true,
-                        evidenceFileName: 'REQ-2026-004_BSF-01.pdf',
-                        evidenceUploadedAt: new Date('2026-01-04T15:20:00'),
-                        submittedAt: new Date('2026-01-04T15:20:00'),
-                        supervisorName: 'Carlo D. Beray',
-                        supervisorQuality: '5',
-                        supervisorTimeliness: '5',
-                        supervisorRemarks: 'All Goods',
-                        notes: '--',
-                    },
-                    {
-                        id: 'task-jan-05',
-                        title: 'OR validation completed daily',
-                        date: '2026-01-05',
-                        requestId: 'REQ-2026-005',
-                        uwpOutputId: 'otc_processing',
-                        uwpOutputLabel: 'Processing of Over-the-Counter Revenue Transactions',
-                        output: 'Official Receipt (OR)',
-                        quantity: '6 receipts validated',
-                        state: 'recording',
-                        durationMs: 18 * 60 * 1000,
-                        startTime: null,
-                        output_state: 'none',
-                        evidenceRequired: true,
-                        evidenceAttached: false,
-                        evidenceFileName: null,
-                        evidenceUploadedAt: null,
-                        submittedAt: null,
-                        supervisorName: null,
-                        supervisorQuality: null,
-                        supervisorTimeliness: null,
-                        supervisorRemarks: null,
-                        notes: 'Active timer',
-                    },
-                    {
-                        id: 'task-jan-06',
-                        title: 'Retrieval logs maintained for audit purposes',
-                        date: '2026-01-06',
-                        requestId: 'REQ-2026-006',
-                        uwpOutputId: 'records_maintenance',
-                        uwpOutputLabel: 'Maintenance of revenue records and filing system',
-                        output: 'Records Inventory Checklist',
-                        quantity: '--',
-                        state: 'missing',
-                        durationMs: 0,
-                        startTime: null,
-                        output_state: 'none',
-                        evidenceRequired: true,
-                        evidenceAttached: false,
-                        evidenceFileName: null,
-                        evidenceUploadedAt: null,
-                        submittedAt: null,
-                        supervisorName: null,
-                        supervisorQuality: null,
-                        supervisorTimeliness: null,
-                        supervisorRemarks: null,
-                        notes: 'No ORS entry submitted for the day',
-                    },
-                ];
+                const rawTasks = @json($myTasks ?? []);
+
+                function outputTypeLabel(code) {
+                    const key = String(code || '').trim().toLowerCase();
+                    if (key === 'bsf_01') return 'Bank Statement Form (BSF-01)';
+                    if (key === 'official_receipt') return 'Official Receipt (OR)';
+                    if (key === 'scanned_doc') return 'Scanned Supporting Document';
+                    if (key === 'records_checklist') return 'Records Inventory Checklist';
+                    return key ? key : '--';
+                }
+
+                const tasks = Array.isArray(rawTasks)
+                    ? rawTasks.map((task) => {
+                        const status = String(task?.status || 'draft').toLowerCase();
+                        const submittedAt = task?.submitted_at ? new Date(task.submitted_at) : null;
+                        const startedAt = task?.started_at ? new Date(task.started_at) : null;
+
+                        return {
+                            id: String(task?.id ?? ''),
+                            title: String(task?.ipcr_item?.indicator_text || '--'),
+                            date: String(task?.work_date || ''),
+                            requestId: task?.client_request_id || null,
+                            uwpOutputLabel: String(task?.ipcr_item?.output_title || '--'),
+                            output: outputTypeLabel(task?.output_type),
+                            quantity: task?.quantity || '--',
+                            state: status,
+                            durationMs: Number(task?.total_seconds || 0) * 1000,
+                            startTime: startedAt && !Number.isNaN(startedAt.getTime()) ? startedAt : null,
+                            output_state: status === 'submitted' ? 'submitted' : 'none',
+                            evidenceAttached: Boolean(task?.has_evidence),
+                            evidenceFileName: null,
+                            evidenceUploadedAt: null,
+                            submittedAt: submittedAt && !Number.isNaN(submittedAt.getTime()) ? submittedAt : null,
+                            notes: task?.notes || '--',
+                        };
+                    })
+                    : [];
 
                 const tbody = document.getElementById('myTasksTbody');
                 const statusFilter = document.getElementById('myTasksStatusFilter');
@@ -350,14 +290,12 @@
                     switch (state) {
                         case 'submitted':
                             return 'Submitted (Locked)';
+                        case 'draft':
+                            return 'Draft (Stopped)';
                         case 'recording':
                             return 'Recording';
                         case 'paused':
                             return 'Paused';
-                        case 'draft':
-                            return 'Draft';
-                        case 'missing':
-                            return 'Missing / Overdue';
                         default:
                             return '--';
                     }
@@ -373,14 +311,12 @@
                 function statusChipClasses(state) {
                     switch (state) {
                         case 'submitted':
-                            return 'bg-violet-900 text-violet-300';
+                            return 'bg-blue-900 text-blue-300';
                         case 'recording':
                         case 'paused':
                             return 'bg-amber-900 text-amber-300';
                         case 'draft':
                             return 'bg-slate-700 text-slate-200';
-                        case 'missing':
-                            return 'bg-red-900 text-red-300';
                         default:
                             return 'bg-slate-700 text-slate-200';
                     }
@@ -426,7 +362,7 @@
                     if (!filteredTasks.length) {
                         tbody.innerHTML = `
                             <tr>
-                                <td colspan="6" class="px-4 py-8 text-center text-sm text-gray-400">
+                                <td colspan="7" class="px-4 py-8 text-center text-sm text-gray-400">
                                     No tasks found for the selected filters.
                                 </td>
                             </tr>
@@ -438,14 +374,15 @@
                         <tr class="hover:bg-gray-750">
                             <td class="px-4 py-3 text-gray-300">${task.title || '--'}</td>
                             <td class="px-4 py-3 text-gray-300">${formatDateHuman(task.date)}</td>
+                            <td class="px-4 py-3 text-gray-300">${task.output || '--'}</td>
                             <td class="px-4 py-3">
                                 <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusChipClasses(task.state)}">
                                     ${statusLabel(task.state)}
                                 </span>
                             </td>
                             <td class="px-4 py-3">
-                                <span class="text-xs font-medium ${task.state === 'missing' ? 'text-red-300' : (task.output_state === 'submitted' ? 'text-emerald-300' : 'text-amber-300')}">
-                                    ${outputStateLabel(task)}
+                                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${task.evidenceAttached ? 'bg-emerald-900 text-emerald-300' : 'bg-slate-700 text-slate-200'}">
+                                    ${task.evidenceAttached ? 'Attached' : 'None'}
                                 </span>
                             </td>
                             <td class="px-4 py-3 text-gray-300">${quantityLabel(task.quantity)}</td>
@@ -494,20 +431,7 @@
                     fields.submittedAt.textContent = formatDateTime(task.submittedAt);
                     fields.duration.textContent = task.durationMs || task.startTime ? formatDuration(computeElapsed(task)) : '--';
                     fields.notes.textContent = task.notes || '--';
-
-                    const isSubmitted = task.state === 'submitted';
-                    if (fields.supervisorSection) {
-                        fields.supervisorSection.classList.toggle('hidden', !isSubmitted);
-                    }
-
-                    if (isSubmitted) {
-                        if (fields.supName) fields.supName.textContent = task.supervisorName || '--';
-                        if (fields.supQuality) fields.supQuality.textContent = task.supervisorQuality ?? '--';
-                        if (fields.supTimeliness) fields.supTimeliness.textContent = task.supervisorTimeliness ?? '--';
-                        if (fields.supRemarks) fields.supRemarks.textContent = task.supervisorRemarks || '--';
-                    } else {
-                        resetSupervisorMonitoring();
-                    }
+                    resetSupervisorMonitoring();
 
                     modal.classList.remove('hidden');
                     modal.classList.add('flex');
