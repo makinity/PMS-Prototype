@@ -175,7 +175,7 @@
                     <div class="border-b border-slate-800 bg-slate-900/80 px-6 py-4">
                         <div class="flex items-start justify-between gap-3">
                             <div>
-                                <h2 class="text-lg font-semibold text-white">Submitted Entries</h2>
+                                <h2 class="text-lg font-semibold text-white">Submitted ORS Entries</h2>
                                 <p id="dayListDateLabel" class="text-xs text-slate-400">--</p>
                             </div>
                             <button id="closeDayListTopBtn"
@@ -193,6 +193,44 @@
                     <div class="border-t border-slate-800 bg-slate-900/80 px-6 py-4">
                         <div class="flex items-center justify-end">
                             <button id="closeDayListBottomBtn"
+                                    type="button"
+                                    class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rated Day List Modal -->
+        <div id="ors-rated-day-list-modal"
+             class="ors-modal fixed inset-0 z-[61] hidden items-center justify-center overflow-y-auto bg-black/60 px-4 py-6 sm:px-6"
+             role="dialog"
+             aria-modal="true">
+            <div class="w-full max-w-3xl rounded-2xl border border-slate-800 bg-slate-900 shadow-xl overflow-hidden">
+                <div class="flex max-h-[84vh] flex-col">
+                    <div class="border-b border-slate-800 bg-slate-900/80 px-6 py-4">
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <h2 class="text-lg font-semibold text-white">Rated ORS Entries</h2>
+                                <p id="ratedDayListDateLabel" class="text-xs text-slate-400">--</p>
+                            </div>
+                            <button id="closeRatedDayListTopBtn"
+                                    type="button"
+                                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white">
+                                x
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 overflow-y-auto px-6 py-5">
+                        <div id="ratedDayListEntries" class="space-y-3"></div>
+                    </div>
+
+                    <div class="border-t border-slate-800 bg-slate-900/80 px-6 py-4">
+                        <div class="flex items-center justify-end">
+                            <button id="closeRatedDayListBottomBtn"
                                     type="button"
                                     class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800">
                                 Close
@@ -497,6 +535,157 @@
             </div>
         </div>
 
+        <!-- Rated Monitoring Detail Modal -->
+        <div id="ors-rated-monitoring-modal"
+             class="ors-modal fixed inset-0 z-[63] hidden items-center justify-center overflow-y-auto bg-black/60 px-4 py-6 sm:px-6"
+             role="dialog"
+             aria-modal="true">
+            <div class="w-full max-w-5xl rounded-2xl border border-slate-800 bg-slate-900 shadow-xl overflow-hidden">
+                <div class="flex max-h-[86vh] flex-col">
+                    <div class="border-b border-slate-800 bg-slate-900/80 px-6 py-4">
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <h2 class="text-lg font-semibold text-white">Rated ORS Monitoring Detail</h2>
+                                <p class="text-xs text-slate-400">
+                                    Read-only supervisor monitoring details for Rated (Locked) entries.
+                                </p>
+                            </div>
+                            <button type="button"
+                                    onclick="closeOrsModal('ors-rated-monitoring-modal')"
+                                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white">
+                                x
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 overflow-y-auto px-6 py-5">
+                        <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
+                            <div class="space-y-5">
+                                <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+                                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                                        <div>
+                                            <p class="text-xs text-slate-400">Ratee (Employee)</p>
+                                            <p id="ratedMonitoringEmployee" class="font-semibold text-white">--</p>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-slate-400">Office / Unit</p>
+                                            <p id="ratedMonitoringOffice" class="text-white">--</p>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-slate-400">Date Submitted</p>
+                                            <p id="ratedMonitoringDate" class="text-white">--</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4 space-y-3 text-sm text-slate-200">
+                                    <div>
+                                        <p class="text-xs text-slate-400">Major Output (MFO)</p>
+                                        <p id="ratedMonitoringMajorOutput" class="text-white">--</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-slate-400">Output Type</p>
+                                        <p id="ratedMonitoringOutputType">--</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-slate-400">Actual Accomplishment</p>
+                                        <p id="ratedMonitoringAccomplishment" class="text-slate-100">--</p>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                    <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+                                        <p class="text-xs text-slate-400">ORS Reference / Request ID</p>
+                                        <p id="ratedMonitoringRequestId" class="text-slate-100 mt-1">--</p>
+                                    </div>
+                                    <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+                                        <p class="text-xs text-slate-400">Time Spent</p>
+                                        <p id="ratedMonitoringDuration" class="text-slate-100 mt-1">--</p>
+                                    </div>
+                                </div>
+
+                                <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+                                    <p class="text-xs text-slate-400">Evidence Attached</p>
+                                    <div class="mt-1 flex items-center justify-between gap-2">
+                                        <p id="ratedMonitoringEvidence" class="text-emerald-300 font-semibold">--</p>
+                                        <button id="ratedMonitoringEvidenceBtn"
+                                                type="button"
+                                                class="hidden rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60">
+                                            View Evidence
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+                                    <p class="text-xs text-slate-400">Quantity (employee-declared)</p>
+                                    <p id="ratedMonitoringQuantity" class="mt-1 text-base font-semibold text-white">--</p>
+                                </div>
+
+                                <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+                                    <p class="text-xs text-slate-400">Notes</p>
+                                    <p id="ratedMonitoringNotes" class="mt-1 text-sm text-slate-200 whitespace-pre-wrap break-words">--</p>
+                                </div>
+                            </div>
+
+                            <div class="space-y-5">
+                                <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4 space-y-3 text-xs text-slate-200">
+                                    <p class="text-[11px] uppercase text-slate-400">Rating basis</p>
+                                    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                        <p id="ratedRatingBasisIndicator" class="text-sm font-semibold text-white">--</p>
+                                        <button id="openRatedRatingBasisBtn"
+                                                type="button"
+                                                class="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-700 bg-slate-900/50 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-slate-800">
+                                            View basis for rating
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4 space-y-3 text-xs text-slate-200">
+                                    <p class="text-[11px] uppercase text-slate-400">Monitoring Rating (Read-only)</p>
+                                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                        <div>
+                                            <p class="text-xs text-slate-400">Quality</p>
+                                            <span id="ratedMonitoringQuality" class="mt-1 inline-flex items-center rounded-full border border-slate-700 bg-slate-800 px-2.5 py-1 text-xs font-semibold text-slate-100">--</span>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-slate-400">Timeliness</p>
+                                            <span id="ratedMonitoringTimeliness" class="mt-1 inline-flex items-center rounded-full border border-slate-700 bg-slate-800 px-2.5 py-1 text-xs font-semibold text-slate-100">--</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-slate-400">Remarks</p>
+                                        <p id="ratedMonitoringRemarks" class="mt-1 rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-sm text-slate-200 whitespace-pre-wrap break-words">--</p>
+                                    </div>
+                                </div>
+
+                                <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+                                    <p class="text-xs text-slate-400">Status</p>
+                                    <div class="mt-2 inline-flex flex-col gap-1">
+                                        <span id="ratedMonitoringStatus" class="status-chip border border-slate-700 bg-slate-800 text-slate-200"></span>
+                                        <span id="ratedMonitoringStatusDetail" class="text-xs text-slate-300"></span>
+                                    </div>
+                                </div>
+
+                                <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4 text-xs text-slate-400">
+                                    Tip: Rated entries remain locked. Use this view for review and evidence inspection.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-slate-800 bg-slate-900/80 px-6 py-4">
+                        <div class="flex items-center justify-end">
+                            <button id="closeRatedMonitoringBottomBtn"
+                                    type="button"
+                                    class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Rating Basis Sub-Modal (Performance Standards Q/E/T) -->
         <div id="ratingBasisModal"
             class="fixed inset-0 z-[70] hidden flex items-center justify-center bg-black/80 px-4 py-6 sm:px-6"
@@ -595,6 +784,7 @@
         <script>
             document.addEventListener('DOMContentLoaded', () => {
                 const modal = document.getElementById('ors-monitoring-modal');
+                const ratedMonitoringModal = document.getElementById('ors-rated-monitoring-modal');
                 const employeeEl = document.getElementById('monitoringEmployee');
                 const officeEl = document.getElementById('monitoringOffice');
                 const dateEl = document.getElementById('monitoringDate');
@@ -609,8 +799,26 @@
                 const statusDetailEl = document.getElementById('monitoringStatusDetail');
                 const quantityEl = document.getElementById('monitoringQuantity');
                 const notesEl = document.getElementById('monitoringNotes');
+                const ratedEmployeeEl = document.getElementById('ratedMonitoringEmployee');
+                const ratedOfficeEl = document.getElementById('ratedMonitoringOffice');
+                const ratedDateEl = document.getElementById('ratedMonitoringDate');
+                const ratedMajorOutputEl = document.getElementById('ratedMonitoringMajorOutput');
+                const ratedOutputTypeEl = document.getElementById('ratedMonitoringOutputType');
+                const ratedAccomplishmentEl = document.getElementById('ratedMonitoringAccomplishment');
+                const ratedRequestIdEl = document.getElementById('ratedMonitoringRequestId');
+                const ratedDurationEl = document.getElementById('ratedMonitoringDuration');
+                const ratedEvidenceEl = document.getElementById('ratedMonitoringEvidence');
+                const ratedMonitoringEvidenceBtn = document.getElementById('ratedMonitoringEvidenceBtn');
+                const ratedStatusEl = document.getElementById('ratedMonitoringStatus');
+                const ratedStatusDetailEl = document.getElementById('ratedMonitoringStatusDetail');
+                const ratedQuantityEl = document.getElementById('ratedMonitoringQuantity');
+                const ratedNotesEl = document.getElementById('ratedMonitoringNotes');
+                const ratedMonitoringQualityEl = document.getElementById('ratedMonitoringQuality');
+                const ratedMonitoringTimelinessEl = document.getElementById('ratedMonitoringTimeliness');
+                const ratedMonitoringRemarksEl = document.getElementById('ratedMonitoringRemarks');
 
                 const ratingBasisIndicatorEl = document.getElementById('ratingBasisIndicator');
+                const ratedRatingBasisIndicatorEl = document.getElementById('ratedRatingBasisIndicator');
 
                 const ratingLockedNote = document.getElementById('rating-locked-note');
                 const ratingControls = document.getElementById('rating-controls');
@@ -625,6 +833,11 @@
                 const dayListEntries = document.getElementById('dayListEntries');
                 const closeDayListTopBtn = document.getElementById('closeDayListTopBtn');
                 const closeDayListBottomBtn = document.getElementById('closeDayListBottomBtn');
+                const ratedDayListModal = document.getElementById('ors-rated-day-list-modal');
+                const ratedDayListDateLabel = document.getElementById('ratedDayListDateLabel');
+                const ratedDayListEntries = document.getElementById('ratedDayListEntries');
+                const closeRatedDayListTopBtn = document.getElementById('closeRatedDayListTopBtn');
+                const closeRatedDayListBottomBtn = document.getElementById('closeRatedDayListBottomBtn');
                 const emptyDateModal = document.getElementById('ors-empty-date-modal');
                 const emptyDateLabel = document.getElementById('emptyDateLabel');
                 const closeEmptyDateTopBtn = document.getElementById('closeEmptyDateTopBtn');
@@ -638,6 +851,7 @@
                 const evidenceTopDownloadBtn = document.getElementById('evidenceTopDownloadBtn');
                 const closeEvidenceTopBtn = document.getElementById('closeEvidenceTopBtn');
                 const closeEvidenceBottomBtn = document.getElementById('closeEvidenceBottomBtn');
+                const closeRatedMonitoringBottomBtn = document.getElementById('closeRatedMonitoringBottomBtn');
 
                 // Basis sub-modal
                 const basisModal = document.getElementById('ratingBasisModal');
@@ -646,6 +860,7 @@
                 const basisIndicator = document.getElementById('basisModalIndicator');
                 const basisFilter = document.getElementById('basisFilter');
                 const openBasisBtn = document.getElementById('openRatingBasisBtn');
+                const openRatedBasisBtn = document.getElementById('openRatedRatingBasisBtn');
                 const closeBasisBtn = document.getElementById('closeRatingBasisBtn');
                 const basisDoneBtn = document.getElementById('basisDoneBtn');
 
@@ -671,8 +886,16 @@
                     }
                 };
                 const tasks = @json($calendarTasks);
-                const byDate = tasks.reduce((carry, task) => {
-                    if (!task || !task.date) return carry;
+                const byDateSubmitted = tasks.reduce((carry, task) => {
+                    if (!task || !task.date || String(task.status || '').toLowerCase() !== 'submitted') return carry;
+                    if (!carry[task.date]) {
+                        carry[task.date] = [];
+                    }
+                    carry[task.date].push(task);
+                    return carry;
+                }, {});
+                const byDateRated = tasks.reduce((carry, task) => {
+                    if (!task || !task.date || String(task.status || '').toLowerCase() !== 'rated') return carry;
                     if (!carry[task.date]) {
                         carry[task.date] = [];
                     }
@@ -680,13 +903,18 @@
                     return carry;
                 }, {});
 
-                Object.keys(byDate).forEach((dateKey) => {
-                    byDate[dateKey].sort((left, right) => {
-                        const employeeCompare = String(left?.employee || '').localeCompare(String(right?.employee || ''));
-                        if (employeeCompare !== 0) return employeeCompare;
-                        return String(left?.accomplishment || '').localeCompare(String(right?.accomplishment || ''));
+                function sortDateMap(map) {
+                    Object.keys(map).forEach((dateKey) => {
+                        map[dateKey].sort((left, right) => {
+                            const employeeCompare = String(left?.employee || '').localeCompare(String(right?.employee || ''));
+                            if (employeeCompare !== 0) return employeeCompare;
+                            return String(left?.accomplishment || '').localeCompare(String(right?.accomplishment || ''));
+                        });
                     });
-                });
+                }
+
+                sortDateMap(byDateSubmitted);
+                sortDateMap(byDateRated);
 
                 const taskById = tasks.reduce((carry, task) => {
                     if (!task || task.id === undefined || task.id === null) return carry;
@@ -694,10 +922,14 @@
                     return carry;
                 }, {});
 
-                const summaryEvents = Object.keys(byDate).flatMap((date) => {
-                    const entries = Array.isArray(byDate[date]) ? byDate[date] : [];
-                    const submittedCount = entries.filter((entry) => String(entry?.status || '').toLowerCase() === 'submitted').length;
-                    const ratedCount = entries.filter((entry) => String(entry?.status || '').toLowerCase() === 'rated').length;
+                const summaryDates = Array.from(new Set([
+                    ...Object.keys(byDateSubmitted),
+                    ...Object.keys(byDateRated),
+                ])).sort();
+
+                const summaryEvents = summaryDates.flatMap((date) => {
+                    const submittedCount = (byDateSubmitted[date] || []).length;
+                    const ratedCount = (byDateRated[date] || []).length;
                     const events = [];
 
                     if (submittedCount > 0) {
@@ -765,11 +997,16 @@
 
                 function refreshBodyLock() {
                     const monitoringOpen = modal && !modal.classList.contains('hidden');
+                    const ratedMonitoringOpen = ratedMonitoringModal && !ratedMonitoringModal.classList.contains('hidden');
                     const dayListOpen = dayListModal && !dayListModal.classList.contains('hidden');
+                    const ratedDayListOpen = ratedDayListModal && !ratedDayListModal.classList.contains('hidden');
                     const evidenceOpen = evidenceModal && !evidenceModal.classList.contains('hidden');
                     const emptyDateOpen = emptyDateModal && !emptyDateModal.classList.contains('hidden');
                     const basisOpen = basisModal && !basisModal.classList.contains('hidden');
-                    document.body.classList.toggle('overflow-hidden', Boolean(monitoringOpen || dayListOpen || evidenceOpen || emptyDateOpen || basisOpen));
+                    document.body.classList.toggle(
+                        'overflow-hidden',
+                        Boolean(monitoringOpen || ratedMonitoringOpen || dayListOpen || ratedDayListOpen || evidenceOpen || emptyDateOpen || basisOpen)
+                    );
                 }
 
                 function formatDateLabel(dateStr) {
@@ -865,8 +1102,16 @@
                     selectable: true,
                     events: summaryEvents,
                     dateClick(info) {
-                        if (Array.isArray(byDate[info.dateStr]) && byDate[info.dateStr].length > 0) {
-                            openDayListModal(info.dateStr);
+                        const hasSubmitted = Array.isArray(byDateSubmitted[info.dateStr]) && byDateSubmitted[info.dateStr].length > 0;
+                        const hasRated = Array.isArray(byDateRated[info.dateStr]) && byDateRated[info.dateStr].length > 0;
+
+                        if (hasSubmitted) {
+                            openSubmittedDayListModal(info.dateStr);
+                            return;
+                        }
+
+                        if (hasRated) {
+                            openRatedDayListModal(info.dateStr);
                             return;
                         }
 
@@ -874,8 +1119,13 @@
                     },
                     eventClick(info) {
                         const dateStr = String(info.event.extendedProps?.date || '');
+                        const status = String(info.event.extendedProps?.status || '').toLowerCase();
                         if (!dateStr) return;
-                        openDayListModal(dateStr);
+                        if (status === 'rated') {
+                            openRatedDayListModal(dateStr);
+                            return;
+                        }
+                        openSubmittedDayListModal(dateStr);
                     }
                 });
                 calendar.render();
@@ -1015,22 +1265,36 @@
                 }
 
                 let currentModalData = null;
-                let __returnToModalId = null;
-                let currentEvidenceEntryId = null;
 
                 function updateRatingBasis(data) {
-                    const isRateableStatus = data.status === 'submitted' || data.status === 'rated';
-                    const indicator = isRateableStatus
-                        ? (data.indicator_text || data.accomplishment || 'No submitted/rated ORS entry')
-                        : 'No submitted/rated ORS entry';
+                    const isSubmitted = String(data?.status || '').toLowerCase() === 'submitted';
+                    const indicator = isSubmitted
+                        ? (data.indicator_text || data.accomplishment || 'No submitted ORS entry')
+                        : 'No submitted ORS entry';
 
                     ratingBasisIndicatorEl.textContent = indicator;
 
-                    const canOpenBasis = isRateableStatus;
                     if (openBasisBtn) {
-                        openBasisBtn.disabled = !canOpenBasis;
-                        openBasisBtn.classList.toggle('opacity-60', !canOpenBasis);
-                        openBasisBtn.classList.toggle('cursor-not-allowed', !canOpenBasis);
+                        openBasisBtn.disabled = !isSubmitted;
+                        openBasisBtn.classList.toggle('opacity-60', !isSubmitted);
+                        openBasisBtn.classList.toggle('cursor-not-allowed', !isSubmitted);
+                    }
+                }
+
+                function updateRatedBasis(data) {
+                    const isRated = String(data?.status || '').toLowerCase() === 'rated';
+                    const indicator = isRated
+                        ? (data.indicator_text || data.accomplishment || 'No rated ORS entry')
+                        : 'No rated ORS entry';
+
+                    if (ratedRatingBasisIndicatorEl) {
+                        ratedRatingBasisIndicatorEl.textContent = indicator;
+                    }
+
+                    if (openRatedBasisBtn) {
+                        openRatedBasisBtn.disabled = !isRated;
+                        openRatedBasisBtn.classList.toggle('opacity-60', !isRated);
+                        openRatedBasisBtn.classList.toggle('cursor-not-allowed', !isRated);
                     }
                 }
 
@@ -1038,6 +1302,13 @@
                     if (!dayListModal) return;
                     dayListModal.classList.add('hidden');
                     dayListModal.classList.remove('flex');
+                    refreshBodyLock();
+                }
+
+                function closeRatedDayListModal() {
+                    if (!ratedDayListModal) return;
+                    ratedDayListModal.classList.add('hidden');
+                    ratedDayListModal.classList.remove('flex');
                     refreshBodyLock();
                 }
 
@@ -1062,7 +1333,6 @@
                     if (!evidenceModal) return;
                     evidenceModal.classList.add('hidden');
                     evidenceModal.classList.remove('flex');
-                    currentEvidenceEntryId = null;
                     if (evidenceFileList) evidenceFileList.innerHTML = '';
                     if (evidencePreviewArea) evidencePreviewArea.innerHTML = '';
                     if (evidencePreviewFileName) evidencePreviewFileName.textContent = 'Select a file';
@@ -1135,7 +1405,6 @@
                     if (!entry || !evidenceModal || !evidenceFileList) return;
 
                     const files = Array.isArray(entry.evidences) ? entry.evidences : [];
-                    currentEvidenceEntryId = String(entry.id);
 
                     if (evidenceModalEntryTitle) {
                         evidenceModalEntryTitle.textContent = entry.accomplishment || '--';
@@ -1207,99 +1476,108 @@
                     openOrsModalStack('ors-evidence-modal');
                 }
 
-                function appendDetailItem(container, labelText, valueText, isWide = false) {
-                    const wrap = document.createElement('div');
-                    if (isWide) {
-                        wrap.className = 'sm:col-span-2';
-                    }
+                function createDayListEntryCard(entry, openHandler) {
+                    const card = document.createElement('div');
+                    card.className = 'rounded-xl border border-slate-800 bg-slate-950/40 p-4';
 
-                    const label = document.createElement('p');
-                    label.className = 'text-[11px] text-slate-400';
-                    label.textContent = labelText;
+                    const left = document.createElement('div');
+                    left.className = 'min-w-0';
 
-                    const value = document.createElement('p');
-                    value.className = isWide ? 'mt-1 text-xs text-slate-200 whitespace-pre-wrap break-words' : 'mt-1 text-xs text-slate-200';
-                    value.textContent = valueText || '--';
+                    const title = document.createElement('p');
+                    title.className = 'truncate text-sm font-semibold text-white';
+                    title.textContent = entry.accomplishment || '--';
 
-                    wrap.appendChild(label);
-                    wrap.appendChild(value);
-                    container.appendChild(wrap);
+                    const subtitle = document.createElement('p');
+                    subtitle.className = 'mt-1 text-xs text-slate-400';
+                    subtitle.textContent = `Employee: ${entry.employee || '--'}`;
+                    left.appendChild(title);
+                    left.appendChild(subtitle);
+
+                    const evidenceCount = Number(entry.evidence_count || 0);
+                    const evidence = document.createElement('span');
+                    evidence.className = evidenceCount > 0
+                        ? 'rounded-full border border-emerald-500/60 bg-emerald-500/10 px-2.5 py-1 text-[11px] text-emerald-200'
+                        : 'rounded-full border border-slate-700 bg-slate-800 px-2.5 py-1 text-[11px] text-slate-300';
+                    evidence.textContent = evidenceCount > 0 ? `Attached (${evidenceCount})` : 'None';
+
+                    const actions = document.createElement('div');
+                    actions.className = 'mt-3 flex flex-wrap items-center justify-end gap-2';
+
+                    const viewEvidenceBtn = document.createElement('button');
+                    viewEvidenceBtn.type = 'button';
+                    const hasEvidenceFiles = Array.isArray(entry.evidences) && entry.evidences.length > 0;
+                    viewEvidenceBtn.className = 'rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60';
+                    viewEvidenceBtn.textContent = 'View Evidence';
+                    viewEvidenceBtn.disabled = !hasEvidenceFiles;
+                    viewEvidenceBtn.addEventListener('click', () => openEvidenceModal(entry.id));
+
+                    const openBtn = document.createElement('button');
+                    openBtn.type = 'button';
+                    openBtn.className = 'rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-500';
+                    openBtn.textContent = 'Open Monitoring';
+                    openBtn.addEventListener('click', () => openHandler(entry));
+
+                    const topRow = document.createElement('div');
+                    topRow.className = 'flex flex-wrap items-start justify-between gap-3';
+                    topRow.appendChild(left);
+                    topRow.appendChild(evidence);
+
+                    actions.appendChild(viewEvidenceBtn);
+                    actions.appendChild(openBtn);
+                    card.appendChild(topRow);
+                    card.appendChild(actions);
+
+                    return card;
                 }
 
-                function openDayListModal(dateStr) {
+                function renderDayList(entries, container, emptyMessage, openHandler) {
+                    if (!container) return;
+                    container.innerHTML = '';
+
+                    if (!Array.isArray(entries) || entries.length === 0) {
+                        const empty = document.createElement('p');
+                        empty.className = 'rounded-lg border border-slate-800 bg-slate-950/50 px-4 py-3 text-sm text-slate-400';
+                        empty.textContent = emptyMessage;
+                        container.appendChild(empty);
+                        return;
+                    }
+
+                    entries.forEach((entry) => {
+                        container.appendChild(createDayListEntryCard(entry, openHandler));
+                    });
+                }
+
+                function openSubmittedDayListModal(dateStr) {
                     if (!dayListModal || !dayListEntries) return;
-                    const entries = byDate[dateStr] || [];
+                    const entries = byDateSubmitted[dateStr] || [];
 
                     if (dayListDateLabel) {
                         dayListDateLabel.textContent = formatDateLabel(dateStr);
                     }
 
-                    dayListEntries.innerHTML = '';
-
-                    if (entries.length === 0) {
-                        const empty = document.createElement('p');
-                        empty.className = 'rounded-lg border border-slate-800 bg-slate-950/50 px-4 py-3 text-sm text-slate-400';
-                        empty.textContent = 'No submitted or rated entries found for this date.';
-                        dayListEntries.appendChild(empty);
-                    } else {
-                        entries.forEach((entry) => {
-                            const card = document.createElement('div');
-                            card.className = 'rounded-xl border border-slate-800 bg-slate-950/40 p-4';
-
-                            const left = document.createElement('div');
-                            left.className = 'min-w-0';
-                            const title = document.createElement('p');
-                            title.className = 'truncate text-sm font-semibold text-white';
-                            title.textContent = entry.accomplishment || '--';
-                            const subtitle = document.createElement('p');
-                            subtitle.className = 'mt-1 text-xs text-slate-400';
-                            subtitle.textContent = `Employee: ${entry.employee || '--'}`;
-                            left.appendChild(title);
-                            left.appendChild(subtitle);
-
-                            const evidenceCount = Number(entry.evidence_count || 0);
-                            const evidence = document.createElement('span');
-                            evidence.className = evidenceCount > 0
-                                ? 'rounded-full border border-emerald-500/60 bg-emerald-500/10 px-2.5 py-1 text-[11px] text-emerald-200'
-                                : 'rounded-full border border-slate-700 bg-slate-800 px-2.5 py-1 text-[11px] text-slate-300';
-                            evidence.textContent = evidenceCount > 0 ? `Attached (${evidenceCount})` : 'None';
-
-                            const actions = document.createElement('div');
-                            actions.className = 'mt-3 flex flex-wrap items-center justify-end gap-2';
-
-                            const viewEvidenceBtn = document.createElement('button');
-                            viewEvidenceBtn.type = 'button';
-                            const hasEvidenceFiles = Array.isArray(entry.evidences) && entry.evidences.length > 0;
-                            viewEvidenceBtn.className = 'rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60';
-                            viewEvidenceBtn.textContent = 'View Evidence';
-                            viewEvidenceBtn.disabled = !hasEvidenceFiles;
-                            viewEvidenceBtn.addEventListener('click', () => openEvidenceModal(entry.id));
-
-                            const openBtn = document.createElement('button');
-                            openBtn.type = 'button';
-                            openBtn.className = 'rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-500';
-                            openBtn.textContent = 'Open Monitoring';
-                            openBtn.addEventListener('click', () => {
-                                closeDayListModal();
-                                openMonitoringModal(entry);
-                            });
-
-                            const topRow = document.createElement('div');
-                            topRow.className = 'flex flex-wrap items-start justify-between gap-3';
-                            topRow.appendChild(left);
-                            topRow.appendChild(evidence);
-
-                            actions.appendChild(viewEvidenceBtn);
-                            actions.appendChild(openBtn);
-
-                            card.appendChild(topRow);
-                            card.appendChild(actions);
-                            dayListEntries.appendChild(card);
-                        });
-                    }
+                    renderDayList(entries, dayListEntries, 'No submitted entries found for this date.', (entry) => {
+                        openMonitoringModal(entry);
+                    });
 
                     dayListModal.classList.remove('hidden');
                     dayListModal.classList.add('flex');
+                    refreshBodyLock();
+                }
+
+                function openRatedDayListModal(dateStr) {
+                    if (!ratedDayListModal || !ratedDayListEntries) return;
+                    const entries = byDateRated[dateStr] || [];
+
+                    if (ratedDayListDateLabel) {
+                        ratedDayListDateLabel.textContent = formatDateLabel(dateStr);
+                    }
+
+                    renderDayList(entries, ratedDayListEntries, 'No rated entries found for this date.', (entry) => {
+                        openRatedMonitoringModal(entry);
+                    });
+
+                    ratedDayListModal.classList.remove('hidden');
+                    ratedDayListModal.classList.add('flex');
                     refreshBodyLock();
                 }
 
@@ -1339,8 +1617,7 @@
 
                     updateRatingBasis(data);
 
-                    // Rateable only if submitted or rated
-                    const rateable = data.status === 'submitted' || data.status === 'rated';
+                    const rateable = String(data.status || '').toLowerCase() === 'submitted';
                     ratingLockedNote.classList.toggle('hidden', rateable);
                     ratingControls.classList.toggle('hidden', !rateable);
 
@@ -1379,6 +1656,61 @@
                     openOrsModalStack('ors-monitoring-modal');
                 }
 
+                function openRatedMonitoringModal(data) {
+                    if (!ratedMonitoringModal) return;
+                    currentModalData = data;
+
+                    if (ratedEmployeeEl) ratedEmployeeEl.textContent = data.employee || '--';
+                    if (ratedOfficeEl) ratedOfficeEl.textContent = data.office || '--';
+                    if (ratedDateEl) ratedDateEl.textContent = data.dateLabel || data.date || '--';
+                    if (ratedMajorOutputEl) ratedMajorOutputEl.textContent = data.uwpOutput || '--';
+                    if (ratedOutputTypeEl) ratedOutputTypeEl.textContent = data.outputType || data.output || '--';
+                    if (ratedAccomplishmentEl) ratedAccomplishmentEl.textContent = data.accomplishment || '--';
+                    if (ratedRequestIdEl) ratedRequestIdEl.textContent = data.requestId || '--';
+                    if (ratedDurationEl) ratedDurationEl.textContent = formatDurationFromEntry(data);
+
+                    if (ratedEvidenceEl) {
+                        ratedEvidenceEl.textContent = Number(data.evidence_count || 0) > 0
+                            ? `Evidence attached (${Number(data.evidence_count || 0)})`
+                            : 'No evidence (read-only)';
+                    }
+
+                    if (ratedMonitoringEvidenceBtn) {
+                        const hasEvidenceFiles = Array.isArray(data.evidences) && data.evidences.length > 0;
+                        ratedMonitoringEvidenceBtn.disabled = !hasEvidenceFiles;
+                        ratedMonitoringEvidenceBtn.classList.toggle('hidden', !hasEvidenceFiles);
+                        ratedMonitoringEvidenceBtn.onclick = hasEvidenceFiles
+                            ? () => openEvidenceModal(data.id)
+                            : null;
+                    }
+
+                    if (ratedQuantityEl) ratedQuantityEl.textContent = data.quantity || '--';
+                    if (ratedNotesEl) ratedNotesEl.textContent = data.notes || '--';
+
+                    const ratedMeta = STATUS_META.rated;
+                    if (ratedStatusEl) {
+                        ratedStatusEl.textContent = ratedMeta.label;
+                        ratedStatusEl.className = `status-chip ${ratedMeta.badge}`;
+                    }
+                    if (ratedStatusDetailEl) {
+                        ratedStatusDetailEl.textContent = ratedMeta.detail || '';
+                    }
+
+                    if (ratedMonitoringQualityEl) {
+                        ratedMonitoringQualityEl.textContent = data.quality_rating ? String(data.quality_rating) : '--';
+                    }
+                    if (ratedMonitoringTimelinessEl) {
+                        ratedMonitoringTimelinessEl.textContent = data.timeliness_rating ? String(data.timeliness_rating) : '--';
+                    }
+                    if (ratedMonitoringRemarksEl) {
+                        const remarks = String(data.remarks || '').trim();
+                        ratedMonitoringRemarksEl.textContent = remarks !== '' ? remarks : '--';
+                    }
+
+                    updateRatedBasis(data);
+                    openOrsModalStack('ors-rated-monitoring-modal');
+                }
+
                 window.closeOrsModal = (modalId) => {
                     const m = document.getElementById(modalId);
                     if (!m) return;
@@ -1387,9 +1719,6 @@
                     if (modalId === 'ors-monitoring-modal' && saveBtn) {
                         setButtonLoading(saveBtn, false);
                         delete saveBtn.dataset.loadingActive;
-                        if (__returnToModalId === 'ors-day-list-modal') {
-                            __returnToModalId = null;
-                        }
                     }
                     refreshBodyLock();
                 };
@@ -1398,8 +1727,14 @@
                 modal?.addEventListener('click', (event) => {
                     if (event.target === modal) closeOrsModal('ors-monitoring-modal');
                 });
+                ratedMonitoringModal?.addEventListener('click', (event) => {
+                    if (event.target === ratedMonitoringModal) closeOrsModal('ors-rated-monitoring-modal');
+                });
                 dayListModal?.addEventListener('click', (event) => {
                     if (event.target === dayListModal) closeDayListModal();
+                });
+                ratedDayListModal?.addEventListener('click', (event) => {
+                    if (event.target === ratedDayListModal) closeRatedDayListModal();
                 });
                 evidenceModal?.addEventListener('click', (event) => {
                     if (event.target === evidenceModal) closeEvidenceModal();
@@ -1422,8 +1757,18 @@
                         return;
                     }
 
+                    if (ratedMonitoringModal && !ratedMonitoringModal.classList.contains('hidden')) {
+                        closeOrsModal('ors-rated-monitoring-modal');
+                        return;
+                    }
+
                     if (modal && !modal.classList.contains('hidden')) {
                         closeOrsModal('ors-monitoring-modal');
+                        return;
+                    }
+
+                    if (ratedDayListModal && !ratedDayListModal.classList.contains('hidden')) {
+                        closeRatedDayListModal();
                         return;
                     }
 
@@ -1449,12 +1794,16 @@
                 }
 
                 openBasisBtn?.addEventListener('click', openBasis);
+                openRatedBasisBtn?.addEventListener('click', openBasis);
                 closeBasisBtn?.addEventListener('click', closeBasis);
                 basisDoneBtn?.addEventListener('click', closeBasis);
                 closeDayListTopBtn?.addEventListener('click', closeDayListModal);
                 closeDayListBottomBtn?.addEventListener('click', closeDayListModal);
+                closeRatedDayListTopBtn?.addEventListener('click', closeRatedDayListModal);
+                closeRatedDayListBottomBtn?.addEventListener('click', closeRatedDayListModal);
                 closeEvidenceTopBtn?.addEventListener('click', closeEvidenceModal);
                 closeEvidenceBottomBtn?.addEventListener('click', closeEvidenceModal);
+                closeRatedMonitoringBottomBtn?.addEventListener('click', () => closeOrsModal('ors-rated-monitoring-modal'));
                 closeEmptyDateTopBtn?.addEventListener('click', closeEmptyDateModal);
                 closeEmptyDateBottomBtn?.addEventListener('click', closeEmptyDateModal);
 
@@ -1468,8 +1817,8 @@
 
                 // Save rating to backend
                 saveBtn?.addEventListener('click', () => {
-                    if (!currentModalData || !['submitted', 'rated'].includes(currentModalData.status)) {
-                        alert('Rating is available only for Submitted or Rated (Locked) entries.');
+                    if (!currentModalData || currentModalData.status !== 'submitted') {
+                        alert('Rating is available only for Submitted (Locked) entries.');
                         return;
                     }
 

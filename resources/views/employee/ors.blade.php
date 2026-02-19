@@ -21,7 +21,14 @@
         }
 
         #ors-calendar .fc-daygrid-event {
-            margin-top: 4px;
+            margin: 4px 6px;
+            border-radius: 9999px;
+            padding: 2px 8px;
+            font-size: 11px;
+            line-height: 1.1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         #ors-calendar .fc-daygrid-more-link {
@@ -33,18 +40,22 @@
             min-height: 110px;
         }
 
-        .ors-summary-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.35rem;
-            padding: 0.18rem 0.55rem;
-            border-radius: 9999px;
-            border: 1px solid rgba(148, 163, 184, 0.35);
-            font-size: 11px;
-            font-weight: 700;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+        #ors-calendar .fc-daygrid-event.ors-summary-event {
+            background: rgba(59, 130, 246, 0.18);
+            border: 1px solid rgba(59, 130, 246, 0.45);
+            color: #dbeafe;
+        }
+
+        #ors-calendar .fc-daygrid-event.ors-summary-event.is-rated {
+            background: rgba(6, 182, 212, 0.18);
+            border: 1px solid rgba(6, 182, 212, 0.45);
+            color: #cffafe;
+        }
+
+        #ors-calendar .fc-daygrid-event.ors-summary-event.is-submitted {
+            background: rgba(59, 130, 246, 0.18);
+            border: 1px solid rgba(59, 130, 246, 0.45);
+            color: #dbeafe;
         }
 
         .status-chip {
@@ -360,9 +371,6 @@
 
                 <div class="mt-3 flex flex-wrap gap-2 text-xs">
                     <span id="taskDetailStatusBadge" class="status-chip border-slate-700 bg-slate-800 text-slate-200">--</span>
-                    <span id="taskDetailLockBadge" class="hidden status-chip border-emerald-500/60 bg-emerald-500/10 text-emerald-100">
-                        Submitted (Locked)
-                    </span>
                 </div>
             </div>
 
@@ -601,105 +609,6 @@
 
             const dbTasksRaw = @json($orsEntries ?? []);
 
-            /**
-             * DEMO LOCKED DATASET (Stage II) — Employee Assigned: Ramon Reyes ONLY
-             * Required statuses:
-             * - Jan 2, 2026: Submitted (Locked) — Same-day verification of OTC transactions
-             * - Jan 4, 2026: Submitted (Locked) — All e-bank transactions scanned and encoded daily
-             * - Jan 5, 2026: Recording — OR validation completed daily
-             * - Jan 6, 2026: Missing / Overdue — Retrieval logs maintained for audit purposes
-             */
-            const demoTasks = [
-                {
-                    id: 'task-jan-02',
-                    title: 'Same-day verification of OTC transactions',
-                    date: '2026-01-02',
-                    client: 'Revenue Collection Unit',
-                    requestId: 'REQ-2026-002',
-                    uwpOutputId: 'otc_processing',
-                    uwpOutputLabel: 'Processing of Over-the-Counter Revenue Transactions',
-                    output: 'Official Receipt (OR)',
-                    notes: 'Demo: Same-day OTC verification completed and submitted.',
-                    quantity: '12 transactions',
-                    rating: '--',
-                    state: 'submitted',
-                    output_state: 'submitted',
-                    submittedAt: new Date('2026-01-02T10:15:00'),
-                    evidenceRequired: true,
-                    evidenceAttached: true,
-                    evidenceFileName: 'REQ-2026-002_OR.pdf',
-                    evidenceUploadedAt: new Date('2026-01-02T10:15:00'),
-                    startTime: null,
-                    durationMs: 2 * 60 * 60 * 1000
-                },
-                {
-                    id: 'task-jan-04',
-                    title: 'All e-bank transactions scanned and encoded daily',
-                    date: '2026-01-04',
-                    client: 'Revenue Collection Unit',
-                    requestId: 'REQ-2026-004',
-                    uwpOutputId: 'ebank_scanning',
-                    uwpOutputLabel: 'E-Bank Scanning and Encoding of Revenue Transactions',
-                    output: 'Bank Statement Form (BSF-01)',
-                    notes: 'Demo: E-bank scanning submitted with evidence (BSF-01).',
-                    quantity: '1 daily batch',
-                    rating: '--',
-                    state: 'submitted',
-                    output_state: 'submitted',
-                    submittedAt: new Date('2026-01-04T15:20:00'),
-                    evidenceRequired: true,
-                    evidenceAttached: true,
-                    evidenceFileName: 'REQ-2026-004_BSF-01.pdf',
-                    evidenceUploadedAt: new Date('2026-01-04T15:20:00'),
-                    startTime: null,
-                    durationMs: 90 * 60 * 1000
-                },
-                {
-                    id: 'task-jan-05',
-                    title: 'OR validation completed daily',
-                    date: '2026-01-05',
-                    client: 'Revenue Collection Unit',
-                    requestId: 'REQ-2026-005',
-                    uwpOutputId: 'otc_processing',
-                    uwpOutputLabel: 'Processing of Over-the-Counter Revenue Transactions',
-                    output: 'Official Receipt (OR)',
-                    notes: 'Demo: OR validation is currently in progress.',
-                    quantity: '6 receipts validated',
-                    rating: '--',
-                    state: 'recording',
-                    output_state: 'none',
-                    submittedAt: null,
-                    evidenceRequired: true,
-                    evidenceAttached: false,
-                    evidenceFileName: null,
-                    evidenceUploadedAt: null,
-                    // make it look active without depending on user clock too much
-                    startTime: new Date(Date.now() - (18 * 60 * 1000)), // started 18 minutes ago
-                    durationMs: 0
-                },
-                {
-                    id: 'task-jan-06',
-                    title: 'Retrieval logs maintained for audit purposes',
-                    date: '2026-01-06',
-                    client: 'Revenue Collection Unit',
-                    requestId: 'REQ-2026-006',
-                    uwpOutputId: 'records_maintenance',
-                    uwpOutputLabel: 'Maintenance of revenue records and filing system',
-                    output: 'Records Inventory Checklist',
-                    notes: 'Demo: No ORS entry submitted — flagged as Missing / Overdue.',
-                    quantity: '',
-                    rating: '--',
-                    state: 'missing',
-                    output_state: 'none',
-                    submittedAt: null,
-                    evidenceRequired: true,
-                    evidenceAttached: false,
-                    evidenceFileName: null,
-                    evidenceUploadedAt: null,
-                    startTime: null,
-                    durationMs: 0
-                },
-            ];
 
             function outputTypeLabel(code) {
                 const key = String(code || '').trim().toLowerCase();
@@ -933,13 +842,11 @@
                     const props = arg.event.extendedProps || {};
                     if (props.type === 'summary') {
                         const stateKey = String(props.status || '').toLowerCase();
-                        const meta = STATE_META[stateKey] || STATE_META.draft;
                         const count = Number(props.count || 0);
                         const labelText = `${summaryStateLabel(stateKey)} (${count})`;
 
                         const wrapper = document.createElement('div');
-                        wrapper.classList.add('text-[11px]', 'leading-tight', 'px-1', 'py-[1px]');
-                        wrapper.innerHTML = `<span class="ors-summary-pill" style="color:${meta.color}; border-color:${meta.color};">${labelText}</span>`;
+                        wrapper.textContent = labelText;
                         return { domNodes: [wrapper] };
                     }
 
@@ -1150,7 +1057,7 @@
                                 title: `${summaryStateLabel(stateKey)} (${count})`,
                                 start: dateKey,
                                 allDay: true,
-                                color: 'transparent',
+                                classNames: ['ors-summary-event', `is-${stateKey}`],
                                 extendedProps: {
                                     type: 'summary',
                                     date: dateKey,
