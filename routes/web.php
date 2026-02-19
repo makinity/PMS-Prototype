@@ -97,6 +97,12 @@ Route::prefix('employee')->middleware('auth')->group(function () {
     // Views
     Route::get('/dashboard', fn () => view('employee.dashboard'))->name('employee.dashboard');
     Route::get('/task', [MyTasksController::class, 'index'])->name('employee.my-task');
+    Route::get('/stage2/my-tasks/{orsEntry}/evidences', [MyTasksController::class, 'evidences'])
+        ->name('stage2.my_tasks.evidences');
+    Route::get('/stage2/my-tasks/{orsEntry}/evidences/{evidence}/view', [MyTasksController::class, 'viewEvidence'])
+        ->name('stage2.my_tasks.evidences.view');
+    Route::get('/stage2/my-tasks/{orsEntry}/evidences/{evidence}/download', [MyTasksController::class, 'downloadEvidence'])
+        ->name('stage2.my_tasks.evidences.download');
     Route::get('/submit-output', fn () => view('employee.submit-output'))->name('employee.submit-output');
     Route::get('/ors', [OrsController::class, 'index'])->name('employee.ors');
     Route::post('/ors', [OrsController::class, 'store'])->name('stage2.ors.store');
