@@ -33,6 +33,20 @@
             min-height: 110px;
         }
 
+        .ors-summary-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.18rem 0.55rem;
+            border-radius: 9999px;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
         .status-chip {
             display: inline-flex;
             align-items: center;
@@ -481,6 +495,40 @@
         </div>
     </div>
 
+    <!-- Day Summary Modal -->
+    <div id="orsDaySummaryModal"
+        role="dialog"
+        aria-modal="true"
+        class="ors-modal fixed inset-0 z-[60] hidden flex items-center justify-center overflow-y-auto bg-black/60 px-4 py-6 sm:px-6">
+        <div class="flex w-full max-w-[95vw] sm:max-w-xl md:max-w-2xl max-h-[calc(100vh-3rem)] flex-col overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-xl">
+            <div class="shrink-0 border-b border-slate-800 bg-slate-900/95 p-5 backdrop-blur">
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <h2 class="text-lg font-semibold text-white">ORS Entries</h2>
+                        <p id="daySummaryDateLabel" class="text-xs text-slate-400">--</p>
+                        <p class="text-[11px] text-slate-500">Select an entry to view details.</p>
+                    </div>
+                    <button type="button" onclick="closeOrsModal('orsDaySummaryModal')" class="text-slate-400 hover:text-white">
+                        x
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-5">
+                <div id="daySummaryList" class="space-y-4"></div>
+            </div>
+
+            <div class="shrink-0 flex items-center justify-between gap-2 border-t border-slate-800 bg-slate-900/95 p-4 backdrop-blur">
+                <button type="button" onclick="closeOrsModal('orsDaySummaryModal')" class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800">
+                    Close
+                </button>
+                <button id="daySummaryLogBtn" type="button" class="rounded-lg bg-blue-500 px-4 py-2 text-xs font-semibold text-slate-900 hover:bg-blue-600">
+                    Log Task for this date
+                </button>
+            </div>
+        </div>
+    </div>
+
     @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
     <script>
@@ -788,6 +836,53 @@
             // DEMO: exactly one active timer -> Jan 5 recording
             let activeTaskId = tasks.find(t => t.state === 'recording' || t.state === 'paused')?.id || null;
             let detailTaskId = null;
+            let daySummaryDate = null;
+            let byDate = {};
+            let byDateStatus = {};
+
+            const SUMMARY_STATE_LABELS = {
+                draft: 'Draft',
+                recording: 'Recording',
+                paused: 'Paused',
+                submitted: 'Submitted',
+                locked: 'Submitted',
+            };
+
+            const daySummaryDateLabelEl = document.getElementById('daySummaryDateLabel');
+            const daySummaryListEl = document.getElementById('daySummaryList');
+            const daySummaryLogBtn = document.getElementById('daySummaryLogBtn');
+
+            function summaryStateLabel(state) {
+                const key = String(state || '').toLowerCase();
+                return SUMMARY_STATE_LABELS[key] || (STATE_META[key]?.label || key || 'Unknown');
+            }
+
+            function formatDateLabel(dateStr) {
+                if (!dateStr) return '--';
+                const parsed = new Date(`${dateStr}T00:00:00`);
+                if (Number.isNaN(parsed.getTime())) return dateStr;
+                return parsed.toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' });
+            }
+
+            function rebuildCalendarBuckets() {
+                byDate = {};
+                byDateStatus = {};
+
+                tasks.forEach((task) => {
+                    const dateKey = String(task?.date || '').trim();
+                    if (!dateKey) return;
+
+                    const stateKey = String(task?.state || 'draft').toLowerCase();
+                    if (stateKey === 'missing') return;
+
+                    if (!byDate[dateKey]) byDate[dateKey] = [];
+                    byDate[dateKey].push(task);
+
+                    if (!byDateStatus[dateKey]) byDateStatus[dateKey] = {};
+                    if (!byDateStatus[dateKey][stateKey]) byDateStatus[dateKey][stateKey] = [];
+                    byDateStatus[dateKey][stateKey].push(task);
+                });
+            }
 
             const calendarEl = document.getElementById('ors-calendar');
             const today = new Date();
@@ -812,16 +907,40 @@
                 dayHeaderClassNames: 'text-slate-300',
                 dayCellClassNames: 'hover:bg-slate-800/30',
                 dateClick(info) {
+                    const dateStr = info.dateStr;
+                    if (Array.isArray(byDate[dateStr]) && byDate[dateStr].length > 0) {
+                        openDaySummaryModal(dateStr, null);
+                        return;
+                    }
+
                     const dateInput = document.getElementById('orsSelectedDate');
-                    if (dateInput) dateInput.value = info.dateStr;
+                    if (dateInput) dateInput.value = dateStr;
                     openOrsModal('orsTaskModal');
                 },
                 eventClick(info) {
+                    const props = info.event.extendedProps || {};
+                    if (props.type === 'summary') {
+                        openDaySummaryModal(props.date, props.status || null);
+                        return;
+                    }
                     openTaskDetails(info.event.id);
                 },
                 events: [],
                 eventContent(arg) {
-                    const meta = STATE_META[arg.event.extendedProps.state] || STATE_META.draft;
+                    const props = arg.event.extendedProps || {};
+                    if (props.type === 'summary') {
+                        const stateKey = String(props.status || '').toLowerCase();
+                        const meta = STATE_META[stateKey] || STATE_META.draft;
+                        const count = Number(props.count || 0);
+                        const labelText = `${summaryStateLabel(stateKey)} (${count})`;
+
+                        const wrapper = document.createElement('div');
+                        wrapper.classList.add('text-[11px]', 'leading-tight', 'px-1', 'py-[1px]');
+                        wrapper.innerHTML = `<span class="ors-summary-pill" style="color:${meta.color}; border-color:${meta.color};">${labelText}</span>`;
+                        return { domNodes: [wrapper] };
+                    }
+
+                    const meta = STATE_META[props.state] || STATE_META.draft;
                     const label = meta.label.length > 16 ? meta.label.substring(0, 13) + '...' : meta.label;
                     const title = arg.event.title.length > 28 ? arg.event.title.substring(0, 25) + '...' : arg.event.title;
                     const wrapper = document.createElement('div');
@@ -990,25 +1109,127 @@
             }
 
             function refreshCalendar() {
+                rebuildCalendarBuckets();
                 calendar.removeAllEvents();
-                tasks.forEach((task) => {
-                    const meta = STATE_META[task.state] || STATE_META.draft;
-                    calendar.addEvent({
-                        id: task.id,
-                        title: task.title,
-                        start: task.date,
-                        color: meta.color,
-                        extendedProps: {
-                            state: task.state,
-                            client: task.client,
-                            requestId: task.requestId,
-                            output: task.output,
-                            notes: task.notes,
-                            duration: formatDuration(computeElapsed(task)),
-                            rating: task.rating || '--'
-                        }
-                    });
+
+                const stateOrder = ['recording', 'paused', 'draft', 'submitted', 'locked'];
+                const stateIndex = (state) => {
+                    const idx = stateOrder.indexOf(state);
+                    return idx === -1 ? Number.MAX_SAFE_INTEGER : idx;
+                };
+
+                Object.keys(byDateStatus).sort().forEach((dateKey) => {
+                    const statusMap = byDateStatus[dateKey] || {};
+                    Object.keys(statusMap)
+                        .sort((left, right) => stateIndex(left) - stateIndex(right) || left.localeCompare(right))
+                        .forEach((stateKey) => {
+                            const count = Array.isArray(statusMap[stateKey]) ? statusMap[stateKey].length : 0;
+                            if (count <= 0) return;
+
+                            calendar.addEvent({
+                                id: `sum-${dateKey}-${stateKey}`,
+                                title: `${summaryStateLabel(stateKey)} (${count})`,
+                                start: dateKey,
+                                allDay: true,
+                                color: 'transparent',
+                                extendedProps: {
+                                    type: 'summary',
+                                    date: dateKey,
+                                    status: stateKey,
+                                    count: count,
+                                }
+                            });
+                        });
                 });
+            }
+
+            function openDaySummaryModal(dateStr, statusFilter = null) {
+                const dateKey = String(dateStr || '').trim();
+                if (!dateKey) return;
+
+                daySummaryDate = dateKey;
+                const filterKey = statusFilter ? String(statusFilter).toLowerCase() : null;
+                if (daySummaryDateLabelEl) {
+                    daySummaryDateLabelEl.textContent = filterKey
+                        ? `${formatDateLabel(dateKey)} - ${summaryStateLabel(filterKey)}`
+                        : formatDateLabel(dateKey);
+                }
+
+                if (!daySummaryListEl) {
+                    openOrsModal('orsDaySummaryModal');
+                    return;
+                }
+
+                daySummaryListEl.innerHTML = '';
+
+                const statusMap = byDateStatus[dateKey] || {};
+                const stateOrder = ['recording', 'paused', 'draft', 'submitted', 'locked'];
+                let statusKeys = filterKey ? [filterKey] : Object.keys(statusMap);
+                statusKeys = statusKeys
+                    .filter((stateKey) => Array.isArray(statusMap[stateKey]) && statusMap[stateKey].length > 0)
+                    .sort((left, right) => {
+                        const l = stateOrder.indexOf(left);
+                        const r = stateOrder.indexOf(right);
+                        const li = l === -1 ? Number.MAX_SAFE_INTEGER : l;
+                        const ri = r === -1 ? Number.MAX_SAFE_INTEGER : r;
+                        return li - ri || left.localeCompare(right);
+                    });
+
+                if (statusKeys.length === 0) {
+                    const empty = document.createElement('p');
+                    empty.className = 'rounded-lg border border-slate-800 bg-slate-950/60 px-3 py-2 text-sm text-slate-300';
+                    empty.textContent = 'No ORS entries for this date.';
+                    daySummaryListEl.appendChild(empty);
+                } else {
+                    statusKeys.forEach((stateKey) => {
+                        const meta = STATE_META[stateKey] || STATE_META.draft;
+                        const entries = statusMap[stateKey];
+
+                        const section = document.createElement('div');
+                        section.className = 'rounded-xl border border-slate-800 bg-slate-950/40 p-3';
+
+                        if (!filterKey) {
+                            const header = document.createElement('div');
+                            header.className = 'mb-2 flex items-center justify-between';
+                            header.innerHTML = `
+                                <span class="text-sm font-semibold text-white">${summaryStateLabel(stateKey)}</span>
+                                <span class="rounded-full border px-2 py-[2px] text-[11px]" style="color:${meta.color}; border-color:${meta.color};">${entries.length}</span>
+                            `;
+                            section.appendChild(header);
+                        }
+
+                        const list = document.createElement('div');
+                        list.className = 'space-y-2';
+
+                        entries.forEach((entry) => {
+                            const itemBtn = document.createElement('button');
+                            itemBtn.type = 'button';
+                            itemBtn.className = 'w-full rounded-lg border border-slate-800 bg-slate-900/50 px-3 py-2 text-left hover:bg-slate-800';
+                            itemBtn.innerHTML = `
+                                <div class="flex items-start justify-between gap-2">
+                                    <div class="min-w-0">
+                                        <p class="truncate text-sm font-semibold text-white">${entry.title || '--'}</p>
+                                        <p class="mt-1 text-[11px] text-slate-400">Duration: ${formatDuration(computeElapsed(entry))}</p>
+                                    </div>
+                                    <div class="shrink-0 text-right">
+                                        <span class="rounded-full border px-2 py-[2px] text-[11px]" style="color:${meta.color}; border-color:${meta.color};">${summaryStateLabel(stateKey)}</span>
+                                        <p class="mt-1 text-[11px] ${entry.evidenceAttached ? 'text-emerald-300' : 'text-slate-400'}">${entry.evidenceAttached ? 'Evidence' : 'No evidence'}</p>
+                                    </div>
+                                </div>
+                            `;
+                            itemBtn.addEventListener('click', () => {
+                                closeOrsModal('orsDaySummaryModal');
+                                openTaskDetails(entry.id);
+                            });
+                            list.appendChild(itemBtn);
+                        });
+
+                        section.appendChild(list);
+                        daySummaryListEl.appendChild(section);
+                    });
+                }
+
+                openOrsModal('orsDaySummaryModal');
             }
 
             function setStatusBadge(element, state) {
@@ -1466,7 +1687,18 @@
                 });
             }
 
+            function wireDaySummaryLogButton() {
+                if (!daySummaryLogBtn) return;
+                daySummaryLogBtn.addEventListener('click', () => {
+                    if (!daySummaryDate) return;
+                    const dateInput = document.getElementById('orsSelectedDate');
+                    if (dateInput) dateInput.value = daySummaryDate;
+                    openOrsModal('orsTaskModal');
+                });
+            }
+
             wireLogButton();
+            wireDaySummaryLogButton();
             refreshCalendar();
             updateActivePanel();
 
