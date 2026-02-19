@@ -499,7 +499,7 @@
     <div id="orsDaySummaryModal"
         role="dialog"
         aria-modal="true"
-        class="ors-modal fixed inset-0 z-[60] hidden flex items-center justify-center overflow-y-auto bg-black/60 px-4 py-6 sm:px-6">
+        class="ors-modal fixed inset-0 z-[59] hidden flex items-center justify-center overflow-y-auto bg-black/60 px-4 py-6 sm:px-6">
         <div class="flex w-full max-w-[95vw] sm:max-w-xl md:max-w-2xl max-h-[calc(100vh-3rem)] flex-col overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-xl">
             <div class="shrink-0 border-b border-slate-800 bg-slate-900/95 p-5 backdrop-blur">
                 <div class="flex items-start justify-between gap-3">
@@ -836,6 +836,7 @@
             // DEMO: exactly one active timer -> Jan 5 recording
             let activeTaskId = tasks.find(t => t.state === 'recording' || t.state === 'paused')?.id || null;
             let detailTaskId = null;
+            let __returnToModalId = null;
             let daySummaryDate = null;
             let byDate = {};
             let byDateStatus = {};
@@ -972,6 +973,14 @@
                 updateModalState();
             };
 
+            window.openOrsModalStack = function (modalId) {
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.classList.remove('hidden');
+                }
+                updateModalState();
+            };
+
             window.closeOrsModal = function (modalId) {
                 const modal = document.getElementById(modalId);
                 if (modal) {
@@ -983,6 +992,9 @@
                         syncQuantityFromInput(currentTask);
                     }
                     detailTaskId = null;
+                    if (__returnToModalId === 'orsDaySummaryModal') {
+                        __returnToModalId = null;
+                    }
                 }
                 updateModalState();
             };
@@ -997,6 +1009,11 @@
 
             document.addEventListener('keydown', function (event) {
                 if (event.key === 'Escape') {
+                    const taskDetailsModal = document.getElementById('taskDetailsModal');
+                    if (taskDetailsModal && !taskDetailsModal.classList.contains('hidden')) {
+                        closeOrsModal('taskDetailsModal');
+                        return;
+                    }
                     orsModals.forEach((modal) => modal.classList.add('hidden'));
                     updateModalState();
                 }
@@ -1218,7 +1235,7 @@
                                 </div>
                             `;
                             itemBtn.addEventListener('click', () => {
-                                closeOrsModal('orsDaySummaryModal');
+                                __returnToModalId = 'orsDaySummaryModal';
                                 openTaskDetails(entry.id);
                             });
                             list.appendChild(itemBtn);
@@ -1383,7 +1400,11 @@
                 toggleAction(document.getElementById('taskDetailStopBtn'), task.state === 'recording' || task.state === 'paused');
                 toggleAction(document.getElementById('taskDetailSubmitBtn'), !locked && (task.state === 'draft' || isMissing));
 
-                openOrsModal('taskDetailsModal');
+                if (__returnToModalId === 'orsDaySummaryModal') {
+                    openOrsModalStack('taskDetailsModal');
+                } else {
+                    openOrsModal('taskDetailsModal');
+                }
             }
 
             async function startTask(taskId) {
