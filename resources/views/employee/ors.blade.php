@@ -410,10 +410,6 @@
                         <p class="text-xs text-slate-400">Duration</p>
                         <p class="text-slate-200" id="taskDetailDuration">--</p>
                     </div>
-                    <div>
-                        <p class="text-xs text-slate-400">Performance Rating</p>
-                        <p class="text-slate-200" id="taskDetailRating">--</p>
-                    </div>
                     <div class="md:col-span-2">
                         <p class="text-xs text-slate-400">Notes</p>
                         <p class="text-slate-200" id="taskDetailNotes">--</p>
@@ -1190,7 +1186,6 @@
                 document.getElementById('taskDetailOutput').textContent = task.output || '--';
                 document.getElementById('taskDetailStatusText').textContent = (STATE_META[task.state] || STATE_META.draft).label;
                 document.getElementById('taskDetailDuration').textContent = formatDuration(computeElapsed(task));
-                document.getElementById('taskDetailRating').textContent = task.rating || '--';
                 document.getElementById('taskDetailNotes').textContent = task.notes || '--';
 
                 const outputStateEl = document.getElementById('taskDetailOutputState');
