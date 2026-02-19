@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class OrsEntry extends Model
 {
@@ -66,6 +67,11 @@ class OrsEntry extends Model
         return $this->hasMany(OrsEntryEvidence::class, 'ors_entry_id');
     }
 
+    public function monitoring(): HasOne
+    {
+        return $this->hasOne(OrsEntryMonitoring::class, 'ors_entry_id');
+    }
+
     public function isLocked(): bool
     {
         return !is_null($this->locked_at);
@@ -81,4 +87,3 @@ class OrsEntry extends Model
         return strtolower((string) $this->status) === 'draft';
     }
 }
-

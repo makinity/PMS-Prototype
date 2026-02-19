@@ -22,6 +22,8 @@ use App\Http\Controllers\StageTwo\Forms\OrsExportController;
 use App\Http\Controllers\StageTwo\Forms\QarExportController;
 use App\Http\Controllers\StageTwo\Forms\SmporExcelExportController;
 use App\Http\Controllers\StageTwo\Monitoring\EmployeeAccomplishmentController;
+use App\Http\Controllers\StageTwo\Monitoring\OrsMonitoringController;
+use App\Http\Controllers\StageTwo\Monitoring\TeamTasksController;
 use App\Http\Controllers\StageTwo\Planning\DeptHeadQarController;
 use App\Http\Controllers\StageTwo\Planning\MporExcelExportController;
 use App\Http\Controllers\StageTwo\Planning\MporSubmissionController;
@@ -217,13 +219,15 @@ Route::prefix('dept-head')->middleware('auth')->group(function () {
 Route::prefix('supervisor')->middleware('auth')->group(function () {
     // Views
     Route::get('/dashboard', fn () => view('supervisor.dashboard'))->name('supervisor.dashboard');
-    Route::get('/team-tasks', fn () => view('supervisor.team-tasks'))->name('supervisor.team-tasks');
+    Route::get('/team-tasks', [TeamTasksController::class, 'index'])->name('supervisor.team-tasks');
+    Route::get('/team-tasks/{orsEntry}/monitor', [OrsMonitoringController::class, 'show'])->name('supervisor.team-tasks.monitor');
+    Route::post('/team-tasks/{orsEntry}/monitor', [OrsMonitoringController::class, 'store'])->name('supervisor.team-tasks.monitor.store');
     Route::get('/ipcr', fn () => view('supervisor.ipcr'))->name('supervisor.ipcr');
     Route::get('/smpor-ipcr-review', fn () => view('supervisor.smpor-ipcr-review'))->name('supervisor.smpor-ipcr-review');
     Route::get('/ipcr-target', fn () => view('supervisor.ipcr-target'))->name('supervisor.ipcr-target');
 
     Route::get('/mpor-validation', fn () => view('supervisor.mpor-validation'))->name('supervisor.mpor-validation');
-    Route::get('/ors-monitoring', fn () => view('supervisor.ors-monitoring'))->name('supervisor.ors-monitoring');
+    Route::get('/ors-monitoring', [OrsMonitoringController::class, 'index'])->name('supervisor.ors-monitoring');
     Route::get('/overdue-alerts', fn () => view('supervisor.overdue-alerts'))->name('supervisor.overdue-alerts');
     Route::get('/task-validation', fn () => view('supervisor.task-validation'))->name('supervisor.task-validation');
     Route::get('/team-productivity', fn () => view('supervisor.team-productivity'))->name('supervisor.team-productivity');

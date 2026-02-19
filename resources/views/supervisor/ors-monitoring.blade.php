@@ -1,10 +1,69 @@
 @extends('layouts.supervisor')
 
 @section('main-content')
+    @php
+        $submittedEntries = $submittedEntries ?? collect();
+
+        $calendarTasks = $submittedEntries
+            ->filter(fn ($entry) => strtolower((string) ($entry->status ?? '')) === 'submitted')
+            ->map(function ($entry) {
+                $workDate = $entry->work_date;
+                $dateValue = null;
+                $dateLabel = '--';
+
+                if ($workDate instanceof \Carbon\CarbonInterface) {
+                    $dateValue = $workDate->format('Y-m-d');
+                    $dateLabel = $workDate->format('F j, Y');
+                } elseif (is_string($workDate) && trim($workDate) !== '') {
+                    $trimmed = trim($workDate);
+                    $dateValue = substr($trimmed, 0, 10);
+                    $dateLabel = $trimmed;
+                }
+
+                $officeName = optional(optional($entry->employee)->office)->name;
+                $officeValue = $officeName ?: (optional($entry->employee)->office_id ? ('Office #' . optional($entry->employee)->office_id) : '--');
+
+                return [
+                    'id' => $entry->id,
+                    'date' => $dateValue,
+                    'dateLabel' => $dateLabel,
+                    'employee' => optional($entry->employee)->name ?? '—',
+                    'office' => $officeValue,
+                    'output' => optional($entry->ipcrItem)->output_title ?? (optional($entry->ipcrItem)->output_type ?? '--'),
+                    'uwpOutput' => optional($entry->ipcrItem)->output_title ?? '--',
+                    'accomplishment' => optional($entry->ipcrItem)->indicator_text ?? '--',
+                    'duration' => $entry->duration ?? ($entry->duration_minutes ?? '--'),
+                    'evidence' => ($entry->evidences_count ?? 0) > 0,
+                    'requestId' => $entry->request_id ?? ('ORS-' . $entry->id),
+                    'quantity' => $entry->quantity ?? '--',
+                    'status' => 'submitted',
+                    'quality_rating' => optional($entry->monitoring)->quality_rating,
+                    'timeliness_rating' => optional($entry->monitoring)->timeliness_rating,
+                    'remarks' => optional($entry->monitoring)->remarks,
+                ];
+            })
+            ->values();
+    @endphp
+
     <style>
         #ors-calendar .fc-col-header-cell { background-color: rgba(15, 23, 42, 0.85); }
         #ors-calendar .fc-col-header-cell-cushion,
         #ors-calendar .fc-daygrid-day-number { color: #e2e8f0; }
+        #ors-calendar .fc-daygrid-event {
+            margin: 4px 6px;
+            border-radius: 9999px;
+            padding: 2px 8px;
+            font-size: 11px;
+            line-height: 1.1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        #ors-calendar .fc-daygrid-event.ors-summary-event {
+            background: rgba(59, 130, 246, 0.18);
+            border: 1px solid rgba(59, 130, 246, 0.45);
+            color: #dbeafe;
+        }
 
         .status-chip{
             display:inline-flex;align-items:center;gap:.35rem;padding:.2rem .55rem;border-radius:9999px;border-width:1px;
@@ -14,12 +73,20 @@
     </style>
 
     <section class="space-y-6">
+        @if (session('success'))
+            <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+                {{ session('error') }}
+            </div>
+        @endif
+
         <div class="space-y-1">
             <h1 class="text-2xl font-semibold text-white">Daily ORS Monitoring</h1>
-            <p class="text-sm text-slate-400">
-                Supervisors monitor submitted daily outputs using the Output Rating Sheet (ORS).
-                <span class="block">Only <span class="font-semibold text-slate-200">Submitted (Locked)</span> ORS entries appear here and can be rated.</span>
-            </p>
         </div>
 
         <!-- Legend (submitted + missing only, aligned with manual ORS) -->
@@ -44,20 +111,12 @@
                     </span>
                 </div>
             </div>
-
-            <p class="mt-3 text-[11px] text-slate-400">
-                This screen mirrors the manual ORS process: the supervisor reviews outputs only after the employee submits the ORS entry.
-                Draft / in-progress work remains visible only to the employee in ORS.
-            </p>
         </div>
 
         <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
             <div class="mb-3 flex flex-wrap items-start justify-between gap-3">
                 <div>
                     <h2 class="text-lg font-semibold text-white">ORS Calendar</h2>
-                    <p class="text-sm text-slate-400">
-                        Click an entry to view details and record monitoring rating. Missing / Overdue indicates no submitted ORS entry for the day.
-                    </p>
                 </div>
             </div>
             <div id="ors-calendar"></div>
@@ -65,6 +124,76 @@
 
         <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-4 text-xs text-slate-400">
             ORS Monitoring is daily coaching and documentation. Final IPCR evaluation occurs in Stage III.
+        </div>
+
+        <!-- Day List Modal -->
+        <div id="ors-day-list-modal"
+             class="ors-modal fixed inset-0 z-[61] hidden items-center justify-center overflow-y-auto bg-black/60 px-4 py-6 sm:px-6"
+             role="dialog"
+             aria-modal="true">
+            <div class="w-full max-w-3xl rounded-2xl border border-slate-800 bg-slate-900 shadow-xl overflow-hidden">
+                <div class="flex max-h-[84vh] flex-col">
+                    <div class="border-b border-slate-800 bg-slate-900/80 px-6 py-4">
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <h2 class="text-lg font-semibold text-white">Submitted Entries</h2>
+                                <p id="dayListDateLabel" class="text-xs text-slate-400">--</p>
+                            </div>
+                            <button id="closeDayListTopBtn"
+                                    type="button"
+                                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white">
+                                x
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 overflow-y-auto px-6 py-5">
+                        <div id="dayListEntries" class="space-y-3"></div>
+                    </div>
+
+                    <div class="border-t border-slate-800 bg-slate-900/80 px-6 py-4">
+                        <div class="flex items-center justify-end">
+                            <button id="closeDayListBottomBtn"
+                                    type="button"
+                                    class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty Date Message Modal -->
+        <div id="ors-empty-date-modal"
+             class="ors-modal fixed inset-0 z-[62] hidden items-center justify-center overflow-y-auto bg-black/60 px-4 py-6 sm:px-6"
+             role="dialog"
+             aria-modal="true">
+            <div class="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 shadow-xl overflow-hidden">
+                <div class="border-b border-slate-800 bg-slate-900/80 px-5 py-4">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <h2 class="text-base font-semibold text-white">No Submitted Entries</h2>
+                            <p id="emptyDateLabel" class="text-xs text-slate-400">--</p>
+                        </div>
+                        <button id="closeEmptyDateTopBtn"
+                                type="button"
+                                class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white">
+                            x
+                        </button>
+                    </div>
+                </div>
+                <div class="px-5 py-4 text-sm text-slate-300">
+                    No submitted entries for this date.
+                </div>
+                <div class="border-t border-slate-800 bg-slate-900/80 px-5 py-3 text-right">
+                    <button id="closeEmptyDateBottomBtn"
+                            type="button"
+                            class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800">
+                        Close
+                    </button>
+                </div>
+            </div>
         </div>
 
         <!-- Monitoring Detail Modal -->
@@ -235,6 +364,12 @@
 
                     <div class="border-t border-slate-800 bg-slate-900/80 px-6 py-4">
                         <div class="flex items-center justify-end gap-2">
+                            <form id="saveMonitoringForm" method="POST" class="hidden">
+                                @csrf
+                                <input type="hidden" name="quality_rating" id="formQualityRating">
+                                <input type="hidden" name="timeliness_rating" id="formTimelinessRating">
+                                <input type="hidden" name="remarks" id="formRemarks">
+                            </form>
 
 
                             <!-- Close removed here; Save is primary. Close still available via "x", ESC, and backdrop click -->
@@ -367,6 +502,19 @@
                 const ratingControls = document.getElementById('rating-controls');
 
                 const saveBtn = document.getElementById('saveMonitoringRatingBtn');
+                const saveForm = document.getElementById('saveMonitoringForm');
+                const formQualityRating = document.getElementById('formQualityRating');
+                const formTimelinessRating = document.getElementById('formTimelinessRating');
+                const formRemarks = document.getElementById('formRemarks');
+                const dayListModal = document.getElementById('ors-day-list-modal');
+                const dayListDateLabel = document.getElementById('dayListDateLabel');
+                const dayListEntries = document.getElementById('dayListEntries');
+                const closeDayListTopBtn = document.getElementById('closeDayListTopBtn');
+                const closeDayListBottomBtn = document.getElementById('closeDayListBottomBtn');
+                const emptyDateModal = document.getElementById('ors-empty-date-modal');
+                const emptyDateLabel = document.getElementById('emptyDateLabel');
+                const closeEmptyDateTopBtn = document.getElementById('closeEmptyDateTopBtn');
+                const closeEmptyDateBottomBtn = document.getElementById('closeEmptyDateBottomBtn');
 
                 // Basis sub-modal
                 const basisModal = document.getElementById('ratingBasisModal');
@@ -440,45 +588,36 @@
                         ],
                     },
                 };
-
-                /**
-                 * DEMO LOCKED DATASET (Stage II) — Supervisor sees SUBMITTED only
-                 * Employee: Ramon Reyes
-                 * - Jan 2, 2026: Submitted (Locked) — Same-day verification of OTC transactions
-                 * - Jan 4, 2026: Submitted (Locked) — All e-bank transactions scanned and encoded daily
-                 */
-                const tasks = [
-                    {
-                        id: 'task-jan-02',
-                        date: '2026-01-02',
-                        dateLabel: 'January 2, 2026',
-                        employee: 'Ramon Reyes',
-                        office: 'Revenue Collection Unit',
-                        output: 'Official Receipt (OR)',
-                        uwpOutput: 'Processing of Over-the-Counter Revenue Transactions',
-                        accomplishment: 'Same-day verification of OTC transactions',
-                        duration: '2h 00m',
-                        evidence: true,
-                        requestId: 'REQ-2026-002',
-                        quantity: '12 transactions',
-                        status: 'submitted'
-                    },
-                    {
-                        id: 'task-jan-04',
-                        date: '2026-01-04',
-                        dateLabel: 'January 4, 2026',
-                        employee: 'Ramon Reyes',
-                        office: 'Revenue Collection Unit',
-                        output: 'Bank Statement Form (BSF-01)',
-                        uwpOutput: 'E-Bank Scanning and Encoding of Revenue Transactions',
-                        accomplishment: 'All e-bank transactions scanned and encoded daily',
-                        duration: '1h 30m',
-                        evidence: true,
-                        requestId: 'REQ-2026-004',
-                        quantity: '1 Daily Batch',
-                        status: 'submitted'
+                const tasks = @json($calendarTasks);
+                const monitorBaseUrl = @json(url('/supervisor/team-tasks'));
+                const byDate = tasks.reduce((carry, task) => {
+                    if (!task || !task.date) return carry;
+                    if (!carry[task.date]) {
+                        carry[task.date] = [];
                     }
-                ];
+                    carry[task.date].push(task);
+                    return carry;
+                }, {});
+
+                Object.keys(byDate).forEach((dateKey) => {
+                    byDate[dateKey].sort((left, right) => {
+                        const employeeCompare = String(left?.employee || '').localeCompare(String(right?.employee || ''));
+                        if (employeeCompare !== 0) return employeeCompare;
+                        return String(left?.accomplishment || '').localeCompare(String(right?.accomplishment || ''));
+                    });
+                });
+
+                const summaryEvents = Object.keys(byDate).map((date) => ({
+                    id: `sum-${date}`,
+                    start: date,
+                    allDay: true,
+                    title: `${byDate[date].length} submitted`,
+                    classNames: ['ors-summary-event'],
+                    extendedProps: {
+                        date,
+                        count: byDate[date].length,
+                    },
+                }));
 
                 function setButtonLoading(button, isLoading, loadingText) {
                     if (!button) return;
@@ -501,64 +640,49 @@
                     }
                 }
 
+                function refreshBodyLock() {
+                    const monitoringOpen = modal && !modal.classList.contains('hidden');
+                    const dayListOpen = dayListModal && !dayListModal.classList.contains('hidden');
+                    const emptyDateOpen = emptyDateModal && !emptyDateModal.classList.contains('hidden');
+                    const basisOpen = basisModal && !basisModal.classList.contains('hidden');
+                    document.body.classList.toggle('overflow-hidden', Boolean(monitoringOpen || dayListOpen || emptyDateOpen || basisOpen));
+                }
+
+                function formatDateLabel(dateStr) {
+                    if (!dateStr) return '--';
+                    const parsed = new Date(`${dateStr}T00:00:00`);
+                    if (Number.isNaN(parsed.getTime())) return dateStr;
+                    return parsed.toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' });
+                }
+
                 // Calendar
                 const calendarEl = document.getElementById('ors-calendar');
+                const today = new Date();
+                const currentYmd = today.toISOString().slice(0, 10);
                 const calendar = new FullCalendar.Calendar(calendarEl, {
                     initialView: 'dayGridMonth',
-                    initialDate: '2026-01-01',
+                    initialDate: currentYmd,
                     height: 'auto',
                     headerToolbar: { left: 'prev,next today', center: 'title', right: '' },
-                    dayMaxEventRows: 3,
+                    dayMaxEvents: true,
+                    dayMaxEventRows: 1,
+                    moreLinkClick: 'popover',
+                    eventDisplay: 'block',
                     editable: false,
                     selectable: true,
-                    events: tasks.map((task) => {
-                        const meta = STATUS_META[task.status] || STATUS_META.submitted;
-                        return {
-                            id: task.id,
-                            title: task.accomplishment,
-                            start: task.date,
-                            color: meta.color,
-                            extendedProps: { ...task, label: meta.label, detail: meta.detail, badge: meta.badge }
-                        };
-                    }),
-                    eventContent(arg) {
-                        const meta = arg.event.extendedProps;
-                        const wrapper = document.createElement('div');
-                        wrapper.classList.add('text-[11px]', 'leading-tight', 'px-1', 'py-[2px]');
-                        const title = (arg.event.title || '').length > 34 ? arg.event.title.substring(0, 31) + '...' : arg.event.title;
-
-                        wrapper.innerHTML = `
-                            <div class="flex flex-col gap-1">
-                                <span class="text-slate-100 font-semibold">${title}</span>
-                                <span class="rounded-full border px-2 py-[1px] text-[10px]" style="color:${meta.color}; border-color:${meta.color};">${meta.label}</span>
-                            </div>
-                        `;
-                        return { domNodes: [wrapper] };
-                    },
+                    events: summaryEvents,
                     dateClick(info) {
-                        const found = tasks.find((t) => t.date === info.dateStr);
-                        if (found) {
-                            openMonitoringModal(found);
+                        if (Array.isArray(byDate[info.dateStr]) && byDate[info.dateStr].length > 0) {
+                            openDayListModal(info.dateStr);
                             return;
                         }
 
-                        openMonitoringModal({
-                            employee: 'Ramon Reyes',
-                            office: 'Revenue Collection Unit',
-                            date: info.dateStr,
-                            dateLabel: info.dateStr,
-                            uwpOutput: '--',
-                            output: 'No submitted ORS entry',
-                            accomplishment: 'No submitted ORS entry for this date.',
-                            duration: '--',
-                            evidence: false,
-                            requestId: '--',
-                            quantity: '--',
-                            status: 'missing'
-                        });
+                        openEmptyDateModal(info.dateStr);
                     },
                     eventClick(info) {
-                        openMonitoringModal(info.event.extendedProps);
+                        const dateStr = String(info.event.extendedProps?.date || '');
+                        if (!dateStr) return;
+                        openDayListModal(dateStr);
                     }
                 });
                 calendar.render();
@@ -628,6 +752,7 @@
 
                     basisModal?.classList.remove('hidden');
                     basisModal?.classList.add('flex');
+                    refreshBodyLock();
                 }
 
                 let currentModalData = null;
@@ -647,12 +772,105 @@
                     }
                 }
 
+                function closeDayListModal() {
+                    if (!dayListModal) return;
+                    dayListModal.classList.add('hidden');
+                    dayListModal.classList.remove('flex');
+                    refreshBodyLock();
+                }
+
+                function closeEmptyDateModal() {
+                    if (!emptyDateModal) return;
+                    emptyDateModal.classList.add('hidden');
+                    emptyDateModal.classList.remove('flex');
+                    refreshBodyLock();
+                }
+
+                function openEmptyDateModal(dateStr) {
+                    if (!emptyDateModal) return;
+                    if (emptyDateLabel) {
+                        emptyDateLabel.textContent = formatDateLabel(dateStr);
+                    }
+                    emptyDateModal.classList.remove('hidden');
+                    emptyDateModal.classList.add('flex');
+                    refreshBodyLock();
+                }
+
+                function openDayListModal(dateStr) {
+                    if (!dayListModal || !dayListEntries) return;
+                    const entries = byDate[dateStr] || [];
+
+                    if (dayListDateLabel) {
+                        dayListDateLabel.textContent = formatDateLabel(dateStr);
+                    }
+
+                    dayListEntries.innerHTML = '';
+
+                    if (entries.length === 0) {
+                        const empty = document.createElement('p');
+                        empty.className = 'rounded-lg border border-slate-800 bg-slate-950/50 px-4 py-3 text-sm text-slate-400';
+                        empty.textContent = 'No submitted entries found for this date.';
+                        dayListEntries.appendChild(empty);
+                    } else {
+                        entries.forEach((entry) => {
+                            const row = document.createElement('div');
+                            row.className = 'flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-950/40 px-4 py-3 hover:bg-slate-900/80';
+
+                            const left = document.createElement('div');
+                            left.className = 'min-w-0';
+                            const title = document.createElement('p');
+                            title.className = 'truncate text-sm font-semibold text-white';
+                            title.textContent = entry.accomplishment || '--';
+                            const sub = document.createElement('p');
+                            sub.className = 'mt-1 text-xs text-slate-400';
+                            sub.textContent = entry.employee || '--';
+                            left.appendChild(title);
+                            left.appendChild(sub);
+
+                            const right = document.createElement('div');
+                            right.className = 'flex shrink-0 items-center gap-2';
+                            const evidence = document.createElement('span');
+                            evidence.className = entry.evidence
+                                ? 'rounded-full border border-emerald-500/60 bg-emerald-500/10 px-2 py-1 text-[11px] text-emerald-200'
+                                : 'rounded-full border border-slate-700 bg-slate-800 px-2 py-1 text-[11px] text-slate-300';
+                            evidence.textContent = entry.evidence ? 'Attached' : 'None';
+
+                            const openBtn = document.createElement('button');
+                            openBtn.type = 'button';
+                            openBtn.className = 'rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-500';
+                            openBtn.textContent = 'Open Monitoring';
+
+                            const openEntry = () => {
+                                closeDayListModal();
+                                openMonitoringModal(entry);
+                            };
+
+                            row.addEventListener('click', openEntry);
+                            openBtn.addEventListener('click', (event) => {
+                                event.stopPropagation();
+                                openEntry();
+                            });
+
+                            right.appendChild(evidence);
+                            right.appendChild(openBtn);
+
+                            row.appendChild(left);
+                            row.appendChild(right);
+                            dayListEntries.appendChild(row);
+                        });
+                    }
+
+                    dayListModal.classList.remove('hidden');
+                    dayListModal.classList.add('flex');
+                    refreshBodyLock();
+                }
+
                 function openMonitoringModal(data) {
                     if (!modal) return;
                     currentModalData = data;
 
-                    employeeEl.textContent = data.employee || 'Ramon Reyes';
-                    officeEl.textContent = data.office || 'Revenue Collection Unit';
+                    employeeEl.textContent = data.employee || '--';
+                    officeEl.textContent = data.office || '--';
                     dateEl.textContent = data.dateLabel || data.date || '--';
 
                     majorOutputEl.textContent = data.uwpOutput || '--';
@@ -676,14 +894,40 @@
                     ratingLockedNote.classList.toggle('hidden', rateable);
                     ratingControls.classList.toggle('hidden', !rateable);
 
-                    // Clear inputs when switching entries (demo clean)
-                    document.getElementById('ratingQual').value = '';
-                    document.getElementById('ratingTime').value = '';
-                    document.getElementById('ratingRemarks').value = '';
+                    const ratingQual = document.getElementById('ratingQual');
+                    const ratingTime = document.getElementById('ratingTime');
+                    const ratingRemarks = document.getElementById('ratingRemarks');
+                    if (ratingQual) {
+                        ratingQual.value = data.quality_rating ? String(data.quality_rating) : '';
+                        ratingQual.disabled = !rateable;
+                    }
+                    if (ratingTime) {
+                        ratingTime.value = data.timeliness_rating ? String(data.timeliness_rating) : '';
+                        ratingTime.disabled = !rateable;
+                    }
+                    if (ratingRemarks) {
+                        ratingRemarks.value = data.remarks || '';
+                        ratingRemarks.disabled = !rateable;
+                    }
+
+                    if (saveBtn) {
+                        setButtonLoading(saveBtn, false);
+                        delete saveBtn.dataset.loadingActive;
+                        saveBtn.disabled = !rateable;
+                        saveBtn.classList.toggle('opacity-60', !rateable);
+                        saveBtn.classList.toggle('cursor-not-allowed', !rateable);
+                    }
+                    if (saveForm) {
+                        if (rateable && data.id) {
+                            saveForm.action = `${monitorBaseUrl}/${encodeURIComponent(data.id)}/monitor`;
+                        } else {
+                            saveForm.removeAttribute('action');
+                        }
+                    }
 
                     modal.classList.remove('hidden');
                     modal.classList.add('flex');
-                    document.body.classList.add('overflow-hidden');
+                    refreshBodyLock();
                 }
 
                 window.closeOrsModal = (modalId) => {
@@ -691,12 +935,22 @@
                     if (!m) return;
                     m.classList.add('hidden');
                     m.classList.remove('flex');
-                    document.body.classList.remove('overflow-hidden');
+                    if (modalId === 'ors-monitoring-modal' && saveBtn) {
+                        setButtonLoading(saveBtn, false);
+                        delete saveBtn.dataset.loadingActive;
+                    }
+                    refreshBodyLock();
                 };
 
                 // Backdrop close (monitoring)
                 modal?.addEventListener('click', (event) => {
                     if (event.target === modal) closeOrsModal('ors-monitoring-modal');
+                });
+                dayListModal?.addEventListener('click', (event) => {
+                    if (event.target === dayListModal) closeDayListModal();
+                });
+                emptyDateModal?.addEventListener('click', (event) => {
+                    if (event.target === emptyDateModal) closeEmptyDateModal();
                 });
 
                 // ESC close (monitoring + basis)
@@ -705,6 +959,16 @@
 
                     if (basisModal && !basisModal.classList.contains('hidden')) {
                         closeBasis();
+                        return;
+                    }
+
+                    if (emptyDateModal && !emptyDateModal.classList.contains('hidden')) {
+                        closeEmptyDateModal();
+                        return;
+                    }
+
+                    if (dayListModal && !dayListModal.classList.contains('hidden')) {
+                        closeDayListModal();
                         return;
                     }
 
@@ -721,11 +985,16 @@
                 function closeBasis() {
                     basisModal?.classList.add('hidden');
                     basisModal?.classList.remove('flex');
+                    refreshBodyLock();
                 }
 
                 openBasisBtn?.addEventListener('click', openBasis);
                 closeBasisBtn?.addEventListener('click', closeBasis);
                 basisDoneBtn?.addEventListener('click', closeBasis);
+                closeDayListTopBtn?.addEventListener('click', closeDayListModal);
+                closeDayListBottomBtn?.addEventListener('click', closeDayListModal);
+                closeEmptyDateTopBtn?.addEventListener('click', closeEmptyDateModal);
+                closeEmptyDateBottomBtn?.addEventListener('click', closeEmptyDateModal);
 
                 basisModal?.addEventListener('click', (event) => {
                     if (event.target === basisModal) closeBasis();
@@ -735,7 +1004,7 @@
                     applyBasisColumnFilter(basisFilter.value);
                 });
 
-                // Demo-only: Save rating (blue, with loading spinner)
+                // Save rating to backend
                 saveBtn?.addEventListener('click', () => {
                     if (!currentModalData || currentModalData.status !== 'submitted') {
                         alert('Rating is available only for Submitted (Locked) entries.');
@@ -750,11 +1019,22 @@
                         return;
                     }
 
+                    if (!saveForm || !saveForm.action) {
+                        alert('Unable to save rating for this entry.');
+                        return;
+                    }
+
+                    if (saveBtn.dataset.loadingActive === 'true') {
+                        return;
+                    }
+
+                    formQualityRating.value = q;
+                    formTimelinessRating.value = t;
+                    formRemarks.value = document.getElementById('ratingRemarks').value || '';
+
                     setButtonLoading(saveBtn, true, 'Saving...');
-                    setTimeout(() => {
-                        setButtonLoading(saveBtn, false);
-                        alert('Demo: Monitoring rating saved.');
-                    }, 600);
+                    saveBtn.dataset.loadingActive = 'true';
+                    saveForm.submit();
                 });
             });
         </script>

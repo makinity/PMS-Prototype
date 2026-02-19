@@ -424,12 +424,13 @@
                     </div>
 
                     <div class="mt-3 space-y-2">
-                        <label class="text-xs text-slate-300">Output Upload (part of ORS submission)</label>
+                        <label class="text-xs text-slate-300">Output Upload (multiple files allowed)</label>
                         <input id="taskDetailUpload"
                             type="file"
+                            multiple
                             class="block w-full rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-xs text-slate-200 file:mr-3 file:rounded-md file:border-0 file:bg-slate-800 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-slate-200">
                         <p class="text-[11px] text-slate-400">
-                            Submission occurs once inside ORS. After submit, the entry is locked and visible in My Tasks (read-only) and MPOR/SMPOR.
+                            You can upload multiple evidence files. After submit, the entry is locked and visible in My Tasks (read-only) and MPOR/SMPOR.
                         </p>
                     </div>
 
@@ -686,6 +687,7 @@
                         submittedAt: submittedAt,
                         evidenceRequired: true,
                         evidenceAttached: Boolean(entry?.evidenceAttached),
+                        evidenceCount: Number(entry?.evidenceCount || 0),
                         evidenceFileName: null,
                         evidenceUploadedAt: null,
                         totalSeconds: Number.isFinite(totalSeconds) ? totalSeconds : 0,
@@ -702,6 +704,7 @@
                 submittedAt: null,
                 evidenceRequired: true,
                 evidenceAttached: false,
+                evidenceCount: 0,
                 evidenceFileName: null,
                 evidenceUploadedAt: null,
             };
@@ -1070,11 +1073,15 @@
 
                 const evidenceFileEl = document.getElementById('taskDetailEvidenceFile');
                 if (evidenceFileEl) {
-                    if (task.evidenceAttached && task.evidenceFileName) {
+                    if (task.evidenceAttached) {
+                        const evidenceCount = Number(task.evidenceCount || 0);
+                        const label = evidenceCount > 1
+                            ? `${evidenceCount} files attached`
+                            : (task.evidenceFileName || (evidenceCount === 1 ? '1 file attached' : '--'));
                         const uploadedAtText = task.evidenceUploadedAt
                             ? ` (${formatDateTime(task.evidenceUploadedAt)})`
                             : '';
-                        evidenceFileEl.textContent = `${task.evidenceFileName}${uploadedAtText}`;
+                        evidenceFileEl.textContent = `${label}${uploadedAtText}`;
                     } else {
                         evidenceFileEl.textContent = '--';
                     }
@@ -1098,13 +1105,15 @@
                     uploadInput.classList.toggle('opacity-70', uploadDisabled);
                     uploadInput.onchange = function () {
                         if (uploadDisabled) return;
-                        const file = this.files && this.files[0] ? this.files[0] : null;
-                        if (file) {
+                        const files = Array.from(this.files || []);
+                        if (files.length > 0) {
                             task.evidenceAttached = true;
-                            task.evidenceFileName = file.name;
+                            task.evidenceCount = files.length;
+                            task.evidenceFileName = files.length === 1 ? files[0].name : `${files.length} files selected`;
                             task.evidenceUploadedAt = new Date();
-                        } else {
+                        } else if (!task.evidenceAttached && Number(task.evidenceCount || 0) <= 0) {
                             task.evidenceAttached = false;
+                            task.evidenceCount = 0;
                             task.evidenceFileName = null;
                             task.evidenceUploadedAt = null;
                         }
@@ -1296,8 +1305,10 @@
                 }
 
                 const uploadInput = document.getElementById('taskDetailUpload');
-                const file = uploadInput?.files?.[0] || null;
-                if (!file) {
+                const selectedFiles = Array.from(uploadInput?.files || []);
+                const hasSelectedFiles = selectedFiles.length > 0;
+                const hasExistingEvidence = Boolean(task.evidenceAttached) || Number(task.evidenceCount || 0) > 0;
+                if (!hasSelectedFiles && !hasExistingEvidence) {
                     alert('Evidence attachment is required before submitting an ORS entry.');
                     return false;
                 }
@@ -1311,7 +1322,9 @@
 
                         const fd = new FormData();
                         fd.append('quantity', qtyValue);
-                        fd.append('evidence', file);
+                        selectedFiles.forEach((file) => {
+                            fd.append('evidence[]', file);
+                        });
 
                         const res = await fetch(url, {
                             method: 'POST',
@@ -1341,11 +1354,20 @@
                         task.startedAt = null;
                         task.stoppedAt = data?.locked_at ? new Date(data.locked_at) : new Date();
                         task.totalSeconds = Number(data?.total_seconds || 0);
-                        task.evidenceAttached = true;
-                        task.evidenceFileName = data?.evidence?.file_name || file.name;
+                        task.evidenceCount = Number(data?.evidence_count || task.evidenceCount || 0);
+                        task.evidenceAttached = task.evidenceCount > 0 || hasExistingEvidence || hasSelectedFiles;
+                        if (task.evidenceCount > 1) {
+                            task.evidenceFileName = `${task.evidenceCount} files attached`;
+                        } else {
+                            task.evidenceFileName = data?.evidence?.file_name
+                                || (selectedFiles.length === 1 ? selectedFiles[0].name : task.evidenceFileName);
+                        }
                         task.evidenceUploadedAt = data?.evidence?.uploaded_at
                             ? new Date(data.evidence.uploaded_at)
-                            : new Date();
+                            : (hasSelectedFiles ? new Date() : task.evidenceUploadedAt);
+                        if (uploadInput) {
+                            uploadInput.value = '';
+                        }
                         if (activeTaskId === taskId) activeTaskId = null;
 
                         refreshCalendar();
@@ -1365,9 +1387,20 @@
                 task.submittedAt = new Date();
                 task.startedAt = null;
                 task.stoppedAt = new Date();
-                task.evidenceAttached = true;
-                task.evidenceFileName = file.name;
-                task.evidenceUploadedAt = new Date();
+                if (hasSelectedFiles) {
+                    task.evidenceCount = selectedFiles.length;
+                    task.evidenceAttached = true;
+                    task.evidenceFileName = selectedFiles.length > 1
+                        ? `${selectedFiles.length} files attached`
+                        : selectedFiles[0].name;
+                    task.evidenceUploadedAt = new Date();
+                } else {
+                    task.evidenceAttached = hasExistingEvidence;
+                    task.evidenceCount = Number(task.evidenceCount || (hasExistingEvidence ? 1 : 0));
+                }
+                if (uploadInput) {
+                    uploadInput.value = '';
+                }
                 if (activeTaskId === taskId) activeTaskId = null;
 
                 refreshCalendar();

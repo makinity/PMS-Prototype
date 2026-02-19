@@ -5,11 +5,9 @@ namespace App\Http\Controllers\StageTwo\Commitement;
 use App\Http\Controllers\Controller;
 use App\Models\Ipcr;
 use App\Models\IpcrItem;
-use App\Models\MyTask;
 use App\Models\OrsEntry;
 use App\Models\OrsEntryEvidence;
 use App\Models\PerformancePeriod;
-use App\Services\MyTaskSyncService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -38,19 +36,44 @@ class OrsController extends Controller
         $weekStart = Carbon::now()->startOfWeek(Carbon::MONDAY)->toDateString();
         $weekEnd = Carbon::now()->endOfWeek(Carbon::SUNDAY)->toDateString();
 
-        $statsBaseQuery = MyTask::query()
-            ->where('employee_id', $user->id);
-
-        if ($activePeriod) {
-            $statsBaseQuery->where('performance_period_id', $activePeriod->id);
-        }
-
         $orsStats = [
-            'thisWeek' => (clone $statsBaseQuery)->whereBetween('work_date', [$weekStart, $weekEnd])->count(),
-            'drafts' => (clone $statsBaseQuery)->where('status', 'draft')->count(),
-            'submitted' => (clone $statsBaseQuery)->where('status', 'submitted')->count(),
-            'validated' => (clone $statsBaseQuery)->whereIn('status', ['validated', 'locked'])->count(),
+            'thisWeek' => 0,
+            'drafts' => 0,
+            'submitted' => 0,
+            'validated' => 0,
         ];
+        if (Schema::hasTable('ors_entries')) {
+            $statsBaseQuery = OrsEntry::query();
+            if (Schema::hasColumn('ors_entries', 'employee_id')) {
+                $statsBaseQuery->where('employee_id', $user->id);
+            } elseif (Schema::hasColumn('ors_entries', 'user_id')) {
+                $statsBaseQuery->where('user_id', $user->id);
+            } else {
+                $statsBaseQuery->whereRaw('1 = 0');
+            }
+
+            if ($activePeriod && Schema::hasColumn('ors_entries', 'performance_period_id')) {
+                $statsBaseQuery->where('performance_period_id', $activePeriod->id);
+            }
+
+            if (Schema::hasColumn('ors_entries', 'work_date')) {
+                $orsStats['thisWeek'] = (clone $statsBaseQuery)
+                    ->whereBetween('work_date', [$weekStart, $weekEnd])
+                    ->count();
+            }
+
+            if (Schema::hasColumn('ors_entries', 'status')) {
+                $orsStats['drafts'] = (clone $statsBaseQuery)
+                    ->where('status', 'draft')
+                    ->count();
+                $orsStats['submitted'] = (clone $statsBaseQuery)
+                    ->where('status', 'submitted')
+                    ->count();
+                $orsStats['validated'] = (clone $statsBaseQuery)
+                    ->whereIn('status', ['validated', 'locked'])
+                    ->count();
+            }
+        }
 
         $committedStatus = defined(Ipcr::class . '::STATUS_COMMITTED')
             ? Ipcr::STATUS_COMMITTED
@@ -273,6 +296,7 @@ class OrsController extends Controller
                     'stoppedAt' => $hasStoppedAt ? data_get($entry, 'stopped_at') : null,
                     'totalSeconds' => $hasTotalSeconds ? (int) (data_get($entry, 'total_seconds') ?? 0) : 0,
                     'durationSeconds' => $hasTotalSeconds ? (int) (data_get($entry, 'total_seconds') ?? 0) : 0,
+                    'evidenceCount' => (int) ($evidenceCounts[$entryId] ?? 0),
                     'evidenceAttached' => (int) ($evidenceCounts[$entryId] ?? 0) > 0,
                 ];
             })->values()->all();
@@ -429,8 +453,6 @@ class OrsController extends Controller
             return OrsEntry::query()->create($entryData);
         });
 
-        $this->syncMyTask($orsEntry);
-
         if ($request->expectsJson()) {
             return response()->json([
                 'ok' => true,
@@ -497,8 +519,6 @@ class OrsController extends Controller
             return $this->jsonError($e->getMessage(), 422);
         }
 
-        $this->syncMyTask($updated);
-
         return $this->jsonEntry($updated);
     }
 
@@ -557,8 +577,6 @@ class OrsController extends Controller
             return $this->jsonError($e->getMessage(), 422);
         }
 
-        $this->syncMyTask($updated);
-
         return $this->jsonEntry($updated);
     }
 
@@ -615,8 +633,6 @@ class OrsController extends Controller
         } catch (\RuntimeException $e) {
             return $this->jsonError($e->getMessage(), 422);
         }
-
-        $this->syncMyTask($updated);
 
         return $this->jsonEntry($updated);
     }
@@ -677,8 +693,6 @@ class OrsController extends Controller
             return $this->jsonError($e->getMessage(), 422);
         }
 
-        $this->syncMyTask($updated);
-
         return $this->jsonEntry($updated);
     }
 
@@ -703,9 +717,16 @@ class OrsController extends Controller
                 : back()->withErrors(['entry' => 'This ORS entry is already submitted/locked.']);
         }
 
+        if (strtolower((string) $orsEntry->status) !== 'draft') {
+            return $request->expectsJson()
+                ? $this->jsonError('Only draft entries can be submitted for review.', 422)
+                : back()->withErrors(['entry' => 'Only draft entries can be submitted for review.']);
+        }
+
         $validated = $request->validate([
             'quantity' => ['required', 'string', 'max:255'],
-            'evidence' => ['nullable', 'file', 'max:10240', 'mimes:pdf,jpg,jpeg,png,doc,docx,xlsx'],
+            'evidence' => ['nullable', 'array'],
+            'evidence.*' => ['file', 'max:10240', 'mimes:pdf,jpg,jpeg,png,doc,docx,xlsx'],
             'notes' => ['nullable', 'string', 'max:1000'],
         ]);
 
@@ -716,14 +737,25 @@ class OrsController extends Controller
                 if ($this->isEntryLocked($entry)) {
                     throw new \RuntimeException('This ORS entry is already submitted/locked.');
                 }
+                if (strtolower((string) $entry->status) !== 'draft') {
+                    throw new \RuntimeException('Only draft entries can be submitted for review.');
+                }
 
                 $now = now();
-                $file = $request->file('evidence');
-                $evidencePayload = null;
+                $files = $request->file('evidence', []);
+                if (!is_array($files)) {
+                    $files = $files ? [$files] : [];
+                }
 
-                if ($file) {
-                    $evidencePayload = $this->storeEvidenceForEntry($entry, $file, $now);
-                } elseif (!$entry->evidences()->exists()) {
+                $uploadedEvidences = [];
+                foreach ($files as $file) {
+                    if (!$file) {
+                        continue;
+                    }
+                    $uploadedEvidences[] = $this->storeEvidenceForEntry($entry, $file, $now);
+                }
+
+                if (!$entry->evidences()->exists()) {
                     throw new \RuntimeException('Evidence is required before submitting this ORS entry.');
                 }
 
@@ -749,11 +781,16 @@ class OrsController extends Controller
                 $entry->locked_at = $now;
                 $entry->save();
 
-                $this->syncMyTask($entry);
+                $latestEvidence = OrsEntryEvidence::query()
+                    ->where('ors_entry_id', $entry->id)
+                    ->orderByDesc('uploaded_at')
+                    ->orderByDesc('id')
+                    ->first();
 
                 return [
                     'entry' => $entry->fresh(),
-                    'evidence' => $evidencePayload,
+                    'latestEvidence' => $latestEvidence,
+                    'uploadedEvidences' => $uploadedEvidences,
                 ];
             });
         } catch (\RuntimeException $e) {
@@ -763,7 +800,15 @@ class OrsController extends Controller
         }
 
         $updated = $result['entry'];
-        $evidence = $result['evidence'];
+        $latestEvidence = $result['latestEvidence'];
+        $uploadedEvidences = $result['uploadedEvidences'] ?? [];
+        $latestEvidencePayload = $latestEvidence
+            ? [
+                'file_name' => $latestEvidence->file_name,
+                'file_path' => $latestEvidence->file_path,
+                'uploaded_at' => $latestEvidence->uploaded_at?->toIso8601String(),
+            ]
+            : null;
 
         if ($request->expectsJson()) {
             return response()->json([
@@ -773,7 +818,9 @@ class OrsController extends Controller
                 'submitted_at' => $updated->submitted_at?->toIso8601String(),
                 'locked_at' => $updated->locked_at?->toIso8601String(),
                 'total_seconds' => (int) ($updated->total_seconds ?? 0),
-                'evidence' => $evidence,
+                'evidence_count' => $updated->evidences()->count(),
+                'evidence' => $latestEvidencePayload,
+                'uploaded_evidences' => $uploadedEvidences,
             ]);
         }
 
@@ -796,7 +843,8 @@ class OrsController extends Controller
         }
 
         $validated = $request->validate([
-            'evidence' => ['required', 'file', 'max:10240', 'mimes:pdf,jpg,jpeg,png,doc,docx,xlsx'],
+            'evidence' => ['required', 'array', 'min:1'],
+            'evidence.*' => ['file', 'max:10240', 'mimes:pdf,jpg,jpeg,png,doc,docx,xlsx'],
         ]);
 
         try {
@@ -808,10 +856,24 @@ class OrsController extends Controller
                 }
 
                 $now = now();
-                $payload = $this->storeEvidenceForEntry($entry, $validated['evidence'], $now);
-                $this->syncMyTask($entry);
+                $files = $validated['evidence'] ?? [];
+                if (!is_array($files)) {
+                    $files = $files ? [$files] : [];
+                }
 
-                return ['entry' => $entry->fresh(), 'evidence' => $payload];
+                $payloads = [];
+                foreach ($files as $file) {
+                    if (!$file) {
+                        continue;
+                    }
+                    $payloads[] = $this->storeEvidenceForEntry($entry, $file, $now);
+                }
+
+                if (count($payloads) === 0) {
+                    throw new \RuntimeException('Please select at least one evidence file to upload.');
+                }
+
+                return ['entry' => $entry->fresh(), 'evidences' => $payloads];
             });
         } catch (\RuntimeException $e) {
             return $request->expectsJson()
@@ -820,12 +882,17 @@ class OrsController extends Controller
         }
 
         if ($request->expectsJson()) {
+            $uploadedEvidences = $result['evidences'] ?? [];
+            $lastUploaded = !empty($uploadedEvidences) ? end($uploadedEvidences) : null;
+
             return response()->json([
                 'ok' => true,
                 'id' => $result['entry']->id,
                 'status' => (string) $result['entry']->status,
-                'has_evidence' => true,
-                'evidence' => $result['evidence'],
+                'has_evidence' => $result['entry']->evidences()->exists(),
+                'evidence_count' => $result['entry']->evidences()->count(),
+                'uploaded_evidences' => $uploadedEvidences,
+                'evidence' => $lastUploaded,
             ]);
         }
 
@@ -870,8 +937,6 @@ class OrsController extends Controller
                 }
                 $evidenceRow->delete();
 
-                $this->syncMyTask($entry);
-
                 return $entry->fresh();
             });
         } catch (\RuntimeException $e) {
@@ -902,7 +967,7 @@ class OrsController extends Controller
 
         $ext = strtolower($file->getClientOriginalExtension() ?: 'bin');
         $finalName = $safeBase . '-' . $now->format('YmdHis') . '-' . Str::random(6) . '.' . $ext;
-        $dir = 'ors-evidence/' . $entry->employee_id . '/' . $entry->id;
+        $dir = 'ors_evidences/' . $entry->employee_id . '/' . $entry->id;
         $path = Storage::disk('public')->putFileAs($dir, $file, $finalName);
 
         if (!$path) {
@@ -923,15 +988,6 @@ class OrsController extends Controller
             'file_path' => $path,
             'uploaded_at' => $now->toIso8601String(),
         ];
-    }
-
-    private function syncMyTask(OrsEntry $entry): void
-    {
-        if (!Schema::hasTable('my_tasks')) {
-            return;
-        }
-
-        app(MyTaskSyncService::class)->syncFromOrsEntry($entry->fresh());
     }
 
     private function isEntryLocked(OrsEntry $orsEntry): bool
