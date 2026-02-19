@@ -3,6 +3,9 @@
 @section('main-content')
     @php
         $submittedEntries = $submittedEntries ?? collect();
+        if ($submittedEntries instanceof \Illuminate\Database\Eloquent\Collection) {
+            $submittedEntries->loadMissing('evidences');
+        }
 
         $calendarTasks = $submittedEntries
             ->filter(fn ($entry) => strtolower((string) ($entry->status ?? '')) === 'submitted')
@@ -22,20 +25,45 @@
 
                 $officeName = optional(optional($entry->employee)->office)->name;
                 $officeValue = $officeName ?: (optional($entry->employee)->office_id ? ('Office #' . optional($entry->employee)->office_id) : '--');
+                $evidences = collect($entry->evidences ?? [])->map(function ($evidence) {
+                    $relativePath = ltrim((string) ($evidence->file_path ?? ''), '/');
+                    $fileUrl = $relativePath !== '' ? asset('storage/' . $relativePath) : null;
+
+                    return [
+                        'id' => $evidence->id,
+                        'file_name' => $evidence->file_name ?? 'Evidence File',
+                        'mime_type' => $evidence->mime_type,
+                        'file_size' => $evidence->file_size,
+                        'uploaded_at' => optional($evidence->uploaded_at)->toIso8601String(),
+                        'preview_url' => $fileUrl,
+                        'download_url' => $fileUrl,
+                    ];
+                })->values();
+                $evidenceCount = (int) ($entry->evidences_count ?? $evidences->count());
 
                 return [
                     'id' => $entry->id,
+                    'ipcr_item_id' => $entry->ipcr_item_id,
                     'date' => $dateValue,
                     'dateLabel' => $dateLabel,
-                    'employee' => optional($entry->employee)->name ?? '—',
+                    'employee' => optional($entry->employee)->name ?? '--',
                     'office' => $officeValue,
                     'output' => optional($entry->ipcrItem)->output_title ?? (optional($entry->ipcrItem)->output_type ?? '--'),
+                    'outputType' => $entry->output_type ?? (optional($entry->ipcrItem)->output_type ?? '--'),
                     'uwpOutput' => optional($entry->ipcrItem)->output_title ?? '--',
                     'accomplishment' => optional($entry->ipcrItem)->indicator_text ?? '--',
+                    'indicator_text' => optional($entry->ipcrItem)->indicator_text ?? '--',
+                    'standards_payload' => optional($entry->ipcrItem)->standards_payload,
                     'duration' => $entry->duration ?? ($entry->duration_minutes ?? '--'),
-                    'evidence' => ($entry->evidences_count ?? 0) > 0,
-                    'requestId' => $entry->request_id ?? ('ORS-' . $entry->id),
+                    'evidence' => $evidenceCount > 0,
+                    'evidence_count' => $evidenceCount,
+                    'requestId' => $entry->client_request_id ?? ($entry->request_id ?? ('ORS-' . $entry->id)),
                     'quantity' => $entry->quantity ?? '--',
+                    'notes' => $entry->notes,
+                    'total_seconds' => is_null($entry->total_seconds) ? null : (int) $entry->total_seconds,
+                    'started_at' => optional($entry->started_at)->toIso8601String(),
+                    'stopped_at' => optional($entry->stopped_at)->toIso8601String(),
+                    'evidences' => $evidences,
                     'status' => 'submitted',
                     'quality_rating' => optional($entry->monitoring)->quality_rating,
                     'timeliness_rating' => optional($entry->monitoring)->timeliness_rating,
@@ -164,6 +192,63 @@
             </div>
         </div>
 
+        <!-- Evidence Sub-Modal -->
+        <div id="ors-evidence-modal"
+             class="ors-modal fixed inset-0 z-[64] hidden items-center justify-center overflow-y-auto bg-black/70 px-4 py-6 sm:px-6"
+             role="dialog"
+             aria-modal="true">
+            <div class="w-full max-w-5xl rounded-2xl border border-slate-800 bg-slate-900 shadow-xl overflow-hidden">
+                <div class="flex max-h-[88vh] flex-col">
+                    <div class="border-b border-slate-800 bg-slate-900/80 px-6 py-4">
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <h2 class="text-lg font-semibold text-white">Evidence Files</h2>
+                                <p id="evidenceModalEntryTitle" class="text-sm text-slate-200">--</p>
+                                <p id="evidenceModalEntryMeta" class="text-xs text-slate-400">--</p>
+                            </div>
+                            <button id="closeEvidenceTopBtn"
+                                    type="button"
+                                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white">
+                                x
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid flex-1 grid-cols-1 overflow-hidden lg:grid-cols-3">
+                        <div class="border-b border-slate-800 p-4 lg:border-b-0 lg:border-r">
+                            <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Attached Files</p>
+                            <div id="evidenceFileList" class="space-y-2 overflow-y-auto max-h-[30vh] lg:max-h-[60vh]"></div>
+                        </div>
+
+                        <div class="lg:col-span-2 flex min-h-[320px] flex-col">
+                            <div class="flex items-center justify-between gap-3 border-b border-slate-800 px-4 py-3">
+                                <p id="evidencePreviewFileName" class="truncate text-sm font-semibold text-white">Select a file</p>
+                                <a id="evidenceTopDownloadBtn"
+                                   href="#"
+                                   target="_blank"
+                                   rel="noopener"
+                                   class="pointer-events-none rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-200 opacity-50 hover:bg-slate-700">
+                                    Download
+                                </a>
+                            </div>
+
+                            <div id="evidencePreviewArea" class="flex-1 overflow-auto bg-black px-4 py-4"></div>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-slate-800 bg-slate-900/80 px-6 py-4">
+                        <div class="flex items-center justify-end">
+                            <button id="closeEvidenceBottomBtn"
+                                    type="button"
+                                    class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Empty Date Message Modal -->
         <div id="ors-empty-date-modal"
              class="ors-modal fixed inset-0 z-[62] hidden items-center justify-center overflow-y-auto bg-black/60 px-4 py-6 sm:px-6"
@@ -198,7 +283,7 @@
 
         <!-- Monitoring Detail Modal -->
         <div id="ors-monitoring-modal"
-             class="ors-modal fixed inset-0 z-[60] hidden items-center justify-center overflow-y-auto bg-black/60 px-4 py-6 sm:px-6"
+             class="ors-modal fixed inset-0 z-[63] hidden items-center justify-center overflow-y-auto bg-black/60 px-4 py-6 sm:px-6"
              role="dialog"
              aria-modal="true">
             <div class="w-full max-w-5xl rounded-2xl border border-slate-800 bg-slate-900 shadow-xl overflow-hidden">
@@ -247,7 +332,7 @@
                                     </div>
                                     <div>
                                         <p class="text-xs text-slate-400">Output Type</p>
-                                        <p id="monitoringOutput">--</p>
+                                        <p id="monitoringOutputType">--</p>
                                     </div>
                                     <div>
                                         <p class="text-xs text-slate-400">Actual Accomplishment</p>
@@ -264,9 +349,17 @@
                                         <p class="text-xs text-slate-400">Time Spent</p>
                                         <p id="monitoringDuration" class="text-slate-100 mt-1">--</p>
                                     </div>
-                                    <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4 sm:col-span-2">
-                                        <p class="text-xs text-slate-400">Evidence Attached</p>
-                                        <p id="monitoringEvidence" class="text-emerald-300 font-semibold mt-1">--</p>
+                                </div>
+
+                                <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+                                    <p class="text-xs text-slate-400">Evidence Attached</p>
+                                    <div class="mt-1 flex items-center justify-between gap-2">
+                                        <p id="monitoringEvidence" class="text-emerald-300 font-semibold">--</p>
+                                        <button id="monitoringEvidenceBtn"
+                                                type="button"
+                                                class="hidden rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60">
+                                            View Evidence
+                                        </button>
                                     </div>
                                 </div>
 
@@ -279,11 +372,8 @@
                                 </div>
 
                                 <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-                                    <p class="text-xs text-slate-400">Status</p>
-                                    <div class="mt-2 inline-flex flex-col gap-1">
-                                        <span id="monitoringStatus" class="status-chip border border-slate-700 bg-slate-800 text-slate-200"></span>
-                                        <span id="monitoringStatusDetail" class="text-xs text-slate-300"></span>
-                                    </div>
+                                    <p class="text-xs text-slate-400">Notes</p>
+                                    <p id="monitoringNotes" class="mt-1 text-sm text-slate-200 whitespace-pre-wrap break-words">--</p>
                                 </div>
                             </div>
 
@@ -355,6 +445,14 @@
                                     </div>
                                 </div>
 
+                                <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+                                    <p class="text-xs text-slate-400">Status</p>
+                                    <div class="mt-2 inline-flex flex-col gap-1">
+                                        <span id="monitoringStatus" class="status-chip border border-slate-700 bg-slate-800 text-slate-200"></span>
+                                        <span id="monitoringStatusDetail" class="text-xs text-slate-300"></span>
+                                    </div>
+                                </div>
+
                                 <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4 text-xs text-slate-400">
                                     Tip: Use remarks for coaching notes. This ORS rating supports monitoring documentation only.
                                 </div>
@@ -386,95 +484,95 @@
         </div>
 
         <!-- Rating Basis Sub-Modal (Performance Standards Q/E/T) -->
-<div id="ratingBasisModal"
-     class="fixed inset-0 z-[70] hidden flex items-center justify-center bg-black/80 px-4 py-6 sm:px-6"
-     role="dialog"
-     aria-modal="true">
+        <div id="ratingBasisModal"
+            class="fixed inset-0 z-[70] hidden flex items-center justify-center bg-black/80 px-4 py-6 sm:px-6"
+            role="dialog"
+            aria-modal="true">
 
-    <!-- Outer modal card -->
-    <div class="w-full max-w-5xl overflow-hidden rounded-3xl border border-slate-700/60 bg-slate-950 shadow-2xl">
+            <!-- Outer modal card -->
+            <div class="w-full max-w-5xl overflow-hidden rounded-3xl border border-slate-700/60 bg-slate-950 shadow-2xl">
 
-        <div class="flex max-h-[85vh] flex-col">
+                <div class="flex max-h-[85vh] flex-col">
 
-            <!-- Header (sticky-like look) -->
-            <div class="flex flex-wrap items-start justify-between gap-4 border-b border-slate-800/70 bg-slate-950 px-6 py-5">
+                    <!-- Header (sticky-like look) -->
+                    <div class="flex flex-wrap items-start justify-between gap-4 border-b border-slate-800/70 bg-slate-950 px-6 py-5">
 
-                <div class="space-y-1">
-                    <p class="text-[11px] uppercase tracking-[0.18em] text-slate-400">Standards (Q/E/T)</p>
-                    <h3 class="text-xl font-semibold text-white">Performance Standards</h3>
+                        <div class="space-y-1">
+                            <p class="text-[11px] uppercase tracking-[0.18em] text-slate-400">Standards (Q/E/T)</p>
+                            <h3 class="text-xl font-semibold text-white">Performance Standards</h3>
 
-                    <div class="pt-1 space-y-1">
-                        <p id="basisModalMfo" class="text-sm text-slate-300">
-                            <span class="text-slate-400">MFO:</span> --
-                        </p>
-                        <p id="basisModalIndicator" class="text-sm text-slate-300">
-                            <span class="text-slate-400">Indicator:</span> --
-                        </p>
-                    </div>
-                </div>
+                            <div class="pt-1 space-y-1">
+                                <p id="basisModalMfo" class="text-sm text-slate-300">
+                                    <span class="text-slate-400">MFO:</span> --
+                                </p>
+                                <p id="basisModalIndicator" class="text-sm text-slate-300">
+                                    <span class="text-slate-400">Indicator:</span> --
+                                </p>
+                            </div>
+                        </div>
 
-                <div class="flex items-start gap-3">
-                    <div class="flex items-center gap-2">
-                        <span class="text-[11px] uppercase tracking-wide text-slate-400">Show</span>
-                        <div class="relative">
-                            <select id="basisFilter"
-                            style="background:#0f172a;color:#e5e7eb;"
-                                    class="h-10 min-w-[200px] rounded-xl border border-slate-700/70 bg-slate-950/40 px-4 pr-10 text-sm font-medium text-slate-100 shadow-inner shadow-black/40 focus:border-blue-500/60 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
-                                <option value="qual">Quality (Q)</option>
-                                <option value="eff">Efficiency (E)</option>
-                                <option value="time">Timeliness (T)</option>
-                            </select>
+                        <div class="flex items-start gap-3">
+                            <div class="flex items-center gap-2">
+                                <span class="text-[11px] uppercase tracking-wide text-slate-400">Show</span>
+                                <div class="relative">
+                                    <select id="basisFilter"
+                                    style="background:#0f172a;color:#e5e7eb;"
+                                            class="h-10 min-w-[200px] rounded-xl border border-slate-700/70 bg-slate-950/40 px-4 pr-10 text-sm font-medium text-slate-100 shadow-inner shadow-black/40 focus:border-blue-500/60 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                                        <option value="qual">Quality (Q)</option>
+                                        <option value="eff">Efficiency (E)</option>
+                                        <option value="time">Timeliness (T)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <button type="button"
+                                    id="closeRatingBasisBtn"
+                                    class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-700/70 bg-slate-950/30 text-slate-300 transition hover:bg-slate-800/70 hover:text-white">
+                                <span class="sr-only">Close rating basis</span>
+                                <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 12 12M13 1 1 13"/>
+                                </svg>
+                            </button>
                         </div>
                     </div>
 
-                    <button type="button"
-                            id="closeRatingBasisBtn"
-                            class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-700/70 bg-slate-950/30 text-slate-300 transition hover:bg-slate-800/70 hover:text-white">
-                        <span class="sr-only">Close rating basis</span>
-                        <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 12 12M13 1 1 13"/>
-                        </svg>
-                    </button>
+                    <!-- Body -->
+                    <div class="flex-1 overflow-y-auto px-6 py-6 text-sm text-slate-200">
+
+                        <div class="overflow-hidden rounded-3xl border border-slate-700/60 bg-slate-950 shadow-inner shadow-black/50">
+                            <table class="w-full text-sm text-slate-200">
+                                <thead class="bg-slate-900 text-xs uppercase tracking-wide text-slate-400">
+                                    <tr>
+                                        <th class="w-20 px-6 py-4 text-left">Rating</th>
+                                        <th class="px-6 py-4 text-left">Quality (Q)</th>
+                                        <th class="px-6 py-4 text-left">Efficiency (E)</th>
+                                        <th class="px-6 py-4 text-left">Timeliness (T)</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody id="basisModalBody" class="divide-y divide-slate-800">
+                                    <!-- JS will inject <tr> rows here -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="border-t border-slate-800/70 bg-slate-950 px-6 py-4 text-[11px] text-slate-400">
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <p>Stage I standards are reference-only. Efficiency is advisory; supervisors rate Quality & Timeliness.</p>
+                            <button type="button"
+                                    id="basisDoneBtn"
+                                    class="rounded-xl border border-slate-700/70 bg-slate-950/30 px-5 py-2.5 text-xs font-semibold text-slate-100 transition hover:bg-slate-800/70">
+                                Done
+                            </button>
+                        </div>
+                    </div>
+
                 </div>
             </div>
-
-            <!-- Body -->
-            <div class="flex-1 overflow-y-auto px-6 py-6 text-sm text-slate-200">
-
-                <div class="overflow-hidden rounded-3xl border border-slate-700/60 bg-slate-950 shadow-inner shadow-black/50">
-                    <table class="w-full text-sm text-slate-200">
-                        <thead class="bg-slate-900 text-xs uppercase tracking-wide text-slate-400">
-                            <tr>
-                                <th class="w-20 px-6 py-4 text-left">Rating</th>
-                                <th class="px-6 py-4 text-left">Quality (Q)</th>
-                                <th class="px-6 py-4 text-left">Efficiency (E)</th>
-                                <th class="px-6 py-4 text-left">Timeliness (T)</th>
-                            </tr>
-                        </thead>
-
-                        <tbody id="basisModalBody" class="divide-y divide-slate-800">
-                            <!-- JS will inject <tr> rows here -->
-                        </tbody>
-                    </table>
-                </div>
-
-            </div>
-
-            <!-- Footer -->
-            <div class="border-t border-slate-800/70 bg-slate-950 px-6 py-4 text-[11px] text-slate-400">
-                <div class="flex flex-wrap items-center justify-between gap-3">
-                    <p>Stage I standards are reference-only. Efficiency is advisory; supervisors rate Quality & Timeliness.</p>
-                    <button type="button"
-                            id="basisDoneBtn"
-                            class="rounded-xl border border-slate-700/70 bg-slate-950/30 px-5 py-2.5 text-xs font-semibold text-slate-100 transition hover:bg-slate-800/70">
-                        Done
-                    </button>
-                </div>
-            </div>
-
         </div>
-    </div>
-</div>
 
     </section>
 
@@ -487,14 +585,16 @@
                 const officeEl = document.getElementById('monitoringOffice');
                 const dateEl = document.getElementById('monitoringDate');
                 const majorOutputEl = document.getElementById('monitoringMajorOutput');
-                const outputEl = document.getElementById('monitoringOutput');
+                const outputTypeEl = document.getElementById('monitoringOutputType');
                 const accomplishmentEl = document.getElementById('monitoringAccomplishment');
                 const requestIdEl = document.getElementById('monitoringRequestId');
                 const durationEl = document.getElementById('monitoringDuration');
                 const evidenceEl = document.getElementById('monitoringEvidence');
+                const monitoringEvidenceBtn = document.getElementById('monitoringEvidenceBtn');
                 const statusEl = document.getElementById('monitoringStatus');
                 const statusDetailEl = document.getElementById('monitoringStatusDetail');
                 const quantityEl = document.getElementById('monitoringQuantity');
+                const notesEl = document.getElementById('monitoringNotes');
 
                 const ratingBasisIndicatorEl = document.getElementById('ratingBasisIndicator');
 
@@ -515,6 +615,15 @@
                 const emptyDateLabel = document.getElementById('emptyDateLabel');
                 const closeEmptyDateTopBtn = document.getElementById('closeEmptyDateTopBtn');
                 const closeEmptyDateBottomBtn = document.getElementById('closeEmptyDateBottomBtn');
+                const evidenceModal = document.getElementById('ors-evidence-modal');
+                const evidenceModalEntryTitle = document.getElementById('evidenceModalEntryTitle');
+                const evidenceModalEntryMeta = document.getElementById('evidenceModalEntryMeta');
+                const evidenceFileList = document.getElementById('evidenceFileList');
+                const evidencePreviewArea = document.getElementById('evidencePreviewArea');
+                const evidencePreviewFileName = document.getElementById('evidencePreviewFileName');
+                const evidenceTopDownloadBtn = document.getElementById('evidenceTopDownloadBtn');
+                const closeEvidenceTopBtn = document.getElementById('closeEvidenceTopBtn');
+                const closeEvidenceBottomBtn = document.getElementById('closeEvidenceBottomBtn');
 
                 // Basis sub-modal
                 const basisModal = document.getElementById('ratingBasisModal');
@@ -541,53 +650,6 @@
                         muted: true
                     }
                 };
-
-                const STANDARDS_BY_INDICATOR = {
-                    'Same-day verification of OTC transactions': {
-                        mfo: 'Processing of Over-the-Counter Revenue Transactions',
-                        indicator: 'Same-day verification of OTC transactions',
-                        rows: [
-                            { rating: 5, q: 'Verified without discrepancies', e: '100% OTC verified', t: 'Same working day' },
-                            { rating: 4, q: 'Minor verifications pending', e: '100% OTC verified', t: 'Same working day' },
-                            { rating: 3, q: 'Few pending verifications', e: '95–99% verified', t: 'End of working day' },
-                            { rating: 2, q: 'Several unverified', e: '<95% verified', t: 'Beyond working day' },
-                            { rating: 1, q: 'Verification not done', e: 'Majority unverified', t: 'Unacceptable' },
-                        ],
-                    },
-                    'All e-bank transactions scanned and encoded daily': {
-                        mfo: 'E-Bank Scanning and Encoding of Revenue Transactions',
-                        indicator: 'All e-bank transactions scanned and encoded daily',
-                        rows: [
-                            { rating: 5, q: 'Scanned/encoded with zero errors', e: '100% encoded same batch', t: 'Same working day' },
-                            { rating: 4, q: 'Minor errors, no rework', e: '100% encoded', t: 'Same working day' },
-                            { rating: 3, q: 'Some errors, minimal rework', e: '95–99% encoded', t: 'End of working day' },
-                            { rating: 2, q: 'Frequent errors, rework needed', e: '<95% encoded', t: 'Beyond working day' },
-                            { rating: 1, q: 'Major errors, unacceptable', e: 'Majority not encoded', t: 'Unacceptable' },
-                        ],
-                    },
-                    'OR validation completed daily': {
-                        mfo: 'Processing of Over-the-Counter Revenue Transactions',
-                        indicator: 'OR validation completed daily',
-                        rows: [
-                            { rating: 5, q: 'Validated with zero variance', e: '100% ORs validated', t: 'Same working day' },
-                            { rating: 4, q: 'Minor variance corrected', e: '100% ORs validated', t: 'Same working day' },
-                            { rating: 3, q: 'Some corrections required', e: '95–99% ORs validated', t: 'End of working day' },
-                            { rating: 2, q: 'Frequent corrections required', e: '<95% ORs validated', t: 'Beyond working day' },
-                            { rating: 1, q: 'Validation incomplete', e: 'Majority not validated', t: 'Unacceptable' },
-                        ],
-                    },
-                    'Retrieval logs maintained for audit purposes': {
-                        mfo: 'Maintenance of revenue records and filing system',
-                        indicator: 'Retrieval logs maintained for audit purposes',
-                        rows: [
-                            { rating: 5, q: 'Logs complete and audit-ready', e: '100% requests logged', t: 'Within set turnaround' },
-                            { rating: 4, q: 'Minor omissions corrected', e: '100% requests logged', t: 'Within set turnaround' },
-                            { rating: 3, q: 'Some omissions', e: '95–99% requests logged', t: 'Slight delay' },
-                            { rating: 2, q: 'Frequent omissions', e: '<95% requests logged', t: 'Delayed' },
-                            { rating: 1, q: 'Logs unreliable', e: 'Majority not logged', t: 'Unacceptable' },
-                        ],
-                    },
-                };
                 const tasks = @json($calendarTasks);
                 const monitorBaseUrl = @json(url('/supervisor/team-tasks'));
                 const byDate = tasks.reduce((carry, task) => {
@@ -606,6 +668,12 @@
                         return String(left?.accomplishment || '').localeCompare(String(right?.accomplishment || ''));
                     });
                 });
+
+                const taskById = tasks.reduce((carry, task) => {
+                    if (!task || task.id === undefined || task.id === null) return carry;
+                    carry[String(task.id)] = task;
+                    return carry;
+                }, {});
 
                 const summaryEvents = Object.keys(byDate).map((date) => ({
                     id: `sum-${date}`,
@@ -640,12 +708,22 @@
                     }
                 }
 
+                function openOrsModalStack(modalId) {
+                    const modalEl = document.getElementById(modalId);
+                    if (!modalEl) return;
+                    modalEl.classList.remove('hidden');
+                    modalEl.classList.add('flex');
+                    document.body.classList.add('overflow-hidden');
+                    refreshBodyLock();
+                }
+
                 function refreshBodyLock() {
                     const monitoringOpen = modal && !modal.classList.contains('hidden');
                     const dayListOpen = dayListModal && !dayListModal.classList.contains('hidden');
+                    const evidenceOpen = evidenceModal && !evidenceModal.classList.contains('hidden');
                     const emptyDateOpen = emptyDateModal && !emptyDateModal.classList.contains('hidden');
                     const basisOpen = basisModal && !basisModal.classList.contains('hidden');
-                    document.body.classList.toggle('overflow-hidden', Boolean(monitoringOpen || dayListOpen || emptyDateOpen || basisOpen));
+                    document.body.classList.toggle('overflow-hidden', Boolean(monitoringOpen || dayListOpen || evidenceOpen || emptyDateOpen || basisOpen));
                 }
 
                 function formatDateLabel(dateStr) {
@@ -653,6 +731,75 @@
                     const parsed = new Date(`${dateStr}T00:00:00`);
                     if (Number.isNaN(parsed.getTime())) return dateStr;
                     return parsed.toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' });
+                }
+
+                function formatDateTimeLabel(value) {
+                    if (!value) return '--';
+                    const parsed = new Date(value);
+                    if (Number.isNaN(parsed.getTime())) return '--';
+                    return parsed.toLocaleString([], {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit',
+                    });
+                }
+
+                function formatFileSize(bytes) {
+                    const size = Number(bytes || 0);
+                    if (!Number.isFinite(size) || size <= 0) return '--';
+                    if (size >= 1024 * 1024) {
+                        return `${(size / (1024 * 1024)).toFixed(2)} MB`;
+                    }
+                    return `${Math.max(1, Math.round(size / 1024))} KB`;
+                }
+
+                function formatDurationSeconds(totalSeconds) {
+                    const seconds = Math.max(0, Math.floor(Number(totalSeconds) || 0));
+                    const hours = Math.floor(seconds / 3600);
+                    const minutes = Math.floor((seconds % 3600) / 60);
+                    const remainingSeconds = seconds % 60;
+
+                    if (hours > 0) {
+                        return `${hours}:${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+                    }
+
+                    return `${minutes}:${String(remainingSeconds).padStart(2, '0')}`;
+                }
+
+                function formatDurationFromEntry(entry) {
+                    const hasTotalSeconds = entry?.total_seconds !== null
+                        && entry?.total_seconds !== undefined
+                        && entry?.total_seconds !== '';
+
+                    if (hasTotalSeconds && Number.isFinite(Number(entry.total_seconds))) {
+                        return formatDurationSeconds(Number(entry.total_seconds));
+                    }
+
+                    if (entry?.started_at && entry?.stopped_at) {
+                        const startedAt = new Date(entry.started_at);
+                        const stoppedAt = new Date(entry.stopped_at);
+                        if (!Number.isNaN(startedAt.getTime()) && !Number.isNaN(stoppedAt.getTime())) {
+                            const elapsedSeconds = Math.max(0, Math.floor((stoppedAt.getTime() - startedAt.getTime()) / 1000));
+                            return formatDurationSeconds(elapsedSeconds);
+                        }
+                    }
+
+                    return entry?.duration && entry.duration !== '--' ? String(entry.duration) : '--';
+                }
+
+                function detectEvidenceType(evidence) {
+                    const mimeType = String(evidence?.mime_type || '').toLowerCase();
+                    const fileName = String(evidence?.file_name || '').toLowerCase();
+
+                    if (mimeType.startsWith('image/') || /\.(png|jpg|jpeg|gif|webp|bmp|svg)$/.test(fileName)) {
+                        return 'image';
+                    }
+                    if (mimeType === 'application/pdf' || fileName.endsWith('.pdf')) {
+                        return 'pdf';
+                    }
+                    return 'other';
                 }
 
                 // Calendar
@@ -706,8 +853,69 @@
                     });
                 }
 
+                function normalizeStandardsPayload(payload) {
+                    let normalizedPayload = payload;
+
+                    if (typeof normalizedPayload === 'string') {
+                        try {
+                            normalizedPayload = JSON.parse(normalizedPayload);
+                        } catch (error) {
+                            normalizedPayload = null;
+                        }
+                    }
+
+                    if (!normalizedPayload || typeof normalizedPayload !== 'object') {
+                        return null;
+                    }
+
+                    const normalized = {};
+                    [5, 4, 3, 2, 1].forEach((rating) => {
+                        const key = String(rating);
+                        const bucket = normalizedPayload[key] || normalizedPayload[rating] || {};
+                        const q = bucket.Q || bucket.q || [];
+                        const e = bucket.E || bucket.e || [];
+                        const t = bucket.T || bucket.t || [];
+
+                        normalized[key] = {
+                            Q: Array.isArray(q) ? q : (q ? [String(q)] : []),
+                            E: Array.isArray(e) ? e : (e ? [String(e)] : []),
+                            T: Array.isArray(t) ? t : (t ? [String(t)] : []),
+                        };
+                    });
+
+                    return normalized;
+                }
+
+                function hasAnyStandards(basis) {
+                    if (!basis || typeof basis !== 'object') return false;
+                    return Object.values(basis).some((bucket) => {
+                        const q = Array.isArray(bucket?.Q) ? bucket.Q.length : 0;
+                        const e = Array.isArray(bucket?.E) ? bucket.E.length : 0;
+                        const t = Array.isArray(bucket?.T) ? bucket.T.length : 0;
+                        return (q + e + t) > 0;
+                    });
+                }
+
+                function escapeHtml(value) {
+                    return String(value ?? '')
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;')
+                        .replace(/"/g, '&quot;')
+                        .replace(/'/g, '&#039;');
+                }
+
+                function renderStandardsCell(items) {
+                    if (!Array.isArray(items) || items.length === 0) {
+                        return '--';
+                    }
+                    return items
+                        .map((item) => `<div class="mb-1 last:mb-0">${escapeHtml(item)}</div>`)
+                        .join('');
+                }
+
                 function renderBasisTable(basis) {
-                    if (!basis || !Array.isArray(basis.rows) || basis.rows.length === 0) {
+                    if (!hasAnyStandards(basis)) {
                         basisBody.innerHTML = `
                             <tr>
                                 <td colspan="4" class="px-6 py-4 text-sm text-slate-300">No locked standards found for this indicator.</td>
@@ -716,26 +924,31 @@
                         return;
                     }
 
-                    const rowsHtml = [...basis.rows]
-                        .sort((a, b) => Number(b.rating) - Number(a.rating))
-                        .map((row) => `
+                    const rowsHtml = [5, 4, 3, 2, 1]
+                        .map((rating) => {
+                            const key = String(rating);
+                            const bucket = basis[key] || { Q: [], E: [], T: [] };
+                            return `
                             <tr>
-                                <td class="px-6 py-4 font-semibold text-white">${row.rating ?? '--'}</td>
-                                <td class="px-6 py-4 align-top" data-col="qual">${row.q || '--'}</td>
-                                <td class="px-6 py-4 align-top" data-col="eff">${row.e || '--'}</td>
-                                <td class="px-6 py-4 align-top" data-col="time">${row.t || '--'}</td>
+                                <td class="px-6 py-4 font-semibold text-white">${key}</td>
+                                <td class="px-6 py-4 align-top" data-col="qual">${renderStandardsCell(bucket.Q)}</td>
+                                <td class="px-6 py-4 align-top" data-col="eff">${renderStandardsCell(bucket.E)}</td>
+                                <td class="px-6 py-4 align-top" data-col="time">${renderStandardsCell(bucket.T)}</td>
                             </tr>
-                        `).join('');
+                        `;
+                        })
+                        .join('');
 
                     basisBody.innerHTML = rowsHtml;
                 }
 
-                function openRatingBasisModal(indicatorText) {
-                    const indicator = indicatorText || '';
-                    const basis = STANDARDS_BY_INDICATOR[indicator];
+                function openRatingBasisModal(selectedTask) {
+                    const task = selectedTask || {};
+                    const indicator = task.indicator_text || task.accomplishment || '--';
+                    const basis = normalizeStandardsPayload(task?.standards_payload);
 
                     if (basisMfo) {
-                        basisMfo.textContent = `MFO: ${basis?.mfo || '--'}`;
+                        basisMfo.textContent = `MFO: ${task.uwpOutput || '--'}`;
                     }
                     if (basisIndicator) {
                         basisIndicator.textContent = `Indicator: ${indicator || '--'}`;
@@ -756,10 +969,12 @@
                 }
 
                 let currentModalData = null;
+                let __returnToModalId = null;
+                let currentEvidenceEntryId = null;
 
                 function updateRatingBasis(data) {
                     const indicator = data.status === 'submitted'
-                        ? (data.accomplishment || 'No submitted ORS entry')
+                        ? (data.indicator_text || data.accomplishment || 'No submitted ORS entry')
                         : 'No submitted ORS entry';
 
                     ratingBasisIndicatorEl.textContent = indicator;
@@ -796,6 +1011,174 @@
                     refreshBodyLock();
                 }
 
+                function closeEvidenceModal() {
+                    if (!evidenceModal) return;
+                    evidenceModal.classList.add('hidden');
+                    evidenceModal.classList.remove('flex');
+                    currentEvidenceEntryId = null;
+                    if (evidenceFileList) evidenceFileList.innerHTML = '';
+                    if (evidencePreviewArea) evidencePreviewArea.innerHTML = '';
+                    if (evidencePreviewFileName) evidencePreviewFileName.textContent = 'Select a file';
+                    if (evidenceTopDownloadBtn) {
+                        evidenceTopDownloadBtn.href = '#';
+                        evidenceTopDownloadBtn.classList.add('pointer-events-none', 'opacity-50');
+                    }
+                    refreshBodyLock();
+                }
+
+                function renderEvidencePreview(file) {
+                    if (!evidencePreviewArea || !evidencePreviewFileName || !evidenceTopDownloadBtn) return;
+
+                    evidencePreviewArea.innerHTML = '';
+                    evidencePreviewFileName.textContent = file?.file_name || 'Evidence File';
+                    const downloadUrl = file?.download_url || file?.preview_url || '#';
+                    evidenceTopDownloadBtn.href = downloadUrl;
+                    evidenceTopDownloadBtn.classList.toggle('pointer-events-none', !downloadUrl || downloadUrl === '#');
+                    evidenceTopDownloadBtn.classList.toggle('opacity-50', !downloadUrl || downloadUrl === '#');
+
+                    const evidenceType = detectEvidenceType(file);
+
+                    if (evidenceType === 'image' && file?.preview_url) {
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'flex h-[70vh] items-center justify-center';
+                        const img = document.createElement('img');
+                        img.src = file.preview_url;
+                        img.alt = file.file_name || 'Evidence Image';
+                        img.className = 'max-h-[70vh] max-w-full rounded-lg object-contain';
+                        wrapper.appendChild(img);
+                        evidencePreviewArea.appendChild(wrapper);
+                        return;
+                    }
+
+                    if (evidenceType === 'pdf' && file?.preview_url) {
+                        const iframe = document.createElement('iframe');
+                        iframe.src = file.preview_url;
+                        iframe.className = 'h-[70vh] w-full rounded-lg border border-slate-800 bg-black';
+                        iframe.setAttribute('title', file.file_name || 'Evidence PDF');
+                        evidencePreviewArea.appendChild(iframe);
+                        return;
+                    }
+
+                    const fallback = document.createElement('div');
+                    fallback.className = 'flex h-[70vh] flex-col items-center justify-center gap-3 text-center text-slate-300';
+
+                    const note = document.createElement('p');
+                    note.className = 'text-sm font-semibold text-white';
+                    note.textContent = 'Preview not available for this file type.';
+                    fallback.appendChild(note);
+
+                    const sub = document.createElement('p');
+                    sub.className = 'text-xs text-slate-400';
+                    sub.textContent = 'Use download to open this file.';
+                    fallback.appendChild(sub);
+
+                    const downloadBtn = document.createElement('a');
+                    downloadBtn.href = downloadUrl;
+                    downloadBtn.target = '_blank';
+                    downloadBtn.rel = 'noopener';
+                    downloadBtn.className = 'rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-700';
+                    downloadBtn.textContent = 'Download file';
+                    fallback.appendChild(downloadBtn);
+
+                    evidencePreviewArea.appendChild(fallback);
+                }
+
+                function openEvidenceModal(entryId) {
+                    const entry = taskById[String(entryId)];
+                    if (!entry || !evidenceModal || !evidenceFileList) return;
+
+                    const files = Array.isArray(entry.evidences) ? entry.evidences : [];
+                    currentEvidenceEntryId = String(entry.id);
+
+                    if (evidenceModalEntryTitle) {
+                        evidenceModalEntryTitle.textContent = entry.accomplishment || '--';
+                    }
+                    if (evidenceModalEntryMeta) {
+                        evidenceModalEntryMeta.textContent = `${entry.employee || '--'} | ${entry.dateLabel || entry.date || '--'}`;
+                    }
+
+                    evidenceFileList.innerHTML = '';
+
+                    if (files.length === 0) {
+                        const empty = document.createElement('div');
+                        empty.className = 'rounded-lg border border-slate-800 bg-slate-950/40 px-3 py-3 text-xs text-slate-400';
+                        empty.textContent = 'No evidence files found for this entry.';
+                        evidenceFileList.appendChild(empty);
+                        renderEvidencePreview(null);
+                    } else {
+                        files.forEach((file, index) => {
+                            const item = document.createElement('div');
+                            item.className = 'rounded-lg border border-slate-800 bg-slate-950/40 px-3 py-3';
+
+                            const name = document.createElement('p');
+                            name.className = 'truncate text-xs font-semibold text-slate-100';
+                            name.textContent = file.file_name || 'Evidence File';
+
+                            const meta = document.createElement('p');
+                            meta.className = 'mt-1 text-[11px] text-slate-400';
+                            meta.textContent = `${formatFileSize(file.file_size)} | ${formatDateTimeLabel(file.uploaded_at)}`;
+
+                            const actions = document.createElement('div');
+                            actions.className = 'mt-2 flex items-center gap-2';
+
+                            const previewBtn = document.createElement('button');
+                            previewBtn.type = 'button';
+                            previewBtn.className = 'rounded-md border border-blue-500/60 bg-blue-500/10 px-2.5 py-1 text-[11px] font-semibold text-blue-100 hover:bg-blue-500/20';
+                            previewBtn.textContent = 'Preview';
+                            previewBtn.addEventListener('click', () => {
+                                evidenceFileList.querySelectorAll('[data-active="1"]').forEach((activeItem) => {
+                                    activeItem.dataset.active = '0';
+                                    activeItem.classList.remove('ring-1', 'ring-blue-500/50');
+                                });
+                                item.dataset.active = '1';
+                                item.classList.add('ring-1', 'ring-blue-500/50');
+                                renderEvidencePreview(file);
+                            });
+
+                            const downloadLink = document.createElement('a');
+                            downloadLink.href = file.download_url || file.preview_url || '#';
+                            downloadLink.target = '_blank';
+                            downloadLink.rel = 'noopener';
+                            downloadLink.className = 'rounded-md border border-slate-700 bg-slate-800 px-2.5 py-1 text-[11px] font-semibold text-slate-200 hover:bg-slate-700';
+                            downloadLink.textContent = 'Download';
+
+                            actions.appendChild(previewBtn);
+                            actions.appendChild(downloadLink);
+                            item.appendChild(name);
+                            item.appendChild(meta);
+                            item.appendChild(actions);
+                            evidenceFileList.appendChild(item);
+
+                            if (index === 0) {
+                                item.dataset.active = '1';
+                                item.classList.add('ring-1', 'ring-blue-500/50');
+                                renderEvidencePreview(file);
+                            }
+                        });
+                    }
+
+                    openOrsModalStack('ors-evidence-modal');
+                }
+
+                function appendDetailItem(container, labelText, valueText, isWide = false) {
+                    const wrap = document.createElement('div');
+                    if (isWide) {
+                        wrap.className = 'sm:col-span-2';
+                    }
+
+                    const label = document.createElement('p');
+                    label.className = 'text-[11px] text-slate-400';
+                    label.textContent = labelText;
+
+                    const value = document.createElement('p');
+                    value.className = isWide ? 'mt-1 text-xs text-slate-200 whitespace-pre-wrap break-words' : 'mt-1 text-xs text-slate-200';
+                    value.textContent = valueText || '--';
+
+                    wrap.appendChild(label);
+                    wrap.appendChild(value);
+                    container.appendChild(wrap);
+                }
+
                 function openDayListModal(dateStr) {
                     if (!dayListModal || !dayListEntries) return;
                     const entries = byDate[dateStr] || [];
@@ -813,50 +1196,58 @@
                         dayListEntries.appendChild(empty);
                     } else {
                         entries.forEach((entry) => {
-                            const row = document.createElement('div');
-                            row.className = 'flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-950/40 px-4 py-3 hover:bg-slate-900/80';
+                            const card = document.createElement('div');
+                            card.className = 'rounded-xl border border-slate-800 bg-slate-950/40 p-4';
 
                             const left = document.createElement('div');
                             left.className = 'min-w-0';
                             const title = document.createElement('p');
                             title.className = 'truncate text-sm font-semibold text-white';
                             title.textContent = entry.accomplishment || '--';
-                            const sub = document.createElement('p');
-                            sub.className = 'mt-1 text-xs text-slate-400';
-                            sub.textContent = entry.employee || '--';
+                            const subtitle = document.createElement('p');
+                            subtitle.className = 'mt-1 text-xs text-slate-400';
+                            subtitle.textContent = `Employee: ${entry.employee || '--'}`;
                             left.appendChild(title);
-                            left.appendChild(sub);
+                            left.appendChild(subtitle);
 
-                            const right = document.createElement('div');
-                            right.className = 'flex shrink-0 items-center gap-2';
+                            const evidenceCount = Number(entry.evidence_count || 0);
                             const evidence = document.createElement('span');
-                            evidence.className = entry.evidence
-                                ? 'rounded-full border border-emerald-500/60 bg-emerald-500/10 px-2 py-1 text-[11px] text-emerald-200'
-                                : 'rounded-full border border-slate-700 bg-slate-800 px-2 py-1 text-[11px] text-slate-300';
-                            evidence.textContent = entry.evidence ? 'Attached' : 'None';
+                            evidence.className = evidenceCount > 0
+                                ? 'rounded-full border border-emerald-500/60 bg-emerald-500/10 px-2.5 py-1 text-[11px] text-emerald-200'
+                                : 'rounded-full border border-slate-700 bg-slate-800 px-2.5 py-1 text-[11px] text-slate-300';
+                            evidence.textContent = evidenceCount > 0 ? `Attached (${evidenceCount})` : 'None';
+
+                            const actions = document.createElement('div');
+                            actions.className = 'mt-3 flex flex-wrap items-center justify-end gap-2';
+
+                            const viewEvidenceBtn = document.createElement('button');
+                            viewEvidenceBtn.type = 'button';
+                            const hasEvidenceFiles = Array.isArray(entry.evidences) && entry.evidences.length > 0;
+                            viewEvidenceBtn.className = 'rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60';
+                            viewEvidenceBtn.textContent = 'View Evidence';
+                            viewEvidenceBtn.disabled = !hasEvidenceFiles;
+                            viewEvidenceBtn.addEventListener('click', () => openEvidenceModal(entry.id));
 
                             const openBtn = document.createElement('button');
                             openBtn.type = 'button';
                             openBtn.className = 'rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-500';
                             openBtn.textContent = 'Open Monitoring';
-
-                            const openEntry = () => {
+                            openBtn.addEventListener('click', () => {
                                 closeDayListModal();
                                 openMonitoringModal(entry);
-                            };
-
-                            row.addEventListener('click', openEntry);
-                            openBtn.addEventListener('click', (event) => {
-                                event.stopPropagation();
-                                openEntry();
                             });
 
-                            right.appendChild(evidence);
-                            right.appendChild(openBtn);
+                            const topRow = document.createElement('div');
+                            topRow.className = 'flex flex-wrap items-start justify-between gap-3';
+                            topRow.appendChild(left);
+                            topRow.appendChild(evidence);
 
-                            row.appendChild(left);
-                            row.appendChild(right);
-                            dayListEntries.appendChild(row);
+                            actions.appendChild(viewEvidenceBtn);
+                            actions.appendChild(openBtn);
+
+                            card.appendChild(topRow);
+                            card.appendChild(actions);
+                            dayListEntries.appendChild(card);
                         });
                     }
 
@@ -874,13 +1265,25 @@
                     dateEl.textContent = data.dateLabel || data.date || '--';
 
                     majorOutputEl.textContent = data.uwpOutput || '--';
-                    outputEl.textContent = data.output || '--';
+                    outputTypeEl.textContent = data.outputType || data.output || '--';
                     accomplishmentEl.textContent = data.accomplishment || '--';
 
                     requestIdEl.textContent = data.requestId || '--';
-                    durationEl.textContent = data.duration || '--';
-                    evidenceEl.textContent = data.evidence ? 'Evidence attached' : 'No evidence (read-only)';
+                    durationEl.textContent = formatDurationFromEntry(data);
+                    evidenceEl.textContent = Number(data.evidence_count || 0) > 0
+                        ? `Evidence attached (${Number(data.evidence_count || 0)})`
+                        : 'No evidence (read-only)';
                     quantityEl.textContent = data.quantity || '--';
+                    notesEl.textContent = data.notes || '--';
+
+                    if (monitoringEvidenceBtn) {
+                        const hasEvidenceFiles = Array.isArray(data.evidences) && data.evidences.length > 0;
+                        monitoringEvidenceBtn.disabled = !hasEvidenceFiles;
+                        monitoringEvidenceBtn.classList.toggle('hidden', !hasEvidenceFiles);
+                        monitoringEvidenceBtn.onclick = hasEvidenceFiles
+                            ? () => openEvidenceModal(data.id)
+                            : null;
+                    }
 
                     const meta = STATUS_META[data.status] || STATUS_META.missing;
                     statusEl.textContent = meta.label;
@@ -925,9 +1328,7 @@
                         }
                     }
 
-                    modal.classList.remove('hidden');
-                    modal.classList.add('flex');
-                    refreshBodyLock();
+                    openOrsModalStack('ors-monitoring-modal');
                 }
 
                 window.closeOrsModal = (modalId) => {
@@ -938,6 +1339,9 @@
                     if (modalId === 'ors-monitoring-modal' && saveBtn) {
                         setButtonLoading(saveBtn, false);
                         delete saveBtn.dataset.loadingActive;
+                        if (__returnToModalId === 'ors-day-list-modal') {
+                            __returnToModalId = null;
+                        }
                     }
                     refreshBodyLock();
                 };
@@ -948,6 +1352,9 @@
                 });
                 dayListModal?.addEventListener('click', (event) => {
                     if (event.target === dayListModal) closeDayListModal();
+                });
+                evidenceModal?.addEventListener('click', (event) => {
+                    if (event.target === evidenceModal) closeEvidenceModal();
                 });
                 emptyDateModal?.addEventListener('click', (event) => {
                     if (event.target === emptyDateModal) closeEmptyDateModal();
@@ -962,8 +1369,13 @@
                         return;
                     }
 
-                    if (emptyDateModal && !emptyDateModal.classList.contains('hidden')) {
-                        closeEmptyDateModal();
+                    if (evidenceModal && !evidenceModal.classList.contains('hidden')) {
+                        closeEvidenceModal();
+                        return;
+                    }
+
+                    if (modal && !modal.classList.contains('hidden')) {
+                        closeOrsModal('ors-monitoring-modal');
                         return;
                     }
 
@@ -972,14 +1384,14 @@
                         return;
                     }
 
-                    if (!modal.classList.contains('hidden')) {
-                        closeOrsModal('ors-monitoring-modal');
+                    if (emptyDateModal && !emptyDateModal.classList.contains('hidden')) {
+                        closeEmptyDateModal();
                     }
                 });
 
                 function openBasis() {
                     if (!currentModalData) return;
-                    openRatingBasisModal(currentModalData.accomplishment || '');
+                    openRatingBasisModal(currentModalData);
                 }
 
                 function closeBasis() {
@@ -993,6 +1405,8 @@
                 basisDoneBtn?.addEventListener('click', closeBasis);
                 closeDayListTopBtn?.addEventListener('click', closeDayListModal);
                 closeDayListBottomBtn?.addEventListener('click', closeDayListModal);
+                closeEvidenceTopBtn?.addEventListener('click', closeEvidenceModal);
+                closeEvidenceBottomBtn?.addEventListener('click', closeEvidenceModal);
                 closeEmptyDateTopBtn?.addEventListener('click', closeEmptyDateModal);
                 closeEmptyDateBottomBtn?.addEventListener('click', closeEmptyDateModal);
 

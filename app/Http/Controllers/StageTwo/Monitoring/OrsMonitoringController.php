@@ -23,8 +23,9 @@ class OrsMonitoringController extends Controller
         $supervisor = $this->authorizedSupervisor();
 
         $orsEntry->load([
-            'employee',
-            'ipcrItem',
+            'employee:id,name,office_id',
+            'employee.office:id,name',
+            'ipcrItem:id,output_title,indicator_text,standards_payload',
             'evidences',
             'monitoring',
         ]);
@@ -95,7 +96,7 @@ class OrsMonitoringController extends Controller
             ->with([
                 'employee:id,name,office_id',
                 'employee.office:id,name',
-                'ipcrItem',
+                'ipcrItem:id,output_title,indicator_text,standards_payload',
                 'monitoring',
             ])
             ->withCount('evidences')
