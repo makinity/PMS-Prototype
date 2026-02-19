@@ -5,6 +5,7 @@ namespace App\Http\Controllers\StageTwo\Commitement;
 use App\Http\Controllers\Controller;
 use App\Models\Ipcr;
 use App\Models\IpcrItem;
+use App\Models\MyTask;
 use App\Models\OrsEntry;
 use App\Models\OrsEntryEvidence;
 use App\Models\PerformancePeriod;
@@ -33,6 +34,23 @@ class OrsController extends Controller
             ->where('is_active', true)
             ->orderByDesc('start_date')
             ->first();
+
+        $weekStart = Carbon::now()->startOfWeek(Carbon::MONDAY)->toDateString();
+        $weekEnd = Carbon::now()->endOfWeek(Carbon::SUNDAY)->toDateString();
+
+        $statsBaseQuery = MyTask::query()
+            ->where('employee_id', $user->id);
+
+        if ($activePeriod) {
+            $statsBaseQuery->where('performance_period_id', $activePeriod->id);
+        }
+
+        $orsStats = [
+            'thisWeek' => (clone $statsBaseQuery)->whereBetween('work_date', [$weekStart, $weekEnd])->count(),
+            'drafts' => (clone $statsBaseQuery)->where('status', 'draft')->count(),
+            'submitted' => (clone $statsBaseQuery)->where('status', 'submitted')->count(),
+            'validated' => (clone $statsBaseQuery)->whereIn('status', ['validated', 'locked'])->count(),
+        ];
 
         $committedStatus = defined(Ipcr::class . '::STATUS_COMMITTED')
             ? Ipcr::STATUS_COMMITTED
@@ -116,6 +134,8 @@ class OrsController extends Controller
             $hasOutputType = Schema::hasColumn($orsTable, 'output_type');
             $hasNotes = Schema::hasColumn($orsTable, 'notes');
             $hasQuantity = Schema::hasColumn($orsTable, 'quantity');
+            $hasStartedAt = Schema::hasColumn($orsTable, 'started_at');
+            $hasStoppedAt = Schema::hasColumn($orsTable, 'stopped_at');
             $hasSubmittedAt = Schema::hasColumn($orsTable, 'submitted_at');
             $hasTotalSeconds = Schema::hasColumn($orsTable, 'total_seconds');
             $hasClientRequestId = Schema::hasColumn($orsTable, 'client_request_id');
@@ -207,6 +227,8 @@ class OrsController extends Controller
                 $hasOutputType,
                 $hasNotes,
                 $hasQuantity,
+                $hasStartedAt,
+                $hasStoppedAt,
                 $hasSubmittedAt,
                 $hasTotalSeconds,
                 $evidenceCounts
@@ -247,6 +269,9 @@ class OrsController extends Controller
                     'notes' => $hasNotes ? data_get($entry, 'notes') : null,
                     'quantity' => $hasQuantity ? data_get($entry, 'quantity') : null,
                     'submittedAt' => $hasSubmittedAt ? data_get($entry, 'submitted_at') : null,
+                    'startedAt' => $hasStartedAt ? data_get($entry, 'started_at') : null,
+                    'stoppedAt' => $hasStoppedAt ? data_get($entry, 'stopped_at') : null,
+                    'totalSeconds' => $hasTotalSeconds ? (int) (data_get($entry, 'total_seconds') ?? 0) : 0,
                     'durationSeconds' => $hasTotalSeconds ? (int) (data_get($entry, 'total_seconds') ?? 0) : 0,
                     'evidenceAttached' => (int) ($evidenceCounts[$entryId] ?? 0) > 0,
                 ];
@@ -260,6 +285,7 @@ class OrsController extends Controller
             'activePeriod' => $activePeriod,
             'ipcr' => $ipcr,
             'orsGate' => $orsGate,
+            'orsStats' => $orsStats,
             'orsOptions' => $orsOptions,
             'orsEntries' => $orsEntries,
             'employeeName' => $user->name ?? '',
@@ -440,7 +466,12 @@ class OrsController extends Controller
                     throw new \RuntimeException('This ORS entry is already submitted/locked.');
                 }
 
-                if (strtolower((string) $entry->status) !== 'draft') {
+                $status = strtolower((string) $entry->status);
+                if ($status === 'recording') {
+                    return $entry->fresh();
+                }
+
+                if ($status !== 'draft') {
                     throw new \RuntimeException('Only draft entries can be started.');
                 }
 
@@ -554,7 +585,12 @@ class OrsController extends Controller
                     throw new \RuntimeException('This ORS entry is already submitted/locked.');
                 }
 
-                if (strtolower((string) $entry->status) !== 'paused') {
+                $status = strtolower((string) $entry->status);
+                if ($status === 'recording') {
+                    return $entry->fresh();
+                }
+
+                if ($status !== 'paused') {
                     throw new \RuntimeException('Only paused entries can be resumed.');
                 }
 

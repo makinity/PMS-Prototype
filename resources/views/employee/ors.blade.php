@@ -56,10 +56,6 @@
         <!-- Page Header -->
         <div class="space-y-1">
             <h1 class="text-2xl font-semibold text-white">Output Rating Sheet (ORS)</h1>
-            <p class="text-sm text-slate-400">
-                ORS is the single source of truth for task creation, timing, output submission, and the only trigger for MPOR.
-                My Tasks, Submit Output, MPOR, and SMPOR are read-only mirrors.
-            </p>
         </div>
 
         @if (session('success'))
@@ -84,71 +80,28 @@
             </div>
         @endif
 
-        <!-- Color Legend -->
-        <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-            <div class="grid grid-cols-1 gap-3 text-xs sm:grid-cols-2 lg:grid-cols-3">
-                <div class="flex items-center gap-2">
-                    <span class="status-chip border-amber-500/60 bg-amber-500/10 text-amber-200">
-                        <span class="status-dot bg-amber-500"></span>
-                        Recording (auto-timer)
-                    </span>
-                    <span class="text-slate-400">Not editable</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="status-chip border-amber-300/60 bg-amber-300/10 text-amber-100">
-                        <span class="status-dot bg-amber-300"></span>
-                        Draft (stopped)
-                    </span>
-                    <span class="text-slate-400">Editable</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="status-chip border-blue-500/60 bg-blue-500/10 text-blue-100">
-                        <span class="status-dot bg-blue-500"></span>
-                        Submitted (locked)
-                    </span>
-                    <span class="text-slate-400">Not editable</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="status-chip border-emerald-500/60 bg-emerald-500/10 text-emerald-100">
-                        <span class="status-dot bg-emerald-500"></span>
-                        Submitted (Locked) – mirrored in MPOR
-                    </span>
-                    <span class="text-slate-400">Not editable</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="status-chip border-red-500/60 bg-red-500/10 text-red-100">
-                        <span class="status-dot bg-red-500"></span>
-                        Missing / Overdue
-                    </span>
-                    <span class="text-slate-400">Not editable</span>
-                </div>
-            </div>
-            <p class="mt-3 text-[11px] text-slate-400">
-                Stopped entries remain drafts until submitted. Submitting happens once, inside ORS, and locks the entry (sent to supervisor/MPOR).
-                Downstream pages mirror state only; no secondary submission exists.
-            </p>
-        </div>
+
 
         <!-- Stats Overview (DEMO LOCKED: 4 tasks total) -->
         <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
             <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">This Week</p>
-                <p class="mt-1 text-2xl font-semibold text-white">4</p>
+                <p class="mt-1 text-2xl font-semibold text-white">{{ $orsStats['thisWeek'] ?? 0 }}</p>
                 <p class="text-xs text-slate-400">Tasks logged (ORS)</p>
             </div>
             <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Drafts</p>
-                <p class="mt-1 text-2xl font-semibold text-amber-300">0</p>
+                <p class="mt-1 text-2xl font-semibold text-amber-300">{{ $orsStats['drafts'] ?? 0 }}</p>
                 <p class="text-xs text-slate-400">Need submission</p>
             </div>
             <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Submitted</p>
-                <p class="mt-1 text-2xl font-semibold text-blue-300">2</p>
+                <p class="mt-1 text-2xl font-semibold text-blue-300">{{ $orsStats['submitted'] ?? 0 }}</p>
                 <p class="text-xs text-slate-400">Eligible for MPOR summary</p>
             </div>
             <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Validated</p>
-                <p class="mt-1 text-2xl font-semibold text-emerald-300">0</p>
+                <p class="mt-1 text-2xl font-semibold text-emerald-300">{{ $orsStats['validated'] ?? 0 }}</p>
                 <p class="text-xs text-slate-400">In SMPOR</p>
             </div>
         </div>
@@ -158,9 +111,6 @@
             <div class="flex flex-wrap items-start justify-between gap-4">
                 <div>
                     <h2 class="text-lg font-semibold text-white">Task Tracking (single source)</h2>
-                    <p class="text-sm text-slate-400">
-                        ORS is the only place to start, stop, and submit. Only one entry can be recording at a time; paused entries still block new starts.
-                    </p>
                 </div>
                 <span class="rounded-full border border-emerald-600/60 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300">
                     ONE ACTIVE TIMER
@@ -223,9 +173,6 @@
             <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
                 <div>
                     <h2 class="text-lg font-semibold text-white">ORS Calendar</h2>
-                    <p class="text-sm text-slate-400">
-                        Supports multiple tasks per day. Click an entry to start, pause, stop, or submit. Locked entries open read-only.
-                    </p>
                 </div>
                 <button type="button"
                         id="openLogTaskBtn"
@@ -234,12 +181,6 @@
                 </button>
             </div>
             <div id="ors-calendar"></div>
-        </div>
-
-        <!-- System Notice -->
-        <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-4 text-xs text-slate-400">
-            ORS captures timing and submissions once. Manual duration entry is disabled. After submission, entries are locked and visible in MPOR -> SMPOR.
-            My Tasks and Submit Output remain read-only displays of ORS state.
         </div>
 
     </section>
@@ -567,12 +508,15 @@
                 }, {})
                 : {};
             const orsConfig = window.__ORS || {};
+            const orsBaseUrl = @json(url('/employee/ors'));
             const ORS_ACTIONS = {
-                start: @json(route('stage2.ors.start', ['orsEntry' => ':id'])),
-                pause: @json(route('stage2.ors.pause', ['orsEntry' => ':id'])),
-                resume: @json(route('stage2.ors.resume', ['orsEntry' => ':id'])),
-                stop: @json(route('stage2.ors.stop', ['orsEntry' => ':id'])),
                 submit: String(orsConfig.submitUrlTemplate || ''),
+            };
+            const ORS_ROUTES = {
+                start: (id) => `${orsBaseUrl}/${encodeURIComponent(String(id))}/start`,
+                pause: (id) => `${orsBaseUrl}/${encodeURIComponent(String(id))}/pause`,
+                resume: (id) => `${orsBaseUrl}/${encodeURIComponent(String(id))}/resume`,
+                stop: (id) => `${orsBaseUrl}/${encodeURIComponent(String(id))}/stop`,
             };
 
             function actionUrl(template, id) {
@@ -580,25 +524,26 @@
                 return String(template).replace(/:id|%3Aid|__ID__/gi, encodedId);
             }
 
-            async function postJson(url, payload = {}, method = 'POST') {
+            async function postOrsAction(url) {
                 const csrfToken = String(orsConfig.csrf || '')
                     || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
                     || document.querySelector('#ors-log-form input[name="_token"]')?.value
                     || '';
 
                 const res = await fetch(url, {
-                    method: method,
+                    method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': csrfToken,
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify(payload)
                 });
 
                 const data = await res.json().catch(() => ({}));
                 if (!res.ok) {
-                    const msg = data?.message || 'Request failed.';
+                    const firstValidation = data?.errors
+                        ? Object.values(data.errors)[0]?.[0]
+                        : null;
+                    const msg = firstValidation || data?.message || 'Request failed.';
                     throw new Error(msg);
                 }
                 return data;
@@ -720,7 +665,9 @@
                     const rawState = String(entry?.state || 'draft').toLowerCase();
                     const state = rawState === 'validated' ? 'locked' : rawState;
                     const submittedAt = entry?.submittedAt ? new Date(entry.submittedAt) : null;
-                    const durationSeconds = Number(entry?.durationSeconds || 0);
+                    const totalSeconds = Number(entry?.totalSeconds ?? entry?.durationSeconds ?? 0);
+                    const startedAt = entry?.startedAt ? new Date(entry.startedAt) : null;
+                    const stoppedAt = entry?.stoppedAt ? new Date(entry.stoppedAt) : null;
 
                     return {
                         id: String(entry?.id ?? `task-db-${Date.now()}`),
@@ -741,8 +688,9 @@
                         evidenceAttached: Boolean(entry?.evidenceAttached),
                         evidenceFileName: null,
                         evidenceUploadedAt: null,
-                        startTime: null,
-                        durationMs: Number.isFinite(durationSeconds) ? durationSeconds * 1000 : 0,
+                        totalSeconds: Number.isFinite(totalSeconds) ? totalSeconds : 0,
+                        startedAt: startedAt && !Number.isNaN(startedAt.getTime()) ? startedAt : null,
+                        stoppedAt: stoppedAt && !Number.isNaN(stoppedAt.getTime()) ? stoppedAt : null,
                     };
                 })
                 : [];
@@ -763,6 +711,8 @@
                 ...task,
                 submittedAt: task.submittedAt ? new Date(task.submittedAt) : null,
                 evidenceUploadedAt: task.evidenceUploadedAt ? new Date(task.evidenceUploadedAt) : null,
+                startedAt: task.startedAt ? new Date(task.startedAt) : null,
+                stoppedAt: task.stoppedAt ? new Date(task.stoppedAt) : null,
             }));
 
             const uwpSelect = document.getElementById('orsUwpOutput');
@@ -961,8 +911,9 @@
             function applyServerEntryToTask(task, entry) {
                 const status = String(entry?.status || task.state || 'draft').toLowerCase();
                 task.state = status === 'validated' ? 'locked' : status;
-                task.durationMs = Number(entry?.total_seconds || 0) * 1000;
-                task.startTime = entry?.started_at ? new Date(entry.started_at) : null;
+                task.totalSeconds = Number(entry?.total_seconds || 0);
+                task.startedAt = entry?.started_at ? new Date(entry.started_at) : null;
+                task.stoppedAt = entry?.stopped_at ? new Date(entry.stopped_at) : null;
 
                 if (task.state === 'recording' || task.state === 'paused') {
                     activeTaskId = task.id;
@@ -988,12 +939,16 @@
 
             function formatDuration(ms) {
                 const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+
                 const hours = Math.floor(totalSeconds / 3600);
                 const minutes = Math.floor((totalSeconds % 3600) / 60);
-                if (hours === 0) {
-                    return `${minutes}m`;
+                const seconds = totalSeconds % 60;
+
+                if (hours > 0) {
+                    return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
                 }
-                return `${hours}h ${minutes}m`;
+
+                return `${minutes}:${String(seconds).padStart(2, '0')}`;
             }
 
             function formatTime(dateObj) {
@@ -1015,6 +970,15 @@
             }
 
             function computeElapsed(task) {
+                if (typeof task.totalSeconds === 'number' || task.startedAt) {
+                    const baseMs = Math.max(0, Number(task.totalSeconds || 0)) * 1000;
+                    const startedAt = task.startedAt instanceof Date ? task.startedAt : (task.startedAt ? new Date(task.startedAt) : null);
+                    if (task.state === 'recording' && startedAt && !Number.isNaN(startedAt.getTime())) {
+                        return baseMs + (Date.now() - startedAt.getTime());
+                    }
+                    return baseMs;
+                }
+
                 const base = task.durationMs || 0;
                 if (task.state === 'recording' && task.startTime) {
                     return base + (Date.now() - task.startTime.getTime());
@@ -1199,13 +1163,17 @@
 
                 if (isDbBackedTask(task)) {
                     try {
-                        const data = await postJson(actionUrl(ORS_ACTIONS.start, task.id));
+                        const data = await postOrsAction(ORS_ROUTES.start(task.id));
                         if (!data?.ok || !data?.entry) {
                             throw new Error('Unable to start task.');
                         }
                         applyServerEntryToTask(task, data.entry);
                     } catch (error) {
-                        alert(error?.message || 'Unable to start task.');
+                        const rawMessage = String(error?.message || 'Unable to start task.');
+                        const message = rawMessage.toLowerCase().includes('currently recording')
+                            ? 'Only one task can be recording at a time.'
+                            : rawMessage;
+                        alert(message);
                         return false;
                     }
                 } else {
@@ -1227,7 +1195,7 @@
 
                 if (isDbBackedTask(task)) {
                     try {
-                        const data = await postJson(actionUrl(ORS_ACTIONS.pause, task.id));
+                        const data = await postOrsAction(ORS_ROUTES.pause(task.id));
                         if (!data?.ok || !data?.entry) {
                             throw new Error('Unable to pause task.');
                         }
@@ -1257,13 +1225,17 @@
 
                 if (isDbBackedTask(task)) {
                     try {
-                        const data = await postJson(actionUrl(ORS_ACTIONS.resume, task.id));
+                        const data = await postOrsAction(ORS_ROUTES.resume(task.id));
                         if (!data?.ok || !data?.entry) {
                             throw new Error('Unable to resume task.');
                         }
                         applyServerEntryToTask(task, data.entry);
                     } catch (error) {
-                        alert(error?.message || 'Unable to resume task.');
+                        const rawMessage = String(error?.message || 'Unable to resume task.');
+                        const message = rawMessage.toLowerCase().includes('currently recording')
+                            ? 'Only one task can be recording at a time.'
+                            : rawMessage;
+                        alert(message);
                         return false;
                     }
                 } else {
@@ -1285,7 +1257,7 @@
 
                 if (isDbBackedTask(task)) {
                     try {
-                        const data = await postJson(actionUrl(ORS_ACTIONS.stop, task.id));
+                        const data = await postOrsAction(ORS_ROUTES.stop(task.id));
                         if (!data?.ok || !data?.entry) {
                             throw new Error('Unable to stop task.');
                         }
@@ -1366,8 +1338,9 @@
                         task.state = 'submitted';
                         task.output_state = 'submitted';
                         task.submittedAt = data?.submitted_at ? new Date(data.submitted_at) : new Date();
-                        task.startTime = null;
-                        task.durationMs = Number(data?.total_seconds || 0) * 1000;
+                        task.startedAt = null;
+                        task.stoppedAt = data?.locked_at ? new Date(data.locked_at) : new Date();
+                        task.totalSeconds = Number(data?.total_seconds || 0);
                         task.evidenceAttached = true;
                         task.evidenceFileName = data?.evidence?.file_name || file.name;
                         task.evidenceUploadedAt = data?.evidence?.uploaded_at
@@ -1390,7 +1363,8 @@
                 task.state = 'submitted';
                 task.output_state = 'submitted';
                 task.submittedAt = new Date();
-                task.startTime = null;
+                task.startedAt = null;
+                task.stoppedAt = new Date();
                 task.evidenceAttached = true;
                 task.evidenceFileName = file.name;
                 task.evidenceUploadedAt = new Date();
@@ -1422,7 +1396,7 @@
                 activeCard.classList.remove('hidden');
 
                 nameEl.textContent = task.title || '--';
-                startEl.textContent = formatTime(task.startTime);
+                startEl.textContent = formatTime(task.startedAt || task.startTime);
                 elapsedEl.textContent = formatDuration(computeElapsed(task));
                 statusEl.textContent = task.state === 'paused' ? 'Paused' : 'Recording';
                 statusEl.className = 'font-semibold ' + (task.state === 'paused' ? 'text-amber-200' : 'text-amber-300');
