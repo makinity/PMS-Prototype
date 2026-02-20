@@ -34,7 +34,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
-use App\Http\Controllers\Employee\DashboardController;
+use App\Http\Controllers\Employee\DashboardController as EmployeeDashboardController;
+use App\Http\Controllers\Supervisor\DashboardController as SupervisorDashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -99,7 +100,7 @@ Route::get('/dashboard', function () {
 
 Route::prefix('employee')->middleware('auth')->group(function () {
     // Views
-    Route::get('/dashboard', [DashboardController::class, 'index'])
+    Route::get('/dashboard', [EmployeeDashboardController::class, 'index'])
     ->name('employee.dashboard');
     Route::get('/task', [MyTasksController::class, 'index'])->name('employee.my-task');
     Route::get('/stage2/my-tasks/{orsEntry}/evidences', [MyTasksController::class, 'evidences'])
@@ -225,7 +226,7 @@ Route::prefix('dept-head')->middleware('auth')->group(function () {
 
 Route::prefix('supervisor')->middleware('auth')->group(function () {
     // Views
-    Route::get('/dashboard', fn () => view('supervisor.dashboard'))->name('supervisor.dashboard');
+    Route::get('/dashboard', [SupervisorDashboardController::class, 'index'])->name('supervisor.dashboard');
     Route::get('/team-tasks', [TeamTasksController::class, 'index'])->name('supervisor.team-tasks');
     Route::get('/team-tasks/{orsEntry}/monitor', [OrsMonitoringController::class, 'show'])->name('supervisor.team-tasks.monitor');
     Route::post('/team-tasks/{orsEntry}/monitor', [OrsMonitoringController::class, 'store'])->name('supervisor.team-tasks.monitor.store');

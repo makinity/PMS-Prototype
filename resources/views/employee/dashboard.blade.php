@@ -228,17 +228,17 @@
             </div>
 
             <div class="flex flex-wrap gap-3">
-                <a href="{{ url('/employee/ors') }}"
+                <a href="{{ route('employee.ors') }}"
                    class="px-4 py-2 rounded-lg bg-blue-600/90 hover:bg-blue-600 text-white text-sm font-medium border border-blue-500/30">
                     Open ORS Logger
                 </a>
 
-                <a href="{{ url('/employee/my-tasks') }}"
+                <a href="{{ route('employee.my-task') }}"
                    class="px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-white text-sm font-medium border border-gray-600">
                     View My Tasks
                 </a>
 
-                <a href="{{ url('/employee/ipcr') }}"
+                <a href="{{ route('employee.ipcr-target') }}"
                    class="px-4 py-2 rounded-lg bg-purple-700/90 hover:bg-purple-700 text-white text-sm font-medium border border-purple-500/30">
                     View IPCR
                 </a>
