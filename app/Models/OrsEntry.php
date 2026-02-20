@@ -17,6 +17,7 @@ class OrsEntry extends Model
         'performance_period_id',
         'ipcr_id',
         'ipcr_item_id',
+        'mpor_id',
         'work_date',
         'client_request_id',
         'output_type',
@@ -60,6 +61,11 @@ class OrsEntry extends Model
     public function ipcrItem(): BelongsTo
     {
         return $this->belongsTo(IpcrItem::class, 'ipcr_item_id');
+    }
+
+    public function mpor(): BelongsTo
+    {
+        return $this->belongsTo(Mpor::class, 'mpor_id');
     }
 
     public function evidences(): HasMany

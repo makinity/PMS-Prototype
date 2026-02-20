@@ -24,11 +24,11 @@ use App\Http\Controllers\StageTwo\Forms\SmporExcelExportController;
 use App\Http\Controllers\StageTwo\Monitoring\EmployeeAccomplishmentController;
 use App\Http\Controllers\StageTwo\Monitoring\OrsMonitoringController;
 use App\Http\Controllers\StageTwo\Monitoring\TeamTasksController;
+use App\Http\Controllers\StageTwo\Mpor\MporController;
 use App\Http\Controllers\StageTwo\Planning\DeptHeadQarController;
 use App\Http\Controllers\StageTwo\Planning\MporExcelExportController;
 use App\Http\Controllers\StageTwo\Planning\MporSubmissionController;
 use App\Http\Controllers\StageTwo\Planning\PmtQarApprovalController;
-use App\Http\Controllers\StageTwo\Planning\SupervisorMporController;
 use App\Http\Controllers\StageTwo\Planning\SupervisorMporEndorseController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -115,7 +115,11 @@ Route::prefix('employee')->middleware('auth')->group(function () {
     Route::post('/ors/{orsEntry}/submit', [OrsController::class, 'submit'])->name('stage2.ors.submit');
     Route::post('/ors/{orsEntry}/evidence', [OrsController::class, 'uploadEvidence'])->name('stage2.ors.evidence.store');
     Route::delete('/ors/{orsEntry}/evidence/{evidence}', [OrsController::class, 'destroyEvidence'])->name('stage2.ors.evidence.destroy');
-    Route::get('/MPOR', fn () => view('employee.mpor'))->name('employee.mpor');
+    Route::get('/mpor', [MporController::class, 'index'])->name('employee.mpor');
+    Route::post('/mpor/generate', [MporController::class, 'employeeGenerate'])->name('employee.mpor.generate');
+    Route::post('/mpor/{mpor}/attach', [MporController::class, 'employeeAttachRatedOrs'])->name('employee.mpor.attach');
+    Route::post('/mpor/{mpor}/detach', [MporController::class, 'employeeDetachRatedOrs'])->name('employee.mpor.detach');
+    Route::get('/MPOR', fn () => redirect()->route('employee.mpor'));
     Route::get('/SMPOR', fn () => view('employee.smpor'))->name('employee.smpor');
     Route::get('/IPCR-Target', [IpcrTargetController::class, 'index'])
         ->name('employee.ipcr-target');
@@ -269,8 +273,8 @@ Route::prefix('supervisor')->middleware('auth')->group(function () {
     Route::post('/stage-one/planning/opcr/{opcr}/submit', [SuperVisorOpcrController::class, 'submit'])->name('stage1.opcr.submit');
 
     // Stage II - MPOR Review
-    Route::get('/mpor', [SupervisorMporController::class, 'index'])->name('supervisor.mpor');
-    Route::get('/mpor/index', [SupervisorMporController::class, 'index'])->name('supervisor.mpor.index');
+    Route::get('/mpor', [MporController::class, 'supervisorIndex'])->name('supervisor.mpor');
+    Route::get('/mpor/index', [MporController::class, 'supervisorIndex'])->name('supervisor.mpor.index');
     Route::post('/mpor/{mpor}/approve', [SupervisorMporEndorseController::class, 'approve'])->name('supervisor.mpor.approve');
     Route::post('/mpor/{mpor}/endorse', [SupervisorMporEndorseController::class, 'endorse'])->name('supervisor.mpor.endorse');
 
