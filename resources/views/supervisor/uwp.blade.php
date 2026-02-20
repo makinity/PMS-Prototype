@@ -10,6 +10,15 @@
         $selectedOfficeId = old('office_id', $selectedOfficeId ?? auth()->user()->office_id);
         $activePeriod = $periods->firstWhere('is_active', true);
         $selectedPerformancePeriodId = old('performance_period_id', $selectedPerformancePeriodId ?? optional($activePeriod)->id);
+        $assignedData = collect($officeEmployees ?? [])
+            ->map(fn ($u) => [
+                'id' => $u->id,
+                'name' => $u->name,
+                'office_id' => $u->office_id,
+                'unit' => auth()->user()->office->name ?? '',
+            ])
+            ->values()
+            ->all();
     @endphp
 @section('main-content')
     <section class="space-y-6">
@@ -88,7 +97,7 @@
                         >
                             @foreach($offices as $office)
                                 <option value="{{ $office->id }}"
-                                    {{ old('office_id', 1) == $office->id ? 'selected' : '' }}>
+                                    {{ (int) old('office_id', $selectedOfficeId) === (int) $office->id ? 'selected' : '' }}>
                                     {{ $office->name }}
                                 </option>
                             @endforeach
@@ -337,7 +346,7 @@
                     </table>
                 </div>
 
-                <p id="uwp-assigned-empty" class="text-[12px] text-slate-500 hidden">No employees available (demo).</p>
+                <p id="uwp-assigned-empty" class="text-[12px] text-slate-500 hidden">No employees available...</p>
             </div>
 
             <div class="mt-4 flex items-center justify-end gap-3 border-t border-slate-800 pt-3">
@@ -516,16 +525,7 @@
                 let activeRowConfirmId = null;
                 let activeFunctionConfirmId = null;
 
-                const assignedData = {
-                    'Revenue Collection Unit': [
-                        { name: 'Ramon Reyes', unit: 'Revenue Collection Unit' },
-                    ],
-                    'Records Management Unit': [],
-                    'Administrative Services Unit': [],
-                    'Human Resource Management Unit': [],
-                    'General Services Unit': [],
-                    'Planning and Development Unit': [],
-                };
+                const assignedData = @json($assignedData);
 
                 const isDraft = {{ $canEdit ? 'true' : 'false' }};
 
@@ -690,10 +690,21 @@
                     return Math.min(max, Math.max(min, num));
                 }
 
+                const supervisorOfficeName = @json(auth()->user()->office->name ?? '');
+
                 function getSelectedUnitLabel() {
-                    if (!unitSelect) return 'Revenue Collection Unit';
+                    if (!unitSelect) return supervisorOfficeName || 'Office / Unit';
                     const option = unitSelect.options[unitSelect.selectedIndex];
-                    return option ? option.text : 'Revenue Collection Unit';
+                    return option ? option.text : (supervisorOfficeName || 'Office / Unit');
+                }
+
+                function getSelectedOfficeId() {
+                    const hidden = document.querySelector('input[name="office_id"]');
+                    if (hidden && hidden.value) return Number(hidden.value);
+
+                    if (unitSelect && unitSelect.value) return Number(unitSelect.value);
+
+                    return 0;
                 }
 
                 function getFunctionDescription(func) {
@@ -783,26 +794,23 @@
                     return Array.isArray(indicator.assignees) ? [...indicator.assignees] : [];
                 }
 
-                function isEmployeeAssigned(indicator, employeeName) {
-                    if (!indicator || !employeeName) return false;
-                    return getAssignedEmployees(indicator).includes(employeeName);
+                function isEmployeeAssigned(indicator, employeeId) {
+                    return getAssignedEmployees(indicator).includes(Number(employeeId));
                 }
 
-                function assignEmployee(indicator, employeeName) {
-                    if (!indicator || !employeeName) return;
+                function assignEmployee(indicator, employeeId) {
+                    employeeId = Number(employeeId);
+                    if (!employeeId) return;
                     indicator.assignees = Array.isArray(indicator.assignees) ? indicator.assignees : [];
-                    if (!indicator.assignees.includes(employeeName)) {
-                        indicator.assignees.push(employeeName);
-                    }
+                    if (!indicator.assignees.includes(employeeId)) indicator.assignees.push(employeeId);
                 }
 
-                function unassignEmployee(indicator, employeeName) {
-                    if (!indicator || !employeeName) return;
+                function unassignEmployee(indicator, employeeId) {
+                    employeeId = Number(employeeId);
+                    if (!employeeId) return;
                     indicator.assignees = Array.isArray(indicator.assignees) ? indicator.assignees : [];
-                    const index = indicator.assignees.indexOf(employeeName);
-                    if (index !== -1) {
-                        indicator.assignees.splice(index, 1);
-                    }
+                    const idx = indicator.assignees.indexOf(employeeId);
+                    if (idx !== -1) indicator.assignees.splice(idx, 1);
                 }
 
                 function renderFunctions() {
@@ -1111,7 +1119,8 @@
                     assignedIndicator.textContent = indicatorText || '---';
 
                     assignedList.innerHTML = '';
-                    const rows = assignedData[unit] || [];
+                    const officeId = getSelectedOfficeId();
+                    const rows = (assignedData || []).filter(e => Number(e.office_id) === Number(officeId));
                     if (!rows.length) {
                         assignedEmpty.classList.remove('hidden');
                         return;
@@ -1133,7 +1142,8 @@
                         const statusTd = document.createElement('td');
                         statusTd.className = 'px-4 py-2';
 
-                        const isAssigned = isEmployeeAssigned(indicator, emp.name);
+                        const isAssigned = isEmployeeAssigned(indicator, emp.id);
+
                         const badge = document.createElement('span');
                         badge.className = `inline-flex items-center px-2 py-1 text-[11px] font-semibold rounded-full border ${
                             isAssigned ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-200' : 'border-slate-600 bg-slate-800 text-slate-300'
@@ -1160,13 +1170,11 @@
                             toggle.textContent = isAssigned ? 'Unassign' : 'Assign';
 
                             toggle.addEventListener('click', () => {
-                                if (!indicator) return;
-                                if (isEmployeeAssigned(indicator, emp.name)) {
-                                    unassignEmployee(indicator, emp.name);
+                                if (isEmployeeAssigned(indicator, emp.id)) {
+                                    unassignEmployee(indicator, emp.id);
                                 } else {
-                                    assignEmployee(indicator, emp.name);
+                                    assignEmployee(indicator, emp.id);
                                 }
-
                                 renderAssigned(unit);
                                 renderIndicators(activeIndicators);
                             });

@@ -91,8 +91,18 @@ class UnitWorkPlanController extends Controller
             $initialFunctions = $this->mapUwpToEditorFunctions($uwp);
         }
 
+        $selectedOfficeId = (int) ($selectedOfficeId ?? $user->office_id);
+
+        $officeEmployees = User::query()
+            ->where('office_id', $selectedOfficeId)
+            ->where('role', 'employee')
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get(['id', 'name', 'office_id']);
+
         return view('supervisor.uwp', compact(
             'offices',
+            'officeEmployees',
             'periods',
             'uwp',
             'status',
