@@ -43,17 +43,6 @@ class TeamTasksController extends Controller
             $entriesQuery->where('employee_id', (int) $employeeId);
         }
 
-        $dateFrom = $request->query('date_from');
-        $dateTo = $request->query('date_to');
-        if (!empty($dateFrom) && !empty($dateTo)) {
-            $entriesQuery->whereBetween('work_date', [$dateFrom, $dateTo]);
-        } else {
-            $workDate = $request->query('work_date');
-            if (!empty($workDate)) {
-                $entriesQuery->whereDate('work_date', $workDate);
-            }
-        }
-
         $entries = $entriesQuery->paginate(15)->withQueryString();
 
         return view('supervisor.team-tasks', compact('entries', 'teamEmployees'));
