@@ -615,7 +615,7 @@
                 return code || '--';
             }
 
-            const tasksFromDb = Array.isArray(dbTasksRaw) && dbTasksRaw.length
+            const tasksFromDb = Array.isArray(dbTasksRaw)
                 ? dbTasksRaw.map((entry) => {
                     const rawState = String(entry?.state || 'draft').toLowerCase();
                     const state = rawState === 'validated' ? 'locked' : rawState;
@@ -651,7 +651,7 @@
                 })
                 : [];
 
-            let tasks = tasksFromDb.length ? tasksFromDb : demoTasks;
+            let tasks = Array.isArray(tasksFromDb) ? tasksFromDb : [];
 
             const TASK_DEFAULTS = {
                 output_state: 'none',
