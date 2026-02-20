@@ -214,7 +214,7 @@
                 @endif
                 <a href="{{ route('employee.mpor.export.excel') }}"
                     class="flex-1 rounded-lg border border-slate-700 px-4 py-2 text-center text-xs text-slate-300 hover:bg-slate-800 md:flex-none">
-                    Export PDF
+                    Export
                 </a>
             </div>
         </div>

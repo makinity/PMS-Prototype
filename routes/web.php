@@ -26,7 +26,7 @@ use App\Http\Controllers\StageTwo\Monitoring\OrsMonitoringController;
 use App\Http\Controllers\StageTwo\Monitoring\TeamTasksController;
 use App\Http\Controllers\StageTwo\Mpor\MporController;
 use App\Http\Controllers\StageTwo\Planning\DeptHeadQarController;
-use App\Http\Controllers\StageTwo\Planning\MporExcelExportController;
+use App\Http\Controllers\StageTwo\Forms\MporExcelExportController;
 use App\Http\Controllers\StageTwo\Planning\MporSubmissionController;
 use App\Http\Controllers\StageTwo\Planning\PmtQarApprovalController;
 use App\Http\Controllers\StageTwo\Planning\SupervisorMporEndorseController;

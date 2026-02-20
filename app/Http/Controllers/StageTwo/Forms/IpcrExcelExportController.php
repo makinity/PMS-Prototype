@@ -4,6 +4,10 @@ namespace App\Http\Controllers\StageTwo\Forms;
 
 use App\Exports\StageTwo\IpcrExcelExport;
 use App\Http\Controllers\Controller;
+use App\Models\Ipcr;
+use App\Models\OrsEntry;
+use App\Models\PerformancePeriod;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
@@ -12,10 +16,11 @@ class IpcrExcelExportController extends Controller
 {
     public function exportExcel(Request $request)
     {
-        $ipcr = $this->buildIpcr();
-        $standards = $this->getStandardsSeedMap();
-        $valuesByIndicator = $this->buildValuesByIndicator();
-        $meta = $this->buildMeta();
+        $ipcrModel = $this->resolveEmployeeIpcr($request);
+        $ipcr = $this->buildIpcr($ipcrModel);
+        $standards = $this->buildStandardsFromIpcrOrFail($ipcrModel);
+        $valuesByIndicator = $this->buildValuesByIndicator($ipcrModel);
+        $meta = $this->buildMeta($request, $ipcrModel);
 
         return Excel::download(
             new IpcrExcelExport($ipcr, $standards, $valuesByIndicator),
@@ -25,10 +30,11 @@ class IpcrExcelExportController extends Controller
 
     public function previewExcel(Request $request)
     {
-        $ipcr = $this->buildIpcr();
-        $standards = $this->getStandardsSeedMap();
-        $valuesByIndicator = $this->buildValuesByIndicator();
-        $meta = $this->buildMeta();
+        $ipcrModel = $this->resolveEmployeeIpcr($request);
+        $ipcr = $this->buildIpcr($ipcrModel);
+        $standards = $this->buildStandardsFromIpcrOrFail($ipcrModel);
+        $valuesByIndicator = $this->buildValuesByIndicator($ipcrModel);
+        $meta = $this->buildMeta($request, $ipcrModel);
 
         return Excel::download(
             new IpcrExcelExport($ipcr, $standards, $valuesByIndicator),
@@ -36,145 +42,322 @@ class IpcrExcelExportController extends Controller
         );
     }
 
-    private function buildMeta(): array
+    private function buildMeta(Request $request, Ipcr $ipcr): array
     {
+        $user = $request->user();
+        $office = (string) ($ipcr->office?->name ?? $user?->office?->name ?? 'Office');
+
+        $periodLabel = 'Period';
+        if ($ipcr->performancePeriod) {
+            $periodName = trim((string) ($ipcr->performancePeriod->name ?? ''));
+            if ($periodName !== '') {
+                $periodLabel = $periodName;
+            } elseif ($ipcr->performancePeriod->start_date && $ipcr->performancePeriod->end_date) {
+                $start = Carbon::parse($ipcr->performancePeriod->start_date)->format('M d, Y');
+                $end = Carbon::parse($ipcr->performancePeriod->end_date)->format('M d, Y');
+                $periodLabel = "{$start} - {$end}";
+            }
+        }
+
         return [
-            'office' => 'Revenue Collection Unit',
-            'period' => 'Jan-Jun 2026',
+            'employee' => (string) ($ipcr->employee?->name ?? $user?->name ?? 'Employee'),
+            'office' => $office,
+            'period' => $periodLabel,
         ];
     }
 
-    private function buildIpcr(): array
+    private function buildIpcr(Ipcr $ipcr): array
     {
+        $sections = [
+            'core' => [],
+            'support' => [],
+        ];
+
+        foreach ($ipcr->items as $item) {
+            $output = trim((string) ($item->output_title ?? ''));
+            $indicator = trim((string) ($item->indicator_text ?? ''));
+            if ($output === '' || $indicator === '') {
+                continue;
+            }
+
+            $functionType = strtolower(trim((string) ($item->function_type ?? '')));
+            $section = str_contains($functionType, 'support') ? 'support' : 'core';
+
+            if (!isset($sections[$section][$output])) {
+                $sections[$section][$output] = [
+                    'output' => $output,
+                    'indicators' => [],
+                ];
+            }
+
+            if (!in_array($indicator, $sections[$section][$output]['indicators'], true)) {
+                $sections[$section][$output]['indicators'][] = $indicator;
+            }
+        }
+
         return [
-            'core' => [
-                [
-                    'output' => 'E-Bank Scanning and Encoding of Revenue Transactions',
-                    'indicators' => [
-                        'All e-bank transactions scanned and encoded daily',
-                        'Indexing complete with no missing pages',
-                        'Audit trail maintained within 24 hours',
-                    ],
-                ],
-                [
-                    'output' => 'Processing of Over-the-Counter Revenue Transactions',
-                    'indicators' => [
-                        'Same-day verification of OTC transactions',
-                        '95% encoded within the business day',
-                        'OR validation completed daily',
-                    ],
-                ],
-            ],
-            'support' => [
-                [
-                    'output' => 'Maintenance of Revenue Records Filing System',
-                    'indicators' => [
-                        'Weekly filing updated and retrievable',
-                        'Digital backups synced monthly',
-                        'Retrieval logs maintained for audits',
-                    ],
-                ],
-            ],
+            'core' => array_values($sections['core']),
+            'support' => array_values($sections['support']),
         ];
     }
 
-    private function buildValuesByIndicator(): array
+    private function buildValuesByIndicator(Ipcr $ipcr): array
     {
-        // Only 2 logged ORS tasks in demo period.
-        return [
-            'All e-bank transactions scanned and encoded daily' => [
-                'accomplishment' => 'Completed 1 output(s) for the period based on submitted MPOR totals.',
-                'q' => 5,
-                'e' => 5,
-                't' => 5,
-                'remarks' => 'Derived from ORS log 1/2; rated by supervisor.',
-            ],
-            'Same-day verification of OTC transactions' => [
-                'accomplishment' => 'Completed 12 output(s) for the period based on submitted MPOR totals.',
-                'q' => 5,
-                'e' => 5,
-                't' => 5,
-                'remarks' => 'Derived from ORS log 2/2; rated by supervisor.',
-            ],
-        ];
+        [$startDate, $endDate] = $this->resolvePeriodWindow($ipcr);
+
+        $entries = OrsEntry::query()
+            ->with([
+                'ipcrItem:id,output_title,function_type,indicator_text',
+                'monitoring:ors_entry_id,quality_rating,timeliness_rating,supervisor_id',
+            ])
+            ->where('employee_id', $ipcr->employee_id)
+            ->where('ipcr_id', $ipcr->id)
+            ->where('status', 'rated')
+            ->whereBetween('work_date', [$startDate->toDateString(), $endDate->toDateString()])
+            ->whereHas('monitoring', function ($q) {
+                $q->whereNotNull('quality_rating')
+                    ->whereNotNull('timeliness_rating');
+            })
+            ->orderBy('work_date')
+            ->get();
+
+        $aggregated = [];
+        foreach ($entries as $entry) {
+            $indicator = trim((string) data_get($entry, 'ipcrItem.indicator_text', ''));
+            if ($indicator === '') {
+                continue;
+            }
+
+            $quantity = is_numeric($entry->quantity) ? (float) $entry->quantity : 0.0;
+            if ($quantity <= 0) {
+                continue;
+            }
+
+            $qualityRating = (float) data_get($entry, 'monitoring.quality_rating', 0);
+            $timelinessRating = (float) data_get($entry, 'monitoring.timeliness_rating', 0);
+
+            if (!isset($aggregated[$indicator])) {
+                $aggregated[$indicator] = [
+                    'total_qty' => 0.0,
+                    'sum_q_points' => 0.0,
+                    'sum_t_points' => 0.0,
+                ];
+            }
+
+            $aggregated[$indicator]['total_qty'] += $quantity;
+            $aggregated[$indicator]['sum_q_points'] += ($quantity * $qualityRating);
+            $aggregated[$indicator]['sum_t_points'] += ($quantity * $timelinessRating);
+        }
+
+        $valuesByIndicator = [];
+        foreach ($aggregated as $indicator => $totals) {
+            $totalQty = (float) ($totals['total_qty'] ?? 0.0);
+            if ($totalQty <= 0) {
+                continue;
+            }
+
+            $q = round(((float) $totals['sum_q_points']) / $totalQty, 2);
+            $t = round(((float) $totals['sum_t_points']) / $totalQty, 2);
+
+            $valuesByIndicator[$indicator] = [
+                'accomplishment' => 'Completed ' . $this->formatQuantity($totalQty) . ' output(s) for the period based on rated ORS totals.',
+                'q' => $q,
+                'e' => $q,
+                't' => $t,
+                'remarks' => 'Derived from rated ORS entries; supervisor ratings applied (Stage II).',
+            ];
+        }
+
+        return $valuesByIndicator;
+    }
+
+    private function buildStandardsFromIpcrOrFail(Ipcr $ipcr): array
+    {
+        $allIndicators = [];
+        foreach ($ipcr->items as $item) {
+            $indicator = trim((string) ($item->indicator_text ?? ''));
+            if ($indicator !== '') {
+                $allIndicators[$indicator] = true;
+            }
+        }
+
+        $standards = [];
+
+        foreach ($ipcr->items as $item) {
+            $indicator = trim((string) ($item->indicator_text ?? ''));
+            if ($indicator === '' || isset($standards[$indicator])) {
+                continue;
+            }
+
+            $rawPayload = $item->standards_payload;
+            $payload = null;
+
+            if (is_string($rawPayload)) {
+                $decoded = json_decode($rawPayload, true);
+                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                    $payload = $decoded;
+                }
+            } elseif (is_array($rawPayload)) {
+                $payload = $rawPayload;
+            }
+
+            if (!is_array($payload) || empty($payload)) {
+                continue;
+            }
+
+            $normalized = [];
+            foreach ([5, 4, 3, 2, 1] as $rating) {
+                $bucket = $payload[(string) $rating] ?? $payload[$rating] ?? [];
+                if (!is_array($bucket)) {
+                    $bucket = [];
+                }
+
+                $bucketUpper = [];
+                foreach ($bucket as $key => $value) {
+                    $bucketUpper[strtoupper((string) $key)] = $value;
+                }
+
+                $normalized[$rating] = [
+                    'q' => $this->normalizeStandardsDimension($bucketUpper['Q'] ?? null),
+                    'e' => $this->normalizeStandardsDimension($bucketUpper['E'] ?? null),
+                    't' => $this->normalizeStandardsDimension($bucketUpper['T'] ?? null),
+                ];
+            }
+
+            $standards[$indicator] = $normalized;
+        }
+
+        $missingIndicators = [];
+        foreach (array_keys($allIndicators) as $indicator) {
+            if (!isset($standards[$indicator])) {
+                $missingIndicators[] = $indicator;
+            }
+        }
+
+        if (!empty($missingIndicators)) {
+            abort(422, 'IPCR export requires standards_payload for all indicators. Missing/invalid for: ' . implode(', ', $missingIndicators));
+        }
+
+        if (empty($standards)) {
+            abort(422, 'IPCR export requires standards_payload for all indicators. Missing/invalid for: (no indicators)');
+        }
+
+        return $standards;
+    }
+
+    private function normalizeStandardsDimension(mixed $value): array
+    {
+        if (is_array($value)) {
+            return array_values(array_filter(array_map(
+                fn ($v) => trim((string) $v),
+                $value
+            ), fn ($v) => $v !== ''));
+        }
+
+        $text = trim((string) $value);
+        if ($text === '') {
+            return [];
+        }
+
+        return [$text];
     }
 
     private function buildFilename(array $meta, bool $preview): string
     {
+        $employee = Str::slug((string) ($meta['employee'] ?? 'Employee'), '_');
         $office = Str::slug((string) ($meta['office'] ?? 'Office'), '_');
         $period = Str::slug((string) ($meta['period'] ?? 'Period'), '_');
         $suffix = $preview ? '_Preview' : '';
 
-        return "IPCR_Ramon_Reyes_{$office}_{$period}{$suffix}.xlsx";
+        return "IPCR_{$employee}_{$office}_{$period}{$suffix}.xlsx";
     }
 
-    protected function getStandardsSeedMap(): array
+    private function resolveEmployeeIpcr(Request $request): Ipcr
     {
-        return [
-            'All e-bank transactions scanned and encoded daily' => [
-                5 => ['q' => ['No errors; accurate encoding'], 'e' => ['100% processed'], 't' => ['Same working day']],
-                4 => ['q' => ['Minor errors'], 'e' => ['100% processed'], 't' => ['Same working day']],
-                3 => ['q' => ['Few minor errors'], 'e' => ['95-99% processed'], 't' => ['End of working day']],
-                2 => ['q' => ['Multiple errors'], 'e' => ['<95% processed'], 't' => ['Beyond working day']],
-                1 => ['q' => ['Major errors/missing'], 'e' => ['Majority unprocessed'], 't' => ['Not within acceptable time']],
-            ],
-            'Indexing complete with no missing pages' => [
-                5 => ['q' => ['Indexing fully verified, zero gaps'], 'e' => ['100% pages indexed'], 't' => ['Same day']],
-                4 => ['q' => ['Indexing minor rechecks'], 'e' => ['100% pages indexed'], 't' => ['Same day']],
-                3 => ['q' => ['Occasional missing indexes fixed'], 'e' => ['95-99% indexed'], 't' => ['Within 24 hours']],
-                2 => ['q' => ['Frequent missing pages'], 'e' => ['<95% indexed'], 't' => ['Beyond 24 hours']],
-                1 => ['q' => ['Indexing largely incomplete'], 'e' => ['Major gaps'], 't' => ['Unacceptable']],
-            ],
-            'Audit trail maintained within 24 hours' => [
-                5 => ['q' => ['Complete trail, no errors'], 'e' => ['100% entries captured'], 't' => ['Within 24 hours']],
-                4 => ['q' => ['Minor corrections only'], 'e' => ['100% entries captured'], 't' => ['Within 24 hours']],
-                3 => ['q' => ['Some gaps corrected'], 'e' => ['95-99% entries captured'], 't' => ['Within 48 hours']],
-                2 => ['q' => ['Multiple missing logs'], 'e' => ['<95% captured'], 't' => ['Beyond 48 hours']],
-                1 => ['q' => ['Trail missing'], 'e' => ['Majority uncaptured'], 't' => ['Unacceptable']],
-            ],
-            'Same-day verification of OTC transactions' => [
-                5 => ['q' => ['Verified without discrepancies'], 'e' => ['100% OTC verified'], 't' => ['Same working day']],
-                4 => ['q' => ['Minor verifications pending'], 'e' => ['100% OTC verified'], 't' => ['Same working day']],
-                3 => ['q' => ['Few pending verifications'], 'e' => ['95-99% verified'], 't' => ['End of working day']],
-                2 => ['q' => ['Several unverified'], 'e' => ['<95% verified'], 't' => ['Beyond working day']],
-                1 => ['q' => ['Verification not done'], 'e' => ['Majority unverified'], 't' => ['Unacceptable']],
-            ],
-            '95% encoded within the business day' => [
-                5 => ['q' => ['Encodings error-free'], 'e' => ['100% encoded'], 't' => ['Same business day']],
-                4 => ['q' => ['Minor corrections'], 'e' => ['100% encoded'], 't' => ['Same business day']],
-                3 => ['q' => ['Few delays'], 'e' => ['95-99% encoded'], 't' => ['By end of day']],
-                2 => ['q' => ['Multiple delays'], 'e' => ['<95% encoded'], 't' => ['Next day']],
-                1 => ['q' => ['Encoding largely incomplete'], 'e' => ['Major backlog'], 't' => ['Unacceptable']],
-            ],
-            'OR validation completed daily' => [
-                5 => ['q' => ['All ORs validated error-free'], 'e' => ['100% validated'], 't' => ['Daily']],
-                4 => ['q' => ['Minor issues corrected same day'], 'e' => ['100% validated'], 't' => ['Daily']],
-                3 => ['q' => ['Some validations late'], 'e' => ['95-99% validated'], 't' => ['Within 48 hours']],
-                2 => ['q' => ['Frequent late validations'], 'e' => ['<95% validated'], 't' => ['Beyond 48 hours']],
-                1 => ['q' => ['Validations mostly missing'], 'e' => ['Majority unvalidated'], 't' => ['Unacceptable']],
-            ],
-            'Weekly filing updated and retrievable' => [
-                5 => ['q' => ['Zero retrieval issues'], 'e' => ['100% weekly updates'], 't' => ['Within week']],
-                4 => ['q' => ['Minor retrieval fixes'], 'e' => ['100% weekly updates'], 't' => ['Within week']],
-                3 => ['q' => ['Some items late'], 'e' => ['95-99% updates'], 't' => ['Within next week']],
-                2 => ['q' => ['Many late updates'], 'e' => ['<95% updates'], 't' => ['Beyond next week']],
-                1 => ['q' => ['Updates not done'], 'e' => ['Major gaps'], 't' => ['Unacceptable']],
-            ],
-            'Digital backups synced monthly' => [
-                5 => ['q' => ['Backups verified'], 'e' => ['100% synced'], 't' => ['Within month']],
-                4 => ['q' => ['Minor sync corrections'], 'e' => ['100% synced'], 't' => ['Within month']],
-                3 => ['q' => ['Some delays'], 'e' => ['95-99% synced'], 't' => ['Within following week']],
-                2 => ['q' => ['Frequent delays'], 'e' => ['<95% synced'], 't' => ['Beyond following week']],
-                1 => ['q' => ['Backups largely missing'], 'e' => ['Major gaps'], 't' => ['Unacceptable']],
-            ],
-            'Retrieval logs maintained for audits' => [
-                5 => ['q' => ['Logs complete and audit-ready'], 'e' => ['100% requests logged'], 't' => ['Same day']],
-                4 => ['q' => ['Minor log gaps corrected'], 'e' => ['100% requests logged'], 't' => ['Same day']],
-                3 => ['q' => ['Some gaps'], 'e' => ['95-99% logged'], 't' => ['Within 48 hours']],
-                2 => ['q' => ['Many gaps'], 'e' => ['<95% logged'], 't' => ['Beyond 48 hours']],
-                1 => ['q' => ['Logs largely missing'], 'e' => ['Majority unlogged'], 't' => ['Unacceptable']],
-            ],
-        ];
-    }
-}
+        $user = $request->user();
+        abort_unless($user, 403);
 
+        $activePeriod = PerformancePeriod::query()
+            ->where('is_active', true)
+            ->orderByDesc('start_date')
+            ->first();
+
+        $query = Ipcr::query()
+            ->with([
+                'employee:id,name,office_id',
+                'office:id,name',
+                'performancePeriod:id,name,start_date,end_date',
+                'items:id,ipcr_id,output_title,function_type,indicator_text,target_summary,standards_payload',
+            ])
+            ->where('employee_id', $user->id)
+            ->whereIn('status', [Ipcr::STATUS_COMMITTED, Ipcr::STATUS_FOR_COMMITMENT]);
+
+        if ($activePeriod) {
+            $query->where('performance_period_id', $activePeriod->id);
+        }
+
+        $ipcr = $query
+            ->orderByDesc('generated_at')
+            ->orderByDesc('id')
+            ->first();
+
+        if (!$ipcr && $activePeriod) {
+            $ipcr = Ipcr::query()
+                ->with([
+                    'employee:id,name,office_id',
+                    'office:id,name',
+                    'performancePeriod:id,name,start_date,end_date',
+                    'items:id,ipcr_id,output_title,function_type,indicator_text,target_summary,standards_payload',
+                ])
+                ->where('employee_id', $user->id)
+                ->whereIn('status', [Ipcr::STATUS_COMMITTED, Ipcr::STATUS_FOR_COMMITMENT])
+                ->orderByDesc('generated_at')
+                ->orderByDesc('id')
+                ->first();
+        }
+
+        abort_if(!$ipcr, 404, 'No IPCR found for export.');
+
+        return $ipcr;
+    }
+
+    private function resolvePeriodWindow(Ipcr $ipcr): array
+    {
+        $start = $ipcr->performancePeriod?->start_date
+            ? Carbon::parse($ipcr->performancePeriod->start_date)
+            : null;
+        $end = $ipcr->performancePeriod?->end_date
+            ? Carbon::parse($ipcr->performancePeriod->end_date)
+            : null;
+
+        if (!$start || !$end) {
+            $fallback = PerformancePeriod::query()
+                ->whereKey($ipcr->performance_period_id)
+                ->orWhere('is_active', true)
+                ->orderByDesc('start_date')
+                ->first();
+
+            if ($fallback?->start_date && $fallback?->end_date) {
+                $start = Carbon::parse($fallback->start_date);
+                $end = Carbon::parse($fallback->end_date);
+            }
+        }
+
+        if (!$start || !$end) {
+            $start = now()->startOfMonth();
+            $end = now()->endOfMonth();
+        }
+
+        return [$start->copy()->startOfDay(), $end->copy()->endOfDay()];
+    }
+
+    private function formatQuantity(float $quantity): string
+    {
+        if (fmod($quantity, 1.0) === 0.0) {
+            return (string) (int) $quantity;
+        }
+
+        return rtrim(rtrim(number_format($quantity, 2, '.', ''), '0'), '.');
+    }
+
+}
