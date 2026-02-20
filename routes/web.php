@@ -34,6 +34,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\Employee\DashboardController;
+
 /*
 |--------------------------------------------------------------------------
 | Public / Auth
@@ -97,7 +99,8 @@ Route::get('/dashboard', function () {
 
 Route::prefix('employee')->middleware('auth')->group(function () {
     // Views
-    Route::get('/dashboard', fn () => view('employee.dashboard'))->name('employee.dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->name('employee.dashboard');
     Route::get('/task', [MyTasksController::class, 'index'])->name('employee.my-task');
     Route::get('/stage2/my-tasks/{orsEntry}/evidences', [MyTasksController::class, 'evidences'])
         ->name('stage2.my_tasks.evidences');
