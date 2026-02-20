@@ -30,6 +30,29 @@ class MporExcelExportController extends Controller
             'support' => [],
         ];
 
+        foreach ($ipcr->items as $item) {
+            $outputTitle = trim((string) ($item->output_title ?? ''));
+            if ($outputTitle === '') {
+                continue;
+            }
+
+            $functionType = strtolower(trim((string) ($item->function_type ?? '')));
+            $section = str_contains($functionType, 'support') ? 'support' : 'core';
+            $outputKey = $this->normalizeOutputKey($outputTitle);
+
+            if (!isset($catalog[$section][$outputKey])) {
+                $catalog[$section][$outputKey] = [
+                    'label' => $outputTitle,
+                    'weeks' => [
+                        1 => ['qty' => 0, 'q_points' => 0, 't_points' => 0],
+                        2 => ['qty' => 0, 'q_points' => 0, 't_points' => 0],
+                        3 => ['qty' => 0, 'q_points' => 0, 't_points' => 0],
+                        4 => ['qty' => 0, 'q_points' => 0, 't_points' => 0],
+                    ],
+                ];
+            }
+        }
+
         $entries = OrsEntry::query()
             ->with([
                 'ipcrItem:id,output_title,function_type',
@@ -39,29 +62,26 @@ class MporExcelExportController extends Controller
             ->where('ipcr_id', $ipcr->id)
             ->where('status', 'rated')
             ->whereBetween('work_date', [$startDate->toDateString(), $endDate->toDateString()])
-            ->whereHas('monitoring', fn ($q) => $q->whereNotNull('quality_rating')->whereNotNull('timeliness_rating'))
+            ->whereHas('monitoring', function ($q) {
+                $q->whereNotNull('quality_rating')
+                    ->whereNotNull('timeliness_rating');
+            })
+            ->where('quantity', '>', 0)
             ->orderBy('work_date')
             ->get();
 
         foreach ($entries as $entry) {
-            $output = trim((string) data_get($entry, 'ipcrItem.output_title', ''));
-            if ($output === '') {
+            $outputTitle = trim((string) data_get($entry, 'ipcrItem.output_title', ''));
+            if ($outputTitle === '') {
                 continue;
             }
 
             $functionType = strtolower(trim((string) data_get($entry, 'ipcrItem.function_type', '')));
             $section = str_contains($functionType, 'support') ? 'support' : 'core';
+            $outputKey = $this->normalizeOutputKey($outputTitle);
 
-            if (!isset($catalog[$section][$output])) {
-                $catalog[$section][$output] = [
-                    'label' => $output,
-                    'weeks' => [
-                        1 => ['qty' => 0, 'q_points' => 0, 't_points' => 0],
-                        2 => ['qty' => 0, 'q_points' => 0, 't_points' => 0],
-                        3 => ['qty' => 0, 'q_points' => 0, 't_points' => 0],
-                        4 => ['qty' => 0, 'q_points' => 0, 't_points' => 0],
-                    ],
-                ];
+            if (!isset($catalog[$section][$outputKey])) {
+                continue;
             }
 
             $day = Carbon::parse((string) $entry->work_date)->day;
@@ -75,10 +95,19 @@ class MporExcelExportController extends Controller
             $qRating = (float) data_get($entry, 'monitoring.quality_rating', 0);
             $tRating = (float) data_get($entry, 'monitoring.timeliness_rating', 0);
 
-            $catalog[$section][$output]['weeks'][$week]['qty'] += $qty;
-            $catalog[$section][$output]['weeks'][$week]['q_points'] += $qty * $qRating;
-            $catalog[$section][$output]['weeks'][$week]['t_points'] += $qty * $tRating;
+            $catalog[$section][$outputKey]['weeks'][$week]['qty'] += $qty;
+            $catalog[$section][$outputKey]['weeks'][$week]['q_points'] += $qty * $qRating;
+            $catalog[$section][$outputKey]['weeks'][$week]['t_points'] += $qty * $tRating;
         }
+
+        $catalog = [
+            'core' => array_filter($catalog['core'], function (array $row): bool {
+                return collect($row['weeks'] ?? [])->sum('qty') > 0;
+            }),
+            'support' => array_filter($catalog['support'], function (array $row): bool {
+                return collect($row['weeks'] ?? [])->sum('qty') > 0;
+            }),
+        ];
 
         $monthYear = trim((string) $request->input('month_year', ''));
         if ($monthYear === '') {
@@ -160,5 +189,12 @@ class MporExcelExportController extends Controller
         $monthYear = Str::slug((string) ($payload['month_year'] ?? 'Month_Year'), '_');
 
         return "MPOR_{$employee}_{$office}_{$monthYear}.xlsx";
+    }
+
+    private function normalizeOutputKey(string $outputTitle): string
+    {
+        return mb_strtolower(
+            trim((string) preg_replace('/\s+/', ' ', $outputTitle))
+        );
     }
 }

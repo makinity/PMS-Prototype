@@ -2,141 +2,19 @@
 
 @section('main-content')
     @php
-        $mporMonthYear = 'January 2026';
-        $employeeName = 'Ramon Reyes';
-        $officeName = 'Revenue Collection Unit';
+        /**
+         * All MPOR data must come from controller.
+         * Keep this small guard only (no hardcoded defaults, no computations).
+         */
+        $mporMonthYear = $mporMonthYear ?? now()->format('F Y');
+        $employeeName = $employeeName ?? (auth()->user()->name ?? '—');
+        $officeName = $officeName ?? (optional(auth()->user()->office)->name ?? '—');
 
-        $mporStatusKey = 'mpor_status_' . (auth()->id() ?? 'guest') . '_' . \Illuminate\Support\Str::slug($mporMonthYear, '_');
-        $mporStatus = (string) data_get(session($mporStatusKey, []), 'status', 'draft');
-        $isMporLocked = in_array($mporStatus, ['submitted', 'endorsed'], true);
+        $mporStatus = $mporStatus ?? 'draft';
+        $isMporLocked = $isMporLocked ?? in_array($mporStatus, ['submitted', 'endorsed'], true);
 
-        $orsTasks = [
-            [
-                'id' => 'task-jan-04',
-                'date' => '2026-01-04',
-                'uwpOutputId' => 'ebank_scanning',
-                'uwpOutputLabel' => 'E-Bank Scanning and Encoding of Revenue Transactions',
-                'quantityValue' => 1,
-                'quantityLabel' => '1 daily batch',
-                'state' => 'submitted',
-                'supervisorQuality' => 5,
-                'supervisorTimeliness' => 5,
-            ],
-            [
-                'id' => 'task-jan-02',
-                'date' => '2026-01-02',
-                'uwpOutputId' => 'otc_processing',
-                'uwpOutputLabel' => 'Processing of Over-the-Counter Revenue Transactions',
-                'quantityValue' => 12,
-                'quantityLabel' => '12 transactions',
-                'state' => 'submitted',
-                'supervisorQuality' => 5,
-                'supervisorTimeliness' => 5,
-            ],
-            [
-                'id' => 'task-jan-05',
-                'date' => '2026-01-05',
-                'uwpOutputId' => 'otc_processing',
-                'uwpOutputLabel' => 'Processing of Over-the-Counter Revenue Transactions',
-                'quantityValue' => 6,
-                'quantityLabel' => '6 receipts validated',
-                'state' => 'recording',
-                'supervisorQuality' => null,
-                'supervisorTimeliness' => null,
-            ],
-            [
-                'id' => 'task-jan-06',
-                'date' => '2026-01-06',
-                'uwpOutputId' => 'records_maintenance',
-                'uwpOutputLabel' => 'Maintenance of Revenue Records Filing System',
-                'quantityValue' => 0,
-                'quantityLabel' => '--',
-                'state' => 'missing',
-                'supervisorQuality' => null,
-                'supervisorTimeliness' => null,
-            ],
-            [
-                'id' => 'task-jan-08',
-                'date' => '2026-01-08',
-                'uwpOutputId' => 'records_maintenance',
-                'uwpOutputLabel' => 'Maintenance of Revenue Records Filing System',
-                'quantityValue' => 3,
-                'quantityLabel' => '3 retrieval logs',
-                'state' => 'submitted',
-                'supervisorQuality' => null,
-                'supervisorTimeliness' => null,
-            ],
-        ];
-
-        $mfoCatalog = [
-            'core' => [
-                ['id' => 'ebank_scanning', 'label' => 'E-Bank Scanning and Encoding of Revenue Transactions'],
-                ['id' => 'otc_processing', 'label' => 'Processing of Over-the-Counter Revenue Transactions'],
-            ],
-            'support' => [
-                ['id' => 'records_maintenance', 'label' => 'Maintenance of Revenue Records Filing System'],
-            ],
-        ];
-
-        $mporRows = [];
-        foreach ($mfoCatalog as $sectionKey => $items) {
-            foreach ($items as $item) {
-                $mporRows[$item['id']] = [
-                    'id' => $item['id'],
-                    'label' => $item['label'],
-                    'section' => $sectionKey,
-                    'qty' => [1 => 0, 2 => 0, 3 => 0, 4 => 0],
-                    'qual' => [1 => 0, 2 => 0, 3 => 0, 4 => 0],
-                    'time' => [1 => 0, 2 => 0, 3 => 0, 4 => 0],
-                    'qtyTotal' => 0,
-                    'qualTotal' => 0,
-                    'timeTotal' => 0,
-                ];
-            }
-        }
-
-        $includedRatedTasks = [];
-
-        foreach ($orsTasks as $task) {
-            $isIncluded = ($task['state'] ?? null) === 'submitted'
-                && is_numeric($task['supervisorQuality'] ?? null)
-                && is_numeric($task['supervisorTimeliness'] ?? null);
-
-            if (! $isIncluded) {
-                continue;
-            }
-
-            $rowId = $task['uwpOutputId'] ?? null;
-            if (! $rowId || ! isset($mporRows[$rowId])) {
-                continue;
-            }
-
-            $day = (int) \Carbon\Carbon::parse($task['date'])->format('j');
-            $week = $day <= 7 ? 1 : ($day <= 14 ? 2 : ($day <= 21 ? 3 : 4));
-
-            $qty = (float) ($task['quantityValue'] ?? 0);
-            $qualRating = (float) ($task['supervisorQuality'] ?? 0);
-            $timeRating = (float) ($task['supervisorTimeliness'] ?? 0);
-
-            $mporRows[$rowId]['qty'][$week] += $qty;
-            $mporRows[$rowId]['qual'][$week] += ($qty * $qualRating);
-            $mporRows[$rowId]['time'][$week] += ($qty * $timeRating);
-
-            $includedRatedTasks[] = $task;
-        }
-
-        foreach ($mporRows as $rowId => $row) {
-            $mporRows[$rowId]['qtyTotal'] = array_sum($row['qty']);
-            $mporRows[$rowId]['qualTotal'] = array_sum($row['qual']);
-            $mporRows[$rowId]['timeTotal'] = array_sum($row['time']);
-        }
-
-        $sectionRows = [
-            'core' => array_values(array_filter($mporRows, fn ($row) => $row['section'] === 'core')),
-            'support' => array_values(array_filter($mporRows, fn ($row) => $row['section'] === 'support')),
-        ];
-
-        $grandTotals = [
+        $sectionRows = $sectionRows ?? ['core' => [], 'support' => []];
+        $grandTotals = $grandTotals ?? [
             'qty' => [1 => 0, 2 => 0, 3 => 0, 4 => 0],
             'qual' => [1 => 0, 2 => 0, 3 => 0, 4 => 0],
             'time' => [1 => 0, 2 => 0, 3 => 0, 4 => 0],
@@ -145,22 +23,13 @@
             'timeTotal' => 0,
         ];
 
-        foreach ($mporRows as $row) {
-            foreach ([1, 2, 3, 4] as $week) {
-                $grandTotals['qty'][$week] += $row['qty'][$week];
-                $grandTotals['qual'][$week] += $row['qual'][$week];
-                $grandTotals['time'][$week] += $row['time'][$week];
-            }
-        }
-
-        $grandTotals['qtyTotal'] = array_sum($grandTotals['qty']);
-        $grandTotals['qualTotal'] = array_sum($grandTotals['qual']);
-        $grandTotals['timeTotal'] = array_sum($grandTotals['time']);
-
-        $sectionLabels = [
+        $sectionLabels = $sectionLabels ?? [
             'core' => 'Core Functions (80%)',
             'support' => 'Support Functions (20%)',
         ];
+
+        $orsTasks = $orsTasks ?? [];
+        $includedRatedTasks = $includedRatedTasks ?? [];
     @endphp
 
     <section class="space-y-6">
@@ -212,19 +81,21 @@
                         Submitted
                     </button>
                 @endif
+
                 <a href="{{ route('employee.mpor.export.excel') }}"
                     class="flex-1 rounded-lg border border-slate-700 px-4 py-2 text-center text-xs text-slate-300 hover:bg-slate-800 md:flex-none">
-                    Export
+                    Export PDF
                 </a>
             </div>
         </div>
 
+        {{-- Mobile cards --}}
         <div class="space-y-4 md:hidden">
             @foreach ($sectionLabels as $sectionKey => $sectionLabel)
                 <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                     <p class="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-slate-400">{{ $sectionLabel }}</p>
 
-                    @foreach ($sectionRows[$sectionKey] as $row)
+                    @forelse ($sectionRows[$sectionKey] ?? [] as $row)
                         <div class="mt-3 rounded-xl border border-slate-800 bg-slate-900/50 p-3">
                             <p class="text-sm font-semibold text-white">{{ $row['label'] }}</p>
                             <div class="mt-3 grid gap-3">
@@ -235,23 +106,26 @@
                                             @for ($week = 1; $week <= 4; $week++)
                                                 <div>
                                                     <p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">W{{ $week }}</p>
-                                                    <p class="text-sm font-semibold text-white">{{ number_format($row[$metricKey][$week], 0) }}</p>
+                                                    <p class="text-sm font-semibold text-white">{{ number_format(data_get($row, "{$metricKey}.{$week}", 0), 0) }}</p>
                                                 </div>
                                             @endfor
                                             <div>
                                                 <p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">Total</p>
-                                                <p class="text-sm font-semibold text-white">{{ number_format($row[$metricKey . 'Total'], 0) }}</p>
+                                                <p class="text-sm font-semibold text-white">{{ number_format(data_get($row, "{$metricKey}Total", 0), 0) }}</p>
                                             </div>
                                         </div>
                                     </div>
                                 @endforeach
                             </div>
                         </div>
-                    @endforeach
+                    @empty
+                        <p class="mt-3 text-sm text-slate-500">No entries available.</p>
+                    @endforelse
                 </div>
             @endforeach
         </div>
 
+        {{-- Desktop table --}}
         <div class="hidden md:block">
             <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
                 <div class="overflow-x-auto">
@@ -264,71 +138,88 @@
                                 <th class="border-l border-slate-800 px-3 py-3 text-center" colspan="5">Timeliness</th>
                             </tr>
                             <tr class="text-[0.6rem] uppercase tracking-[0.3em] text-slate-500">
-                                <th class="border-l border-slate-800 px-2 py-2 text-right">W1</th>
-                                <th class="px-2 py-2 text-right">W2</th>
-                                <th class="px-2 py-2 text-right">W3</th>
-                                <th class="px-2 py-2 text-right">W4</th>
-                                <th class="px-2 py-2 text-right font-semibold">Total</th>
-                                <th class="border-l border-slate-800 px-2 py-2 text-right">W1</th>
-                                <th class="px-2 py-2 text-right">W2</th>
-                                <th class="px-2 py-2 text-right">W3</th>
-                                <th class="px-2 py-2 text-right">W4</th>
-                                <th class="px-2 py-2 text-right font-semibold">Total</th>
-                                <th class="border-l border-slate-800 px-2 py-2 text-right">W1</th>
-                                <th class="px-2 py-2 text-right">W2</th>
-                                <th class="px-2 py-2 text-right">W3</th>
-                                <th class="px-2 py-2 text-right">W4</th>
-                                <th class="px-2 py-2 text-right font-semibold">Total</th>
+                                @for ($i = 0; $i < 3; $i++)
+                                    <th class="{{ $i === 0 ? 'border-l border-slate-800' : '' }} px-2 py-2 text-right">W1</th>
+                                    <th class="px-2 py-2 text-right">W2</th>
+                                    <th class="px-2 py-2 text-right">W3</th>
+                                    <th class="px-2 py-2 text-right">W4</th>
+                                    <th class="px-2 py-2 text-right font-semibold">Total</th>
+                                @endfor
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-800 text-[0.75rem]">
-                            <tr class="bg-slate-800/40 text-[0.65rem] uppercase tracking-[0.3em] text-slate-400">
-                                <td class="px-3 py-2 font-semibold text-slate-200" colspan="16">Core Functions (80%)</td>
-                            </tr>
-                            @foreach ($sectionRows['core'] as $row)
-                                <tr>
-                                    <td class="px-3 py-3 font-semibold text-white">{{ $row['label'] }}</td>
-                                    <td class="border-l border-slate-800 px-2 py-3 text-right tabular-nums">{{ number_format($row['qty'][1], 0) }}</td>
-                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format($row['qty'][2], 0) }}</td>
-                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format($row['qty'][3], 0) }}</td>
-                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format($row['qty'][4], 0) }}</td>
-                                    <td class="px-2 py-3 text-right font-semibold tabular-nums">{{ number_format($row['qtyTotal'], 0) }}</td>
-                                    <td class="border-l border-slate-800 px-2 py-3 text-right tabular-nums">{{ number_format($row['qual'][1], 0) }}</td>
-                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format($row['qual'][2], 0) }}</td>
-                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format($row['qual'][3], 0) }}</td>
-                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format($row['qual'][4], 0) }}</td>
-                                    <td class="px-2 py-3 text-right font-semibold tabular-nums">{{ number_format($row['qualTotal'], 0) }}</td>
-                                    <td class="border-l border-slate-800 px-2 py-3 text-right tabular-nums">{{ number_format($row['time'][1], 0) }}</td>
-                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format($row['time'][2], 0) }}</td>
-                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format($row['time'][3], 0) }}</td>
-                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format($row['time'][4], 0) }}</td>
-                                    <td class="px-2 py-3 text-right font-semibold tabular-nums">{{ number_format($row['timeTotal'], 0) }}</td>
-                                </tr>
-                            @endforeach
 
+                        <tbody class="divide-y divide-slate-800 text-[0.75rem]">
+                            {{-- Core --}}
                             <tr class="bg-slate-800/40 text-[0.65rem] uppercase tracking-[0.3em] text-slate-400">
-                                <td class="px-3 py-2 font-semibold text-slate-200" colspan="16">Support Functions (20%)</td>
+                                <td class="px-3 py-2 font-semibold text-slate-200" colspan="16">{{ $sectionLabels['core'] ?? 'Core Functions' }}</td>
                             </tr>
-                            @foreach ($sectionRows['support'] as $row)
+
+                            @forelse ($sectionRows['core'] ?? [] as $row)
                                 <tr>
                                     <td class="px-3 py-3 font-semibold text-white">{{ $row['label'] }}</td>
-                                    <td class="border-l border-slate-800 px-2 py-3 text-right tabular-nums">{{ number_format($row['qty'][1], 0) }}</td>
-                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format($row['qty'][2], 0) }}</td>
-                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format($row['qty'][3], 0) }}</td>
-                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format($row['qty'][4], 0) }}</td>
-                                    <td class="px-2 py-3 text-right font-semibold tabular-nums">{{ number_format($row['qtyTotal'], 0) }}</td>
-                                    <td class="border-l border-slate-800 px-2 py-3 text-right tabular-nums">{{ number_format($row['qual'][1], 0) }}</td>
-                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format($row['qual'][2], 0) }}</td>
-                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format($row['qual'][3], 0) }}</td>
-                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format($row['qual'][4], 0) }}</td>
-                                    <td class="px-2 py-3 text-right font-semibold tabular-nums">{{ number_format($row['qualTotal'], 0) }}</td>
-                                    <td class="border-l border-slate-800 px-2 py-3 text-right tabular-nums">{{ number_format($row['time'][1], 0) }}</td>
-                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format($row['time'][2], 0) }}</td>
-                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format($row['time'][3], 0) }}</td>
-                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format($row['time'][4], 0) }}</td>
-                                    <td class="px-2 py-3 text-right font-semibold tabular-nums">{{ number_format($row['timeTotal'], 0) }}</td>
+
+                                    {{-- qty --}}
+                                    <td class="border-l border-slate-800 px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qty.1', 0), 0) }}</td>
+                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qty.2', 0), 0) }}</td>
+                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qty.3', 0), 0) }}</td>
+                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qty.4', 0), 0) }}</td>
+                                    <td class="px-2 py-3 text-right font-semibold tabular-nums">{{ number_format(data_get($row, 'qtyTotal', 0), 0) }}</td>
+
+                                    {{-- qual --}}
+                                    <td class="border-l border-slate-800 px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qual.1', 0), 0) }}</td>
+                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qual.2', 0), 0) }}</td>
+                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qual.3', 0), 0) }}</td>
+                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qual.4', 0), 0) }}</td>
+                                    <td class="px-2 py-3 text-right font-semibold tabular-nums">{{ number_format(data_get($row, 'qualTotal', 0), 0) }}</td>
+
+                                    {{-- time --}}
+                                    <td class="border-l border-slate-800 px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'time.1', 0), 0) }}</td>
+                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'time.2', 0), 0) }}</td>
+                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'time.3', 0), 0) }}</td>
+                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'time.4', 0), 0) }}</td>
+                                    <td class="px-2 py-3 text-right font-semibold tabular-nums">{{ number_format(data_get($row, 'timeTotal', 0), 0) }}</td>
                                 </tr>
-                            @endforeach
+                            @empty
+                                <tr>
+                                    <td colspan="16" class="px-3 py-6 text-center text-sm text-slate-500">No core entries available.</td>
+                                </tr>
+                            @endforelse
+
+                            {{-- Support --}}
+                            <tr class="bg-slate-800/40 text-[0.65rem] uppercase tracking-[0.3em] text-slate-400">
+                                <td class="px-3 py-2 font-semibold text-slate-200" colspan="16">{{ $sectionLabels['support'] ?? 'Support Functions' }}</td>
+                            </tr>
+
+                            @forelse ($sectionRows['support'] ?? [] as $row)
+                                <tr>
+                                    <td class="px-3 py-3 font-semibold text-white">{{ $row['label'] }}</td>
+
+                                    {{-- qty --}}
+                                    <td class="border-l border-slate-800 px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qty.1', 0), 0) }}</td>
+                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qty.2', 0), 0) }}</td>
+                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qty.3', 0), 0) }}</td>
+                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qty.4', 0), 0) }}</td>
+                                    <td class="px-2 py-3 text-right font-semibold tabular-nums">{{ number_format(data_get($row, 'qtyTotal', 0), 0) }}</td>
+
+                                    {{-- qual --}}
+                                    <td class="border-l border-slate-800 px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qual.1', 0), 0) }}</td>
+                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qual.2', 0), 0) }}</td>
+                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qual.3', 0), 0) }}</td>
+                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qual.4', 0), 0) }}</td>
+                                    <td class="px-2 py-3 text-right font-semibold tabular-nums">{{ number_format(data_get($row, 'qualTotal', 0), 0) }}</td>
+
+                                    {{-- time --}}
+                                    <td class="border-l border-slate-800 px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'time.1', 0), 0) }}</td>
+                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'time.2', 0), 0) }}</td>
+                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'time.3', 0), 0) }}</td>
+                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'time.4', 0), 0) }}</td>
+                                    <td class="px-2 py-3 text-right font-semibold tabular-nums">{{ number_format(data_get($row, 'timeTotal', 0), 0) }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="16" class="px-3 py-6 text-center text-sm text-slate-500">No support entries available.</td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
@@ -336,7 +227,7 @@
         </div>
 
         <p class="mt-3 text-xs text-slate-400">
-            Stage II demo: MPOR points = Quantity &times; Supervisor Rating (Q/T). Only submitted ORS entries with supervisor ratings are included.
+            Stage II demo: MPOR points = Quantity &times; Supervisor Rating (Q/T). Only rated ORS entries with supervisor ratings are included.
         </p>
 
         <div class="grid gap-4 lg:grid-cols-2">
@@ -345,11 +236,11 @@
                     <span>Week 1</span><span>Week 2</span><span>Week 3</span><span>Week 4</span><span>Total</span>
                 </div>
                 <div class="mt-2 grid grid-cols-5 text-center text-sm font-semibold text-white">
-                    <span>{{ number_format($grandTotals['qty'][1], 0) }}</span>
-                    <span>{{ number_format($grandTotals['qty'][2], 0) }}</span>
-                    <span>{{ number_format($grandTotals['qty'][3], 0) }}</span>
-                    <span>{{ number_format($grandTotals['qty'][4], 0) }}</span>
-                    <span>{{ number_format($grandTotals['qtyTotal'], 0) }}</span>
+                    <span>{{ number_format(data_get($grandTotals, 'qty.1', 0), 0) }}</span>
+                    <span>{{ number_format(data_get($grandTotals, 'qty.2', 0), 0) }}</span>
+                    <span>{{ number_format(data_get($grandTotals, 'qty.3', 0), 0) }}</span>
+                    <span>{{ number_format(data_get($grandTotals, 'qty.4', 0), 0) }}</span>
+                    <span>{{ number_format(data_get($grandTotals, 'qtyTotal', 0), 0) }}</span>
                 </div>
                 <div class="my-5 border-t border-slate-700/70"></div>
                 <div class="mt-3 space-y-2 text-[0.65rem] tracking-[0.2em] text-slate-500">
@@ -359,7 +250,7 @@
                     </div>
                     <div class="flex items-center justify-between gap-3">
                         <span class="min-w-0">Excluded entries (unrated/draft/missing)</span>
-                        <span class="shrink-0 font-semibold text-white">{{ count($orsTasks) - count($includedRatedTasks) }}</span>
+                        <span class="shrink-0 font-semibold text-white">{{ max(count($orsTasks) - count($includedRatedTasks), 0) }}</span>
                     </div>
                 </div>
             </div>
