@@ -76,9 +76,16 @@ class OrsMonitoringController extends Controller
                 'quality_rating' => (int) $validated['quality_rating'],
                 'timeliness_rating' => (int) $validated['timeliness_rating'],
                 'remarks' => $validated['remarks'] ?? null,
+
                 'rated_at' => now(),
             ]
         );
+
+        if ($orsEntry->status === 'submitted') {
+            $orsEntry->update([
+                'status' => 'rated',
+            ]);
+        }
 
         return back()->with('success', 'Rating saved successfully.');
     }
