@@ -36,6 +36,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Employee\DashboardController as EmployeeDashboardController;
 use App\Http\Controllers\Supervisor\DashboardController as SupervisorDashboardController;
+use App\Http\Controllers\Supervisor\MporController as SupervisorMporController;
 
 /*
 |--------------------------------------------------------------------------
@@ -152,8 +153,10 @@ Route::prefix('employee')->middleware('auth')->group(function () {
         ->name('stage2.smpor.preview.excel');
 
     // Exports - ORS PDF
-    Route::get('/ors/export/pdf', [OrsExportController::class, 'exportPdf'])
+    Route::get('/ors/export/pdf', [OrsExportController::class, 'preview'])
         ->name('employee.ors.export.pdf');
+    Route::get('/ors/export/pdf/download', [OrsExportController::class, 'exportPdf'])
+        ->name('employee.ors.export.pdf.download');
 
     // Exports - MPOR Excel
     Route::get('/mpor/export/excel', [MporExcelExportController::class, 'exportExcel'])
@@ -234,6 +237,7 @@ Route::prefix('supervisor')->middleware('auth')->group(function () {
     Route::get('/smpor-ipcr-review', fn () => view('supervisor.smpor-ipcr-review'))->name('supervisor.smpor-ipcr-review');
     Route::get('/ipcr-target', fn () => view('supervisor.ipcr-target'))->name('supervisor.ipcr-target');
 
+
     Route::get('/mpor-validation', fn () => view('supervisor.mpor-validation'))->name('supervisor.mpor-validation');
     Route::get('/ors-monitoring', [OrsMonitoringController::class, 'index'])->name('supervisor.ors-monitoring');
     Route::post('/ors-monitoring/{orsEntry}/monitor', [OrsMonitoringController::class, 'store'])->name('supervisor.ors-monitoring.store');
@@ -277,10 +281,10 @@ Route::prefix('supervisor')->middleware('auth')->group(function () {
     Route::post('/stage-one/planning/opcr/{opcr}/submit', [SuperVisorOpcrController::class, 'submit'])->name('stage1.opcr.submit');
 
     // Stage II - MPOR Review
-    Route::get('/mpor', [MporController::class, 'supervisorIndex'])->name('supervisor.mpor');
-    Route::get('/mpor/index', [MporController::class, 'supervisorIndex'])->name('supervisor.mpor.index');
-    Route::post('/mpor/{mpor}/approve', [SupervisorMporEndorseController::class, 'approve'])->name('supervisor.mpor.approve');
-    Route::post('/mpor/{mpor}/endorse', [SupervisorMporEndorseController::class, 'endorse'])->name('supervisor.mpor.endorse');
+    Route::get('/mpoSr', [SupervisorMporController::class, 'index'])->name('supervisor.mpor');
+    Route::get('/mpor/index', [SupervisorMporController::class, 'index'])->name('supervisor.mpor');
+    Route::post('/mpor/{mpor}/approve', [SupervisorMporController::class, 'approve'])->name('supervisor.mpor.approve');
+    Route::post('/mpor/{mpor}/endorse', [SupervisorMporController::class, 'endorse'])->name('supervisor.mpor.endorse');
 
     // Exports - OPCR
     Route::get('/opcr/export/pdf', [OpcrExportController::class, 'exportPdf'])

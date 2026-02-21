@@ -57,7 +57,6 @@
         <strong>Matti, Digos City</strong>
         <div class="office">PROVINCIAL HUMAN RESOURCE MANAGEMENT OFFICE</div>
         <div class="sheet-title">OUTPUT RATING SHEET</div>
-        <div class="muted">(Stage II – Monitoring Copy | Demo)</div>
     </div>
 
     <table>
@@ -103,9 +102,6 @@
             </tr>
         </table>
 
-        <div class="small-note">
-            Demo rule: Quantity is employee-declared (locked). Quality & Timeliness default to 5 for export preview.
-        </div>
     </div>
 
     <div class="remarks-block">
@@ -132,9 +128,6 @@
             </tr>
         </table>
 
-        <div class="small-note">
-            System-generated ORS copy for Stage II (Monitoring). Read-only export aligned to demo dummy data.
-        </div>
     </div>
 
 </body>

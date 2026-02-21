@@ -1,14 +1,6 @@
 @extends('layouts.supervisor')
 
 @section('main-content')
-    @php
-        try {
-            $monthLabel = \Carbon\Carbon::createFromFormat('Y-m', $month)->format('F Y');
-        } catch (\Throwable $e) {
-            $monthLabel = $month;
-        }
-    @endphp
-
     <section class="space-y-6">
         <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-lg">
             <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
@@ -79,17 +71,10 @@
                 No MPOR found for the selected employee and month.
             </div>
         @else
-            @php
-                $officeLabel = $mpor->employee?->office?->name;
-                if (!$officeLabel) {
-                    $officeLabel = $mpor->employee?->office_id ? ('Office #' . $mpor->employee?->office_id) : 'Unassigned Office';
-                }
-            @endphp
-
             <div class="grid grid-cols-1 gap-4 lg:grid-cols-4">
                 <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
                     <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Employee</p>
-                    <p class="mt-2 text-lg font-semibold text-white">{{ $mpor->employee?->name ?? '—' }}</p>
+                    <p class="mt-2 text-lg font-semibold text-white">{{ $mpor->employee?->name ?? 'â€”' }}</p>
                 </div>
                 <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
                     <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Office / Division</p>
@@ -120,11 +105,15 @@
                 </div>
                 <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
                     <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Avg Quality</p>
-                    <p class="mt-2 text-lg font-semibold text-white">{{ is_null($summary['avg_quality']) ? '--' : number_format((float) $summary['avg_quality'], 2) }}</p>
+                    <p class="mt-2 text-lg font-semibold text-white">
+                        {{ is_null($summary['avg_quality']) ? '--' : number_format((float) $summary['avg_quality'], 2) }}
+                    </p>
                 </div>
                 <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
                     <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Avg Timeliness</p>
-                    <p class="mt-2 text-lg font-semibold text-white">{{ is_null($summary['avg_timeliness']) ? '--' : number_format((float) $summary['avg_timeliness'], 2) }}</p>
+                    <p class="mt-2 text-lg font-semibold text-white">
+                        {{ is_null($summary['avg_timeliness']) ? '--' : number_format((float) $summary['avg_timeliness'], 2) }}
+                    </p>
                 </div>
             </div>
 
@@ -148,16 +137,13 @@
                         </thead>
                         <tbody class="divide-y divide-slate-800 text-slate-200">
                             @forelse ($attachedEntries as $entry)
-                                @php
-                                    $taskText = ($entry->ipcrItem->output_title ?? '—') . ' — ' . ($entry->ipcrItem->indicator_text ?? '');
-                                @endphp
                                 <tr class="hover:bg-slate-800/40">
-                                    <td class="px-3 py-2 align-top">{{ optional($entry->work_date)->format('M d, Y') ?? $entry->work_date ?? '—' }}</td>
-                                    <td class="px-3 py-2 align-top text-slate-100">{{ $taskText }}</td>
-                                    <td class="px-3 py-2 align-top">{{ $entry->quantity ?? '—' }}</td>
-                                    <td class="px-3 py-2 align-top">{{ $entry->monitoring->quality_rating ?? '--' }}</td>
-                                    <td class="px-3 py-2 align-top">{{ $entry->monitoring->timeliness_rating ?? '--' }}</td>
-                                    <td class="px-3 py-2 align-top">{{ $entry->evidences_count ?? 0 }}</td>
+                                    <td class="px-3 py-2 align-top">{{ $entry['work_date_label'] }}</td>
+                                    <td class="px-3 py-2 align-top text-slate-100">{{ $entry['task_text'] }}</td>
+                                    <td class="px-3 py-2 align-top">{{ $entry['quantity_label'] }}</td>
+                                    <td class="px-3 py-2 align-top">{{ $entry['quality_label'] }}</td>
+                                    <td class="px-3 py-2 align-top">{{ $entry['timeliness_label'] }}</td>
+                                    <td class="px-3 py-2 align-top">{{ $entry['evidence_count'] }}</td>
                                 </tr>
                             @empty
                                 <tr>

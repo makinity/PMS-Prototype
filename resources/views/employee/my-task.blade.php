@@ -189,11 +189,11 @@
                             class="rounded-lg border border-gray-600 px-4 py-2 text-sm font-medium text-gray-200 transition hover:bg-gray-800">
                             Close
                         </button>
-                        <a href="{{ route('employee.ors.export.pdf') }}" id="exportOrsBtn"
+                        <a href="{{ route('employee.ors.export.pdf') }}"
+                            id="exportOrsBtn"
                             title="Export available only after supervisor validation"
-                            class="pointer-events-none cursor-not-allowed rounded-lg border border-gray-600 px-4 py-2 text-sm font-medium text-gray-200 opacity-50"
-                            aria-disabled="true">
-                            Export ORS
+                            class="rounded-lg border border-gray-600 px-4 py-2 text-sm font-medium text-gray-200 opacity-50 cursor-not-allowed pointer-events-none">
+                                Preview
                         </a>
                         <a href="{{ route('employee.ors') }}"
                             class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-500">
@@ -281,6 +281,7 @@
             (function () {
                 const rawTasks = @json($orsEntries ?? []);
                 const evidencesEndpointTemplate = @json(route('stage2.my_tasks.evidences', ['orsEntry' => '__ENTRY__']));
+                const exportOrsBaseUrl = @json(route('employee.ors.export.pdf'));
 
                 function outputTypeLabel(code) {
                     const key = String(code || '').trim().toLowerCase();
@@ -342,6 +343,7 @@
                 const modal = document.getElementById('task-view-modal');
                 const closeTopBtn = document.getElementById('closeTaskViewTop');
                 const closeBottomBtn = document.getElementById('closeTaskViewBottom');
+                const exportOrsBtn = document.getElementById('exportOrsBtn');
                 const viewEvidenceBtn = document.getElementById('mvViewEvidenceBtn');
 
                 const evidenceModal = document.getElementById('evidence-preview-modal');
@@ -607,6 +609,36 @@
                     if (fields.supRemarks) fields.supRemarks.textContent = '--';
                 }
 
+                function setExportButton(task) {
+                    if (!exportOrsBtn) return;
+
+                    const canExport = Boolean(
+                        task &&
+                        task.id &&
+                        (
+                            String(task.state || '').toLowerCase() === 'rated' ||
+                            task?.monitoring?.rated_at
+                        )
+                    );
+
+                    if (!canExport) {
+                        exportOrsBtn.classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none', 'border-gray-600', 'text-gray-200');
+                        exportOrsBtn.classList.remove('border-emerald-600', 'bg-emerald-600', 'text-white', 'hover:bg-emerald-500');
+                        exportOrsBtn.href = '#';
+                        exportOrsBtn.title = 'Export available only after supervisor validation';
+                        exportOrsBtn.removeAttribute('target');
+                        exportOrsBtn.removeAttribute('rel');
+                        return;
+                    }
+
+                    exportOrsBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none', 'border-gray-600', 'text-gray-200');
+                    exportOrsBtn.classList.add('border-emerald-600', 'bg-emerald-600', 'text-white', 'hover:bg-emerald-500');
+                    exportOrsBtn.href = `${exportOrsBaseUrl}?ors_entry_id=${encodeURIComponent(task.id)}`;
+                    exportOrsBtn.title = 'Export ORS (PDF)';
+                    exportOrsBtn.setAttribute('target', '_blank');
+                    exportOrsBtn.setAttribute('rel', 'noopener');
+                }
+
                 function openTaskViewModal(taskId) {
                     const task = tasks.find((item) => item.id === taskId);
                     if (!task || !modal) return;
@@ -652,6 +684,7 @@
                         if (fields.supTimeliness) fields.supTimeliness.textContent = mon.timeliness_rating ? String(mon.timeliness_rating) : '--';
                         if (fields.supRemarks) fields.supRemarks.textContent = (mon.remarks && String(mon.remarks).trim()) ? mon.remarks : '--';
                     }
+                    setExportButton(task);
 
                     modal.classList.remove('hidden');
                     modal.classList.add('flex');
@@ -671,6 +704,7 @@
                         delete viewEvidenceBtn.dataset.entryId;
                         viewEvidenceBtn.onclick = null;
                     }
+                    setExportButton(null);
                     modal.classList.add('hidden');
                     modal.classList.remove('flex');
                     updateBodyScrollLock();
@@ -964,6 +998,7 @@
                     }
                 });
 
+                setExportButton(null);
                 renderRows();
             })();
         </script>
