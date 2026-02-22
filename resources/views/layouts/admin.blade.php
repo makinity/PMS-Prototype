@@ -23,6 +23,7 @@
         @php
             $isAdminDashboard = request()->routeIs('admin.dashboard');
             $isAdminPRF = request()->routeIs('admin.performance-period');
+            $isAdminOffice = request()->routeIs('admin.office');
             $isAdminUsers = request()->routeIs('admin.users');
             $isAdminRoles = request()->routeIs('admin.roles');
             $isAdminOPCR = request()->routeIs('admin.opcr');
@@ -119,10 +120,16 @@
                     <div>
                         <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">User Management</p>
                         <ul class="mt-2 space-y-1 menu-stagger">
-                             <li>
+                            <li>
                                 <a href="{{ route('admin.performance-period') }}" class="sidebar-link" @if($isAdminPRF) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-arrows-rotate"></i>
                                     <span>Performance Period</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.office') }}" class="sidebar-link" @if($isAdminOffice) aria-current="page" @endif>
+                                    <i class="sidebar-icon fa-solid fa-arrows-rotate"></i>
+                                    <span>Offices</span>
                                 </a>
                             </li>
                             <li>
