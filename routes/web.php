@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\PerformancePeriodsController;
 use App\Http\Controllers\Auth\ActivationController;
 use App\Http\Controllers\StageOne\Forms\IpcrExportController;
 use App\Http\Controllers\StageOne\Forms\IpcrExcelExportController;
@@ -376,6 +377,13 @@ Route::middleware(['auth'])->group(function () {
 Route::prefix('administrator')->middleware('auth')->group(function () {
     // Views
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('/performance-period', [PerformancePeriodsController::class, 'index'])->name('admin.performance-period');
+    Route::post('/performance-period', [PerformancePeriodsController::class, 'store'])->name('admin.performance-periods.store');
+    Route::put('/performance-period/{period}', [PerformancePeriodsController::class, 'update'])->name('admin.performance-periods.update');
+    Route::patch('/performance-period/{period}', [PerformancePeriodsController::class, 'update']);
+    Route::post('/performance-period/{period}/activate', [PerformancePeriodsController::class, 'activate'])->name('admin.performance-periods.activate');
+    Route::post('/performance-period/{period}/deactivate', [PerformancePeriodsController::class, 'deactivate'])->name('admin.performance-periods.deactivate');
+    Route::delete('/performance-period/{period}', [PerformancePeriodsController::class, 'destroy'])->name('admin.performance-periods.destroy');
     Route::get('/users', fn () => view('admin.users'))->name('admin.users');
     Route::get('/roles', fn () => view('admin.roles'))->name('admin.roles');
     Route::get('/opcr', fn () => view('admin.opcr'))->name('admin.opcr');
