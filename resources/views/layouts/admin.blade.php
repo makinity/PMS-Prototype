@@ -128,7 +128,7 @@
                             </li>
                             <li>
                                 <a href="{{ route('admin.office') }}" class="sidebar-link" @if($isAdminOffice) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-arrows-rotate"></i>
+                                    <i class="sidebar-icon fa-solid fa-building"></i>
                                     <span>Offices</span>
                                 </a>
                             </li>

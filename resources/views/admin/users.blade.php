@@ -64,6 +64,7 @@
                         name="search"
                         value="{{ $filters['search'] ?? '' }}"
                         placeholder="Name, email, employee ID"
+                        style="background:#0f172a;color:#e5e7eb;"
                         class="w-full rounded-lg border border-white/10 bg-gray-900/60 px-3 py-2 text-sm text-gray-100 outline-none focus:border-blue-500" />
                 </div>
 
@@ -72,6 +73,7 @@
                     <select
                         id="filterRole"
                         name="role"
+                        style="background:#0f172a;color:#e5e7eb;"
                         class="w-full rounded-lg border border-white/10 bg-gray-900/60 px-3 py-2 text-sm text-gray-100 outline-none focus:border-blue-500">
                         <option value="">All Roles</option>
                         <option value="employee" @selected(($filters['role'] ?? '') === 'employee')>Employee</option>
@@ -86,6 +88,7 @@
                     <select
                         id="filterOffice"
                         name="office_id"
+                        style="background:#0f172a;color:#e5e7eb;"
                         class="w-full rounded-lg border border-white/10 bg-gray-900/60 px-3 py-2 text-sm text-gray-100 outline-none focus:border-blue-500">
                         <option value="">All Offices</option>
                         @foreach ($offices as $office)
@@ -101,6 +104,7 @@
                     <select
                         id="filterStatus"
                         name="status"
+                        style="background:#0f172a;color:#e5e7eb;"
                         class="w-full rounded-lg border border-white/10 bg-gray-900/60 px-3 py-2 text-sm text-gray-100 outline-none focus:border-blue-500">
                         <option value="all" @selected(($filters['status'] ?? 'all') === 'all')>All Statuses</option>
                         <option value="active" @selected(($filters['status'] ?? '') === 'active')>Active</option>
