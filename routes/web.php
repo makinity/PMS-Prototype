@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Auth\ActivationController;
 use App\Http\Controllers\StageOne\Forms\IpcrExportController;
 use App\Http\Controllers\StageOne\Forms\IpcrExcelExportController;
@@ -374,7 +375,7 @@ Route::middleware(['auth'])->group(function () {
 
 Route::prefix('administrator')->middleware('auth')->group(function () {
     // Views
-    Route::get('/dashboard', fn () => view('admin.dashboard'))->name('admin.dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
     Route::get('/users', fn () => view('admin.users'))->name('admin.users');
     Route::get('/roles', fn () => view('admin.roles'))->name('admin.roles');
     Route::get('/opcr', fn () => view('admin.opcr'))->name('admin.opcr');
