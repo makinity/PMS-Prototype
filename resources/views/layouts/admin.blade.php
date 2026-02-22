@@ -121,7 +121,7 @@
                         <ul class="mt-2 space-y-1 menu-stagger">
                              <li>
                                 <a href="{{ route('admin.performance-period') }}" class="sidebar-link" @if($isAdminPRF) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-users"></i>
+                                    <i class="sidebar-icon fa-solid fa-arrows-rotate"></i>
                                     <span>Performance Period</span>
                                 </a>
                             </li>

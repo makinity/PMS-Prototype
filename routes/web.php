@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PerformancePeriodsController;
+use App\Http\Controllers\Admin\UsersController;
 use App\Http\Controllers\Auth\ActivationController;
 use App\Http\Controllers\StageOne\Forms\IpcrExportController;
 use App\Http\Controllers\StageOne\Forms\IpcrExcelExportController;
@@ -384,7 +385,12 @@ Route::prefix('administrator')->middleware('auth')->group(function () {
     Route::post('/performance-period/{period}/activate', [PerformancePeriodsController::class, 'activate'])->name('admin.performance-periods.activate');
     Route::post('/performance-period/{period}/deactivate', [PerformancePeriodsController::class, 'deactivate'])->name('admin.performance-periods.deactivate');
     Route::delete('/performance-period/{period}', [PerformancePeriodsController::class, 'destroy'])->name('admin.performance-periods.destroy');
-    Route::get('/users', fn () => view('admin.users'))->name('admin.users');
+    Route::get('/users', [UsersController::class, 'index'])->name('admin.users');
+    // Users governance actions
+    Route::put('/users/{user}', [UsersController::class, 'update'])->name('admin.users.update');
+    Route::patch('/users/{user}', [UsersController::class, 'update']);
+    Route::post('/users/{user}/toggle-active', [UsersController::class, 'toggleActive'])->name('admin.users.toggle');
+    Route::post('/users/{user}/reset-password', [UsersController::class, 'resetPassword'])->name('admin.users.reset-password');
     Route::get('/roles', fn () => view('admin.roles'))->name('admin.roles');
     Route::get('/opcr', fn () => view('admin.opcr'))->name('admin.opcr');
     Route::get('/opcr-accomplishment', fn () => view('admin.opcr-acc'))->name('admin.opcr-acc');
