@@ -147,7 +147,7 @@ Route::prefix('employee')->middleware('auth')->group(function () {
         ->name('stage2.employee.accomplishment.submit');
 
     // Stage II - MPOR Submit
-    Route::post('/mpor/submit', [MporSubmissionController::class, 'submit'])
+    Route::post('/mpor/submit', [MporController::class, 'submitMpor'])
         ->name('employee.mpor.submit');
 
     // Exports - SMPOR Excel
@@ -285,8 +285,8 @@ Route::prefix('supervisor')->middleware('auth')->group(function () {
     Route::post('/stage-one/planning/opcr/{opcr}/submit', [SuperVisorOpcrController::class, 'submit'])->name('stage1.opcr.submit');
 
     // Stage II - MPOR Review
-    Route::get('/mpoSr', [SupervisorMporController::class, 'index'])->name('supervisor.mpor');
-    Route::get('/mpor/index', [SupervisorMporController::class, 'index'])->name('supervisor.mpor');
+    Route::get('/mpor', [SupervisorMporController::class, 'index'])->name('supervisor.mpor');
+    Route::get('/mpor/{mpor}', [SupervisorMporController::class, 'show'])->name('supervisor.mpor.show');
     Route::post('/mpor/{mpor}/approve', [SupervisorMporController::class, 'approve'])->name('supervisor.mpor.approve');
     Route::post('/mpor/{mpor}/endorse', [SupervisorMporController::class, 'endorse'])->name('supervisor.mpor.endorse');
 

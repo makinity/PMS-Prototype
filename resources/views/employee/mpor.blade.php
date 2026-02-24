@@ -297,7 +297,7 @@
                     <form id="mporSubmitForm" method="POST" action="{{ route('employee.mpor.submit') }}"
                         class="flex items-center justify-end gap-2 border-t border-slate-800 p-5">
                         @csrf
-                        <input type="hidden" name="month_year" value="{{ $mporMonthYear }}">
+                        <input type="hidden" name="month" value="{{ $month }}">
 
                         <button type="button" data-modal-hide="mporSubmitConfirmModal"
                             class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 transition hover:bg-slate-800">

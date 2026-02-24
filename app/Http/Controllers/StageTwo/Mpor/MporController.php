@@ -241,4 +241,93 @@ class MporController extends Controller
             'sectionLabels'
         ));
     }
+
+    public function submitMpor(Request $request)
+    {
+        $user = auth()->user();
+        abort_unless($user && $user->role === 'employee', 403);
+
+        $month = $request->input('month');
+
+        if (!is_string($month) || !preg_match('/^\d{4}-\d{2}$/', $month)) {
+            return redirect()
+                ->route('employee.mpor.index')
+                ->with('info', 'Invalid month selected.');
+        }
+
+        $start = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+        $end = $start->copy()->endOfMonth();
+
+        // Get active IPCR (same logic as index)
+        $activePeriod = PerformancePeriod::query()
+            ->where('is_active', true)
+            ->orderByDesc('start_date')
+            ->first();
+
+        $ipcrQuery = Ipcr::query()
+            ->where('employee_id', $user->id)
+            ->whereIn('status', [Ipcr::STATUS_COMMITTED, Ipcr::STATUS_FOR_COMMITMENT]);
+
+        if ($activePeriod) {
+            $ipcrQuery->where('performance_period_id', $activePeriod->id);
+        }
+
+        $ipcr = $ipcrQuery
+            ->orderByDesc('generated_at')
+            ->orderByDesc('id')
+            ->first();
+
+        if (!$ipcr) {
+            return redirect()
+                ->route('employee.mpor.index', ['month' => $month])
+                ->with('info', 'No active IPCR found.');
+        }
+
+        // Ensure there are rated ORS entries for this month
+        $hasRatedEntries = OrsEntry::query()
+            ->where('employee_id', $user->id)
+            ->where('ipcr_id', $ipcr->id)
+            ->where('status', 'rated')
+            ->where('quantity', '>', 0)
+            ->whereBetween('work_date', [$start->toDateString(), $end->toDateString()])
+            ->whereHas('monitoring', function ($q) {
+                $q->whereNotNull('quality_rating')
+                ->whereNotNull('timeliness_rating');
+            })
+            ->exists();
+
+        if (! $hasRatedEntries) {
+            return redirect()
+                ->route('employee.mpor.index', ['month' => $month])
+                ->with('info', 'No rated ORS entries found for this month.');
+        }
+
+        $mpor = Mpor::query()
+            ->where('employee_id', $user->id)
+            ->where('month', $month)
+            ->first();
+
+        if ($mpor && in_array($mpor->status, ['submitted', 'endorsed', 'approved'], true)) {
+            return redirect()
+                ->route('employee.mpor.index', ['month' => $month])
+                ->with('info', 'MPOR already submitted.');
+        }
+
+        if (! $mpor) {
+            $mpor = new Mpor();
+            $mpor->employee_id = $user->id;
+            $mpor->office_id = $user->office_id;
+            $mpor->month = $month;
+            $mpor->generated_at = now();
+            $mpor->created_by = $user->id;
+        }
+
+        $mpor->status = 'submitted';
+        $mpor->submitted_at = now();
+        $mpor->save();
+
+        return redirect()
+            ->route('employee.mpor', ['month' => $month])
+            ->with('success', 'MPOR successfully submitted.');
+    }
 }

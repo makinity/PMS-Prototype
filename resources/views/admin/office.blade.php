@@ -16,7 +16,7 @@
 
     <section class="space-y-4 px-3 md:px-6">
         <div class="min-w-0 rounded-xl border border-white/10 bg-gray-800/90 p-4 shadow-sm">
-            <div class="flex flex-wrap items-start justify-between gap-3">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                     <h1 class="text-lg font-semibold text-gray-100 sm:text-xl">Office Management</h1>
                     <p class="mt-1 text-sm text-gray-300">Manage offices, assign one department head, and review staffing summaries.</p>
@@ -25,7 +25,7 @@
                 <button
                     type="button"
                     id="openCreateOfficeModalBtn"
-                    class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500">
+                    class="w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 sm:w-auto">
                     Create Office
                 </button>
             </div>
@@ -54,7 +54,96 @@
             </div>
         @endif
 
-        <div class="min-w-0 rounded-xl border border-white/10 bg-gray-800/90 shadow-sm">
+        <div class="space-y-3 sm:hidden">
+            @forelse ($offices as $office)
+                @php
+                    $employeesPayload = collect($office->employees ?? [])
+                        ->map(fn ($employee) => [
+                            'id' => (int) $employee->id,
+                            'name' => (string) ($employee->name ?? ''),
+                            'email' => (string) ($employee->email ?? ''),
+                            'role' => strtolower((string) ($employee->role ?? 'employee')),
+                            'position' => (string) ($employee->position ?? ''),
+                            'is_active' => (int) ($employee->is_active ? 1 : 0),
+                            'activated_at' => $employee->activated_at ? $employee->activated_at->format('Y-m-d H:i:s') : null,
+                        ])
+                        ->values();
+                    $hasBlockingData = (int) ($office->employees_count ?? 0) > 0 || (int) ($office->unit_work_plans_count ?? 0) > 0;
+                @endphp
+                <article class="rounded-xl border border-white/10 bg-gray-800/90 p-4 shadow-sm">
+                    <div class="flex items-start justify-between gap-2">
+                        <h2 class="break-words text-sm font-semibold text-gray-100">{{ $office->name }}</h2>
+                        <span class="shrink-0 rounded-full border border-white/10 bg-gray-700/70 px-2.5 py-1 text-[11px] font-semibold text-gray-200">
+                            {{ $office->code ?: '--' }}
+                        </span>
+                    </div>
+
+                    <div class="mt-3 space-y-2 text-xs">
+                        <div>
+                            <p class="uppercase tracking-wide text-gray-500">Dept Head</p>
+                            @if ($office->head)
+                                <p class="mt-1 break-words text-sm font-medium text-gray-100">{{ $office->head->name }}</p>
+                                <p class="break-words text-xs text-gray-400">{{ $office->head->email }}</p>
+                            @else
+                                <p class="mt-1 text-sm text-gray-400">--</p>
+                            @endif
+                        </div>
+
+                        <div class="flex items-center justify-between rounded-lg border border-white/10 bg-gray-900/50 px-3 py-2">
+                            <span class="text-gray-400">UWPs</span>
+                            <span class="text-sm font-semibold text-gray-100">{{ (int) ($office->unit_work_plans_count ?? 0) }}</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-3 flex flex-wrap justify-end gap-2">
+                        <button
+                            type="button"
+                            data-view-office
+                            data-id="{{ $office->id }}"
+                            data-code="{{ $office->code ?? '' }}"
+                            data-name="{{ $office->name }}"
+                            data-head-id="{{ $office->head_id ?? '' }}"
+                            data-head-name="{{ $office->head?->name ?? '' }}"
+                            data-head-email="{{ $office->head?->email ?? '' }}"
+                            data-employees-count="{{ (int) ($office->employees_count ?? 0) }}"
+                            data-supervisors-count="{{ (int) ($office->supervisors_count ?? 0) }}"
+                            data-uwp-count="{{ (int) ($office->unit_work_plans_count ?? 0) }}"
+                            data-employees='@json($employeesPayload)'
+                            class="min-w-[80px] rounded-lg border border-gray-500 px-3 py-2 text-sm font-semibold text-gray-100 hover:bg-gray-700/60">
+                            View
+                        </button>
+                        <button
+                            type="button"
+                            data-edit-office
+                            data-id="{{ $office->id }}"
+                            data-code="{{ $office->code ?? '' }}"
+                            data-name="{{ $office->name }}"
+                            data-head-id="{{ $office->head_id ?? '' }}"
+                            class="min-w-[80px] rounded-lg border border-white/10 bg-gray-700/70 px-3 py-2 text-sm font-semibold text-gray-100 hover:bg-gray-600/80">
+                            Edit
+                        </button>
+                        <button
+                            type="button"
+                            data-delete-office
+                            data-id="{{ $office->id }}"
+                            data-name="{{ $office->name }}"
+                            data-code="{{ $office->code ?? '' }}"
+                            data-blocked="{{ $hasBlockingData ? 1 : 0 }}"
+                            data-employees-count="{{ (int) ($office->employees_count ?? 0) }}"
+                            data-uwp-count="{{ (int) ($office->unit_work_plans_count ?? 0) }}"
+                            class="min-w-[80px] rounded-lg border border-rose-600/50 bg-rose-500/10 px-3 py-2 text-sm font-semibold text-rose-300 hover:bg-rose-500/20">
+                            Delete
+                        </button>
+                    </div>
+                </article>
+            @empty
+                <div class="rounded-xl border border-white/10 bg-gray-800/90 px-4 py-10 text-center text-sm text-gray-400 shadow-sm">
+                    No offices found.
+                </div>
+            @endforelse
+        </div>
+
+        <div class="hidden min-w-0 rounded-xl border border-white/10 bg-gray-800/90 shadow-sm sm:block">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-white/10 text-xs sm:text-sm">
                     <thead class="bg-gray-900/70 text-[11px] uppercase tracking-wide text-gray-400 sm:text-xs">
@@ -84,18 +173,18 @@
                             @endphp
                             <tr>
                                 <td class="px-4 py-3 font-medium text-gray-100">{{ $office->code ?: '--' }}</td>
-                                <td class="px-4 py-3 text-gray-100">{{ $office->name }}</td>
+                                <td class="px-4 py-3 break-words text-gray-100">{{ $office->name }}</td>
                                 <td class="px-4 py-3">
                                     @if ($office->head)
                                         <p class="text-sm font-medium text-gray-100">{{ $office->head->name }}</p>
-                                        <p class="text-xs text-gray-400">{{ $office->head->email }}</p>
+                                        <p class="break-words text-xs text-gray-400">{{ $office->head->email }}</p>
                                     @else
                                         <span class="text-gray-400">--</span>
                                     @endif
                                 </td>
                                 <td class="px-4 py-3 text-center font-medium text-gray-200">{{ (int) ($office->unit_work_plans_count ?? 0) }}</td>
                                 <td class="px-4 py-3">
-                                    <div class="flex justify-end gap-2">
+                                    <div class="flex flex-wrap justify-end gap-2">
                                         <button
                                             type="button"
                                             data-view-office
