@@ -490,13 +490,28 @@
                                             <tr class="bg-slate-900/40">
                                                 <td class="px-4 py-3 font-semibold text-slate-100">{{ $row['major_output'] ?? '—' }}</td>
                                                 <td class="px-4 py-3">
-                                                    <button type="button"
-                                                            data-ipcr-open-indicators
-                                                            data-section-index="{{ $sectionIndex }}"
-                                                            data-row-index="{{ $rowIndex }}"
-                                                            class="inline-flex items-center rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-1.5 text-xs font-semibold text-sky-200 hover:bg-sky-500/20 transition">
-                                                        View ({{ (int) ($row['indicators_count'] ?? 0) }})
-                                                    </button>
+                                                    <a href="javascript:void(0)"
+                                                       data-ipcr-open-indicators
+                                                       data-section-index="{{ $sectionIndex }}"
+                                                       data-row-index="{{ $rowIndex }}"
+                                                       aria-label="View success indicators ({{ (int) ($row['indicators_count'] ?? 0) }})"
+                                                       class="inline-flex items-center gap-1 text-sky-300 transition hover:text-sky-200 focus:outline-none focus:ring-2 focus:ring-sky-500/40">
+                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                             viewBox="0 0 24 24"
+                                                             fill="none"
+                                                             stroke="currentColor"
+                                                             stroke-width="1.5"
+                                                             class="h-4 w-4"
+                                                             aria-hidden="true">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                  d="M2.036 12.322a1 1 0 010-.644C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178a1 1 0 010 .644C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178z" />
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                        </svg>
+                                                        <span class="text-xs font-semibold leading-none">
+                                                            {{ (int) ($row['indicators_count'] ?? 0) }}
+                                                        </span>
+                                                    </a>
                                                 </td>
                                                 <td class="px-4 py-3 text-slate-300">{{ $row['target_summary'] ?? '—' }}</td>
                                                 <td class="px-4 py-3 text-slate-300">{{ $row['timeline'] ?? $periodLabelValue }}</td>
@@ -901,12 +916,24 @@
                                 <tr class="bg-slate-900/40">
                                     <td class="px-4 py-3 text-slate-100">${escapeHtml(indicator?.indicator_text ?? '—')}</td>
                                     <td class="px-4 py-3">
-                                        <button type="button"
-                                                data-ipcr-open-standards
-                                                data-indicator-index="${indicatorIndex}"
-                                                class="inline-flex items-center rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-1.5 text-xs font-semibold text-sky-200 hover:bg-sky-500/20 transition">
-                                            View Standards
-                                        </button>
+                                        <a href="javascript:void(0)"
+                                           data-ipcr-open-standards
+                                           data-indicator-index="${indicatorIndex}"
+                                           aria-label="View standards"
+                                           class="inline-flex items-center text-sky-300 transition hover:text-sky-200 focus:outline-none focus:ring-2 focus:ring-sky-500/40">
+                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                 viewBox="0 0 24 24"
+                                                 fill="none"
+                                                 stroke="currentColor"
+                                                 stroke-width="1.5"
+                                                 class="h-4 w-4"
+                                                 aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                      d="M2.036 12.322a1 1 0 010-.644C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178a1 1 0 010 .644C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            </svg>
+                                        </a>
                                     </td>
                                 </tr>
                             `).join('');
