@@ -310,8 +310,16 @@
                                 Close
                             </button>
 
-                            @if ($isEndorsedModal)
-                                <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2">
+                                <a href="{{ route('pmt.qar.previewPdf', ['qarHeader' => $header->id]) }}"
+                                   target="_blank"
+                                   rel="noopener noreferrer"
+                                   class="inline-flex items-center gap-2 rounded-lg border border-slate-600 bg-slate-900/70 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800">
+                                   <i class="fa-solid fa-file-pdf text-xs"></i>
+                                   <span>Preview PDF</span>
+                                </a>
+
+                                @if ((string) ($header->status ?? '') === 'dept_head_endorsed')
                                     <form id="pmtQarReturnForm-{{ $header->id }}"
                                         data-return-form
                                         data-loading-label="Returning..."
@@ -343,8 +351,8 @@
                                             <span data-button-label>Approve</span>
                                         </button>
                                     </form>
-                                </div>
-                            @endif
+                                @endif
+                            </div>
                         </div>
                     </div>
                 </div>

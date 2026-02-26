@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Pmt;
 use App\Http\Controllers\Controller;
 use App\Models\PerformancePeriod;
 use App\Models\QarHeader;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -176,5 +177,49 @@ class QarController extends Controller
         }
 
         return $params;
+    }
+
+    public function previewPdf(Request $request, QarHeader $qarHeader)
+    {
+        $qarHeader->load([
+            'office:id,name',
+            'performancePeriod:id,name,start_date,end_date',
+            'rows:id,qar_header_id,ppa_code,mfo_title,indicator_text,target_timeline,actual_performance,remarks,sort_order',
+        ]);
+
+        $officeName = $qarHeader->office?->name ?? 'Office';
+        $period = $qarHeader->performancePeriod;
+
+        $periodName = $period?->name ?? 'Performance Period';
+
+        $periodRange = '-';
+        if ($period?->start_date && $period?->end_date) {
+            $periodRange =
+                Carbon::parse($period->start_date)->format('M d, Y')
+                . ' - ' .
+                Carbon::parse($period->end_date)->format('M d, Y');
+        }
+
+        $quarterEndingLabel = now()->format('F d, Y');
+        if (preg_match('/^(\d{4})-Q(\d)$/', (string) $qarHeader->quarter_key, $matches)) {
+            $year = (int) $matches[1];
+            $quarter = (int) $matches[2];
+
+            if ($quarter === 1) {
+                $quarterEndingLabel = Carbon::create($year, 3, 31)->format('F d, Y');
+            } elseif ($quarter === 2) {
+                $quarterEndingLabel = Carbon::create($year, 6, 30)->format('F d, Y');
+            }
+        }
+
+        $pdf = Pdf::loadView('pdf.stage-two.qar', [
+            'qarHeader' => $qarHeader,
+            'officeName' => $officeName,
+            'periodName' => $periodName,
+            'periodRange' => $periodRange,
+            'quarterEndingLabel' => $quarterEndingLabel,
+        ])->setPaper('legal', 'landscape');
+
+        return $pdf->stream('QAR-' . ($qarHeader->quarter_key ?? 'report') . '.pdf');
     }
 }

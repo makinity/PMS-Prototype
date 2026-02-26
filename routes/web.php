@@ -335,6 +335,8 @@ Route::prefix('pmt')->middleware('auth')->group(function () {
     // Stage II - QAR
     Route::get('/qar', [PmtQarController::class, 'index'])
         ->name('pmt.qar');
+    Route::get('/qar/{qarHeader}/preview-pdf', [PmtQarController::class, 'previewPdf'])
+        ->name('pmt.qar.previewPdf');
     Route::post('/qar/{qarHeader}/approve', [PmtQarController::class, 'approve'])
         ->name('pmt.qar.approve');
     Route::post('/qar/{qarHeader}/return', [PmtQarController::class, 'return'])
