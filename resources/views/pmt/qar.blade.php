@@ -7,15 +7,36 @@
                 'label' => 'Draft',
                 'badge' => 'border-slate-600/60 bg-slate-700/40 text-slate-200',
             ],
-            'dept_head_approved' => [
-                'label' => 'Dept Head Approved',
+            'dept_head_endorsed' => [
+                'label' => 'Dept Head Endorsed',
                 'badge' => 'border-emerald-500/40 bg-emerald-500/10 text-emerald-200',
             ],
-            'pmt_validated' => [
-                'label' => 'PMT Validated',
+            'pmt_approved' => [
+                'label' => 'PMT Approved',
                 'badge' => 'border-cyan-500/40 bg-cyan-500/10 text-cyan-200',
             ],
         ];
+
+        $headersSafe = $headers ?? collect();
+
+        $formatDate = static function ($value): string {
+            if (empty($value)) {
+                return '-';
+            }
+
+            try {
+                return \Illuminate\Support\Carbon::parse($value)->format('M d, Y g:i A');
+            } catch (\Throwable) {
+                return (string) $value;
+            }
+        };
+
+        $periodRange = '-';
+        if ($period?->start_date && $period?->end_date) {
+            $periodRange = \Illuminate\Support\Carbon::parse($period->start_date)->format('M d, Y')
+                . ' - '
+                . \Illuminate\Support\Carbon::parse($period->end_date)->format('M d, Y');
+        }
     @endphp
 
     <section class="space-y-6">
@@ -31,23 +52,39 @@
             </div>
         @endif
 
-        @if (session('error'))
-            <div class="rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-                {{ session('error') }}
+        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
+            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Stage II - PMT Approval</p>
+            <h1 class="mt-1 text-2xl font-bold text-white">Office Quarterly Accomplishment Report (QAR) - PMT</h1>
+            <p class="mt-1 text-sm text-slate-400">Approve endorsed QAR records to open the employee IPCR/SMPOR accomplishment gate.</p>
+
+            <div class="mt-4 grid gap-3 sm:grid-cols-3">
+                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                    <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Quarter</p>
+                    <p class="mt-1 text-sm font-semibold text-white">{{ $quarterLabel ?? '-' }}</p>
+                </div>
+                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                    <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Performance Period</p>
+                    <p class="mt-1 text-sm font-semibold text-white">{{ $period?->name ?? 'No active period' }}</p>
+                    <p class="text-xs text-slate-400">{{ $periodRange }}</p>
+                </div>
+                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                    <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Queue</p>
+                    <p class="mt-1 text-sm font-semibold text-white">Endorsed: {{ $endorsedCount ?? 0 }} | Approved: {{ $approvedCount ?? 0 }}</p>
+                </div>
+            </div>
+        </div>
+
+        @if (!$period)
+            <div class="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+                No active performance period found.
             </div>
         @endif
 
-        <div>
-            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Stage II - PMT Final Validation</p>
-            <h1 class="mt-1 text-2xl font-bold text-white">Quarterly Accomplishment Reports (QAR)</h1>
-            <p class="mt-1 text-sm text-slate-400">Review Dept Head-approved QARs and validate as final approval.</p>
-        </div>
-
         <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
             <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-                <h2 class="text-lg font-semibold text-white">Pending QAR Queue</h2>
+                <h2 class="text-lg font-semibold text-white">QAR Approval Queue</h2>
                 <span class="inline-flex items-center rounded-full border border-slate-700 bg-slate-900/70 px-3 py-1 text-xs text-slate-300">
-                    Pending Validation: {{ $pendingQars->count() }}
+                    Records: {{ $headersSafe->count() }}
                 </span>
             </div>
 
@@ -58,37 +95,52 @@
                             <th class="px-4 py-3">Office</th>
                             <th class="px-4 py-3">Quarter</th>
                             <th class="px-4 py-3">Status</th>
-                            <th class="px-4 py-3 text-right">Action</th>
+                            <th class="px-4 py-3">Endorsed Date</th>
+                            <th class="px-4 py-3">PMT Validated</th>
+                            <th class="px-4 py-3 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-800 text-slate-200">
-                        @forelse ($qars as $qar)
+                        @forelse ($headersSafe as $header)
                             @php
-                                $meta = $statusMeta[$qar['status']] ?? $statusMeta['draft'];
+                                $statusKey = (string) ($header->status ?? 'draft');
+                                $meta = $statusMeta[$statusKey] ?? $statusMeta['draft'];
+                                $isEndorsed = $statusKey === 'dept_head_endorsed';
+                                $isApproved = $statusKey === 'pmt_approved';
+                                $endorsedDate = $header->approved_at ?? $header->generated_at;
                             @endphp
                             <tr>
-                                <td class="px-4 py-3 font-medium text-white">{{ $qar['office'] }}</td>
-                                <td class="px-4 py-3">{{ $qar['quarter'] }}</td>
+                                <td class="px-4 py-3 font-semibold text-white">{{ $header->office?->name ?? 'Office' }}</td>
+                                <td class="px-4 py-3">{{ $header->quarter_key ?? ($quarterKey ?? '-') }}</td>
                                 <td class="px-4 py-3">
                                     <span class="inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold {{ $meta['badge'] }}">
                                         {{ $meta['label'] }}
                                     </span>
                                 </td>
+                                <td class="px-4 py-3 text-slate-300">{{ $formatDate($endorsedDate) }}</td>
+                                <td class="px-4 py-3 text-slate-300">{{ $formatDate($header->pmt_validated_at) }}</td>
                                 <td class="px-4 py-3 text-right">
-                                    <button type="button"
-                                        data-open-qar-view
-                                        data-qar='@json($qar)'
-                                        data-modal-target="pmtQarViewModal"
-                                        data-modal-toggle="pmtQarViewModal"
-                                        class="rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:bg-slate-800">
-                                        View
-                                    </button>
+                                    @if ($isEndorsed)
+                                        <button type="button"
+                                            data-modal-target="pmtQarApproveModal-{{ $header->id }}"
+                                            data-modal-toggle="pmtQarApproveModal-{{ $header->id }}"
+                                            class="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-emerald-500">
+                                            Approve QAR
+                                        </button>
+                                    @elseif ($isApproved)
+                                        <button type="button" disabled
+                                            class="cursor-not-allowed rounded-lg border border-cyan-500/40 bg-cyan-500/10 px-3 py-1.5 text-xs font-semibold text-cyan-200 opacity-70">
+                                            Approved
+                                        </button>
+                                    @else
+                                        <span class="text-slate-500">-</span>
+                                    @endif
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="px-4 py-8 text-center text-sm text-slate-400">
-                                    No QAR records available.
+                                <td colspan="6" class="px-4 py-8 text-center text-sm text-slate-400">
+                                    No endorsed/approved QAR records found for this quarter.
                                 </td>
                             </tr>
                         @endforelse
@@ -98,308 +150,84 @@
         </div>
     </section>
 
-    <div id="pmtQarViewModal" tabindex="-1" aria-hidden="true"
-        class="fixed left-0 right-0 top-0 z-50 hidden h-[calc(100%-1rem)] max-h-full w-full items-center justify-center overflow-y-auto overflow-x-hidden md:inset-0">
-        <div class="relative max-h-full w-full max-w-6xl p-4">
-            <div class="relative rounded-2xl border border-slate-800 bg-slate-900 shadow-lg">
-                <div class="flex items-start justify-between gap-4 border-b border-slate-800 p-5">
-                    <div>
-                        <h3 class="text-lg font-semibold text-white">View QAR (Annex I) - Read-only</h3>
-                        <p class="mt-1 text-sm text-slate-400">Final PMT validation gate for Stage II.</p>
-                    </div>
-                    <button type="button" data-modal-hide="pmtQarViewModal"
-                        class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-800 hover:text-white">
-                        <span class="sr-only">Close modal</span>
-                        <i class="fa-solid fa-xmark text-sm"></i>
-                    </button>
-                </div>
+    @foreach ($headersSafe as $header)
+        @if ((string) ($header->status ?? '') === 'dept_head_endorsed')
+            <div id="pmtQarApproveModal-{{ $header->id }}" tabindex="-1" aria-hidden="true"
+                class="fixed left-0 right-0 top-0 z-50 hidden h-[calc(100%-1rem)] max-h-full w-full items-center justify-center overflow-y-auto overflow-x-hidden md:inset-0">
+                <div class="relative max-h-full w-full max-w-lg p-4">
+                    <div class="relative rounded-2xl border border-slate-800 bg-slate-900 shadow-lg">
+                        <div class="flex items-start justify-between border-b border-slate-800 p-5">
+                            <h3 class="text-lg font-semibold text-white">Approve this QAR?</h3>
+                            <button type="button" data-modal-hide="pmtQarApproveModal-{{ $header->id }}"
+                                class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-800 hover:text-white">
+                                <span class="sr-only">Close modal</span>
+                                <i class="fa-solid fa-xmark text-sm"></i>
+                            </button>
+                        </div>
 
-                <div class="max-h-[70vh] overflow-y-auto p-5">
-                    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                        <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
-                            <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Office</p>
-                            <p id="pmtQarModalOffice" class="mt-1 text-sm font-semibold text-white">-</p>
+                        <div class="space-y-3 p-5 text-sm text-slate-300">
+                            <p>
+                                Office: <span class="font-semibold text-white">{{ $header->office?->name ?? 'Office' }}</span>
+                                <span class="mx-1 text-slate-500">-</span>
+                                Quarter: <span class="font-semibold text-white">{{ $header->quarter_key ?? ($quarterKey ?? '-') }}</span>
+                            </p>
+                            <p>
+                                Once approved, QAR becomes read-only and employees may proceed to IPCR/SMPOR accomplishments.
+                            </p>
                         </div>
-                        <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
-                            <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Quarter</p>
-                            <p id="pmtQarModalQuarter" class="mt-1 text-sm font-semibold text-white">-</p>
-                        </div>
-                        <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
-                            <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Status</p>
-                            <span id="pmtQarModalStatus"
-                                class="mt-1 inline-flex rounded-full border px-2 py-1 text-xs font-semibold">-</span>
-                        </div>
-                        <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
-                            <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Prepared/Approved by</p>
-                            <p id="pmtQarModalPreparedBy" class="mt-1 text-sm font-semibold text-white">-</p>
-                        </div>
-                    </div>
 
-                    <div class="mt-4 overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/50">
-                        <table class="min-w-full divide-y divide-slate-800 text-sm text-slate-200">
-                            <thead>
-                                <tr class="bg-slate-900/70 text-left text-xs uppercase tracking-[0.2em] text-slate-400">
-                                    <th class="px-4 py-3">PPA Code</th>
-                                    <th class="px-4 py-3">MFO/PPA</th>
-                                    <th class="px-4 py-3">Performance Indicator</th>
-                                    <th class="px-4 py-3 text-center">Target / Timeline</th>
-                                    <th class="px-4 py-3 text-center">Actual Performance</th>
-                                    <th class="px-4 py-3">Remarks</th>
-                                </tr>
-                            </thead>
-                            <tbody id="pmtQarRowsBody" class="divide-y divide-slate-800"></tbody>
-                        </table>
+                        <form id="pmtQarApproveForm-{{ $header->id }}"
+                            data-approve-form
+                            method="POST"
+                            action="{{ route('pmt.qar.approve', ['qarHeader' => $header->id]) }}"
+                            class="flex items-center justify-end gap-2 border-t border-slate-800 p-5">
+                            @csrf
+                            <button type="button" data-modal-hide="pmtQarApproveModal-{{ $header->id }}"
+                                class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 transition hover:bg-slate-800">
+                                Cancel
+                            </button>
+                            <button type="submit"
+                                id="pmtQarApproveBtn-{{ $header->id }}"
+                                data-submit-button
+                                class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500">
+                                <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                                <span data-button-label>Approve</span>
+                            </button>
+                        </form>
                     </div>
-
-                    <div class="mt-4 grid gap-3 sm:grid-cols-2">
-                        <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
-                            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Prepared/Approved by</p>
-                            <p id="pmtQarPreparedName" class="mt-2 text-sm font-semibold text-white">-</p>
-                            <p class="mt-2 text-xs text-slate-500">Date</p>
-                            <p id="pmtQarPreparedDate" class="text-sm text-slate-300">-</p>
-                        </div>
-                        <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
-                            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Validated by</p>
-                            <p id="pmtQarValidatedName" class="mt-2 text-sm font-semibold text-white">Pending PMT validation</p>
-                            <p class="mt-2 text-xs text-slate-500">Date</p>
-                            <p id="pmtQarValidatedDate" class="text-sm text-slate-300">-</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex flex-wrap items-center justify-end gap-2 border-t border-slate-800 p-5">
-                    <button type="button" data-modal-hide="pmtQarViewModal"
-                        class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 transition hover:bg-slate-800">
-                        Close
-                    </button>
-                    <button type="button"
-                        id="pmtQarValidateBtn"
-                        data-modal-target="pmtQarValidateConfirmModal"
-                        data-modal-toggle="pmtQarValidateConfirmModal"
-                        class="hidden rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500">
-                        Validate QAR
-                    </button>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <div id="pmtQarValidateConfirmModal" tabindex="-1" aria-hidden="true"
-        class="fixed left-0 right-0 top-0 z-[60] hidden h-[calc(100%-1rem)] max-h-full w-full items-center justify-center overflow-y-auto overflow-x-hidden md:inset-0">
-        <div class="relative max-h-full w-full max-w-lg p-4">
-            <div class="relative rounded-2xl border border-slate-800 bg-slate-900 shadow-lg">
-                <div class="flex items-start justify-between border-b border-slate-800 p-5">
-                    <h3 class="text-lg font-semibold text-white">Validate QAR</h3>
-                    <button type="button" data-modal-hide="pmtQarValidateConfirmModal"
-                        class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-800 hover:text-white">
-                        <span class="sr-only">Close modal</span>
-                        <i class="fa-solid fa-xmark text-sm"></i>
-                    </button>
-                </div>
-
-                <div class="space-y-3 p-5 text-sm text-slate-300">
-                    <p>
-                        Validate this QAR as final approval?
-                    </p>
-                    <p>
-                        Once validated, this QAR becomes locked and official.
-                    </p>
-                    <p id="pmtQarConfirmContext" class="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-xs text-slate-400">
-                        -
-                    </p>
-                </div>
-
-                <form id="pmtQarValidateForm"
-                    method="POST"
-                    action="{{ route('pmt.qar.validate', ['qar' => 1]) }}"
-                    data-action-template="{{ route('pmt.qar.validate', ['qar' => '__QAR__']) }}"
-                    class="flex items-center justify-end gap-2 border-t border-slate-800 p-5">
-                    @csrf
-                    <button type="button" data-modal-hide="pmtQarValidateConfirmModal"
-                        class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 transition hover:bg-slate-800">
-                        Cancel
-                    </button>
-                    <button type="submit" id="pmtQarProceedValidateBtn"
-                        class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500">
-                        <span data-button-spinner
-                            class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
-                        <span data-button-label>Proceed Validate</span>
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
+        @endif
+    @endforeach
 
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                const statusMeta = {
-                    draft: {
-                        label: 'Draft',
-                        badge: 'border-slate-600/60 bg-slate-700/40 text-slate-200',
-                    },
-                    dept_head_approved: {
-                        label: 'Dept Head Approved',
-                        badge: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-200',
-                    },
-                    pmt_validated: {
-                        label: 'PMT Validated',
-                        badge: 'border-cyan-500/40 bg-cyan-500/10 text-cyan-200',
-                    },
-                };
-
-                let selectedQar = null;
-
-                const parseJson = (value) => {
-                    try {
-                        return JSON.parse(value);
-                    } catch (error) {
-                        return null;
-                    }
-                };
-
-                const escapeHtml = (value) => String(value ?? '')
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;')
-                    .replace(/"/g, '&quot;')
-                    .replace(/'/g, '&#039;');
-
-                const formatDate = (value) => {
-                    if (!value) {
-                        return '-';
-                    }
-
-                    const date = new Date(value);
-                    if (Number.isNaN(date.getTime())) {
-                        return String(value);
-                    }
-
-                    return date.toLocaleString('en-US', {
-                        month: 'short',
-                        day: '2-digit',
-                        year: 'numeric',
-                        hour: 'numeric',
-                        minute: '2-digit',
-                    });
-                };
-
-                const renderRows = (rows) => {
-                    const body = document.getElementById('pmtQarRowsBody');
-                    if (!body) {
+                const bindLoadingSubmit = (form, button, loadingLabel) => {
+                    if (!form || !button) {
                         return;
                     }
 
-                    body.innerHTML = '';
+                    const spinner = button.querySelector('[data-button-spinner]');
+                    const label = button.querySelector('[data-button-label]');
 
-                    (Array.isArray(rows) ? rows : []).forEach((row) => {
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
-                            <td class="px-4 py-3">${escapeHtml(row.ppa_code ?? '-')}</td>
-                            <td class="px-4 py-3">${escapeHtml(row.mfo ?? '-')}</td>
-                            <td class="px-4 py-3">${escapeHtml(row.indicator ?? '-')}</td>
-                            <td class="px-4 py-3 text-center">${escapeHtml(row.target_timeline ?? '-')}</td>
-                            <td class="px-4 py-3 text-center font-semibold">${escapeHtml(row.actual_performance ?? '-')}</td>
-                            <td class="px-4 py-3">${escapeHtml(row.remarks ?? '-')}</td>
-                        `;
-                        body.appendChild(tr);
-                    });
+                    form.addEventListener('submit', function() {
+                        button.disabled = true;
+                        button.classList.add('cursor-not-allowed', 'opacity-80');
 
-                    if (!body.children.length) {
-                        body.innerHTML = '<tr><td colspan="6" class="px-4 py-6 text-center text-slate-400">No QAR rows found.</td></tr>';
-                    }
-                };
-
-                const hydrateViewModal = (qar) => {
-                    selectedQar = qar;
-
-                    const office = qar?.office ?? '-';
-                    const quarter = qar?.quarter ?? '-';
-                    const preparedBy = qar?.prepared_by ?? 'Dept Head';
-                    const preparedDate = formatDate(qar?.prepared_date);
-                    const validatedBy = qar?.validated_by ?? 'Pending PMT validation';
-                    const validatedDate = qar?.validated_at ? formatDate(qar.validated_at) : 'Pending PMT validation';
-                    const statusKey = String(qar?.status ?? 'draft');
-                    const status = statusMeta[statusKey] ?? statusMeta.draft;
-
-                    document.getElementById('pmtQarModalOffice').textContent = office;
-                    document.getElementById('pmtQarModalQuarter').textContent = quarter;
-                    document.getElementById('pmtQarModalPreparedBy').textContent = preparedBy;
-
-                    const statusEl = document.getElementById('pmtQarModalStatus');
-                    statusEl.textContent = status.label;
-                    statusEl.className = `mt-1 inline-flex rounded-full border px-2 py-1 text-xs font-semibold ${status.badge}`;
-
-                    document.getElementById('pmtQarPreparedName').textContent = preparedBy;
-                    document.getElementById('pmtQarPreparedDate').textContent = preparedDate;
-                    document.getElementById('pmtQarValidatedName').textContent = validatedBy;
-                    document.getElementById('pmtQarValidatedDate').textContent = validatedDate;
-
-                    const validateButton = document.getElementById('pmtQarValidateBtn');
-                    if (statusKey === 'dept_head_approved') {
-                        validateButton.classList.remove('hidden');
-                    } else {
-                        validateButton.classList.add('hidden');
-                    }
-
-                    renderRows(qar?.rows ?? []);
-                };
-
-                document.querySelectorAll('[data-open-qar-view]').forEach((button) => {
-                    button.addEventListener('click', function() {
-                        const qar = parseJson(this.getAttribute('data-qar') || 'null');
-                        if (!qar) {
-                            return;
+                        if (spinner) {
+                            spinner.classList.remove('hidden');
                         }
 
-                        hydrateViewModal(qar);
-                    });
-                });
-
-                const validateButton = document.getElementById('pmtQarValidateBtn');
-                const validateForm = document.getElementById('pmtQarValidateForm');
-                const confirmContext = document.getElementById('pmtQarConfirmContext');
-
-                validateButton?.addEventListener('click', function() {
-                    if (!selectedQar) {
-                        return;
-                    }
-
-                    if (String(selectedQar.status) !== 'dept_head_approved') {
-                        return;
-                    }
-
-                    if (confirmContext) {
-                        confirmContext.textContent = `${selectedQar.office ?? '-'} - ${selectedQar.quarter ?? '-'}`;
-                    }
-
-                    if (validateForm) {
-                        const actionTemplate = validateForm.getAttribute('data-action-template') || '';
-                        if (actionTemplate) {
-                            validateForm.setAttribute('action', actionTemplate.replace('__QAR__', String(selectedQar.id ?? 0)));
+                        if (label) {
+                            label.textContent = loadingLabel;
                         }
-                    }
-                });
+                    });
+                };
 
-                validateForm?.addEventListener('submit', function() {
-                    const submitButton = document.getElementById('pmtQarProceedValidateBtn');
-                    if (!submitButton) {
-                        return;
-                    }
-
-                    const spinner = submitButton.querySelector('[data-button-spinner]');
-                    const label = submitButton.querySelector('[data-button-label]');
-
-                    submitButton.disabled = true;
-                    submitButton.classList.add('cursor-not-allowed', 'opacity-80');
-
-                    if (spinner) {
-                        spinner.classList.remove('hidden');
-                    }
-
-                    if (label) {
-                        label.textContent = 'Validating...';
-                    }
+                document.querySelectorAll('[data-approve-form]').forEach((form) => {
+                    const button = form.querySelector('[data-submit-button]');
+                    bindLoadingSubmit(form, button, 'Approving...');
                 });
             });
         </script>

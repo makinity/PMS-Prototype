@@ -9,7 +9,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class QarHeader extends Model
 {
     public const STATUS_DRAFT = 'draft';
-    public const STATUS_DEPT_HEAD_APPROVED = 'dept_head_approved';
+    public const STATUS_DEPT_HEAD_ENDORSED = 'dept_head_endorsed';
+    public const STATUS_PMT_APPROVED = 'pmt_approved';
 
     public const PMT_PENDING = 'pending';
     public const PMT_VALIDATED = 'validated';
@@ -77,9 +78,14 @@ class QarHeader extends Model
         return $this->status === self::STATUS_DRAFT;
     }
 
-    public function isApprovedByDeptHead(): bool
+    public function isEndorsedByDeptHead(): bool
     {
-        return $this->status === self::STATUS_DEPT_HEAD_APPROVED;
+        return $this->status === self::STATUS_DEPT_HEAD_ENDORSED;
+    }
+
+    public function isPmtApproved(): bool
+    {
+        return $this->status === self::STATUS_PMT_APPROVED;
     }
 
     public function isPmtValidated(): bool
@@ -89,7 +95,6 @@ class QarHeader extends Model
 
     public function isLockedForDeptHead(): bool
     {
-        return $this->status === self::STATUS_DEPT_HEAD_APPROVED;
+        return in_array($this->status, [self::STATUS_DEPT_HEAD_ENDORSED, self::STATUS_PMT_APPROVED], true);
     }
 }
-

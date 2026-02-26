@@ -87,9 +87,13 @@ class QarController extends Controller
             $state = [];
         }
 
-        $status = (string) ($state['status'] ?? 'draft');
-        if (!in_array($status, ['draft', 'dept_head_approved'], true)) {
-            $status = 'draft';
+        $status = (string) ($state['status'] ?? QarHeader::STATUS_DRAFT);
+        $status = str_replace('-', '_', $status);
+        if ($status === 'endorsed') {
+            $status = QarHeader::STATUS_DEPT_HEAD_ENDORSED;
+        }
+        if (!in_array($status, [QarHeader::STATUS_DRAFT, QarHeader::STATUS_DEPT_HEAD_ENDORSED, QarHeader::STATUS_PMT_APPROVED], true)) {
+            $status = QarHeader::STATUS_DRAFT;
         }
         $approvedAt = $state['approved_at'] ?? null;
 
@@ -465,7 +469,7 @@ class QarController extends Controller
         ));
     }
 
-    public function approve(Request $request)
+    public function endorse(Request $request)
     {
         $deptHead = $request->user();
         $officeId = (int) ($deptHead?->office_id ?? 0);
@@ -557,10 +561,13 @@ class QarController extends Controller
             ->where('quarter_key', $quarterKey)
             ->first();
 
-        if ($existingHeader && $existingHeader->status === QarHeader::STATUS_DEPT_HEAD_APPROVED) {
+        if (
+            $existingHeader
+            && in_array((string) $existingHeader->status, [QarHeader::STATUS_DEPT_HEAD_ENDORSED, QarHeader::STATUS_PMT_APPROVED], true)
+        ) {
             return redirect()
                 ->route('dept-head.qar')
-                ->with('info', 'QAR is already approved.');
+                ->with('info', 'QAR is already endorsed.');
         }
 
         $approvedAt = now();
@@ -584,7 +591,7 @@ class QarController extends Controller
                     'quarter_key' => $quarterKey,
                 ],
                 [
-                    'status' => QarHeader::STATUS_DEPT_HEAD_APPROVED,
+                    'status' => QarHeader::STATUS_DEPT_HEAD_ENDORSED,
                     'generated_at' => $generatedAt,
                     'generated_by' => $deptHead?->id,
                     'approved_at' => $approvedAt,
@@ -643,14 +650,14 @@ class QarController extends Controller
         if (!is_array($state)) {
             $state = [];
         }
-        $state['status'] = 'dept_head_approved';
+        $state['status'] = QarHeader::STATUS_DEPT_HEAD_ENDORSED;
         $state['approved_at'] = $approvedAt->toDateTimeString();
         $state['generated_at'] = Carbon::parse($header?->generated_at ?? $generatedAt)->toDateTimeString();
         $request->session()->put(self::QAR_SESSION_KEY, $state);
 
         return redirect()
             ->route('dept-head.qar')
-            ->with('success', 'QAR approved and saved. MPORs=' . $incomingMporModels->count() . ', rows=' . count($rows));
+            ->with('success', 'QAR endorsed and saved. MPORs=' . $incomingMporModels->count() . ', rows=' . count($rows));
     }
 
     public function generate(Request $request)

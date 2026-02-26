@@ -7,9 +7,13 @@
                 'label' => 'Draft',
                 'badge' => 'border-violet-500/40 bg-violet-500/10 text-violet-200',
             ],
-            'dept_head_approved' => [
-                'label' => 'Dept Head Approved',
+            'dept_head_endorsed' => [
+                'label' => 'Dept Head Endorsed',
                 'badge' => 'border-emerald-500/40 bg-emerald-500/10 text-emerald-200',
+            ],
+            'pmt_approved' => [
+                'label' => 'PMT Approved',
+                'badge' => 'border-sky-500/40 bg-sky-500/10 text-sky-200',
             ],
         ];
 
@@ -19,13 +23,13 @@
         $consolidatedMporsSafe = $consolidatedMpors ?? [];
         $rowsSafe = $rows ?? [];
 
-        $isApproved = $status === 'dept_head_approved';
+        $isEndorsed = in_array($status, ['dept_head_endorsed', 'pmt_approved'], true);
         $hasIncoming = !empty($incomingMporsSafe);
         $hasConsolidated = !empty($consolidatedMporsSafe);
 
-        $canApprove = ! $isApproved && $hasConsolidated;
+        $canEndorse = ($status === 'draft') && $hasConsolidated;
 
-        $approvedDateLabel = $isApproved && !empty($approvedAt)
+        $approvedDateLabel = $isEndorsed && !empty($approvedAt)
             ? \Illuminate\Support\Carbon::parse($approvedAt)->format('M d, Y g:i A')
             : '-';
 
@@ -203,9 +207,8 @@
                 <button type="button"
                     data-modal-target="qarApproveConfirmModal"
                     data-modal-toggle="qarApproveConfirmModal"
-                    @disabled(!$canApprove)
                     class="rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-200 transition hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-60">
-                    Approve QAR
+                    Endorse QAR
                 </button>
             </div>
 
@@ -269,7 +272,7 @@
         <div class="relative max-h-full w-full max-w-lg p-4">
             <div class="relative rounded-2xl border border-slate-800 bg-slate-900 shadow-lg">
                 <div class="flex items-start justify-between border-b border-slate-800 p-5">
-                    <h3 class="text-lg font-semibold text-white">Approve QAR</h3>
+                    <h3 class="text-lg font-semibold text-white">Endorse QAR</h3>
                     <button type="button" data-modal-hide="qarApproveConfirmModal"
                         class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-800 hover:text-white">
                         <span class="sr-only">Close modal</span>
@@ -277,10 +280,10 @@
                     </button>
                 </div>
                 <div class="space-y-3 p-5 text-sm text-slate-300">
-                    <p>Approve this QAR for PMT validation?</p>
-                    <p>Once approved, QAR becomes read-only at Dept Head level.</p>
+                    <p>Endorse this QAR for PMT validation?</p>
+                    <p>Once endorsed, QAR becomes read-only at Dept Head level.</p>
                 </div>
-                <form id="qarApproveForm" method="POST" action="{{ route('dept-head.qar.approve') }}"
+                <form id="qarEndorseForm" method="POST" action="{{ route('dept-head.qar.endorse') }}"
                     class="flex items-center justify-end gap-2 border-t border-slate-800 p-5">
                     @csrf
                     <button type="button" data-modal-hide="qarApproveConfirmModal"
@@ -290,7 +293,7 @@
                     <button type="submit" id="qarApproveProceedBtn"
                         class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500">
                         <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
-                        <span data-button-label>Proceed Approve</span>
+                        <span data-button-label>Proceed Endorse</span>
                     </button>
                 </form>
             </div>
@@ -520,8 +523,7 @@
                     });
                 };
 
-                bindLoadingSubmit('qarApproveForm', 'qarApproveProceedBtn', 'Approving...');
-                bindLoadingSubmit('qarResetForm', 'qarResetBtn', 'Resetting...');
+                bindLoadingSubmit('qarEndorseForm', 'qarApproveProceedBtn', 'Endorsing...');
 
                 const autoOpenViewButton = document.getElementById('qarAutoOpenViewModal');
                 if (autoOpenViewButton) {
@@ -533,4 +535,3 @@
         </script>
     @endpush
 @endsection
-

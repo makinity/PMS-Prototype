@@ -34,6 +34,7 @@ use App\Http\Controllers\StageTwo\Forms\MporExcelExportController;
 use App\Http\Controllers\StageTwo\Planning\MporSubmissionController;
 use App\Http\Controllers\StageTwo\Planning\PmtQarApprovalController;
 use App\Http\Controllers\StageTwo\Planning\SupervisorMporEndorseController;
+use App\Http\Controllers\Pmt\QarController as PmtQarController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -214,7 +215,7 @@ Route::prefix('dept-head')->middleware('auth')->group(function () {
     // Stage II - QAR
     Route::get('/qar', [QarController::class, 'index'])->name('dept-head.qar');
     Route::post('/qar/generate', [QarController::class, 'generate'])->name('dept-head.qar.generate');
-    Route::post('/qar/approve', [QarController::class, 'approve'])->name('dept-head.qar.approve');
+    Route::post('/qar/endorse', [QarController::class, 'endorse'])->name('dept-head.qar.endorse');
     Route::post('/qar/reset', [QarController::class, 'reset'])->name('dept-head.qar.reset');
 
     // Exports
@@ -332,7 +333,11 @@ Route::prefix('pmt')->middleware('auth')->group(function () {
         ->name('pmt.opcr.review.export');
 
     // Stage II - QAR
-    Route::get('/qar', [PmtQarApprovalController::class, 'index'])
+    Route::get('/qar', [PmtQarController::class, 'index'])
+        ->name('pmt.qar');
+    Route::post('/qar/{qarHeader}/approve', [PmtQarController::class, 'approve'])
+        ->name('pmt.qar.approve');
+    Route::get('/qar/index', [PmtQarApprovalController::class, 'index'])
         ->name('pmt.qar.index');
     Route::post('/qar/{qar}/validate', [PmtQarApprovalController::class, 'validateQar'])
         ->name('pmt.qar.validate');
