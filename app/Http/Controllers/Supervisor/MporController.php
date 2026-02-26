@@ -260,21 +260,6 @@ class MporController extends Controller
         ]);
     }
 
-    public function approve(Mpor $mpor)
-    {
-        if ($mpor->status !== 'submitted') {
-            return back()->with('error', 'MPOR cannot be approved.');
-        }
-
-        $mpor->update([
-            'status' => 'approved',
-            'approved_at' => now(),
-            'approved_by' => auth()->id(),
-        ]);
-
-        return back()->with('success', 'MPOR approved successfully.');
-    }
-
     public function endorse(Mpor $mpor)
     {
         if ($mpor->status !== 'approved') {
@@ -288,5 +273,20 @@ class MporController extends Controller
         ]);
 
         return back()->with('success', 'MPOR endorsed to Department Head.');
+    }
+
+    public function approve(Mpor $mpor)
+    {
+        if ($mpor->status !== 'submitted') {
+            return back()->with('error', 'MPOR cannot be approved.');
+        }
+
+        $mpor->update([
+            'status' => 'approved',
+            'approved_at' => now(),
+            'approved_by' => auth()->id(),
+        ]);
+
+        return back()->with('success', 'MPOR approved successfully.');
     }
 }

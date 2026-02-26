@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\StageTwo\Planning;
 
 use App\Http\Controllers\Controller;
+use App\Models\Mpor;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -90,37 +92,8 @@ class DeptHeadQarController extends Controller
 
     public function generate(Request $request)
     {
-        $state = $this->getState($request);
-
-        if (($state['status'] ?? 'draft') === 'dept_head_approved') {
-            return redirect()->route('dept-head.qar')
-                ->with('info', 'QAR is already approved and locked at Dept Head level.');
-        }
-
-        $incomingMpors = array_values($state['incoming_mpors'] ?? []);
-        if ($incomingMpors === []) {
-            return redirect()->route('dept-head.qar')
-                ->with('info', 'DEBUG: incoming empty; nothing to consolidate.');
-        }
-
-        $incomingBefore = count($incomingMpors);
-        $state['consolidated_mpors'] = $incomingMpors;
-        $state['incoming_mpors'] = [];
-
-        $uwpTargetTimelineMap = $this->getUwpTargetTimelineMap();
-        $rows = $this->buildDummyQarRows('Q1 2026 (Jan-Mar)');
-        $state['qar_rows'] = $this->applyUwpTargetsToRows($rows, $uwpTargetTimelineMap);
-        $state['generated_at'] = now()->toDateTimeString();
-        $state['status'] = 'draft';
-        $state['approved_at'] = null;
-
-        $request->session()->put(self::SESSION_KEY, $state);
-        $request->session()->save();
-
         return redirect()->route('dept-head.qar')
-            ->with('success', 'DEBUG: generate hit. incoming(before)=' . $incomingBefore
-                . ' consolidated(after)=' . count($state['consolidated_mpors'])
-                . ' rows=' . count($state['qar_rows']));
+            ->with('info', 'Consolidation is automatic. Approved MPORs are now used directly.');
     }
 
     public function approve(Request $request)
@@ -132,17 +105,80 @@ class DeptHeadQarController extends Controller
                 ->with('info', 'QAR is already approved.');
         }
 
-        $generatedAt = $state['generated_at'] ?? null;
         $consolidatedMpors = array_values($state['consolidated_mpors'] ?? []);
+        $incomingMpors = array_values($state['incoming_mpors'] ?? []);
 
-        if (empty($generatedAt) || $consolidatedMpors === []) {
+        if ($consolidatedMpors === [] && $incomingMpors !== []) {
+            $state['consolidated_mpors'] = $incomingMpors;
+            $state['incoming_mpors'] = [];
+            $consolidatedMpors = $state['consolidated_mpors'];
+        }
+
+        if ($consolidatedMpors === []) {
+            $deptHead = $request->user();
+            $officeId = (int) ($deptHead?->office_id ?? 0);
+            $now = Carbon::now();
+            $year = (int) $now->year;
+            $quarterNumber = (int) ceil($now->month / 3);
+            $quarterStartMonth = (($quarterNumber - 1) * 3) + 1;
+            $quarterMonths = collect(range($quarterStartMonth, $quarterStartMonth + 2))
+                ->map(fn (int $month): string => sprintf('%d-%02d', $year, $month))
+                ->all();
+
+            $formatMonthLabel = static function (?string $month): string {
+                if (!is_string($month) || trim($month) === '') {
+                    return '-';
+                }
+
+                try {
+                    return Carbon::createFromFormat('Y-m', $month)->format('M Y');
+                } catch (\Throwable) {
+                    return $month;
+                }
+            };
+
+            $dbMpors = Mpor::query()
+                ->with(['employee:id,name'])
+                ->when($officeId > 0, function ($query) use ($officeId) {
+                    $query->where('office_id', $officeId);
+                })
+                ->whereRaw('LOWER(status) = ?', ['approved'])
+                ->whereIn('month', $quarterMonths)
+                ->orderByDesc('month')
+                ->orderByDesc('id')
+                ->get();
+
+            if ($dbMpors->isNotEmpty()) {
+                $state['consolidated_mpors'] = $dbMpors->map(function (Mpor $mpor) use ($formatMonthLabel): array {
+                    return [
+                        'employee' => $mpor->employee?->name ?? '-',
+                        'month' => $formatMonthLabel($mpor->month),
+                        'status' => (string) ($mpor->status ?? '-'),
+                    ];
+                })->values()->all();
+
+                $latestGenerated = $dbMpors
+                    ->map(fn (Mpor $mpor) => $mpor->submitted_at ?? $mpor->generated_at)
+                    ->filter()
+                    ->sortBy(fn ($dt) => $dt instanceof Carbon ? $dt->getTimestamp() : 0)
+                    ->last();
+
+                $state['generated_at'] = $latestGenerated
+                    ? Carbon::parse($latestGenerated)->toDateTimeString()
+                    : now()->toDateTimeString();
+                $state['incoming_mpors'] = [];
+                $consolidatedMpors = $state['consolidated_mpors'];
+            }
+        }
+
+        if ($consolidatedMpors === []) {
             return redirect()->route('dept-head.qar')
-                ->with('info', 'Consolidate QAR first before approving.');
+                ->with('info', 'No approved MPOR data found for QAR approval.');
         }
 
         $state['status'] = 'dept_head_approved';
         $state['approved_at'] = now()->toDateTimeString();
-        $state['generated_at'] = $generatedAt;
+        $state['generated_at'] = $state['generated_at'] ?? now()->toDateTimeString();
 
         $request->session()->put(self::SESSION_KEY, $state);
         $request->session()->save();
@@ -346,4 +382,3 @@ class DeptHeadQarController extends Controller
         }, $rows);
     }
 }
-

@@ -109,18 +109,7 @@
                                                 Preview
                                             </button>
 
-                                            @if (($mpor->status ?? null) === 'submitted')
-                                                <form method="POST" action="{{ route('supervisor.mpor.approve', $mpor) }}" data-action-form>
-                                                    @csrf
-                                                    <button
-                                                        type="submit"
-                                                        class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-emerald-500"
-                                                    >
-                                                        <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
-                                                        <span data-button-label>Approve</span>
-                                                    </button>
-                                                </form>
-                                            @endif
+
 
                                             @if (($mpor->status ?? null) === 'approved')
                                                 <form method="POST" action="{{ route('supervisor.mpor.endorse', $mpor) }}" data-action-form>
@@ -285,6 +274,19 @@
                     </div>
 
                     <div class="flex shrink-0 items-center justify-end gap-2 border-t border-slate-800 p-5">
+                        @if (($mpor->status ?? null) === 'submitted')
+                            <form method="POST" action="{{ route('supervisor.mpor.approve', $mpor) }}" data-action-form>
+                                @csrf
+                                <button
+                                    type="submit"
+                                    class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-emerald-500"
+                                >
+                                    <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                                    <span data-button-label>Approve</span>
+                                </button>
+                            </form>
+                        @endif
+
                         <button
                             type="button"
                             data-modal-hide="mporPreviewModal"

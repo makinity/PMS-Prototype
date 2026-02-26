@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\OfficeController;
 use App\Http\Controllers\Admin\PerformancePeriodsController;
 use App\Http\Controllers\Admin\UsersController;
 use App\Http\Controllers\Auth\ActivationController;
+use App\Http\Controllers\DeptHead\QarController;
 use App\Http\Controllers\StageOne\Forms\IpcrExportController;
 use App\Http\Controllers\StageOne\Forms\IpcrExcelExportController;
 use App\Http\Controllers\StageOne\Forms\OpcrExportController;
@@ -29,7 +30,6 @@ use App\Http\Controllers\StageTwo\Monitoring\EmployeeAccomplishmentController;
 use App\Http\Controllers\StageTwo\Monitoring\OrsMonitoringController;
 use App\Http\Controllers\StageTwo\Monitoring\TeamTasksController;
 use App\Http\Controllers\StageTwo\Mpor\MporController;
-use App\Http\Controllers\StageTwo\Planning\DeptHeadQarController;
 use App\Http\Controllers\StageTwo\Forms\MporExcelExportController;
 use App\Http\Controllers\StageTwo\Planning\MporSubmissionController;
 use App\Http\Controllers\StageTwo\Planning\PmtQarApprovalController;
@@ -212,10 +212,10 @@ Route::prefix('dept-head')->middleware('auth')->group(function () {
     Route::post('/opcr/review', [DeptHeadOpcrReviewController::class, 'review'])->name('dept-head.opcr.review');
 
     // Stage II - QAR
-    Route::get('/qar', [DeptHeadQarController::class, 'index'])->name('dept-head.qar');
-    Route::post('/qar/generate', [DeptHeadQarController::class, 'generate'])->name('dept-head.qar.generate');
-    Route::post('/qar/approve', [DeptHeadQarController::class, 'approve'])->name('dept-head.qar.approve');
-    Route::post('/qar/reset', [DeptHeadQarController::class, 'reset'])->name('dept-head.qar.reset');
+    Route::get('/qar', [QarController::class, 'index'])->name('dept-head.qar');
+    Route::post('/qar/generate', [QarController::class, 'generate'])->name('dept-head.qar.generate');
+    Route::post('/qar/approve', [QarController::class, 'approve'])->name('dept-head.qar.approve');
+    Route::post('/qar/reset', [QarController::class, 'reset'])->name('dept-head.qar.reset');
 
     // Exports
     Route::get('/qar/export/pdf', [QarExportController::class, 'exportPdf'])
