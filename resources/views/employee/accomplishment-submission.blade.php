@@ -8,7 +8,7 @@
             : 'inline-flex items-center rounded-full bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-200 border border-amber-500/40';
         $periodLabelValue = $periodLabel ?? '—';
         $periodHeaderLabel = $periodLabelValue === '—' ? 'No active period' : $periodLabelValue;
-    
+
         $smporMonthLabels = !empty($smporMonths ?? []) && is_array($smporMonths)
             ? array_values($smporMonths)
             : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
@@ -64,9 +64,9 @@
                         View SMPOR
                     </a>
 
-                    <a href="{{ route('stage2.smpor.export.excel') }}"
+                    <a href="{{ route('smpor.export.excel') }}"
                         class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800">
-                            Export PDF
+                            Export
                     </a>
                 </div>
             </div>
@@ -250,6 +250,16 @@
                     </div>
                     <p class="text-xs text-slate-400">Monthly totals are derived from rated ORS monitoring within submitted MPORs.</p>
 
+                    @php
+                        $smporSectionList = is_array($smporSections ?? null) ? $smporSections : [];
+                        $formatSmporValue = static function ($value): string {
+                            $numeric = (float) ($value ?? 0);
+                            return fmod($numeric, 1.0) === 0.0
+                                ? (string) (int) $numeric
+                                : rtrim(rtrim(number_format($numeric, 2, '.', ''), '0'), '.');
+                        };
+                    @endphp
+
                     <div data-smpor-tab-panel="quantity" class="overflow-x-auto rounded-xl border border-slate-800">
                         <table class="min-w-full text-left text-sm text-slate-200">
                             <thead class="bg-slate-950/70 text-xs uppercase text-slate-400">
@@ -262,29 +272,37 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-800">
-                                @forelse ($smporRows as $smporRow)
-                                    <tr class="bg-slate-900/40">
-                                        <td class="px-4 py-3 font-semibold">{{ $smporRow['mfo'] }}</td>
-                                        @foreach ($smporMonthLabels as $monthLabel)
-                                            <td class="px-4 py-3 text-right">{{ $smporRow['monthly_quantity'][$monthLabel] ?? 0 }}</td>
-                                        @endforeach
-                                        <td class="px-4 py-3 text-right">{{ $smporRow['total_quantity'] ?? 0 }}</td>
+                                @forelse ($smporSectionList as $section)
+                                    @php
+                                        $sectionRows = is_array($section['rows'] ?? null) ? $section['rows'] : [];
+                                        $sectionTitle = trim((string) ($section['title'] ?? 'Section'));
+                                        $sectionTitle = $sectionTitle !== '' ? $sectionTitle : 'Section';
+                                        $sectionQtyTotal = (float) ($section['totals']['quantity_total'] ?? 0);
+                                    @endphp
+                                    <tr class="bg-slate-950/60">
+                                        <td colspan="{{ count($smporMonthLabels) + 2 }}" class="px-4 py-3 text-xs font-bold uppercase tracking-[0.14em] text-slate-100">
+                                            {{ $sectionTitle }}
+                                        </td>
                                     </tr>
+                                    @forelse ($sectionRows as $row)
+                                        <tr class="bg-slate-900/40">
+                                            <td class="px-4 py-3 font-semibold">{{ $row['expected_output'] ?? '—' }}</td>
+                                            @foreach ($smporMonthLabels as $monthLabel)
+                                                <td class="px-4 py-3 text-right">{{ $formatSmporValue($row['quantity'][$monthLabel] ?? 0) }}</td>
+                                            @endforeach
+                                            <td class="px-4 py-3 text-right">{{ $formatSmporValue($row['quantity_total'] ?? 0) }}</td>
+                                        </tr>
+                                    @empty
+                                        <tr class="bg-slate-900/40">
+                                            <td colspan="{{ count($smporMonthLabels) + 2 }}" class="px-4 py-3 text-center text-slate-400">No outputs found for this section.</td>
+                                        </tr>
+                                    @endforelse
                                 @empty
                                     <tr class="bg-slate-900/40">
                                         <td colspan="{{ count($smporMonthLabels) + 2 }}" class="px-4 py-3 text-center text-slate-400">No submitted MPOR data available.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
-                            <tfoot class="bg-slate-950/70">
-                                <tr>
-                                    <th class="px-4 py-3 text-left font-semibold text-slate-100">Grand Total</th>
-                                    @foreach ($smporMonthLabels as $monthLabel)
-                                        <th class="px-4 py-3 text-right font-semibold text-slate-100">{{ $smporTotals['monthly_quantity'][$monthLabel] ?? 0 }}</th>
-                                    @endforeach
-                                    <th class="px-4 py-3 text-right font-semibold text-slate-100">{{ $smporTotals['quantity'] ?? 0 }}</th>
-                                </tr>
-                            </tfoot>
                         </table>
                     </div>
 
@@ -301,41 +319,44 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-800">
-                                @forelse ($smporRows as $smporRow)
+                                @forelse ($smporSectionList as $section)
                                     @php
-                                        $rowQty = (float) ($smporRow['total_quantity'] ?? 0);
-                                        $rowQuality = (float) ($smporRow['total_quality_points'] ?? 0);
-                                        $rowQualityAvg = $rowQty > 0 ? $rowQuality / $rowQty : 0;
+                                        $sectionRows = is_array($section['rows'] ?? null) ? $section['rows'] : [];
+                                        $sectionTitle = trim((string) ($section['title'] ?? 'Section'));
+                                        $sectionTitle = $sectionTitle !== '' ? $sectionTitle : 'Section';
+                                        $sectionQualityTotal = (float) ($section['totals']['quality_total'] ?? 0);
+                                        $sectionQualityAvg = (float) ($section['totals']['quality_avg'] ?? 0);
                                     @endphp
-                                    <tr class="bg-slate-900/40">
-                                        <td class="px-4 py-3 font-semibold">{{ $smporRow['mfo'] }}</td>
-                                        @foreach ($smporMonthLabels as $monthLabel)
-                                            <td class="px-4 py-3 text-right">{{ $smporRow['monthly_quality_points'][$monthLabel] ?? 0 }}</td>
-                                        @endforeach
-                                        <td class="px-4 py-3 text-right">{{ $rowQuality }}</td>
-                                        <td class="px-4 py-3 text-right">{{ number_format($rowQualityAvg, 2, '.', '') }}</td>
+                                    <tr class="bg-slate-950/60">
+                                        <td colspan="{{ count($smporMonthLabels) + 3 }}" class="px-4 py-3 text-xs font-bold uppercase tracking-[0.14em] text-slate-100">
+                                            {{ $sectionTitle }}
+                                        </td>
                                     </tr>
+                                    @forelse ($sectionRows as $row)
+                                        @php
+                                            $rowQty = (float) ($row['quantity_total'] ?? 0);
+                                            $rowQuality = (float) ($row['quality_total'] ?? 0);
+                                            $rowQualityAvg = $rowQty > 0 ? $rowQuality / $rowQty : 0;
+                                        @endphp
+                                        <tr class="bg-slate-900/40">
+                                            <td class="px-4 py-3 font-semibold">{{ $row['expected_output'] ?? '—' }}</td>
+                                            @foreach ($smporMonthLabels as $monthLabel)
+                                                <td class="px-4 py-3 text-right">{{ $formatSmporValue($row['quality'][$monthLabel] ?? 0) }}</td>
+                                            @endforeach
+                                            <td class="px-4 py-3 text-right">{{ $formatSmporValue($rowQuality) }}</td>
+                                            <td class="px-4 py-3 text-right">{{ number_format($rowQualityAvg, 2, '.', '') }}</td>
+                                        </tr>
+                                    @empty
+                                        <tr class="bg-slate-900/40">
+                                            <td colspan="{{ count($smporMonthLabels) + 3 }}" class="px-4 py-3 text-center text-slate-400">No outputs found for this section.</td>
+                                        </tr>
+                                    @endforelse
                                 @empty
                                     <tr class="bg-slate-900/40">
                                         <td colspan="{{ count($smporMonthLabels) + 3 }}" class="px-4 py-3 text-center text-slate-400">No submitted MPOR data available.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
-                            <tfoot class="bg-slate-950/70">
-                                @php
-                                    $totalQty = (float) ($smporTotals['quantity'] ?? 0);
-                                    $totalQuality = (float) ($smporTotals['quality_points'] ?? 0);
-                                    $totalQualityAvg = $totalQty > 0 ? $totalQuality / $totalQty : 0;
-                                @endphp
-                                <tr>
-                                    <th class="px-4 py-3 text-left font-semibold text-slate-100">Grand Total</th>
-                                    @foreach ($smporMonthLabels as $monthLabel)
-                                        <th class="px-4 py-3 text-right font-semibold text-slate-100">{{ $smporTotals['monthly_quality_points'][$monthLabel] ?? 0 }}</th>
-                                    @endforeach
-                                    <th class="px-4 py-3 text-right font-semibold text-slate-100">{{ $totalQuality }}</th>
-                                    <th class="px-4 py-3 text-right font-semibold text-slate-100">{{ number_format($totalQualityAvg, 2, '.', '') }}</th>
-                                </tr>
-                            </tfoot>
                         </table>
                     </div>
 
@@ -352,41 +373,44 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-800">
-                                @forelse ($smporRows as $smporRow)
+                                @forelse ($smporSectionList as $section)
                                     @php
-                                        $rowQty = (float) ($smporRow['total_quantity'] ?? 0);
-                                        $rowTimeliness = (float) ($smporRow['total_timeliness_points'] ?? 0);
-                                        $rowTimelinessAvg = $rowQty > 0 ? $rowTimeliness / $rowQty : 0;
+                                        $sectionRows = is_array($section['rows'] ?? null) ? $section['rows'] : [];
+                                        $sectionTitle = trim((string) ($section['title'] ?? 'Section'));
+                                        $sectionTitle = $sectionTitle !== '' ? $sectionTitle : 'Section';
+                                        $sectionTimelinessTotal = (float) ($section['totals']['timeliness_total'] ?? 0);
+                                        $sectionTimelinessAvg = (float) ($section['totals']['timeliness_avg'] ?? 0);
                                     @endphp
-                                    <tr class="bg-slate-900/40">
-                                        <td class="px-4 py-3 font-semibold">{{ $smporRow['mfo'] }}</td>
-                                        @foreach ($smporMonthLabels as $monthLabel)
-                                            <td class="px-4 py-3 text-right">{{ $smporRow['monthly_timeliness_points'][$monthLabel] ?? 0 }}</td>
-                                        @endforeach
-                                        <td class="px-4 py-3 text-right">{{ $rowTimeliness }}</td>
-                                        <td class="px-4 py-3 text-right">{{ number_format($rowTimelinessAvg, 2, '.', '') }}</td>
+                                    <tr class="bg-slate-950/60">
+                                        <td colspan="{{ count($smporMonthLabels) + 3 }}" class="px-4 py-3 text-xs font-bold uppercase tracking-[0.14em] text-slate-100">
+                                            {{ $sectionTitle }}
+                                        </td>
                                     </tr>
+                                    @forelse ($sectionRows as $row)
+                                        @php
+                                            $rowQty = (float) ($row['quantity_total'] ?? 0);
+                                            $rowTimeliness = (float) ($row['timeliness_total'] ?? 0);
+                                            $rowTimelinessAvg = $rowQty > 0 ? $rowTimeliness / $rowQty : 0;
+                                        @endphp
+                                        <tr class="bg-slate-900/40">
+                                            <td class="px-4 py-3 font-semibold">{{ $row['expected_output'] ?? '—' }}</td>
+                                            @foreach ($smporMonthLabels as $monthLabel)
+                                                <td class="px-4 py-3 text-right">{{ $formatSmporValue($row['timeliness'][$monthLabel] ?? 0) }}</td>
+                                            @endforeach
+                                            <td class="px-4 py-3 text-right">{{ $formatSmporValue($rowTimeliness) }}</td>
+                                            <td class="px-4 py-3 text-right">{{ number_format($rowTimelinessAvg, 2, '.', '') }}</td>
+                                        </tr>
+                                    @empty
+                                        <tr class="bg-slate-900/40">
+                                            <td colspan="{{ count($smporMonthLabels) + 3 }}" class="px-4 py-3 text-center text-slate-400">No outputs found for this section.</td>
+                                        </tr>
+                                    @endforelse
                                 @empty
                                     <tr class="bg-slate-900/40">
                                         <td colspan="{{ count($smporMonthLabels) + 3 }}" class="px-4 py-3 text-center text-slate-400">No submitted MPOR data available.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
-                            <tfoot class="bg-slate-950/70">
-                                @php
-                                    $totalQty = (float) ($smporTotals['quantity'] ?? 0);
-                                    $totalTimeliness = (float) ($smporTotals['timeliness_points'] ?? 0);
-                                    $totalTimelinessAvg = $totalQty > 0 ? $totalTimeliness / $totalQty : 0;
-                                @endphp
-                                <tr>
-                                    <th class="px-4 py-3 text-left font-semibold text-slate-100">Grand Total</th>
-                                    @foreach ($smporMonthLabels as $monthLabel)
-                                        <th class="px-4 py-3 text-right font-semibold text-slate-100">{{ $smporTotals['monthly_timeliness_points'][$monthLabel] ?? 0 }}</th>
-                                    @endforeach
-                                    <th class="px-4 py-3 text-right font-semibold text-slate-100">{{ $totalTimeliness }}</th>
-                                    <th class="px-4 py-3 text-right font-semibold text-slate-100">{{ number_format($totalTimelinessAvg, 2, '.', '') }}</th>
-                                </tr>
-                            </tfoot>
                         </table>
                     </div>
 
@@ -406,12 +430,12 @@
     <div id="ipcr-preview-modal"
          data-preview-modal
          class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 px-4 py-6">
-        <div class="w-full max-w-5xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
+        <div class="w-full max-w-6xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
             <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
                 <div>
                     <p class="text-xs uppercase tracking-[0.2em] text-blue-300">IPCR Accomplishment Report</p>
                     <h3 class="text-lg font-semibold text-white">IPCR Accomplishment Preview &mdash; {{ $periodLabelValue }}</h3>
-                    <p class="text-sm text-slate-400 mt-1">System-generated accomplishments derived from SMPOR totals (Stage II).</p>
+                    <p class="text-sm text-slate-400 mt-1">System-generated commitments for digital accomplishment submission.</p>
                 </div>
                 <button type="button" data-close-modal class="text-slate-400 hover:text-white">&times;</button>
             </div>
@@ -431,39 +455,123 @@
                     </div>
                     <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                         <p class="text-[11px] uppercase text-slate-500">Source</p>
-                        <p class="mt-1 font-semibold">SMPOR totals</p>
+                        <p class="mt-1 font-semibold">IPCR Commitments</p>
                     </div>
                 </div>
 
-                <div class="space-y-2">
-                    <h4 class="text-base font-semibold text-white">Accomplishment Summary</h4>
-                    <div class="overflow-x-auto rounded-xl border border-slate-800">
-                        <table class="min-w-full text-left text-sm text-slate-200">
-                            <thead class="bg-slate-950/70 text-xs uppercase text-slate-400">
-                                <tr>
-                                    <th class="px-4 py-3">MFO</th>
-                                    <th class="px-4 py-3">Accomplishment Summary</th>
-                                    <th class="px-4 py-3">Evidence</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-800">
-                                @forelse ($ipcrRows as $ipcrRow)
-                                    <tr class="bg-slate-900/40">
-                                        <td class="px-4 py-3 font-semibold">{{ $ipcrRow['mfo'] }}</td>
-                                        <td class="px-4 py-3 text-slate-300">{{ $ipcrRow['accomplishment_summary'] }}</td>
-                                        <td class="px-4 py-3 text-slate-300">{{ $ipcrRow['evidence_label'] }}</td>
-                                    </tr>
-                                @empty
-                                    <tr class="bg-slate-900/40">
-                                        <td colspan="3" class="px-4 py-3 text-center text-slate-400">No SMPOR totals available for IPCR preview.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                <div class="space-y-4">
+                    @forelse (($ipcrSections ?? []) as $sectionIndex => $section)
+                        @php
+                            $sectionTitle = trim((string) ($section['title'] ?? '')) ?: 'Untitled Section';
+                            $sectionWeight = $section['weight_percent'] ?? null;
+                            $sectionRows = $section['rows'] ?? [];
+                        @endphp
+                        <div class="rounded-xl border border-slate-800 bg-slate-950/50 p-4 space-y-3">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <h4 class="text-sm font-semibold uppercase tracking-[0.14em] text-slate-100">{{ $sectionTitle }}</h4>
+                                @if (!is_null($sectionWeight))
+                                    <span class="rounded-full border border-sky-500/30 bg-sky-500/10 px-3 py-1 text-[11px] font-semibold text-sky-200">
+                                        {{ rtrim(rtrim(number_format((float) $sectionWeight, 2, '.', ''), '0'), '.') }}%
+                                    </span>
+                                @endif
+                            </div>
+                            <div class="overflow-x-auto rounded-lg border border-slate-800">
+                                <table class="min-w-full text-left text-sm text-slate-200">
+                                    <thead class="bg-slate-950/70 text-xs uppercase text-slate-400">
+                                        <tr>
+                                            <th class="px-4 py-3">Major Output</th>
+                                            <th class="px-4 py-3">Success Indicators</th>
+                                            <th class="px-4 py-3">Target Summary</th>
+                                            <th class="px-4 py-3">Timeline</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-800">
+                                        @forelse ($sectionRows as $rowIndex => $row)
+                                            <tr class="bg-slate-900/40">
+                                                <td class="px-4 py-3 font-semibold text-slate-100">{{ $row['major_output'] ?? '—' }}</td>
+                                                <td class="px-4 py-3">
+                                                    <button type="button"
+                                                            data-ipcr-open-indicators
+                                                            data-section-index="{{ $sectionIndex }}"
+                                                            data-row-index="{{ $rowIndex }}"
+                                                            class="inline-flex items-center rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-1.5 text-xs font-semibold text-sky-200 hover:bg-sky-500/20 transition">
+                                                        View ({{ (int) ($row['indicators_count'] ?? 0) }})
+                                                    </button>
+                                                </td>
+                                                <td class="px-4 py-3 text-slate-300">{{ $row['target_summary'] ?? '—' }}</td>
+                                                <td class="px-4 py-3 text-slate-300">{{ $row['timeline'] ?? $periodLabelValue }}</td>
+                                            </tr>
+                                        @empty
+                                            <tr class="bg-slate-900/40">
+                                                <td colspan="4" class="px-4 py-3 text-center text-slate-400">No outputs found for this section.</td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="rounded-xl border border-slate-800 bg-slate-950/50 p-4 text-sm text-slate-400">
+                            No IPCR commitments found for this period.
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+            <div class="flex items-center justify-end gap-3 border-t border-slate-800 pt-4 mt-4">
+
+
+                <button type="button"
+                        data-close-modal
+                        class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-800 transition">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Indicators Modal -->
+    <div id="ipcr-indicators-modal"
+         data-preview-modal
+         data-parent-modal-id="ipcr-preview-modal"
+         class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 px-4 py-6">
+        <div class="w-full max-w-6xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
+            <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
+                <div>
+                    <p class="text-xs uppercase tracking-[0.2em] text-blue-300">IPCR Success Indicators</p>
+                    <h3 id="ipcrIndicatorsMajorOutput" class="text-lg font-semibold text-white">Success Indicators</h3>
+                </div>
+                <button type="button" data-close-modal class="text-slate-400 hover:text-white">&times;</button>
+            </div>
+            <div class="mt-4 space-y-5 max-h-[65vh] overflow-y-auto text-sm text-slate-200">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                        <p class="text-[11px] uppercase text-slate-500">Employee</p>
+                        <p class="mt-1 font-semibold">{{ $employeeName ?? 'Ramon Reyes' }}</p>
                     </div>
-                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3 text-xs text-slate-400">
-                        Final IPCR rating is completed in Stage III. This preview is monitoring-derived and read-only.
+                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                        <p class="text-[11px] uppercase text-slate-500">Office/Unit</p>
+                        <p class="mt-1 font-semibold">{{ $officeName ?? 'Revenue Collection Unit' }}</p>
                     </div>
+                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                        <p class="text-[11px] uppercase text-slate-500">Period</p>
+                        <p class="mt-1 font-semibold">{{ $periodLabelValue }}</p>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto rounded-xl border border-slate-800">
+                    <table class="min-w-full text-left text-sm text-slate-200">
+                        <thead class="bg-slate-950/70 text-xs uppercase text-slate-400">
+                            <tr>
+                                <th class="px-4 py-3">Indicator</th>
+                                <th class="px-4 py-3">Standards (Q/E/T)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ipcrIndicatorsTbody" class="divide-y divide-slate-800">
+                            <tr class="bg-slate-900/40">
+                                <td colspan="2" class="px-4 py-3 text-center text-slate-400">Select a major output to view indicators.</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
             <div class="flex items-center justify-end gap-3 border-t border-slate-800 pt-4 mt-4">
@@ -475,6 +583,51 @@
             </div>
         </div>
     </div>
+
+    <!-- Standards Modal -->
+    <div id="ipcr-standards-modal"
+         data-preview-modal
+         data-parent-modal-id="ipcr-indicators-modal"
+         class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 px-4 py-6">
+        <div class="w-full max-w-6xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
+            <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
+                <div>
+                    <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Standards (Q/E/T)</p>
+                    <h3 class="text-lg font-semibold text-white">Performance Standards</h3>
+                    <p id="ipcrStandardsIndicatorText" class="text-sm text-slate-400 mt-1">Select an indicator to view standards.</p>
+                </div>
+                <button type="button" data-close-modal class="text-slate-400 hover:text-white">&times;</button>
+            </div>
+            <div class="mt-4 max-h-[65vh] overflow-y-auto text-sm text-slate-200">
+                <div class="overflow-x-auto rounded-xl border border-slate-800">
+                    <table class="min-w-full text-left text-sm text-slate-200">
+                        <thead class="bg-slate-950/70 text-xs uppercase text-slate-400">
+                            <tr>
+                                <th class="px-4 py-3">Rating</th>
+                                <th class="px-4 py-3">Quality (Q)</th>
+                                <th class="px-4 py-3">Efficiency (E)</th>
+                                <th class="px-4 py-3">Timeliness (T)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ipcrStandardsTbody" class="divide-y divide-slate-800">
+                            <tr class="bg-slate-900/40">
+                                <td colspan="4" class="px-4 py-3 text-center text-slate-400">No standards loaded.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="flex items-center justify-end gap-3 border-t border-slate-800 pt-4 mt-4">
+                <button type="button"
+                        data-close-modal
+                        class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-800 transition">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script id="ipcr-sections-json" type="application/json">{!! json_encode($ipcrSections ?? [], JSON_UNESCAPED_UNICODE) !!}</script>
 
     <!-- Generic Modal -->
     <div id="action-modal"
@@ -524,7 +677,15 @@
                 const submitBtn = document.getElementById('submit-accomplishments');
                 const smporTabButtons = Array.from(document.querySelectorAll('[data-smpor-tab]'));
                 const smporTabPanels = Array.from(document.querySelectorAll('[data-smpor-tab-panel]'));
+                const ipcrSectionsJsonEl = document.getElementById('ipcr-sections-json');
+                const ipcrIndicatorsMajorOutput = document.getElementById('ipcrIndicatorsMajorOutput');
+                const ipcrIndicatorsTbody = document.getElementById('ipcrIndicatorsTbody');
+                const ipcrStandardsIndicatorText = document.getElementById('ipcrStandardsIndicatorText');
+                const ipcrStandardsTbody = document.getElementById('ipcrStandardsTbody');
+                const ipcrIndicatorButtons = Array.from(document.querySelectorAll('[data-ipcr-open-indicators]'));
+                const openPreviewStack = [];
                 let activeAction = null;
+                let selectedIndicators = [];
 
                 const modalContent = {
                     'confirm-submission': {
@@ -533,11 +694,25 @@
                         showConfirm: true,
                     },
                 };
+                let ipcrSectionsData = [];
+                if (ipcrSectionsJsonEl) {
+                    try {
+                        const parsedPayload = JSON.parse(ipcrSectionsJsonEl.textContent || '[]');
+                        ipcrSectionsData = Array.isArray(parsedPayload) ? parsedPayload : [];
+                    } catch (error) {
+                        ipcrSectionsData = [];
+                    }
+                }
+
+                previewModals.forEach((previewModal) => {
+                    if (previewModal.classList.contains('flex') && !previewModal.classList.contains('hidden')) {
+                        openPreviewStack.push(previewModal);
+                    }
+                });
 
                 function isAnyModalOpen() {
                     const actionOpen = modal && modal.classList.contains('flex');
-                    const previewOpen = previewModals.some((item) => item.classList.contains('flex'));
-                    return actionOpen || previewOpen;
+                    return actionOpen || openPreviewStack.length > 0;
                 }
 
                 function syncBodyScroll() {
@@ -565,31 +740,92 @@
                     activeAction = null;
                 }
 
+                function refreshPreviewModalZIndices() {
+                    const baseZIndex = 80;
+                    openPreviewStack.forEach((modalEl, index) => {
+                        modalEl.style.zIndex = String(baseZIndex + (index * 10));
+                    });
+                }
+
+                function getParentModalId(modalEl) {
+                    return modalEl?.dataset?.parentModalId || '';
+                }
+
+                function isDescendantOfModal(modalEl, ancestorModalId) {
+                    if (!modalEl || !ancestorModalId) {
+                        return false;
+                    }
+
+                    let currentParentId = getParentModalId(modalEl);
+                    while (currentParentId) {
+                        if (currentParentId === ancestorModalId) {
+                            return true;
+                        }
+
+                        const parentModal = document.getElementById(currentParentId);
+                        if (!parentModal) {
+                            break;
+                        }
+
+                        currentParentId = getParentModalId(parentModal);
+                    }
+
+                    return false;
+                }
+
+                function hidePreviewModal(modalEl) {
+                    if (!modalEl) return;
+                    modalEl.classList.add('hidden');
+                    modalEl.classList.remove('flex');
+                    modalEl.style.zIndex = '';
+                }
+
                 function openPreviewModal(modalId) {
                     if (!modalId) return;
                     const target = document.getElementById(modalId);
                     if (!target) return;
-                    previewModals.forEach((item) => {
-                        if (item !== target) {
-                            item.classList.add('hidden');
-                            item.classList.remove('flex');
-                        }
-                    });
+
+                    hidePreviewModal(target);
+                    const existingIndex = openPreviewStack.indexOf(target);
+                    if (existingIndex !== -1) {
+                        openPreviewStack.splice(existingIndex, 1);
+                    }
+
                     target.classList.remove('hidden');
                     target.classList.add('flex');
+                    openPreviewStack.push(target);
+                    refreshPreviewModalZIndices();
                     syncBodyScroll();
                 }
 
-                function closePreviewModal(modalEl) {
+                function closePreviewModal(modalEl, cascadeChildren = true) {
                     if (!modalEl) return;
-                    modalEl.classList.add('hidden');
-                    modalEl.classList.remove('flex');
+
+                    if (cascadeChildren && modalEl.id) {
+                        const descendants = openPreviewStack
+                            .filter((item) => isDescendantOfModal(item, modalEl.id))
+                            .reverse();
+                        descendants.forEach((descendantModal) => closePreviewModal(descendantModal, false));
+                    }
+
+                    hidePreviewModal(modalEl);
+                    const index = openPreviewStack.indexOf(modalEl);
+                    if (index !== -1) {
+                        openPreviewStack.splice(index, 1);
+                    }
+                    refreshPreviewModalZIndices();
                     syncBodyScroll();
                 }
 
                 function closeAllPreviewModals() {
-                    previewModals.forEach((item) => closePreviewModal(item));
+                    openPreviewStack
+                        .slice()
+                        .reverse()
+                        .forEach((modalEl) => closePreviewModal(modalEl, false));
                 }
+
+                refreshPreviewModalZIndices();
+                syncBodyScroll();
 
                 function setSmporTab(activeTab) {
                     smporTabButtons.forEach((button) => {
@@ -606,6 +842,110 @@
                     smporTabPanels.forEach((panel) => {
                         panel.classList.toggle('hidden', panel.dataset.smporTabPanel !== activeTab);
                     });
+                }
+
+                function escapeHtml(value) {
+                    return String(value ?? '')
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;')
+                        .replace(/"/g, '&quot;')
+                        .replace(/'/g, '&#039;');
+                }
+
+                function normalizeStandardsPayload(payload) {
+                    if (!payload) return {};
+                    if (typeof payload === 'string') {
+                        try {
+                            const parsed = JSON.parse(payload);
+                            return parsed && typeof parsed === 'object' ? parsed : {};
+                        } catch (error) {
+                            return {};
+                        }
+                    }
+                    return typeof payload === 'object' ? payload : {};
+                }
+
+                function buildStandardsCell(values) {
+                    if (!Array.isArray(values) || values.length === 0) {
+                        return '<span class="text-slate-400">—</span>';
+                    }
+
+                    return `
+                        <ul class="list-disc space-y-1 pl-4 text-xs text-slate-200">
+                            ${values.map((value) => `<li>${escapeHtml(value)}</li>`).join('')}
+                        </ul>
+                    `;
+                }
+
+                function renderIndicatorsModal(sectionIndex, rowIndex) {
+                    const section = ipcrSectionsData?.[sectionIndex];
+                    const row = section?.rows?.[rowIndex];
+                    if (!row) return;
+
+                    selectedIndicators = Array.isArray(row.indicators) ? row.indicators : [];
+
+                    if (ipcrIndicatorsMajorOutput) {
+                        ipcrIndicatorsMajorOutput.textContent = `Success Indicators - ${row.major_output ?? 'Major Output'}`;
+                    }
+
+                    if (ipcrIndicatorsTbody) {
+                        if (selectedIndicators.length === 0) {
+                            ipcrIndicatorsTbody.innerHTML = `
+                                <tr class="bg-slate-900/40">
+                                    <td colspan="2" class="px-4 py-3 text-center text-slate-400">No success indicators available.</td>
+                                </tr>
+                            `;
+                        } else {
+                            ipcrIndicatorsTbody.innerHTML = selectedIndicators.map((indicator, indicatorIndex) => `
+                                <tr class="bg-slate-900/40">
+                                    <td class="px-4 py-3 text-slate-100">${escapeHtml(indicator?.indicator_text ?? '—')}</td>
+                                    <td class="px-4 py-3">
+                                        <button type="button"
+                                                data-ipcr-open-standards
+                                                data-indicator-index="${indicatorIndex}"
+                                                class="inline-flex items-center rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-1.5 text-xs font-semibold text-sky-200 hover:bg-sky-500/20 transition">
+                                            View Standards
+                                        </button>
+                                    </td>
+                                </tr>
+                            `).join('');
+                        }
+                    }
+
+                    openPreviewModal('ipcr-indicators-modal');
+                }
+
+                function renderStandardsModal(indicatorIndex) {
+                    const indicator = selectedIndicators?.[indicatorIndex];
+                    if (!indicator) return;
+
+                    if (ipcrStandardsIndicatorText) {
+                        ipcrStandardsIndicatorText.textContent = indicator.indicator_text || '—';
+                    }
+
+                    const payload = normalizeStandardsPayload(indicator.standards_payload);
+                    const ratings = ['5', '4', '3', '2', '1'];
+
+                    if (ipcrStandardsTbody) {
+                        ipcrStandardsTbody.innerHTML = ratings.map((rating) => {
+                            const ratingPayload = payload?.[rating] ?? {};
+                            const qualityValues = Array.isArray(ratingPayload?.Q) ? ratingPayload.Q : [];
+                            const efficiencyValues = Array.isArray(ratingPayload?.E) ? ratingPayload.E : [];
+                            const timelinessValues = Array.isArray(ratingPayload?.T) ? ratingPayload.T : [];
+
+                            return `
+                                <tr class="bg-slate-900/40 align-top">
+                                    <td class="px-4 py-3 font-semibold text-slate-100">${rating}</td>
+                                    <td class="px-4 py-3">${buildStandardsCell(qualityValues)}</td>
+                                    <td class="px-4 py-3">${buildStandardsCell(efficiencyValues)}</td>
+                                    <td class="px-4 py-3">${buildStandardsCell(timelinessValues)}</td>
+                                </tr>
+                            `;
+                        }).join('');
+                    }
+
+                    openPreviewModal('ipcr-standards-modal');
                 }
 
                 function handleConfirm(event) {
@@ -638,6 +978,24 @@
                     button.addEventListener('click', () => setSmporTab(button.dataset.smporTab));
                 });
                 setSmporTab('quantity');
+
+                ipcrIndicatorButtons.forEach((button) => {
+                    button.addEventListener('click', () => {
+                        const sectionIndex = Number.parseInt(button.dataset.sectionIndex ?? '', 10);
+                        const rowIndex = Number.parseInt(button.dataset.rowIndex ?? '', 10);
+                        if (Number.isNaN(sectionIndex) || Number.isNaN(rowIndex)) return;
+                        renderIndicatorsModal(sectionIndex, rowIndex);
+                    });
+                });
+
+                ipcrIndicatorsTbody?.addEventListener('click', (event) => {
+                    const targetButton = event.target.closest('[data-ipcr-open-standards]');
+                    if (!targetButton) return;
+
+                    const indicatorIndex = Number.parseInt(targetButton.dataset.indicatorIndex ?? '', 10);
+                    if (Number.isNaN(indicatorIndex)) return;
+                    renderStandardsModal(indicatorIndex);
+                });
 
                 document.querySelectorAll('[data-close-modal]').forEach((btn) => {
                     btn.addEventListener('click', () => {
@@ -673,7 +1031,12 @@
                 });
                 document.addEventListener('keydown', (e) => {
                     if (e.key === 'Escape') {
-                        closeAllPreviewModals();
+                        if (openPreviewStack.length > 0) {
+                            const topmostPreviewModal = openPreviewStack[openPreviewStack.length - 1];
+                            closePreviewModal(topmostPreviewModal);
+                            return;
+                        }
+
                         closeModal();
                     }
                 });

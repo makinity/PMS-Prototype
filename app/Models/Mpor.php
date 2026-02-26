@@ -47,10 +47,35 @@ class Mpor extends Model
      * Stage II: MPOR mirror is derived from rated ORS entries in the MPOR month
      * (not dependent on ors_entries.mpor_id being set).
      */
+    // public function ratedOrsEntriesForMonth(): HasMany
+    // {
+    //     $start = Carbon::createFromFormat('Y-m', (string) $this->month)->startOfMonth()->toDateString();
+    //     $end = Carbon::createFromFormat('Y-m', (string) $this->month)->endOfMonth()->toDateString();
+
+    //     return $this->hasMany(OrsEntry::class, 'employee_id', 'employee_id')
+    //         ->where('status', 'rated')
+    //         ->where('quantity', '>', 0)
+    //         ->whereBetween('work_date', [$start, $end])
+    //         ->whereHas('monitoring', function ($q) {
+    //             $q->whereNotNull('quality_rating')
+    //               ->whereNotNull('timeliness_rating');
+    //         });
+    // }
+
     public function ratedOrsEntriesForMonth(): HasMany
     {
-        $start = Carbon::createFromFormat('Y-m', (string) $this->month)->startOfMonth()->toDateString();
-        $end = Carbon::createFromFormat('Y-m', (string) $this->month)->endOfMonth()->toDateString();
+        $raw = trim((string) $this->month);
+        $monthKey = substr($raw, 0, 7); // supports YYYY-MM or YYYY-MM-DD
+
+        try {
+            $base = Carbon::createFromFormat('Y-m', $monthKey);
+        } catch (\Throwable $e) {
+            // fallback for weird formats (e.g., "January 2026")
+            $base = Carbon::parse($raw)->startOfMonth();
+        }
+
+        $start = $base->copy()->startOfMonth()->toDateString();
+        $end   = $base->copy()->endOfMonth()->toDateString();
 
         return $this->hasMany(OrsEntry::class, 'employee_id', 'employee_id')
             ->where('status', 'rated')
@@ -58,7 +83,19 @@ class Mpor extends Model
             ->whereBetween('work_date', [$start, $end])
             ->whereHas('monitoring', function ($q) {
                 $q->whereNotNull('quality_rating')
-                  ->whereNotNull('timeliness_rating');
+                ->whereNotNull('timeliness_rating');
             });
+    }
+
+    public function setMonthAttribute($value): void
+    {
+        $raw = trim((string) $value);
+        $monthKey = substr($raw, 0, 7);
+
+        try {
+            $this->attributes['month'] = Carbon::createFromFormat('Y-m', $monthKey)->format('Y-m');
+        } catch (\Throwable $e) {
+            $this->attributes['month'] = Carbon::parse($raw)->format('Y-m');
+        }
     }
 }

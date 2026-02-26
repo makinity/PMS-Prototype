@@ -403,12 +403,23 @@ class SmporExcelExport implements FromArray, WithStyles, WithColumnWidths, WithT
 
         foreach ($rows as $row) {
             $months = $this->normalizeMonths($row['months'] ?? []);
+            $qtyBand = $this->buildBandFromMonths($months, 'qty');
+            $qualityBand = $this->buildBandFromMonths($months, 'q_points');
+            $timelinessBand = $this->buildBandFromMonths($months, 't_points');
+
+            $qtyTotal = (int) ($qtyBand['total'] ?? 0);
+            $qualityBand['avg'] = $qtyTotal > 0
+                ? round(((int) ($qualityBand['total'] ?? 0)) / $qtyTotal, 2)
+                : 0;
+            $timelinessBand['avg'] = $qtyTotal > 0
+                ? round(((int) ($timelinessBand['total'] ?? 0)) / $qtyTotal, 2)
+                : 0;
 
             $normalized[] = [
                 'label' => (string) ($row['label'] ?? ''),
-                'qty' => $this->buildBandFromMonths($months, 'qty'),
-                'quality' => $this->buildBandFromMonths($months, 'q_points'),
-                'timeliness' => $this->buildBandFromMonths($months, 't_points'),
+                'qty' => $qtyBand,
+                'quality' => $qualityBand,
+                'timeliness' => $timelinessBand,
             ];
         }
 
@@ -472,6 +483,5 @@ class SmporExcelExport implements FromArray, WithStyles, WithColumnWidths, WithT
         return self::BASE_ROW_HEIGHT + max(0, $lines - 1) * self::LINE_HEIGHT;
     }
 }
-
 
 

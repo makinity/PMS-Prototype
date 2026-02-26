@@ -152,10 +152,8 @@ Route::prefix('employee')->middleware('auth')->group(function () {
         ->name('employee.mpor.submit');
 
     // Exports - SMPOR Excel
-    Route::get('/stage-two/forms/smpor/export-excel', [SmporExcelExportController::class, 'exportExcel'])
-        ->name('stage2.smpor.export.excel');
-    Route::get('/stage-two/forms/smpor/preview-excel', [SmporExcelExportController::class, 'previewExcel'])
-        ->name('stage2.smpor.preview.excel');
+    Route::get('/smpor/export', [SmporIpcrAccomplishmentController::class, 'exportExcel'])
+        ->name('smpor.export.excel');
 
     // Exports - ORS PDF
     Route::get('/ors/export/pdf', [OrsExportController::class, 'preview'])
