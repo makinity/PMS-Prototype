@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class QarHeader extends Model
 {
@@ -71,6 +72,11 @@ class QarHeader extends Model
     public function rows(): HasMany
     {
         return $this->hasMany(QarRow::class)->orderBy('sort_order');
+    }
+
+    public function smpor(): HasOne
+    {
+        return $this->hasOne(Smpor::class, 'qar_header_id');
     }
 
     public function isDraft(): bool

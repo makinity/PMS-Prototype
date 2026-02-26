@@ -6,7 +6,13 @@
         $statusBadgeClasses = $isSubmitted
             ? 'inline-flex items-center rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-200 border border-emerald-500/40'
             : 'inline-flex items-center rounded-full bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-200 border border-amber-500/40';
-    @endphp
+        $periodLabelValue = $periodLabel ?? '—';
+        $periodHeaderLabel = $periodLabelValue === '—' ? 'No active period' : $periodLabelValue;
+    
+        $smporMonthLabels = !empty($smporMonths ?? []) && is_array($smporMonths)
+            ? array_values($smporMonths)
+            : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+@endphp
 
     <section class="space-y-6">
         @if (session('success'))
@@ -32,7 +38,7 @@
             <div>
                 <h1 class="text-2xl font-bold text-white">SMPOR &amp; IPCR Accomplishment Submission</h1>
                 <p class="text-sm text-slate-400">Formal end-of-period submission of accomplishments</p>
-                <p class="text-xs text-slate-500 mt-1">Performance Period: January&ndash;June 2026</p>
+                <p class="text-xs text-slate-500 mt-1">Performance Period: {{ $periodHeaderLabel }}</p>
             </div>
             <div class="flex flex-col items-end gap-1">
                 <span id="status-badge" class="{{ $statusBadgeClasses }}">
@@ -67,7 +73,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-slate-200">
                 <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Period</p>
-                    <p class="mt-1 font-semibold">{{ $periodLabel ?? 'January-June 2026' }}</p>
+                    <p class="mt-1 font-semibold">{{ $periodLabelValue }}</p>
                 </div>
                 <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Status</p>
@@ -104,7 +110,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-slate-200">
                 <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Rating Period</p>
-                    <p class="mt-1 font-semibold">{{ $periodLabel ?? 'January-June 2026' }}</p>
+                    <p class="mt-1 font-semibold">{{ $periodLabelValue }}</p>
                 </div>
                 <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Status</p>
@@ -195,7 +201,7 @@
             <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
                 <div>
                     <p class="text-xs uppercase tracking-[0.2em] text-blue-300">SMPOR (Monitoring Summary)</p>
-                    <h3 class="text-lg font-semibold text-white">SMPOR Preview &mdash; January&ndash;June 2026</h3>
+                    <h3 class="text-lg font-semibold text-white">SMPOR Preview &mdash; {{ $periodLabelValue }}</h3>
                     <p class="text-sm text-slate-400 mt-1">System-generated, monitoring-only. Derived from submitted MPORs.</p>
                 </div>
                 <button type="button" data-close-modal class="text-slate-400 hover:text-white">&times;</button>
@@ -212,7 +218,7 @@
                     </div>
                     <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                         <p class="text-[11px] uppercase text-slate-500">Period</p>
-                        <p class="mt-1 font-semibold">{{ $periodLabel ?? 'January-June 2026' }}</p>
+                        <p class="mt-1 font-semibold">{{ $periodLabelValue }}</p>
                     </div>
                     <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                         <p class="text-[11px] uppercase text-slate-500">Source</p>
@@ -225,40 +231,165 @@
                         <h4 class="text-base font-semibold text-white">Monitoring Totals</h4>
                         <span class="text-xs text-slate-400">Quality Points = Quantity &times; Quality Rating &middot; Timeliness Points = Quantity &times; Timeliness Rating</span>
                     </div>
-                    <div class="overflow-x-auto rounded-xl border border-slate-800">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button type="button"
+                                data-smpor-tab="quantity"
+                                class="rounded-lg border border-sky-500/40 bg-sky-500/20 px-3 py-1.5 text-xs font-semibold text-sky-200 transition">
+                            Efficiency/Quantity
+                        </button>
+                        <button type="button"
+                                data-smpor-tab="quality"
+                                class="rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:bg-slate-800">
+                            Quality/Effectiveness
+                        </button>
+                        <button type="button"
+                                data-smpor-tab="timeliness"
+                                class="rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:bg-slate-800">
+                            Timeliness
+                        </button>
+                    </div>
+                    <p class="text-xs text-slate-400">Monthly totals are derived from rated ORS monitoring within submitted MPORs.</p>
+
+                    <div data-smpor-tab-panel="quantity" class="overflow-x-auto rounded-xl border border-slate-800">
                         <table class="min-w-full text-left text-sm text-slate-200">
                             <thead class="bg-slate-950/70 text-xs uppercase text-slate-400">
                                 <tr>
-                                    <th class="px-4 py-3">MFO</th>
-                                    <th class="px-4 py-3 text-right">Total Quantity (Monitoring)</th>
-                                    <th class="px-4 py-3 text-right">Total Quality Points</th>
-                                    <th class="px-4 py-3 text-right">Total Timeliness Points</th>
+                                    <th class="px-4 py-3">Expected Outputs</th>
+                                    @foreach ($smporMonthLabels as $monthLabel)
+                                        <th class="px-4 py-3 text-right">{{ $monthLabel }}</th>
+                                    @endforeach
+                                    <th class="px-4 py-3 text-right">Total</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-800">
                                 @forelse ($smporRows as $smporRow)
                                     <tr class="bg-slate-900/40">
                                         <td class="px-4 py-3 font-semibold">{{ $smporRow['mfo'] }}</td>
-                                        <td class="px-4 py-3 text-right">{{ $smporRow['total_quantity'] }}</td>
-                                        <td class="px-4 py-3 text-right">{{ $smporRow['total_quality_points'] }}</td>
-                                        <td class="px-4 py-3 text-right">{{ $smporRow['total_timeliness_points'] }}</td>
+                                        @foreach ($smporMonthLabels as $monthLabel)
+                                            <td class="px-4 py-3 text-right">{{ $smporRow['monthly_quantity'][$monthLabel] ?? 0 }}</td>
+                                        @endforeach
+                                        <td class="px-4 py-3 text-right">{{ $smporRow['total_quantity'] ?? 0 }}</td>
                                     </tr>
                                 @empty
                                     <tr class="bg-slate-900/40">
-                                        <td colspan="4" class="px-4 py-3 text-center text-slate-400">No submitted MPOR data available.</td>
+                                        <td colspan="{{ count($smporMonthLabels) + 2 }}" class="px-4 py-3 text-center text-slate-400">No submitted MPOR data available.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
                             <tfoot class="bg-slate-950/70">
                                 <tr>
                                     <th class="px-4 py-3 text-left font-semibold text-slate-100">Grand Total</th>
+                                    @foreach ($smporMonthLabels as $monthLabel)
+                                        <th class="px-4 py-3 text-right font-semibold text-slate-100">{{ $smporTotals['monthly_quantity'][$monthLabel] ?? 0 }}</th>
+                                    @endforeach
                                     <th class="px-4 py-3 text-right font-semibold text-slate-100">{{ $smporTotals['quantity'] ?? 0 }}</th>
-                                    <th class="px-4 py-3 text-right font-semibold text-slate-100">{{ $smporTotals['quality_points'] ?? 0 }}</th>
-                                    <th class="px-4 py-3 text-right font-semibold text-slate-100">{{ $smporTotals['timeliness_points'] ?? 0 }}</th>
                                 </tr>
                             </tfoot>
                         </table>
                     </div>
+
+                    <div data-smpor-tab-panel="quality" class="hidden overflow-x-auto rounded-xl border border-slate-800">
+                        <table class="min-w-full text-left text-sm text-slate-200">
+                            <thead class="bg-slate-950/70 text-xs uppercase text-slate-400">
+                                <tr>
+                                    <th class="px-4 py-3">Expected Outputs</th>
+                                    @foreach ($smporMonthLabels as $monthLabel)
+                                        <th class="px-4 py-3 text-right">{{ $monthLabel }}</th>
+                                    @endforeach
+                                    <th class="px-4 py-3 text-right">Total</th>
+                                    <th class="px-4 py-3 text-right">Average</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800">
+                                @forelse ($smporRows as $smporRow)
+                                    @php
+                                        $rowQty = (float) ($smporRow['total_quantity'] ?? 0);
+                                        $rowQuality = (float) ($smporRow['total_quality_points'] ?? 0);
+                                        $rowQualityAvg = $rowQty > 0 ? $rowQuality / $rowQty : 0;
+                                    @endphp
+                                    <tr class="bg-slate-900/40">
+                                        <td class="px-4 py-3 font-semibold">{{ $smporRow['mfo'] }}</td>
+                                        @foreach ($smporMonthLabels as $monthLabel)
+                                            <td class="px-4 py-3 text-right">{{ $smporRow['monthly_quality_points'][$monthLabel] ?? 0 }}</td>
+                                        @endforeach
+                                        <td class="px-4 py-3 text-right">{{ $rowQuality }}</td>
+                                        <td class="px-4 py-3 text-right">{{ number_format($rowQualityAvg, 2, '.', '') }}</td>
+                                    </tr>
+                                @empty
+                                    <tr class="bg-slate-900/40">
+                                        <td colspan="{{ count($smporMonthLabels) + 3 }}" class="px-4 py-3 text-center text-slate-400">No submitted MPOR data available.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                            <tfoot class="bg-slate-950/70">
+                                @php
+                                    $totalQty = (float) ($smporTotals['quantity'] ?? 0);
+                                    $totalQuality = (float) ($smporTotals['quality_points'] ?? 0);
+                                    $totalQualityAvg = $totalQty > 0 ? $totalQuality / $totalQty : 0;
+                                @endphp
+                                <tr>
+                                    <th class="px-4 py-3 text-left font-semibold text-slate-100">Grand Total</th>
+                                    @foreach ($smporMonthLabels as $monthLabel)
+                                        <th class="px-4 py-3 text-right font-semibold text-slate-100">{{ $smporTotals['monthly_quality_points'][$monthLabel] ?? 0 }}</th>
+                                    @endforeach
+                                    <th class="px-4 py-3 text-right font-semibold text-slate-100">{{ $totalQuality }}</th>
+                                    <th class="px-4 py-3 text-right font-semibold text-slate-100">{{ number_format($totalQualityAvg, 2, '.', '') }}</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <div data-smpor-tab-panel="timeliness" class="hidden overflow-x-auto rounded-xl border border-slate-800">
+                        <table class="min-w-full text-left text-sm text-slate-200">
+                            <thead class="bg-slate-950/70 text-xs uppercase text-slate-400">
+                                <tr>
+                                    <th class="px-4 py-3">Expected Outputs</th>
+                                    @foreach ($smporMonthLabels as $monthLabel)
+                                        <th class="px-4 py-3 text-right">{{ $monthLabel }}</th>
+                                    @endforeach
+                                    <th class="px-4 py-3 text-right">Total</th>
+                                    <th class="px-4 py-3 text-right">Average</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800">
+                                @forelse ($smporRows as $smporRow)
+                                    @php
+                                        $rowQty = (float) ($smporRow['total_quantity'] ?? 0);
+                                        $rowTimeliness = (float) ($smporRow['total_timeliness_points'] ?? 0);
+                                        $rowTimelinessAvg = $rowQty > 0 ? $rowTimeliness / $rowQty : 0;
+                                    @endphp
+                                    <tr class="bg-slate-900/40">
+                                        <td class="px-4 py-3 font-semibold">{{ $smporRow['mfo'] }}</td>
+                                        @foreach ($smporMonthLabels as $monthLabel)
+                                            <td class="px-4 py-3 text-right">{{ $smporRow['monthly_timeliness_points'][$monthLabel] ?? 0 }}</td>
+                                        @endforeach
+                                        <td class="px-4 py-3 text-right">{{ $rowTimeliness }}</td>
+                                        <td class="px-4 py-3 text-right">{{ number_format($rowTimelinessAvg, 2, '.', '') }}</td>
+                                    </tr>
+                                @empty
+                                    <tr class="bg-slate-900/40">
+                                        <td colspan="{{ count($smporMonthLabels) + 3 }}" class="px-4 py-3 text-center text-slate-400">No submitted MPOR data available.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                            <tfoot class="bg-slate-950/70">
+                                @php
+                                    $totalQty = (float) ($smporTotals['quantity'] ?? 0);
+                                    $totalTimeliness = (float) ($smporTotals['timeliness_points'] ?? 0);
+                                    $totalTimelinessAvg = $totalQty > 0 ? $totalTimeliness / $totalQty : 0;
+                                @endphp
+                                <tr>
+                                    <th class="px-4 py-3 text-left font-semibold text-slate-100">Grand Total</th>
+                                    @foreach ($smporMonthLabels as $monthLabel)
+                                        <th class="px-4 py-3 text-right font-semibold text-slate-100">{{ $smporTotals['monthly_timeliness_points'][$monthLabel] ?? 0 }}</th>
+                                    @endforeach
+                                    <th class="px-4 py-3 text-right font-semibold text-slate-100">{{ $totalTimeliness }}</th>
+                                    <th class="px-4 py-3 text-right font-semibold text-slate-100">{{ number_format($totalTimelinessAvg, 2, '.', '') }}</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
                 </div>
             </div>
             <div class="flex items-center justify-end gap-3 border-t border-slate-800 pt-4 mt-4">
@@ -279,7 +410,7 @@
             <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
                 <div>
                     <p class="text-xs uppercase tracking-[0.2em] text-blue-300">IPCR Accomplishment Report</p>
-                    <h3 class="text-lg font-semibold text-white">IPCR Accomplishment Preview &mdash; January&ndash;June 2026</h3>
+                    <h3 class="text-lg font-semibold text-white">IPCR Accomplishment Preview &mdash; {{ $periodLabelValue }}</h3>
                     <p class="text-sm text-slate-400 mt-1">System-generated accomplishments derived from SMPOR totals (Stage II).</p>
                 </div>
                 <button type="button" data-close-modal class="text-slate-400 hover:text-white">&times;</button>
@@ -296,7 +427,7 @@
                     </div>
                     <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                         <p class="text-[11px] uppercase text-slate-500">Period</p>
-                        <p class="mt-1 font-semibold">{{ $periodLabel ?? 'January-June 2026' }}</p>
+                        <p class="mt-1 font-semibold">{{ $periodLabelValue }}</p>
                     </div>
                     <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                         <p class="text-[11px] uppercase text-slate-500">Source</p>
@@ -391,6 +522,8 @@
                 const modalLabel = modalConfirm?.querySelector('[data-modal-label]');
                 const submissionForm = document.getElementById('accomplishment-submission-form');
                 const submitBtn = document.getElementById('submit-accomplishments');
+                const smporTabButtons = Array.from(document.querySelectorAll('[data-smpor-tab]'));
+                const smporTabPanels = Array.from(document.querySelectorAll('[data-smpor-tab-panel]'));
                 let activeAction = null;
 
                 const modalContent = {
@@ -458,6 +591,23 @@
                     previewModals.forEach((item) => closePreviewModal(item));
                 }
 
+                function setSmporTab(activeTab) {
+                    smporTabButtons.forEach((button) => {
+                        const isActive = button.dataset.smporTab === activeTab;
+                        button.classList.toggle('border-sky-500/40', isActive);
+                        button.classList.toggle('bg-sky-500/20', isActive);
+                        button.classList.toggle('text-sky-200', isActive);
+                        button.classList.toggle('border-slate-700', !isActive);
+                        button.classList.toggle('text-slate-300', !isActive);
+                        button.classList.toggle('hover:bg-slate-800', !isActive);
+                        button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+                    });
+
+                    smporTabPanels.forEach((panel) => {
+                        panel.classList.toggle('hidden', panel.dataset.smporTabPanel !== activeTab);
+                    });
+                }
+
                 function handleConfirm(event) {
                     if (activeAction !== 'confirm-submission' || !submissionForm || !modalConfirm) {
                         closeModal();
@@ -483,6 +633,11 @@
                         openPreviewModal(trigger.getAttribute('data-open-modal'));
                     });
                 });
+
+                smporTabButtons.forEach((button) => {
+                    button.addEventListener('click', () => setSmporTab(button.dataset.smporTab));
+                });
+                setSmporTab('quantity');
 
                 document.querySelectorAll('[data-close-modal]').forEach((btn) => {
                     btn.addEventListener('click', () => {

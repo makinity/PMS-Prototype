@@ -28,6 +28,11 @@ class Mpor extends Model
         return $this->belongsTo(User::class, 'employee_id');
     }
 
+    public function office(): BelongsTo
+    {
+        return $this->belongsTo(Office::class);
+    }
+
     public function orsEntries(): HasMany
     {
         return $this->hasMany(OrsEntry::class, 'mpor_id');

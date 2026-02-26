@@ -40,6 +40,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Employee\DashboardController as EmployeeDashboardController;
+use App\Http\Controllers\Employee\SmporIpcrAccomplishmentController;
 use App\Http\Controllers\Supervisor\DashboardController as SupervisorDashboardController;
 use App\Http\Controllers\Supervisor\MporController as SupervisorMporController;
 
@@ -142,8 +143,7 @@ Route::prefix('employee')->middleware('auth')->group(function () {
     Route::get('/Profile', fn () => view('employee.profile'))->name('employee.profile');
 
     // Stage II - Accomplishment Submission
-    Route::get('/accomplishment-submission', [EmployeeAccomplishmentController::class, 'index'])
-        ->name('employee.accomplishment-submission');
+    Route::get('/accomplishment-submission', [SmporIpcrAccomplishmentController::class, 'index'])->name('employee.accomplishment-submission');
     Route::post('/accomplishment/submit', [EmployeeAccomplishmentController::class, 'submit'])
         ->name('stage2.employee.accomplishment.submit');
 

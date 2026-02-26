@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Pmt;
 use App\Http\Controllers\Controller;
 use App\Models\PerformancePeriod;
 use App\Models\QarHeader;
+use App\Services\SmporGeneratorService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -104,6 +105,7 @@ class QarController extends Controller
             $qarHeader->pmt_validated_at = now();
             $qarHeader->pmt_validated_by = $request->user()?->id;
             $qarHeader->save();
+            app(SmporGeneratorService::class)->generateFromApprovedQar($qarHeader, $request->user()?->id);
         });
 
         return redirect()
