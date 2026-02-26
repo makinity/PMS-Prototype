@@ -18,6 +18,10 @@
         ];
 
         $headersSafe = $headers ?? collect();
+        $allowedQuarterOptionsSafe = is_array($allowedQuarterOptions ?? null) ? $allowedQuarterOptions : [];
+        $selectedQuarterNumberSafe = (int) ($selectedQuarterNumber ?? 0);
+        $quarterInputValue = $selectedQuarterNumberSafe > 0 ? $selectedQuarterNumberSafe : (int) request('q', 0);
+        $officeSearchSafe = isset($officeSearch) ? (string) $officeSearch : (string) request('office', '');
 
         $formatDate = static function ($value): string {
             if (empty($value)) {
@@ -72,6 +76,25 @@
                     <p class="mt-1 text-sm font-semibold text-white">Endorsed: {{ $endorsedCount ?? 0 }} | Approved: {{ $approvedCount ?? 0 }}</p>
                 </div>
             </div>
+
+            @if (!empty($allowedQuarterOptionsSafe))
+                <div class="mt-3 flex flex-wrap gap-2">
+                    @foreach ($allowedQuarterOptionsSafe as $option)
+                        @php
+                            $qValue = (int) ($option['value'] ?? 0);
+                            $isQuarterSelected = $qValue === $selectedQuarterNumberSafe;
+                            $quarterParams = ['q' => $qValue];
+                            if ($officeSearchSafe !== '') {
+                                $quarterParams['office'] = $officeSearchSafe;
+                            }
+                        @endphp
+                        <a href="{{ route('pmt.qar', $quarterParams) }}"
+                            class="{{ $isQuarterSelected ? 'border-sky-500/50 bg-sky-500/10 text-sky-200' : 'border-slate-700 bg-slate-900/60 text-slate-300 hover:bg-slate-800' }} rounded-lg border px-3 py-1.5 text-xs font-semibold transition">
+                            {{ $option['label'] ?? ('Q' . $qValue) }}
+                        </a>
+                    @endforeach
+                </div>
+            @endif
         </div>
 
         @if (!$period)
@@ -83,9 +106,36 @@
         <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
             <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
                 <h2 class="text-lg font-semibold text-white">QAR Approval Queue</h2>
-                <span class="inline-flex items-center rounded-full border border-slate-700 bg-slate-900/70 px-3 py-1 text-xs text-slate-300">
-                    Records: {{ $headersSafe->count() }}
-                </span>
+                <div class="flex flex-wrap items-center justify-end gap-2">
+                    <form method="GET" action="{{ route('pmt.qar') }}" class="flex items-center gap-2">
+                        @if ($quarterInputValue > 0)
+                            <input type="hidden" name="q" value="{{ $quarterInputValue }}">
+                        @endif
+                        <input
+                            type="text"
+                            name="office"
+                            value="{{ $officeSearchSafe }}"
+                            placeholder="Search office..."
+                            style="background:#0f172a;color:#e5e7eb;"
+                            class="rounded-lg border border-slate-700 bg-slate-950/50 px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:border-sky-500/50 focus:ring-0"
+                        >
+                        <button
+                            type="submit"
+                            class="rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:bg-slate-800">
+                            Search
+                        </button>
+                        @if ($officeSearchSafe !== '')
+                            <a
+                                href="{{ route('pmt.qar', $quarterInputValue > 0 ? ['q' => $quarterInputValue] : []) }}"
+                                class="rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:bg-slate-800">
+                                Clear
+                            </a>
+                        @endif
+                    </form>
+                    <span class="inline-flex items-center rounded-full border border-slate-700 bg-slate-900/70 px-3 py-1 text-xs text-slate-300">
+                        Records: {{ $headersSafe->count() }}
+                    </span>
+                </div>
             </div>
 
             <div class="overflow-x-auto">
@@ -122,10 +172,10 @@
                                 <td class="px-4 py-3 text-right">
                                     @if ($isEndorsed)
                                         <button type="button"
-                                            data-modal-target="pmtQarApproveModal-{{ $header->id }}"
-                                            data-modal-toggle="pmtQarApproveModal-{{ $header->id }}"
-                                            class="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-emerald-500">
-                                            Approve QAR
+                                            data-modal-target="pmtQarViewModal-{{ $header->id }}"
+                                            data-modal-toggle="pmtQarViewModal-{{ $header->id }}"
+                                            class="rounded-lg border border-slate-600 bg-slate-900/70 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-slate-800">
+                                            View
                                         </button>
                                     @elseif ($isApproved)
                                         <button type="button" disabled
@@ -152,48 +202,145 @@
 
     @foreach ($headersSafe as $header)
         @if ((string) ($header->status ?? '') === 'dept_head_endorsed')
-            <div id="pmtQarApproveModal-{{ $header->id }}" tabindex="-1" aria-hidden="true"
+            @php
+                $headerStatusKey = (string) ($header->status ?? 'draft');
+                $headerMeta = $statusMeta[$headerStatusKey] ?? $statusMeta['draft'];
+                $endorsedDate = $header->approved_at ?? $header->generated_at;
+            @endphp
+            <div id="pmtQarViewModal-{{ $header->id }}" tabindex="-1" aria-hidden="true"
                 class="fixed left-0 right-0 top-0 z-50 hidden h-[calc(100%-1rem)] max-h-full w-full items-center justify-center overflow-y-auto overflow-x-hidden md:inset-0">
-                <div class="relative max-h-full w-full max-w-lg p-4">
+                <div class="relative max-h-full w-full max-w-6xl p-4">
                     <div class="relative rounded-2xl border border-slate-800 bg-slate-900 shadow-lg">
                         <div class="flex items-start justify-between border-b border-slate-800 p-5">
-                            <h3 class="text-lg font-semibold text-white">Approve this QAR?</h3>
-                            <button type="button" data-modal-hide="pmtQarApproveModal-{{ $header->id }}"
+                            <div>
+                                <h3 class="text-lg font-semibold text-white">QAR Details</h3>
+                                <p class="mt-1 text-xs text-slate-400">Review annex rows and included MPOR links before final action.</p>
+                            </div>
+                            <button type="button" data-modal-hide="pmtQarViewModal-{{ $header->id }}"
                                 class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-800 hover:text-white">
                                 <span class="sr-only">Close modal</span>
                                 <i class="fa-solid fa-xmark text-sm"></i>
                             </button>
                         </div>
 
-                        <div class="space-y-3 p-5 text-sm text-slate-300">
-                            <p>
-                                Office: <span class="font-semibold text-white">{{ $header->office?->name ?? 'Office' }}</span>
-                                <span class="mx-1 text-slate-500">-</span>
-                                Quarter: <span class="font-semibold text-white">{{ $header->quarter_key ?? ($quarterKey ?? '-') }}</span>
-                            </p>
-                            <p>
-                                Once approved, QAR becomes read-only and employees may proceed to IPCR/SMPOR accomplishments.
-                            </p>
+                        <div class="space-y-4 p-5 text-sm text-slate-300">
+                            <div class="grid gap-3 md:grid-cols-4">
+                                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                                    <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Office</p>
+                                    <p class="mt-1 text-sm font-semibold text-white">{{ $header->office?->name ?? 'Office' }}</p>
+                                </div>
+                                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                                    <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Quarter</p>
+                                    <p class="mt-1 text-sm font-semibold text-white">{{ $header->quarter_key ?? ($quarterKey ?? '-') }}</p>
+                                </div>
+                                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                                    <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Status</p>
+                                    <span class="mt-1 inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold {{ $headerMeta['badge'] }}">
+                                        {{ $headerMeta['label'] }}
+                                    </span>
+                                </div>
+                                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                                    <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Endorsed Date</p>
+                                    <p class="mt-1 text-sm font-semibold text-white">{{ $formatDate($endorsedDate) }}</p>
+                                </div>
+                            </div>
+
+                            <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+                                <h4 class="text-sm font-semibold text-white">Included MPORs</h4>
+                                <div class="mt-3 max-h-56 space-y-2 overflow-y-auto pr-1">
+                                    @forelse (($header->mporLinks ?? collect()) as $link)
+                                        <div class="rounded-lg border border-slate-800 bg-slate-900/80 px-3 py-2">
+                                            <div class="flex flex-wrap items-center gap-2 text-sm">
+                                                <span class="font-semibold text-white">{{ $link->employee_name ?: '-' }}</span>
+                                                <span class="text-slate-500">-</span>
+                                                <span class="text-slate-300">{{ $link->month_label ?: '-' }}</span>
+                                                <span class="text-slate-500">-</span>
+                                                <span class="text-xs text-slate-400">{{ $link->status_label ?: '-' }}</span>
+                                            </div>
+                                        </div>
+                                    @empty
+                                        <p class="text-xs text-slate-400">No linked MPOR records.</p>
+                                    @endforelse
+                                </div>
+                            </div>
+
+                            <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+                                <h4 class="text-sm font-semibold text-white">Annex I QAR Rows</h4>
+                                <div class="mt-3 max-h-72 overflow-y-auto rounded-lg border border-slate-800">
+                                    <table class="min-w-full divide-y divide-slate-800 text-xs">
+                                        <thead class="bg-slate-900/90 text-[11px] uppercase tracking-[0.2em] text-slate-400">
+                                            <tr>
+                                                <th class="px-3 py-2 text-left">PPA Code</th>
+                                                <th class="px-3 py-2 text-left">MFO/PPA</th>
+                                                <th class="px-3 py-2 text-left">Indicator</th>
+                                                <th class="px-3 py-2 text-left">Target/Timeline</th>
+                                                <th class="px-3 py-2 text-right">Actual Performance</th>
+                                                <th class="px-3 py-2 text-left">Remarks</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-slate-800 text-slate-200">
+                                            @forelse (($header->rows ?? collect()) as $row)
+                                                <tr>
+                                                    <td class="px-3 py-2">{{ $row->ppa_code ?: '-' }}</td>
+                                                    <td class="px-3 py-2">{{ $row->mfo_title ?: '-' }}</td>
+                                                    <td class="px-3 py-2">{{ $row->indicator_text ?: '-' }}</td>
+                                                    <td class="px-3 py-2">{{ $row->target_timeline ?: '-' }}</td>
+                                                    <td class="px-3 py-2 text-right">{{ (int) round((float) ($row->actual_performance ?? 0)) }}</td>
+                                                    <td class="px-3 py-2">{{ $row->remarks ?: '-' }}</td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="6" class="px-3 py-6 text-center text-xs text-slate-400">
+                                                        No Annex I rows saved for this QAR.
+                                                    </td>
+                                                </tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
 
-                        <form id="pmtQarApproveForm-{{ $header->id }}"
-                            data-approve-form
-                            method="POST"
-                            action="{{ route('pmt.qar.approve', ['qarHeader' => $header->id]) }}"
-                            class="flex items-center justify-end gap-2 border-t border-slate-800 p-5">
-                            @csrf
-                            <button type="button" data-modal-hide="pmtQarApproveModal-{{ $header->id }}"
+                        <div class="flex items-center justify-between gap-2 border-t border-slate-800 p-5">
+                            <button type="button" data-modal-hide="pmtQarViewModal-{{ $header->id }}"
                                 class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 transition hover:bg-slate-800">
-                                Cancel
+                                Close
                             </button>
-                            <button type="submit"
-                                id="pmtQarApproveBtn-{{ $header->id }}"
-                                data-submit-button
-                                class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500">
-                                <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
-                                <span data-button-label>Approve</span>
-                            </button>
-                        </form>
+
+                            <div class="flex items-center gap-2">
+                                <form id="pmtQarReturnForm-{{ $header->id }}"
+                                    data-return-form
+                                    data-loading-label="Returning..."
+                                    method="POST"
+                                    action="{{ route('pmt.qar.return', ['qarHeader' => $header->id]) }}">
+                                    @csrf
+                                    <input type="hidden" name="q" value="{{ $quarterInputValue }}">
+                                    <input type="hidden" name="office" value="{{ $officeSearchSafe }}">
+                                    <button type="submit"
+                                        data-submit-button
+                                        class="inline-flex items-center gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-sm font-semibold text-amber-200 transition hover:bg-amber-500/20">
+                                        <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-amber-200/40 border-t-amber-100"></span>
+                                        <span data-button-label>Return</span>
+                                    </button>
+                                </form>
+
+                                <form id="pmtQarApproveForm-{{ $header->id }}"
+                                    data-approve-form
+                                    data-loading-label="Approving..."
+                                    method="POST"
+                                    action="{{ route('pmt.qar.approve', ['qarHeader' => $header->id]) }}">
+                                    @csrf
+                                    <input type="hidden" name="q" value="{{ $quarterInputValue }}">
+                                    <input type="hidden" name="office" value="{{ $officeSearchSafe }}">
+                                    <button type="submit"
+                                        data-submit-button
+                                        class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500">
+                                        <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                                        <span data-button-label>Approve</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -225,9 +372,10 @@
                     });
                 };
 
-                document.querySelectorAll('[data-approve-form]').forEach((form) => {
+                document.querySelectorAll('[data-approve-form], [data-return-form]').forEach((form) => {
                     const button = form.querySelector('[data-submit-button]');
-                    bindLoadingSubmit(form, button, 'Approving...');
+                    const loadingLabel = form.dataset.loadingLabel || 'Processing...';
+                    bindLoadingSubmit(form, button, loadingLabel);
                 });
             });
         </script>

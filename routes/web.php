@@ -337,10 +337,8 @@ Route::prefix('pmt')->middleware('auth')->group(function () {
         ->name('pmt.qar');
     Route::post('/qar/{qarHeader}/approve', [PmtQarController::class, 'approve'])
         ->name('pmt.qar.approve');
-    Route::get('/qar/index', [PmtQarApprovalController::class, 'index'])
-        ->name('pmt.qar.index');
-    Route::post('/qar/{qar}/validate', [PmtQarApprovalController::class, 'validateQar'])
-        ->name('pmt.qar.validate');
+    Route::post('/qar/{qarHeader}/return', [PmtQarController::class, 'return'])
+        ->name('pmt.qar.return');
 
     // Exports - UWP
     Route::get('/uwp/export/pdf', [UwpExportController::class, 'exportPdf'])

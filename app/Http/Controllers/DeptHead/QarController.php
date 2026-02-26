@@ -29,16 +29,15 @@ class QarController extends Controller
             ->where('is_active', true)
             ->first();
 
-        $now = Carbon::now();
-        $year = (int) $now->year;
-        $quarterNumber = (int) ceil($now->month / 3);
-        $quarterKey = sprintf('%d-Q%d', $year, $quarterNumber);
-        $quarterLabel = sprintf('Q%d %d', $quarterNumber, $year);
-
-        $quarterStartMonth = (($quarterNumber - 1) * 3) + 1;
-        $quarterMonths = collect(range($quarterStartMonth, $quarterStartMonth + 2))
-            ->map(fn (int $month): string => sprintf('%d-%02d', $year, $month))
-            ->all();
+        $quarterContext = $this->resolveQuarterContext($request, $period);
+        $period = $quarterContext['period'];
+        $quarterNumber = $quarterContext['quarterNumber'];
+        $quarterKey = $quarterContext['quarterKey'];
+        $quarterLabel = $quarterContext['quarterLabel'];
+        $quarterMonths = $quarterContext['quarterMonths'];
+        $allowedQuarterNumbers = $quarterContext['allowedQuarterNumbers'];
+        $allowedQuarterOptions = $quarterContext['allowedQuarterOptions'];
+        $selectedQuarterNumber = $quarterContext['selectedQuarterNumber'];
 
         $incomingMporModels = Mpor::query()
             ->with(['employee:id,name,office_id', 'employee.office:id,name'])
@@ -82,7 +81,8 @@ class QarController extends Controller
             ->sortBy(fn ($dt) => $dt instanceof Carbon ? $dt->getTimestamp() : 0)
             ->last();
 
-        $state = $request->session()->get(self::QAR_SESSION_KEY, []);
+        $sessionKey = self::QAR_SESSION_KEY . ':' . $quarterKey;
+        $state = $request->session()->get($sessionKey, []);
         if (!is_array($state)) {
             $state = [];
         }
@@ -151,7 +151,7 @@ class QarController extends Controller
             ->all();
 
         $state['qar_rows'] = $rows;
-        $request->session()->put(self::QAR_SESSION_KEY, $state);
+        $request->session()->put($sessionKey, $state);
 
         $uwpTargetTimelineMap = [];
 
@@ -451,8 +451,12 @@ class QarController extends Controller
             'office',
             'officeId',
             'period',
+            'quarterNumber',
             'quarterKey',
             'quarterLabel',
+            'allowedQuarterNumbers',
+            'allowedQuarterOptions',
+            'selectedQuarterNumber',
             'incomingMpors',
             'consolidatedMpors',
             'generatedAt',
@@ -488,14 +492,10 @@ class QarController extends Controller
                 ->with('info', 'No active performance period found.');
         }
 
-        $now = Carbon::now();
-        $year = (int) $now->year;
-        $quarterNumber = (int) ceil($now->month / 3);
-        $quarterKey = sprintf('%d-Q%d', $year, $quarterNumber);
-        $quarterStartMonth = (($quarterNumber - 1) * 3) + 1;
-        $quarterMonths = collect(range($quarterStartMonth, $quarterStartMonth + 2))
-            ->map(fn (int $month): string => sprintf('%d-%02d', $year, $month))
-            ->all();
+        $quarterContext = $this->resolveQuarterContext($request, $period);
+        $quarterNumber = $quarterContext['quarterNumber'];
+        $quarterKey = $quarterContext['quarterKey'];
+        $quarterMonths = $quarterContext['quarterMonths'];
 
         $incomingMporModels = Mpor::query()
             ->with(['employee:id,name,office_id'])
@@ -566,7 +566,7 @@ class QarController extends Controller
             && in_array((string) $existingHeader->status, [QarHeader::STATUS_DEPT_HEAD_ENDORSED, QarHeader::STATUS_PMT_APPROVED], true)
         ) {
             return redirect()
-                ->route('dept-head.qar')
+                ->route('dept-head.qar', ['q' => $quarterNumber])
                 ->with('info', 'QAR is already endorsed.');
         }
 
@@ -646,34 +646,156 @@ class QarController extends Controller
             }
         });
 
-        $state = $request->session()->get(self::QAR_SESSION_KEY, []);
+        $sessionKey = self::QAR_SESSION_KEY . ':' . $quarterKey;
+        $state = $request->session()->get($sessionKey, []);
         if (!is_array($state)) {
             $state = [];
         }
         $state['status'] = QarHeader::STATUS_DEPT_HEAD_ENDORSED;
         $state['approved_at'] = $approvedAt->toDateTimeString();
         $state['generated_at'] = Carbon::parse($header?->generated_at ?? $generatedAt)->toDateTimeString();
-        $request->session()->put(self::QAR_SESSION_KEY, $state);
+        $request->session()->put($sessionKey, $state);
 
         return redirect()
-            ->route('dept-head.qar')
+            ->route('dept-head.qar', ['q' => $quarterNumber])
             ->with('success', 'QAR endorsed and saved. MPORs=' . $incomingMporModels->count() . ', rows=' . count($rows));
     }
 
     public function generate(Request $request)
     {
+        $period = PerformancePeriod::query()
+            ->where('is_active', true)
+            ->first();
+        $quarterContext = $this->resolveQuarterContext($request, $period);
+
         return redirect()
-            ->route('dept-head.qar')
+            ->route('dept-head.qar', ['q' => $quarterContext['selectedQuarterNumber']])
             ->with('info', 'Consolidation is automatic. Approved MPORs are now used directly.');
     }
 
     public function reset(Request $request)
     {
+        $period = PerformancePeriod::query()
+            ->where('is_active', true)
+            ->first();
+        $quarterContext = $this->resolveQuarterContext($request, $period);
+        $quarterKey = $quarterContext['quarterKey'];
+        $quarterNumber = $quarterContext['selectedQuarterNumber'];
+
         $request->session()->forget(self::QAR_SESSION_KEY);
+        $request->session()->forget(self::QAR_SESSION_KEY . ':' . $quarterKey);
 
         return redirect()
-            ->route('dept-head.qar')
+            ->route('dept-head.qar', ['q' => $quarterNumber])
             ->with('success', 'Prototype reset.');
     }
 
+    private function resolveQuarterContext(Request $request, ?PerformancePeriod $period = null): array
+    {
+        $period = $period ?: PerformancePeriod::query()
+            ->where('is_active', true)
+            ->first();
+
+        $quarterData = $this->buildAllowedQuarterData($period);
+        $allowedQuarterNumbers = $quarterData['allowedQuarterNumbers'];
+        $allowedQuarterOptions = $quarterData['allowedQuarterOptions'];
+        $yearForQuarterKey = $quarterData['yearForQuarterKey'];
+
+        $requestedQ = (int) $request->input('q', 0);
+        $currentQ = (int) ceil(now()->month / 3);
+
+        if (in_array($requestedQ, $allowedQuarterNumbers, true)) {
+            $selectedQuarterNumber = $requestedQ;
+        } elseif (in_array($currentQ, $allowedQuarterNumbers, true)) {
+            $selectedQuarterNumber = $currentQ;
+        } else {
+            $selectedQuarterNumber = (int) ($allowedQuarterNumbers[0] ?? $currentQ);
+        }
+
+        $quarterNumber = $selectedQuarterNumber;
+        $quarterKey = sprintf('%d-Q%d', $yearForQuarterKey, $quarterNumber);
+        $quarterLabel = sprintf('Q%d %d', $quarterNumber, $yearForQuarterKey);
+
+        $quarterStartMonth = (($quarterNumber - 1) * 3) + 1;
+        $quarterMonths = collect(range($quarterStartMonth, $quarterStartMonth + 2))
+            ->map(fn (int $month): string => sprintf('%d-%02d', $yearForQuarterKey, $month))
+            ->all();
+
+        return [
+            'period' => $period,
+            'year' => $yearForQuarterKey,
+            'quarterNumber' => $quarterNumber,
+            'quarterKey' => $quarterKey,
+            'quarterLabel' => $quarterLabel,
+            'quarterMonths' => $quarterMonths,
+            'allowedQuarterNumbers' => $allowedQuarterNumbers,
+            'allowedQuarterOptions' => $allowedQuarterOptions,
+            'selectedQuarterNumber' => $selectedQuarterNumber,
+        ];
+    }
+
+    private function buildAllowedQuarterData(?PerformancePeriod $period): array
+    {
+        $now = now();
+        $currentQuarter = (int) ceil($now->month / 3);
+        $yearForQuarterKey = (int) $now->year;
+
+        if (!$period || empty($period->start_date) || empty($period->end_date)) {
+            return [
+                'allowedQuarterNumbers' => [$currentQuarter],
+                'allowedQuarterOptions' => [
+                    ['value' => $currentQuarter, 'label' => 'Q' . $currentQuarter],
+                ],
+                'yearForQuarterKey' => $yearForQuarterKey,
+            ];
+        }
+
+        try {
+            $start = Carbon::parse($period->start_date)->startOfMonth();
+            $end = Carbon::parse($period->end_date)->startOfMonth();
+        } catch (\Throwable) {
+            return [
+                'allowedQuarterNumbers' => [$currentQuarter],
+                'allowedQuarterOptions' => [
+                    ['value' => $currentQuarter, 'label' => 'Q' . $currentQuarter],
+                ],
+                'yearForQuarterKey' => $yearForQuarterKey,
+            ];
+        }
+
+        if ($end->lt($start)) {
+            [$start, $end] = [$end, $start];
+        }
+
+        $yearForQuarterKey = (int) $start->year;
+
+        $quarters = [];
+        $cursor = $start->copy();
+        while ($cursor->lte($end)) {
+            $quarters[] = (int) ceil($cursor->month / 3);
+            $cursor->addMonthNoOverflow();
+        }
+
+        $allowedQuarterNumbers = collect($quarters)
+            ->filter(fn ($q) => $q >= 1 && $q <= 4)
+            ->unique()
+            ->sort()
+            ->values()
+            ->all();
+
+        if (empty($allowedQuarterNumbers)) {
+            $allowedQuarterNumbers = [$currentQuarter];
+        }
+
+        $allowedQuarterOptions = collect($allowedQuarterNumbers)
+            ->map(fn (int $q) => ['value' => $q, 'label' => 'Q' . $q])
+            ->values()
+            ->all();
+
+        return [
+            'allowedQuarterNumbers' => $allowedQuarterNumbers,
+            'allowedQuarterOptions' => $allowedQuarterOptions,
+            'yearForQuarterKey' => $yearForQuarterKey,
+        ];
+    }
 }

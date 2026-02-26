@@ -22,6 +22,8 @@
         $incomingMporsSafe = $incomingMpors ?? [];
         $consolidatedMporsSafe = $consolidatedMpors ?? [];
         $rowsSafe = $rows ?? [];
+        $allowedQuarterOptionsSafe = is_array($allowedQuarterOptions ?? null) ? $allowedQuarterOptions : [];
+        $selectedQuarterNumberSafe = (int) ($selectedQuarterNumber ?? 0);
 
         $isEndorsed = in_array($status, ['dept_head_endorsed', 'pmt_approved'], true);
         $hasIncoming = !empty($incomingMporsSafe);
@@ -89,9 +91,25 @@
                     </div>
                 </div>
 
+                @if (!empty($allowedQuarterOptionsSafe))
+                    <div class="flex flex-wrap justify-end gap-2">
+                        @foreach ($allowedQuarterOptionsSafe as $option)
+                            @php
+                                $qValue = (int) ($option['value'] ?? 0);
+                                $isQuarterSelected = $qValue === $selectedQuarterNumberSafe;
+                            @endphp
+                            <a href="{{ route('dept-head.qar', ['q' => $qValue]) }}"
+                                class="{{ $isQuarterSelected ? 'border-sky-500/50 bg-sky-500/10 text-sky-200' : 'border-slate-700 bg-slate-900/60 text-slate-300 hover:bg-slate-800' }} rounded-lg border px-3 py-1.5 text-xs font-semibold transition">
+                                {{ $option['label'] ?? ('Q' . $qValue) }}
+                            </a>
+                        @endforeach
+                    </div>
+                @endif
+
                 <div class="flex justify-end">
                     <form id="qarResetForm" method="POST" action="{{ route('dept-head.qar.reset') }}">
                         @csrf
+                        <input type="hidden" name="q" value="{{ $selectedQuarterNumberSafe }}">
                         <button type="submit"
                             id="qarResetBtn"
                             class="inline-flex items-center gap-2 rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs font-semibold text-rose-200 transition hover:bg-rose-500/20">
@@ -135,7 +153,7 @@
                                 <td class="px-4 py-3 text-slate-300">Auto-populated to QAR</td>
                                 <td class="px-4 py-3">
                                     <div class="flex items-center justify-center gap-2">
-                                        <a href="{{ route('dept-head.qar', ['mpor_id' => $mpor['id'] ?? 0]) }}"
+                                        <a href="{{ route('dept-head.qar', ['q' => $selectedQuarterNumberSafe, 'mpor_id' => $mpor['id'] ?? 0]) }}"
                                             class="rounded-lg border border-slate-700 bg-slate-900/50 px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:bg-slate-800">
                                             View
                                         </a>
@@ -207,6 +225,7 @@
                 <button type="button"
                     data-modal-target="qarApproveConfirmModal"
                     data-modal-toggle="qarApproveConfirmModal"
+                    @disabled(!$canEndorse)
                     class="rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-200 transition hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-60">
                     Endorse QAR
                 </button>
@@ -286,6 +305,7 @@
                 <form id="qarEndorseForm" method="POST" action="{{ route('dept-head.qar.endorse') }}"
                     class="flex items-center justify-end gap-2 border-t border-slate-800 p-5">
                     @csrf
+                    <input type="hidden" name="q" value="{{ $selectedQuarterNumberSafe }}">
                     <button type="button" data-modal-hide="qarApproveConfirmModal"
                         class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 transition hover:bg-slate-800">
                         Cancel
@@ -524,6 +544,7 @@
                 };
 
                 bindLoadingSubmit('qarEndorseForm', 'qarApproveProceedBtn', 'Endorsing...');
+                bindLoadingSubmit('qarResetForm', 'qarResetBtn', 'Resetting...');
 
                 const autoOpenViewButton = document.getElementById('qarAutoOpenViewModal');
                 if (autoOpenViewButton) {

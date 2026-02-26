@@ -149,7 +149,7 @@
             $isPmtOpcrApproval = request()->routeIs('pmt.opcr');
             $isSMPOR = request()->routeIs('pmt.smpor');
             $isIPCR = request()->routeIs('pmt.ipcr');
-            $isQAR = request()->routeIs('pmt.qar.index');
+            $isQAR = request()->routeIs('pmt.qar');
             $isDeptHeadIPCRSMPORReview = request()->routeIs('pmt.smpor-ipcr-review');
             $isRD = request()->routeIs('pmt.rewards');
             $isIPCRCalibOVR = request()->routeIs('pmt.ipcr-calib-overview');
@@ -271,7 +271,7 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('pmt.qar.index') }}" class="sidebar-link" @if($isQAR) aria-current="page" @endif>
+                                <a href="{{ route('pmt.qar') }}" class="sidebar-link" @if($isQAR) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-user-check"></i>
                                     <span>QAR validation</span>
                                 </a>
