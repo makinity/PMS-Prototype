@@ -22,6 +22,7 @@
         $selectedQuarterNumberSafe = (int) ($selectedQuarterNumber ?? 0);
         $quarterInputValue = $selectedQuarterNumberSafe > 0 ? $selectedQuarterNumberSafe : (int) request('q', 0);
         $officeSearchSafe = isset($officeSearch) ? (string) $officeSearch : (string) request('office', '');
+        $periodSafe = $period ?? null;
 
         $formatDate = static function ($value): string {
             if (empty($value)) {
@@ -36,10 +37,10 @@
         };
 
         $periodRange = '-';
-        if ($period?->start_date && $period?->end_date) {
-            $periodRange = \Illuminate\Support\Carbon::parse($period->start_date)->format('M d, Y')
+        if ($periodSafe?->start_date && $periodSafe?->end_date) {
+            $periodRange = \Illuminate\Support\Carbon::parse($periodSafe->start_date)->format('M d, Y')
                 . ' - '
-                . \Illuminate\Support\Carbon::parse($period->end_date)->format('M d, Y');
+                . \Illuminate\Support\Carbon::parse($periodSafe->end_date)->format('M d, Y');
         }
     @endphp
 
@@ -68,7 +69,7 @@
                 </div>
                 <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
                     <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Performance Period</p>
-                    <p class="mt-1 text-sm font-semibold text-white">{{ $period?->name ?? 'No active period' }}</p>
+                    <p class="mt-1 text-sm font-semibold text-white">{{ $periodSafe?->name ?? 'No active period' }}</p>
                     <p class="text-xs text-slate-400">{{ $periodRange }}</p>
                 </div>
                 <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
@@ -97,7 +98,7 @@
             @endif
         </div>
 
-        @if (!$period)
+        @if (!$periodSafe)
             <div class="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
                 No active performance period found.
             </div>
@@ -107,7 +108,7 @@
             <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
                 <h2 class="text-lg font-semibold text-white">QAR Approval Queue</h2>
                 <div class="flex flex-wrap items-center justify-end gap-2">
-                    <form method="GET" action="{{ route('pmt.qar') }}" class="flex items-center gap-2">
+                    <form method="GET" action="{{ route('pmt.qar') }}" data-search-form data-loading-label="Searching..." class="flex items-center gap-2">
                         @if ($quarterInputValue > 0)
                             <input type="hidden" name="q" value="{{ $quarterInputValue }}">
                         @endif
@@ -121,8 +122,10 @@
                         >
                         <button
                             type="submit"
+                            data-submit-button
                             class="rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:bg-slate-800">
-                            Search
+                            <span data-button-spinner class="mr-2 hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-slate-400/40 border-t-slate-100"></span>
+                            <span data-button-label>Search</span>
                         </button>
                         @if ($officeSearchSafe !== '')
                             <a
@@ -170,17 +173,12 @@
                                 <td class="px-4 py-3 text-slate-300">{{ $formatDate($endorsedDate) }}</td>
                                 <td class="px-4 py-3 text-slate-300">{{ $formatDate($header->pmt_validated_at) }}</td>
                                 <td class="px-4 py-3 text-right">
-                                    @if ($isEndorsed)
+                                    @if ($isEndorsed || $isApproved)
                                         <button type="button"
                                             data-modal-target="pmtQarViewModal-{{ $header->id }}"
                                             data-modal-toggle="pmtQarViewModal-{{ $header->id }}"
                                             class="rounded-lg border border-slate-600 bg-slate-900/70 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-slate-800">
                                             View
-                                        </button>
-                                    @elseif ($isApproved)
-                                        <button type="button" disabled
-                                            class="cursor-not-allowed rounded-lg border border-cyan-500/40 bg-cyan-500/10 px-3 py-1.5 text-xs font-semibold text-cyan-200 opacity-70">
-                                            Approved
                                         </button>
                                     @else
                                         <span class="text-slate-500">-</span>
@@ -201,11 +199,16 @@
     </section>
 
     @foreach ($headersSafe as $header)
-        @if ((string) ($header->status ?? '') === 'dept_head_endorsed')
+        @php
+            $modalStatusKey = (string) ($header->status ?? '');
+            $showViewModal = in_array($modalStatusKey, ['dept_head_endorsed', 'pmt_approved'], true);
+        @endphp
+        @if ($showViewModal)
             @php
                 $headerStatusKey = (string) ($header->status ?? 'draft');
                 $headerMeta = $statusMeta[$headerStatusKey] ?? $statusMeta['draft'];
                 $endorsedDate = $header->approved_at ?? $header->generated_at;
+                $isEndorsedModal = $headerStatusKey === 'dept_head_endorsed';
             @endphp
             <div id="pmtQarViewModal-{{ $header->id }}" tabindex="-1" aria-hidden="true"
                 class="fixed left-0 right-0 top-0 z-50 hidden h-[calc(100%-1rem)] max-h-full w-full items-center justify-center overflow-y-auto overflow-x-hidden md:inset-0">
@@ -307,39 +310,41 @@
                                 Close
                             </button>
 
-                            <div class="flex items-center gap-2">
-                                <form id="pmtQarReturnForm-{{ $header->id }}"
-                                    data-return-form
-                                    data-loading-label="Returning..."
-                                    method="POST"
-                                    action="{{ route('pmt.qar.return', ['qarHeader' => $header->id]) }}">
-                                    @csrf
-                                    <input type="hidden" name="q" value="{{ $quarterInputValue }}">
-                                    <input type="hidden" name="office" value="{{ $officeSearchSafe }}">
-                                    <button type="submit"
-                                        data-submit-button
-                                        class="inline-flex items-center gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-sm font-semibold text-amber-200 transition hover:bg-amber-500/20">
-                                        <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-amber-200/40 border-t-amber-100"></span>
-                                        <span data-button-label>Return</span>
-                                    </button>
-                                </form>
+                            @if ($isEndorsedModal)
+                                <div class="flex items-center gap-2">
+                                    <form id="pmtQarReturnForm-{{ $header->id }}"
+                                        data-return-form
+                                        data-loading-label="Returning..."
+                                        method="POST"
+                                        action="{{ route('pmt.qar.return', ['qarHeader' => $header->id]) }}">
+                                        @csrf
+                                        <input type="hidden" name="q" value="{{ $quarterInputValue }}">
+                                        <input type="hidden" name="office" value="{{ $officeSearchSafe }}">
+                                        <button type="submit"
+                                            data-submit-button
+                                            class="inline-flex items-center gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-sm font-semibold text-amber-200 transition hover:bg-amber-500/20">
+                                            <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-amber-200/40 border-t-amber-100"></span>
+                                            <span data-button-label>Return</span>
+                                        </button>
+                                    </form>
 
-                                <form id="pmtQarApproveForm-{{ $header->id }}"
-                                    data-approve-form
-                                    data-loading-label="Approving..."
-                                    method="POST"
-                                    action="{{ route('pmt.qar.approve', ['qarHeader' => $header->id]) }}">
-                                    @csrf
-                                    <input type="hidden" name="q" value="{{ $quarterInputValue }}">
-                                    <input type="hidden" name="office" value="{{ $officeSearchSafe }}">
-                                    <button type="submit"
-                                        data-submit-button
-                                        class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500">
-                                        <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
-                                        <span data-button-label>Approve</span>
-                                    </button>
-                                </form>
-                            </div>
+                                    <form id="pmtQarApproveForm-{{ $header->id }}"
+                                        data-approve-form
+                                        data-loading-label="Approving..."
+                                        method="POST"
+                                        action="{{ route('pmt.qar.approve', ['qarHeader' => $header->id]) }}">
+                                        @csrf
+                                        <input type="hidden" name="q" value="{{ $quarterInputValue }}">
+                                        <input type="hidden" name="office" value="{{ $officeSearchSafe }}">
+                                        <button type="submit"
+                                            data-submit-button
+                                            class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500">
+                                            <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                                            <span data-button-label>Approve</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -372,7 +377,7 @@
                     });
                 };
 
-                document.querySelectorAll('[data-approve-form], [data-return-form]').forEach((form) => {
+                document.querySelectorAll('[data-approve-form], [data-return-form], [data-search-form]').forEach((form) => {
                     const button = form.querySelector('[data-submit-button]');
                     const loadingLabel = form.dataset.loadingLabel || 'Processing...';
                     bindLoadingSubmit(form, button, loadingLabel);

@@ -19,12 +19,10 @@ class QarController extends Controller
             ->where('is_active', true)
             ->first();
 
-        $quarterContext = $this->resolveQuarterContext($request, $period);
-        $period = $quarterContext['period'];
+        $quarterContext = $this->resolveQuarterContext($request);
         $quarterNumber = $quarterContext['quarterNumber'];
         $quarterKey = $quarterContext['quarterKey'];
         $quarterLabel = $quarterContext['quarterLabel'];
-        $allowedQuarterNumbers = $quarterContext['allowedQuarterNumbers'];
         $allowedQuarterOptions = $quarterContext['allowedQuarterOptions'];
         $selectedQuarterNumber = $quarterContext['selectedQuarterNumber'];
 
@@ -37,8 +35,8 @@ class QarController extends Controller
                     'performancePeriod:id,name,start_date,end_date',
                     'approver:id,name',
                     'pmtValidator:id,name',
-                    'rows:id,qar_header_id,ppa_code,mfo_title,indicator_text,target_timeline,actual_performance,remarks,sort_order',
-                    'mporLinks:id,qar_header_id,mpor_id,employee_name,month_label,status_label',
+                    'mporLinks',
+                    'rows',
                 ])
                 ->where('performance_period_id', $period->id)
                 ->where('quarter_key', $quarterKey)
@@ -74,7 +72,6 @@ class QarController extends Controller
             'quarterNumber',
             'quarterKey',
             'quarterLabel',
-            'allowedQuarterNumbers',
             'allowedQuarterOptions',
             'selectedQuarterNumber',
             'headers',
@@ -86,12 +83,7 @@ class QarController extends Controller
 
     public function approve(Request $request, QarHeader $qarHeader)
     {
-        $period = PerformancePeriod::query()
-            ->where('is_active', true)
-            ->first();
-        $quarterContext = $this->resolveQuarterContext($request, $period);
-        $selectedQuarterNumber = $quarterContext['selectedQuarterNumber'];
-        $redirectParams = $this->buildQuarterRedirectParams($request, $selectedQuarterNumber);
+        $redirectParams = $this->buildRedirectParams($request);
 
         if ($qarHeader->status === QarHeader::STATUS_PMT_APPROVED) {
             return redirect()
@@ -120,12 +112,7 @@ class QarController extends Controller
 
     public function return(Request $request, QarHeader $qarHeader)
     {
-        $period = PerformancePeriod::query()
-            ->where('is_active', true)
-            ->first();
-        $quarterContext = $this->resolveQuarterContext($request, $period);
-        $selectedQuarterNumber = $quarterContext['selectedQuarterNumber'];
-        $redirectParams = $this->buildQuarterRedirectParams($request, $selectedQuarterNumber);
+        $redirectParams = $this->buildRedirectParams($request);
 
         if ($qarHeader->status === QarHeader::STATUS_PMT_APPROVED) {
             return redirect()
@@ -139,10 +126,10 @@ class QarController extends Controller
                 ->with('info', 'QAR must be endorsed by Dept Head first.');
         }
 
-        DB::transaction(function () use ($qarHeader): void {
+        DB::transaction(function () use ($request, $qarHeader): void {
             $qarHeader->pmt_status = QarHeader::PMT_RETURNED;
-            $qarHeader->pmt_validated_at = null;
-            $qarHeader->pmt_validated_by = null;
+            $qarHeader->pmt_validated_at = now();
+            $qarHeader->pmt_validated_by = $request->user()?->id;
             $qarHeader->save();
         });
 
@@ -151,119 +138,41 @@ class QarController extends Controller
             ->with('success', 'QAR returned to Dept Head.');
     }
 
-    private function resolveQuarterContext(Request $request, ?PerformancePeriod $period = null): array
+    private function resolveQuarterContext(Request $request): array
     {
-        $period = $period ?: PerformancePeriod::query()
-            ->where('is_active', true)
-            ->first();
-
-        $quarterData = $this->buildAllowedQuarterData($period);
-        $allowedQuarterNumbers = $quarterData['allowedQuarterNumbers'];
-        $allowedQuarterOptions = $quarterData['allowedQuarterOptions'];
-        $yearForQuarterKey = $quarterData['yearForQuarterKey'];
-
-        $requestedQ = (int) $request->input('q', 0);
-        $currentQ = (int) ceil(now()->month / 3);
-
-        if (in_array($requestedQ, $allowedQuarterNumbers, true)) {
-            $selectedQuarterNumber = $requestedQ;
-        } elseif (in_array($currentQ, $allowedQuarterNumbers, true)) {
-            $selectedQuarterNumber = $currentQ;
-        } else {
-            $selectedQuarterNumber = (int) ($allowedQuarterNumbers[0] ?? $currentQ);
+        $selectedQuarterNumber = (int) $request->query('q', 1);
+        if (!in_array($selectedQuarterNumber, [1, 2], true)) {
+            $selectedQuarterNumber = 1;
         }
 
-        $quarterNumber = $selectedQuarterNumber;
-        $quarterKey = sprintf('%d-Q%d', $yearForQuarterKey, $quarterNumber);
-        $quarterLabel = sprintf('Q%d %d', $quarterNumber, $yearForQuarterKey);
+        $year = (int) Carbon::now()->year;
+        $quarterKey = sprintf('%d-Q%d', $year, $selectedQuarterNumber);
+        $quarterLabel = sprintf('Q%d %d', $selectedQuarterNumber, $year);
+        $allowedQuarterOptions = [
+            ['value' => 1, 'label' => 'Q1'],
+            ['value' => 2, 'label' => 'Q2'],
+        ];
 
         return [
-            'period' => $period,
-            'year' => $yearForQuarterKey,
-            'quarterNumber' => $quarterNumber,
+            'quarterNumber' => $selectedQuarterNumber,
             'quarterKey' => $quarterKey,
             'quarterLabel' => $quarterLabel,
-            'allowedQuarterNumbers' => $allowedQuarterNumbers,
             'allowedQuarterOptions' => $allowedQuarterOptions,
             'selectedQuarterNumber' => $selectedQuarterNumber,
         ];
     }
 
-    private function buildAllowedQuarterData(?PerformancePeriod $period): array
-    {
-        $now = now();
-        $currentQuarter = (int) ceil($now->month / 3);
-        $yearForQuarterKey = (int) $now->year;
-
-        if (!$period || empty($period->start_date) || empty($period->end_date)) {
-            return [
-                'allowedQuarterNumbers' => [$currentQuarter],
-                'allowedQuarterOptions' => [
-                    ['value' => $currentQuarter, 'label' => 'Q' . $currentQuarter],
-                ],
-                'yearForQuarterKey' => $yearForQuarterKey,
-            ];
-        }
-
-        try {
-            $start = Carbon::parse($period->start_date)->startOfMonth();
-            $end = Carbon::parse($period->end_date)->startOfMonth();
-        } catch (\Throwable) {
-            return [
-                'allowedQuarterNumbers' => [$currentQuarter],
-                'allowedQuarterOptions' => [
-                    ['value' => $currentQuarter, 'label' => 'Q' . $currentQuarter],
-                ],
-                'yearForQuarterKey' => $yearForQuarterKey,
-            ];
-        }
-
-        if ($end->lt($start)) {
-            [$start, $end] = [$end, $start];
-        }
-
-        $yearForQuarterKey = (int) $start->year;
-
-        $quarters = [];
-        $cursor = $start->copy();
-        while ($cursor->lte($end)) {
-            $quarters[] = (int) ceil($cursor->month / 3);
-            $cursor->addMonthNoOverflow();
-        }
-
-        $allowedQuarterNumbers = collect($quarters)
-            ->filter(fn ($q) => $q >= 1 && $q <= 4)
-            ->unique()
-            ->sort()
-            ->values()
-            ->all();
-
-        if (empty($allowedQuarterNumbers)) {
-            $allowedQuarterNumbers = [$currentQuarter];
-        }
-
-        $allowedQuarterOptions = collect($allowedQuarterNumbers)
-            ->map(fn (int $q) => ['value' => $q, 'label' => 'Q' . $q])
-            ->values()
-            ->all();
-
-        return [
-            'allowedQuarterNumbers' => $allowedQuarterNumbers,
-            'allowedQuarterOptions' => $allowedQuarterOptions,
-            'yearForQuarterKey' => $yearForQuarterKey,
-        ];
-    }
-
-    private function buildQuarterRedirectParams(Request $request, int $selectedQuarterNumber): array
+    private function buildRedirectParams(Request $request): array
     {
         $params = [];
 
         if ($request->filled('q')) {
-            $params['q'] = $selectedQuarterNumber;
+            $params['q'] = (int) $request->input('q');
         }
 
-        if ($request->filled('office')) {
-            $params['office'] = (string) $request->input('office');
+        $office = trim((string) $request->input('office', ''));
+        if ($office !== '') {
+            $params['office'] = $office;
         }
 
         return $params;
