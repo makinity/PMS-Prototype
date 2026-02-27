@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\OfficeController;
 use App\Http\Controllers\Admin\PerformancePeriodsController;
 use App\Http\Controllers\Admin\UsersController;
 use App\Http\Controllers\Auth\ActivationController;
+use App\Http\Controllers\DeptHead\AccomplishmentReviewController;
 use App\Http\Controllers\DeptHead\QarController;
 use App\Http\Controllers\StageOne\Forms\IpcrExportController;
 use App\Http\Controllers\StageOne\Forms\IpcrExcelExportController;
@@ -41,6 +42,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Employee\DashboardController as EmployeeDashboardController;
 use App\Http\Controllers\Employee\IpcrTargetController;
 use App\Http\Controllers\Employee\SmporIpcrAccomplishmentController;
+use App\Http\Controllers\Pmt\AccomplishmentReviewController as PmtAccomplishmentReviewController;
 use App\Http\Controllers\Supervisor\AccomplishmentController as SupervisorAccomplishmentController;
 use App\Http\Controllers\Supervisor\DashboardController as SupervisorDashboardController;
 use App\Http\Controllers\Supervisor\MporController as SupervisorMporController;
@@ -222,6 +224,9 @@ Route::prefix('dept-head')->middleware('auth')->group(function () {
 
     Route::get('/ipcr/export/pdf', [IpcrExportController::class, 'exportPdf'])
         ->name('stage1.ipcr.export.pdf');
+
+    Route::get('/accomplishment-review', [AccomplishmentReviewController::class, 'index'])->name('dept-head.acc-review');
+    Route::post('/accomplishment-review/{id}', [AccomplishmentReviewController::class, 'endorseToPmt'])->name('dept-head.acc-review.endorse');
 });
 
 /*
@@ -313,7 +318,6 @@ Route::prefix('pmt')->middleware('auth')->group(function () {
     Route::get('/OPCR', fn () => view('pmt.opcr'))->name('pmt.opcr');
     Route::get('/OPCR/approval', fn () => view('pmt.opcr-app-view'))->name('pmt.opcr-app-view');
     Route::get('/ipcr', fn () => view('pmt.ipcr'))->name('pmt.ipcr');
-    Route::get('/smpor-ipcr-review', fn () => view('pmt.smpor-ipcr-review'))->name('pmt.smpor-ipcr-review');
     Route::get('/ipcr-overview', fn () => view('pmt.ipcr-calib-overview'))->name('pmt.ipcr-calib-overview');
     Route::get('/ipcr-calibration', fn () => view('pmt.ipcr-calib'))->name('pmt.ipcr-calib');
     Route::get('/final-calibration', fn () => view('pmt.final-calibration'))->name('pmt.final-calib');
@@ -364,6 +368,9 @@ Route::prefix('pmt')->middleware('auth')->group(function () {
     // Exports - Stage III IPCR PDF
     Route::get('/ipcr/export/pdf', [StageThreeFormsIpcrExportController::class, 'exportPdf'])
         ->name('stage3.ipcr.export.pdf');
+
+    Route::get('/acc-review', [PmtAccomplishmentReviewController::class, 'index'])->name('pmt.acc-review');
+    Route::post('/acc-review/{id}/approve', [PmtAccomplishmentReviewController::class, 'approve'])->name('pmt.acc-review.approve');
 });
 
 /*

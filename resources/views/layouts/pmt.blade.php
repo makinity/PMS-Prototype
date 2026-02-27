@@ -150,7 +150,7 @@
             $isSMPOR = request()->routeIs('pmt.smpor');
             $isIPCR = request()->routeIs('pmt.ipcr');
             $isQAR = request()->routeIs('pmt.qar');
-            $isDeptHeadIPCRSMPORReview = request()->routeIs('pmt.smpor-ipcr-review');
+            $isDeptHeadAccReview = request()->routeIs('pmt.acc-review');
             $isRD = request()->routeIs('pmt.rewards');
             $isIPCRCalibOVR = request()->routeIs('pmt.ipcr-calib-overview');
             $isFinalCalib = request()->routeIs('pmt.final-calib');
@@ -278,9 +278,9 @@
                             </li>
 
                             <li>
-                                <a href="{{ route('pmt.smpor-ipcr-review') }}" class="sidebar-link" @if($isDeptHeadIPCRSMPORReview) aria-current="page" @endif>
+                                <a href="{{ route('pmt.acc-review') }}" class="sidebar-link" @if($isDeptHeadAccReview) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-star-half-stroke"></i>
-                                    <span>SMPOR & IPCR Review</span>
+                                    <span>Accomplishment Review</span>
                                 </a>
                             </li>
                             <li>
