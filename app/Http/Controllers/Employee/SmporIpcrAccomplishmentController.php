@@ -83,7 +83,7 @@ class SmporIpcrAccomplishmentController extends Controller
             $submission = AccomplishmentSubmission::query()
                 ->where('employee_id', $user->id)
                 ->where('performance_period_id', $period->id)
-                ->with(['mpors:id,month,status'])
+                ->with(['mpors:id,employee_id,office_id,month,status'])
                 ->first();
 
             if ($submission) {
@@ -125,6 +125,8 @@ class SmporIpcrAccomplishmentController extends Controller
         $smporTotals['monthly_quantity'] = array_fill_keys($smporMonths, 0.0);
         $smporTotals['monthly_quality_points'] = array_fill_keys($smporMonths, 0.0);
         $smporTotals['monthly_timeliness_points'] = array_fill_keys($smporMonths, 0.0);
+        $rangeStartYm = !empty($monthKeys) ? (string) $monthKeys[0] : null;
+        $rangeEndYm = !empty($monthKeys) ? (string) $monthKeys[count($monthKeys) - 1] : null;
 
         $ipcr = null;
         if ($user?->id) {
@@ -252,25 +254,28 @@ class SmporIpcrAccomplishmentController extends Controller
                 : collect();
 
             if ($officialMporIds->isNotEmpty()) {
-                $officialMporQuery = Mpor::query()
+                $officialMporBaseQuery = Mpor::query()
                     ->whereIn('id', $officialMporIds)
                     ->where('office_id', $user->office_id);
 
                 if ($user?->id) {
-                    $officialMporQuery->where('employee_id', $user->id);
+                    $officialMporBaseQuery->where('employee_id', $user->id);
                 }
 
-                if (!empty($monthKeys)) {
-                    $officialMporQuery->where(function ($query) use ($monthKeys): void {
-                        foreach ($monthKeys as $yearMonth) {
-                            $query->orWhere('month', 'like', $yearMonth . '%');
-                        }
-                    });
+                $selectedMpors = collect();
+
+                if ($rangeStartYm && $rangeEndYm) {
+                    $selectedMpors = (clone $officialMporBaseQuery)
+                        ->whereBetween(DB::raw('LEFT(month, 7)'), [$rangeStartYm, $rangeEndYm])
+                        ->orderBy('month')
+                        ->get();
                 }
 
-                $selectedMpors = $officialMporQuery
-                    ->orderBy('month')
-                    ->get();
+                if ($selectedMpors->isEmpty()) {
+                    $selectedMpors = $officialMporBaseQuery
+                        ->orderBy('month')
+                        ->get();
+                }
 
                 if ($selectedMpors->isNotEmpty()) {
                     $usingOfficialDataset = true;
@@ -286,12 +291,8 @@ class SmporIpcrAccomplishmentController extends Controller
                 ->where('office_id', $user->office_id)
                 ->whereIn('status', ['submitted']);
 
-            if (!empty($monthKeys)) {
-                $previewMporQuery->where(function ($query) use ($monthKeys): void {
-                    foreach ($monthKeys as $yearMonth) {
-                        $query->orWhere('month', 'like', $yearMonth . '%');
-                    }
-                });
+            if ($rangeStartYm && $rangeEndYm) {
+                $previewMporQuery->whereBetween(DB::raw('LEFT(month, 7)'), [$rangeStartYm, $rangeEndYm]);
             }
 
             $selectedMpors = $previewMporQuery

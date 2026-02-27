@@ -55,7 +55,7 @@
             <div class="flex items-start justify-between gap-3">
                 <div>
                     <h2 class="text-lg font-semibold text-white">SMPOR &ndash; Monitoring Summary</h2>
-                    <p class="text-sm text-slate-400">System-generated summary based on submitted MPORs. Read-only.</p>
+                    <p class="text-sm text-slate-400">System-generated summary. {{ $smporModeLabel ?? 'Preview (monitoring-only)' }}.</p>
                 </div>
                 <div class="flex gap-2">
                     <a href="#"
@@ -85,11 +85,11 @@
                 </div>
                 <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Status</p>
-                    <p class="mt-1 font-semibold">System-generated, monitoring-only</p>
+                    <p class="mt-1 font-semibold">{{ $smporModeLabel ?? 'Preview (monitoring-only)' }}</p>
                 </div>
                 <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Data Source</p>
-                    <p class="mt-1 font-semibold">Submitted MPORs</p>
+                    <p class="mt-1 font-semibold">{{ $smporSourceLabel ?? 'Submitted MPORs' }}</p>
                 </div>
             </div>
         </div>
@@ -213,7 +213,7 @@
                 <div>
                     <p class="text-xs uppercase tracking-[0.2em] text-blue-300">SMPOR (Monitoring Summary)</p>
                     <h3 class="text-lg font-semibold text-white">SMPOR Preview &mdash; {{ $periodLabelValue }}</h3>
-                    <p class="text-sm text-slate-400 mt-1">System-generated, monitoring-only. Derived from submitted MPORs.</p>
+                    <p class="text-sm text-slate-400 mt-1">System-generated, monitoring-only. {{ $smporModeLabel ?? '' }}</p>
                 </div>
                 <button type="button" data-close-modal class="text-slate-400 hover:text-white">&times;</button>
             </div>
@@ -233,7 +233,7 @@
                     </div>
                     <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                         <p class="text-[11px] uppercase text-slate-500">Source</p>
-                        <p class="mt-1 font-semibold">Submitted MPORs</p>
+                        <p class="mt-1 font-semibold">{{ $smporSourceLabel ?? 'Submitted MPORs' }}</p>
                     </div>
                 </div>
 
@@ -259,7 +259,7 @@
                             Timeliness
                         </button>
                     </div>
-                    <p class="text-xs text-slate-400">Monthly totals are derived from rated ORS monitoring within submitted MPORs.</p>
+                    <p class="text-xs text-slate-400">Monthly totals are derived from rated ORS monitoring from the selected SMPOR data source.</p>
 
                     @php
                         $smporSectionList = is_array($smporSections ?? null) ? $smporSections : [];
