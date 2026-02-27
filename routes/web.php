@@ -41,6 +41,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Employee\DashboardController as EmployeeDashboardController;
 use App\Http\Controllers\Employee\IpcrTargetController;
 use App\Http\Controllers\Employee\SmporIpcrAccomplishmentController;
+use App\Http\Controllers\Supervisor\AccomplishmentController as SupervisorAccomplishmentController;
 use App\Http\Controllers\Supervisor\DashboardController as SupervisorDashboardController;
 use App\Http\Controllers\Supervisor\MporController as SupervisorMporController;
 
@@ -232,6 +233,8 @@ Route::prefix('dept-head')->middleware('auth')->group(function () {
 Route::prefix('supervisor')->middleware('auth')->group(function () {
     // Views
     Route::get('/dashboard', [SupervisorDashboardController::class, 'index'])->name('supervisor.dashboard');
+    Route::get('/employee-submissions', [SupervisorAccomplishmentController::class, 'index'])
+        ->name('supervisor.employee_submissions.index');
     Route::get('/team-tasks', [TeamTasksController::class, 'index'])->name('supervisor.team-tasks');
     Route::get('/team-tasks/{orsEntry}/monitor', [OrsMonitoringController::class, 'show'])->name('supervisor.team-tasks.monitor');
     Route::post('/team-tasks/{orsEntry}/monitor', [OrsMonitoringController::class, 'store'])->name('supervisor.team-tasks.monitor.store');
