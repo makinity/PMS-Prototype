@@ -3,6 +3,7 @@
 namespace App\Exports\StageTwo;
 
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
@@ -10,6 +11,7 @@ use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Events\AfterSheet;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
@@ -71,12 +73,14 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
     private array $ipcr;
     private array $standards;
     private array $valuesByIndicator;
+    private array $meta;
 
-    public function __construct(array $ipcr, array $standards, array $valuesByIndicator = [])
+    public function __construct(array $ipcr, array $standards, array $valuesByIndicator = [], array $meta = [])
     {
         $this->ipcr = $ipcr;
         $this->standards = $standards;
         $this->valuesByIndicator = $valuesByIndicator;
+        $this->meta = $meta;
     }
 
     public function array(): array
@@ -176,13 +180,17 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
      */
     private function writeManualHeader(Worksheet $sheet): void
     {
+        $employeeName = trim((string) ($this->meta['employee'] ?? '—'));
+        $officeName = trim((string) ($this->meta['office'] ?? '—'));
+        $periodLabel = trim((string) ($this->meta['period'] ?? 'the period'));
+
         $sheet->mergeCells('A1:N1');
         $sheet->setCellValue('A1', 'INDIVIDUAL PERFORMANCE COMMITMENT AND REVIEW (IPCR)');
 
         $sheet->mergeCells('A3:N3');
         $sheet->setCellValue(
             'A3',
-            'I RAMON REYES, of REVENUE COLLECTION UNIT section of REVENUE COLLECTION UNIT, commit to deliver and agree to be rated on the attainment of the following targets in accordance with the indicated measures for the period JANUARY – JUNE 2026.'
+            "I {$employeeName}, of {$officeName}, commit to deliver and agree to be rated on the attainment of the following targets in accordance with the indicated measures for the period {$periodLabel}."
         );
 
         $sheet->mergeCells('A10:C10');
@@ -343,18 +351,36 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
                 $sheet->mergeCells("C{$row}:D{$row}");
 
                 // Ratings (Q/E/T). If unfinished -> blanks.
-                $q = $hasVals ? ($vals['q'] ?? '') : '';
-                $e = $hasVals ? ($vals['e'] ?? '') : '';
-                $t = $hasVals ? ($vals['t'] ?? '') : '';
+                $qNum = $hasVals ? $this->toNumericOrNull($vals['q'] ?? null) : null;
+                $eNum = $hasVals ? $this->toNumericOrNull($vals['e'] ?? null) : null;
+                $tNum = $hasVals ? $this->toNumericOrNull($vals['t'] ?? null) : null;
 
-                $sheet->setCellValue("E{$row}", $q === null ? '' : $q);
-                $sheet->setCellValue("F{$row}", $e === null ? '' : $e);
-                $sheet->setCellValue("G{$row}", $t === null ? '' : $t);
+                if ($qNum !== null) {
+                    $sheet->setCellValueExplicit("E{$row}", $qNum, DataType::TYPE_NUMERIC);
+                } else {
+                    $sheet->setCellValue("E{$row}", '');
+                }
 
-                $sheet->setCellValue(
-                    "H{$row}",
-                    '=IF(COUNTA(E'.$row.':G'.$row.')=0,"",AVERAGE(E'.$row.':G'.$row.'))'
-                );
+                if ($eNum !== null) {
+                    $sheet->setCellValueExplicit("F{$row}", $eNum, DataType::TYPE_NUMERIC);
+                } else {
+                    $sheet->setCellValue("F{$row}", '');
+                }
+
+                if ($tNum !== null) {
+                    $sheet->setCellValueExplicit("G{$row}", $tNum, DataType::TYPE_NUMERIC);
+                } else {
+                    $sheet->setCellValue("G{$row}", '');
+                }
+
+                $nums = array_values(array_filter([$qNum, $eNum, $tNum], static fn ($v) => $v !== null));
+                $aNum = !empty($nums) ? round(array_sum($nums) / count($nums), 2) : null;
+
+                if ($aNum !== null) {
+                    $sheet->setCellValueExplicit("H{$row}", $aNum, DataType::TYPE_NUMERIC);
+                } else {
+                    $sheet->setCellValue("H{$row}", '');
+                }
 
                 // Remarks
                 $remarks = $hasVals
@@ -378,6 +404,9 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
                 $sheet->getStyle("E{$row}:H{$row}")
                     ->getAlignment()
                     ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle("E{$row}:H{$row}")
+                    ->getNumberFormat()
+                    ->setFormatCode('0.00');
 
                 // Vertical borders only (Stage 1)
                 $this->applyRowVerticalBorders($sheet, $row);
@@ -410,6 +439,19 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
         }
 
         return $row;
+    }
+
+    private function toNumericOrNull(mixed $v): ?float
+    {
+        if ($v === null) {
+            return null;
+        }
+
+        if (is_string($v)) {
+            $v = trim($v);
+        }
+
+        return is_numeric($v) ? (float) $v : null;
     }
 
     private function formatStdBlock(array $standards, string $indicator, int $rating): string

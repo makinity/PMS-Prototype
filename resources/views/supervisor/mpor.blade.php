@@ -109,7 +109,7 @@
                                                 Preview
                                             </button>
 
-
+{{--
 
                                             @if (($mpor->status ?? null) === 'approved')
                                                 <form method="POST" action="{{ route('supervisor.mpor.endorse', $mpor) }}" data-action-form>
@@ -122,7 +122,7 @@
                                                         <span data-button-label>Endorse</span>
                                                     </button>
                                                 </form>
-                                            @endif
+                                            @endif --}}
                                         </div>
                                     @endif
                                 </td>

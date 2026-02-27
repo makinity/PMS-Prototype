@@ -1139,7 +1139,7 @@ class SmporIpcrAccomplishmentController extends Controller
         $meta = $this->buildMeta($request, $ipcrModel);
 
         return Excel::download(
-            new IpcrExcelExport($ipcr, $standards, $valuesByIndicator),
+            new IpcrExcelExport($ipcr, $standards, $valuesByIndicator, $meta),
             $this->buildIpcrFilename($meta, false)
         );
     }
@@ -1220,6 +1220,11 @@ class SmporIpcrAccomplishmentController extends Controller
     private function buildValuesByIndicator(Ipcr $ipcr): array
     {
         [$startDate, $endDate] = $this->resolvePeriodWindow($ipcr);
+        $ipcrItemIds = $ipcr->items->pluck('id')->filter()->values()->all();
+
+        if (empty($ipcrItemIds)) {
+            return [];
+        }
 
         $entries = OrsEntry::query()
             ->with([
@@ -1227,7 +1232,7 @@ class SmporIpcrAccomplishmentController extends Controller
                 'monitoring:ors_entry_id,quality_rating,timeliness_rating,supervisor_id',
             ])
             ->where('employee_id', $ipcr->employee_id)
-            ->where('ipcr_id', $ipcr->id)
+            ->whereIn('ipcr_item_id', $ipcrItemIds)
             ->where('status', 'rated')
             ->whereBetween('work_date', [$startDate->toDateString(), $endDate->toDateString()])
             ->whereHas('monitoring', function ($q) {
