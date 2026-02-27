@@ -9,6 +9,7 @@ use App\Models\PerformancePeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class AccomplishmentController extends Controller
@@ -478,5 +479,21 @@ class AccomplishmentController extends Controller
         }
 
         return $normalized;
+    }
+
+    public function endorseToDeptHead($id)
+    {
+        $submission = AccomplishmentSubmission::findOrFail($id);
+        if ($submission->status !== 'submitted_to_supervisor') {
+            return back()->with('error', 'Only submissions submitted to supervisor can be endorsed.');
+        }
+
+        $submission->update([
+            'status' => 'supervisor_endorsed',
+            'supervisor_id' => Auth::id(),
+            'supervisor_action_at' => now(),
+        ]);
+
+        return back()->with('success', 'Submission successfully endorsed to Department Head.');
     }
 }

@@ -197,7 +197,16 @@
                 </div>
             </div>
 
-            <div class="mt-5 flex items-center justify-end gap-3 border-t border-slate-800 pt-4">
+            <div class="mt-5 flex items-center justify-end gap-4 border-t border-slate-800 pt-4">
+                <form method="POST"
+                    action="{{ route('supervisor.submissions.endorse', $row['id']) }}"
+                    class="inline">
+                    @csrf
+                    <button type="submit"
+                        class="rounded-lg border border-emerald-600/40 bg-emerald-600/10 px-3 py-2 text-xs font-semibold text-emerald-300 transition hover:bg-emerald-600/20">
+                        Endorse
+                    </button>
+                </form>
                 <button type="button" data-close-modal class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-800">Close</button>
             </div>
         </div>

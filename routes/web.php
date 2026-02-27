@@ -233,14 +233,17 @@ Route::prefix('dept-head')->middleware('auth')->group(function () {
 Route::prefix('supervisor')->middleware('auth')->group(function () {
     // Views
     Route::get('/dashboard', [SupervisorDashboardController::class, 'index'])->name('supervisor.dashboard');
-    Route::get('/employee-submissions', [SupervisorAccomplishmentController::class, 'index'])
-        ->name('supervisor.employee_submissions.index');
     Route::get('/team-tasks', [TeamTasksController::class, 'index'])->name('supervisor.team-tasks');
     Route::get('/team-tasks/{orsEntry}/monitor', [OrsMonitoringController::class, 'show'])->name('supervisor.team-tasks.monitor');
     Route::post('/team-tasks/{orsEntry}/monitor', [OrsMonitoringController::class, 'store'])->name('supervisor.team-tasks.monitor.store');
     Route::get('/ipcr', fn () => view('supervisor.ipcr'))->name('supervisor.ipcr');
     Route::get('/smpor-ipcr-review', fn () => view('supervisor.smpor-ipcr-review'))->name('supervisor.smpor-ipcr-review');
     Route::get('/ipcr-target', fn () => view('supervisor.ipcr-target'))->name('supervisor.ipcr-target');
+
+    Route::get('/submissions', [SupervisorAccomplishmentController::class, 'index'])
+        ->name('supervisor.employee-submissions');
+    Route::post('/submissions/{id}/endorse', [SupervisorAccomplishmentController::class, 'endorseToDeptHead'])
+        ->name('supervisor.submissions.endorse');
 
 
     Route::get('/mpor-validation', fn () => view('supervisor.mpor-validation'))->name('supervisor.mpor-validation');

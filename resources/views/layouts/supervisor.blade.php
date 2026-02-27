@@ -151,7 +151,7 @@
             $isSupervisorIPCRTARGET = request()->routeIs('supervisor.ipcr-target');
             $isSupervisorOPCR = request()->routeIs('supervisor.opcr');
             $isSupervisorMPOR = request()->routeIs('supervisor.mpor');
-            $isSupervisorEmpAcc = request()->routeIs('supervisor.employee_submissions.index');
+            $isSupervisorEmpAcc = request()->routeIs('supervisor.employee-submissions');
             $isSupervisorMPORValidation = request()->routeIs('supervisor.mpor-validation');
             $isSupervisorORS = request()->routeIs('supervisor.ors-monitoring');
             $isSupervisorOverdueAlerts = request()->routeIs('supervisor.overdue-alerts');
@@ -276,7 +276,7 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('supervisor.employee_submissions.index') }}" class="sidebar-link" @if($isSupervisorEmpAcc) aria-current="page" @endif>
+                                <a href="{{ route('supervisor.employee-submissions') }}" class="sidebar-link" @if($isSupervisorEmpAcc) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-file-lines"></i>
                                     <span>Accomplishment Review</span>
                                 </a>
