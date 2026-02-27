@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\StageOne\Planning;
+namespace App\Http\Controllers\Employee;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use App\Models\Ipcr;
 use App\Models\PerformancePeriod;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -24,7 +24,7 @@ class IpcrTargetController extends Controller
             ->first();
 
         $ipcrQuery = Ipcr::query()
-            ->with(['ipcrItems', 'office', 'performancePeriod', 'employee'])
+            ->with(['ipcrItems.uwpFunction', 'office', 'performancePeriod', 'employee'])
             ->where('employee_id', $user->id)
             ->orderByDesc('id');
 
@@ -51,11 +51,40 @@ class IpcrTargetController extends Controller
         ];
 
         if ($ipcr) {
+            $functions = $ipcr->ipcrItems
+                ->pluck('uwpFunction')
+                ->filter()
+                ->unique('id')
+                ->values();
+
+            if ($functions->isNotEmpty()) {
+                $functionHeaderMeta = [
+                    'core_percent' => (float) $functions->sum(function ($function) {
+                        return strtolower(trim((string) ($function->function_type ?? ''))) === 'support'
+                            ? 0
+                            : (float) ($function->weight_percent ?? 0);
+                    }),
+                    'support_percent' => (float) $functions->sum(function ($function) {
+                        return strtolower(trim((string) ($function->function_type ?? ''))) === 'support'
+                            ? (float) ($function->weight_percent ?? 0)
+                            : 0;
+                    }),
+                ];
+            }
+
             $groups = [];
-            $items = $ipcr->ipcrItems->sortBy('id')->values();
+            $items = $ipcr->ipcrItems
+                ->sortBy(function ($item) {
+                    $sortOrder = $item->uwpFunction?->sort_order;
+                    $resolvedSort = is_numeric($sortOrder) ? (int) $sortOrder : 9999;
+
+                    return sprintf('%05d-%010d', $resolvedSort, (int) $item->id);
+                })
+                ->values();
 
             foreach ($items as $item) {
-                $groupType = strtolower(trim((string) $item->function_type)) === 'support' ? 'support' : 'core';
+                $groupFunctionType = strtolower(trim((string) ($item->uwpFunction?->function_type ?? $item->function_type)));
+                $groupType = $groupFunctionType === 'support' ? 'support' : 'core';
                 $outputTitle = (string) ($item->output_title ?? '');
                 $groupKey = $groupType . '||' . $outputTitle;
 
@@ -129,7 +158,7 @@ class IpcrTargetController extends Controller
                     'output_title' => $outputTitle,
                     'target_summary' => $targetSummary,
                     'timeline' => (string) ($ipcr->performancePeriod?->name ?? ''),
-                    'weight_percent' => null,
+                    'weight_percent' => (float) ($groupItems->first()?->uwpFunction?->weight_percent ?? 0),
                     'indicators' => $indicators,
                 ];
 

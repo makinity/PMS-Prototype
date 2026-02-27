@@ -13,7 +13,6 @@ use App\Http\Controllers\StageOne\Forms\OpcrExcelExportController;
 use App\Http\Controllers\StageOne\Forms\UwpExportController;
 use App\Http\Controllers\StageOne\Forms\UwpExcelExportController;
 use App\Http\Controllers\StageOne\Planning\DeptHeadOpcrReviewController;
-use App\Http\Controllers\StageOne\Planning\IpcrTargetController;
 use App\Http\Controllers\StageOne\Planning\OpcrPmtReviewController;
 use App\Http\Controllers\StageOne\Planning\SuperVisorOpcrController;
 use App\Http\Controllers\StageOne\Planning\UnitWorkPlanController;
@@ -40,6 +39,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Employee\DashboardController as EmployeeDashboardController;
+use App\Http\Controllers\Employee\IpcrTargetController;
 use App\Http\Controllers\Employee\SmporIpcrAccomplishmentController;
 use App\Http\Controllers\Supervisor\DashboardController as SupervisorDashboardController;
 use App\Http\Controllers\Supervisor\MporController as SupervisorMporController;
@@ -151,9 +151,11 @@ Route::prefix('employee')->middleware('auth')->group(function () {
     Route::post('/mpor/submit', [MporController::class, 'submitMpor'])
         ->name('employee.mpor.submit');
 
-    // Exports - SMPOR Excel
+    // Exports - SMPOR and IPCR Excel
     Route::get('/smpor/export', [SmporIpcrAccomplishmentController::class, 'exportExcel'])
         ->name('smpor.export.excel');
+    Route::get('ipcr/export-excel', [SmporIpcrAccomplishmentController::class, 'exportIpcrExcel'])
+        ->name('ipcr.export.excel');
 
     // Exports - ORS PDF
     Route::get('/ors/export/pdf', [OrsExportController::class, 'preview'])
@@ -171,10 +173,7 @@ Route::prefix('employee')->middleware('auth')->group(function () {
     Route::get('/ipcr/export/pdf', [FormsIpcrExportController::class, 'exportPdf'])
         ->name('stage2.ipcr.export.pdf');
 
-    Route::get('/stage-two/forms/ipcr/export-excel', [\App\Http\Controllers\StageTwo\Forms\IpcrExcelExportController::class, 'exportExcel'])
-        ->name('stage2.ipcr.export.excel');
-    Route::get('/stage-two/forms/ipcr/preview-excel', [\App\Http\Controllers\StageTwo\Forms\IpcrExcelExportController::class, 'previewExcel'])
-        ->name('stage2.ipcr.preview.excel');
+
 
     // Exports - IPCR Excel (Stage I Forms) - kept as-is
     Route::get('/ipcr/export/excel', [IpcrExcelExportController::class, 'exportExcel'])

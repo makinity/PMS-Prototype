@@ -74,6 +74,7 @@ class IpcrGeneratorService
                         }
 
                         $byEmployee[$employeeId][] = [
+                            'uwp_function_id' => (int) $function->id,
                             'output_title' => (string) ($mfo->title ?? ''),
                             'function_type' => strtolower((string) ($function->function_type ?? '')),
                             'indicator_text' => (string) ($indicator->indicator_text ?? ''),
@@ -136,6 +137,7 @@ class IpcrGeneratorService
                 foreach ($items as $item) {
                     IpcrItem::query()->create([
                         'ipcr_id' => $ipcr->id,
+                        'uwp_function_id' => $item['uwp_function_id'] ?? null,
                         'output_title' => $item['output_title'],
                         'function_type' => $item['function_type'],
                         'indicator_text' => $item['indicator_text'],

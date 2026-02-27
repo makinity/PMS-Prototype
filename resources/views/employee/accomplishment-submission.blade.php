@@ -60,13 +60,21 @@
                 <div class="flex gap-2">
                     <a href="#"
                        data-open-modal="smpor-preview-modal"
-                       class="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-800 transition">
-                        View SMPOR
-                    </a>
-
-                    <a href="{{ route('smpor.export.excel') }}"
-                        class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800">
-                            Export
+                       aria-label="View SMPOR"
+                       title="View SMPOR"
+                       class="inline-flex items-center justify-center rounded-lg border border-slate-700 px-3 py-2 text-slate-200 hover:bg-slate-800 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             viewBox="0 0 24 24"
+                             fill="none"
+                             stroke="currentColor"
+                             stroke-width="1.5"
+                             class="h-4 w-4"
+                             aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M2.036 12.322a1 1 0 010-.644C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178a1 1 0 010 .644C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178z" />
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
                     </a>
                 </div>
             </div>
@@ -96,15 +104,22 @@
                 <div class="flex gap-2">
                     <a href="#"
                        data-open-modal="ipcr-preview-modal"
-                       class="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-800 transition">
-                        View IPCR Accomplishment
+                       aria-label="View IPCR Accomplishment"
+                       title="View IPCR Accomplishment"
+                       class="inline-flex items-center justify-center rounded-lg border border-slate-700 px-3 py-2 text-slate-200 hover:bg-slate-800 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             viewBox="0 0 24 24"
+                             fill="none"
+                             stroke="currentColor"
+                             stroke-width="1.5"
+                             class="h-4 w-4"
+                             aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M2.036 12.322a1 1 0 010-.644C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178a1 1 0 010 .644C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178z" />
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
                     </a>
-
-                    <a href="{{ route('stage2.ipcr.export.excel') }}"
-                        class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800">
-                            Export
-                    </a>
-
                 </div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-slate-200">
@@ -176,10 +191,6 @@
 
             <!-- Actions -->
             <div class="flex flex-wrap items-center justify-end gap-3 pt-2">
-                <button type="button"
-                        class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-800 transition">
-                    Back
-                </button>
                 <button type="button"
                         id="submit-accomplishments"
                         data-action="confirm-submission"
@@ -417,6 +428,10 @@
                 </div>
             </div>
             <div class="flex items-center justify-end gap-3 border-t border-slate-800 pt-4 mt-4">
+                <a href="{{ route('smpor.export.excel') }}"
+                   class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg">
+                    Export
+                </a>
                 <button type="button"
                         data-close-modal
                         class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-800 transition">
@@ -481,12 +496,26 @@
                                         <tr>
                                             <th class="px-4 py-3">Major Output</th>
                                             <th class="px-4 py-3">Success Indicators</th>
+                                            <th class="px-4 py-3 text-right">Q</th>
+                                            <th class="px-4 py-3 text-right">E</th>
+                                            <th class="px-4 py-3 text-right">T</th>
                                             <th class="px-4 py-3">Target Summary</th>
                                             <th class="px-4 py-3">Timeline</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-800">
                                         @forelse ($sectionRows as $rowIndex => $row)
+                                            @php
+                                                $qDisplay = isset($row['q']) && $row['q'] !== null
+                                                    ? number_format((float) $row['q'], 2, '.', '')
+                                                    : "\u{2014}";
+                                                $eDisplay = isset($row['e']) && $row['e'] !== null
+                                                    ? number_format((float) $row['e'], 2, '.', '')
+                                                    : "\u{2014}";
+                                                $tDisplay = isset($row['t']) && $row['t'] !== null
+                                                    ? number_format((float) $row['t'], 2, '.', '')
+                                                    : "\u{2014}";
+                                            @endphp
                                             <tr class="bg-slate-900/40">
                                                 <td class="px-4 py-3 font-semibold text-slate-100">{{ $row['major_output'] ?? '—' }}</td>
                                                 <td class="px-4 py-3">
@@ -513,12 +542,15 @@
                                                         </span>
                                                     </a>
                                                 </td>
+                                                <td class="px-4 py-3 text-right tabular-nums text-slate-200">{{ $qDisplay }}</td>
+                                                <td class="px-4 py-3 text-right tabular-nums text-slate-200">{{ $eDisplay }}</td>
+                                                <td class="px-4 py-3 text-right tabular-nums text-slate-200">{{ $tDisplay }}</td>
                                                 <td class="px-4 py-3 text-slate-300">{{ $row['target_summary'] ?? '—' }}</td>
                                                 <td class="px-4 py-3 text-slate-300">{{ $row['timeline'] ?? $periodLabelValue }}</td>
                                             </tr>
                                         @empty
                                             <tr class="bg-slate-900/40">
-                                                <td colspan="4" class="px-4 py-3 text-center text-slate-400">No outputs found for this section.</td>
+                                                <td colspan="7" class="px-4 py-3 text-center text-slate-400">No outputs found for this section.</td>
                                             </tr>
                                         @endforelse
                                     </tbody>
@@ -533,8 +565,10 @@
                 </div>
             </div>
             <div class="flex items-center justify-end gap-3 border-t border-slate-800 pt-4 mt-4">
-
-
+                <a href="{{ route('ipcr.export.excel') }}"
+                   class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg">
+                    Export
+                </a>
                 <button type="button"
                         data-close-modal
                         class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-800 transition">

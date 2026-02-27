@@ -11,6 +11,7 @@ class IpcrItem extends Model
 
     protected $fillable = [
         'ipcr_id',
+        'uwp_function_id',
         'output_title',
         'function_type',
         'indicator_text',
@@ -25,5 +26,10 @@ class IpcrItem extends Model
     public function ipcr(): BelongsTo
     {
         return $this->belongsTo(Ipcr::class, 'ipcr_id');
+    }
+
+    public function uwpFunction(): BelongsTo
+    {
+        return $this->belongsTo(UwpFunction::class, 'uwp_function_id');
     }
 }
