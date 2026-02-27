@@ -1432,4 +1432,8 @@ class SmporIpcrAccomplishmentController extends Controller
 
         return rtrim(rtrim(number_format($quantity, 2, '.', ''), '0'), '.');
     }
+
+    public function submit(){
+
+    }
 }
