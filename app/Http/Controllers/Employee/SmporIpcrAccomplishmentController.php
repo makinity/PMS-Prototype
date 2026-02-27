@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Employee;
 use App\Exports\StageTwo\IpcrExcelExport;
 use App\Exports\StageTwo\SmporExcelExport;
 use App\Http\Controllers\Controller;
+use App\Models\AccomplishmentSubmission;
 use App\Models\Ipcr;
 use App\Models\Mpor;
 use App\Models\OrsEntry;
@@ -15,6 +16,8 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 class SmporIpcrAccomplishmentController extends Controller
 {
@@ -74,6 +77,29 @@ class SmporIpcrAccomplishmentController extends Controller
 
         $periodLabel = (string) ($period->name ?? '-');
         $monthKeys = [];
+
+        $submission = null;
+        if ($user?->id && $period?->id) {
+            $submission = AccomplishmentSubmission::query()
+                ->where('employee_id', $user->id)
+                ->where('performance_period_id', $period->id)
+                ->with(['mpors:id,month,status'])
+                ->first();
+
+            if ($submission) {
+                $submissionStatus = (string) ($submission->status ?? 'draft');
+                $submittedAtLabel = $submission->submitted_at
+                    ? $submission->submitted_at->format('M d, Y h:i A')
+                    : '-';
+
+                $remarksValue = (string) ($submission->employee_remarks ?? '');
+                $attachmentNames = collect($submission->attachments ?? [])
+                    ->pluck('original_name')
+                    ->filter()
+                    ->values()
+                    ->all();
+            }
+        }
 
         if (!empty($period->start_date) && !empty($period->end_date)) {
             $start = Carbon::parse($period->start_date);
@@ -195,7 +221,23 @@ class SmporIpcrAccomplishmentController extends Controller
             ? constant(QarHeader::class . '::STATUS_PMT_APPROVED')
             : 'pmt_approved';
 
-        if ($user?->office_id) {
+        if (
+            $submission
+            && in_array(strtolower((string) $submission->status), [
+                'submitted_to_supervisor',
+                'supervisor_endorsed',
+                'dept_head_endorsed',
+                'pmt_approved',
+            ], true)
+            && $submission->mpors->isNotEmpty()
+        ) {
+            $selectedMpors = $submission->mpors->sortBy('month')->values();
+            $usingOfficialDataset = strtolower((string) $submission->dataset_source) === 'qar_official';
+            $smporModeLabel = $usingOfficialDataset ? 'Official (Submitted Snapshot)' : 'Preview (Submitted Snapshot)';
+            $smporSourceLabel = $usingOfficialDataset ? 'QAR-linked MPORs (snapshot)' : 'Submitted MPORs (snapshot)';
+        }
+
+        if ($selectedMpors->isEmpty() && $user?->office_id) {
             $qar = QarHeader::query()
                 ->where('office_id', $user->office_id)
                 ->where('performance_period_id', $period->id)
@@ -238,7 +280,7 @@ class SmporIpcrAccomplishmentController extends Controller
             }
         }
 
-        if (!$usingOfficialDataset && $user?->id && $user?->office_id) {
+        if ($selectedMpors->isEmpty() && !$usingOfficialDataset && $user?->id && $user?->office_id) {
             $previewMporQuery = Mpor::query()
                 ->where('employee_id', $user->id)
                 ->where('office_id', $user->office_id)
@@ -1433,7 +1475,193 @@ class SmporIpcrAccomplishmentController extends Controller
         return rtrim(rtrim(number_format($quantity, 2, '.', ''), '0'), '.');
     }
 
-    public function submit(){
+    public function submit(Request $request)
+    {
+        $user = $request->user();
+        abort_unless($user, 403);
 
+        $period = PerformancePeriod::query()->where('is_active', 1)->first();
+        if (!$period) {
+            return back()->with('info', 'No active performance period is configured.');
+        }
+
+        $ipcr = Ipcr::query()
+            ->where('employee_id', $user->id)
+            ->where('performance_period_id', $period->id)
+            ->with(['items'])
+            ->orderByDesc('id')
+            ->first();
+
+        if (!$ipcr) {
+            return back()->withErrors(['No IPCR found for this performance period.']);
+        }
+
+        $validated = $request->validate([
+            'remarks' => ['nullable', 'string', 'max:5000'],
+            'supporting_files' => ['nullable', 'array'],
+            'supporting_files.*' => ['file', 'max:51200'],
+        ]);
+
+        $existing = AccomplishmentSubmission::query()
+            ->where('employee_id', $user->id)
+            ->where('performance_period_id', $period->id)
+            ->first();
+
+        $existingStatus = strtolower((string) ($existing->status ?? 'draft'));
+        if ($existing && !in_array($existingStatus, ['draft', 'returned_to_employee'], true)) {
+            return back()->with('info', 'You already submitted your accomplishments for this period.');
+        }
+
+        $monthKeys = [];
+        if (!empty($period->start_date) && !empty($period->end_date)) {
+            $start = Carbon::parse($period->start_date)->startOfMonth();
+            $end = Carbon::parse($period->end_date)->startOfMonth();
+            if ($end->lt($start)) {
+                [$start, $end] = [$end, $start];
+            }
+
+            $cursor = $start->copy();
+            while ($cursor->lte($end)) {
+                $monthKeys[] = $cursor->format('Y-m');
+                $cursor->addMonth();
+            }
+        }
+
+        $datasetSource = 'submitted_mpor_preview';
+        $qarHeaderId = null;
+        $selectedMpors = collect();
+
+        $pmtApprovedStatus = defined(QarHeader::class . '::STATUS_PMT_APPROVED')
+            ? constant(QarHeader::class . '::STATUS_PMT_APPROVED')
+            : 'pmt_approved';
+
+        if ($user->office_id) {
+            $qar = QarHeader::query()
+                ->where('office_id', $user->office_id)
+                ->where('performance_period_id', $period->id)
+                ->where('status', $pmtApprovedStatus)
+                ->with(['mporLinks:id,qar_header_id,mpor_id'])
+                ->orderByDesc('approved_at')
+                ->orderByDesc('id')
+                ->first();
+
+            $officialMporIds = $qar?->mporLinks
+                ? $qar->mporLinks->pluck('mpor_id')->filter()->unique()->values()
+                : collect();
+
+            if ($qar && $officialMporIds->isNotEmpty()) {
+                $officialQuery = Mpor::query()
+                    ->whereIn('id', $officialMporIds)
+                    ->where('office_id', $user->office_id)
+                    ->where('employee_id', $user->id);
+
+                if (!empty($monthKeys)) {
+                    $officialQuery->where(function ($q) use ($monthKeys) {
+                        foreach ($monthKeys as $ym) {
+                            $q->orWhere('month', 'like', $ym . '%');
+                        }
+                    });
+                }
+
+                $selectedMpors = $officialQuery->orderBy('month')->get();
+
+                if ($selectedMpors->isNotEmpty()) {
+                    $datasetSource = 'qar_official';
+                    $qarHeaderId = $qar->id;
+                }
+            }
+        }
+
+        if ($selectedMpors->isEmpty()) {
+            $previewQuery = Mpor::query()
+                ->where('employee_id', $user->id)
+                ->where('office_id', $user->office_id)
+                ->whereIn('status', ['submitted']);
+
+            if (!empty($monthKeys)) {
+                $previewQuery->where(function ($q) use ($monthKeys) {
+                    foreach ($monthKeys as $ym) {
+                        $q->orWhere('month', 'like', $ym . '%');
+                    }
+                });
+            }
+
+            $selectedMpors = $previewQuery->orderBy('month')->get();
+        }
+
+        if ($selectedMpors->isEmpty()) {
+            return back()->withErrors([
+                'No eligible MPORs found to submit. Please make sure you have submitted MPORs with rated ORS entries for this period.',
+            ]);
+        }
+
+        $office = $user->office()->with(['head:id,name', 'employees:id,name,role,office_id'])->first();
+        $supervisorId = (int) ($office?->employees?->firstWhere('role', 'supervisor')?->id ?? 0) ?: null;
+        $deptHeadId = (int) ($office?->head?->id ?? $office?->employees?->firstWhere('role', 'dept-head')?->id ?? 0) ?: null;
+
+        DB::beginTransaction();
+
+        try {
+            $attachmentsPayload = [];
+
+            $files = $request->file('supporting_files', []);
+            if (!is_array($files)) {
+                $files = [];
+            }
+
+            foreach ($files as $file) {
+                if (!$file || !$file->isValid()) {
+                    continue;
+                }
+
+                $originalName = $file->getClientOriginalName();
+                $storedPath = $file->store(
+                    "accomplishment_submissions/period_{$period->id}/employee_{$user->id}",
+                    'public'
+                );
+
+                $attachmentsPayload[] = [
+                    'original_name' => $originalName,
+                    'path' => $storedPath,
+                    'size' => $file->getSize(),
+                    'mime' => $file->getMimeType(),
+                ];
+            }
+
+            $submission = AccomplishmentSubmission::updateOrCreate(
+                [
+                    'employee_id' => $user->id,
+                    'performance_period_id' => $period->id,
+                ],
+                [
+                    'office_id' => $user->office_id,
+                    'ipcr_id' => $ipcr->id,
+                    'dataset_source' => $datasetSource,
+                    'qar_header_id' => $qarHeaderId,
+                    'status' => 'submitted_to_supervisor',
+                    'employee_remarks' => $validated['remarks'] ?? null,
+                    'attachments' => !empty($attachmentsPayload) ? $attachmentsPayload : null,
+                    'submitted_at' => now(),
+                    'supervisor_id' => $supervisorId,
+                    'supervisor_remarks' => null,
+                    'supervisor_action_at' => null,
+                    'dept_head_id' => $deptHeadId,
+                    'dept_head_remarks' => null,
+                    'dept_head_action_at' => null,
+                    'pmt_id' => null,
+                    'pmt_remarks' => null,
+                    'pmt_action_at' => null,
+                ]
+            );
+
+            $submission->mpors()->sync($selectedMpors->pluck('id')->all());
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return back()->withErrors(['Submission failed: ' . $e->getMessage()]);
+        }
+
+        return back()->with('success', 'Accomplishments submitted successfully. Uploads and remarks are now read-only.');
     }
 }

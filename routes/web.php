@@ -144,8 +144,8 @@ Route::prefix('employee')->middleware('auth')->group(function () {
 
     // Stage II - Accomplishment Submission
     Route::get('/accomplishment-submission', [SmporIpcrAccomplishmentController::class, 'index'])->name('employee.accomplishment-submission');
-    Route::post('/accomplishment/submit', [EmployeeAccomplishmentController::class, 'submit'])
-        ->name('stage2.employee.accomplishment.submit');
+    Route::post('/accomplishment/submit', [SmporIpcrAccomplishmentController::class, 'submit'])
+        ->name('employee.accomplishment.submit');
 
     // Stage II - MPOR Submit
     Route::post('/mpor/submit', [MporController::class, 'submitMpor'])

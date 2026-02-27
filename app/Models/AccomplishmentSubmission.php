@@ -65,7 +65,9 @@ class AccomplishmentSubmission extends Model
     {
         return $this->belongsToMany(
             Mpor::class,
-            'accomplishment_submission_mpor'
-        );
+            'accomplishment_submission_mpor',
+            'accomplishment_submission_id',
+            'mpor_id'
+        )->withTimestamps();
     }
 }

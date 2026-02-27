@@ -2,7 +2,7 @@
 
 @section('main-content')
     @php
-        $isSubmitted = ($submissionStatus ?? 'draft') === 'submitted';
+        $isSubmitted = !in_array(strtolower((string) ($submissionStatus ?? 'draft')), ['draft', 'returned_to_employee'], true);
         $statusBadgeClasses = $isSubmitted
             ? 'inline-flex items-center rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-200 border border-emerald-500/40'
             : 'inline-flex items-center rounded-full bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-200 border border-amber-500/40';
@@ -140,7 +140,7 @@
 
         <form id="accomplishment-submission-form"
               method="POST"
-              action="{{ route('stage2.employee.accomplishment.submit') }}"
+              action="{{ route('employee.accomplishment.submit') }}"
               enctype="multipart/form-data"
               class="space-y-6">
             @csrf
