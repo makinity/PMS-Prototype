@@ -44,6 +44,7 @@
         }
     @endphp
 
+    <div id="pmtQarPageRoot">
     <section class="space-y-6">
         @if (session('success'))
             <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
@@ -129,6 +130,7 @@
                         </button>
                         @if ($officeSearchSafe !== '')
                             <a
+                                data-clear-link
                                 href="{{ route('pmt.qar', $quarterInputValue > 0 ? ['q' => $quarterInputValue] : []) }}"
                                 class="rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:bg-slate-800">
                                 Clear
@@ -359,14 +361,55 @@
             </div>
         @endif
     @endforeach
+    </div>
 
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function() {
+                const replaceRootFromHtml = (html) => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const returnedRoot = doc.getElementById('pmtQarPageRoot');
+                    const currentRoot = document.getElementById('pmtQarPageRoot');
+
+                    if (!returnedRoot || !currentRoot) {
+                        return false;
+                    }
+
+                    currentRoot.innerHTML = returnedRoot.innerHTML;
+                    return true;
+                };
+
+                const closeContainingModal = (formEl) => {
+                    const modalEl = formEl?.closest?.('[id^="pmtQarViewModal-"]');
+                    if (modalEl) {
+                        try {
+                            const inst = window.FlowbiteInstances?.getInstance?.('Modal', modalEl);
+                            if (inst && typeof inst.hide === 'function') {
+                                inst.hide();
+                            } else {
+                                modalEl.classList.add('hidden');
+                                modalEl.setAttribute('aria-hidden', 'true');
+                            }
+                        } catch (e) {
+                            modalEl.classList.add('hidden');
+                            modalEl.setAttribute('aria-hidden', 'true');
+                        }
+                    }
+
+                    document.body.classList.remove('overflow-hidden');
+                    document.querySelectorAll('[modal-backdrop]').forEach((el) => el.remove());
+                };
+
                 const bindLoadingSubmit = (form, button, loadingLabel) => {
                     if (!form || !button) {
                         return;
                     }
+
+                    if (form.dataset.loadingBound === 'true') {
+                        return;
+                    }
+                    form.dataset.loadingBound = 'true';
 
                     const spinner = button.querySelector('[data-button-spinner]');
                     const label = button.querySelector('[data-button-label]');
@@ -385,11 +428,169 @@
                     });
                 };
 
-                document.querySelectorAll('[data-approve-form], [data-return-form], [data-search-form]').forEach((form) => {
-                    const button = form.querySelector('[data-submit-button]');
-                    const loadingLabel = form.dataset.loadingLabel || 'Processing...';
-                    bindLoadingSubmit(form, button, loadingLabel);
-                });
+                const fetchAndReplace = async (url, options = {}, { pushUrl = '', closeModalForm = null } = {}) => {
+                    const response = await fetch(url, options);
+                    if (!response.ok) {
+                        throw new Error('Request failed.');
+                    }
+
+                    const html = await response.text();
+                    const updated = replaceRootFromHtml(html);
+                    if (!updated) {
+                        throw new Error('Unable to update view.');
+                    }
+
+                    if (pushUrl) {
+                        history.pushState({}, '', pushUrl);
+                    }
+
+                    initBindings(document);
+
+                    if (closeModalForm) {
+                        closeContainingModal(closeModalForm);
+                    }
+                };
+
+                const bindAjaxForms = (root = document) => {
+                    root.querySelectorAll('[data-search-form], [data-approve-form], [data-return-form]').forEach((form) => {
+                        if (form.dataset.bound === 'true') {
+                            return;
+                        }
+                        form.dataset.bound = 'true';
+
+                        form.addEventListener('submit', async (event) => {
+                            if (form.dataset.submitting === 'true') {
+                                event.preventDefault();
+                                return;
+                            }
+
+                            event.preventDefault();
+                            form.dataset.submitting = 'true';
+
+                            const isSearch = form.matches('[data-search-form]');
+                            const action = form.getAttribute('action') || location.href;
+                            let fallbackUrl = action;
+
+                            try {
+                                if (isSearch) {
+                                    const params = new URLSearchParams(new FormData(form));
+                                    const query = params.toString();
+                                    const joiner = action.includes('?') ? '&' : '?';
+                                    const url = query ? `${action}${joiner}${query}` : action;
+                                    fallbackUrl = url;
+
+                                    await fetchAndReplace(
+                                        url,
+                                        {
+                                            method: 'GET',
+                                            headers: {
+                                                'X-Requested-With': 'XMLHttpRequest',
+                                                'Accept': 'text/html',
+                                            },
+                                        },
+                                        { pushUrl: url }
+                                    );
+                                } else {
+                                    const token = form.querySelector('input[name="_token"]')?.value || '';
+                                    await fetchAndReplace(
+                                        action,
+                                        {
+                                            method: 'POST',
+                                            headers: {
+                                                'X-Requested-With': 'XMLHttpRequest',
+                                                'Accept': 'text/html',
+                                                ...(token ? { 'X-CSRF-TOKEN': token } : {}),
+                                            },
+                                            body: new FormData(form),
+                                            redirect: 'follow',
+                                        },
+                                        { pushUrl: location.href, closeModalForm: form }
+                                    );
+                                }
+                            } catch (error) {
+                                window.location.href = fallbackUrl || location.href;
+                            } finally {
+                                form.dataset.submitting = 'false';
+                            }
+                        });
+                    });
+                };
+
+                const initBindings = (root = document) => {
+                    if (typeof window.initFlowbite === 'function') {
+                        window.initFlowbite();
+                    }
+
+                    root.querySelectorAll('[data-approve-form], [data-return-form], [data-search-form]').forEach((form) => {
+                        const button = form.querySelector('[data-submit-button]');
+                        const loadingLabel = form.dataset.loadingLabel || 'Processing...';
+                        bindLoadingSubmit(form, button, loadingLabel);
+                    });
+
+                    bindAjaxForms(root);
+
+                    root.querySelectorAll('[data-clear-link]').forEach((link) => {
+                        if (link.dataset.bound === 'true') {
+                            return;
+                        }
+                        link.dataset.bound = 'true';
+
+                        link.addEventListener('click', async (event) => {
+                            event.preventDefault();
+                            const href = link.getAttribute('href');
+                            if (!href) {
+                                return;
+                            }
+
+                            try {
+                                await fetchAndReplace(
+                                    href,
+                                    {
+                                        method: 'GET',
+                                        headers: {
+                                            'X-Requested-With': 'XMLHttpRequest',
+                                            'Accept': 'text/html',
+                                        },
+                                    },
+                                    { pushUrl: href }
+                                );
+                            } catch (error) {
+                                window.location.href = href;
+                            }
+                        });
+                    });
+                };
+
+                if (!window.__pmtQarPopStateBound) {
+                    window.__pmtQarPopStateBound = true;
+                    window.addEventListener('popstate', async () => {
+                        try {
+                            const response = await fetch(location.href, {
+                                method: 'GET',
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'Accept': 'text/html',
+                                },
+                            });
+
+                            if (!response.ok) {
+                                throw new Error('Failed to load page.');
+                            }
+
+                            const html = await response.text();
+                            const updated = replaceRootFromHtml(html);
+                            if (!updated) {
+                                throw new Error('Unable to update view.');
+                            }
+
+                            initBindings(document);
+                        } catch (error) {
+                            window.location.href = location.href;
+                        }
+                    });
+                }
+
+                initBindings(document);
             });
         </script>
     @endpush
