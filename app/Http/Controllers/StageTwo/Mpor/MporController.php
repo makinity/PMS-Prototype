@@ -250,6 +250,14 @@ class MporController extends Controller
         $month = $request->input('month');
 
         if (!is_string($month) || !preg_match('/^\d{4}-\d{2}$/', $month)) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'ok' => false,
+                    'type' => 'info',
+                    'message' => 'Invalid month selected.',
+                ], 422);
+            }
+
             return redirect()
                 ->route('employee.mpor.index')
                 ->with('info', 'Invalid month selected.');
@@ -278,6 +286,14 @@ class MporController extends Controller
             ->first();
 
         if (!$ipcr) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'ok' => false,
+                    'type' => 'info',
+                    'message' => 'No active IPCR found.',
+                ], 422);
+            }
+
             return redirect()
                 ->route('employee.mpor.index', ['month' => $month])
                 ->with('info', 'No active IPCR found.');
@@ -297,6 +313,14 @@ class MporController extends Controller
             ->exists();
 
         if (! $hasRatedEntries) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'ok' => false,
+                    'type' => 'info',
+                    'message' => 'No rated ORS entries found for this month.',
+                ], 422);
+            }
+
             return redirect()
                 ->route('employee.mpor.index', ['month' => $month])
                 ->with('info', 'No rated ORS entries found for this month.');
@@ -308,6 +332,14 @@ class MporController extends Controller
             ->first();
 
         if ($mpor && in_array($mpor->status, ['submitted', 'endorsed', 'approved'], true)) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'ok' => false,
+                    'type' => 'info',
+                    'message' => 'MPOR already submitted.',
+                ], 422);
+            }
+
             return redirect()
                 ->route('employee.mpor.index', ['month' => $month])
                 ->with('info', 'MPOR already submitted.');
@@ -325,6 +357,16 @@ class MporController extends Controller
         $mpor->status = 'submitted';
         $mpor->submitted_at = now();
         $mpor->save();
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'ok' => true,
+                'type' => 'success',
+                'message' => 'MPOR successfully submitted.',
+                'status' => 'submitted',
+                'month' => $month,
+            ]);
+        }
 
         return redirect()
             ->route('employee.mpor', ['month' => $month])

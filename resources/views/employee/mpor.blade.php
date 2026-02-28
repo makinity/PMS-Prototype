@@ -45,6 +45,8 @@
             </div>
         @endif
 
+        <div id="mporAjaxAlertHost" class="space-y-3"></div>
+
         <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div class="min-w-0">
                 <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Monthly Performance Output Report</p>
@@ -69,7 +71,7 @@
                 </div>
             </div>
 
-            <div class="flex w-full flex-row gap-2 md:w-auto md:items-center">
+            <div id="mporActionButtons" class="flex w-full flex-row gap-2 md:w-auto md:items-center">
                 @if (! $isMporLocked)
                     <button type="button" data-modal-target="mporSubmitConfirmModal" data-modal-toggle="mporSubmitConfirmModal"
                         class="flex-1 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-center text-xs font-semibold text-white transition hover:bg-slate-700 md:flex-none">
@@ -322,24 +324,140 @@
         document.addEventListener('DOMContentLoaded', function() {
             const submitForm = document.getElementById('mporSubmitForm');
             const proceedButton = document.getElementById('mporProceedSubmissionBtn');
+            const alertHost = document.getElementById('mporAjaxAlertHost');
+            const actionButtons = document.getElementById('mporActionButtons');
+            const label = proceedButton?.querySelector('[data-button-label]');
+            const spinner = proceedButton?.querySelector('[data-button-spinner]');
+            const originalLabel = label?.textContent?.trim() || 'Proceed Submission';
+            const modalId = 'mporSubmitConfirmModal';
 
             if (!submitForm || !proceedButton) {
                 return;
             }
 
-            submitForm.addEventListener('submit', function() {
-                const label = proceedButton.querySelector('[data-button-label]');
-                const spinner = proceedButton.querySelector('[data-button-spinner]');
+            const clearAlert = () => {
+                if (alertHost) {
+                    alertHost.innerHTML = '';
+                }
+            };
 
+            const renderAlert = (type, message) => {
+                if (!alertHost || !message) {
+                    return;
+                }
+
+                let classes = 'rounded-xl border px-4 py-3 text-sm';
+                if (type === 'success') {
+                    classes += ' border-emerald-500/30 bg-emerald-500/10 text-emerald-200';
+                } else if (type === 'info') {
+                    classes += ' border-sky-500/30 bg-sky-500/10 text-sky-200';
+                } else {
+                    classes += ' border-rose-500/30 bg-rose-500/10 text-rose-200';
+                }
+
+                const alert = document.createElement('div');
+                alert.className = classes;
+                alert.textContent = String(message);
+                alertHost.innerHTML = '';
+                alertHost.appendChild(alert);
+            };
+
+            const setLoading = (isLoading) => {
                 proceedButton.disabled = true;
                 proceedButton.classList.add('cursor-not-allowed', 'opacity-80');
 
                 if (label) {
-                    label.textContent = 'Submitting...';
+                    label.textContent = isLoading ? 'Submitting...' : originalLabel;
                 }
 
                 if (spinner) {
-                    spinner.classList.remove('hidden');
+                    spinner.classList.toggle('hidden', !isLoading);
+                }
+
+                if (!isLoading) {
+                    proceedButton.disabled = false;
+                    proceedButton.classList.remove('cursor-not-allowed', 'opacity-80');
+                    delete proceedButton.dataset.loadingActive;
+                }
+            };
+
+            const closeSubmitModal = () => {
+                const hideButton = document.querySelector(`[data-modal-hide="${modalId}"]`);
+                if (hideButton) {
+                    hideButton.click();
+                    return;
+                }
+
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                }
+            };
+
+            const markSubmittedActionButton = () => {
+                if (!actionButtons) {
+                    return;
+                }
+
+                const submitMporButton = actionButtons.querySelector('[data-modal-target="mporSubmitConfirmModal"]');
+                if (!submitMporButton) {
+                    return;
+                }
+
+                const submittedButton = document.createElement('button');
+                submittedButton.type = 'button';
+                submittedButton.disabled = true;
+                submittedButton.className = 'flex-1 cursor-not-allowed rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-center text-xs font-semibold text-emerald-200 opacity-80 md:flex-none';
+                submittedButton.textContent = 'Submitted';
+                submitMporButton.replaceWith(submittedButton);
+            };
+
+            submitForm.addEventListener('submit', async function(event) {
+                event.preventDefault();
+
+                if (proceedButton.dataset.loadingActive === 'true') {
+                    return;
+                }
+
+                clearAlert();
+                proceedButton.dataset.loadingActive = 'true';
+                setLoading(true);
+
+                const token = submitForm.querySelector('input[name="_token"]')?.value
+                    || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+                    || '';
+
+                try {
+                    const response = await fetch(submitForm.action, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': token,
+                        },
+                        body: new FormData(submitForm),
+                    });
+
+                    const payload = await response.json().catch(() => ({}));
+
+                    if (response.ok && payload?.ok === true) {
+                        renderAlert('success', payload?.message || 'MPOR successfully submitted.');
+                        closeSubmitModal();
+                        markSubmittedActionButton();
+                        return;
+                    }
+
+                    const message = payload?.message || 'Unable to submit MPOR.';
+                    if (response.status === 422 || payload?.type === 'info' || payload?.ok === false) {
+                        renderAlert('info', message);
+                    } else {
+                        renderAlert('error', message);
+                    }
+                    setLoading(false);
+                } catch (error) {
+                    renderAlert('error', 'Something went wrong while submitting MPOR. Please try again.');
+                    setLoading(false);
                 }
             });
         });
