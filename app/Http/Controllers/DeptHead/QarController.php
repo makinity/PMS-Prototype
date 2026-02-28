@@ -446,6 +446,11 @@ class QarController extends Controller
             ];
         }
 
+        // If requested via AJAX as JSON, return only the selected MPOR detail
+        if ($request->wantsJson()) {
+            return response()->json($selectedMporDetail);
+        }
+
         return view('dept-head.qar', compact(
             'deptHeadName',
             'office',
@@ -658,7 +663,7 @@ class QarController extends Controller
 
         return redirect()
             ->route('dept-head.qar', ['q' => $quarterNumber])
-            ->with('success', 'QAR endorsed and saved. MPORs=' . $incomingMporModels->count() . ', rows=' . count($rows));
+            ->with('success', 'QAR endorsed and saved');
     }
 
     public function generate(Request $request)
