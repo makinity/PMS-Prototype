@@ -106,18 +106,6 @@
                     </div>
                 @endif
 
-                <div class="flex justify-end">
-                    <form id="qarResetForm" method="POST" action="{{ route('dept-head.qar.reset') }}">
-                        @csrf
-                        <input type="hidden" name="q" value="{{ $selectedQuarterNumberSafe }}">
-                        <button type="submit"
-                            id="qarResetBtn"
-                            class="inline-flex items-center gap-2 rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs font-semibold text-rose-200 transition hover:bg-rose-500/20">
-                            <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
-                            <span data-button-label>Reset Prototype</span>
-                        </button>
-                    </form>
-                </div>
             </div>
         </div>
 
@@ -544,8 +532,6 @@
                 };
 
                 bindLoadingSubmit('qarEndorseForm', 'qarApproveProceedBtn', 'Endorsing...');
-                bindLoadingSubmit('qarResetForm', 'qarResetBtn', 'Resetting...');
-
                 const autoOpenViewButton = document.getElementById('qarAutoOpenViewModal');
                 if (autoOpenViewButton) {
                     window.setTimeout(() => {
