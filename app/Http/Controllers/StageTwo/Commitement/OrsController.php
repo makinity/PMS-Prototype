@@ -454,9 +454,13 @@ class OrsController extends Controller
         });
 
         if ($request->expectsJson()) {
+            $freshEntry = $orsEntry->fresh() ?? $orsEntry;
+
             return response()->json([
                 'ok' => true,
                 'id' => $orsEntry->id,
+                'entry' => $this->entryPayload($freshEntry),
+                'message' => 'ORS task logged as draft.',
             ], 201);
         }
 
@@ -821,6 +825,7 @@ class OrsController extends Controller
                 'evidence_count' => $updated->evidences()->count(),
                 'evidence' => $latestEvidencePayload,
                 'uploaded_evidences' => $uploadedEvidences,
+                'entry' => $this->entryPayload($updated->fresh() ?? $updated),
             ]);
         }
 
@@ -1004,17 +1009,90 @@ class OrsController extends Controller
         ], $status);
     }
 
+    private function entryPayload(OrsEntry $entry): array
+    {
+        $orsTable = 'ors_entries';
+        $hasOrsTable = Schema::hasTable($orsTable);
+        $hasRequestId = $hasOrsTable && Schema::hasColumn($orsTable, 'request_id');
+        $hasClientRequestId = $hasOrsTable && Schema::hasColumn($orsTable, 'client_request_id');
+        $hasOutputType = $hasOrsTable && Schema::hasColumn($orsTable, 'output_type');
+        $hasNotes = $hasOrsTable && Schema::hasColumn($orsTable, 'notes');
+        $hasQuantity = $hasOrsTable && Schema::hasColumn($orsTable, 'quantity');
+        $hasSubmittedAt = $hasOrsTable && Schema::hasColumn($orsTable, 'submitted_at');
+        $hasStartedAt = $hasOrsTable && Schema::hasColumn($orsTable, 'started_at');
+        $hasStoppedAt = $hasOrsTable && Schema::hasColumn($orsTable, 'stopped_at');
+        $hasTotalSeconds = $hasOrsTable && Schema::hasColumn($orsTable, 'total_seconds');
+        $hasDurationSeconds = $hasOrsTable && Schema::hasColumn($orsTable, 'duration_seconds');
+        $hasIpcrItemId = $hasOrsTable && Schema::hasColumn($orsTable, 'ipcr_item_id');
+        $hasIpcrItemsTable = Schema::hasTable('ipcr_items');
+
+        if ($hasIpcrItemsTable && $hasIpcrItemId) {
+            $entry->loadMissing(['ipcrItem:id,output_title,indicator_text']);
+        }
+
+        $requestId = null;
+        if ($hasRequestId) {
+            $requestId = data_get($entry, 'request_id');
+        } elseif ($hasClientRequestId) {
+            $requestId = data_get($entry, 'client_request_id');
+        }
+
+        $workDateRaw = data_get($entry, 'work_date');
+        $workDate = null;
+        if ($workDateRaw instanceof \DateTimeInterface) {
+            $workDate = $workDateRaw->format('Y-m-d');
+        } elseif (!is_null($workDateRaw) && (string) $workDateRaw !== '') {
+            $workDate = substr((string) $workDateRaw, 0, 10);
+        }
+
+        $indicatorText = trim((string) (data_get($entry, 'ipcrItem.indicator_text') ?? ''));
+        $outputTitle = trim((string) (data_get($entry, 'ipcrItem.output_title') ?? ''));
+
+        $submittedAt = $hasSubmittedAt ? data_get($entry, 'submitted_at') : null;
+        $startedAt = $hasStartedAt ? data_get($entry, 'started_at') : null;
+        $stoppedAt = $hasStoppedAt ? data_get($entry, 'stopped_at') : null;
+
+        $totalSeconds = 0;
+        if ($hasTotalSeconds) {
+            $totalSeconds = (int) (data_get($entry, 'total_seconds') ?? 0);
+        } elseif ($hasDurationSeconds) {
+            $totalSeconds = (int) (data_get($entry, 'duration_seconds') ?? 0);
+        }
+
+        $evidenceCount = 0;
+        if (Schema::hasTable('ors_entry_evidences') && Schema::hasColumn('ors_entry_evidences', 'ors_entry_id') && method_exists($entry, 'evidences')) {
+            if (array_key_exists('evidences_count', $entry->getAttributes())) {
+                $evidenceCount = (int) ($entry->getAttribute('evidences_count') ?? 0);
+            } else {
+                $evidenceCount = (int) $entry->evidences()->count();
+            }
+        }
+
+        return [
+            'id' => (int) (data_get($entry, 'id') ?? 0),
+            'title' => $indicatorText !== '' ? $indicatorText : 'Untitled Activity',
+            'date' => $workDate,
+            'state' => (string) (data_get($entry, 'status') ?? 'draft'),
+            'uwpOutputLabel' => $outputTitle !== '' ? $outputTitle : 'Untitled Output',
+            'requestId' => $requestId,
+            'output' => $hasOutputType ? data_get($entry, 'output_type') : null,
+            'notes' => $hasNotes ? data_get($entry, 'notes') : null,
+            'quantity' => $hasQuantity ? data_get($entry, 'quantity') : null,
+            'submittedAt' => $submittedAt instanceof \DateTimeInterface ? $submittedAt->toIso8601String() : (!empty($submittedAt) ? Carbon::parse($submittedAt)->toIso8601String() : null),
+            'startedAt' => $startedAt instanceof \DateTimeInterface ? $startedAt->toIso8601String() : (!empty($startedAt) ? Carbon::parse($startedAt)->toIso8601String() : null),
+            'stoppedAt' => $stoppedAt instanceof \DateTimeInterface ? $stoppedAt->toIso8601String() : (!empty($stoppedAt) ? Carbon::parse($stoppedAt)->toIso8601String() : null),
+            'totalSeconds' => $totalSeconds,
+            'durationSeconds' => $totalSeconds,
+            'evidenceCount' => $evidenceCount,
+            'evidenceAttached' => $evidenceCount > 0,
+        ];
+    }
+
     private function jsonEntry(OrsEntry $orsEntry)
     {
         return response()->json([
             'ok' => true,
-            'entry' => [
-                'id' => $orsEntry->id,
-                'status' => (string) $orsEntry->status,
-                'started_at' => $orsEntry->started_at?->toIso8601String(),
-                'stopped_at' => $orsEntry->stopped_at?->toIso8601String(),
-                'total_seconds' => (int) ($orsEntry->total_seconds ?? 0),
-            ],
+            'entry' => $this->entryPayload($orsEntry->fresh() ?? $orsEntry),
         ]);
     }
 }

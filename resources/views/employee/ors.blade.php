@@ -105,6 +105,8 @@
             </div>
         @endif
 
+        <div id="orsClientFlash" class="hidden"></div>
+
 
 
         <!-- Stats Overview (DEMO LOCKED: 4 tasks total) -->
@@ -171,12 +173,14 @@
                     <button id="activePauseBtn"
                             type="button"
                             class="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-slate-800">
-                        Pause
+                        <span data-button-label>Pause</span>
+                        <span data-button-spinner class="hidden h-3 w-3 animate-spin rounded-full border-2 border-slate-500/40 border-t-slate-200"></span>
                     </button>
                     <button id="activeStopBtn"
                             type="button"
                             class="inline-flex items-center gap-2 rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-100 hover:border-amber-500 hover:bg-amber-500/20">
-                        Stop (Draft)
+                        <span data-button-label>Stop (Draft)</span>
+                        <span data-button-spinner class="hidden h-3 w-3 animate-spin rounded-full border-2 border-amber-200/30 border-t-amber-100"></span>
                     </button>
                     <button id="activeSubmitBtn"
                             type="button"
@@ -337,9 +341,11 @@
                     </button>
 
                     <button
+                        id="orsLogTaskSubmitBtn"
                         type="submit"
                         class="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-1.5 text-xs font-semibold text-slate-900 hover:bg-emerald-600">
-                        Log Task
+                        <span data-button-label>Log Task</span>
+                        <span data-button-spinner class="hidden h-3 w-3 animate-spin rounded-full border-2 border-emerald-900/30 border-t-emerald-900"></span>
                     </button>
 
                 </div>
@@ -456,22 +462,26 @@
                         <button id="taskDetailStartBtn"
                                 type="button"
                                 class="inline-flex items-center gap-2 rounded-lg border border-blue-500/60 bg-blue-500/10 px-3 py-1.5 text-xs font-semibold text-blue-100 hover:bg-blue-500/20">
-                            Start Task
+                            <span data-button-label>Start Task</span>
+                            <span data-button-spinner class="hidden h-3 w-3 animate-spin rounded-full border-2 border-blue-200/30 border-t-blue-100"></span>
                         </button>
                         <button id="taskDetailPauseBtn"
                                 type="button"
-                                class="hidden rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-slate-800">
-                            Pause
+                                class="hidden inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-slate-800">
+                            <span data-button-label>Pause</span>
+                            <span data-button-spinner class="hidden h-3 w-3 animate-spin rounded-full border-2 border-slate-500/40 border-t-slate-200"></span>
                         </button>
                         <button id="taskDetailResumeBtn"
                                 type="button"
-                                class="hidden rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-100 hover:bg-amber-500/20">
-                            Resume
+                                class="hidden inline-flex items-center gap-2 rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-100 hover:bg-amber-500/20">
+                            <span data-button-label>Resume</span>
+                            <span data-button-spinner class="hidden h-3 w-3 animate-spin rounded-full border-2 border-amber-200/30 border-t-amber-100"></span>
                         </button>
                         <button id="taskDetailStopBtn"
                                 type="button"
-                                class="hidden rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-100 hover:bg-amber-500/20">
-                            Stop (Draft)
+                                class="hidden inline-flex items-center gap-2 rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-100 hover:bg-amber-500/20">
+                            <span data-button-label>Stop (Draft)</span>
+                            <span data-button-spinner class="hidden h-3 w-3 animate-spin rounded-full border-2 border-amber-200/30 border-t-amber-100"></span>
                         </button>
                         <button id="taskDetailSubmitBtn"
                                 type="button"
@@ -745,6 +755,7 @@
             let detailTaskId = null;
             let __returnToModalId = null;
             let daySummaryDate = null;
+            let daySummaryStatusFilter = null;
             let byDate = {};
             let byDateStatus = {};
 
@@ -760,6 +771,7 @@
             const daySummaryDateLabelEl = document.getElementById('daySummaryDateLabel');
             const daySummaryListEl = document.getElementById('daySummaryList');
             const daySummaryLogBtn = document.getElementById('daySummaryLogBtn');
+            const flashHostEl = document.getElementById('orsClientFlash');
 
             function summaryStateLabel(state) {
                 const key = String(state || '').toLowerCase();
@@ -771,6 +783,34 @@
                 const parsed = new Date(`${dateStr}T00:00:00`);
                 if (Number.isNaN(parsed.getTime())) return dateStr;
                 return parsed.toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' });
+            }
+
+            function escapeHtml(value) {
+                return String(value ?? '')
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;');
+            }
+
+            function clearFlash() {
+                if (!flashHostEl) return;
+                flashHostEl.className = 'hidden';
+                flashHostEl.innerHTML = '';
+            }
+
+            function showFlash(type, message) {
+                if (!flashHostEl || !message) return;
+                const normalizedType = String(type || 'info').toLowerCase();
+                const className = normalizedType === 'success'
+                    ? 'rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200'
+                    : normalizedType === 'error'
+                        ? 'rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200'
+                        : 'rounded-xl border border-sky-500/30 bg-sky-500/10 px-4 py-3 text-sm text-sky-200';
+
+                flashHostEl.className = className;
+                flashHostEl.innerHTML = `<p>${escapeHtml(message)}</p>`;
             }
 
             function rebuildCalendarBuckets() {
@@ -887,6 +927,11 @@
                 updateModalState();
             };
 
+            function isModalOpen(id) {
+                const el = document.getElementById(id);
+                return Boolean(el) && !el.classList.contains('hidden');
+            }
+
             window.closeOrsModal = function (modalId) {
                 const modal = document.getElementById(modalId);
                 if (modal) {
@@ -901,6 +946,10 @@
                     if (__returnToModalId === 'orsDaySummaryModal') {
                         __returnToModalId = null;
                     }
+                }
+                if (modalId === 'orsDaySummaryModal') {
+                    daySummaryStatusFilter = null;
+                    daySummaryDate = null;
                 }
                 updateModalState();
             };
@@ -945,6 +994,9 @@
                 }
             }
 
+            const orsLogForm = document.getElementById('ors-log-form');
+            const orsLogTaskSubmitBtn = document.getElementById('orsLogTaskSubmitBtn');
+
             function getTaskById(id) {
                 return tasks.find((t) => t.id === id);
             }
@@ -953,18 +1005,138 @@
                 return /^\d+$/.test(String(task?.id ?? '').trim());
             }
 
+            function normalizeTaskState(state) {
+                const normalized = String(state || 'draft').toLowerCase();
+                return normalized === 'validated' ? 'locked' : normalized;
+            }
+
+            function normalizeServerEntry(entry, fallback = {}) {
+                if (!entry || typeof entry !== 'object') return null;
+
+                const id = entry.id ?? fallback.id ?? null;
+                if (id === null || id === undefined || String(id).trim() === '') return null;
+
+                const state = normalizeTaskState(entry.status ?? entry.state ?? fallback.state ?? 'draft');
+                const evidenceCount = Number(
+                    entry.evidenceCount
+                    ?? entry.evidence_count
+                    ?? fallback.evidenceCount
+                    ?? 0
+                );
+                const evidenceAttached = Boolean(
+                    entry.evidenceAttached
+                    ?? entry.evidence_attached
+                    ?? fallback.evidenceAttached
+                    ?? (evidenceCount > 0)
+                );
+                const submittedAtValue = entry.submittedAt ?? entry.submitted_at ?? fallback.submittedAt ?? null;
+                const startedAtValue = entry.startedAt ?? entry.started_at ?? fallback.startedAt ?? null;
+                const stoppedAtValue = entry.stoppedAt ?? entry.stopped_at ?? fallback.stoppedAt ?? null;
+                const totalSecondsValue = Number(
+                    entry.totalSeconds
+                    ?? entry.total_seconds
+                    ?? entry.durationSeconds
+                    ?? entry.duration_seconds
+                    ?? fallback.totalSeconds
+                    ?? 0
+                );
+
+                return {
+                    id: String(id),
+                    title: String(entry.title ?? entry.task_name ?? fallback.title ?? '--'),
+                    date: String(entry.date ?? entry.work_date ?? fallback.date ?? ''),
+                    client: String(entry.client ?? fallback.client ?? 'Revenue Collection Unit'),
+                    requestId: entry.client_request_id ?? entry.requestId ?? fallback.requestId ?? null,
+                    uwpOutputId: String(entry.uwp_output_key ?? fallback.uwpOutputId ?? ''),
+                    uwpOutputLabel: String(entry.uwp_output_label ?? entry.uwpOutputLabel ?? fallback.uwpOutputLabel ?? '--'),
+                    output: outputTypeLabel(entry.output_type ?? entry.output ?? fallback.outputType ?? fallback.output ?? ''),
+                    notes: String(entry.notes ?? fallback.notes ?? 'No notes'),
+                    quantity: String(entry.quantity ?? fallback.quantity ?? ''),
+                    rating: String(fallback.rating ?? '--'),
+                    state: state,
+                    output_state: ['submitted', 'rated', 'locked'].includes(state) ? 'submitted' : 'none',
+                    submittedAt: submittedAtValue ? new Date(submittedAtValue) : null,
+                    evidenceRequired: true,
+                    evidenceAttached: evidenceAttached,
+                    evidenceCount: Number.isFinite(evidenceCount) ? evidenceCount : 0,
+                    evidenceFileName: entry?.evidence?.file_name ?? fallback.evidenceFileName ?? null,
+                    evidenceUploadedAt: entry?.evidence?.uploaded_at
+                        ? new Date(entry.evidence.uploaded_at)
+                        : (fallback.evidenceUploadedAt ? new Date(fallback.evidenceUploadedAt) : null),
+                    totalSeconds: Number.isFinite(totalSecondsValue) ? totalSecondsValue : 0,
+                    startedAt: startedAtValue ? new Date(startedAtValue) : null,
+                    stoppedAt: stoppedAtValue ? new Date(stoppedAtValue) : null,
+                };
+            }
+
             function applyServerEntryToTask(task, entry) {
-                const status = String(entry?.status || task.state || 'draft').toLowerCase();
-                task.state = status === 'validated' ? 'locked' : status;
-                task.totalSeconds = Number(entry?.total_seconds || 0);
-                task.startedAt = entry?.started_at ? new Date(entry.started_at) : null;
-                task.stoppedAt = entry?.stopped_at ? new Date(entry.stopped_at) : null;
+                if (!task) return;
+                const normalized = normalizeServerEntry(entry, task);
+                if (!normalized) return;
+                Object.assign(task, normalized);
 
                 if (task.state === 'recording' || task.state === 'paused') {
                     activeTaskId = task.id;
                 } else if (activeTaskId === task.id) {
                     activeTaskId = null;
                 }
+            }
+
+            function clearFieldErrors() {
+                const fieldIds = [
+                    'orsSelectedDate',
+                    'orsUwpOutput',
+                    'orsTaskType',
+                    'orsRequestId',
+                    'orsOutput',
+                    'orsNotes',
+                ];
+
+                fieldIds.forEach((id) => {
+                    const field = document.getElementById(id);
+                    field?.classList.remove('border-rose-500/50');
+                });
+
+                document.getElementById('orsLogFormErrors')?.remove();
+            }
+
+            function showFieldErrors(errorsObj) {
+                clearFieldErrors();
+                if (!orsLogForm || !errorsObj || typeof errorsObj !== 'object') {
+                    return;
+                }
+
+                const fieldMap = {
+                    work_date: 'orsSelectedDate',
+                    uwp_output_key: 'orsUwpOutput',
+                    ipcr_item_id: 'orsTaskType',
+                    client_request_id: 'orsRequestId',
+                    output_type: 'orsOutput',
+                    notes: 'orsNotes',
+                };
+
+                const allMessages = [];
+                Object.entries(errorsObj).forEach(([key, messages]) => {
+                    const keyBase = String(key).split('.')[0];
+                    const fieldId = fieldMap[key] || fieldMap[keyBase];
+                    if (fieldId) {
+                        const fieldEl = document.getElementById(fieldId);
+                        fieldEl?.classList.add('border-rose-500/50');
+                    }
+
+                    const list = Array.isArray(messages) ? messages : [messages];
+                    list.forEach((msg) => {
+                        if (msg) allMessages.push(String(msg));
+                    });
+                });
+
+                if (allMessages.length === 0) return;
+
+                const box = document.createElement('div');
+                box.id = 'orsLogFormErrors';
+                box.className = 'rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-200';
+                box.innerHTML = `<ul class="list-disc space-y-1 pl-4">${allMessages.map((msg) => `<li>${escapeHtml(msg)}</li>`).join('')}</ul>`;
+                orsLogForm.prepend(box);
             }
 
             function isLockedState(state) {
@@ -1066,12 +1238,13 @@
                 });
             }
 
-            function openDaySummaryModal(dateStr, statusFilter = null) {
+            function openDaySummaryModal(dateStr, statusFilter = null, skipOpen = false) {
                 const dateKey = String(dateStr || '').trim();
                 if (!dateKey) return;
 
                 daySummaryDate = dateKey;
-                const filterKey = statusFilter ? String(statusFilter).toLowerCase() : null;
+                daySummaryStatusFilter = statusFilter ? String(statusFilter).toLowerCase() : null;
+                const filterKey = daySummaryStatusFilter;
                 if (daySummaryDateLabelEl) {
                     daySummaryDateLabelEl.textContent = filterKey
                         ? `${formatDateLabel(dateKey)} - ${summaryStateLabel(filterKey)}`
@@ -1079,7 +1252,9 @@
                 }
 
                 if (!daySummaryListEl) {
-                    openOrsModal('orsDaySummaryModal');
+                    if (!skipOpen) {
+                        openOrsModal('orsDaySummaryModal');
+                    }
                     return;
                 }
 
@@ -1132,7 +1307,11 @@
                                 <div class="flex items-start justify-between gap-2">
                                     <div class="min-w-0">
                                         <p class="truncate text-sm font-semibold text-white">${entry.title || '--'}</p>
-                                        <p class="mt-1 text-[11px] text-slate-400">Duration: ${formatDuration(computeElapsed(entry))}</p>
+                                        <p class="mt-1 text-[11px] text-slate-400">
+                                            Duration: <span class="ors-day-duration" data-task-id="${entry.id}">
+                                                ${formatDuration(computeElapsed(entry))}
+                                            </span>
+                                        </p>
                                     </div>
                                     <div class="shrink-0 text-right">
                                         <span class="rounded-full border px-2 py-[2px] text-[11px]" style="color:${meta.color}; border-color:${meta.color};">${summaryStateLabel(stateKey)}</span>
@@ -1152,7 +1331,38 @@
                     });
                 }
 
-                openOrsModal('orsDaySummaryModal');
+                if (!skipOpen) {
+                    openOrsModal('orsDaySummaryModal');
+                }
+            }
+
+            function refreshDaySummaryIfOpen(changedTask = null) {
+                if (!isModalOpen('orsDaySummaryModal') || !daySummaryDate) {
+                    return;
+                }
+
+                if (changedTask) {
+                    const changedTaskDate = String(changedTask?.date || '').trim();
+                    if (changedTaskDate !== String(daySummaryDate || '').trim()) {
+                        return;
+                    }
+                }
+
+                const currentFilter = daySummaryStatusFilter ? String(daySummaryStatusFilter).toLowerCase() : null;
+                const dateKey = String(daySummaryDate || '').trim();
+                const statusMap = byDateStatus[dateKey] || {};
+                const hasAny = Object.values(statusMap).some((arr) => Array.isArray(arr) && arr.length > 0);
+                const hasFiltered = currentFilter
+                    ? (Array.isArray(statusMap[currentFilter]) && statusMap[currentFilter].length > 0)
+                    : hasAny;
+
+                if (currentFilter && !hasFiltered && hasAny) {
+                    daySummaryStatusFilter = null;
+                    openDaySummaryModal(dateKey, null, true);
+                    return;
+                }
+
+                openDaySummaryModal(dateKey, currentFilter, true);
             }
 
             function setStatusBadge(element, state) {
@@ -1266,6 +1476,19 @@
 
                 setStatusBadge(document.getElementById('taskDetailStatusBadge'), task.state);
 
+                [
+                    'taskDetailStartBtn',
+                    'taskDetailPauseBtn',
+                    'taskDetailResumeBtn',
+                    'taskDetailStopBtn',
+                    'taskDetailSubmitBtn',
+                ].forEach((buttonId) => {
+                    const button = document.getElementById(buttonId);
+                    if (button) {
+                        button.dataset.taskId = String(task.id);
+                    }
+                });
+
                 const lockBadge = document.getElementById('taskDetailLockBadge');
                 const lockMsg = document.getElementById('taskDetailLockMessage');
                 const draftMsg = document.getElementById('taskDetailDraftMessage');
@@ -1324,11 +1547,15 @@
                             throw new Error('Unable to start task.');
                         }
                         applyServerEntryToTask(task, data.entry);
+                        if (data?.message) {
+                            showFlash('success', data.message);
+                        }
                     } catch (error) {
                         const rawMessage = String(error?.message || 'Unable to start task.');
                         const message = rawMessage.toLowerCase().includes('currently recording')
                             ? 'Only one task can be recording at a time.'
                             : rawMessage;
+                        showFlash('error', message);
                         alert(message);
                         return false;
                     }
@@ -1340,6 +1567,7 @@
                 }
 
                 refreshCalendar();
+                refreshDaySummaryIfOpen(task);
                 updateActivePanel();
                 if (detailTaskId === taskId) openTaskDetails(taskId);
                 return true;
@@ -1356,8 +1584,13 @@
                             throw new Error('Unable to pause task.');
                         }
                         applyServerEntryToTask(task, data.entry);
+                        if (data?.message) {
+                            showFlash('success', data.message);
+                        }
                     } catch (error) {
-                        alert(error?.message || 'Unable to pause task.');
+                        const message = String(error?.message || 'Unable to pause task.');
+                        showFlash('error', message);
+                        alert(message);
                         return false;
                     }
                 } else {
@@ -1370,6 +1603,7 @@
                 }
 
                 refreshCalendar();
+                refreshDaySummaryIfOpen(task);
                 updateActivePanel();
                 if (detailTaskId === taskId) openTaskDetails(taskId);
                 return true;
@@ -1386,11 +1620,15 @@
                             throw new Error('Unable to resume task.');
                         }
                         applyServerEntryToTask(task, data.entry);
+                        if (data?.message) {
+                            showFlash('success', data.message);
+                        }
                     } catch (error) {
                         const rawMessage = String(error?.message || 'Unable to resume task.');
                         const message = rawMessage.toLowerCase().includes('currently recording')
                             ? 'Only one task can be recording at a time.'
                             : rawMessage;
+                        showFlash('error', message);
                         alert(message);
                         return false;
                     }
@@ -1402,6 +1640,7 @@
                 }
 
                 refreshCalendar();
+                refreshDaySummaryIfOpen(task);
                 updateActivePanel();
                 if (detailTaskId === taskId) openTaskDetails(taskId);
                 return true;
@@ -1418,8 +1657,13 @@
                             throw new Error('Unable to stop task.');
                         }
                         applyServerEntryToTask(task, data.entry);
+                        if (data?.message) {
+                            showFlash('success', data.message);
+                        }
                     } catch (error) {
-                        alert(error?.message || 'Unable to stop task.');
+                        const message = String(error?.message || 'Unable to stop task.');
+                        showFlash('error', message);
+                        alert(message);
                         return false;
                     }
                 } else {
@@ -1435,6 +1679,7 @@
                 }
 
                 refreshCalendar();
+                refreshDaySummaryIfOpen(task);
                 updateActivePanel();
                 if (detailTaskId === taskId) openTaskDetails(taskId);
                 return true;
@@ -1518,11 +1763,16 @@
                         if (activeTaskId === taskId) activeTaskId = null;
 
                         refreshCalendar();
+                        refreshDaySummaryIfOpen(task);
                         updateActivePanel();
                         if (detailTaskId === taskId) openTaskDetails(taskId);
+                        if (data?.message) {
+                            showFlash('success', data.message);
+                        }
                         return true;
                     } catch (error) {
                         const message = String(error?.message || 'Submit failed. Please try again.');
+                        showFlash('error', message);
                         alert(message);
                         return false;
                     }
@@ -1551,6 +1801,7 @@
                 if (activeTaskId === taskId) activeTaskId = null;
 
                 refreshCalendar();
+                refreshDaySummaryIfOpen(task);
                 updateActivePanel();
                 if (detailTaskId === taskId) openTaskDetails(taskId);
                 return true;
@@ -1585,9 +1836,17 @@
                 const stopBtn = document.getElementById('activeStopBtn');
                 const submitBtn = document.getElementById('activeSubmitBtn');
 
-                pauseBtn.textContent = task.state === 'paused' ? 'Resume' : 'Pause';
-                pauseBtn.onclick = () => task.state === 'paused' ? resumeTask(task.id) : pauseTask(task.id);
-                stopBtn.onclick = () => stopTask(task.id);
+                const pauseLabel = pauseBtn?.querySelector('[data-button-label]');
+                if (pauseLabel) {
+                    pauseLabel.textContent = task.state === 'paused' ? 'Resume' : 'Pause';
+                }
+
+                pauseBtn.onclick = () => runWithLoading(
+                    pauseBtn,
+                    task.state === 'paused' ? 'Resuming...' : 'Pausing...',
+                    () => (task.state === 'paused' ? resumeTask(task.id) : pauseTask(task.id))
+                );
+                stopBtn.onclick = () => runWithLoading(stopBtn, 'Stopping...', () => stopTask(task.id));
                 submitBtn.onclick = () => runWithLoading(submitBtn, 'Submitting...', () => submitTask(task.id));
             }
 
@@ -1597,6 +1856,25 @@
                 if (!task) return;
                 const durationEl = document.getElementById('taskDetailDuration');
                 if (durationEl) durationEl.textContent = formatDuration(computeElapsed(task));
+            }
+
+            function updateDaySummaryDurations() {
+                if (!isModalOpen('orsDaySummaryModal')) return;
+
+                const nodes = document.querySelectorAll('#daySummaryList .ors-day-duration[data-task-id]');
+                if (!nodes.length) return;
+
+                nodes.forEach((node) => {
+                    const taskId = String(node.getAttribute('data-task-id') || '').trim();
+                    if (!taskId) return;
+
+                    const task = getTaskById(taskId);
+                    if (!task) return;
+
+                    if (String(task.state).toLowerCase() !== 'recording') return;
+
+                    node.textContent = formatDuration(computeElapsed(task));
+                });
             }
 
             function wireLogButton() {
@@ -1631,6 +1909,7 @@
             setInterval(() => {
                 if (activeTaskId) updateActivePanel();
                 if (detailTaskId) updateDetailElapsed();
+                updateDaySummaryDurations();
             }, 1000);
 
             async function runWithLoading(button, loadingText, actionFn) {
@@ -1648,20 +1927,119 @@
                 }
             }
 
-            document.getElementById('taskDetailStartBtn')?.addEventListener('click', () => {
-                startTask(detailTaskId);
+            if (orsLogForm && orsLogTaskSubmitBtn) {
+                orsLogForm.addEventListener('submit', async (event) => {
+                    event.preventDefault();
+                    if (orsLogForm.dataset.loadingActive === 'true') return;
+
+                    clearFlash();
+                    clearFieldErrors();
+
+                    await runWithLoading(orsLogTaskSubmitBtn, 'Logging...', async () => {
+                        orsLogForm.dataset.loadingActive = 'true';
+                        try {
+                            const csrfToken = String(orsConfig.csrf || '')
+                                || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+                                || document.querySelector('#ors-log-form input[name="_token"]')?.value
+                                || '';
+
+                            const formData = new FormData(orsLogForm);
+                            const response = await fetch(orsLogForm.action, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': csrfToken,
+                                    'Accept': 'application/json',
+                                },
+                                body: formData,
+                            });
+
+                            const payload = await response.json().catch(() => null);
+                            if (!response.ok) {
+                                if (response.status === 422 && payload?.errors) {
+                                    showFieldErrors(payload.errors);
+                                    showFlash('error', payload?.message || 'Please correct the highlighted fields.');
+                                    return;
+                                }
+
+                                showFlash('error', payload?.message || 'Unable to log ORS task. Please try again.');
+                                return;
+                            }
+
+                            const entry = payload?.entry ?? payload;
+                            const fallback = {
+                                date: String(document.getElementById('orsSelectedDate')?.value || ''),
+                                requestId: String(document.getElementById('orsRequestId')?.value || ''),
+                                uwpOutputId: String(document.getElementById('orsUwpOutput')?.value || ''),
+                                uwpOutputLabel: document.getElementById('orsUwpOutput')?.selectedOptions?.[0]?.textContent?.trim() || '--',
+                                outputType: String(document.getElementById('orsOutput')?.value || ''),
+                                notes: String(document.getElementById('orsNotes')?.value || ''),
+                                quantity: '',
+                                state: 'draft',
+                            };
+
+                            const task = normalizeServerEntry(entry, fallback);
+                            if (!task) {
+                                showFlash('error', payload?.message || 'Unable to parse ORS task response.');
+                                return;
+                            }
+
+                            const existingTaskIndex = tasks.findIndex((item) => String(item.id) === String(task.id));
+                            if (existingTaskIndex >= 0) {
+                                tasks[existingTaskIndex] = { ...tasks[existingTaskIndex], ...task };
+                            } else {
+                                tasks.push(task);
+                            }
+
+                            const selectedDateValue = String(document.getElementById('orsSelectedDate')?.value || task.date || '');
+                            orsLogForm.reset();
+                            const dateInput = document.getElementById('orsSelectedDate');
+                            if (dateInput && selectedDateValue) {
+                                dateInput.value = selectedDateValue;
+                            }
+                            resetTaskOptions();
+                            clearFieldErrors();
+
+                            refreshCalendar();
+                            refreshDaySummaryIfOpen(task);
+                            updateActivePanel();
+
+                            closeOrsModal('orsTaskModal');
+                            showFlash('success', payload?.message || 'ORS task logged successfully.');
+                        } catch (error) {
+                            const message = String(error?.message || 'Unexpected error while logging ORS task.');
+                            showFlash('error', message);
+                            alert(message);
+                        } finally {
+                            delete orsLogForm.dataset.loadingActive;
+                        }
+                    });
+                });
+            }
+
+            document.getElementById('taskDetailStartBtn')?.addEventListener('click', (e) => {
+                const taskId = String(e.currentTarget?.dataset?.taskId || '').trim();
+                if (!taskId) return;
+                runWithLoading(e.currentTarget, 'Starting...', () => startTask(taskId));
             });
-            document.getElementById('taskDetailPauseBtn')?.addEventListener('click', () => {
-                pauseTask(detailTaskId);
+            document.getElementById('taskDetailPauseBtn')?.addEventListener('click', (e) => {
+                const taskId = String(e.currentTarget?.dataset?.taskId || '').trim();
+                if (!taskId) return;
+                runWithLoading(e.currentTarget, 'Pausing...', () => pauseTask(taskId));
             });
-            document.getElementById('taskDetailResumeBtn')?.addEventListener('click', () => {
-                resumeTask(detailTaskId);
+            document.getElementById('taskDetailResumeBtn')?.addEventListener('click', (e) => {
+                const taskId = String(e.currentTarget?.dataset?.taskId || '').trim();
+                if (!taskId) return;
+                runWithLoading(e.currentTarget, 'Resuming...', () => resumeTask(taskId));
             });
-            document.getElementById('taskDetailStopBtn')?.addEventListener('click', () => {
-                stopTask(detailTaskId);
+            document.getElementById('taskDetailStopBtn')?.addEventListener('click', (e) => {
+                const taskId = String(e.currentTarget?.dataset?.taskId || '').trim();
+                if (!taskId) return;
+                runWithLoading(e.currentTarget, 'Stopping...', () => stopTask(taskId));
             });
             document.getElementById('taskDetailSubmitBtn')?.addEventListener('click', (e) => {
-                runWithLoading(e.currentTarget, 'Submitting...', () => submitTask(detailTaskId));
+                const taskId = String(e.currentTarget?.dataset?.taskId || '').trim();
+                if (!taskId) return;
+                runWithLoading(e.currentTarget, 'Submitting...', () => submitTask(taskId));
             });
         });
     </script>
