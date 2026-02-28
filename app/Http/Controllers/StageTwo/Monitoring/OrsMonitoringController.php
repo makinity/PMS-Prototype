@@ -55,10 +55,16 @@ class OrsMonitoringController extends Controller
         );
 
         $status = strtolower((string) $orsEntry->status);
-        $rateable = in_array($status, ['submitted', 'rated'], true);
+        $rateable = $status === 'submitted';
 
         if (!$rateable) {
-            return back()->with('error', 'Rating is allowed only for submitted OR rated ORS entries.');
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Rating is allowed only for submitted ORS entries.',
+                ], 403);
+            }
+            return back()->with('error', 'Rating is allowed only for submitted ORS entries.');
         }
 
         $validated = $request->validate([
@@ -67,7 +73,8 @@ class OrsMonitoringController extends Controller
             'remarks' => ['nullable', 'string', 'max:2000'],
         ]);
 
-        OrsEntryMonitoring::query()->updateOrCreate(
+        $ratedAt = now();
+        $monitoring = OrsEntryMonitoring::query()->updateOrCreate(
             [
                 'ors_entry_id' => $orsEntry->id,
                 'supervisor_id' => $supervisor->id,
@@ -77,7 +84,7 @@ class OrsMonitoringController extends Controller
                 'timeliness_rating' => (int) $validated['timeliness_rating'],
                 'remarks' => $validated['remarks'] ?? null,
 
-                'rated_at' => now(),
+                'rated_at' => $ratedAt,
             ]
         );
 
@@ -87,7 +94,26 @@ class OrsMonitoringController extends Controller
             ]);
         }
 
-        return back()->with('success', 'Rating saved successfully.');
+        $orsEntry->refresh();
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'status' => strtolower((string) $orsEntry->status),
+                'monitoring' => [
+                    'quality_rating' => (int) ($monitoring->quality_rating ?? 0),
+                    'timeliness_rating' => (int) ($monitoring->timeliness_rating ?? 0),
+                    'remarks' => $monitoring->remarks,
+                    'rated_at' => $ratedAt->toIso8601String(),
+                ],
+                'orsEntry' => [
+                    'id' => $orsEntry->id,
+                    'status' => strtolower((string) $orsEntry->status),
+                ],
+            ]);
+        }
+
+        return back();
     }
 
     private function authorizedSupervisor(): User

@@ -342,7 +342,7 @@
                             <div>
                                 <h2 class="text-lg font-semibold text-white">ORS Monitoring Detail</h2>
                                 <p class="text-xs text-slate-400">
-                                    Supervisor review (manual ORS equivalent). Rating applies only to Submitted (Locked) entries.
+                                    Supervisor review (manual ORS equivalent). Rating applies only to Submitted ORS entries.
                                 </p>
                             </div>
                             <button type="button"
@@ -455,7 +455,7 @@
                                     <p class="text-[11px] uppercase text-slate-400">Monitoring Rating (ORS Format)</p>
 
                                     <div id="rating-locked-note" class="mt-2 text-[11px] text-slate-400">
-                                        Rating is available only for Submitted (Locked) ORS entries.
+                                        Rating is available only for Submitted ORS entries.
                                     </div>
 
                                     <!-- NOTE: Efficiency rating REMOVED (Supervisor rates Quality & Timeliness only) -->
@@ -922,48 +922,52 @@
                     return carry;
                 }, {});
 
-                const summaryDates = Array.from(new Set([
-                    ...Object.keys(byDateSubmitted),
-                    ...Object.keys(byDateRated),
-                ])).sort();
+                function buildSummaryEvents() {
+                    const summaryDates = Array.from(new Set([
+                        ...Object.keys(byDateSubmitted),
+                        ...Object.keys(byDateRated),
+                    ])).sort();
 
-                const summaryEvents = summaryDates.flatMap((date) => {
-                    const submittedCount = (byDateSubmitted[date] || []).length;
-                    const ratedCount = (byDateRated[date] || []).length;
-                    const events = [];
+                    return summaryDates.flatMap((date) => {
+                        const submittedCount = (byDateSubmitted[date] || []).length;
+                        const ratedCount = (byDateRated[date] || []).length;
+                        const events = [];
 
-                    if (submittedCount > 0) {
-                        events.push({
-                            id: `sum-${date}-submitted`,
-                            start: date,
-                            allDay: true,
-                            title: `${submittedCount} submitted`,
-                            classNames: ['ors-summary-event', 'ors-submitted-event'],
-                            extendedProps: {
-                                date,
-                                status: 'submitted',
-                                count: submittedCount,
-                            },
-                        });
-                    }
+                        if (submittedCount > 0) {
+                            events.push({
+                                id: `sum-${date}-submitted`,
+                                start: date,
+                                allDay: true,
+                                title: `${submittedCount} submitted`,
+                                classNames: ['ors-summary-event', 'ors-submitted-event'],
+                                extendedProps: {
+                                    date,
+                                    status: 'submitted',
+                                    count: submittedCount,
+                                },
+                            });
+                        }
 
-                    if (ratedCount > 0) {
-                        events.push({
-                            id: `sum-${date}-rated`,
-                            start: date,
-                            allDay: true,
-                            title: `${ratedCount} rated`,
-                            classNames: ['ors-summary-event', 'ors-rated-event'],
-                            extendedProps: {
-                                date,
-                                status: 'rated',
-                                count: ratedCount,
-                            },
-                        });
-                    }
+                        if (ratedCount > 0) {
+                            events.push({
+                                id: `sum-${date}-rated`,
+                                start: date,
+                                allDay: true,
+                                title: `${ratedCount} rated`,
+                                classNames: ['ors-summary-event', 'ors-rated-event'],
+                                extendedProps: {
+                                    date,
+                                    status: 'rated',
+                                    count: ratedCount,
+                                },
+                            });
+                        }
 
-                    return events;
-                });
+                        return events;
+                    });
+                }
+
+                const summaryEvents = buildSummaryEvents();
 
                 function setButtonLoading(button, isLoading, loadingText) {
                     if (!button) return;
@@ -1130,6 +1134,13 @@
                 });
                 calendar.render();
 
+                function refreshCalendarEvents() {
+                    calendar.removeAllEvents();
+                    buildSummaryEvents().forEach((eventConfig) => {
+                        calendar.addEvent(eventConfig);
+                    });
+                }
+
                 function applyBasisColumnFilter(selected) {
                     if (!basisBody) return;
 
@@ -1265,6 +1276,8 @@
                 }
 
                 let currentModalData = null;
+                let currentSubmittedDayListDate = null;
+                let currentRatedDayListDate = null;
 
                 function updateRatingBasis(data) {
                     const isSubmitted = String(data?.status || '').toLowerCase() === 'submitted';
@@ -1302,6 +1315,7 @@
                     if (!dayListModal) return;
                     dayListModal.classList.add('hidden');
                     dayListModal.classList.remove('flex');
+                    currentSubmittedDayListDate = null;
                     refreshBodyLock();
                 }
 
@@ -1309,6 +1323,7 @@
                     if (!ratedDayListModal) return;
                     ratedDayListModal.classList.add('hidden');
                     ratedDayListModal.classList.remove('flex');
+                    currentRatedDayListDate = null;
                     refreshBodyLock();
                 }
 
@@ -1547,9 +1562,81 @@
                     });
                 }
 
+                function removeEntryFromMap(map, entry) {
+                    const date = String(entry?.date || '').trim();
+                    if (!date || !Array.isArray(map[date])) return;
+
+                    map[date] = map[date].filter((item) => String(item?.id ?? '') !== String(entry?.id ?? ''));
+                    if (map[date].length === 0) {
+                        delete map[date];
+                    }
+                }
+
+                function upsertEntryInMap(map, entry) {
+                    const date = String(entry?.date || '').trim();
+                    if (!date) return;
+
+                    if (!Array.isArray(map[date])) {
+                        map[date] = [];
+                    }
+
+                    const existingIndex = map[date].findIndex((item) => String(item?.id ?? '') === String(entry?.id ?? ''));
+                    if (existingIndex >= 0) {
+                        map[date][existingIndex] = entry;
+                    } else {
+                        map[date].push(entry);
+                    }
+                }
+
+                function moveEntryToRated(entry) {
+                    const date = entry.date;
+                    if (!date) return;
+
+                    byDateSubmitted[date] = (byDateSubmitted[date] || []).filter(x => String(x.id) !== String(entry.id));
+                    if (byDateSubmitted[date].length === 0) {
+                        delete byDateSubmitted[date];
+                    }
+
+                    if (!byDateRated[date]) byDateRated[date] = [];
+                    if (!byDateRated[date].some(x => String(x.id) === String(entry.id))) {
+                        byDateRated[date].push(entry);
+                    } else {
+                        byDateRated[date] = byDateRated[date].map((item) =>
+                            String(item.id) === String(entry.id) ? entry : item
+                        );
+                    }
+
+                    sortDateMap(byDateSubmitted);
+                    sortDateMap(byDateRated);
+                }
+
+                function refreshOpenDayListsForDate(date) {
+                    const normalizedDate = String(date || '').trim();
+                    if (!normalizedDate) return;
+
+                    if (dayListModal && !dayListModal.classList.contains('hidden') && currentSubmittedDayListDate === normalizedDate) {
+                        renderDayList(
+                            byDateSubmitted[normalizedDate] || [],
+                            dayListEntries,
+                            'No submitted entries found for this date.',
+                            (entry) => openMonitoringModal(entry)
+                        );
+                    }
+
+                    if (ratedDayListModal && !ratedDayListModal.classList.contains('hidden') && currentRatedDayListDate === normalizedDate) {
+                        renderDayList(
+                            byDateRated[normalizedDate] || [],
+                            ratedDayListEntries,
+                            'No rated entries found for this date.',
+                            (entry) => openRatedMonitoringModal(entry)
+                        );
+                    }
+                }
+
                 function openSubmittedDayListModal(dateStr) {
                     if (!dayListModal || !dayListEntries) return;
                     const entries = byDateSubmitted[dateStr] || [];
+                    currentSubmittedDayListDate = dateStr;
 
                     if (dayListDateLabel) {
                         dayListDateLabel.textContent = formatDateLabel(dateStr);
@@ -1567,6 +1654,7 @@
                 function openRatedDayListModal(dateStr) {
                     if (!ratedDayListModal || !ratedDayListEntries) return;
                     const entries = byDateRated[dateStr] || [];
+                    currentRatedDayListDate = dateStr;
 
                     if (ratedDayListDateLabel) {
                         ratedDayListDateLabel.textContent = formatDateLabel(dateStr);
@@ -1583,6 +1671,7 @@
 
                 function openMonitoringModal(data) {
                     if (!modal) return;
+                    data.status = String(data?.status || '').toLowerCase() || 'submitted';
                     currentModalData = data;
 
                     employeeEl.textContent = data.employee || '--';
@@ -1617,7 +1706,8 @@
 
                     updateRatingBasis(data);
 
-                    const rateable = String(data.status || '').toLowerCase() === 'submitted';
+                    const status = String(data.status || '').toLowerCase();
+                    const rateable = status === 'submitted';
                     ratingLockedNote.classList.toggle('hidden', rateable);
                     ratingControls.classList.toggle('hidden', !rateable);
 
@@ -1816,9 +1906,10 @@
                 });
 
                 // Save rating to backend
-                saveBtn?.addEventListener('click', () => {
-                    if (!currentModalData || currentModalData.status !== 'submitted') {
-                        alert('Rating is available only for Submitted (Locked) entries.');
+                saveBtn?.addEventListener('click', async () => {
+                    const modalStatus = String(currentModalData?.status || '').toLowerCase();
+                    if (!currentModalData || modalStatus !== 'submitted') {
+                        alert('Rating is available only for Submitted ORS entries.');
                         return;
                     }
 
@@ -1843,9 +1934,102 @@
                     formTimelinessRating.value = t;
                     formRemarks.value = document.getElementById('ratingRemarks').value || '';
 
-                    setButtonLoading(saveBtn, true, 'Saving...');
-                    saveBtn.dataset.loadingActive = 'true';
-                    saveForm.submit();
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+                        || saveForm.querySelector('input[name="_token"]')?.value
+                        || '';
+
+                    const previousStatus = modalStatus;
+
+                    try {
+                        setButtonLoading(saveBtn, true, 'Saving...');
+                        saveBtn.dataset.loadingActive = 'true';
+
+                        const response = await fetch(saveForm.action, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': csrfToken,
+                                'Accept': 'application/json',
+                            },
+                            body: new FormData(saveForm),
+                        });
+
+                        const payload = await response.json().catch(() => ({}));
+                        if (!response.ok) {
+                            if (response.status === 422 && payload?.errors) {
+                                const firstError = Object.values(payload.errors)?.[0]?.[0];
+                                alert(firstError || payload?.message || 'Unable to save rating.');
+                                return;
+                            }
+
+                            alert(payload?.message || 'Unable to save rating.');
+                            return;
+                        }
+
+                        if (!payload?.success) {
+                            alert(payload?.message || 'Unable to save rating.');
+                            return;
+                        }
+
+                        const entryId = String(currentModalData.id);
+                        const nextStatus = String(payload?.status || payload?.orsEntry?.status || previousStatus).toLowerCase();
+                        const updatedEntry = {
+                            ...currentModalData,
+                            status: nextStatus,
+                            quality_rating: payload?.monitoring?.quality_rating ?? Number(q),
+                            timeliness_rating: payload?.monitoring?.timeliness_rating ?? Number(t),
+                            remarks: payload?.monitoring?.remarks ?? (formRemarks.value || ''),
+                        };
+
+                        taskById[entryId] = {
+                            ...(taskById[entryId] || {}),
+                            ...updatedEntry,
+                        };
+                        currentModalData = taskById[entryId];
+
+                        if (nextStatus === 'rated') {
+                            if (saveBtn) {
+                                saveBtn.disabled = true;
+                                saveBtn.classList.add('opacity-60', 'cursor-not-allowed');
+                            }
+
+                            if (ratingControls) {
+                                ratingControls.classList.add('hidden');
+                            }
+
+                            if (ratingLockedNote) {
+                                ratingLockedNote.classList.remove('hidden');
+                            }
+
+                            const ratingQual = document.getElementById('ratingQual');
+                            const ratingTime = document.getElementById('ratingTime');
+                            const ratingRemarks = document.getElementById('ratingRemarks');
+
+                            if (ratingQual) ratingQual.disabled = true;
+                            if (ratingTime) ratingTime.disabled = true;
+                            if (ratingRemarks) ratingRemarks.disabled = true;
+                        }
+
+                        if (previousStatus === 'submitted' && nextStatus === 'rated') {
+                            moveEntryToRated(currentModalData);
+                        } else if (nextStatus === 'rated') {
+                            removeEntryFromMap(byDateSubmitted, currentModalData);
+                            upsertEntryInMap(byDateRated, currentModalData);
+                            sortDateMap(byDateSubmitted);
+                            sortDateMap(byDateRated);
+                        } else {
+                            removeEntryFromMap(byDateRated, currentModalData);
+                            upsertEntryInMap(byDateSubmitted, currentModalData);
+                            sortDateMap(byDateSubmitted);
+                            sortDateMap(byDateRated);
+                        }
+
+                        refreshCalendarEvents();
+                        refreshOpenDayListsForDate(currentModalData.date);
+                        openMonitoringModal(currentModalData);
+                    } finally {
+                        setButtonLoading(saveBtn, false);
+                        delete saveBtn.dataset.loadingActive;
+                    }
                 });
             });
         </script>
