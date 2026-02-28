@@ -89,8 +89,17 @@
                                     {{ (int) ($mpor->rated_ors_entries_count ?? 0) }}
                                 </td>
                                 <td class="px-4 py-3 text-center">
-                                    <span class="rounded-full border border-slate-700 bg-slate-800 px-3 py-1 text-xs font-semibold text-slate-200">
-                                        {{ strtoupper($mpor->status ?? '—') }}
+                                    @php
+                                        $statusKey = strtolower((string) ($mpor->status ?? ''));
+                                        $badgeClass = match ($statusKey) {
+                                            'submitted' => 'border-blue-500/30 bg-blue-500/10 text-blue-200',
+                                            'approved' => 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200',
+                                            'endorsed' => 'border-violet-400/30 bg-violet-400/10 text-violet-200',
+                                            default => 'border-slate-700 bg-slate-800 text-slate-200',
+                                        };
+                                    @endphp
+                                    <span class="rounded-full border px-3 py-1 text-xs font-semibold {{ $badgeClass }}">
+                                        {{ strtoupper($statusKey ?: '—') }}
                                     </span>
                                 </td>
                                 <td class="px-4 py-3">
@@ -108,21 +117,6 @@
                                             >
                                                 Preview
                                             </button>
-
-{{--
-
-                                            @if (($mpor->status ?? null) === 'approved')
-                                                <form method="POST" action="{{ route('supervisor.mpor.endorse', $mpor) }}" data-action-form>
-                                                    @csrf
-                                                    <button
-                                                        type="submit"
-                                                        class="inline-flex items-center gap-2 rounded-lg bg-sky-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-sky-500"
-                                                    >
-                                                        <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
-                                                        <span data-button-label>Endorse</span>
-                                                    </button>
-                                                </form>
-                                            @endif --}}
                                         </div>
                                     @endif
                                 </td>
@@ -154,6 +148,10 @@
                             <p class="mt-1 text-sm text-slate-400">
                                 Read-only mirror of locked ORS entries with supervisor ratings.
                             </p>
+                            <span id="mporStatusBadge"
+                                class="hidden mt-2 inline-flex rounded-full border px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.3em]">
+                                --
+                            </span>
                         </div>
 
                         <button
@@ -274,18 +272,7 @@
                     </div>
 
                     <div class="flex shrink-0 items-center justify-end gap-2 border-t border-slate-800 p-5">
-                        @if (($mpor->status ?? null) === 'submitted')
-                            <form method="POST" action="{{ route('supervisor.mpor.approve', $mpor) }}" data-action-form>
-                                @csrf
-                                <button
-                                    type="submit"
-                                    class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-emerald-500"
-                                >
-                                    <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
-                                    <span data-button-label>Approve</span>
-                                </button>
-                            </form>
-                        @endif
+                        <div id="mporModalActionSlot" class="flex items-center justify-end gap-2"></div>
 
                         <button
                             type="button"
@@ -295,6 +282,19 @@
                             Close
                         </button>
                     </div>
+
+                    <template id="tplMporApproveForm">
+                        <form method="POST" action="__ACTION__" data-action-form>
+                            @csrf
+                            <button
+                                type="submit"
+                                class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-emerald-500"
+                            >
+                                <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                                <span data-button-label>Approve</span>
+                            </button>
+                        </form>
+                    </template>
                 </div>
             </div>
         </div>
@@ -304,7 +304,12 @@
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            document.querySelectorAll('form[data-action-form]').forEach((form) => {
+            function bindActionForm(form) {
+                if (!form || form.dataset.actionBound === 'true') {
+                    return;
+                }
+
+                form.dataset.actionBound = 'true';
                 form.addEventListener('submit', function () {
                     const btn = form.querySelector('button[type="submit"]');
                     if (!btn) {
@@ -325,16 +330,26 @@
                         spinner.classList.remove('hidden');
                     }
                 });
-            });
+            }
+
+            function bindActionForms(root = document) {
+                root.querySelectorAll('form[data-action-form]').forEach(bindActionForm);
+            }
+
+            bindActionForms();
 
             const loadingBox = document.getElementById('mporModalLoading');
             const headerCards = document.getElementById('mporHeaderCards');
             const tableWrap = document.getElementById('mporTableWrap');
             const bottomCards = document.getElementById('mporBottomCards');
+            const modalActionSlot = document.getElementById('mporModalActionSlot');
+            const approveTemplate = document.getElementById('tplMporApproveForm');
+            const approveUrlTpl = @json(route('supervisor.mpor.approve', ['mpor' => '__ID__']));
 
             const elEmployeeName = document.getElementById('mporEmployeeName');
             const elOfficeName = document.getElementById('mporOfficeName');
             const elMonthLabel = document.getElementById('mporMonthLabel');
+            const mporStatusBadge = document.getElementById('mporStatusBadge');
 
             const tbody = document.getElementById('mporModalTbody');
 
@@ -443,6 +458,63 @@
                 confirmEmployee.textContent = meta?.employeeName ?? '--';
             }
 
+            function setModalStatusBadge(status) {
+                if (!mporStatusBadge) {
+                    return;
+                }
+
+                mporStatusBadge.classList.remove(
+                    'border-blue-500/30', 'bg-blue-500/10', 'text-blue-200',
+                    'border-emerald-500/30', 'bg-emerald-500/10', 'text-emerald-200',
+                    'border-violet-400/30', 'bg-violet-400/10', 'text-violet-200',
+                    'border-slate-700', 'bg-slate-800', 'text-slate-200'
+                );
+
+                const statusKey = String(status || '').toLowerCase();
+                let badgeClass = ['border-slate-700', 'bg-slate-800', 'text-slate-200'];
+
+                if (statusKey === 'submitted') {
+                    badgeClass = ['border-blue-500/30', 'bg-blue-500/10', 'text-blue-200'];
+                } else if (statusKey === 'approved') {
+                    badgeClass = ['border-emerald-500/30', 'bg-emerald-500/10', 'text-emerald-200'];
+                } else if (statusKey === 'endorsed') {
+                    badgeClass = ['border-violet-400/30', 'bg-violet-400/10', 'text-violet-200'];
+                }
+
+                mporStatusBadge.classList.add(...badgeClass);
+                mporStatusBadge.textContent = statusKey ? statusKey.toUpperCase() : '--';
+
+                if (statusKey) {
+                    mporStatusBadge.classList.remove('hidden');
+                } else {
+                    mporStatusBadge.classList.add('hidden');
+                }
+            }
+
+            function renderModalActions(status, resolvedId) {
+                if (!modalActionSlot) {
+                    return;
+                }
+
+                modalActionSlot.innerHTML = '';
+
+                const normalizedStatus = String(status || '').toLowerCase();
+                const safeId = String(resolvedId || '').trim();
+                if (!safeId || normalizedStatus !== 'submitted' || !approveTemplate) {
+                    return;
+                }
+
+                const fragment = approveTemplate.content.cloneNode(true);
+                const form = fragment.querySelector('form[data-action-form]');
+                if (!form) {
+                    return;
+                }
+
+                form.setAttribute('action', approveUrlTpl.replace('__ID__', encodeURIComponent(safeId)));
+                modalActionSlot.appendChild(fragment);
+                bindActionForms(modalActionSlot);
+            }
+
             async function loadMporPreview(mporId) {
                 if (!mporId) {
                     return;
@@ -455,6 +527,8 @@
                 tableWrap.classList.add('hidden');
                 bottomCards.classList.add('hidden');
                 tbody.innerHTML = '';
+                renderModalActions('', '');
+                setModalStatusBadge('');
 
                 try {
                     const url = @json(route('supervisor.mpor.show', ['mpor' => '__ID__'])).replace('__ID__', String(mporId));
@@ -475,6 +549,8 @@
                     const sectionRows = data?.sectionRows ?? {};
                     const grandTotals = data?.grandTotals ?? {};
                     const kpis = data?.kpis ?? {};
+                    const status = String(meta?.status ?? data?.status ?? '').toLowerCase();
+                    const resolvedId = String(meta?.mporId ?? data?.mporId ?? mporId);
 
                     elEmployeeName.textContent = meta?.employeeName ?? '--';
                     elOfficeName.textContent = meta?.officeName ?? '--';
@@ -482,6 +558,8 @@
 
                     renderTable(sectionLabels, sectionRows);
                     applyTotals(grandTotals, kpis, meta);
+                    renderModalActions(status, resolvedId);
+                    setModalStatusBadge(status);
 
                     loadingBox.classList.add('hidden');
                     headerCards.classList.remove('hidden');
@@ -490,6 +568,8 @@
                 } catch (error) {
                     loadingBox.textContent = error?.message ?? 'Unable to load MPOR preview.';
                     loadingBox.classList.remove('hidden');
+                    renderModalActions('', '');
+                    setModalStatusBadge('');
                 }
             }
 

@@ -287,6 +287,6 @@ class MporController extends Controller
             'approved_by' => auth()->id(),
         ]);
 
-        return back()->with('success', 'MPOR approved successfully.');
+        return back();
     }
 }
