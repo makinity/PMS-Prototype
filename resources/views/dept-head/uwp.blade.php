@@ -152,15 +152,18 @@
                             })->values()->all(),
                         ];
 
-                        $badge = match($uwp->status) {
+                        $statusKey = strtolower(str_replace('-', '_', (string) ($uwp->status ?? '')));
+                        $badge = match($statusKey) {
+                            'returned' => ['bg'=>'bg-rose-500/10', 'text'=>'text-rose-300', 'border'=>'border-rose-500/20', 'label'=>'Returned'],
                             'submitted' => ['bg'=>'bg-blue-500/10', 'text'=>'text-blue-300', 'border'=>'border-blue-500/20', 'label'=>'Submitted'],
-                            'endorsed' => ['bg'=>'bg-emerald-500/10', 'text'=>'text-emerald-300', 'border'=>'border-emerald-500/20', 'label'=>'Endorsed'],
+                            'endorsed' => ['bg'=>'bg-violet-500/10', 'text'=>'text-violet-300', 'border'=>'border-violet-500/20', 'label'=>'Endorsed'],
+                            'approved', 'pmt_approved' => ['bg'=>'bg-emerald-500/10', 'text'=>'text-emerald-300', 'border'=>'border-emerald-500/20', 'label'=>'Approved'],
                             'draft' => ['bg'=>'bg-slate-500/10', 'text'=>'text-slate-200', 'border'=>'border-slate-500/20', 'label'=>'Draft'],
-                            default => ['bg'=>'bg-amber-500/10', 'text'=>'text-amber-300', 'border'=>'border-amber-500/20', 'label'=>ucwords(str_replace('_',' ', $uwp->status ?? 'Unknown'))],
+                            default => ['bg'=>'bg-amber-500/10', 'text'=>'text-amber-300', 'border'=>'border-amber-500/20', 'label'=>ucwords(str_replace('_',' ', $statusKey !== '' ? $statusKey : 'unknown'))],
                         };
                     @endphp
 
-                    <tr class="hover:bg-slate-800/40 transition">
+                    <tr class="hover:bg-slate-800/40 transition" data-uwp-row="{{ (int) $uwp->id }}" data-uwp-row-id="{{ (int) $uwp->id }}">
                         <td class="px-4 py-3 text-sm text-slate-100 font-medium">
                             {{ $uwp->office?->name ?? '—' }}
                         </td>
@@ -171,14 +174,14 @@
                             Unit-Level Plan
                         </td>
                         <td class="px-4 py-3 text-sm text-center">
-                            <span class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full {{ $badge['bg'] }} {{ $badge['text'] }} border {{ $badge['border'] }}">
+                            <span data-status-badge class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full {{ $badge['bg'] }} {{ $badge['text'] }} border {{ $badge['border'] }}">
                                 {{ $badge['label'] }}
                             </span>
                         </td>
                         <td class="px-4 py-3 text-sm text-center">
                             <button type="button"
-                                data-modal-target="uwp-review-modal"
-                                data-modal-toggle="uwp-review-modal"
+                                data-review-btn
+                                data-uwp-id="{{ (int) $uwp->id }}"
                                 data-uwp='@json($payload)'
                                 class="inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg
                                 border border-blue-500 text-blue-400 hover:bg-blue-500/10 transition">
@@ -201,15 +204,15 @@
 {{-- Review UWP Modal (Flowbite-style) --}}
 <div id="uwp-review-modal" data-modal-container tabindex="-1" aria-hidden="true"
      class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/70 backdrop-blur-sm overflow-y-auto">
-    <div class="w-full max-w-5xl px-6">
-        <div class="rounded-2xl border border-slate-800 bg-slate-950 text-slate-100">
+    <div class="w-full max-w-5xl px-6 my-10">
+        <div class="rounded-2xl border border-slate-800 bg-slate-950 text-slate-100 max-h-[85vh] overflow-y-auto">
             <div class="flex items-start justify-between gap-4 border-b border-slate-800 px-8 py-6">
                 <div>
                     <h2 class="text-xl font-semibold">Unit Work Plan</h2>
                     <p id="uwp-modal-subtitle" class="mt-1 text-sm text-slate-400">Select a UWP to view details</p>
                     <span id="uwp-modal-period" class="hidden">-</span>
                 </div>
-                <button type="button" data-modal-hide="uwp-review-modal"
+                <button type="button" data-review-close
                         class="inline-flex items-center justify-center rounded-lg border border-slate-800 bg-slate-950/60 px-2.5 py-2 text-slate-400 transition hover:bg-slate-900 hover:text-white">
                     <i class="fa-solid fa-xmark text-sm"></i>
                 </button>
@@ -237,10 +240,10 @@
                 </div>
             </div>
 
-            <div id="uwp-return-remarks-wrap" class="hidden mx-8 mt-6 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-amber-200">
+            <div id="uwp-return-remarks-wrap" class="hidden mx-8 mt-6 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-rose-200">
                 <p class="text-sm font-semibold">Returned Remarks</p>
-                <p id="uwp-return-remarks-meta" class="mt-1 text-xs text-amber-200/80"></p>
-                <div id="uwp-return-remarks-text" class="mt-2 whitespace-pre-line text-sm text-amber-100">-</div>
+                <p id="uwp-return-remarks-meta" class="mt-1 text-xs text-rose-200/80"></p>
+                <div id="uwp-return-remarks-text" class="mt-2 whitespace-pre-line text-sm text-rose-100">-</div>
             </div>
 
             <div class="px-8 py-6">
@@ -290,7 +293,7 @@
                 <div class="flex items-center justify-between border-t border-slate-800 px-8 py-5">
                     <p class="text-xs text-slate-500">Department Head can endorse or return submitted UWPs only.</p>
                     <div class="flex items-center gap-3">
-                        <button type="button" data-modal-hide="uwp-review-modal" class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">Close</button>
+                        <button type="button" data-review-close class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">Close</button>
 
                         <button type="button"
                             id="btn-return-uwp"
@@ -546,8 +549,45 @@
     function closeModal(modal) {
         if (!modal) return;
         modal.classList.add('hidden');
-        modal.classList.remove('flex');
+        clearFlowbiteBackdrops();
+    }
+
+    function cleanupFlowbiteBackdrop() {
+        document.querySelectorAll('[modal-backdrop], [data-modal-backdrop], .modal-backdrop').forEach((el) => el.remove());
+        document.querySelectorAll('body > div').forEach((el) => {
+            if (!(el instanceof HTMLDivElement)) return;
+            const className = String(el.className || '');
+            const looksLikeFlowbiteBackdrop =
+                className.includes('bg-gray-900/50') &&
+                className.includes('fixed') &&
+                className.includes('inset-0') &&
+                className.includes('z-40');
+
+            if (looksLikeFlowbiteBackdrop) {
+                el.remove();
+            }
+        });
         document.body.classList.remove(bodyOverflowClass);
+    }
+
+    function clearFlowbiteBackdrops() {
+        cleanupFlowbiteBackdrop();
+    }
+
+    function closeReviewModalSafely() {
+        const modal = document.getElementById('uwp-review-modal');
+        if (modal) {
+            modal.classList.add('hidden');
+        }
+
+        const ids = ['uwp-indicators-modal', 'uwp-standards-viewer-modal', 'uwp-assignees-viewer-modal'];
+        ids.forEach((id) => {
+            const m = document.getElementById(id);
+            if (!m) return;
+            m.classList.add('hidden');
+        });
+
+        clearFlowbiteBackdrops();
     }
 
     function openStandardsViewer(mfoTitle, indicatorText) {
@@ -625,7 +665,36 @@
         indicatorStandardsBody = document.getElementById('uwp-standards-table-body');
         standardsModal = document.getElementById('uwp-standards-viewer-modal');
         assigneesModal = document.getElementById('uwp-assignees-viewer-modal');
+        const indicatorsModal = document.getElementById('uwp-indicators-modal');
+        const reviewModal = document.getElementById('uwp-review-modal');
 
+        if (reviewModal && !reviewModal.classList.contains('flex')) {
+            reviewModal.classList.add('flex');
+        }
+
+        document.querySelectorAll('[data-review-close]').forEach((btn) => {
+            btn.addEventListener('click', () => closeReviewModalSafely());
+        });
+
+        reviewModal?.addEventListener('click', (event) => {
+            if (event.target === reviewModal) {
+                closeReviewModalSafely();
+            }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key !== 'Escape') return;
+            window.setTimeout(() => {
+                const modalEl = document.getElementById('uwp-review-modal');
+                if (modalEl?.classList.contains('hidden')) {
+                    cleanupFlowbiteBackdrop();
+                }
+            }, 0);
+        });
+
+        document.querySelectorAll('[data-modal-hide="uwp-indicators-modal"]').forEach((btn) => {
+            btn.addEventListener('click', () => closeModal(indicatorsModal));
+        });
         document.querySelectorAll('[data-modal-hide="uwp-standards-viewer-modal"]').forEach((btn) => {
             btn.addEventListener('click', () => closeModal(standardsModal));
         });
@@ -633,6 +702,9 @@
             btn.addEventListener('click', () => closeModal(assigneesModal));
         });
 
+        indicatorsModal?.addEventListener('click', (event) => {
+            if (event.target === indicatorsModal) closeModal(indicatorsModal);
+        });
         standardsModal?.addEventListener('click', (event) => {
             if (event.target === standardsModal) closeModal(standardsModal);
         });
@@ -650,31 +722,95 @@
             .replaceAll("'", '&#039;');
     }
 
+    function normalizeStatusKey(status) {
+        return String(status || '').toLowerCase().replaceAll('-', '_');
+    }
+
     function labelStatus(status) {
-        const s = String(status || '').toLowerCase();
+        const s = normalizeStatusKey(status);
         if (!s) return '-';
         return s.replaceAll('_', ' ').replace(/\b\w/g, c => c.toUpperCase());
     }
 
     function statusBadgeClass(status) {
-        const s = String(status || '').toLowerCase();
+        const s = normalizeStatusKey(status);
+        if (s === 'returned') {
+            return 'border-rose-500/30 bg-rose-500/10 text-rose-300';
+        }
         if (s === 'submitted') {
             return 'border-blue-500/30 bg-blue-500/10 text-blue-300';
         }
         if (s === 'endorsed') {
-            return 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300';
-        }
-        if (s === 'pmt_approved') {
             return 'border-violet-500/30 bg-violet-500/10 text-violet-300';
         }
-        if (s === 'returned') {
-            return 'border-amber-500/30 bg-amber-500/10 text-amber-300';
+        if (s === 'approved' || s === 'pmt_approved') {
+            return 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300';
         }
         if (s === 'draft') {
             return 'border-slate-500/30 bg-slate-500/10 text-slate-200';
         }
 
         return 'border-slate-500/30 bg-slate-500/10 text-slate-200';
+    }
+
+    function setButtonLoading(buttonEl, isLoading) {
+        if (!buttonEl) return;
+
+        const spinner = buttonEl.querySelector('[data-button-spinner]');
+        const label = buttonEl.querySelector('[data-button-label]');
+
+        if (label && !buttonEl.dataset.originalLabel) {
+            buttonEl.dataset.originalLabel = label.textContent;
+        }
+
+        if (isLoading) {
+            buttonEl.disabled = true;
+            buttonEl.classList.add('opacity-80', 'cursor-not-allowed');
+            if (spinner) spinner.classList.remove('hidden');
+            if (label) label.textContent = buttonEl.dataset.loadingText || 'Processing...';
+            return;
+        }
+
+        buttonEl.disabled = false;
+        buttonEl.classList.remove('opacity-80', 'cursor-not-allowed');
+        if (spinner) spinner.classList.add('hidden');
+        if (label && buttonEl.dataset.originalLabel) {
+            label.textContent = buttonEl.dataset.originalLabel;
+        }
+    }
+
+    function updateDeptHeadListRow(uwpId, newStatus, options = {}) {
+        const row = document.querySelector(`[data-uwp-row-id="${uwpId}"]`) || document.querySelector(`[data-uwp-row="${uwpId}"]`);
+        if (!row) return;
+
+        const statusKey = normalizeStatusKey(newStatus);
+        const statusBadge = row.querySelector('[data-status-badge]');
+        if (statusBadge) {
+            statusBadge.className = `inline-flex items-center px-3 py-1 text-xs font-medium rounded-full border ${statusBadgeClass(statusKey)}`;
+            statusBadge.textContent = labelStatus(statusKey);
+        }
+
+        const reviewBtn = row.querySelector(`[data-uwp-id="${uwpId}"][data-uwp]`) || row.querySelector('[data-review-btn]');
+        if (!reviewBtn) return;
+
+        try {
+            const payload = JSON.parse(reviewBtn.getAttribute('data-uwp') || '{}');
+            payload.status = statusKey;
+
+            if (statusKey === 'returned') {
+                payload.return_remarks = options.return_remarks ?? payload.return_remarks ?? '';
+                payload.returned_at = options.returned_at ?? payload.returned_at ?? new Date().toISOString();
+                payload.returned_by_role = 'dept-head';
+            } else {
+                if (Object.prototype.hasOwnProperty.call(options, 'return_remarks')) payload.return_remarks = options.return_remarks;
+                if (Object.prototype.hasOwnProperty.call(options, 'returned_at')) payload.returned_at = options.returned_at;
+                if (Object.prototype.hasOwnProperty.call(options, 'returned_by_role')) payload.returned_by_role = options.returned_by_role;
+            }
+
+            reviewBtn.setAttribute('data-uwp', JSON.stringify(payload));
+        } catch (_) {
+            // Keep existing payload if malformed
+        }
     }
 
     function buildFunctionBadge(fnType) {
@@ -862,28 +998,22 @@
     }
 
     function initReviewModalTriggers() {
-        const triggers = document.querySelectorAll('[data-modal-target="uwp-review-modal"][data-uwp]');
-        triggers.forEach((btn) => {
-            btn.addEventListener('click', () => {
+        if (!document.body.dataset.uwpReviewDelegated) {
+            document.addEventListener('click', (event) => {
+                const btn = event.target.closest('[data-review-btn][data-uwp]');
+                if (!btn) return;
+
                 let uwp = null;
                 try {
                     uwp = JSON.parse(btn.getAttribute('data-uwp') || 'null');
-                } catch (e) {
+                } catch (_) {
                     uwp = null;
                 }
                 hydrateReviewModal(uwp);
+                showModal(document.getElementById('uwp-review-modal'));
             });
-        });
-
-        document.querySelectorAll('[data-modal-hide="uwp-indicators-modal"]').forEach((button) => {
-            const modal = document.getElementById('uwp-indicators-modal');
-            button.addEventListener('click', () => closeModal(modal));
-        });
-
-        const indicatorsModal = document.getElementById('uwp-indicators-modal');
-        indicatorsModal?.addEventListener('click', (event) => {
-            if (event.target === indicatorsModal) closeModal(indicatorsModal);
-        });
+            document.body.dataset.uwpReviewDelegated = 'true';
+        }
 
         const btnEndorse = document.getElementById('btn-endorse-uwp');
         const btnReturn = document.getElementById('btn-return-uwp');
@@ -900,18 +1030,111 @@
             form.submit();
         });
 
-        btnReturn?.addEventListener('click', () => {
+        btnReturn?.addEventListener('click', async () => {
             if (!form) return;
-            const val = (remarks?.value || '').trim();
-            if (!val) {
+            const remarksValue = (remarks?.value || '').trim();
+            if (!remarksValue) {
                 remarks?.focus();
                 return;
             }
-            if (form.dataset.returnAction) {
-                form.action = form.dataset.returnAction;
+
+            if (btnReturn.disabled) return;
+
+            const url = String(form.dataset.returnAction || '').trim();
+            if (!url) {
+                alert('Return endpoint is missing.');
+                return;
             }
-            if (actionInput) actionInput.value = '';
-            form.submit();
+
+            setButtonLoading(btnReturn, true);
+            if (btnEndorse) {
+                btnEndorse.disabled = true;
+                btnEndorse.classList.add('opacity-80', 'cursor-not-allowed');
+            }
+
+            try {
+                const csrfToken =
+                    document.querySelector('meta[name="csrf-token"]')?.content ||
+                    form.querySelector('input[name="_token"]')?.value ||
+                    '';
+                const uwpIdValue = String(selectedUwp?.id || document.getElementById('uwp-modal-uwp-id')?.value || '').trim();
+
+                const fd = new FormData();
+                fd.append('_token', csrfToken);
+                fd.append('unit_work_plan_id', uwpIdValue);
+                fd.append('remarks', remarksValue);
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: fd,
+                });
+
+                let data = {};
+                try {
+                    data = await response.json();
+                } catch (_) {
+                    data = {};
+                }
+
+                if (!response.ok || !data?.success) {
+                    throw new Error(data?.message || data?.error || 'Unable to return UWP');
+                }
+
+                const returnedAt = data?.returned_at || new Date().toISOString();
+                const remarksText = data?.return_remarks || remarksValue;
+                const returnedByRole = data?.returned_by_role || 'dept-head';
+                const returnedStatus = data?.status || 'returned';
+                const uwpId = Number(selectedUwp?.id || data?.uwp_id || uwpIdValue || 0);
+
+                if (!selectedUwp) selectedUwp = {};
+                selectedUwp.id = selectedUwp.id || uwpId;
+                selectedUwp.status = returnedStatus;
+                selectedUwp.return_remarks = remarksText;
+                selectedUwp.returned_at = returnedAt;
+                selectedUwp.returned_by_role = returnedByRole;
+
+                hydrateReviewModal(selectedUwp);
+                updateDeptHeadListRow(selectedUwp.id || uwpId, returnedStatus, {
+                    return_remarks: selectedUwp.return_remarks,
+                    returned_at: selectedUwp.returned_at,
+                    returned_by_role: selectedUwp.returned_by_role,
+                });
+
+                const row = document.querySelector(`[data-uwp-row-id="${uwpId}"]`) || document.querySelector(`[data-uwp-row="${uwpId}"]`);
+                const reviewBtn = row?.querySelector(`[data-uwp-id="${uwpId}"][data-uwp]`) || row?.querySelector('[data-review-btn][data-uwp]');
+                if (reviewBtn) {
+                    let nextPayload = {};
+                    try {
+                        nextPayload = JSON.parse(reviewBtn.getAttribute('data-uwp') || '{}');
+                    } catch (_) {
+                        nextPayload = {};
+                    }
+                    nextPayload.status = normalizeStatusKey(returnedStatus);
+                    nextPayload.return_remarks = remarksText;
+                    nextPayload.returned_at = returnedAt;
+                    nextPayload.returned_by_role = returnedByRole;
+                    reviewBtn.setAttribute('data-uwp', JSON.stringify(nextPayload));
+                }
+
+                if (remarks) {
+                    remarks.value = '';
+                }
+                closeReviewModalSafely();
+            } catch (error) {
+                alert(error?.message || 'Unable to return UWP right now. Please try again.');
+            } finally {
+                setButtonLoading(btnReturn, false);
+                if (btnEndorse) {
+                    btnEndorse.disabled = false;
+                    btnEndorse.classList.remove('opacity-80', 'cursor-not-allowed');
+                }
+                clearFlowbiteBackdrops();
+            }
         });
     }
 
