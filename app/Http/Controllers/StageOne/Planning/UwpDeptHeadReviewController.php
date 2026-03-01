@@ -86,21 +86,48 @@ class UwpDeptHeadReviewController extends Controller
      */
     public function review(Request $request)
     {
+        $expectsJson = $request->expectsJson() || $request->ajax();
+
         $user = Auth::user();
         if (!$user) {
+            if ($expectsJson) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized.',
+                ], 403);
+            }
+
             abort(403, 'Unauthorized.');
         }
 
-        $validated = $request->validate([
-            'unit_work_plan_id' => ['required', 'exists:unit_work_plans,id'],
-            'action' => ['required', Rule::in(['endorse', 'return'])],
-            'remarks' => ['nullable', 'string'],
-        ]);
+        try {
+            $validated = validator($request->all(), [
+                'unit_work_plan_id' => ['required', 'exists:unit_work_plans,id'],
+                'action' => ['required', Rule::in(['endorse', 'return'])],
+                'remarks' => ['nullable', 'string'],
+            ])->validate();
+        } catch (ValidationException $e) {
+            if ($expectsJson) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->validator->errors()->first() ?: 'Invalid review request.',
+                ], 422);
+            }
+
+            throw $e;
+        }
 
         $uwp = UnitWorkPlan::with('office.head')
             ->findOrFail($validated['unit_work_plan_id']);
 
         if (!$uwp->office || !$uwp->office->head || (int) $uwp->office->head->id !== (int) $user->id) {
+            if ($expectsJson) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You are not authorized to review this Unit Work Plan.',
+                ], 403);
+            }
+
             return back()->with('error', 'You are not authorized to review this Unit Work Plan.');
         }
 
@@ -110,41 +137,85 @@ class UwpDeptHeadReviewController extends Controller
         ], true);
 
         if (!$reviewable) {
+            if ($expectsJson) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only submitted or endorsed Unit Work Plans can be reviewed.',
+                ], 422);
+            }
+
             return back()->with('error', 'Only submitted or endorsed Unit Work Plans can be reviewed.');
         }
 
         if ($validated['action'] === 'endorse' && $uwp->status !== UnitWorkPlan::STATUS_SUBMITTED) {
+            if ($expectsJson) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only submitted Unit Work Plans can be endorsed.',
+                ], 422);
+            }
+
             return back()->with('error', 'Only submitted Unit Work Plans can be endorsed.');
         }
 
         if ($validated['action'] === 'return' && empty(trim((string) ($validated['remarks'] ?? '')))) {
+            if ($expectsJson) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Remarks are required when returning a Unit Work Plan.',
+                ], 422);
+            }
+
             return back()->with('error', 'Remarks are required when returning a Unit Work Plan.');
         }
 
-        DB::transaction(function () use ($uwp, $validated, $user) {
-            if ($validated['action'] === 'endorse') {
-                $uwp->status = UnitWorkPlan::STATUS_ENDORSED;
-                $uwp->endorsed_at = now();
-                $uwp->returned_at = null;
-                $uwp->returned_by = null;
-                $uwp->returned_by_role = null;
-                $uwp->return_remarks = null;
+        try {
+            DB::transaction(function () use ($uwp, $validated, $user) {
+                if ($validated['action'] === 'endorse') {
+                    $uwp->status = UnitWorkPlan::STATUS_ENDORSED;
+                    $uwp->endorsed_at = now();
+                    $uwp->returned_at = null;
+                    $uwp->returned_by = null;
+                    $uwp->returned_by_role = null;
+                    $uwp->return_remarks = null;
+                }
+
+                if ($validated['action'] === 'return') {
+                    $uwp->status = UnitWorkPlan::STATUS_RETURNED;
+                    $uwp->returned_at = now();
+                    $uwp->returned_by = $user->id;
+                    $uwp->returned_by_role = 'dept-head';
+                    $uwp->return_remarks = trim((string) ($validated['remarks'] ?? ''));
+                    $uwp->endorsed_at = null;
+                    $uwp->approved_at = null;
+                    $uwp->locked_at = null;
+                    $uwp->submitted_at = null;
+                }
+
+                $uwp->save();
+            });
+        } catch (\Throwable $e) {
+            if ($expectsJson) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unable to review Unit Work Plan.',
+                ], 500);
             }
 
-            if ($validated['action'] === 'return') {
-                $uwp->status = UnitWorkPlan::STATUS_RETURNED;
-                $uwp->returned_at = now();
-                $uwp->returned_by = $user->id;
-                $uwp->returned_by_role = 'dept-head';
-                $uwp->return_remarks = trim((string) ($validated['remarks'] ?? ''));
-                $uwp->endorsed_at = null;
-                $uwp->approved_at = null;
-                $uwp->locked_at = null;
-                $uwp->submitted_at = null;
-            }
+            throw $e;
+        }
 
-            $uwp->save();
-        });
+        if ($expectsJson) {
+            return response()->json([
+                'success' => true,
+                'uwp_id' => (int) $uwp->id,
+                'status' => (string) $uwp->status,
+                'endorsed_at' => optional($uwp->endorsed_at)->toDateTimeString(),
+                'returned_at' => optional($uwp->returned_at)->toDateTimeString(),
+                'returned_by_role' => $uwp->returned_by_role,
+                'return_remarks' => $uwp->return_remarks,
+            ]);
+        }
 
         return redirect()
             ->route('dept-head.uwp.index', $request->only('status'))
