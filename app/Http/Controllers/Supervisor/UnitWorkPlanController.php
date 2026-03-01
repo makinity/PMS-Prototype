@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\StageOne\Planning;
+namespace App\Http\Controllers\Supervisor;
 
 use App\Http\Controllers\Controller;
 use App\Models\UnitWorkPlan;
@@ -339,9 +339,7 @@ class UnitWorkPlanController extends Controller
             ]);
         }
 
-        return redirect()
-            ->route('supervisor.uwp-page')
-            ->with('success', 'Draft saved.');
+        return redirect()->route('supervisor.uwp-page');
     }
 
     private function handleSubmitData(Request $request, ?int $forcedUwpId)
@@ -1006,6 +1004,13 @@ class UnitWorkPlanController extends Controller
                 }
             }
 
+            if (
+                in_array((string) $uwp->status, [UnitWorkPlan::STATUS_DRAFT, UnitWorkPlan::STATUS_RETURNED], true)
+                && !$uwp->uwpFunctions()->exists()
+            ) {
+                $this->ensureDefaultUwpFunctions($uwp);
+            }
+
             return $uwp;
         });
     }
@@ -1017,6 +1022,28 @@ class UnitWorkPlanController extends Controller
                 $query->where('unit_work_plan_id', $uwp->id);
             })
             ->count();
+    }
+
+    private function ensureDefaultUwpFunctions(UnitWorkPlan $uwp): void
+    {
+        if ($uwp->uwpFunctions()->exists()) {
+            return;
+        }
+
+        $uwp->uwpFunctions()->createMany([
+            [
+                'name' => 'Core Functions',
+                'function_type' => 'core',
+                'weight_percent' => 80.00,
+                'sort_order' => 1,
+            ],
+            [
+                'name' => 'Support Functions',
+                'function_type' => 'support',
+                'weight_percent' => 20.00,
+                'sort_order' => 2,
+            ],
+        ]);
     }
 
     private function mapUwpToEditorFunctions(UnitWorkPlan $uwp): array

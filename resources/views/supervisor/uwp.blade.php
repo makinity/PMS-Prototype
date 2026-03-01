@@ -350,15 +350,6 @@
             </div>
 
             <div class="mt-4 flex items-center justify-end gap-3 border-t border-slate-800 pt-3">
-                @if ($canEdit)
-                    <button type="button"
-                            id="uwp-save-assignments"
-                            class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500">
-                        <span data-button-label>Save Assignment</span>
-                        <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
-                    </button>
-                @endif
-
                 <button type="button"
                         class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800"
                         onclick="closeAssignedModal()">
@@ -789,6 +780,34 @@
                     };
                 }
 
+                function normalizeFunctionType(type) {
+                    const value = String(type || '').toLowerCase();
+                    return ['core', 'support', 'custom'].includes(value) ? value : 'custom';
+                }
+
+                function isFunctionTypeTaken(type, exceptIndex = -1) {
+                    const normalized = normalizeFunctionType(type);
+                    if (!['core', 'support'].includes(normalized)) return false;
+
+                    return uwpState.functions.some((func, idx) => {
+                        if (idx === exceptIndex) return false;
+                        return normalizeFunctionType(func?.type) === normalized;
+                    });
+                }
+
+                function resolveFunctionTypeSelection(type, currentIndex) {
+                    const normalized = normalizeFunctionType(type);
+                    if (!['core', 'support'].includes(normalized)) {
+                        return 'custom';
+                    }
+
+                    if (isFunctionTypeTaken(normalized, currentIndex)) {
+                        return 'custom';
+                    }
+
+                    return normalized;
+                }
+
                 function getAssignedEmployees(indicator) {
                     if (!indicator) return [];
                     return Array.isArray(indicator.assignees) ? [...indicator.assignees] : [];
@@ -817,11 +836,15 @@
                     if (!functionsWrapper) return;
 
                     const html = uwpState.functions.map((func, funcIndex) => {
+                        const functionType = normalizeFunctionType(func.type);
+                        func.type = functionType;
                         const weightValue = Number(func.weight || 0);
                         const description = getFunctionDescription(func);
                         const inputDisabled = isDraft ? '' : 'disabled';
                         const mutedClass = isDraft ? '' : 'opacity-60 pointer-events-none';
-                        const canDeleteFunction = isDraft;
+                        const canDeleteFunction = isDraft && functionType === 'custom';
+                        const coreTakenByOther = isFunctionTypeTaken('core', funcIndex);
+                        const supportTakenByOther = isFunctionTypeTaken('support', funcIndex);
                         const isFunctionConfirmOpen = activeFunctionConfirmId === funcIndex;
 
                         const mfoRows = (func.mfos || []).map((mfo, mfoIndex) => {
@@ -936,6 +959,17 @@
                                         }
                                     </div>
                                     <div class="flex flex-wrap items-center justify-end gap-2">
+                                        <select
+                                            data-function-type
+                                            data-function-index="${funcIndex}"
+                                            class="rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none ${mutedClass}"
+                                            style="background:#0f172a;color:#e5e7eb;"
+                                            ${inputDisabled}>
+                                            <option value="core" ${functionType === 'core' ? 'selected' : ''} ${functionType !== 'core' && coreTakenByOther ? 'disabled' : ''}>Core</option>
+                                            <option value="support" ${functionType === 'support' ? 'selected' : ''} ${functionType !== 'support' && supportTakenByOther ? 'disabled' : ''}>Support</option>
+                                            <option value="custom" ${functionType === 'custom' ? 'selected' : ''}>Custom</option>
+                                        </select>
+
                                         <input type="number" min="0" max="100"
                                             data-function-weight
                                             data-function-index="${funcIndex}"
@@ -1663,7 +1697,14 @@
                         if (target.matches('[data-function-type]')) {
                             const idx = Number(target.dataset.functionIndex);
                             if (!Number.isNaN(idx) && uwpState.functions[idx]) {
-                                uwpState.functions[idx].type = target.value;
+                                const selectedType = normalizeFunctionType(target.value);
+                                const resolvedType = resolveFunctionTypeSelection(selectedType, idx);
+                                uwpState.functions[idx].type = resolvedType;
+                                uwpState.functions[idx].isCustom = resolvedType === 'custom';
+                                if (resolvedType !== selectedType) {
+                                    target.value = resolvedType;
+                                }
+                                renderFunctions();
                             }
                         }
                     });

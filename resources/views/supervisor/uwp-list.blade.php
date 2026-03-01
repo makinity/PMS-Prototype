@@ -51,7 +51,7 @@
 
                         <tbody class="divide-y divide-slate-800">
                             @foreach ($lists as $list)
-                                <tr class="hover:bg-slate-900/50 transition">
+                                <tr class="hover:bg-slate-900/50 transition" data-uwp-row="{{ (int) $list->id }}">
                                     <td class="px-4 py-3">
                                         {{ $list->office?->name ?? '—' }}
                                     </td>
@@ -73,6 +73,7 @@
                                         @endphp
 
                                         <span
+                                            data-status-badge
                                             class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold {{ $statusClass }}">
                                             {{ ucfirst(str_replace('_', ' ', $list->status)) }}
                                         </span>
@@ -99,6 +100,7 @@
                                         <button type="button"
                                                 aria-label="View Unit Work Plan"
                                                 title="View Unit Work Plan"
+                                                data-uwp-preview-btn
                                                 data-uwp='@json($previewPayload)'
                                                 onclick="showUwpPreview({{ $list->id }}, this)"
                                                 class="inline-flex items-center justify-center rounded-lg
@@ -111,6 +113,7 @@
                                             <button type="button"
                                                     aria-label="Delete Unit Work Plan"
                                                     title="Delete Unit Work Plan"
+                                                    data-delete-btn
                                                     onclick='openDeleteUwpModal(
                                                         {{ (int) $list->id }},
                                                         @json($list->office?->name ?? "--"),
@@ -125,6 +128,7 @@
                                             <button type="button"
                                                     aria-label="Delete Unit Work Plan"
                                                     title="Only Draft/Returned & unlocked can be deleted"
+                                                    data-delete-btn
                                                     disabled
                                                     class="inline-flex cursor-not-allowed items-center justify-center rounded-lg p-2 text-slate-500 opacity-40">
                                                 <i class="fa-regular fa-trash-can text-sm"></i>
@@ -644,6 +648,7 @@
                     console.log('Success response:', data);
 
                     if (data.success) {
+                        const submittedId = currentUwpId;
 
                         const statusBadge = document.getElementById('modalStatus');
                         if (statusBadge) {
@@ -654,9 +659,9 @@
                         submitButton.classList.add('hidden');
 
                         setTimeout(() => {
+                            updateListRowAfterSubmit(submittedId);
                             closeModal('uwpPreviewModal');
-                            location.reload();
-                        }, 1500);
+                        }, 600);
                     } else {
                         throw new Error(data.error || 'Failed to submit UWP');
                     }
@@ -677,6 +682,37 @@
                     const buttonSpinner = submitButton.querySelector('[data-button-spinner]');
                     if (buttonLabel) buttonLabel.textContent = 'Submit for Approval';
                     if (buttonSpinner) buttonSpinner.classList.add('hidden');
+                }
+            }
+
+            function updateListRowAfterSubmit(uwpId) {
+                const row = document.querySelector(`[data-uwp-row="${uwpId}"]`);
+                if (!row) return;
+
+                const statusBadge = row.querySelector('[data-status-badge]');
+                if (statusBadge) {
+                    statusBadge.textContent = 'Submitted';
+                    statusBadge.className = 'inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold border-blue-500/30 bg-blue-500/10 text-blue-300';
+                }
+
+                const deleteBtn = row.querySelector('[data-delete-btn]');
+                if (deleteBtn) {
+                    deleteBtn.disabled = true;
+                    deleteBtn.title = 'Only Draft/Returned & unlocked can be deleted';
+                    deleteBtn.className = 'inline-flex cursor-not-allowed items-center justify-center rounded-lg p-2 text-slate-500 opacity-40';
+                }
+
+                const previewBtn = row.querySelector('[data-uwp-preview-btn]');
+                if (previewBtn) {
+                    try {
+                        const payload = JSON.parse(previewBtn.getAttribute('data-uwp') || '{}');
+                        payload.status = 'submitted';
+                        payload.return_remarks = '';
+                        payload.returned_at = null;
+                        previewBtn.setAttribute('data-uwp', JSON.stringify(payload));
+                    } catch (error) {
+                        // Keep existing payload if malformed
+                    }
                 }
             }
 
