@@ -98,21 +98,23 @@
                                 ];
                             })->values()->all(),
                         ];
-                        $badge = match($uwp->status) {
+                        $statusKey = strtolower(str_replace('-', '_', (string) ($uwp->status ?? '')));
+                        $badge = match($statusKey) {
                             'draft' => ['bg' => 'bg-slate-500/10', 'text' => 'text-slate-200', 'border' => 'border-slate-500/20', 'label' => 'Draft'],
                             'submitted' => ['bg' => 'bg-blue-500/10', 'text' => 'text-blue-300', 'border' => 'border-blue-500/20', 'label' => 'Submitted'],
-                            'endorsed' => ['bg' => 'bg-emerald-500/10', 'text' => 'text-emerald-300', 'border' => 'border-emerald-500/20', 'label' => 'Endorsed'],
-                            'pmt_approved' => ['bg' => 'bg-teal-500/10', 'text' => 'text-teal-300', 'border' => 'border-teal-500/20', 'label' => 'PMT Approved'],
-                            'returned' => ['bg' => 'bg-amber-500/10', 'text' => 'text-amber-300', 'border' => 'border-amber-500/20', 'label' => 'Returned'],
+                            'returned' => ['bg' => 'bg-rose-500/10', 'text' => 'text-rose-300', 'border' => 'border-rose-500/20', 'label' => 'Returned'],
+                            'endorsed' => ['bg' => 'bg-violet-500/10', 'text' => 'text-violet-300', 'border' => 'border-violet-500/20', 'label' => 'Endorsed'],
+                            'approved' => ['bg' => 'bg-emerald-500/10', 'text' => 'text-emerald-300', 'border' => 'border-emerald-500/20', 'label' => 'Approved'],
+                            'pmt_approved' => ['bg' => 'bg-emerald-500/10', 'text' => 'text-emerald-300', 'border' => 'border-emerald-500/20', 'label' => 'PMT Approved'],
                             default => ['bg' => 'bg-slate-500/10', 'text' => 'text-slate-200', 'border' => 'border-slate-500/20', 'label' => ucwords(str_replace('_', ' ', (string) $uwp->status))],
                         };
                     @endphp
-                    <tr class="transition hover:bg-slate-800/40">
+                    <tr class="transition hover:bg-slate-800/40" data-uwp-row-id="{{ (int) $uwp->id }}">
                         <td class="px-4 py-3 text-slate-100">{{ $uwp->office?->name ?? '—' }}</td>
                         <td class="px-4 py-3 text-slate-300">{{ $uwp->creator?->name ?? '—' }}</td>
-                        <td class="px-4 py-3 text-center"><span class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium {{ $badge['bg'] }} {{ $badge['text'] }} {{ $badge['border'] }}">{{ $badge['label'] }}</span></td>
+                        <td class="px-4 py-3 text-center"><span data-status-badge class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium {{ $badge['bg'] }} {{ $badge['text'] }} {{ $badge['border'] }}">{{ $badge['label'] }}</span></td>
                         <td class="px-4 py-3 text-center">
-                            <button type="button" data-modal-target="pmt-review-modal" data-modal-toggle="pmt-review-modal" data-uwp='@json($payload)' class="inline-flex items-center justify-center rounded-lg border border-blue-500 px-3 py-2 text-sm font-medium text-blue-300 transition hover:bg-blue-500/10">Review UWP</button>
+                            <button type="button" data-review-btn data-uwp-id="{{ (int) $uwp->id }}" data-uwp='@json($payload)' class="inline-flex items-center justify-center rounded-lg border border-blue-500 px-3 py-2 text-sm font-medium text-blue-300 transition hover:bg-blue-500/10">Review UWP</button>
                         </td>
                     </tr>
                 @empty
@@ -328,19 +330,67 @@
     function escapeHtml(str) {
         return String(str ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;');
     }
+    function normalizeStatusKey(status) {
+        return String(status || '').toLowerCase().replaceAll('-', '_');
+    }
     function labelStatus(status) {
-        const s = String(status || '').toLowerCase();
+        const s = normalizeStatusKey(status);
         if (!s) return '—';
         return s.replaceAll('_', ' ').replace(/\b\w/g, (char) => char.toUpperCase());
     }
+    function tableBadgeClass(status) {
+        const s = normalizeStatusKey(status);
+        return {
+            submitted: 'bg-blue-500/10 text-blue-300 border-blue-500/20',
+            returned: 'bg-rose-500/10 text-rose-300 border-rose-500/20',
+            endorsed: 'bg-violet-500/10 text-violet-300 border-violet-500/20',
+            approved: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20',
+            pmt_approved: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20',
+        }[s] || 'bg-slate-500/10 text-slate-200 border-slate-500/20';
+    }
     function statusBadgeClass(status) {
+        const s = normalizeStatusKey(status);
         return {
             draft: 'border-slate-500/30 bg-slate-500/10 text-slate-200',
             submitted: 'border-blue-500/30 bg-blue-500/10 text-blue-300',
-            endorsed: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300',
-            pmt_approved: 'border-teal-500/30 bg-teal-500/10 text-teal-300',
-            returned: 'border-amber-500/30 bg-amber-500/10 text-amber-300',
-        }[String(status || '').toLowerCase()] || 'border-slate-500/30 bg-slate-500/10 text-slate-200';
+            returned: 'border-rose-500/30 bg-rose-500/10 text-rose-300',
+            endorsed: 'border-violet-500/30 bg-violet-500/10 text-violet-300',
+            approved: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300',
+            pmt_approved: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300',
+        }[s] || 'border-slate-500/30 bg-slate-500/10 text-slate-200';
+    }
+    function updatePmtListRow(uwpId, newStatus, options = {}) {
+        const row = document.querySelector(`[data-uwp-row-id="${uwpId}"]`);
+        if (!row) return;
+
+        const normalizedStatus = normalizeStatusKey(newStatus);
+        const badge = row.querySelector('[data-status-badge]');
+        if (badge) {
+            badge.className = 'inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium ' + tableBadgeClass(normalizedStatus);
+            badge.textContent = labelStatus(normalizedStatus);
+        }
+
+        const reviewButton = row.querySelector(`[data-review-btn][data-uwp-id="${uwpId}"]`);
+        if (!reviewButton) return;
+
+        try {
+            const payload = JSON.parse(reviewButton.getAttribute('data-uwp') || '{}');
+            payload.status = normalizedStatus;
+
+            if (normalizedStatus === 'returned') {
+                payload.return_remarks = options.return_remarks ?? payload.return_remarks ?? '';
+                payload.returned_at = options.returned_at ?? payload.returned_at ?? new Date().toISOString();
+                payload.returned_by_role = options.returned_by_role ?? 'pmt';
+            } else if (normalizedStatus === 'approved' || normalizedStatus === 'pmt_approved') {
+                payload.return_remarks = '';
+                payload.returned_at = null;
+                payload.returned_by_role = null;
+            }
+
+            reviewButton.setAttribute('data-uwp', JSON.stringify(payload));
+        } catch (_) {
+            // Ignore invalid payload to keep UI responsive.
+        }
     }
     function functionBadge(type) {
         const t = String(type || '').toLowerCase();
@@ -373,8 +423,12 @@
         button.disabled = false;
         button.classList.remove('opacity-70', 'cursor-wait');
     }
+    function cleanupFlowbiteBackdrops() {
+        document.querySelectorAll('[modal-backdrop]').forEach((el) => el.remove());
+        document.querySelectorAll('.modal-backdrop').forEach((el) => el.remove());
+    }
     function openModalById(id) { const modal = document.getElementById(id); if (!modal) return; modal.classList.remove('hidden'); modal.classList.add('flex'); document.body.classList.add('overflow-hidden'); }
-    function closeModalById(id) { const modal = document.getElementById(id); if (!modal) return; modal.classList.add('hidden'); modal.classList.remove('flex'); if (!document.querySelector('[data-modal-container].flex')) document.body.classList.remove('overflow-hidden'); }
+    function closeModalById(id) { const modal = document.getElementById(id); if (!modal) return; modal.classList.add('hidden'); modal.classList.remove('flex'); if (!document.querySelector('[data-modal-container].flex')) document.body.classList.remove('overflow-hidden'); cleanupFlowbiteBackdrops(); }
     function openReviewModal(uwp) {
         selectedUwp = uwp || null;
         const office = selectedUwp?.office?.name || '—';
@@ -566,7 +620,7 @@
     }
 
     function initReviewTriggers() {
-        document.querySelectorAll('[data-modal-target="pmt-review-modal"][data-uwp]').forEach((button) => {
+        document.querySelectorAll('[data-review-btn][data-uwp]').forEach((button) => {
             button.addEventListener('click', () => {
                 let uwp = null;
                 try { uwp = JSON.parse(button.getAttribute('data-uwp') || 'null'); } catch (error) { uwp = null; }
@@ -594,18 +648,73 @@
         const idInput = document.getElementById('pmt-modal-uwp-id');
         if (!form || !button) return;
 
-        form.addEventListener('submit', (event) => {
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
             if (!idInput || !idInput.value) {
-                event.preventDefault();
                 alert('Please select a UWP from the list before approving.');
                 return;
             }
 
-            setButtonLoading(button, true, button.dataset.loadingText || 'Approving...');
             const returnButton = document.getElementById('btn-pmt-return');
-            if (returnButton) {
-                returnButton.disabled = true;
-                returnButton.classList.add('opacity-70', 'cursor-wait');
+            setButtonLoading(button, true, button.dataset.loadingText || 'Approving...');
+            if (returnButton) returnButton.disabled = true;
+
+            try {
+                const csrfToken =
+                    document.querySelector('meta[name="csrf-token"]')?.content ||
+                    form.querySelector('input[name="_token"]')?.value ||
+                    '';
+                const fd = new FormData();
+                fd.append('_token', csrfToken);
+                fd.append('unit_work_plan_id', idInput.value);
+
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': csrfToken,
+                    },
+                    body: fd,
+                });
+
+                let data = {};
+                try {
+                    data = await response.json();
+                } catch (_) {
+                    data = {};
+                }
+
+                if (!response.ok || !data?.success) {
+                    throw new Error(data?.message || data?.error || 'Unable to approve UWP.');
+                }
+
+                const uwpId = Number(selectedUwp?.id || data?.uwp_id || idInput.value || 0);
+                if (!selectedUwp) selectedUwp = {};
+                selectedUwp.id = selectedUwp.id || uwpId;
+                selectedUwp.status = data?.status || 'pmt_approved';
+                selectedUwp.return_remarks = '';
+                selectedUwp.returned_at = null;
+                selectedUwp.returned_by_role = null;
+
+                updatePmtListRow(uwpId, selectedUwp.status, {
+                    return_remarks: '',
+                    returned_at: null,
+                    returned_by_role: null,
+                });
+
+                const remarksInput = document.getElementById('pmt-modal-remarks');
+                const remarksError = document.getElementById('pmt-modal-remarks-error');
+                if (remarksInput) remarksInput.value = '';
+                if (remarksError) remarksError.classList.add('hidden');
+
+                closeModalById('pmt-review-modal');
+            } catch (error) {
+                alert(error?.message || 'Unable to approve UWP.');
+            } finally {
+                setButtonLoading(button, false);
+                if (returnButton) returnButton.disabled = false;
             }
         });
     }
@@ -618,7 +727,7 @@
         const remarksError = document.getElementById('pmt-modal-remarks-error');
         if (!form || !button) return;
 
-        button.addEventListener('click', () => {
+        button.addEventListener('click', async () => {
             if (!idInput || !idInput.value) {
                 alert('Please select a UWP from the list before returning.');
                 return;
@@ -635,12 +744,67 @@
             setButtonLoading(button, true, button.dataset.loadingText || 'Returning...');
 
             const approveButton = document.getElementById('btn-pmt-approve');
-            if (approveButton) {
-                approveButton.disabled = true;
-                approveButton.classList.add('opacity-70', 'cursor-wait');
-            }
+            if (approveButton) approveButton.disabled = true;
 
-            form.submit();
+            try {
+                const csrfToken =
+                    document.querySelector('meta[name="csrf-token"]')?.content ||
+                    form.querySelector('input[name="_token"]')?.value ||
+                    '';
+
+                const fd = new FormData();
+                fd.append('_token', csrfToken);
+                fd.append('unit_work_plan_id', idInput.value);
+                fd.append('remarks', remarks);
+
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': csrfToken,
+                    },
+                    body: fd,
+                });
+
+                let data = {};
+                try {
+                    data = await response.json();
+                } catch (_) {
+                    data = {};
+                }
+
+                if (!response.ok || !data?.success) {
+                    throw new Error(data?.message || data?.error || 'Unable to return UWP.');
+                }
+
+                const uwpId = Number(selectedUwp?.id || data?.uwp_id || idInput.value || 0);
+                const returnedAt = data?.returned_at || new Date().toISOString();
+                const returnedRemarks = data?.return_remarks || remarks;
+
+                if (!selectedUwp) selectedUwp = {};
+                selectedUwp.id = selectedUwp.id || uwpId;
+                selectedUwp.status = data?.status || 'returned';
+                selectedUwp.return_remarks = returnedRemarks;
+                selectedUwp.returned_at = returnedAt;
+                selectedUwp.returned_by_role = data?.returned_by_role || 'pmt';
+
+                updatePmtListRow(uwpId, selectedUwp.status, {
+                    return_remarks: selectedUwp.return_remarks,
+                    returned_at: selectedUwp.returned_at,
+                    returned_by_role: selectedUwp.returned_by_role,
+                });
+
+                if (remarksInput) remarksInput.value = '';
+                if (remarksError) remarksError.classList.add('hidden');
+
+                closeModalById('pmt-review-modal');
+            } catch (error) {
+                alert(error?.message || 'Unable to return UWP.');
+            } finally {
+                setButtonLoading(button, false);
+                if (approveButton) approveButton.disabled = false;
+            }
         });
     }
 
