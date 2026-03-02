@@ -217,7 +217,7 @@
                 </div>
                 <button type="button" data-close-modal class="text-slate-400 hover:text-white">&times;</button>
             </div>
-            <div class="mt-4 space-y-5 max-h-[65vh] overflow-y-auto text-sm text-slate-200">
+            <div class="mt-4 space-y-4 max-h-[65vh] overflow-y-auto text-sm text-slate-200">
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
                     <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                         <p class="text-[11px] uppercase text-slate-500">Employee</p>
@@ -454,7 +454,7 @@
                 </div>
                 <button type="button" data-close-modal class="text-slate-400 hover:text-white">&times;</button>
             </div>
-            <div class="mt-4 space-y-5 max-h-[65vh] overflow-y-auto text-sm text-slate-200">
+            <div class="mt-4 space-y-4 max-h-[65vh] overflow-y-auto text-sm text-slate-200">
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
                     <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                         <p class="text-[11px] uppercase text-slate-500">Employee</p>
@@ -496,26 +496,12 @@
                                         <tr>
                                             <th class="px-4 py-3">Major Output</th>
                                             <th class="px-4 py-3">Success Indicators</th>
-                                            <th class="px-4 py-3 text-right">Q</th>
-                                            <th class="px-4 py-3 text-right">E</th>
-                                            <th class="px-4 py-3 text-right">T</th>
                                             <th class="px-4 py-3">Target Summary</th>
                                             <th class="px-4 py-3">Timeline</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-800">
                                         @forelse ($sectionRows as $rowIndex => $row)
-                                            @php
-                                                $qDisplay = isset($row['q']) && $row['q'] !== null
-                                                    ? number_format((float) $row['q'], 2, '.', '')
-                                                    : "\u{2014}";
-                                                $eDisplay = isset($row['e']) && $row['e'] !== null
-                                                    ? number_format((float) $row['e'], 2, '.', '')
-                                                    : "\u{2014}";
-                                                $tDisplay = isset($row['t']) && $row['t'] !== null
-                                                    ? number_format((float) $row['t'], 2, '.', '')
-                                                    : "\u{2014}";
-                                            @endphp
                                             <tr class="bg-slate-900/40">
                                                 <td class="px-4 py-3 font-semibold text-slate-100">{{ $row['major_output'] ?? '—' }}</td>
                                                 <td class="px-4 py-3">
@@ -542,15 +528,12 @@
                                                         </span>
                                                     </a>
                                                 </td>
-                                                <td class="px-4 py-3 text-right tabular-nums text-slate-200">{{ $qDisplay }}</td>
-                                                <td class="px-4 py-3 text-right tabular-nums text-slate-200">{{ $eDisplay }}</td>
-                                                <td class="px-4 py-3 text-right tabular-nums text-slate-200">{{ $tDisplay }}</td>
                                                 <td class="px-4 py-3 text-slate-300">{{ $row['target_summary'] ?? '—' }}</td>
                                                 <td class="px-4 py-3 text-slate-300">{{ $row['timeline'] ?? $periodLabelValue }}</td>
                                             </tr>
                                         @empty
                                             <tr class="bg-slate-900/40">
-                                                <td colspan="7" class="px-4 py-3 text-center text-slate-400">No outputs found for this section.</td>
+                                                <td colspan="4" class="px-4 py-3 text-center text-slate-400">No outputs found for this section.</td>
                                             </tr>
                                         @endforelse
                                     </tbody>
@@ -591,7 +574,7 @@
                 </div>
                 <button type="button" data-close-modal class="text-slate-400 hover:text-white">&times;</button>
             </div>
-            <div class="mt-4 space-y-5 max-h-[65vh] overflow-y-auto text-sm text-slate-200">
+            <div class="mt-4 space-y-4 max-h-[65vh] overflow-y-auto text-sm text-slate-200">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                         <p class="text-[11px] uppercase text-slate-500">Employee</p>
@@ -607,23 +590,37 @@
                     </div>
                 </div>
 
-                <div class="overflow-x-auto rounded-xl border border-slate-800">
-                    <table class="min-w-full text-left text-sm text-slate-200">
-                        <thead class="bg-slate-950/70 text-xs uppercase text-slate-400">
-                            <tr>
-                                <th class="px-4 py-3">Indicator</th>
-                                <th class="px-4 py-3">Standards (Q/E/T)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="ipcrIndicatorsTbody" class="divide-y divide-slate-800">
-                            <tr class="bg-slate-900/40">
-                                <td colspan="2" class="px-4 py-3 text-center text-slate-400">Select a major output to view indicators.</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="overflow-hidden rounded-xl border border-slate-800 bg-slate-950/40">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full table-fixed text-left text-sm text-slate-200">
+                            <colgroup>
+                                <col class="w-[52%]">
+                                <col class="w-[88px]">
+                                <col class="w-[88px]">
+                                <col class="w-[88px]">
+                                <col class="w-[88px]">
+                                <col class="w-[96px]">
+                            </colgroup>
+                            <thead class="bg-slate-950/70 text-xs uppercase text-slate-400">
+                                <tr>
+                                    <th class="px-4 py-3 text-left">Indicator</th>
+                                    <th class="px-4 py-3 text-center tabular-nums">Q</th>
+                                    <th class="px-4 py-3 text-center tabular-nums">E</th>
+                                    <th class="px-4 py-3 text-center tabular-nums">T</th>
+                                    <th class="px-4 py-3 text-center tabular-nums">A</th>
+                                    <th class="px-4 py-3 text-center">Standards</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ipcrIndicatorsTbody" class="divide-y divide-slate-800">
+                                <tr class="bg-slate-900/40">
+                                    <td colspan="6" class="px-4 py-3 text-center text-slate-400">Select a major output to view indicators.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-            <div class="flex items-center justify-end gap-3 border-t border-slate-800 pt-4 mt-4">
+            <div class="mt-3 flex items-center justify-end gap-3 border-t border-slate-800 pt-4">
                 <button type="button"
                         data-close-modal
                         class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-800 transition">
@@ -927,6 +924,15 @@
                     `;
                 }
 
+                function formatIndicatorRating(value) {
+                    const numeric = Number(value);
+                    if (!Number.isFinite(numeric)) {
+                        return '&mdash;';
+                    }
+
+                    return numeric.toFixed(2);
+                }
+
                 function renderIndicatorsModal(sectionIndex, rowIndex) {
                     const section = ipcrSectionsData?.[sectionIndex];
                     const row = section?.rows?.[rowIndex];
@@ -942,19 +948,23 @@
                         if (selectedIndicators.length === 0) {
                             ipcrIndicatorsTbody.innerHTML = `
                                 <tr class="bg-slate-900/40">
-                                    <td colspan="2" class="px-4 py-3 text-center text-slate-400">No success indicators available.</td>
+                                    <td colspan="6" class="px-4 py-3 text-center text-slate-400">No success indicators available.</td>
                                 </tr>
                             `;
                         } else {
                             ipcrIndicatorsTbody.innerHTML = selectedIndicators.map((indicator, indicatorIndex) => `
-                                <tr class="bg-slate-900/40">
-                                    <td class="px-4 py-3 text-slate-100">${escapeHtml(indicator?.indicator_text ?? '—')}</td>
-                                    <td class="px-4 py-3">
+                                <tr class="bg-slate-900/40 hover:bg-slate-900/60 transition">
+                                    <td class="px-4 py-4 text-slate-100 font-medium leading-snug break-words">${escapeHtml(indicator?.indicator_text ?? '—')}</td>
+                                    <td class="px-4 py-4 text-right tabular-nums whitespace-nowrap text-slate-200">${formatIndicatorRating(indicator?.q)}</td>
+                                    <td class="px-4 py-4 text-right tabular-nums whitespace-nowrap text-slate-200">${formatIndicatorRating(indicator?.e)}</td>
+                                    <td class="px-4 py-4 text-right tabular-nums whitespace-nowrap text-slate-200">${formatIndicatorRating(indicator?.t)}</td>
+                                    <td class="px-4 py-4 text-right tabular-nums whitespace-nowrap text-slate-200">${formatIndicatorRating(indicator?.a)}</td>
+                                    <td class="px-4 py-4 text-center">
                                         <a href="javascript:void(0)"
                                            data-ipcr-open-standards
                                            data-indicator-index="${indicatorIndex}"
                                            aria-label="View standards"
-                                           class="inline-flex items-center text-sky-300 transition hover:text-sky-200 focus:outline-none focus:ring-2 focus:ring-sky-500/40">
+                                           class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-700 bg-slate-950/40 hover:bg-slate-800 transition">
                                             <svg xmlns="http://www.w3.org/2000/svg"
                                                  viewBox="0 0 24 24"
                                                  fill="none"

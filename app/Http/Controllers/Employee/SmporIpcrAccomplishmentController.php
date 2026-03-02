@@ -188,6 +188,10 @@ class SmporIpcrAccomplishmentController extends Controller
                         return [
                             'indicator_text' => trim((string) ($item->indicator_text ?? '')) ?: '—',
                             'standards_payload' => $standardsPayload,
+                            'q' => null,
+                            'e' => null,
+                            't' => null,
+                            'a' => null,
                         ];
                     })->values()->all();
 
@@ -304,6 +308,7 @@ class SmporIpcrAccomplishmentController extends Controller
         $aggregatesBySection = [];
         $aggregatesByOutput = [];
         $ipcrRatingsTotalsByOutput = [];
+        $ipcrRatingsTotalsByIndicator = [];
 
         foreach ($selectedMpors as $mpor) {
             $ratedEntries = $mpor->ratedOrsEntriesForMonth()
@@ -402,6 +407,22 @@ class SmporIpcrAccomplishmentController extends Controller
                 $ipcrRatingsTotalsByOutput[$expectedOutput]['qty'] += $quantity;
                 $ipcrRatingsTotalsByOutput[$expectedOutput]['q_points'] += $qualityPoints;
                 $ipcrRatingsTotalsByOutput[$expectedOutput]['t_points'] += $timelinessPoints;
+
+                // Per-indicator accumulator (weighted by quantity).
+                $indicatorText = trim((string) ($entry->ipcrItem?->indicator_text ?? ''));
+                if ($indicatorText !== '') {
+                    if (!isset($ipcrRatingsTotalsByIndicator[$indicatorText])) {
+                        $ipcrRatingsTotalsByIndicator[$indicatorText] = [
+                            'qty' => 0.0,
+                            'q_points' => 0.0,
+                            't_points' => 0.0,
+                        ];
+                    }
+
+                    $ipcrRatingsTotalsByIndicator[$indicatorText]['qty'] += $quantity;
+                    $ipcrRatingsTotalsByIndicator[$indicatorText]['q_points'] += $qualityPoints;
+                    $ipcrRatingsTotalsByIndicator[$indicatorText]['t_points'] += $timelinessPoints;
+                }
             }
         }
 
@@ -423,6 +444,28 @@ class SmporIpcrAccomplishmentController extends Controller
             ];
         }
 
+        $ipcrRatingsAvgByIndicator = [];
+        foreach ($ipcrRatingsTotalsByIndicator as $indicatorText => $totals) {
+            $ratedQty = (float) ($totals['qty'] ?? 0);
+            if ($ratedQty <= 0) {
+                continue;
+            }
+
+            // Weighted averages by ORS quantity; E mirrors Q, then A is the mean of Q/E/T.
+            $q = round(((float) ($totals['q_points'] ?? 0)) / $ratedQty, 2);
+            $t = round(((float) ($totals['t_points'] ?? 0)) / $ratedQty, 2);
+            $e = $q;
+            $a = round(($q + $e + $t) / 3, 2);
+
+            $ipcrRatingsAvgByIndicator[$indicatorText] = [
+                'qty' => $ratedQty,
+                'q' => $q,
+                'e' => $e,
+                't' => $t,
+                'a' => $a,
+            ];
+        }
+
         if (!empty($ipcrSections)) {
             foreach ($ipcrSections as $sectionIndex => $section) {
                 $rows = is_array($section['rows'] ?? null) ? $section['rows'] : [];
@@ -439,6 +482,19 @@ class SmporIpcrAccomplishmentController extends Controller
                     $ipcrSections[$sectionIndex]['rows'][$rowIndex]['e'] = $ratings ? (float) $ratings['e'] : null;
                     $ipcrSections[$sectionIndex]['rows'][$rowIndex]['t'] = $ratings ? (float) $ratings['t'] : null;
                     $ipcrSections[$sectionIndex]['rows'][$rowIndex]['rated_qty'] = $ratings ? (float) $ratings['qty'] : null;
+
+                    $rowIndicators = is_array($row['indicators'] ?? null) ? $row['indicators'] : [];
+                    foreach ($rowIndicators as $indicatorIndex => $indicator) {
+                        $indicatorText = trim((string) ($indicator['indicator_text'] ?? ''));
+                        $indicatorRatings = $indicatorText !== '' && $indicatorText !== '—'
+                            ? ($ipcrRatingsAvgByIndicator[$indicatorText] ?? null)
+                            : null;
+
+                        $ipcrSections[$sectionIndex]['rows'][$rowIndex]['indicators'][$indicatorIndex]['q'] = $indicatorRatings ? (float) $indicatorRatings['q'] : null;
+                        $ipcrSections[$sectionIndex]['rows'][$rowIndex]['indicators'][$indicatorIndex]['e'] = $indicatorRatings ? (float) $indicatorRatings['e'] : null;
+                        $ipcrSections[$sectionIndex]['rows'][$rowIndex]['indicators'][$indicatorIndex]['t'] = $indicatorRatings ? (float) $indicatorRatings['t'] : null;
+                        $ipcrSections[$sectionIndex]['rows'][$rowIndex]['indicators'][$indicatorIndex]['a'] = $indicatorRatings ? (float) $indicatorRatings['a'] : null;
+                    }
                 }
             }
         }

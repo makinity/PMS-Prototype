@@ -18,36 +18,6 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-/**
- * Stage II IPCR Excel Export
- * - SAME layout/gridlines style as Stage I IPCR Target (your pasted exporter):
- *   - Landscape Legal
- *   - Header block with gray fill
- *   - Section rows with "green-line feel" (bottom border only)
- *   - Data rows with vertical borders only (left/right)
- *   - OUTPUT column merged across indicators
- *
- * Data source:
- *  - $ipcr: same structure as Stage 1 buildIpcr():
- *      [
- *        'core' => [ ['output'=>..., 'indicators'=>[...] ], ... ],
- *        'support' => [ ... ],
- *      ]
- *  - $standards: same Stage 1 standardsSeedMap:
- *      [ 'indicator text' => [ 5=>['q'=>[],'e'=>[],'t'=>[]], ... ] ]
- *  - $valuesByIndicator: Stage II values keyed by indicator text:
- *      [
- *        'indicator text' => [
- *           'accomplishment' => '...',
- *           'q' => 5, 'e' => 5, 't' => 5,
- *           'remarks' => '...',
- *        ],
- *        ...
- *      ]
- *
- * Notes:
- * - If an indicator has no entry in $valuesByIndicator, it stays UNFINISHED and ratings blank.
- */
 class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTitle, WithEvents
 {
     use Exportable;

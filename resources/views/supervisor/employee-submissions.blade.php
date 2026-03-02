@@ -198,8 +198,10 @@
             </div>
 
             <div class="mt-5 flex items-center justify-end gap-4 border-t border-slate-800 pt-4">
-                <form method="POST"
-                    action="{{ route('supervisor.submissions.endorse', ['id' => '__ID__']) }}"
+               <form id="endorseSubmissionForm"
+                    method="POST"
+                    data-action-template="{{ route('supervisor.submissions.endorse', ['id' => '__ID__']) }}"
+                    action="{{ route('supervisor.submissions.endorse', ['id' => 0]) }}"
                     class="inline">
                     @csrf
                     <button type="submit"
@@ -367,9 +369,9 @@
                 const ipcrIndicatorsBodyEl = document.getElementById('ipcrIndicatorsBody');
                 const ipcrStandardsIndicatorTextEl = document.getElementById('ipcrStandardsIndicatorText');
                 const ipcrStandardsBodyEl = document.getElementById('ipcrStandardsBody');
-
                 const openSmporPreviewBtn = document.querySelector('[data-open-smpor-preview]');
                 const openIpcrPreviewBtn = document.querySelector('[data-open-ipcr-preview]');
+                const endorseFormEl = document.getElementById('endorseSubmissionForm');
 
                 let payloadMap = {};
                 let currentPayload = null;
@@ -592,6 +594,11 @@
                 function renderSubmissionModal(payload) {
                     currentPayload = payload || null;
                     if (!currentPayload) return;
+
+                    if (endorseFormEl) {
+                        const template = endorseFormEl.dataset.actionTemplate || '';
+                        endorseFormEl.action = template.replace('__ID__', String(payload.id));
+                    }
 
                     if (submissionEmployeeEl) submissionEmployeeEl.textContent = payload.employee_name || '--';
                     if (submissionOfficeEl) submissionOfficeEl.textContent = payload.office_name || '--';
