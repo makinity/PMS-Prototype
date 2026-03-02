@@ -343,8 +343,9 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
                     $sheet->setCellValue("G{$row}", '');
                 }
 
-                $nums = array_values(array_filter([$qNum, $eNum, $tNum], static fn ($v) => $v !== null));
-                $aNum = !empty($nums) ? round(array_sum($nums) / count($nums), 2) : null;
+                $aNum = ($eNum !== null && $tNum !== null)
+                    ? round(($eNum + $tNum) / 2, 2)
+                    : null;
 
                 if ($aNum !== null) {
                     $sheet->setCellValueExplicit("H{$row}", $aNum, DataType::TYPE_NUMERIC);
@@ -374,7 +375,7 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
                 $sheet->getStyle("E{$row}:H{$row}")
                     ->getAlignment()
                     ->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $sheet->getStyle("E{$row}:H{$row}")
+                $sheet->getStyle("F{$row}:H{$row}")
                     ->getNumberFormat()
                     ->setFormatCode('0.00');
 

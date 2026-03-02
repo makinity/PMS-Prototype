@@ -433,14 +433,16 @@ class SmporIpcrAccomplishmentController extends Controller
                 continue;
             }
 
-            $q = round(((float) ($totals['q_points'] ?? 0)) / $ratedQty, 2);
+            $e = round(((float) ($totals['q_points'] ?? 0)) / $ratedQty, 2);
             $t = round(((float) ($totals['t_points'] ?? 0)) / $ratedQty, 2);
+            $a = round(($e + $t) / 2, 2);
 
             $ipcrRatingsAvgByOutput[$outputTitle] = [
                 'qty' => $ratedQty,
-                'q' => $q,
-                'e' => $q,
+                'q' => $ratedQty,
+                'e' => $e,
                 't' => $t,
+                'a' => $a,
             ];
         }
 
@@ -451,15 +453,13 @@ class SmporIpcrAccomplishmentController extends Controller
                 continue;
             }
 
-            // Weighted averages by ORS quantity; E mirrors Q, then A is the mean of Q/E/T.
-            $q = round(((float) ($totals['q_points'] ?? 0)) / $ratedQty, 2);
-            $t = round(((float) ($totals['t_points'] ?? 0)) / $ratedQty, 2);
-            $e = $q;
-            $a = round(($q + $e + $t) / 3, 2);
+            $e = round(((float) ($totals['q_points'] ?? 0)) / $ratedQty, 2); // effectiveness avg
+            $t = round(((float) ($totals['t_points'] ?? 0)) / $ratedQty, 2); // timeliness avg
+            $a = round(($e + $t) / 2, 2);
 
             $ipcrRatingsAvgByIndicator[$indicatorText] = [
-                'qty' => $ratedQty,
-                'q' => $q,
+                'qty' => $ratedQty,  // total quantity
+                'q' => $ratedQty,    // Q column = quantity total
                 'e' => $e,
                 't' => $t,
                 'a' => $a,
@@ -481,6 +481,7 @@ class SmporIpcrAccomplishmentController extends Controller
                     $ipcrSections[$sectionIndex]['rows'][$rowIndex]['q'] = $ratings ? (float) $ratings['q'] : null;
                     $ipcrSections[$sectionIndex]['rows'][$rowIndex]['e'] = $ratings ? (float) $ratings['e'] : null;
                     $ipcrSections[$sectionIndex]['rows'][$rowIndex]['t'] = $ratings ? (float) $ratings['t'] : null;
+                    $ipcrSections[$sectionIndex]['rows'][$rowIndex]['a'] = $ratings ? (float) $ratings['a'] : null;
                     $ipcrSections[$sectionIndex]['rows'][$rowIndex]['rated_qty'] = $ratings ? (float) $ratings['qty'] : null;
 
                     $rowIndicators = is_array($row['indicators'] ?? null) ? $row['indicators'] : [];
@@ -1333,14 +1334,16 @@ class SmporIpcrAccomplishmentController extends Controller
                 continue;
             }
 
-            $q = round(((float) $totals['sum_q_points']) / $totalQty, 2);
+            $e = round(((float) $totals['sum_q_points']) / $totalQty, 2);
             $t = round(((float) $totals['sum_t_points']) / $totalQty, 2);
+            $a = round(($e + $t) / 2, 2);
 
             $valuesByIndicator[$indicator] = [
                 'accomplishment' => 'Completed ' . $this->formatQuantity($totalQty) . ' output(s) for the period based on rated ORS totals.',
-                'q' => $q,
-                'e' => $q,
+                'q' => $totalQty,
+                'e' => $e,
                 't' => $t,
+                'a' => $a,
                 'remarks' => 'Derived from rated ORS entries; supervisor ratings applied (Stage II).',
             ];
         }

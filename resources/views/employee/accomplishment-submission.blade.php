@@ -933,6 +933,13 @@
                     return numeric.toFixed(2);
                 }
 
+                function formatQuantity(value) {
+                    const numeric = Number(value);
+                    if (!Number.isFinite(numeric) || numeric <= 0) return '&mdash;';
+                    if (Number.isInteger(numeric)) return String(numeric);
+                    return numeric.toFixed(2).replace(/\.?0+$/, '');
+                }
+
                 function renderIndicatorsModal(sectionIndex, rowIndex) {
                     const section = ipcrSectionsData?.[sectionIndex];
                     const row = section?.rows?.[rowIndex];
@@ -955,7 +962,7 @@
                             ipcrIndicatorsTbody.innerHTML = selectedIndicators.map((indicator, indicatorIndex) => `
                                 <tr class="bg-slate-900/40 hover:bg-slate-900/60 transition">
                                     <td class="px-4 py-4 text-slate-100 font-medium leading-snug break-words">${escapeHtml(indicator?.indicator_text ?? '—')}</td>
-                                    <td class="px-4 py-4 text-right tabular-nums whitespace-nowrap text-slate-200">${formatIndicatorRating(indicator?.q)}</td>
+                                    <td class="px-4 py-4 text-right tabular-nums whitespace-nowrap text-slate-200">${formatQuantity(indicator?.q)}</td>
                                     <td class="px-4 py-4 text-right tabular-nums whitespace-nowrap text-slate-200">${formatIndicatorRating(indicator?.e)}</td>
                                     <td class="px-4 py-4 text-right tabular-nums whitespace-nowrap text-slate-200">${formatIndicatorRating(indicator?.t)}</td>
                                     <td class="px-4 py-4 text-right tabular-nums whitespace-nowrap text-slate-200">${formatIndicatorRating(indicator?.a)}</td>
