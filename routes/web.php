@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\UsersController;
 use App\Http\Controllers\Auth\ActivationController;
 use App\Http\Controllers\Supervisor\UnitWorkPlanController;
 use App\Http\Controllers\DeptHead\AccomplishmentReviewController;
+use App\Http\Controllers\DeptHead\OpcrController as DeptHeadOpcrController;
 use App\Http\Controllers\DeptHead\QarController;
 use App\Http\Controllers\StageOne\Forms\IpcrExportController;
 use App\Http\Controllers\StageOne\Forms\IpcrExcelExportController;
@@ -14,11 +15,8 @@ use App\Http\Controllers\StageOne\Forms\OpcrExportController;
 use App\Http\Controllers\StageOne\Forms\OpcrExcelExportController;
 use App\Http\Controllers\StageOne\Forms\UwpExportController;
 use App\Http\Controllers\StageOne\Forms\UwpExcelExportController;
-use App\Http\Controllers\StageOne\Planning\DeptHeadOpcrReviewController;
-use App\Http\Controllers\StageOne\Planning\OpcrPmtReviewController;
-use App\Http\Controllers\StageOne\Planning\SuperVisorOpcrController;
-use App\Http\Controllers\StageOne\Planning\UwpDeptHeadReviewController;
-use App\Http\Controllers\StageOne\Planning\UwpPmtReviewController;
+use App\Http\Controllers\DeptHead\UnitWorkPlanController as DeptHeadUnitWorkPlanController;
+use App\Http\Controllers\Pmt\UnitWorkPlanController as PmtUnitWorkPlanController;
 use App\Http\Controllers\StageThree\Forms\IpcrExportController as StageThreeFormsIpcrExportController;
 use App\Http\Controllers\StageTwo\Commitement\OrsController;
 use App\Http\Controllers\StageTwo\Commitement\MyTasksController;
@@ -43,9 +41,11 @@ use App\Http\Controllers\Employee\DashboardController as EmployeeDashboardContro
 use App\Http\Controllers\Employee\IpcrTargetController;
 use App\Http\Controllers\Employee\SmporIpcrAccomplishmentController;
 use App\Http\Controllers\Pmt\AccomplishmentReviewController as PmtAccomplishmentReviewController;
+use App\Http\Controllers\Pmt\OpcrController as PmtOpcrController;
 use App\Http\Controllers\Supervisor\AccomplishmentController as SupervisorAccomplishmentController;
 use App\Http\Controllers\Supervisor\DashboardController as SupervisorDashboardController;
 use App\Http\Controllers\Supervisor\MporController as SupervisorMporController;
+use App\Http\Controllers\Supervisor\OpcrController;
 
 /*
 |--------------------------------------------------------------------------
@@ -176,8 +176,6 @@ Route::prefix('employee')->middleware('auth')->group(function () {
     Route::get('/ipcr/export/pdf', [FormsIpcrExportController::class, 'exportPdf'])
         ->name('stage2.ipcr.export.pdf');
 
-
-
     // Exports - IPCR Excel (Stage I Forms) - kept as-is
     Route::get('/ipcr/export/excel', [IpcrExcelExportController::class, 'exportExcel'])
         ->name('stage1.ipcr.export.excel');
@@ -200,17 +198,17 @@ Route::prefix('dept-head')->middleware('auth')->group(function () {
     Route::get('/profile', fn () => view('dept-head.profile'))->name('dept-head.profile');
 
     // Stage I - UWP Review
-    Route::get('/uwp', [UwpDeptHeadReviewController::class, 'index'])->name('dept-head.uwp');
-    Route::get('/uwp/index', [UwpDeptHeadReviewController::class, 'index'])->name('dept-head.uwp.index');
-    Route::post('/uwp/review', [UwpDeptHeadReviewController::class, 'review'])->name('dept-head.uwp.review');
-    Route::post('/uwp/return', [UwpDeptHeadReviewController::class, 'returnUwp'])->name('dept-head.uwp.return');
+    Route::get('/uwp', [DeptHeadUnitWorkPlanController::class, 'index'])->name('dept-head.uwp');
+    Route::get('/uwp/index', [DeptHeadUnitWorkPlanController::class, 'index'])->name('dept-head.uwp.index');
+    Route::post('/uwp/review', [DeptHeadUnitWorkPlanController::class, 'review'])->name('dept-head.uwp.review');
+    Route::post('/uwp/return', [DeptHeadUnitWorkPlanController::class, 'returnUwp'])->name('dept-head.uwp.return');
 
     // Stage I - OPCR Review
-    Route::get('/opcr', [DeptHeadOpcrReviewController::class, 'index'])->name('dept-head.opcr');
-    Route::get('/opcr/index', [DeptHeadOpcrReviewController::class, 'index'])->name('dept-head.opcr.index');
-    Route::post('/opcr/{opcr}/endorse', [DeptHeadOpcrReviewController::class, 'endorse'])->name('dept-head.opcr.endorse');
-    Route::post('/opcr/{opcr}/return', [DeptHeadOpcrReviewController::class, 'returnOpcr'])->name('dept-head.opcr.return');
-    Route::post('/opcr/review', [DeptHeadOpcrReviewController::class, 'review'])->name('dept-head.opcr.review');
+    Route::get('/opcr', [DeptHeadOpcrController::class, 'index'])->name('dept-head.opcr');
+    Route::get('/opcr/index', [DeptHeadOpcrController::class, 'index'])->name('dept-head.opcr.index');
+    Route::post('/opcr/{opcr}/endorse', [DeptHeadOpcrController::class, 'endorse'])->name('dept-head.opcr.endorse');
+    Route::post('/opcr/{opcr}/return', [DeptHeadOpcrController::class, 'returnOpcr'])->name('dept-head.opcr.return');
+    Route::post('/opcr/review', [DeptHeadOpcrController::class, 'review'])->name('dept-head.opcr.review');
 
     // Stage II - QAR
     Route::get('/qar', [QarController::class, 'index'])->name('dept-head.qar');
@@ -268,6 +266,8 @@ Route::prefix('supervisor')->middleware('auth')->group(function () {
     Route::get('/stage-one/planning/uwp/{id}', [UnitWorkPlanController::class, 'show'])->name('supervisor.uwp.show');
     Route::get('/uwp', [UnitWorkPlanController::class, 'index'])->name('supervisor.uwp');
 
+    Route::get('/uwp/{uwp}/excel', [UwpExcelExportController::class, 'excelExport'])->name('uwp.excel.export');
+
     Route::post('/uwp/save-draft', [UnitWorkPlanController::class, 'saveDraftData'])
         ->name('supervisor.uwp.saveDraftData');
     Route::post('/uwp/{id}/save-draft', [UnitWorkPlanController::class, 'saveDraftDataById'])
@@ -288,10 +288,10 @@ Route::prefix('supervisor')->middleware('auth')->group(function () {
         ->name('supervisor.uwp.preview');
 
     // Stage I - OPCR
-    Route::get('/opcr', [SuperVisorOpcrController::class, 'index'])->name('supervisor.opcr');
-    Route::get('/stage-one/planning/opcr', [SuperVisorOpcrController::class, 'index'])->name('stage1.opcr.index');
-    Route::post('/stage-one/planning/opcr/generate', [SuperVisorOpcrController::class, 'generate'])->name('stage1.opcr.generate');
-    Route::post('/stage-one/planning/opcr/{opcr}/submit', [SuperVisorOpcrController::class, 'submit'])->name('stage1.opcr.submit');
+    Route::get('/opcr', [OpcrController::class, 'index'])->name('supervisor.opcr');
+    Route::get('/stage-one/planning/opcr', [OpcrController::class, 'index'])->name('stage1.opcr.index');
+    Route::post('/stage-one/planning/opcr/generate', [OpcrController::class, 'generate'])->name('stage1.opcr.generate');
+    Route::post('/stage-one/planning/opcr/{opcr}/submit', [OpcrController::class, 'submit'])->name('stage1.opcr.submit');
 
     // Stage II - MPOR Review
     Route::get('/mpor', [SupervisorMporController::class, 'index'])->name('supervisor.mpor');
@@ -328,16 +328,13 @@ Route::prefix('pmt')->middleware('auth')->group(function () {
     Route::get('/profile', fn () => view('pmt.profile'))->name('pmt.profile');
 
     // Stage I - UWP / OPCR
-    Route::get('/UWP', [UwpPmtReviewController::class, 'index'])->name('pmt.uwp');
-    Route::post('/uwp/review', [UwpPmtReviewController::class, 'review'])->name('pmt.uwp.review');
-    Route::post('/uwp/return', [UwpPmtReviewController::class, 'returnUwp'])->name('pmt.uwp.return');
+    Route::get('/UWP', [PmtUnitWorkPlanController::class, 'index'])->name('pmt.uwp');
+    Route::post('/uwp/review', [PmtUnitWorkPlanController::class, 'review'])->name('pmt.uwp.review');
+    Route::post('/uwp/return', [PmtUnitWorkPlanController::class, 'returnUwp'])->name('pmt.uwp.return');
 
-    Route::get('/opcr-review', [OpcrPmtReviewController::class, 'index'])
-        ->name('pmt.opcr.review.index');
-    Route::post('/opcr-review/action', [OpcrPmtReviewController::class, 'review'])
-        ->name('pmt.opcr.review.action');
-    Route::get('/opcr-review/{opcr}/export', [OpcrPmtReviewController::class, 'export'])
-        ->name('pmt.opcr.review.export');
+    Route::get('/opcr-review', [PmtOpcrController::class, 'index'])->name('pmt.opcr.review.index');
+    Route::post('/opcr-review/action', [PmtOpcrController::class, 'review'])->name('pmt.opcr.review.action');
+    Route::get('/opcr-review/{opcr}/export', [PmtOpcrController::class, 'export'])->name('pmt.opcr.review.export');
 
     // Stage II - QAR
     Route::get('/qar', [PmtQarController::class, 'index'])
@@ -380,9 +377,9 @@ Route::prefix('pmt')->middleware('auth')->group(function () {
 */
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/stage-one/pmt/uwp', [UwpPmtReviewController::class, 'index'])->name('pmt.uwp.index');
-    Route::post('/stage-one/pmt/uwp/approve', [UwpPmtReviewController::class, 'approve'])->name('pmt.uwp.approve');
-    Route::get('/stage-one/uwp/{uwp}/export', [UwpExcelExportController::class, 'exportExcel'])->name('uwp.export');
+    Route::get('/stage-one/pmt/uwp', [PmtUnitWorkPlanController::class, 'index'])->name('pmt.uwp.index');
+    Route::post('/stage-one/pmt/uwp/approve', [PmtUnitWorkPlanController::class, 'approve'])->name('pmt.uwp.approve');
+    Route::get('/stage-one/uwp/{uwp}/export', [PmtUnitWorkPlanController::class, 'exportExcel'])->name('uwp.export');
 });
 
 /*

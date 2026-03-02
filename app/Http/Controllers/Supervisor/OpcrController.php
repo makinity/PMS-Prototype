@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\StageOne\Planning;
+namespace App\Http\Controllers\Supervisor;
 
 use App\Http\Controllers\Controller;
 use App\Models\Opcr;
@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
-class SuperVisorOpcrController extends Controller
+class OpcrController extends Controller
 {
     public function index(Request $request)
     {

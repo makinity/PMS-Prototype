@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\StageOne\Planning;
+namespace App\Http\Controllers\Pmt;
 
 use App\Http\Controllers\Controller;
 use App\Models\PerformancePeriod;
@@ -11,26 +11,23 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
-class UwpPmtReviewController extends Controller
+class UnitWorkPlanController extends Controller
 {
     public function index(Request $request)
     {
         $user = Auth::user();
-        if (!$user) {
-            abort(403, 'Unauthorized.');
-        }
-        if ($user->role !== 'pmt') {
-            abort(403, 'Unauthorized.');
-        }
+        if (!$user || $user->role !== 'pmt') abort(403, 'Unauthorized.');
 
         $activePeriod = PerformancePeriod::query()
             ->where('is_active', true)
             ->orderByDesc('start_date')
             ->first();
 
-        $statusRaw = $request->get('status', null);
-        $hasStatusParam = $request->has('status');
+        $hasStatusParam = $request->exists('status');
+
+        $statusRaw = $request->query('status', null);
         $status = strtolower(trim((string) $statusRaw));
+
         $allowedStatuses = [
             UnitWorkPlan::STATUS_SUBMITTED,
             UnitWorkPlan::STATUS_ENDORSED,
@@ -51,25 +48,21 @@ class UwpPmtReviewController extends Controller
                                     ->with([
                                         'successIndicators' => function ($indicatorQuery) {
                                             $indicatorQuery->orderBy('sort_order')
-                                                ->with([
-                                                    'qetStandards',
-                                                    'assignments.employee',
-                                                ]);
+                                                ->with(['qetStandards', 'assignments.employee']);
                                         },
                                     ]);
                             },
                         ]);
                 },
-            ]);
+            ])
+            ->where('status', '!=', UnitWorkPlan::STATUS_DRAFT);
 
-        $uwpsQuery->where('status', '!=', UnitWorkPlan::STATUS_DRAFT);
-
-        if (!$hasStatusParam) {
-            $uwpsQuery->where('status', UnitWorkPlan::STATUS_ENDORSED);
-        } elseif ($status === UnitWorkPlan::STATUS_DRAFT) {
-            $uwpsQuery->where('status', UnitWorkPlan::STATUS_ENDORSED);
-        } elseif ($status !== '' && in_array($status, $allowedStatuses, true)) {
-            $uwpsQuery->where('status', $status);
+        if ($hasStatusParam) {
+            if ($status === UnitWorkPlan::STATUS_DRAFT) {
+                $uwpsQuery->where('status', UnitWorkPlan::STATUS_ENDORSED);
+            } elseif ($status !== '' && in_array($status, $allowedStatuses, true)) {
+                $uwpsQuery->where('status', $status);
+            }
         }
 
         if ($activePeriod) {

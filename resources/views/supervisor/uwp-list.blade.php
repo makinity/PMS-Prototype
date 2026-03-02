@@ -207,8 +207,8 @@
 
                 <!-- FOOTER -->
                 <div class="flex gap-4 justify-end border-t border-slate-800 px-8 py-5">
-                    <a id="modalExportExcelLink" href="#"
-                        class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800">
+                    <a id="modalExportExcelLink" href="#" aria-disabled="true"
+                        class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800 opacity-50 cursor-not-allowed pointer-events-none">
                         Export Excel
                     </a>
                     <button type="submit"
@@ -398,7 +398,7 @@
     <script>
         window.uwpPreviewBaseUrl = "{{ route('supervisor.uwp.show', ['id' => '__ID__']) }}";
         window.uwpSubmitBaseUrl = "{{ route('supervisor.uwp.submit', ['id' => '__ID__']) }}";
-        window.uwpExportBaseUrl = "{{ route('uwp.export', ['uwp' => '__ID__']) }}";
+        window.uwpExportBaseUrl = "{{ route('uwp.excel.export', ['uwp' => '__ID__']) }}";
         window.uwpDeleteBaseUrl = "{{ route('supervisor.uwp.destroy', ['id' => '__ID__']) }}";
     </script>
     @push('scripts')
@@ -466,9 +466,7 @@
             }
 
             function populateUwpModal(uwpData) {
-                if (uwpData.id) {
-                    updateExportLink(uwpData.id);
-                }
+                updateExportLink(uwpData?.id || currentUwpId);
 
                 document.getElementById('modalOfficeUnit').textContent = uwpData.office?.name || 'N/A';
                 document.getElementById('modalUwpSubtitle').textContent =
@@ -986,12 +984,26 @@
                 const exportLink = document.getElementById('modalExportExcelLink');
                 if (!exportLink) return;
 
-                if (!uwpId) {
+                const parsedId = Number(uwpId);
+                const hasValidId = Number.isFinite(parsedId) && parsedId > 0;
+
+                if (!hasValidId) {
                     exportLink.setAttribute('href', '#');
+                    exportLink.setAttribute('aria-disabled', 'true');
+                    exportLink.classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
                     return;
                 }
 
-                exportLink.setAttribute('href', window.uwpExportBaseUrl.replace('__ID__', uwpId));
+                const baseUrl = String(window.uwpExportBaseUrl || '');
+                let exportUrl = baseUrl.replace('__ID__', String(parsedId));
+                if (exportUrl === baseUrl) {
+                    // Fallback in case placeholder was URL-encoded by route() helper.
+                    exportUrl = baseUrl.replace('%5F%5FID%5F%5F', String(parsedId));
+                }
+
+                exportLink.setAttribute('href', exportUrl);
+                exportLink.removeAttribute('aria-disabled');
+                exportLink.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
             }
 
             function closeModal(modalId) {

@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Http\Controllers\StageOne\Planning;
+namespace App\Http\Controllers\DeptHead;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use App\Models\PerformancePeriod;
 use App\Models\UnitWorkPlan;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
-class UwpDeptHeadReviewController extends Controller
+class UnitWorkPlanController extends Controller
 {
     public function index(Request $request)
     {

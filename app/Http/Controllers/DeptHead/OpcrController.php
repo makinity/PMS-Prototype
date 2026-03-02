@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\StageOne\Planning;
+namespace App\Http\Controllers\DeptHead;
 
 use App\Http\Controllers\Controller;
 use App\Models\Opcr;
@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
-class DeptHeadOpcrReviewController extends Controller
+class OpcrController extends Controller
 {
     public function index(Request $request)
     {

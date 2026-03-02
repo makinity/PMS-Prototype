@@ -10,7 +10,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class UwpExcelExportController extends Controller
 {
-    public function exportExcel(int $uwpId)
+    public function excelExport(int $uwpId)
     {
         $uwp = UnitWorkPlan::query()
             ->with([

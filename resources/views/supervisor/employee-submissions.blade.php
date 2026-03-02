@@ -199,7 +199,7 @@
 
             <div class="mt-5 flex items-center justify-end gap-4 border-t border-slate-800 pt-4">
                 <form method="POST"
-                    action="{{ route('supervisor.submissions.endorse', $row['id']) }}"
+                    action="{{ route('supervisor.submissions.endorse', ['id' => '__ID__']) }}"
                     class="inline">
                     @csrf
                     <button type="submit"
