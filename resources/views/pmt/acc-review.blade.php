@@ -306,7 +306,11 @@
                         <thead class="bg-slate-950/70 text-xs uppercase text-slate-400">
                             <tr>
                                 <th class="px-4 py-3">Indicator</th>
-                                <th class="px-4 py-3 text-center">Standards (Q/E/T)</th>
+                                <th class="px-4 py-3 text-center">Q</th>
+                                <th class="px-4 py-3 text-center">E</th>
+                                <th class="px-4 py-3 text-center">T</th>
+                                <th class="px-4 py-3 text-center">A</th>
+                                <th class="px-4 py-3 text-center">Standards</th>
                             </tr>
                         </thead>
                         <tbody id="ipcrIndicatorsBody" class="divide-y divide-slate-800"></tbody>
@@ -774,17 +778,14 @@
                             const weightLabel = Number.isFinite(weight) && weight > 0 ? ` (${formatNumber(weight)}%)` : '';
 
                             const rowsHtml = rows.length === 0
-                                ? '<tr class="bg-slate-900/40"><td colspan="7" class="px-4 py-3 text-center text-slate-400">No major outputs found.</td></tr>'
+                                ? '<tr class="bg-slate-900/40"><td colspan="4" class="px-4 py-3 text-center text-slate-400">No major outputs found.</td></tr>'
                                 : rows.map((row, rowIndex) => {
                                     const indicatorsCount = Number(row?.indicators_count ?? 0);
-                                    const qValue = row?.q === null || row?.q === undefined ? '--' : formatNumber(row.q, 2);
-                                    const eValue = row?.e === null || row?.e === undefined ? '--' : formatNumber(row.e, 2);
-                                    const tValue = row?.t === null || row?.t === undefined ? '--' : formatNumber(row.t, 2);
 
-                                    return `<tr class="bg-slate-900/40 align-top"><td class="px-4 py-3 font-semibold text-slate-100">${escapeHtml(row?.major_output || '--')}</td><td class="px-4 py-3"><a href="javascript:void(0)" data-ipcr-open-indicators data-section-index="${sectionIndex}" data-row-index="${rowIndex}" aria-label="View success indicators (${indicatorsCount})" class="inline-flex items-center gap-1 text-sky-300 transition hover:text-sky-200 focus:outline-none focus:ring-2 focus:ring-sky-500/40"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-4 w-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1 1 0 010-.644C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178a1 1 0 010 .644C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg><span class="text-xs">(${indicatorsCount})</span></a></td><td class="px-4 py-3 text-right tabular-nums">${qValue}</td><td class="px-4 py-3 text-right tabular-nums">${eValue}</td><td class="px-4 py-3 text-right tabular-nums">${tValue}</td><td class="px-4 py-3 text-slate-200">${escapeHtml(row?.target_summary || '--')}</td><td class="px-4 py-3 text-slate-300">${escapeHtml(row?.timeline || '--')}</td></tr>`;
+                                    return `<tr class="bg-slate-900/40 align-top"><td class="px-4 py-3 font-semibold text-slate-100">${escapeHtml(row?.major_output || '--')}</td><td class="px-4 py-3"><a href="javascript:void(0)" data-ipcr-open-indicators data-section-index="${sectionIndex}" data-row-index="${rowIndex}" aria-label="View success indicators (${indicatorsCount})" class="inline-flex items-center gap-1 text-sky-300 transition hover:text-sky-200 focus:outline-none focus:ring-2 focus:ring-sky-500/40"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-4 w-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1 1 0 010-.644C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178a1 1 0 010 .644C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg><span class="text-xs">(${indicatorsCount})</span></a></td><td class="px-4 py-3 text-slate-200">${escapeHtml(row?.target_summary || '--')}</td><td class="px-4 py-3 text-slate-300">${escapeHtml(row?.timeline || '--')}</td></tr>`;
                                 }).join('');
 
-                            return `<div class="rounded-xl border border-slate-800 bg-slate-950/60"><div class="border-b border-slate-800 px-4 py-3"><h4 class="text-sm font-semibold uppercase tracking-[0.12em] text-slate-100">${escapeHtml(String(section?.title || 'Section') + weightLabel)}</h4></div><div class="overflow-x-auto"><table class="min-w-full text-left text-sm text-slate-200"><thead class="bg-slate-950/70 text-xs uppercase text-slate-400"><tr><th class="px-4 py-3">Major Output</th><th class="px-4 py-3">Success Indicators</th><th class="px-4 py-3 text-right">Q</th><th class="px-4 py-3 text-right">E</th><th class="px-4 py-3 text-right">T</th><th class="px-4 py-3">Target Summary</th><th class="px-4 py-3">Timeline</th></tr></thead><tbody class="divide-y divide-slate-800">${rowsHtml}</tbody></table></div></div>`;
+                            return `<div class="rounded-xl border border-slate-800 bg-slate-950/60"><div class="border-b border-slate-800 px-4 py-3"><h4 class="text-sm font-semibold uppercase tracking-[0.12em] text-slate-100">${escapeHtml(String(section?.title || 'Section') + weightLabel)}</h4></div><div class="overflow-x-auto"><table class="min-w-full text-left text-sm text-slate-200"><thead class="bg-slate-950/70 text-xs uppercase text-slate-400"><tr><th class="px-4 py-3">Major Output</th><th class="px-4 py-3">Success Indicators</th><th class="px-4 py-3">Target Summary</th><th class="px-4 py-3">Timeline</th></tr></thead><tbody class="divide-y divide-slate-800">${rowsHtml}</tbody></table></div></div>`;
                         }).join('');
                     }
 
@@ -801,8 +802,26 @@
 
                     if (ipcrIndicatorsBodyEl) {
                         ipcrIndicatorsBodyEl.innerHTML = selectedIndicators.length === 0
-                            ? '<tr class="bg-slate-900/40"><td colspan="2" class="px-4 py-3 text-center text-slate-400">No success indicators available.</td></tr>'
-                            : selectedIndicators.map((indicator, indicatorIndex) => `<tr class="bg-slate-900/40 align-top"><td class="px-4 py-3 text-slate-100">${escapeHtml(indicator?.indicator_text || '--')}</td><td class="px-4 py-3 text-center"><a href="javascript:void(0)" data-ipcr-open-standards data-indicator-index="${indicatorIndex}" aria-label="View standards" class="inline-flex items-center text-sky-300 transition hover:text-sky-200 focus:outline-none focus:ring-2 focus:ring-sky-500/40"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-4 w-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1 1 0 010-.644C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178a1 1 0 010 .644C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg></a></td></tr>`).join('');
+                            ? '<tr class="bg-slate-900/40"><td colspan="6" class="px-4 py-3 text-center text-slate-400">No success indicators available.</td></tr>'
+                            : selectedIndicators.map((indicator, indicatorIndex) => {
+                                const qVal = indicator?.q === null || indicator?.q === undefined
+                                    ? '&mdash;'
+                                    : String(Math.round(Number(indicator.q)));
+                                const eVal = indicator?.e === null || indicator?.e === undefined ? '&mdash;' : formatNumber(indicator.e, 2);
+                                const tVal = indicator?.t === null || indicator?.t === undefined ? '&mdash;' : formatNumber(indicator.t, 2);
+                                const aVal = indicator?.a === null || indicator?.a === undefined ? '&mdash;' : formatNumber(indicator.a, 2);
+
+                                return `<tr class="bg-slate-900/40 align-top">
+                                    <td class="px-4 py-3 text-slate-100">${escapeHtml(indicator?.indicator_text || '--')}</td>
+                                    <td class="px-4 py-3 text-center tabular-nums">${qVal}</td>
+                                    <td class="px-4 py-3 text-center tabular-nums">${eVal}</td>
+                                    <td class="px-4 py-3 text-center tabular-nums">${tVal}</td>
+                                    <td class="px-4 py-3 text-center tabular-nums">${aVal}</td>
+                                    <td class="px-4 py-3 text-center">
+                                        <a href="javascript:void(0)" data-ipcr-open-standards data-indicator-index="${indicatorIndex}" aria-label="View standards" class="inline-flex items-center text-sky-300 transition hover:text-sky-200 focus:outline-none focus:ring-2 focus:ring-sky-500/40"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-4 w-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1 1 0 010-.644C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178a1 1 0 010 .644C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg></a>
+                                    </td>
+                                </tr>`;
+                            }).join('');
                     }
 
                     openPreviewModal('pmt-ipcr-indicators-modal');
