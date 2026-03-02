@@ -65,7 +65,7 @@ class AccomplishmentController extends Controller
                 : '--';
 
             $attachments = $this->buildAttachmentPayload($submission->attachments ?? []);
-            [$smporSections, $ratingsByOutput] = $this->buildSmporSectionsFromSnapshot(
+            [$smporSections, $ratingsByOutput, $ratingsByIndicator] = $this->buildSmporSectionsFromSnapshot(
                 $submission->mpors ?? collect(),
                 $monthLabels
             );
@@ -81,7 +81,8 @@ class AccomplishmentController extends Controller
             $ipcrSections = $this->buildIpcrSections(
                 $submission->ipcr,
                 $periodLabel,
-                $ratingsByOutput
+                $ratingsByOutput,
+                $ratingsByIndicator
             );
 
             $payload = [
@@ -178,8 +179,10 @@ class AccomplishmentController extends Controller
     {
         $sections = [];
         $ratingsByOutput = [];
+        $ratingsByIndicator = [];
         $sectionBuckets = [];
         $ratingsTotals = [];
+        $indicatorRatingsTotals = [];
 
         foreach ($mpors as $mpor) {
             $ratedEntries = $mpor->ratedOrsEntriesForMonth()
@@ -233,6 +236,21 @@ class AccomplishmentController extends Controller
                 $qualityPoints = $quantity * (float) $monitoring->quality_rating;
                 $timelinessPoints = $quantity * (float) $monitoring->timeliness_rating;
 
+                $indicatorText = trim((string) ($entry->ipcrItem?->indicator_text ?? ''));
+                if ($indicatorText !== '') {
+                    if (!isset($indicatorRatingsTotals[$indicatorText])) {
+                        $indicatorRatingsTotals[$indicatorText] = [
+                            'qty' => 0.0,
+                            'q_points' => 0.0,
+                            't_points' => 0.0,
+                        ];
+                    }
+
+                    $indicatorRatingsTotals[$indicatorText]['qty'] += $quantity;
+                    $indicatorRatingsTotals[$indicatorText]['q_points'] += $qualityPoints;
+                    $indicatorRatingsTotals[$indicatorText]['t_points'] += $timelinessPoints;
+                }
+
                 $sectionBuckets[$functionType][$expectedOutput]['quantity'][$monthLabel] += $quantity;
                 $sectionBuckets[$functionType][$expectedOutput]['quality'][$monthLabel] += $qualityPoints;
                 $sectionBuckets[$functionType][$expectedOutput]['timeliness'][$monthLabel] += $timelinessPoints;
@@ -268,6 +286,25 @@ class AccomplishmentController extends Controller
                 'q' => $q,
                 'e' => $q,
                 't' => $t,
+            ];
+        }
+
+        foreach ($indicatorRatingsTotals as $indicatorText => $totals) {
+            $qty = (float) ($totals['qty'] ?? 0);
+            if ($qty <= 0) {
+                continue;
+            }
+
+            $e = round(((float) ($totals['q_points'] ?? 0)) / $qty, 2);
+            $t = round(((float) ($totals['t_points'] ?? 0)) / $qty, 2);
+            $a = round(($e + $t) / 2, 2);
+
+            $ratingsByIndicator[$indicatorText] = [
+                'qty' => $qty,
+                'q' => $qty,
+                'e' => $e,
+                't' => $t,
+                'a' => $a,
             ];
         }
 
@@ -332,10 +369,10 @@ class AccomplishmentController extends Controller
             ];
         }
 
-        return [$sections, $ratingsByOutput];
+        return [$sections, $ratingsByOutput, $ratingsByIndicator];
     }
 
-    private function buildIpcrSections(?Ipcr $ipcr, string $periodLabel, array $ratingsByOutput): array
+    private function buildIpcrSections(?Ipcr $ipcr, string $periodLabel, array $ratingsByOutput, array $ratingsByIndicator): array
     {
         if (!$ipcr) {
             return [];
@@ -367,8 +404,12 @@ class AccomplishmentController extends Controller
                 $targetSummary = '--';
             }
 
-            $indicators = $groupItems->map(function ($item): array {
+            $ratings = $ratingsByOutput[$majorOutput] ?? null;
+
+            $indicators = $groupItems->map(function ($item) use ($ratingsByIndicator): array {
+
                 $standardsPayload = $item->standards_payload;
+
                 if (is_string($standardsPayload)) {
                     $decoded = json_decode($standardsPayload, true);
                     $standardsPayload = is_array($decoded) ? $decoded : [];
@@ -376,13 +417,20 @@ class AccomplishmentController extends Controller
                     $standardsPayload = [];
                 }
 
+                $indicatorText = trim((string) ($item->indicator_text ?? '')) ?: '--';
+                $lookupKey = $indicatorText !== '--' ? $indicatorText : '';
+
+                $indicatorRatings = $lookupKey !== '' ? ($ratingsByIndicator[$lookupKey] ?? null) : null;
+
                 return [
-                    'indicator_text' => trim((string) ($item->indicator_text ?? '')) ?: '--',
+                    'indicator_text' => $indicatorText,
                     'standards_payload' => $standardsPayload,
+                    'q' => $indicatorRatings ? (float) ($indicatorRatings['q'] ?? 0) : null,
+                    'e' => $indicatorRatings ? (float) ($indicatorRatings['e'] ?? 0) : null,
+                    't' => $indicatorRatings ? (float) ($indicatorRatings['t'] ?? 0) : null,
+                    'a' => $indicatorRatings ? (float) ($indicatorRatings['a'] ?? 0) : null,
                 ];
             })->values()->all();
-
-            $ratings = $ratingsByOutput[$majorOutput] ?? null;
 
             if (!isset($sections[$functionType])) {
                 $sections[$functionType] = [
