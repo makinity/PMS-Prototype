@@ -284,35 +284,23 @@
 
                 </div>
 
-                <!-- CLIENT REQUEST ID -->
+                <!-- SUPERVISOR -->
                 <div>
                     <label class="text-[11px] uppercase text-slate-400">
-                        Client Request ID (optional)
+                        Supervisor
                     </label>
-                    <input id="orsRequestId"
-                        name="client_request_id"
-                        type="text"
-                        placeholder="REQ-2026-00123"
-                        class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
-                </div>
-
-                <!-- FORM / OUTPUT -->
-                <div>
-                    <label class="text-[11px] uppercase text-slate-400">
-                        Form / Output Type
-                    </label>
-
-                    <select id="orsOutput"
-                            name="output_type"
-                            class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200"
-                            required>
-                        <option value="">Select form/output</option>
-                        <option value="bsf_01">Bank Statement Form (BSF-01)</option>
-                        <option value="official_receipt">Official Receipt (OR)</option>
-                        <option value="scanned_doc">Scanned Supporting Document</option>
-                        <option value="records_checklist">Records Inventory Checklist</option>
+                    <select id="orsSupervisorId"
+                        name="supervisor_id"
+                        class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200"
+                        @disabled($orsModalBlocked)
+                        required>
+                        <option value="">Select supervisor</option>
+                        @foreach(($supervisors ?? []) as $supervisor)
+                            <option value="{{ is_array($supervisor) ? ($supervisor['id'] ?? '') : ($supervisor->id ?? '') }}">
+                                {{ is_array($supervisor) ? ($supervisor['name'] ?? '--') : ($supervisor->name ?? '--') }}
+                            </option>
+                        @endforeach
                     </select>
-
                 </div>
 
                 <!-- NOTES -->
@@ -386,10 +374,6 @@
                         <p class="text-xs text-slate-400">Supervisor</p>
                         <p class="text-slate-200" id="taskDetailClient">--</p>
                     </div>
-                    <div>
-                        <p class="text-xs text-slate-400">Request ID</p>
-                        <p class="text-slate-200" id="taskDetailRequest">--</p>
-                    </div>
                     <div class="md:col-span-2">
                         <p class="text-xs text-slate-400">MFO / UWP Output</p>
                         <p class="text-slate-200" id="taskDetailMfo">--</p>
@@ -403,10 +387,6 @@
                         <p class="mt-1 text-[11px] text-slate-400">
                             Quantity is declared by the employee. Supervisor rates Quality & Timeliness during ORS Monitoring.
                         </p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-slate-400">Output Type</p>
-                        <p class="text-slate-200" id="taskDetailOutput">--</p>
                     </div>
                     <div>
                         <p class="text-xs text-slate-400">Status</p>
@@ -616,16 +596,6 @@
 
             const dbTasksRaw = @json($orsEntries ?? []);
 
-
-            function outputTypeLabel(code) {
-                const key = String(code || '').trim().toLowerCase();
-                if (key === 'bsf_01') return 'Bank Statement Form (BSF-01)';
-                if (key === 'official_receipt') return 'Official Receipt (OR)';
-                if (key === 'scanned_doc') return 'Scanned Supporting Document';
-                if (key === 'records_checklist') return 'Records Inventory Checklist';
-                return code || '--';
-            }
-
             const tasksFromDb = Array.isArray(dbTasksRaw)
                 ? dbTasksRaw.map((entry) => {
                     const rawState = String(entry?.state || 'draft').toLowerCase();
@@ -634,18 +604,22 @@
                     const totalSeconds = Number(entry?.totalSeconds ?? entry?.durationSeconds ?? 0);
                     const startedAt = entry?.startedAt ? new Date(entry.startedAt) : null;
                     const stoppedAt = entry?.stoppedAt ? new Date(entry.stoppedAt) : null;
+                    const supervisorIdValue = entry?.supervisorId ?? entry?.supervisor_id ?? null;
+                    const supervisorNameValue = String(entry?.supervisorName ?? entry?.supervisor_name ?? '').trim();
 
                     return {
                         id: String(entry?.id ?? `task-db-${Date.now()}`),
                         title: String(entry?.title || '--'),
                         date: String(entry?.date || ''),
                         client: 'Revenue Collection Unit',
-                        requestId: entry?.requestId || null,
                         uwpOutputId: '',
                         uwpOutputLabel: String(entry?.uwpOutputLabel || '--'),
-                        output: outputTypeLabel(entry?.output),
                         notes: String(entry?.notes || 'No notes'),
                         quantity: String(entry?.quantity || ''),
+                        supervisorId: supervisorIdValue === null || supervisorIdValue === undefined || String(supervisorIdValue).trim() === ''
+                            ? null
+                            : String(supervisorIdValue),
+                        supervisorName: supervisorNameValue !== '' ? supervisorNameValue : null,
                         rating: '--',
                         state: state,
                         output_state: (state === 'submitted' || state === 'rated' || state === 'locked') ? 'submitted' : 'none',
@@ -1032,6 +1006,8 @@
                 const submittedAtValue = entry.submittedAt ?? entry.submitted_at ?? fallback.submittedAt ?? null;
                 const startedAtValue = entry.startedAt ?? entry.started_at ?? fallback.startedAt ?? null;
                 const stoppedAtValue = entry.stoppedAt ?? entry.stopped_at ?? fallback.stoppedAt ?? null;
+                const supervisorIdValue = entry.supervisor_id ?? entry.supervisorId ?? fallback.supervisorId ?? null;
+                const supervisorNameValue = String(entry.supervisor_name ?? entry.supervisorName ?? fallback.supervisorName ?? '').trim();
                 const totalSecondsValue = Number(
                     entry.totalSeconds
                     ?? entry.total_seconds
@@ -1046,12 +1022,14 @@
                     title: String(entry.title ?? entry.task_name ?? fallback.title ?? '--'),
                     date: String(entry.date ?? entry.work_date ?? fallback.date ?? ''),
                     client: String(entry.client ?? fallback.client ?? 'Revenue Collection Unit'),
-                    requestId: entry.client_request_id ?? entry.requestId ?? fallback.requestId ?? null,
                     uwpOutputId: String(entry.uwp_output_key ?? fallback.uwpOutputId ?? ''),
                     uwpOutputLabel: String(entry.uwp_output_label ?? entry.uwpOutputLabel ?? fallback.uwpOutputLabel ?? '--'),
-                    output: outputTypeLabel(entry.output_type ?? entry.output ?? fallback.outputType ?? fallback.output ?? ''),
                     notes: String(entry.notes ?? fallback.notes ?? 'No notes'),
                     quantity: String(entry.quantity ?? fallback.quantity ?? ''),
+                    supervisorId: supervisorIdValue === null || supervisorIdValue === undefined || String(supervisorIdValue).trim() === ''
+                        ? null
+                        : String(supervisorIdValue),
+                    supervisorName: supervisorNameValue !== '' ? supervisorNameValue : null,
                     rating: String(fallback.rating ?? '--'),
                     state: state,
                     output_state: ['submitted', 'rated', 'locked'].includes(state) ? 'submitted' : 'none',
@@ -1087,8 +1065,7 @@
                     'orsSelectedDate',
                     'orsUwpOutput',
                     'orsTaskType',
-                    'orsRequestId',
-                    'orsOutput',
+                    'orsSupervisorId',
                     'orsNotes',
                 ];
 
@@ -1110,8 +1087,7 @@
                     work_date: 'orsSelectedDate',
                     uwp_output_key: 'orsUwpOutput',
                     ipcr_item_id: 'orsTaskType',
-                    client_request_id: 'orsRequestId',
-                    output_type: 'orsOutput',
+                    supervisor_id: 'orsSupervisorId',
                     notes: 'orsNotes',
                 };
 
@@ -1391,10 +1367,8 @@
 
                 document.getElementById('taskDetailTitle').textContent = task.title || '--';
                 document.getElementById('taskDetailDate').textContent = `Date: ${task.date || '--'}`;
-                document.getElementById('taskDetailClient').textContent = task.client || '--';
-                document.getElementById('taskDetailRequest').textContent = task.requestId || '--';
+                document.getElementById('taskDetailClient').textContent = task.supervisorName || '--';
                 document.getElementById('taskDetailMfo').textContent = task.uwpOutputLabel || '--';
-                document.getElementById('taskDetailOutput').textContent = task.output || '--';
                 document.getElementById('taskDetailStatusText').textContent = (STATE_META[task.state] || STATE_META.draft).label;
                 document.getElementById('taskDetailDuration').textContent = formatDuration(computeElapsed(task));
                 document.getElementById('taskDetailNotes').textContent = task.notes || '--';
@@ -1966,13 +1940,18 @@
                             }
 
                             const entry = payload?.entry ?? payload;
+                            const supervisorSelect = document.getElementById('orsSupervisorId');
+                            const selectedSupervisorId = String(supervisorSelect?.value || '').trim();
+                            const selectedSupervisorName = selectedSupervisorId !== ''
+                                ? String(supervisorSelect?.selectedOptions?.[0]?.textContent || '').trim()
+                                : '';
                             const fallback = {
                                 date: String(document.getElementById('orsSelectedDate')?.value || ''),
-                                requestId: String(document.getElementById('orsRequestId')?.value || ''),
                                 uwpOutputId: String(document.getElementById('orsUwpOutput')?.value || ''),
                                 uwpOutputLabel: document.getElementById('orsUwpOutput')?.selectedOptions?.[0]?.textContent?.trim() || '--',
-                                outputType: String(document.getElementById('orsOutput')?.value || ''),
                                 notes: String(document.getElementById('orsNotes')?.value || ''),
+                                supervisorId: selectedSupervisorId !== '' ? selectedSupervisorId : null,
+                                supervisorName: selectedSupervisorName !== '' ? selectedSupervisorName : null,
                                 quantity: '',
                                 state: 'draft',
                             };

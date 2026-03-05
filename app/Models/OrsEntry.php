@@ -13,14 +13,13 @@ class OrsEntry extends Model
 
     protected $fillable = [
         'employee_id',
+        'supervisor_id',
         'office_id',
         'performance_period_id',
         'ipcr_id',
         'ipcr_item_id',
         'mpor_id',
         'work_date',
-        'client_request_id',
-        'output_type',
         'notes',
         'quantity',
         'started_at',
@@ -41,6 +40,11 @@ class OrsEntry extends Model
     public function employee(): BelongsTo
     {
         return $this->belongsTo(User::class, 'employee_id');
+    }
+
+    public function supervisor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'supervisor_id');
     }
 
     public function office(): BelongsTo

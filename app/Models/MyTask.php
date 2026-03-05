@@ -17,8 +17,6 @@ class MyTask extends Model
         'ipcr_id',
         'ipcr_item_id',
         'work_date',
-        'client_request_id',
-        'output_type',
         'notes',
         'quantity',
         'started_at',

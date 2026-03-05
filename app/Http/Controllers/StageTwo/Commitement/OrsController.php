@@ -8,6 +8,7 @@ use App\Models\IpcrItem;
 use App\Models\OrsEntry;
 use App\Models\OrsEntryEvidence;
 use App\Models\PerformancePeriod;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,7 +17,6 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class OrsController extends Controller
@@ -105,6 +105,34 @@ class OrsController extends Controller
             $orsGate['reason'] = 'IPCR not committed for active period.';
         }
 
+        $supervisorOfficeId = $ipcr?->office_id ?: $user->office_id;
+        $supervisors = [];
+        if (Schema::hasTable('users')) {
+            $supervisorsQuery = User::query()
+                ->select(['id', 'name'])
+                ->where('role', 'supervisor');
+
+            if (!is_null($supervisorOfficeId)) {
+                $supervisorsQuery->where('office_id', $supervisorOfficeId);
+            } else {
+                $supervisorsQuery->whereRaw('1 = 0');
+            }
+
+            if (Schema::hasColumn('users', 'is_active')) {
+                $supervisorsQuery->where('is_active', true);
+            }
+
+            $supervisors = $supervisorsQuery
+                ->orderBy('name')
+                ->get()
+                ->map(static fn (User $supervisor): array => [
+                    'id' => (int) $supervisor->id,
+                    'name' => (string) $supervisor->name,
+                ])
+                ->values()
+                ->all();
+        }
+
         $orsOptions = [];
         if ($ipcr) {
             $grouped = [];
@@ -154,23 +182,29 @@ class OrsController extends Controller
             $hasIpcrItemId = Schema::hasColumn($orsTable, 'ipcr_item_id');
             $hasWorkDate = Schema::hasColumn($orsTable, 'work_date');
             $hasStatus = Schema::hasColumn($orsTable, 'status');
-            $hasOutputType = Schema::hasColumn($orsTable, 'output_type');
             $hasNotes = Schema::hasColumn($orsTable, 'notes');
             $hasQuantity = Schema::hasColumn($orsTable, 'quantity');
             $hasStartedAt = Schema::hasColumn($orsTable, 'started_at');
             $hasStoppedAt = Schema::hasColumn($orsTable, 'stopped_at');
             $hasSubmittedAt = Schema::hasColumn($orsTable, 'submitted_at');
             $hasTotalSeconds = Schema::hasColumn($orsTable, 'total_seconds');
-            $hasClientRequestId = Schema::hasColumn($orsTable, 'client_request_id');
-            $hasRequestId = Schema::hasColumn($orsTable, 'request_id');
+            $hasSupervisorId = Schema::hasColumn($orsTable, 'supervisor_id');
+            $hasUsersTable = Schema::hasTable('users');
 
             $entries = collect();
 
             if (class_exists(OrsEntry::class)) {
                 $query = OrsEntry::query();
 
+                $with = [];
                 if ($hasIpcrItemId && Schema::hasTable('ipcr_items')) {
-                    $query->with(['ipcrItem:id,output_title,indicator_text']);
+                    $with[] = 'ipcrItem:id,output_title,indicator_text';
+                }
+                if ($hasSupervisorId && $hasUsersTable && method_exists(OrsEntry::class, 'supervisor')) {
+                    $with[] = 'supervisor:id,name';
+                }
+                if (!empty($with)) {
+                    $query->with($with);
                 }
 
                 if ($hasEmployeeId) {
@@ -199,6 +233,9 @@ class OrsController extends Controller
                 if ($hasIpcrItemId && Schema::hasTable('ipcr_items')) {
                     $query->leftJoin('ipcr_items as ii', 'ii.id', '=', 'oe.ipcr_item_id');
                 }
+                if ($hasSupervisorId && $hasUsersTable) {
+                    $query->leftJoin('users as su', 'su.id', '=', 'oe.supervisor_id');
+                }
 
                 if ($hasEmployeeId) {
                     $query->where('oe.employee_id', $user->id);
@@ -219,6 +256,11 @@ class OrsController extends Controller
                     $query->addSelect([
                         'ii.output_title as joined_output_title',
                         'ii.indicator_text as joined_indicator_text',
+                    ]);
+                }
+                if ($hasSupervisorId && $hasUsersTable) {
+                    $query->addSelect([
+                        'su.name as joined_supervisor_name',
                     ]);
                 }
 
@@ -245,15 +287,13 @@ class OrsController extends Controller
             $orsEntries = $entries->map(function ($entry) use (
                 $hasWorkDate,
                 $hasStatus,
-                $hasRequestId,
-                $hasClientRequestId,
-                $hasOutputType,
                 $hasNotes,
                 $hasQuantity,
                 $hasStartedAt,
                 $hasStoppedAt,
                 $hasSubmittedAt,
                 $hasTotalSeconds,
+                $hasSupervisorId,
                 $evidenceCounts
             ) {
                 $workDateRaw = $hasWorkDate ? data_get($entry, 'work_date') : null;
@@ -277,9 +317,14 @@ class OrsController extends Controller
                 );
 
                 $entryId = (int) (data_get($entry, 'id') ?? 0);
-                $requestId = $hasRequestId
-                    ? data_get($entry, 'request_id')
-                    : ($hasClientRequestId ? data_get($entry, 'client_request_id') : null);
+                $supervisorIdRaw = $hasSupervisorId ? data_get($entry, 'supervisor_id') : null;
+                $supervisorName = $hasSupervisorId
+                    ? (string) (
+                        data_get($entry, 'supervisor.name')
+                        ?? data_get($entry, 'joined_supervisor_name')
+                        ?? ''
+                    )
+                    : '';
 
                 return [
                     'id' => $entryId,
@@ -287,8 +332,6 @@ class OrsController extends Controller
                     'date' => $workDate,
                     'state' => $hasStatus ? (string) (data_get($entry, 'status') ?? 'draft') : 'draft',
                     'uwpOutputLabel' => $outputTitle !== '' ? $outputTitle : 'Untitled Output',
-                    'requestId' => $requestId,
-                    'output' => $hasOutputType ? data_get($entry, 'output_type') : null,
                     'notes' => $hasNotes ? data_get($entry, 'notes') : null,
                     'quantity' => $hasQuantity ? data_get($entry, 'quantity') : null,
                     'submittedAt' => $hasSubmittedAt ? data_get($entry, 'submitted_at') : null,
@@ -298,6 +341,8 @@ class OrsController extends Controller
                     'durationSeconds' => $hasTotalSeconds ? (int) (data_get($entry, 'total_seconds') ?? 0) : 0,
                     'evidenceCount' => (int) ($evidenceCounts[$entryId] ?? 0),
                     'evidenceAttached' => (int) ($evidenceCounts[$entryId] ?? 0) > 0,
+                    'supervisorId' => is_numeric($supervisorIdRaw) ? (int) $supervisorIdRaw : null,
+                    'supervisorName' => $supervisorName !== '' ? $supervisorName : null,
                 ];
             })->values()->all();
         }
@@ -312,6 +357,7 @@ class OrsController extends Controller
             'orsStats' => $orsStats,
             'orsOptions' => $orsOptions,
             'orsEntries' => $orsEntries,
+            'supervisors' => $supervisors,
             'employeeName' => $user->name ?? '',
             'officeName' => $officeName,
             'periodName' => $periodName,
@@ -328,12 +374,7 @@ class OrsController extends Controller
         $validated = $request->validate([
             'work_date' => ['required', 'date'],
             'ipcr_item_id' => ['required', 'integer', 'exists:ipcr_items,id'],
-            'client_request_id' => ['nullable', 'string', 'max:100'],
-            'output_type' => [
-                'required',
-                'string',
-                Rule::in(['bsf_01', 'official_receipt', 'scanned_doc', 'records_checklist']),
-            ],
+            'supervisor_id' => ['required', 'integer', 'exists:users,id'],
             'notes' => ['nullable', 'string', 'max:1000'],
         ]);
 
@@ -379,6 +420,30 @@ class OrsController extends Controller
             ]);
         }
 
+        $selectedSupervisorId = $validated['supervisor_id'] ?? null;
+        $resolvedOfficeId = $ipcr->office_id ?? $user->office_id ?? null;
+
+        if (!is_null($selectedSupervisorId)) {
+            $supervisor = User::query()
+                ->select(['id', 'role', 'office_id'])
+                ->find($selectedSupervisorId);
+
+            if (!$supervisor || strtolower(trim((string) $supervisor->role)) !== 'supervisor') {
+                throw ValidationException::withMessages([
+                    'supervisor_id' => ['Selected supervisor is invalid.'],
+                ]);
+            }
+
+            if (!is_null($resolvedOfficeId)) {
+                $supervisorOfficeId = $supervisor->office_id;
+                if (is_null($supervisorOfficeId) || (int) $supervisorOfficeId !== (int) $resolvedOfficeId) {
+                    throw ValidationException::withMessages([
+                        'supervisor_id' => ['Selected supervisor must belong to your office.'],
+                    ]);
+                }
+            }
+        }
+
         $ipcrItem = IpcrItem::query()
             ->whereKey($validated['ipcr_item_id'])
             ->where('ipcr_id', $ipcr->id)
@@ -413,7 +478,6 @@ class OrsController extends Controller
             'ipcr_id' => $ipcr->id,
             'ipcr_item_id' => $ipcrItem->id,
             'work_date' => $workDate->toDateString(),
-            'output_type' => $validated['output_type'],
             'notes' => $validated['notes'] ?? null,
             'status' => 'draft',
             'started_at' => null,
@@ -435,8 +499,8 @@ class OrsController extends Controller
             $entryData['performance_period_id'] = $ipcr->performance_period_id;
         }
 
-        if (Schema::hasColumn('ors_entries', 'client_request_id')) {
-            $entryData['client_request_id'] = $validated['client_request_id'] ?? null;
+        if (Schema::hasColumn('ors_entries', 'supervisor_id')) {
+            $entryData['supervisor_id'] = !is_null($selectedSupervisorId) ? (int) $selectedSupervisorId : null;
         }
 
         if (Schema::hasColumn('ors_entries', 'duration_seconds')) {
@@ -1013,9 +1077,6 @@ class OrsController extends Controller
     {
         $orsTable = 'ors_entries';
         $hasOrsTable = Schema::hasTable($orsTable);
-        $hasRequestId = $hasOrsTable && Schema::hasColumn($orsTable, 'request_id');
-        $hasClientRequestId = $hasOrsTable && Schema::hasColumn($orsTable, 'client_request_id');
-        $hasOutputType = $hasOrsTable && Schema::hasColumn($orsTable, 'output_type');
         $hasNotes = $hasOrsTable && Schema::hasColumn($orsTable, 'notes');
         $hasQuantity = $hasOrsTable && Schema::hasColumn($orsTable, 'quantity');
         $hasSubmittedAt = $hasOrsTable && Schema::hasColumn($orsTable, 'submitted_at');
@@ -1028,13 +1089,6 @@ class OrsController extends Controller
 
         if ($hasIpcrItemsTable && $hasIpcrItemId) {
             $entry->loadMissing(['ipcrItem:id,output_title,indicator_text']);
-        }
-
-        $requestId = null;
-        if ($hasRequestId) {
-            $requestId = data_get($entry, 'request_id');
-        } elseif ($hasClientRequestId) {
-            $requestId = data_get($entry, 'client_request_id');
         }
 
         $workDateRaw = data_get($entry, 'work_date');
@@ -1074,8 +1128,6 @@ class OrsController extends Controller
             'date' => $workDate,
             'state' => (string) (data_get($entry, 'status') ?? 'draft'),
             'uwpOutputLabel' => $outputTitle !== '' ? $outputTitle : 'Untitled Output',
-            'requestId' => $requestId,
-            'output' => $hasOutputType ? data_get($entry, 'output_type') : null,
             'notes' => $hasNotes ? data_get($entry, 'notes') : null,
             'quantity' => $hasQuantity ? data_get($entry, 'quantity') : null,
             'submittedAt' => $submittedAt instanceof \DateTimeInterface ? $submittedAt->toIso8601String() : (!empty($submittedAt) ? Carbon::parse($submittedAt)->toIso8601String() : null),

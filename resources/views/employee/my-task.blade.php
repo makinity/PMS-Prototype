@@ -33,7 +33,6 @@
                         <tr>
                             <th class="px-4 py-3 text-left font-medium text-white">Task</th>
                             <th class="px-4 py-3 text-left font-medium text-white">Date</th>
-                            <th class="px-4 py-3 text-left font-medium text-white">Output Type</th>
                             <th class="px-4 py-3 text-left font-medium text-white">Status</th>
                             <th class="px-4 py-3 text-left font-medium text-white">Evidence</th>
                             <th class="px-4 py-3 text-left font-medium text-white">Quantity (ORS)</th>
@@ -94,20 +93,12 @@
                                 <p id="mvDate" class="text-sm font-medium text-white">--</p>
                             </div>
                             <div>
-                                <p class="text-xs uppercase tracking-wide text-gray-500">Client Request ID</p>
-                                <p id="mvRequestId" class="text-sm font-medium text-white">--</p>
-                            </div>
-                            <div>
                                 <p class="text-xs uppercase tracking-wide text-gray-500">Status</p>
                                 <p id="mvStatus" class="text-sm font-medium text-white">--</p>
                             </div>
                             <div>
                                 <p class="text-xs uppercase tracking-wide text-gray-500">Output State</p>
                                 <p id="mvOutputState" class="text-sm font-medium text-white">--</p>
-                            </div>
-                            <div>
-                                <p class="text-xs uppercase tracking-wide text-gray-500">Output Type</p>
-                                <p id="mvOutputType" class="text-sm font-medium text-white">--</p>
                             </div>
                             <div>
                                 <p class="text-xs uppercase tracking-wide text-gray-500">Quantity (ORS)</p>
@@ -283,15 +274,6 @@
                 const evidencesEndpointTemplate = @json(route('stage2.my_tasks.evidences', ['orsEntry' => '__ENTRY__']));
                 const exportOrsBaseUrl = @json(route('employee.ors.export.pdf'));
 
-                function outputTypeLabel(code) {
-                    const key = String(code || '').trim().toLowerCase();
-                    if (key === 'bsf_01') return 'Bank Statement Form (BSF-01)';
-                    if (key === 'official_receipt') return 'Official Receipt (OR)';
-                    if (key === 'scanned_doc') return 'Scanned Supporting Document';
-                    if (key === 'records_checklist') return 'Records Inventory Checklist';
-                    return key ? key : '--';
-                }
-
                 const tasks = Array.isArray(rawTasks)
                     ? rawTasks.map((entry) => {
                         const status = String(entry?.status || 'draft').toLowerCase();
@@ -306,9 +288,7 @@
                             id: String(entry?.id ?? ''),
                             title: String(entry?.ipcr_item?.indicator_text || '--'),
                             date: String(entry?.work_date || ''),
-                            requestId: entry?.client_request_id || null,
                             uwpOutputLabel: String(entry?.ipcr_item?.output_title || '--'),
-                            output: outputTypeLabel(entry?.output_type),
                             quantity: entry?.quantity || '--',
                             state: status,
                             durationMs: Number(entry?.total_seconds || 0) * 1000,
@@ -369,9 +349,7 @@
                     task: document.getElementById('mvTask'),
                     mfo: document.getElementById('mvMfo'),
                     date: document.getElementById('mvDate'),
-                    requestId: document.getElementById('mvRequestId'),
                     status: document.getElementById('mvStatus'),
-                    outputType: document.getElementById('mvOutputType'),
                     outputState: document.getElementById('mvOutputState'),
                     quantity: document.getElementById('mvQuantity'),
                     evidence: document.getElementById('mvEvidence'),
@@ -564,7 +542,7 @@
                     if (!filteredTasks.length) {
                         tbody.innerHTML = `
                             <tr>
-                                <td colspan="7" class="px-4 py-8 text-center text-sm text-gray-400">
+                                <td colspan="6" class="px-4 py-8 text-center text-sm text-gray-400">
                                     No tasks found for the selected filters.
                                 </td>
                             </tr>
@@ -576,7 +554,6 @@
                         <tr class="hover:bg-gray-750">
                             <td class="px-4 py-3 text-gray-300">${task.title || '--'}</td>
                             <td class="px-4 py-3 text-gray-300">${formatDateHuman(task.date)}</td>
-                            <td class="px-4 py-3 text-gray-300">${task.output || '--'}</td>
                             <td class="px-4 py-3">
                                 <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusChipClasses(task.state)}">
                                     ${statusLabel(task.state)}
@@ -646,9 +623,7 @@
                     fields.task.textContent = task.title || '--';
                     fields.mfo.textContent = task.uwpOutputLabel || '--';
                     fields.date.textContent = formatDateHuman(task.date);
-                    fields.requestId.textContent = task.requestId && String(task.requestId).trim() ? task.requestId : '--';
                     fields.status.textContent = statusLabel(task.state);
-                    fields.outputType.textContent = task.output || '--';
                     fields.outputState.textContent = outputStateLabel(task);
                     fields.quantity.textContent = quantityLabel(task.quantity);
 
@@ -698,7 +673,6 @@
                     }
                     resetSupervisorMonitoring();
                     if (fields.mfo) fields.mfo.textContent = '--';
-                    if (fields.requestId) fields.requestId.textContent = '--';
                     if (viewEvidenceBtn) {
                         viewEvidenceBtn.classList.add('hidden');
                         delete viewEvidenceBtn.dataset.entryId;

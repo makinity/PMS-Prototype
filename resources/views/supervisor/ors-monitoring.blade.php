@@ -48,8 +48,7 @@
                     'dateLabel' => $dateLabel,
                     'employee' => optional($entry->employee)->name ?? '--',
                     'office' => $officeValue,
-                    'output' => optional($entry->ipcrItem)->output_title ?? (optional($entry->ipcrItem)->output_type ?? '--'),
-                    'outputType' => $entry->output_type ?? (optional($entry->ipcrItem)->output_type ?? '--'),
+                    'output' => optional($entry->ipcrItem)->output_title ?? '--',
                     'uwpOutput' => optional($entry->ipcrItem)->output_title ?? '--',
                     'accomplishment' => optional($entry->ipcrItem)->indicator_text ?? '--',
                     'indicator_text' => optional($entry->ipcrItem)->indicator_text ?? '--',
@@ -57,7 +56,6 @@
                     'duration' => $entry->duration ?? ($entry->duration_minutes ?? '--'),
                     'evidence' => $evidenceCount > 0,
                     'evidence_count' => $evidenceCount,
-                    'requestId' => $entry->client_request_id ?? ($entry->request_id ?? ('ORS-' . $entry->id)),
                     'quantity' => $entry->quantity ?? '--',
                     'notes' => $entry->notes,
                     'total_seconds' => is_null($entry->total_seconds) ? null : (int) $entry->total_seconds,
@@ -380,24 +378,14 @@
                                         <p id="monitoringMajorOutput" class="text-white">--</p>
                                     </div>
                                     <div>
-                                        <p class="text-xs text-slate-400">Output Type</p>
-                                        <p id="monitoringOutputType">--</p>
-                                    </div>
-                                    <div>
                                         <p class="text-xs text-slate-400">Actual Accomplishment</p>
                                         <p id="monitoringAccomplishment" class="text-slate-100">--</p>
                                     </div>
                                 </div>
 
-                                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                    <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-                                        <p class="text-xs text-slate-400">ORS Reference / Request ID</p>
-                                        <p id="monitoringRequestId" class="text-slate-100 mt-1">--</p>
-                                    </div>
-                                    <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-                                        <p class="text-xs text-slate-400">Time Spent</p>
-                                        <p id="monitoringDuration" class="text-slate-100 mt-1">--</p>
-                                    </div>
+                                <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+                                    <p class="text-xs text-slate-400">Time Spent</p>
+                                    <p id="monitoringDuration" class="text-slate-100 mt-1">--</p>
                                 </div>
 
                                 <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
@@ -584,24 +572,14 @@
                                         <p id="ratedMonitoringMajorOutput" class="text-white">--</p>
                                     </div>
                                     <div>
-                                        <p class="text-xs text-slate-400">Output Type</p>
-                                        <p id="ratedMonitoringOutputType">--</p>
-                                    </div>
-                                    <div>
                                         <p class="text-xs text-slate-400">Actual Accomplishment</p>
                                         <p id="ratedMonitoringAccomplishment" class="text-slate-100">--</p>
                                     </div>
                                 </div>
 
-                                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                    <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-                                        <p class="text-xs text-slate-400">ORS Reference / Request ID</p>
-                                        <p id="ratedMonitoringRequestId" class="text-slate-100 mt-1">--</p>
-                                    </div>
-                                    <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-                                        <p class="text-xs text-slate-400">Time Spent</p>
-                                        <p id="ratedMonitoringDuration" class="text-slate-100 mt-1">--</p>
-                                    </div>
+                                <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+                                    <p class="text-xs text-slate-400">Time Spent</p>
+                                    <p id="ratedMonitoringDuration" class="text-slate-100 mt-1">--</p>
                                 </div>
 
                                 <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
@@ -789,9 +767,7 @@
                 const officeEl = document.getElementById('monitoringOffice');
                 const dateEl = document.getElementById('monitoringDate');
                 const majorOutputEl = document.getElementById('monitoringMajorOutput');
-                const outputTypeEl = document.getElementById('monitoringOutputType');
                 const accomplishmentEl = document.getElementById('monitoringAccomplishment');
-                const requestIdEl = document.getElementById('monitoringRequestId');
                 const durationEl = document.getElementById('monitoringDuration');
                 const evidenceEl = document.getElementById('monitoringEvidence');
                 const monitoringEvidenceBtn = document.getElementById('monitoringEvidenceBtn');
@@ -803,9 +779,7 @@
                 const ratedOfficeEl = document.getElementById('ratedMonitoringOffice');
                 const ratedDateEl = document.getElementById('ratedMonitoringDate');
                 const ratedMajorOutputEl = document.getElementById('ratedMonitoringMajorOutput');
-                const ratedOutputTypeEl = document.getElementById('ratedMonitoringOutputType');
                 const ratedAccomplishmentEl = document.getElementById('ratedMonitoringAccomplishment');
-                const ratedRequestIdEl = document.getElementById('ratedMonitoringRequestId');
                 const ratedDurationEl = document.getElementById('ratedMonitoringDuration');
                 const ratedEvidenceEl = document.getElementById('ratedMonitoringEvidence');
                 const ratedMonitoringEvidenceBtn = document.getElementById('ratedMonitoringEvidenceBtn');
@@ -1679,10 +1653,8 @@
                     dateEl.textContent = data.dateLabel || data.date || '--';
 
                     majorOutputEl.textContent = data.uwpOutput || '--';
-                    outputTypeEl.textContent = data.outputType || data.output || '--';
                     accomplishmentEl.textContent = data.accomplishment || '--';
 
-                    requestIdEl.textContent = data.requestId || '--';
                     durationEl.textContent = formatDurationFromEntry(data);
                     evidenceEl.textContent = Number(data.evidence_count || 0) > 0
                         ? `Evidence attached (${Number(data.evidence_count || 0)})`
@@ -1754,9 +1726,7 @@
                     if (ratedOfficeEl) ratedOfficeEl.textContent = data.office || '--';
                     if (ratedDateEl) ratedDateEl.textContent = data.dateLabel || data.date || '--';
                     if (ratedMajorOutputEl) ratedMajorOutputEl.textContent = data.uwpOutput || '--';
-                    if (ratedOutputTypeEl) ratedOutputTypeEl.textContent = data.outputType || data.output || '--';
                     if (ratedAccomplishmentEl) ratedAccomplishmentEl.textContent = data.accomplishment || '--';
-                    if (ratedRequestIdEl) ratedRequestIdEl.textContent = data.requestId || '--';
                     if (ratedDurationEl) ratedDurationEl.textContent = formatDurationFromEntry(data);
 
                     if (ratedEvidenceEl) {

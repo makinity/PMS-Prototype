@@ -20,8 +20,6 @@ class MyTaskSyncService
                 'ipcr_id' => $entry->ipcr_id,
                 'ipcr_item_id' => $entry->ipcr_item_id,
                 'work_date' => $entry->work_date,
-                'client_request_id' => $entry->client_request_id,
-                'output_type' => $entry->output_type,
                 'notes' => $entry->notes,
                 'quantity' => $entry->quantity,
                 'started_at' => $entry->started_at,
