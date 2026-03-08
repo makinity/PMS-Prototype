@@ -406,6 +406,29 @@
             let currentUwpId = null;
             let selectedUwp = null;
 
+            function formatTargetTimelineDisplay(targetQuantity, targetTimeline) {
+                const quantity = targetQuantity === null || targetQuantity === undefined || targetQuantity === ''
+                    ? ''
+                    : String(targetQuantity).trim();
+                const timeline = targetTimeline === null || targetTimeline === undefined || targetTimeline === ''
+                    ? ''
+                    : String(targetTimeline).trim();
+
+                if (quantity !== '' && timeline !== '') {
+                    return `${quantity}+${timeline}`;
+                }
+
+                if (quantity !== '') {
+                    return quantity;
+                }
+
+                if (timeline !== '') {
+                    return timeline;
+                }
+
+                return 'Not specified';
+            }
+
             function showUwpPreview(uwpId, trigger = null) {
                 currentUwpId = uwpId;
                 selectedUwp = null;
@@ -579,7 +602,7 @@
                                 </div>
                             </td>
                             <td class="px-5 py-5 text-slate-300">
-                                ${mfo.target_timeline || 'Not specified'}
+                                ${formatTargetTimelineDisplay(mfo.target_quantity, mfo.target_timeline)}
                             </td>
                             <td class="px-5 py-5 text-center">
                                 <span class="rounded-full border border-${functionColor}-500/40 px-3 py-1 text-xs font-semibold text-${functionColor}-400">

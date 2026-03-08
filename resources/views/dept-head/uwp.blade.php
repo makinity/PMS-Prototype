@@ -115,6 +115,7 @@
                                         return [
                                             'id' => $mfo->id,
                                             'title' => $mfo->title,
+                                            'target_quantity' => $mfo->target_quantity,
                                             'target_timeline' => $mfo->target_timeline,
                                             'weight_percent' => (string) ($mfo->weight_percent ?? ''),
                                             'success_indicators' => $mfo->successIndicators->map(function ($si) {
@@ -829,6 +830,29 @@
         return list.length;
     }
 
+    function formatTargetTimelineDisplay(targetQuantity, targetTimeline) {
+        const quantity = targetQuantity === null || targetQuantity === undefined || targetQuantity === ''
+            ? ''
+            : String(targetQuantity).trim();
+        const timeline = targetTimeline === null || targetTimeline === undefined || targetTimeline === ''
+            ? ''
+            : String(targetTimeline).trim();
+
+        if (quantity !== '' && timeline !== '') {
+            return `${quantity}+${timeline}`;
+        }
+
+        if (quantity !== '') {
+            return quantity;
+        }
+
+        if (timeline !== '') {
+            return timeline;
+        }
+
+        return '-';
+    }
+
     function openIndicatorsModal(title, unit, mfoTitle, successIndicators) {
         const modal = document.getElementById('uwp-indicators-modal');
         const titleEl = document.getElementById('uwp-indicators-title');
@@ -985,7 +1009,7 @@
 
                 const tdTimeline = document.createElement('td');
                 tdTimeline.className = 'px-4 py-3 text-sm text-center text-slate-100';
-                tdTimeline.textContent = mfo.target_timeline || '—';
+                tdTimeline.textContent = formatTargetTimelineDisplay(mfo.target_quantity, mfo.target_timeline);
 
                 const tdFunction = document.createElement('td');
                 tdFunction.className = 'px-4 py-3 text-sm text-center';

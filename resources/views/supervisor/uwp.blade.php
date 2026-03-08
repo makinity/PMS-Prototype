@@ -573,6 +573,16 @@
                         : (selectedUwpId ? seededFunctions : []),
                 };
 
+                uwpState.functions = (uwpState.functions || []).map((func) => ({
+                    ...func,
+                    mfos: Array.isArray(func?.mfos)
+                        ? func.mfos.map((mfo) => ({
+                            ...mfo,
+                            targetQuantity: normalizeTargetQuantity(mfo?.targetQuantity ?? mfo?.target_quantity),
+                        }))
+                        : [],
+                }));
+
                 const standardsSeedMap = {
                     'All e-bank transactions scanned and encoded daily': {
                         5: { q: ['No errors; accurate encoding'], e: ['100% processed'], t: ['Same working day'] },
@@ -681,6 +691,15 @@
                     return Math.min(max, Math.max(min, num));
                 }
 
+                function normalizeTargetQuantity(value) {
+                    if (value === null || value === undefined || value === '') return null;
+
+                    const num = Number(value);
+                    if (!Number.isFinite(num)) return null;
+
+                    return Math.max(0, Math.trunc(num));
+                }
+
                 const supervisorOfficeName = @json(auth()->user()->office->name ?? '');
 
                 function getSelectedUnitLabel() {
@@ -761,10 +780,11 @@
                     };
                 }
 
-                function createMfo(title, target, indicators) {
+                function createMfo(title, target, targetQuantity, indicators) {
                     return {
                         title: title || '',
                         target: target || '',
+                        targetQuantity: normalizeTargetQuantity(targetQuantity),
                         indicators: Array.isArray(indicators) ? indicators : [],
                     };
                 }
@@ -878,15 +898,31 @@
                                     </td>
 
                                     <td class="px-4 py-4">
-                                        <textarea
-                                            data-mfo-target
-                                            data-function-index="${funcIndex}"
-                                            data-mfo-index="${mfoIndex}"
-                                            rows="2"
-                                            class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none ${mutedClass}"
-                                            style="background:#0f172a;color:#e5e7eb;"
-                                            placeholder="e.g., Monthly; 1,200 files"
-                                            ${inputDisabled}>${escapeHtml(mfo.target)}</textarea>
+                                        <div class="flex gap-2">
+                                            <input
+                                                type="number"
+                                                data-mfo-target-quantity
+                                                data-function-index="${funcIndex}"
+                                                data-mfo-index="${mfoIndex}"
+                                                value="${mfo.targetQuantity ?? ''}"
+                                                placeholder="Qty"
+                                                style="background:#0f172a;color:#e5e7eb;"
+                                                class="w-24 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none ${mutedClass}"
+                                                ${inputDisabled}
+                                            >
+
+                                            <input
+                                                type="text"
+                                                data-mfo-target
+                                                data-function-index="${funcIndex}"
+                                                data-mfo-index="${mfoIndex}"
+                                                class="flex-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none ${mutedClass}"
+                                                style="background:#0f172a;color:#e5e7eb;"
+                                                placeholder="e.g., files per month"
+                                                value="${escapeHtml(mfo.target)}"
+                                                ${inputDisabled}
+                                            >
+                                        </div>
                                     </td>
 
                                     <td class="px-4 py-4 text-right">
@@ -1516,7 +1552,7 @@
                     const func = uwpState.functions[functionIndex];
                     if (!func) return;
                     func.mfos = Array.isArray(func.mfos) ? func.mfos : [];
-                    func.mfos.push(createMfo('', '', []));
+                    func.mfos.push(createMfo('', '', null, []));
                     renderFunctions();
                 }
 
@@ -1569,6 +1605,7 @@
                         weight: func.weight,
                         mfos: (func.mfos || []).map((mfo) => ({
                             title: mfo.title,
+                            target_quantity: normalizeTargetQuantity(mfo.targetQuantity),
                             target: mfo.target,
                             indicators: (mfo.indicators || []).map((indicator) => ({
                                 text: indicator.text,
@@ -1611,6 +1648,7 @@
                             payload.push({
                                 function_code: functionCode,
                                 title: titleText,
+                                target_quantity: normalizeTargetQuantity(mfo.targetQuantity),
                                 target_summary: (mfo.target || '').trim(),
                                 weight: weight,
                                 sort_order: sortOrder,
@@ -1682,6 +1720,13 @@
                             const mfoIdx = Number(target.dataset.mfoIndex);
                             const mfo = uwpState.functions[funcIdx]?.mfos?.[mfoIdx];
                             if (mfo) mfo.title = target.value;
+                        }
+
+                        if (target.matches('[data-mfo-target-quantity]')) {
+                            const funcIdx = Number(target.dataset.functionIndex);
+                            const mfoIdx = Number(target.dataset.mfoIndex);
+                            const mfo = uwpState.functions[funcIdx]?.mfos?.[mfoIdx];
+                            if (mfo) mfo.targetQuantity = normalizeTargetQuantity(target.value);
                         }
 
                         if (target.matches('[data-mfo-target]')) {

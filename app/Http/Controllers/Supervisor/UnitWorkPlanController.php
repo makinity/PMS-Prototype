@@ -685,9 +685,13 @@ class UnitWorkPlanController extends Controller
             }
 
             $indicators = $this->normalizeIndicatorsPayload($mfoPayload['indicators'] ?? $mfoPayload['success_indicators'] ?? []);
+            $targetQuantity = $this->normalizeTargetQuantity(
+                $mfoPayload['target_quantity'] ?? $mfoPayload['targetQuantity'] ?? null
+            );
 
             $mfos[] = [
                 'title' => $title,
+                'target_quantity' => $targetQuantity,
                 'target_timeline' => (string) ($mfoPayload['target'] ?? $mfoPayload['target_timeline'] ?? ''),
                 'weight_percent' => isset($mfoPayload['weight_percent']) ? (float) $mfoPayload['weight_percent'] : null,
                 'sort_order' => (int) ($mfoPayload['sort_order'] ?? $sortOrder),
@@ -733,9 +737,13 @@ class UnitWorkPlanController extends Controller
             }
 
             $indicators = $this->normalizeIndicatorsPayload($mfoPayload['success_indicators'] ?? []);
+            $targetQuantity = $this->normalizeTargetQuantity(
+                $mfoPayload['target_quantity'] ?? $mfoPayload['targetQuantity'] ?? null
+            );
 
             $functions[$functionCode]['mfos'][] = [
                 'title' => $title,
+                'target_quantity' => $targetQuantity,
                 'target_timeline' => (string) ($mfoPayload['target_summary'] ?? ''),
                 'weight_percent' => isset($mfoPayload['weight']) ? (float) $mfoPayload['weight'] : null,
                 'sort_order' => (int) ($mfoPayload['sort_order'] ?? count($functions[$functionCode]['mfos']) + 1),
@@ -744,6 +752,19 @@ class UnitWorkPlanController extends Controller
         }
 
         return array_values($functions);
+    }
+
+    private function normalizeTargetQuantity(mixed $value): ?int
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        if (!is_numeric($value)) {
+            return null;
+        }
+
+        return max(0, (int) $value);
     }
 
     private function normalizeIndicatorsPayload(array $indicatorsPayload): array
@@ -935,8 +956,13 @@ class UnitWorkPlanController extends Controller
                         continue;
                     }
 
+                    $targetQuantity = $this->normalizeTargetQuantity(
+                        $mfoPayload['target_quantity'] ?? $mfoPayload['targetQuantity'] ?? null
+                    );
+
                     $mfo = $function->mfos()->create([
                         'title' => $title,
+                        'target_quantity' => $targetQuantity,
                         'target_timeline' => (string) ($mfoPayload['target_timeline'] ?? ''),
                         'weight_percent' => isset($mfoPayload['weight_percent']) ? (float) $mfoPayload['weight_percent'] : null,
                         'sort_order' => (int) ($mfoPayload['sort_order'] ?? $mfoOrder),
@@ -1063,6 +1089,7 @@ class UnitWorkPlanController extends Controller
                         ->map(function ($mfo) {
                             return [
                                 'title' => (string) $mfo->title,
+                                'targetQuantity' => $this->normalizeTargetQuantity($mfo->target_quantity),
                                 'target' => (string) ($mfo->target_timeline ?? ''),
                                 'indicators' => $mfo->successIndicators
                                     ->sortBy('sort_order')
@@ -1280,6 +1307,7 @@ class UnitWorkPlanController extends Controller
                             return [
                                 'id' => $mfo->id,
                                 'title' => $mfo->title,
+                                'target_quantity' => $this->normalizeTargetQuantity($mfo->target_quantity),
                                 'target_timeline' => $mfo->target_timeline,
                                 'weight_percent' => $mfo->weight_percent,
                                 'success_indicators' => $mfo->successIndicators->map(function ($indicator) {
