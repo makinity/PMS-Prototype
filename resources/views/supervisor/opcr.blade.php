@@ -353,6 +353,29 @@ document.addEventListener('DOMContentLoaded', function () {
         .replaceAll('"', '&quot;')
         .replaceAll("'", '&#039;');
 
+    const formatTargetTimelineDisplay = (targetQuantity, targetTimeline) => {
+        const quantity = targetQuantity === null || targetQuantity === undefined || targetQuantity === ''
+            ? ''
+            : String(targetQuantity).trim();
+        const timeline = targetTimeline === null || targetTimeline === undefined || targetTimeline === ''
+            ? ''
+            : String(targetTimeline).trim();
+
+        if (quantity !== '' && timeline !== '') {
+            return `${quantity} ${timeline}`.trim();
+        }
+
+        if (quantity !== '') {
+            return quantity;
+        }
+
+        if (timeline !== '') {
+            return timeline;
+        }
+
+        return '-';
+    };
+
     const statusLabel = (status) => {
         const key = String(status || '').toLowerCase();
         if (key === 'draft') return 'Draft';
@@ -540,7 +563,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         <i class="fa-regular fa-eye text-sm"></i><span>(${indicators.length})</span>
                     </button>
                 </td>
-                <td class="px-4 py-4 text-slate-200">${escapeHtml(output?.target_timeline || '�')}</td>
+                <td class="px-4 py-4 text-slate-200">${escapeHtml(formatTargetTimelineDisplay(output?.target_quantity, output?.target_timeline))}</td>
                 <td class="px-4 py-4 text-slate-200">${output?.weight_percent !== null && output?.weight_percent !== undefined && output?.weight_percent !== '' ? escapeHtml(String(output.weight_percent) + '%') : '�'}</td>
                 <td class="px-4 py-4">${functionBadge(output?.function_type)}</td>
             `;

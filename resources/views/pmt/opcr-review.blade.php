@@ -290,6 +290,29 @@ document.addEventListener('DOMContentLoaded', function () {
         .replaceAll('"', '&quot;')
         .replaceAll("'", '&#039;');
 
+    const formatTargetSummaryDisplay = (targetQuantity, targetSummary) => {
+        const quantity = targetQuantity === null || targetQuantity === undefined || targetQuantity === ''
+            ? ''
+            : String(targetQuantity).trim();
+        const summary = targetSummary === null || targetSummary === undefined || targetSummary === ''
+            ? ''
+            : String(targetSummary).trim();
+
+        if (quantity !== '' && summary !== '') {
+            return `${quantity} ${summary}`.trim();
+        }
+
+        if (quantity !== '') {
+            return quantity;
+        }
+
+        if (summary !== '') {
+            return summary;
+        }
+
+        return '-';
+    };
+
     const parseJson = (raw) => {
         try { return JSON.parse(raw); } catch (e) { return null; }
     };
@@ -376,7 +399,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         <span class="text-xs">(${indicators.length})</span>
                     </button>
                 </td>
-                <td class="px-4 py-3 align-top text-slate-200">${escapeHtml(output.target_summary || '-')}</td>
+                <td class="px-4 py-3 align-top text-slate-200">${escapeHtml(formatTargetSummaryDisplay(output.target_quantity, output.target_summary))}</td>
                 <td class="px-4 py-3 align-top text-slate-200">${output.weight_percent !== null && output.weight_percent !== undefined && output.weight_percent !== '' ? escapeHtml(String(output.weight_percent) + '%') : '-'}</td>
                 <td class="px-4 py-3 align-top">${functionBadge(output.function_type)}</td>
             `;

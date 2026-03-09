@@ -235,6 +235,7 @@ class OpcrController extends Controller
 
                     $outputs[] = [
                         'title' => (string) ($mfo->title ?? ''),
+                        'target_quantity' => $mfo->target_quantity,
                         'target_summary' => (string) ($mfo->target_timeline ?? ''),
                         'weight_percent' => $mfo->weight_percent ?? $function->weight_percent ?? '',
                         'function_type' => strtolower((string) ($function->function_type ?? '')),

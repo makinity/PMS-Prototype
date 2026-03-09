@@ -488,7 +488,7 @@
             : String(targetTimeline).trim();
 
         if (quantity !== '' && timeline !== '') {
-            return `${quantity}+${timeline}`;
+            return `${quantity} ${timeline}`.trim();
         }
 
         if (quantity !== '') {
