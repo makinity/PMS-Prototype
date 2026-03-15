@@ -806,7 +806,7 @@
                             : selectedIndicators.map((indicator, indicatorIndex) => {
                                 const qVal = indicator?.q === null || indicator?.q === undefined
                                     ? '&mdash;'
-                                    : String(Math.round(Number(indicator.q)));
+                                    : formatNumber(indicator.q, 2);
                                 const eVal = indicator?.e === null || indicator?.e === undefined ? '&mdash;' : formatNumber(indicator.e, 2);
                                 const tVal = indicator?.t === null || indicator?.t === undefined ? '&mdash;' : formatNumber(indicator.t, 2);
                                 const aVal = indicator?.a === null || indicator?.a === undefined ? '&mdash;' : formatNumber(indicator.a, 2);

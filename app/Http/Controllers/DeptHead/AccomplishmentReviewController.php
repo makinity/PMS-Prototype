@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AccomplishmentSubmission;
 use App\Models\Ipcr;
 use App\Models\PerformancePeriod;
+use App\Support\ResolvesIpcrTargetScores;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -14,10 +15,22 @@ use Illuminate\Support\Facades\Storage;
 
 class AccomplishmentReviewController extends Controller
 {
+    use ResolvesIpcrTargetScores;
+
     public function index(Request $request)
     {
         $user = $request->user();
         abort_unless($user, 403);
+        $statusFilter = strtolower(trim((string) $request->query('status', '')));
+        $allowedStatuses = [
+            'draft',
+            'submitted_to_supervisor',
+            'supervisor_endorsed',
+            'dept_head_endorsed',
+            'pmt_approved',
+            'returned_to_employee',
+        ];
+        $statusFilter = in_array($statusFilter, $allowedStatuses, true) ? $statusFilter : '';
 
         $period = PerformancePeriod::query()
             ->where('is_active', 1)
@@ -42,9 +55,8 @@ class AccomplishmentReviewController extends Controller
         $monthLabels = $this->buildMonthLabels($period);
 
         // Dept Head scope (demo): same office/unit as the employee
-        $submissions = AccomplishmentSubmission::query()
+        $submissionQuery = AccomplishmentSubmission::query()
             ->where('performance_period_id', $period->id)
-            ->whereIn('status', ['supervisor_endorsed', 'dept_head_endorsed'])
             ->whereHas('employee', function ($q) use ($user) {
                 $q->where('office_id', $user->office_id);
             })
@@ -52,15 +64,23 @@ class AccomplishmentReviewController extends Controller
                 'employee:id,name,office_id',
                 'employee.office:id,name',
                 'mpors:id,employee_id,office_id,month,status',
-                'ipcr:id,performance_period_id,office_id,employee_id',
-                'ipcr.items:id,ipcr_id,output_title,function_type,indicator_text,target_summary,standards_payload',
+                'ipcr:id,unit_work_plan_id,performance_period_id,office_id,employee_id',
+                'ipcr.unitWorkPlan.uwpFunctions.mfos:id,uwp_function_id,title,target_quantity,target_timeline',
+                'ipcr.items:id,ipcr_id,uwp_function_id,output_title,function_type,indicator_text,target_summary,standards_payload',
             ])
-            ->orderByDesc('supervisor_action_at')
-            ->orderByDesc('id')
-            ->get();
+            ->orderByDesc('submitted_at')
+            ->orderByDesc('id');
+
+        if ($statusFilter !== '') {
+            $submissionQuery->where('status', $statusFilter);
+        }
+
+        $submissions = $submissionQuery->get();
 
         if ($submissions->isEmpty()) {
-            $infoMessage = 'No supervisor- or dept-head-endorsed submissions found for your office/unit.';
+            $infoMessage = $statusFilter !== ''
+                ? 'No submissions found for the selected status in your office/unit.'
+                : 'No submissions found for your office/unit.';
         }
 
         foreach ($submissions as $submission) {
@@ -81,7 +101,8 @@ class AccomplishmentReviewController extends Controller
             // Same SMPOR/IPCR snapshot logic as Supervisor
             [$smporSections, $ratingsByOutput, $ratingsByIndicator] = $this->buildSmporSectionsFromSnapshot(
                 $submission->mpors ?? collect(),
-                $monthLabels
+                $monthLabels,
+                $submission->ipcr
             );
 
             $source = strtolower((string) ($submission->dataset_source ?? ''));
@@ -189,8 +210,9 @@ class AccomplishmentReviewController extends Controller
             ->all();
     }
 
-    private function buildSmporSectionsFromSnapshot(Collection $mpors, array $monthLabels): array
+    private function buildSmporSectionsFromSnapshot(Collection $mpors, array $monthLabels, ?Ipcr $ipcr = null): array
     {
+        $targetQuantityByOutput = $this->buildTargetQuantityByOutput($ipcr);
         $sections = [];
         $ratingsByOutput = [];
         $ratingsByIndicator = [];
@@ -252,17 +274,21 @@ class AccomplishmentReviewController extends Controller
 
                 $indicatorText = trim((string) ($entry->ipcrItem?->indicator_text ?? ''));
                 if ($indicatorText !== '') {
-                    if (!isset($indicatorTotals[$indicatorText])) {
-                        $indicatorTotals[$indicatorText] = [
+                    $indicatorLookupKey = $this->buildIndicatorRatingLookupKey($expectedOutput, $indicatorText);
+
+                    if (!isset($indicatorTotals[$indicatorLookupKey])) {
+                        $indicatorTotals[$indicatorLookupKey] = [
+                            'output' => $expectedOutput,
+                            'indicator_text' => $indicatorText,
                             'qty' => 0.0,
                             'q_points' => 0.0,
                             't_points' => 0.0,
                         ];
                     }
 
-                    $indicatorTotals[$indicatorText]['qty'] += $quantity;
-                    $indicatorTotals[$indicatorText]['q_points'] += $qualityPoints;
-                    $indicatorTotals[$indicatorText]['t_points'] += $timelinessPoints;
+                    $indicatorTotals[$indicatorLookupKey]['qty'] += $quantity;
+                    $indicatorTotals[$indicatorLookupKey]['q_points'] += $qualityPoints;
+                    $indicatorTotals[$indicatorLookupKey]['t_points'] += $timelinessPoints;
                 }
 
                 $sectionBuckets[$functionType][$expectedOutput]['quantity'][$monthLabel] += $quantity;
@@ -286,41 +312,7 @@ class AccomplishmentReviewController extends Controller
             }
         }
 
-        foreach ($ratingsTotals as $output => $totals) {
-            $qty = (float) ($totals['qty'] ?? 0);
-            if ($qty <= 0) {
-                continue;
-            }
-
-            $q = round(((float) ($totals['q_points'] ?? 0)) / $qty, 2);
-            $t = round(((float) ($totals['t_points'] ?? 0)) / $qty, 2);
-
-            $ratingsByOutput[$output] = [
-                'qty' => $qty,
-                'q' => $q,
-                'e' => $q,
-                't' => $t,
-            ];
-        }
-
-        foreach ($indicatorTotals as $indicatorText => $totals) {
-            $qty = (float) ($totals['qty'] ?? 0);
-            if ($qty <= 0) {
-                continue;
-            }
-
-            $e = round(((float) ($totals['q_points'] ?? 0)) / $qty, 2);
-            $t = round(((float) ($totals['t_points'] ?? 0)) / $qty, 2);
-            $a = round(($e + $t) / 2, 2);
-
-            $ratingsByIndicator[$indicatorText] = [
-                'qty' => $qty,
-                'q' => $qty,
-                'e' => $e,
-                't' => $t,
-                'a' => $a,
-            ];
-        }
+        [$ratingsByOutput, $ratingsByIndicator] = $this->buildRatedIpcrPerformanceMaps($ipcr);
 
         $sectionTypes = array_keys($sectionBuckets);
         usort($sectionTypes, function (string $left, string $right): int {
@@ -397,6 +389,7 @@ class AccomplishmentReviewController extends Controller
             return [];
         }
 
+        $targetSummaryByFunctionAndOutput = $this->buildTargetSummaryByFunctionAndOutput($ipcr);
         $sections = [];
         $itemsByFunctionAndOutput = $items->groupBy(function ($item): string {
             $functionType = $this->normalizeFunctionType((string) ($item->function_type ?? 'support'));
@@ -410,15 +403,18 @@ class AccomplishmentReviewController extends Controller
 
         foreach ($itemsByFunctionAndOutput as $groupKey => $groupItems) {
             [$functionType, $majorOutput] = explode('||', (string) $groupKey, 2);
-            $targetSummary = trim((string) ($groupItems->first(function ($row) {
+            $fallbackTargetSummary = trim((string) ($groupItems->first(function ($row) {
                 return trim((string) ($row->target_summary ?? '')) !== '';
             })?->target_summary ?? ''));
+            $firstMatchingItem = $groupItems->first();
+            $targetMapKey = (int) ($firstMatchingItem?->uwp_function_id ?? 0) . '||' . trim((string) $majorOutput);
+            $targetSummary = trim((string) ($targetSummaryByFunctionAndOutput[$targetMapKey] ?? $fallbackTargetSummary));
 
             if ($targetSummary === '') {
                 $targetSummary = '--';
             }
 
-            $indicators = $groupItems->map(function ($item) use ($ratingsByIndicator): array {
+            $indicators = $groupItems->map(function ($item) use ($ratingsByIndicator, $majorOutput): array {
                 $standardsPayload = $item->standards_payload;
                 if (is_string($standardsPayload)) {
                     $decoded = json_decode($standardsPayload, true);
@@ -429,7 +425,10 @@ class AccomplishmentReviewController extends Controller
 
                 $indicatorText = trim((string) ($item->indicator_text ?? '')) ?: '--';
                 $lookupKey = $indicatorText !== '--' ? $indicatorText : '';
-                $indicatorRatings = $lookupKey !== '' ? ($ratingsByIndicator[$lookupKey] ?? null) : null;
+                $indicatorLookupKey = $lookupKey !== ''
+                    ? $this->buildIndicatorRatingLookupKey($majorOutput, $lookupKey)
+                    : '';
+                $indicatorRatings = $indicatorLookupKey !== '' ? ($ratingsByIndicator[$indicatorLookupKey] ?? null) : null;
 
                 return [
                     'indicator_text' => $indicatorText,
@@ -438,6 +437,7 @@ class AccomplishmentReviewController extends Controller
                     'e' => $indicatorRatings ? (float) ($indicatorRatings['e'] ?? 0) : null,
                     't' => $indicatorRatings ? (float) ($indicatorRatings['t'] ?? 0) : null,
                     'a' => $indicatorRatings ? (float) ($indicatorRatings['a'] ?? 0) : null,
+                    'rated_qty' => $indicatorRatings ? (float) ($indicatorRatings['qty'] ?? 0) : null,
                 ];
             })->values()->all();
 
@@ -461,6 +461,7 @@ class AccomplishmentReviewController extends Controller
                 'q' => $ratings ? (float) $ratings['q'] : null,
                 'e' => $ratings ? (float) $ratings['e'] : null,
                 't' => $ratings ? (float) $ratings['t'] : null,
+                'a' => $ratings ? (float) $ratings['a'] : null,
                 'rated_qty' => $ratings ? (float) $ratings['qty'] : null,
             ];
         }

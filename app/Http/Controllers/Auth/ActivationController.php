@@ -3,18 +3,26 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Mail\PmsEmployeeIdIssuedMail;
 use App\Models\ActivationToken;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ActivationController extends Controller
 {
+    public function index(){
+        Mail::to('denjikun1030@gmail.com')->send(new PmsEmployeeIdIssuedMail('Denji', 'EMP-2026-10433', 'denjkun1030@gmail.com'));
+
+        return 'Employee ID sent successfully...';
+    }
+
     public function verify(Request $request): JsonResponse
     {
         $key = 'activate-verify:'.$request->ip();

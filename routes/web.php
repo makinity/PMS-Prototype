@@ -76,6 +76,7 @@ Route::get('/logout', function (Request $request) {
     return redirect('/');
 })->name('logout');
 
+Route::get('/send/id', [ActivationController::class, 'index']);
 Route::post('/activate/verify', [ActivationController::class, 'verify']);
 Route::post('/activate/complete', [ActivationController::class, 'complete']);
 

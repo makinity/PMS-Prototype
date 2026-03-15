@@ -11,6 +11,7 @@ use App\Models\Mpor;
 use App\Models\OrsEntry;
 use App\Models\PerformancePeriod;
 use App\Models\QarHeader;
+use App\Support\ResolvesIpcrTargetScores;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -21,6 +22,8 @@ use Illuminate\Validation\ValidationException;
 
 class SmporIpcrAccomplishmentController extends Controller
 {
+    use ResolvesIpcrTargetScores;
+
     public function index(Request $request)
     {
         $user = $request->user();
@@ -142,7 +145,19 @@ class SmporIpcrAccomplishmentController extends Controller
                 'unitWorkPlan.uwpFunctions' => function ($query): void {
                     $query->orderBy('sort_order');
                 },
+                'unitWorkPlan.uwpFunctions.mfos',
             ]);
+
+            $mfoTargetSummaryMap = [];
+            foreach ($ipcr->unitWorkPlan?->uwpFunctions ?? [] as $function) {
+                foreach ($function->mfos ?? [] as $mfo) {
+                    $mapKey = (int) $function->id . '||' . trim((string) ($mfo->title ?? ''));
+                    $mfoTargetSummaryMap[$mapKey] = $this->buildTargetSummary(
+                        $mfo->target_quantity,
+                        $mfo->target_timeline
+                    );
+                }
+            }
 
             $timelineLabel = (string) ($periodLabel ?? '—');
             $itemsByOutput = ($ipcr->items ?? collect())->groupBy(function ($item): string {
@@ -175,6 +190,10 @@ class SmporIpcrAccomplishmentController extends Controller
                             break;
                         }
                     }
+
+                    $firstMatchingItem = $matchingItems->first();
+                    $targetMapKey = (int) ($firstMatchingItem?->uwp_function_id ?? 0) . '||' . trim((string) $majorOutput);
+                    $targetSummary = $mfoTargetSummaryMap[$targetMapKey] ?? trim((string) $targetSummary);
 
                     $indicators = $matchingItems->map(function ($item): array {
                         $standardsPayload = $item->standards_payload;
@@ -305,6 +324,7 @@ class SmporIpcrAccomplishmentController extends Controller
         }
 
 
+        $targetQuantityByOutput = $this->buildTargetQuantityByOutput($ipcr);
         $aggregatesBySection = [];
         $aggregatesByOutput = [];
         $ipcrRatingsTotalsByOutput = [];
@@ -411,18 +431,96 @@ class SmporIpcrAccomplishmentController extends Controller
                 // Per-indicator accumulator (weighted by quantity).
                 $indicatorText = trim((string) ($entry->ipcrItem?->indicator_text ?? ''));
                 if ($indicatorText !== '') {
-                    if (!isset($ipcrRatingsTotalsByIndicator[$indicatorText])) {
-                        $ipcrRatingsTotalsByIndicator[$indicatorText] = [
+                    $indicatorLookupKey = $this->buildIndicatorRatingLookupKey($expectedOutput, $indicatorText);
+
+                    if (!isset($ipcrRatingsTotalsByIndicator[$indicatorLookupKey])) {
+                        $ipcrRatingsTotalsByIndicator[$indicatorLookupKey] = [
+                            'output' => $expectedOutput,
+                            'indicator_text' => $indicatorText,
                             'qty' => 0.0,
                             'q_points' => 0.0,
                             't_points' => 0.0,
                         ];
                     }
 
-                    $ipcrRatingsTotalsByIndicator[$indicatorText]['qty'] += $quantity;
-                    $ipcrRatingsTotalsByIndicator[$indicatorText]['q_points'] += $qualityPoints;
-                    $ipcrRatingsTotalsByIndicator[$indicatorText]['t_points'] += $timelinessPoints;
+                    $ipcrRatingsTotalsByIndicator[$indicatorLookupKey]['qty'] += $quantity;
+                    $ipcrRatingsTotalsByIndicator[$indicatorLookupKey]['q_points'] += $qualityPoints;
+                    $ipcrRatingsTotalsByIndicator[$indicatorLookupKey]['t_points'] += $timelinessPoints;
                 }
+            }
+        }
+
+        $ipcrRatingsTotalsByOutput = [];
+        $ipcrRatingsTotalsByIndicator = [];
+
+        if ($ipcr && $user?->id) {
+            [$ipcrStartDate, $ipcrEndDate] = $this->resolvePeriodWindow($ipcr);
+
+            $ratedIpcrEntries = OrsEntry::query()
+                ->with([
+                    'monitoring:ors_entry_id,quality_rating,timeliness_rating',
+                    'ipcrItem:id,output_title,indicator_text',
+                ])
+                ->where('employee_id', $user->id)
+                ->where('ipcr_id', $ipcr->id)
+                ->where('status', 'rated')
+                ->whereBetween('work_date', [$ipcrStartDate->toDateString(), $ipcrEndDate->toDateString()])
+                ->whereHas('monitoring', function ($query) {
+                    $query->whereNotNull('quality_rating')
+                        ->whereNotNull('timeliness_rating');
+                })
+                ->get();
+
+            foreach ($ratedIpcrEntries as $entry) {
+                $monitoring = $entry->monitoring;
+                if (!$monitoring) {
+                    continue;
+                }
+
+                $quantity = (float) ($entry->quantity ?? 0);
+                if ($quantity <= 0) {
+                    continue;
+                }
+
+                $expectedOutput = trim((string) ($entry->ipcrItem?->output_title ?? ''));
+                if ($expectedOutput === '') {
+                    $expectedOutput = 'Unassigned Output';
+                }
+
+                $qualityPoints = $quantity * (float) $monitoring->quality_rating;
+                $timelinessPoints = $quantity * (float) $monitoring->timeliness_rating;
+
+                if (!isset($ipcrRatingsTotalsByOutput[$expectedOutput])) {
+                    $ipcrRatingsTotalsByOutput[$expectedOutput] = [
+                        'qty' => 0.0,
+                        'q_points' => 0.0,
+                        't_points' => 0.0,
+                    ];
+                }
+
+                $ipcrRatingsTotalsByOutput[$expectedOutput]['qty'] += $quantity;
+                $ipcrRatingsTotalsByOutput[$expectedOutput]['q_points'] += $qualityPoints;
+                $ipcrRatingsTotalsByOutput[$expectedOutput]['t_points'] += $timelinessPoints;
+
+                $indicatorText = trim((string) ($entry->ipcrItem?->indicator_text ?? ''));
+                if ($indicatorText === '') {
+                    continue;
+                }
+
+                $indicatorLookupKey = $this->buildIndicatorRatingLookupKey($expectedOutput, $indicatorText);
+                if (!isset($ipcrRatingsTotalsByIndicator[$indicatorLookupKey])) {
+                    $ipcrRatingsTotalsByIndicator[$indicatorLookupKey] = [
+                        'output' => $expectedOutput,
+                        'indicator_text' => $indicatorText,
+                        'qty' => 0.0,
+                        'q_points' => 0.0,
+                        't_points' => 0.0,
+                    ];
+                }
+
+                $ipcrRatingsTotalsByIndicator[$indicatorLookupKey]['qty'] += $quantity;
+                $ipcrRatingsTotalsByIndicator[$indicatorLookupKey]['q_points'] += $qualityPoints;
+                $ipcrRatingsTotalsByIndicator[$indicatorLookupKey]['t_points'] += $timelinessPoints;
             }
         }
 
@@ -433,37 +531,36 @@ class SmporIpcrAccomplishmentController extends Controller
                 continue;
             }
 
-            $e = round(((float) ($totals['q_points'] ?? 0)) / $ratedQty, 2);
-            $t = round(((float) ($totals['t_points'] ?? 0)) / $ratedQty, 2);
-            $a = round(($e + $t) / 2, 2);
+            $ratings = $this->buildPerformanceRatings(
+                $ratedQty,
+                (float) ($totals['q_points'] ?? 0),
+                (float) ($totals['t_points'] ?? 0),
+                $targetQuantityByOutput[$outputTitle] ?? null
+            );
 
-            $ipcrRatingsAvgByOutput[$outputTitle] = [
-                'qty' => $ratedQty,
-                'q' => $ratedQty,
-                'e' => $e,
-                't' => $t,
-                'a' => $a,
-            ];
+            if ($ratings !== null) {
+                $ipcrRatingsAvgByOutput[$outputTitle] = $ratings;
+            }
         }
 
         $ipcrRatingsAvgByIndicator = [];
-        foreach ($ipcrRatingsTotalsByIndicator as $indicatorText => $totals) {
+        foreach ($ipcrRatingsTotalsByIndicator as $indicatorLookupKey => $totals) {
             $ratedQty = (float) ($totals['qty'] ?? 0);
             if ($ratedQty <= 0) {
                 continue;
             }
 
-            $e = round(((float) ($totals['q_points'] ?? 0)) / $ratedQty, 2); // effectiveness avg
-            $t = round(((float) ($totals['t_points'] ?? 0)) / $ratedQty, 2); // timeliness avg
-            $a = round(($e + $t) / 2, 2);
+            $outputTitle = trim((string) ($totals['output'] ?? ''));
+            $ratings = $this->buildPerformanceRatings(
+                $ratedQty,
+                (float) ($totals['q_points'] ?? 0),
+                (float) ($totals['t_points'] ?? 0),
+                $targetQuantityByOutput[$outputTitle] ?? null
+            );
 
-            $ipcrRatingsAvgByIndicator[$indicatorText] = [
-                'qty' => $ratedQty,  // total quantity
-                'q' => $ratedQty,    // Q column = quantity total
-                'e' => $e,
-                't' => $t,
-                'a' => $a,
-            ];
+            if ($ratings !== null) {
+                $ipcrRatingsAvgByIndicator[$indicatorLookupKey] = $ratings;
+            }
         }
 
         if (!empty($ipcrSections)) {
@@ -487,14 +584,16 @@ class SmporIpcrAccomplishmentController extends Controller
                     $rowIndicators = is_array($row['indicators'] ?? null) ? $row['indicators'] : [];
                     foreach ($rowIndicators as $indicatorIndex => $indicator) {
                         $indicatorText = trim((string) ($indicator['indicator_text'] ?? ''));
+                        $indicatorLookupKey = $this->buildIndicatorRatingLookupKey($lookupOutput, $indicatorText);
                         $indicatorRatings = $indicatorText !== '' && $indicatorText !== '—'
-                            ? ($ipcrRatingsAvgByIndicator[$indicatorText] ?? null)
+                            ? ($ipcrRatingsAvgByIndicator[$indicatorLookupKey] ?? null)
                             : null;
 
                         $ipcrSections[$sectionIndex]['rows'][$rowIndex]['indicators'][$indicatorIndex]['q'] = $indicatorRatings ? (float) $indicatorRatings['q'] : null;
                         $ipcrSections[$sectionIndex]['rows'][$rowIndex]['indicators'][$indicatorIndex]['e'] = $indicatorRatings ? (float) $indicatorRatings['e'] : null;
                         $ipcrSections[$sectionIndex]['rows'][$rowIndex]['indicators'][$indicatorIndex]['t'] = $indicatorRatings ? (float) $indicatorRatings['t'] : null;
                         $ipcrSections[$sectionIndex]['rows'][$rowIndex]['indicators'][$indicatorIndex]['a'] = $indicatorRatings ? (float) $indicatorRatings['a'] : null;
+                        $ipcrSections[$sectionIndex]['rows'][$rowIndex]['indicators'][$indicatorIndex]['rated_qty'] = $indicatorRatings ? (float) $indicatorRatings['qty'] : null;
                     }
                 }
             }
@@ -1241,6 +1340,7 @@ class SmporIpcrAccomplishmentController extends Controller
 
     private function buildIpcr(Ipcr $ipcr): array
     {
+        $targetQuantityByOutput = $this->buildTargetQuantityByOutput($ipcr);
         $sections = [
             'core' => [],
             'support' => [],
@@ -1263,8 +1363,16 @@ class SmporIpcrAccomplishmentController extends Controller
                 ];
             }
 
-            if (!in_array($indicator, $sections[$section][$output]['indicators'], true)) {
-                $sections[$section][$output]['indicators'][] = $indicator;
+            $existingIndicators = array_map(
+                static fn ($entry) => is_array($entry) ? (string) ($entry['text'] ?? '') : (string) $entry,
+                $sections[$section][$output]['indicators']
+            );
+
+            if (!in_array($indicator, $existingIndicators, true)) {
+                $sections[$section][$output]['indicators'][] = [
+                    'text' => $indicator,
+                    'target_quantity' => $targetQuantityByOutput[$output] ?? null,
+                ];
             }
         }
 
@@ -1277,11 +1385,7 @@ class SmporIpcrAccomplishmentController extends Controller
     private function buildValuesByIndicator(Ipcr $ipcr): array
     {
         [$startDate, $endDate] = $this->resolvePeriodWindow($ipcr);
-        $ipcrItemIds = $ipcr->items->pluck('id')->filter()->values()->all();
-
-        if (empty($ipcrItemIds)) {
-            return [];
-        }
+        $targetQuantityByOutput = $this->buildTargetQuantityByOutput($ipcr);
 
         $entries = OrsEntry::query()
             ->with([
@@ -1289,7 +1393,7 @@ class SmporIpcrAccomplishmentController extends Controller
                 'monitoring:ors_entry_id,quality_rating,timeliness_rating,supervisor_id',
             ])
             ->where('employee_id', $ipcr->employee_id)
-            ->whereIn('ipcr_item_id', $ipcrItemIds)
+            ->where('ipcr_id', $ipcr->id)
             ->where('status', 'rated')
             ->whereBetween('work_date', [$startDate->toDateString(), $endDate->toDateString()])
             ->whereHas('monitoring', function ($q) {
@@ -1301,8 +1405,9 @@ class SmporIpcrAccomplishmentController extends Controller
 
         $aggregated = [];
         foreach ($entries as $entry) {
+            $outputTitle = trim((string) data_get($entry, 'ipcrItem.output_title', ''));
             $indicator = trim((string) data_get($entry, 'ipcrItem.indicator_text', ''));
-            if ($indicator === '') {
+            if ($outputTitle === '' || $indicator === '') {
                 continue;
             }
 
@@ -1314,36 +1419,48 @@ class SmporIpcrAccomplishmentController extends Controller
             $qualityRating = (float) data_get($entry, 'monitoring.quality_rating', 0);
             $timelinessRating = (float) data_get($entry, 'monitoring.timeliness_rating', 0);
 
-            if (!isset($aggregated[$indicator])) {
-                $aggregated[$indicator] = [
+            $lookupKey = $this->buildIndicatorRatingLookupKey($outputTitle, $indicator);
+
+            if (!isset($aggregated[$lookupKey])) {
+                $aggregated[$lookupKey] = [
+                    'output' => $outputTitle,
+                    'indicator' => $indicator,
                     'total_qty' => 0.0,
                     'sum_q_points' => 0.0,
                     'sum_t_points' => 0.0,
                 ];
             }
 
-            $aggregated[$indicator]['total_qty'] += $quantity;
-            $aggregated[$indicator]['sum_q_points'] += ($quantity * $qualityRating);
-            $aggregated[$indicator]['sum_t_points'] += ($quantity * $timelinessRating);
+            $aggregated[$lookupKey]['total_qty'] += $quantity;
+            $aggregated[$lookupKey]['sum_q_points'] += ($quantity * $qualityRating);
+            $aggregated[$lookupKey]['sum_t_points'] += ($quantity * $timelinessRating);
         }
 
         $valuesByIndicator = [];
-        foreach ($aggregated as $indicator => $totals) {
+        foreach ($aggregated as $lookupKey => $totals) {
             $totalQty = (float) ($totals['total_qty'] ?? 0.0);
             if ($totalQty <= 0) {
                 continue;
             }
 
-            $e = round(((float) $totals['sum_q_points']) / $totalQty, 2);
-            $t = round(((float) $totals['sum_t_points']) / $totalQty, 2);
-            $a = round(($e + $t) / 2, 2);
+            $outputTitle = trim((string) ($totals['output'] ?? ''));
+            $ratings = $this->buildPerformanceRatings(
+                $totalQty,
+                (float) ($totals['sum_q_points'] ?? 0.0),
+                (float) ($totals['sum_t_points'] ?? 0.0),
+                $targetQuantityByOutput[$outputTitle] ?? null
+            );
 
-            $valuesByIndicator[$indicator] = [
+            if ($ratings === null) {
+                continue;
+            }
+
+            $valuesByIndicator[$lookupKey] = [
                 'accomplishment' => 'Completed ' . $this->formatQuantity($totalQty) . ' output(s) for the period based on rated ORS totals.',
-                'q' => $totalQty,
-                'e' => $e,
-                't' => $t,
-                'a' => $a,
+                'q' => $ratings['q'],
+                'e' => $ratings['e'],
+                't' => $ratings['t'],
+                'a' => $ratings['a'],
                 'remarks' => 'Derived from rated ORS entries; supervisor ratings applied (Stage II).',
             ];
         }
@@ -1499,6 +1616,14 @@ class SmporIpcrAccomplishmentController extends Controller
         abort_if(!$ipcr, 404, 'No IPCR found for export.');
 
         return $ipcr;
+    }
+
+    private function buildTargetSummary($targetQuantity, ?string $targetTimeline): string
+    {
+        $quantityText = $targetQuantity === null ? '' : trim((string) $targetQuantity);
+        $timelineText = trim((string) ($targetTimeline ?? ''));
+
+        return trim($quantityText . ' ' . $timelineText);
     }
 
     private function resolvePeriodWindow(Ipcr $ipcr): array

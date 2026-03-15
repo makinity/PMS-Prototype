@@ -110,7 +110,7 @@ class DatabaseSeeder extends Seeder
             );
 
             $empMark = User::query()->updateOrCreate(
-                ['email' => 'mark.juntilla@example.com'],
+                ['email' => 'marklionesios@gmail.com.com'],
                 [
                     'employee_id' => 'EMP-RCU-0002',
                     'name' => 'Mark Juntilla',
@@ -124,7 +124,7 @@ class DatabaseSeeder extends Seeder
             );
 
             $empDenji = User::query()->updateOrCreate(
-                ['email' => 'denji.kun@example.com'],
+                ['email' => 'denjikun1030.com'],
                 [
                     'employee_id' => 'EMP-RCU-0003',
                     'name' => 'Denji Kun',
@@ -289,6 +289,7 @@ class DatabaseSeeder extends Seeder
                         $mfo = UwpMfo::query()->create([
                             'uwp_function_id' => $function->id,
                             'title' => $mfoData['title'],
+                            'target_quantity' => $mfoData['target_quantity'] ?? null,
                             'target_timeline' => $mfoData['target_timeline'],
                             'sort_order' => $mfoData['sort_order'],
                         ]);
@@ -331,7 +332,8 @@ class DatabaseSeeder extends Seeder
                     'mfos' => [
                         [
                             'title' => 'E-Bank Scanning and Encoding of Revenue Transactions',
-                            'target_timeline' => 'Daily; all e-bank transactions processed within the same working day',
+                            'target_quantity' => 1200,
+                            'target_timeline' => 'e-bank transactions processed within the semester',
                             'sort_order' => 1,
                             'indicators' => [
                                 'All e-bank transactions scanned and encoded daily',
@@ -341,7 +343,8 @@ class DatabaseSeeder extends Seeder
                         ],
                         [
                             'title' => 'Processing of Over-the-Counter Revenue Transactions',
-                            'target_timeline' => 'Daily; 95% processed within the same working day',
+                            'target_quantity' => 3000,
+                            'target_timeline' => 'OCR processed within the semester',
                             'sort_order' => 2,
                             'indicators' => [
                                 'Same-day verification of OTC transactions',
@@ -359,7 +362,8 @@ class DatabaseSeeder extends Seeder
                     'mfos' => [
                         [
                             'title' => 'Maintenance of revenue records and filing system',
-                            'target_timeline' => 'Quarterly; records validated and properly filed',
+                            'target_quantity' => 2400,
+                            'target_timeline' => 'records validated and properly filed within the semester',
                             'sort_order' => 1,
                             'indicators' => [
                                 'Weekly filing updated and retrievable',
@@ -446,7 +450,8 @@ class DatabaseSeeder extends Seeder
                     'mfos' => [
                         [
                             'title' => 'Daily Revenue Posting and Ledger Updating',
-                            'target_timeline' => 'Daily; all collections posted within the same working day',
+                            'target_quantity' => 4100,
+                            'target_timeline' => 'collections posted within the semester',
                             'sort_order' => 1,
                             'indicators' => [
                                 'All daily collections posted to the ledger within the day',
@@ -456,7 +461,8 @@ class DatabaseSeeder extends Seeder
                         ],
                         [
                             'title' => 'Preparation of Monthly Revenue Reports',
-                            'target_timeline' => 'Monthly; report submitted within 3 working days after month-end',
+                            'target_quantity' => 3200,
+                            'target_timeline' => 'report submitted within 3 working days after semester-end',
                             'sort_order' => 2,
                             'indicators' => [
                                 'Monthly revenue report prepared with complete schedules',
@@ -474,7 +480,8 @@ class DatabaseSeeder extends Seeder
                     'mfos' => [
                         [
                             'title' => 'Responding to revenue verification and audit requests',
-                            'target_timeline' => 'As needed; responses issued within 2 working days',
+                            'target_quantity' => 2700,
+                            'target_timeline' => 'responses issued within before semester ends',
                             'sort_order' => 1,
                             'indicators' => [
                                 'Audit request documents compiled complete and accurate',

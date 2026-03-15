@@ -935,7 +935,7 @@
 
                 function formatQuantity(value) {
                     const numeric = Number(value);
-                    if (!Number.isFinite(numeric) || numeric <= 0) return '&mdash;';
+                    if (!Number.isFinite(numeric)) return '&mdash;';
                     if (Number.isInteger(numeric)) return String(numeric);
                     return numeric.toFixed(2).replace(/\.?0+$/, '');
                 }

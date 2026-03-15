@@ -24,7 +24,13 @@ class IpcrTargetController extends Controller
             ->first();
 
         $ipcrQuery = Ipcr::query()
-            ->with(['ipcrItems.uwpFunction', 'office', 'performancePeriod', 'employee'])
+            ->with([
+                'ipcrItems.uwpFunction',
+                'unitWorkPlan.uwpFunctions.mfos',
+                'office',
+                'performancePeriod',
+                'employee',
+            ])
             ->where('employee_id', $user->id)
             ->orderByDesc('id');
 
@@ -51,6 +57,17 @@ class IpcrTargetController extends Controller
         ];
 
         if ($ipcr) {
+            $mfoTargetSummaryMap = [];
+            foreach ($ipcr->unitWorkPlan?->uwpFunctions ?? [] as $function) {
+                foreach ($function->mfos ?? [] as $mfo) {
+                    $mapKey = (int) $function->id . '||' . trim((string) ($mfo->title ?? ''));
+                    $mfoTargetSummaryMap[$mapKey] = $this->buildTargetSummary(
+                        $mfo->target_quantity,
+                        $mfo->target_timeline
+                    );
+                }
+            }
+
             $functions = $ipcr->ipcrItems
                 ->pluck('uwpFunction')
                 ->filter()
@@ -106,12 +123,22 @@ class IpcrTargetController extends Controller
                 $functionType = $group['type'];
                 $outputTitle = $group['title'];
                 $groupItems = collect($group['items']);
+                $firstGroupItem = $groupItems->first();
+                $targetMapKey = (int) ($firstGroupItem?->uwp_function_id ?? 0) . '||' . trim($outputTitle);
 
-                $targetSummary = (string) (
+                $storedTargetSummary = (string) (
                     $groupItems->first(function ($row) {
                         return trim((string) ($row->target_summary ?? '')) !== '';
                     })?->target_summary ?? ''
                 );
+
+                $targetSummary = $mfoTargetSummaryMap[$targetMapKey] ?? '';
+                if ($targetSummary === '') {
+                    $targetSummary = trim($storedTargetSummary);
+                }
+                if ($targetSummary === '') {
+                    $targetSummary = '—';
+                }
 
                 $indicators = $groupItems->map(function ($row) {
                     $rawStandards = $row->standards_payload;
@@ -182,6 +209,14 @@ class IpcrTargetController extends Controller
             'supervisorName' => '',
             'employeePosition' => (string) ($ipcr?->employee?->position ?? ''),
         ]);
+    }
+
+    private function buildTargetSummary($targetQuantity, ?string $targetTimeline): string
+    {
+        $quantityText = $targetQuantity === null ? '' : trim((string) $targetQuantity);
+        $timelineText = trim((string) ($targetTimeline ?? ''));
+
+        return trim($quantityText . ' ' . $timelineText);
     }
 
     public function commit(Request $request)

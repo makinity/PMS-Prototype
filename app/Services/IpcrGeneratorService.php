@@ -78,7 +78,10 @@ class IpcrGeneratorService
                             'output_title' => (string) ($mfo->title ?? ''),
                             'function_type' => strtolower((string) ($function->function_type ?? '')),
                             'indicator_text' => (string) ($indicator->indicator_text ?? ''),
-                            'target_summary' => (string) ($mfo->target_timeline ?? ''),
+                            'target_summary' => $this->buildTargetSummary(
+                                $mfo->target_quantity,
+                                $mfo->target_timeline
+                            ),
                             'standards_payload' => $standardsByRating,
                         ];
                     }
@@ -147,5 +150,13 @@ class IpcrGeneratorService
                 }
             });
         }
+    }
+
+    private function buildTargetSummary($targetQuantity, ?string $targetTimeline): string
+    {
+        $quantityText = $targetQuantity === null ? '' : trim((string) $targetQuantity);
+        $timelineText = trim((string) ($targetTimeline ?? ''));
+
+        return trim($quantityText . ' ' . $timelineText);
     }
 }

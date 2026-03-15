@@ -774,7 +774,7 @@
                         ipcrIndicatorsBodyEl.innerHTML = selectedIndicators.length === 0
                             ? '<tr class="bg-slate-900/40"><td colspan="6" class="px-4 py-3 text-center text-slate-400">No success indicators available.</td></tr>'
                             : selectedIndicators.map((indicator, indicatorIndex) => {
-                                const qVal = indicator?.q === null || indicator?.q === undefined ? '&mdash;' : formatNumber(Math.round(Number(indicator.q)));
+                                const qVal = indicator?.q === null || indicator?.q === undefined ? '&mdash;' : formatNumber(indicator.q, 2);
                                 const eVal = indicator?.e === null || indicator?.e === undefined ? '&mdash;' : formatNumber(indicator.e, 2);
                                 const tVal = indicator?.t === null || indicator?.t === undefined ? '&mdash;' : formatNumber(indicator.t, 2);
                                 const aVal = indicator?.a === null || indicator?.a === undefined ? '&mdash;' : formatNumber(indicator.a, 2);

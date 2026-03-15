@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Ipcr;
 use App\Models\OrsEntry;
 use App\Models\PerformancePeriod;
+use App\Support\ResolvesIpcrTargetScores;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -14,6 +15,8 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class IpcrExcelExportController extends Controller
 {
+    use ResolvesIpcrTargetScores;
+
     public function exportExcel(Request $request)
     {
         $ipcrModel = $this->resolveEmployeeIpcr($request);
@@ -68,6 +71,7 @@ class IpcrExcelExportController extends Controller
 
     private function buildIpcr(Ipcr $ipcr): array
     {
+        $targetQuantityByOutput = $this->buildTargetQuantityByOutput($ipcr);
         $sections = [
             'core' => [],
             'support' => [],
@@ -90,8 +94,16 @@ class IpcrExcelExportController extends Controller
                 ];
             }
 
-            if (!in_array($indicator, $sections[$section][$output]['indicators'], true)) {
-                $sections[$section][$output]['indicators'][] = $indicator;
+            $existingIndicators = array_map(
+                static fn ($entry) => is_array($entry) ? (string) ($entry['text'] ?? '') : (string) $entry,
+                $sections[$section][$output]['indicators']
+            );
+
+            if (!in_array($indicator, $existingIndicators, true)) {
+                $sections[$section][$output]['indicators'][] = [
+                    'text' => $indicator,
+                    'target_quantity' => $targetQuantityByOutput[$output] ?? null,
+                ];
             }
         }
 
@@ -104,6 +116,7 @@ class IpcrExcelExportController extends Controller
     private function buildValuesByIndicator(Ipcr $ipcr): array
     {
         [$startDate, $endDate] = $this->resolvePeriodWindow($ipcr);
+        $targetQuantityByOutput = $this->buildTargetQuantityByOutput($ipcr);
 
         $entries = OrsEntry::query()
             ->with([
@@ -123,8 +136,9 @@ class IpcrExcelExportController extends Controller
 
         $aggregated = [];
         foreach ($entries as $entry) {
+            $outputTitle = trim((string) data_get($entry, 'ipcrItem.output_title', ''));
             $indicator = trim((string) data_get($entry, 'ipcrItem.indicator_text', ''));
-            if ($indicator === '') {
+            if ($outputTitle === '' || $indicator === '') {
                 continue;
             }
 
@@ -136,34 +150,48 @@ class IpcrExcelExportController extends Controller
             $qualityRating = (float) data_get($entry, 'monitoring.quality_rating', 0);
             $timelinessRating = (float) data_get($entry, 'monitoring.timeliness_rating', 0);
 
-            if (!isset($aggregated[$indicator])) {
-                $aggregated[$indicator] = [
+            $lookupKey = $this->buildIndicatorRatingLookupKey($outputTitle, $indicator);
+
+            if (!isset($aggregated[$lookupKey])) {
+                $aggregated[$lookupKey] = [
+                    'output' => $outputTitle,
+                    'indicator' => $indicator,
                     'total_qty' => 0.0,
                     'sum_q_points' => 0.0,
                     'sum_t_points' => 0.0,
                 ];
             }
 
-            $aggregated[$indicator]['total_qty'] += $quantity;
-            $aggregated[$indicator]['sum_q_points'] += ($quantity * $qualityRating);
-            $aggregated[$indicator]['sum_t_points'] += ($quantity * $timelinessRating);
+            $aggregated[$lookupKey]['total_qty'] += $quantity;
+            $aggregated[$lookupKey]['sum_q_points'] += ($quantity * $qualityRating);
+            $aggregated[$lookupKey]['sum_t_points'] += ($quantity * $timelinessRating);
         }
 
         $valuesByIndicator = [];
-        foreach ($aggregated as $indicator => $totals) {
+        foreach ($aggregated as $lookupKey => $totals) {
             $totalQty = (float) ($totals['total_qty'] ?? 0.0);
             if ($totalQty <= 0) {
                 continue;
             }
 
-            $q = round(((float) $totals['sum_q_points']) / $totalQty, 2);
-            $t = round(((float) $totals['sum_t_points']) / $totalQty, 2);
+            $outputTitle = trim((string) ($totals['output'] ?? ''));
+            $ratings = $this->buildPerformanceRatings(
+                $totalQty,
+                (float) ($totals['sum_q_points'] ?? 0.0),
+                (float) ($totals['sum_t_points'] ?? 0.0),
+                $targetQuantityByOutput[$outputTitle] ?? null
+            );
 
-            $valuesByIndicator[$indicator] = [
+            if ($ratings === null) {
+                continue;
+            }
+
+            $valuesByIndicator[$lookupKey] = [
                 'accomplishment' => 'Completed ' . $this->formatQuantity($totalQty) . ' output(s) for the period based on rated ORS totals.',
-                'q' => $q,
-                'e' => $q,
-                't' => $t,
+                'q' => $ratings['q'],
+                'e' => $ratings['e'],
+                't' => $ratings['t'],
+                'a' => $ratings['a'],
                 'remarks' => 'Derived from rated ORS entries; supervisor ratings applied (Stage II).',
             ];
         }

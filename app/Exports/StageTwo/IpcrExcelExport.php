@@ -301,16 +301,23 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
             $startRow = $row;
 
             foreach ($indicators as $index => $indicator) {
-                $indicator = (string) $indicator;
+                $indicatorText = is_array($indicator)
+                    ? trim((string) ($indicator['text'] ?? ''))
+                    : trim((string) $indicator);
+                $targetQuantity = is_array($indicator) && is_numeric($indicator['target_quantity'] ?? null)
+                    ? trim((string) $indicator['target_quantity'])
+                    : '';
 
-                $vals = $valuesByIndicator[$indicator] ?? null;
+                $lookupKey = trim((string) ($item['output'] ?? '')) . '||' . $indicatorText;
+                $vals = $valuesByIndicator[$lookupKey] ?? $valuesByIndicator[$indicatorText] ?? null;
                 $hasVals = is_array($vals);
 
                 // OUTPUT (first row only; merged later)
                 $sheet->setCellValue("A{$row}", $index === 0 ? (string) ($item['output'] ?? '') : '');
 
                 // Indicator text
-                $sheet->setCellValue("B{$row}", $indicator);
+                $indicatorCellText = $this->buildIndicatorCellText($indicatorText, $targetQuantity);
+                $sheet->setCellValue("B{$row}", $indicatorCellText);
 
                 // 6 Months Summary of Accomplishment
                 $accomplishment = $hasVals
@@ -343,8 +350,8 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
                     $sheet->setCellValue("G{$row}", '');
                 }
 
-                $aNum = ($eNum !== null && $tNum !== null)
-                    ? round(($eNum + $tNum) / 2, 2)
+                $aNum = $hasVals
+                    ? $this->toNumericOrNull($vals['a'] ?? null)
                     : null;
 
                 if ($aNum !== null) {
@@ -363,7 +370,7 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
                 $stdTexts = [];
                 foreach (self::RATINGS as $rating) {
                     $col = self::STANDARDS_COLUMNS[$rating];
-                    $text = $this->formatStdBlock($standards, $indicator, (int) $rating);
+                    $text = $this->formatStdBlock($standards, $indicatorText, (int) $rating);
                     $sheet->setCellValue("{$col}{$row}", $text);
                     $sheet->getStyle("{$col}{$row}")->getAlignment()->setWrapText(true);
                     $stdTexts[] = $text;
@@ -384,7 +391,7 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
 
                 // Auto row height (Stage 1)
                 $sheet->getRowDimension($row)->setRowHeight(
-                    $this->estimateRowHeight($indicator, $accomplishment, $remarks, ...$stdTexts)
+                    $this->estimateRowHeight($indicatorCellText, $accomplishment, $remarks, ...$stdTexts)
                 );
 
                 $row++;
@@ -423,6 +430,15 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
         }
 
         return is_numeric($v) ? (float) $v : null;
+    }
+
+    private function buildIndicatorCellText(string $indicatorText, string $targetQuantity): string
+    {
+        if ($targetQuantity === '') {
+            return $indicatorText;
+        }
+
+        return $indicatorText . "\nTarget: " . $targetQuantity;
     }
 
     private function formatStdBlock(array $standards, string $indicator, int $rating): string

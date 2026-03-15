@@ -40,11 +40,13 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
 
     private Ipcr $ipcr;
     private array $groupedItems;
+    private array $targetQuantityByOutput;
 
     public function __construct(Ipcr $ipcr)
     {
         $this->ipcr = $ipcr;
         $this->groupedItems = $this->groupItemsBySection();
+        $this->targetQuantityByOutput = $this->buildTargetQuantityByOutput();
     }
 
     public function array(): array
@@ -359,13 +361,16 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
     private function buildIndicatorCellText(IpcrItem $item): string
     {
         $indicatorText = trim((string) ($item->indicator_text ?? ''));
-        $targetSummary = trim((string) ($item->target_summary ?? ''));
+        $outputTitle = trim((string) ($item->output_title ?? ''));
+        $targetQuantity = $outputTitle !== ''
+            ? ($this->targetQuantityByOutput[$outputTitle] ?? null)
+            : null;
 
-        if ($targetSummary === '') {
+        if (!is_numeric($targetQuantity)) {
             return $indicatorText;
         }
 
-        return $indicatorText . "\nTarget: " . $targetSummary;
+        return $indicatorText . "\nTarget: " . $this->formatTargetQuantity((float) $targetQuantity);
     }
 
     private function formatStdBlock(IpcrItem $item, int $rating): string
@@ -494,5 +499,38 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
                     ->setBorderStyle(Border::BORDER_THIN);
             }
         }
+    }
+
+    private function buildTargetQuantityByOutput(): array
+    {
+        $this->ipcr->loadMissing([
+            'unitWorkPlan.uwpFunctions.mfos',
+            'opcr.unitWorkPlan.uwpFunctions.mfos',
+        ]);
+
+        $targetQuantities = [];
+        $unitWorkPlan = $this->ipcr->unitWorkPlan ?? $this->ipcr->opcr?->unitWorkPlan;
+
+        foreach ($unitWorkPlan?->uwpFunctions ?? [] as $function) {
+            foreach ($function->mfos ?? [] as $mfo) {
+                $outputTitle = trim((string) ($mfo->title ?? ''));
+                if ($outputTitle === '' || !is_numeric($mfo->target_quantity)) {
+                    continue;
+                }
+
+                $targetQuantities[$outputTitle] = (float) $mfo->target_quantity;
+            }
+        }
+
+        return $targetQuantities;
+    }
+
+    private function formatTargetQuantity(float $quantity): string
+    {
+        if (fmod($quantity, 1.0) === 0.0) {
+            return (string) (int) $quantity;
+        }
+
+        return rtrim(rtrim(number_format($quantity, 2, '.', ''), '0'), '.');
     }
 }

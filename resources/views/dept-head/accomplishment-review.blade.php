@@ -44,7 +44,7 @@
         <div class="flex flex-wrap items-start justify-between gap-3">
             <div>
                 <h1 class="text-2xl font-bold text-white">Accomplishment Review</h1>
-                <p class="text-sm text-slate-400">Supervisor- and Dept Head-endorsed submissions for your office/unit.</p>
+                <p class="text-sm text-slate-400">All accomplishment submissions for your office/unit in the active period.</p>
                 <p class="mt-1 text-xs text-slate-500">Active Performance Period: {{ $periodLabelSafe }}</p>
             </div>
             <div class="rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3 text-right">
@@ -97,7 +97,7 @@
                             </tr>
                         @empty
                             <tr class="bg-slate-900/40">
-                                <td colspan="7" class="px-5 py-8 text-center text-sm text-slate-400">No supervisor- or dept-head-endorsed submissions found for your office/unit.</td>
+                                <td colspan="7" class="px-5 py-8 text-center text-sm text-slate-400">No submissions found for your office/unit.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -791,7 +791,7 @@
                             : selectedIndicators.map((indicator, indicatorIndex) => {
                                 const qVal = indicator?.q === null || indicator?.q === undefined
                                     ? '&mdash;'
-                                    : String(Math.round(Number(indicator.q)));
+                                    : formatNumber(indicator.q, 2);
                                 const eVal = indicator?.e === null || indicator?.e === undefined ? '&mdash;' : formatNumber(indicator.e, 2);
                                 const tVal = indicator?.t === null || indicator?.t === undefined ? '&mdash;' : formatNumber(indicator.t, 2);
                                 const aVal = indicator?.a === null || indicator?.a === undefined ? '&mdash;' : formatNumber(indicator.a, 2);
