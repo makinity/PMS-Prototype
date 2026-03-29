@@ -25,10 +25,8 @@ class MporExcelExportController extends Controller
         $startDate = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
         $endDate = $startDate->copy()->endOfMonth();
 
-        $catalog = [
-            'core' => [],
-            'support' => [],
-        ];
+        $functionWeights = $this->resolveFunctionWeights($ipcr);
+        $catalog = [];
 
         foreach ($ipcr->items as $item) {
             $outputTitle = trim((string) ($item->output_title ?? ''));
@@ -36,12 +34,20 @@ class MporExcelExportController extends Controller
                 continue;
             }
 
-            $functionType = strtolower(trim((string) ($item->function_type ?? '')));
-            $section = str_contains($functionType, 'support') ? 'support' : 'core';
+            $rawFunctionType = trim((string) ($item->function_type ?? ''));
+            $section = $this->normalizeFunctionType($rawFunctionType);
+            $sectionLabel = $this->labelForFunctionType($section, $rawFunctionType, $functionWeights);
             $outputKey = $this->normalizeOutputKey($outputTitle);
 
-            if (!isset($catalog[$section][$outputKey])) {
-                $catalog[$section][$outputKey] = [
+            if (!isset($catalog[$section])) {
+                $catalog[$section] = [
+                    'label' => $sectionLabel,
+                    'rows' => [],
+                ];
+            }
+
+            if (!isset($catalog[$section]['rows'][$outputKey])) {
+                $catalog[$section]['rows'][$outputKey] = [
                     'label' => $outputTitle,
                     'weeks' => [
                         1 => ['qty' => 0, 'q_points' => 0, 't_points' => 0],
@@ -76,11 +82,18 @@ class MporExcelExportController extends Controller
                 continue;
             }
 
-            $functionType = strtolower(trim((string) data_get($entry, 'ipcrItem.function_type', '')));
-            $section = str_contains($functionType, 'support') ? 'support' : 'core';
+            $rawFunctionType = trim((string) data_get($entry, 'ipcrItem.function_type', ''));
+            $section = $this->normalizeFunctionType($rawFunctionType);
             $outputKey = $this->normalizeOutputKey($outputTitle);
 
-            if (!isset($catalog[$section][$outputKey])) {
+            if (!isset($catalog[$section])) {
+                $catalog[$section] = [
+                    'label' => $this->labelForFunctionType($section, $rawFunctionType, $functionWeights),
+                    'rows' => [],
+                ];
+            }
+
+            if (!isset($catalog[$section]['rows'][$outputKey])) {
                 continue;
             }
 
@@ -95,19 +108,40 @@ class MporExcelExportController extends Controller
             $qRating = (float) data_get($entry, 'monitoring.quality_rating', 0);
             $tRating = (float) data_get($entry, 'monitoring.timeliness_rating', 0);
 
-            $catalog[$section][$outputKey]['weeks'][$week]['qty'] += $qty;
-            $catalog[$section][$outputKey]['weeks'][$week]['q_points'] += $qty * $qRating;
-            $catalog[$section][$outputKey]['weeks'][$week]['t_points'] += $qty * $tRating;
+            $catalog[$section]['rows'][$outputKey]['weeks'][$week]['qty'] += $qty;
+            $catalog[$section]['rows'][$outputKey]['weeks'][$week]['q_points'] += $qty * $qRating;
+            $catalog[$section]['rows'][$outputKey]['weeks'][$week]['t_points'] += $qty * $tRating;
         }
 
-        $catalog = [
-            'core' => array_filter($catalog['core'], function (array $row): bool {
+        foreach ($catalog as $key => $sectionData) {
+            $rows = array_filter($sectionData['rows'] ?? [], function (array $row): bool {
                 return collect($row['weeks'] ?? [])->sum('qty') > 0;
-            }),
-            'support' => array_filter($catalog['support'], function (array $row): bool {
-                return collect($row['weeks'] ?? [])->sum('qty') > 0;
-            }),
-        ];
+            });
+            if ($rows === []) {
+                unset($catalog[$key]);
+                continue;
+            }
+            $catalog[$key]['rows'] = $rows;
+        }
+
+        $preferredOrder = ['core', 'support'];
+        $orderedKeys = array_values(array_filter($preferredOrder, fn ($key) => isset($catalog[$key])));
+        $otherKeys = array_diff(array_keys($catalog), $orderedKeys);
+        sort($otherKeys);
+        $orderedKeys = array_merge($orderedKeys, $otherKeys);
+
+        $sections = [];
+        foreach ($orderedKeys as $key) {
+            $sectionData = $catalog[$key] ?? null;
+            if (!$sectionData) {
+                continue;
+            }
+            $sections[] = [
+                'key' => $key,
+                'label' => $sectionData['label'] ?? strtoupper($key) . ' FUNCTIONS',
+                'rows' => array_values($sectionData['rows'] ?? []),
+            ];
+        }
 
         $monthYear = trim((string) $request->input('month_year', ''));
         if ($monthYear === '') {
@@ -119,8 +153,9 @@ class MporExcelExportController extends Controller
             'office' => (string) ($ipcr->office?->name ?? 'Office'),
             'month_year' => $monthYear,
             'supervisor' => 'Supervisor',
-            'core' => array_values($catalog['core']),
-            'support' => array_values($catalog['support']),
+            'sections' => $sections,
+            'core' => array_values($catalog['core']['rows'] ?? []),
+            'support' => array_values($catalog['support']['rows'] ?? []),
             'attendance' => [
                 'absence' => [1 => 0, 2 => 0, 3 => 0, 4 => 0, 'total' => 0],
                 'tardiness' => [1 => 0, 2 => 0, 3 => 0, 4 => 0, 'total' => 0],
@@ -148,7 +183,8 @@ class MporExcelExportController extends Controller
                 'employee:id,name,office_id',
                 'office:id,name',
                 'performancePeriod:id,name,start_date,end_date',
-                'items:id,ipcr_id,output_title,function_type,indicator_text',
+                'items:id,ipcr_id,output_title,function_type,indicator_text,uwp_function_id',
+                'items.uwpFunction:id,function_type,weight_percent',
             ])
             ->where('employee_id', $user->id)
             ->whereIn('status', [Ipcr::STATUS_COMMITTED, Ipcr::STATUS_FOR_COMMITMENT]);
@@ -168,7 +204,8 @@ class MporExcelExportController extends Controller
                     'employee:id,name,office_id',
                     'office:id,name',
                     'performancePeriod:id,name,start_date,end_date',
-                    'items:id,ipcr_id,output_title,function_type,indicator_text',
+                    'items:id,ipcr_id,output_title,function_type,indicator_text,uwp_function_id',
+                    'items.uwpFunction:id,function_type,weight_percent',
                 ])
                 ->where('employee_id', $user->id)
                 ->whereIn('status', [Ipcr::STATUS_COMMITTED, Ipcr::STATUS_FOR_COMMITMENT])
@@ -196,5 +233,89 @@ class MporExcelExportController extends Controller
         return mb_strtolower(
             trim((string) preg_replace('/\s+/', ' ', $outputTitle))
         );
+    }
+
+    private function normalizeFunctionType(?string $rawType): string
+    {
+        $value = strtolower(trim((string) $rawType));
+        if ($value === '') {
+            return 'core';
+        }
+        if (str_contains($value, 'support')) {
+            return 'support';
+        }
+        if (str_contains($value, 'core')) {
+            return 'core';
+        }
+
+        return Str::slug($value, '_');
+    }
+
+    private function labelForFunctionType(string $normalized, ?string $rawType = null, array $weights = []): string
+    {
+        $weight = $weights[$normalized] ?? null;
+        $baseLabel = match ($normalized) {
+            'core' => 'CORE FUNCTIONS',
+            'support' => 'SUPPORT FUNCTIONS',
+            default => null,
+        };
+
+        $base = $baseLabel ?? trim((string) $rawType);
+        if ($base === '') {
+            $base = str_replace('_', ' ', $normalized);
+        }
+
+        $label = strtoupper($base) . ' FUNCTIONS';
+
+        if ($weight === null) {
+            return $label;
+        }
+
+        return sprintf('%s (%s%%)', $label, $this->formatWeightPercent((float) $weight));
+    }
+
+    private function resolveFunctionWeights(Ipcr $ipcr): array
+    {
+        $weights = [];
+
+        $uniqueFunctions = $ipcr->items
+            ->filter(fn ($item) => !is_null($item->uwp_function_id))
+            ->unique('uwp_function_id')
+            ->values();
+
+        foreach ($uniqueFunctions as $item) {
+            $function = $item->uwpFunction;
+            $rawType = (string) ($function?->function_type ?? $item->function_type ?? '');
+            $type = $this->normalizeFunctionType($rawType);
+            if ($type === '') {
+                continue;
+            }
+            $weights[$type] = ($weights[$type] ?? 0) + (float) ($function?->weight_percent ?? 0);
+        }
+
+        if (empty($weights)) {
+            return $this->defaultFunctionWeights();
+        }
+
+        return $weights;
+    }
+
+    private function defaultFunctionWeights(): array
+    {
+        return [
+            'core' => 80.0,
+            'support' => 20.0,
+        ];
+    }
+
+    private function formatWeightPercent(float $value): string
+    {
+        $rounded = round($value, 2);
+        if (abs($rounded - round($rounded)) < 0.01) {
+            return (string) (int) round($rounded);
+        }
+
+        $formatted = number_format($rounded, 2, '.', '');
+        return rtrim(rtrim($formatted, '0'), '.');
     }
 }

@@ -10,14 +10,6 @@
         </div>
     </div>
 
-    @if (session('success'))
-        <div class="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">{{ session('success') }}</div>
-    @endif
-
-    @if (session('error'))
-        <div class="rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">{{ session('error') }}</div>
-    @endif
-
     <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
         <div class="mb-4 flex flex-wrap items-end justify-between gap-4">
             <div>
@@ -198,6 +190,7 @@
                         <thead class="bg-slate-900/70 text-xs uppercase text-slate-300">
                             <tr class="border-b border-slate-800">
                                 <th class="w-[56%] px-4 py-3 text-left">Success Indicator</th>
+                                <th class="w-[24%] px-4 py-3 text-left">Target Summary</th>
                                 <th class="w-[20%] px-4 py-3 text-left">Standards</th>
                                 <th class="w-[24%] px-4 py-3 text-left">Assigned Employee</th>
                             </tr>
@@ -296,6 +289,10 @@ document.addEventListener('DOMContentLoaded', function () {
             ? ''
             : String(targetSummary).trim();
 
+        if (summary.toLowerCase() === 'multiple indicator targets') {
+            return summary;
+        }
+
         if (quantity !== '' && summary !== '') {
             return `${quantity} ${summary}`.trim();
         }
@@ -310,6 +307,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
         return '—';
     };
+
+    const getIndicatorTargetSummary = (indicator) => formatTargetSummaryDisplay(
+        indicator?.target_quantity,
+        indicator?.target_timeline
+    );
 
     const parseJson = (raw) => {
         try { return JSON.parse(raw); } catch (e) { return null; }
@@ -496,6 +498,7 @@ document.addEventListener('DOMContentLoaded', function () {
             tr.className = 'hover:bg-slate-900/40';
             tr.innerHTML = `
                 <td class="px-4 py-3 align-top text-slate-100">${escapeHtml(indicatorText)}</td>
+                <td class="px-4 py-3 align-top text-slate-300">${escapeHtml(getIndicatorTargetSummary(indicator))}</td>
                 <td class="px-4 py-3 align-top">
                     <button type="button" class="inline-flex items-center gap-2 text-blue-300 hover:text-blue-200" data-standards-btn>
                         <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
@@ -528,7 +531,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         if (!tbody.children.length) {
-            tbody.innerHTML = '<tr><td colspan="3" class="px-4 py-6 text-center text-slate-400">No indicators found.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-6 text-center text-slate-400">No indicators found.</td></tr>';
         }
 
         openModal('dh-indicators-modal');

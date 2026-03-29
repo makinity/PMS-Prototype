@@ -44,6 +44,7 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
     private array $standards;
     private array $valuesByIndicator;
     private array $meta;
+    private array $sectionLabels = [];
 
     public function __construct(array $ipcr, array $standards, array $valuesByIndicator = [], array $meta = [])
     {
@@ -111,9 +112,15 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
         $this->writeTableHeader($sheet);
 
         $currentRow = self::TABLE_START_ROW;
-
-        $currentRow = $this->writeSection($sheet, 'core', 'A. CORE FUNCTIONS (80%)', $currentRow);
-        $currentRow = $this->writeSection($sheet, 'support', 'B. SUPPORT FUNCTIONS (20%)', $currentRow);
+        foreach ($this->resolveSections() as $index => $section) {
+            $sectionLabel = $this->prefixSectionLabel($index, (string) ($section['label'] ?? 'FUNCTIONS'));
+            $currentRow = $this->writeSection(
+                $sheet,
+                $sectionLabel,
+                $currentRow,
+                is_array($section['items'] ?? null) ? $section['items'] : []
+            );
+        }
 
         $lastRow = max($currentRow - 1, self::TABLE_SUBHEADER_ROW);
 
@@ -247,10 +254,11 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
         $sheet->getRowDimension(self::TABLE_SUBHEADER_ROW)->setRowHeight(20);
     }
 
-    private function writeSection(Worksheet $sheet, string $type, string $label, int $startRow): int
+    private function writeSection(Worksheet $sheet, string $label, int $startRow, array $items): int
     {
         $sheet->setCellValue("A{$startRow}", $label);
         $sheet->mergeCells("A{$startRow}:N{$startRow}");
+        $this->sectionLabels[] = $label;
 
         $sheet->getStyle("A{$startRow}:N{$startRow}")->getFont()->setBold(true);
         $sheet->getStyle("A{$startRow}:N{$startRow}")->getFill()
@@ -273,7 +281,7 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
         return $this->writeIndicatorsFlat(
             $sheet,
             $row,
-            $this->ipcr[$type] ?? [],
+            $items,
             $this->standards,
             $this->valuesByIndicator
         );
@@ -511,12 +519,39 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
     {
         for ($r = $fromRow; $r <= $toRow; $r++) {
             $value = trim((string) $sheet->getCell("A{$r}")->getValue());
-            if (in_array($value, ['A. CORE FUNCTIONS (80%)', 'B. SUPPORT FUNCTIONS (20%)'], true)) {
+            if (in_array($value, $this->sectionLabels, true)) {
                 $sheet->getStyle("A{$r}:N{$r}")
                     ->getBorders()
                     ->getBottom()
                     ->setBorderStyle(Border::BORDER_THIN);
             }
         }
+    }
+
+    private function resolveSections(): array
+    {
+        $sections = is_array($this->ipcr['sections'] ?? null) ? $this->ipcr['sections'] : [];
+        if (!empty($sections)) {
+            return $sections;
+        }
+
+        return [
+            [
+                'label' => 'CORE FUNCTIONS (80%)',
+                'items' => is_array($this->ipcr['core'] ?? null) ? $this->ipcr['core'] : [],
+            ],
+            [
+                'label' => 'SUPPORT FUNCTIONS (20%)',
+                'items' => is_array($this->ipcr['support'] ?? null) ? $this->ipcr['support'] : [],
+            ],
+        ];
+    }
+
+    private function prefixSectionLabel(int $index, string $label): string
+    {
+        $letters = range('A', 'Z');
+        $prefix = $letters[$index] ?? ('S' . ($index + 1));
+
+        return $prefix . '. ' . $label;
     }
 }

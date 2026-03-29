@@ -18,14 +18,6 @@
         </button>
     </div>
 
-    @if (session('success'))
-        <div class="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">{{ session('success') }}</div>
-    @endif
-
-    @if (session('error'))
-        <div class="rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">{{ session('error') }}</div>
-    @endif
-
     <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
         <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
             <div>
@@ -160,7 +152,7 @@
                                 <tr>
                                     <th class="py-2 text-left">Output</th>
                                     <th class="py-2 text-left">Success Indicators</th>
-                                    <th class="py-2 text-left">Timeline / Target</th>
+                                    <th class="py-2 text-left">Target Summary</th>
                                     <th class="py-2 pr-4 text-left">Weight</th>
                                     <th class="py-2 pl-4 text-left">Function</th>
                                 </tr>
@@ -255,6 +247,7 @@
                         <thead class="bg-slate-900/60 text-xs uppercase tracking-[0.22em] text-slate-500">
                             <tr>
                                 <th class="px-5 py-4 text-left">Success Indicator</th>
+                                <th class="px-5 py-4 text-left">Target Summary</th>
                                 <th class="px-5 py-4 text-center">Standards</th>
                                 <th class="px-5 py-4 text-center">Assigned Employee</th>
                             </tr>
@@ -353,7 +346,12 @@ document.addEventListener('DOMContentLoaded', function () {
         .replaceAll('"', '&quot;')
         .replaceAll("'", '&#039;');
 
-    const formatTargetTimelineDisplay = (targetQuantity, targetTimeline) => {
+    const formatTargetSummaryDisplay = (targetQuantity, targetTimeline) => {
+        const summary = String(targetTimeline || '').trim();
+        if (summary.toLowerCase() === 'multiple indicator targets') {
+            return summary;
+        }
+
         const quantity = targetQuantity === null || targetQuantity === undefined || targetQuantity === ''
             ? ''
             : String(targetQuantity).trim();
@@ -375,6 +373,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
         return '-';
     };
+
+    const getIndicatorTargetSummary = (indicator) => formatTargetSummaryDisplay(
+        indicator?.target_quantity,
+        indicator?.target_timeline
+    );
 
     const statusLabel = (status) => {
         const key = String(status || '').toLowerCase();
@@ -515,6 +518,10 @@ document.addEventListener('DOMContentLoaded', function () {
             tdIndicator.className = 'px-5 py-4 text-slate-100';
             tdIndicator.textContent = indicatorText;
 
+            const tdTarget = document.createElement('td');
+            tdTarget.className = 'px-5 py-4 text-slate-300';
+            tdTarget.textContent = getIndicatorTargetSummary(indicator);
+
             const tdStandards = document.createElement('td');
             tdStandards.className = 'px-5 py-4 text-center';
             const standardsBtn = document.createElement('button');
@@ -533,12 +540,12 @@ document.addEventListener('DOMContentLoaded', function () {
             assigneeBtn.addEventListener('click', () => renderAssigneesModal(mfoTitle, indicatorText, assignees));
             tdAssignee.appendChild(assigneeBtn);
 
-            tr.append(tdIndicator, tdStandards, tdAssignee);
+            tr.append(tdIndicator, tdTarget, tdStandards, tdAssignee);
             tbody.appendChild(tr);
         });
 
         if (!tbody.children.length) {
-            tbody.innerHTML = '<tr><td colspan="3" class="px-4 py-6 text-center text-slate-400">No success indicators found.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-6 text-center text-slate-400">No success indicators found.</td></tr>';
         }
 
         openModal('uwp-indicators-modal');
@@ -563,7 +570,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         <i class="fa-regular fa-eye text-sm"></i><span>(${indicators.length})</span>
                     </button>
                 </td>
-                <td class="px-4 py-4 text-slate-200">${escapeHtml(formatTargetTimelineDisplay(output?.target_quantity, output?.target_timeline))}</td>
+                <td class="px-4 py-4 text-slate-200">${escapeHtml(formatTargetSummaryDisplay(output?.target_quantity, output?.target_summary ?? output?.target_timeline))}</td>
                 <td class="px-4 py-4 text-slate-200">${output?.weight_percent !== null && output?.weight_percent !== undefined && output?.weight_percent !== '' ? escapeHtml(String(output.weight_percent) + '%') : '�'}</td>
                 <td class="px-4 py-4">${functionBadge(output?.function_type)}</td>
             `;

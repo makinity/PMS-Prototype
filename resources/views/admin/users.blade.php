@@ -24,33 +24,10 @@
             <p class="mt-1 text-sm text-gray-300">Manage roles, offices, and activation status.</p>
         </div>
 
-        @if (session('success'))
-            <div class="rounded-xl border border-emerald-700/40 bg-emerald-900/20 px-4 py-3 text-sm text-emerald-200">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if (session('error'))
-            <div class="rounded-xl border border-rose-700/40 bg-rose-900/20 px-4 py-3 text-sm text-rose-200">
-                {{ session('error') }}
-            </div>
-        @endif
-
         @if (session('temporary_password'))
             <div class="rounded-xl border border-amber-700/40 bg-amber-900/20 px-4 py-3 text-sm text-amber-200">
                 Temporary password for <span class="font-semibold">{{ session('temporary_password_user') }}</span>:
                 <span class="font-mono font-semibold">{{ session('temporary_password') }}</span>
-            </div>
-        @endif
-
-        @if ($errors->any())
-            <div class="rounded-xl border border-amber-700/40 bg-amber-900/20 px-4 py-3 text-sm text-amber-200">
-                <p class="font-medium">Please review the following:</p>
-                <ul class="mt-2 list-disc space-y-1 pl-5">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
             </div>
         @endif
 

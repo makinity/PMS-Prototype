@@ -246,6 +246,7 @@
                             <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.2em] text-slate-400">
                                 <tr>
                                     <th class="px-4 py-3 text-left">Success Indicator</th>
+                                    <th class="px-4 py-3 text-left">Target Summary</th>
                                     <th class="px-4 py-3 text-center">Standards</th>
                                     <th class="px-4 py-3 text-center">Assigned Employee</th>
                                 </tr>
@@ -406,10 +407,30 @@
             let currentUwpId = null;
             let selectedUwp = null;
 
+            function normalizeTargetQuantity(value) {
+                if (value === null || value === undefined || value === '') {
+                    return '';
+                }
+
+                const numeric = Number(value);
+                if (!Number.isFinite(numeric)) {
+                    return String(value).trim();
+                }
+
+                return Number.isInteger(numeric)
+                    ? String(numeric)
+                    : numeric.toFixed(2).replace(/\.00$/, '').replace(/(\.\d*[1-9])0+$/, '$1');
+            }
+
             function formatTargetTimelineDisplay(targetQuantity, targetTimeline) {
+                const summary = String(targetTimeline || '').trim();
+                if (summary.toLowerCase() === 'multiple indicator targets') {
+                    return summary;
+                }
+
                 const quantity = targetQuantity === null || targetQuantity === undefined || targetQuantity === ''
                     ? ''
-                    : String(targetQuantity).trim();
+                    : normalizeTargetQuantity(targetQuantity);
                 const timeline = targetTimeline === null || targetTimeline === undefined || targetTimeline === ''
                     ? ''
                     : String(targetTimeline).trim();
@@ -427,6 +448,32 @@
                 }
 
                 return 'Not specified';
+            }
+
+            function getIndicatorTargetSummary(indicator) {
+                return formatTargetTimelineDisplay(
+                    indicator?.targetQuantity ?? indicator?.target_quantity,
+                    indicator?.targetTimeline ?? indicator?.target_timeline
+                );
+            }
+
+            function getMfoTargetSummary(mfo) {
+                const indicators = Array.isArray(mfo?.success_indicators) ? mfo.success_indicators : [];
+                const summaries = Array.from(new Set(
+                    indicators
+                        .map((indicator) => getIndicatorTargetSummary(indicator))
+                        .filter((value) => String(value || '').trim() !== '' && value !== 'Not specified')
+                ));
+
+                if (summaries.length === 1) {
+                    return summaries[0];
+                }
+
+                if (summaries.length > 1) {
+                    return 'Multiple indicator targets';
+                }
+
+                return formatTargetTimelineDisplay(mfo?.target_quantity, mfo?.target_timeline);
             }
 
             function showUwpPreview(uwpId, trigger = null) {
@@ -574,7 +621,6 @@
                             <tr>
                                 <th class="px-5 py-4">PPA / MFO</th>
                                 <th class="px-5 py-4 text-center">Success Indicators</th>
-                                <th class="px-5 py-4">Target / Timeline</th>
                                 <th class="px-5 py-4 text-center">Function</th>
                             </tr>
                         </thead>
@@ -600,9 +646,6 @@
                                         <span>(${indicatorCount})</span>
                                     </button>
                                 </div>
-                            </td>
-                            <td class="px-5 py-5 text-slate-300">
-                                ${formatTargetTimelineDisplay(mfo.target_quantity, mfo.target_timeline)}
                             </td>
                             <td class="px-5 py-5 text-center">
                                 <span class="rounded-full border border-${functionColor}-500/40 px-3 py-1 text-xs font-semibold text-${functionColor}-400">
@@ -826,7 +869,7 @@
                 if (!indicators || indicators.length === 0) {
                     indicatorsBody.innerHTML = `
                         <tr>
-                            <td colspan="3" class="px-4 py-8 text-center text-slate-400">
+                            <td colspan="4" class="px-4 py-8 text-center text-slate-400">
                                 No success indicators found for this MFO.
                             </td>
                         </tr>
@@ -843,6 +886,9 @@
                             <tr>
                                 <td class="px-4 py-4 text-slate-100">
                                     ${indicator.indicator_text || 'Unnamed Indicator'}
+                                </td>
+                                <td class="px-4 py-4 text-slate-300">
+                                    ${getIndicatorTargetSummary(indicator)}
                                 </td>
                                 <td class="px-4 py-4 text-center">
                                     <button

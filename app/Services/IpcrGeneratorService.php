@@ -75,12 +75,15 @@ class IpcrGeneratorService
 
                         $byEmployee[$employeeId][] = [
                             'uwp_function_id' => (int) $function->id,
+                            'uwp_success_indicator_id' => (int) ($indicator->id ?? 0),
                             'output_title' => (string) ($mfo->title ?? ''),
                             'function_type' => strtolower((string) ($function->function_type ?? '')),
                             'indicator_text' => (string) ($indicator->indicator_text ?? ''),
+                            'target_quantity' => $indicator->target_quantity ?? $mfo->target_quantity,
+                            'target_timeline' => $indicator->target_timeline ?? $mfo->target_timeline,
                             'target_summary' => $this->buildTargetSummary(
-                                $mfo->target_quantity,
-                                $mfo->target_timeline
+                                $indicator->target_quantity ?? $mfo->target_quantity,
+                                $indicator->target_timeline ?? $mfo->target_timeline
                             ),
                             'standards_payload' => $standardsByRating,
                         ];
@@ -141,9 +144,12 @@ class IpcrGeneratorService
                     IpcrItem::query()->create([
                         'ipcr_id' => $ipcr->id,
                         'uwp_function_id' => $item['uwp_function_id'] ?? null,
+                        'uwp_success_indicator_id' => $item['uwp_success_indicator_id'] ?? null,
                         'output_title' => $item['output_title'],
                         'function_type' => $item['function_type'],
                         'indicator_text' => $item['indicator_text'],
+                        'target_quantity' => $item['target_quantity'] ?? null,
+                        'target_timeline' => $item['target_timeline'] ?? null,
                         'target_summary' => $item['target_summary'],
                         'standards_payload' => $item['standards_payload'],
                     ]);

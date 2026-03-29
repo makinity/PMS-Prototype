@@ -105,18 +105,6 @@
     </style>
 
     <section class="space-y-6">
-        @if (session('success'))
-            <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if (session('error'))
-            <div class="rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-                {{ session('error') }}
-            </div>
-        @endif
-
         <div class="space-y-1">
             <h1 class="text-2xl font-semibold text-white">Daily ORS Monitoring</h1>
         </div>
@@ -761,6 +749,17 @@
         <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', () => {
+                function showSnackbar(type, message) {
+                    if (!message) return;
+                    if (window.PMSnackbar && !window.PMSnackbar.hasActive()) {
+                        window.PMSnackbar.show({
+                            type: String(type || 'info').toLowerCase(),
+                            message: String(message),
+                        });
+                        return;
+                    }
+                    alert(String(message));
+                }
                 const modal = document.getElementById('ors-monitoring-modal');
                 const ratedMonitoringModal = document.getElementById('ors-rated-monitoring-modal');
                 const employeeEl = document.getElementById('monitoringEmployee');
@@ -1995,7 +1994,8 @@
 
                         refreshCalendarEvents();
                         refreshOpenDayListsForDate(currentModalData.date);
-                        openMonitoringModal(currentModalData);
+                        closeOrsModal('ors-monitoring-modal');
+                        showSnackbar('success', 'Rating saved.');
                     } finally {
                         setButtonLoading(saveBtn, false);
                         delete saveBtn.dataset.loadingActive;

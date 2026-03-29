@@ -54,7 +54,7 @@ class AccomplishmentReviewController extends Controller
                 'mpors:id,employee_id,office_id,month,status',
                 'ipcr:id,unit_work_plan_id,performance_period_id,office_id,employee_id',
                 'ipcr.unitWorkPlan.uwpFunctions.mfos:id,uwp_function_id,title,target_quantity,target_timeline',
-                'ipcr.items:id,ipcr_id,uwp_function_id,output_title,function_type,indicator_text,target_summary,standards_payload',
+                'ipcr.items:id,ipcr_id,uwp_function_id,uwp_success_indicator_id,output_title,function_type,indicator_text,target_quantity,target_timeline,target_summary,standards_payload',
             ])
             ->orderByDesc('dept_head_action_at')
             ->orderByDesc('id')

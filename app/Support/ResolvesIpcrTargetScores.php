@@ -3,20 +3,62 @@
 namespace App\Support;
 
 use App\Models\Ipcr;
+use App\Models\IpcrItem;
 use App\Models\OrsEntry;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 
 trait ResolvesIpcrTargetScores
 {
+    private function normalizeTargetQuantityValue(mixed $targetQuantity): ?float
+    {
+        if ($targetQuantity === null || $targetQuantity === '') {
+            return null;
+        }
+
+        return is_numeric($targetQuantity) ? (float) $targetQuantity : null;
+    }
+
+    private function stringifyTargetQuantityValue(mixed $targetQuantity): string
+    {
+        $resolved = $this->normalizeTargetQuantityValue($targetQuantity);
+        if ($resolved === null) {
+            return '';
+        }
+
+        if (fmod($resolved, 1.0) === 0.0) {
+            return (string) (int) $resolved;
+        }
+
+        return rtrim(rtrim(number_format($resolved, 2, '.', ''), '0'), '.');
+    }
+
     private function formatTargetSummary(mixed $targetQuantity, ?string $targetTimeline): string
     {
-        $quantityText = $targetQuantity === null ? '' : trim((string) $targetQuantity);
+        $quantityText = $this->stringifyTargetQuantityValue($targetQuantity);
         $timelineText = trim((string) ($targetTimeline ?? ''));
 
         return trim($quantityText . ' ' . $timelineText);
     }
 
-    private function buildTargetSummaryByFunctionAndOutput(?Ipcr $ipcr): array
+    private function fetchIpcrTargetItems(Ipcr $ipcr): Collection
+    {
+        return IpcrItem::query()
+            ->where('ipcr_id', $ipcr->id)
+            ->get([
+                'id',
+                'ipcr_id',
+                'uwp_function_id',
+                'uwp_success_indicator_id',
+                'output_title',
+                'indicator_text',
+                'target_quantity',
+                'target_timeline',
+                'target_summary',
+            ]);
+    }
+
+    private function buildLegacyTargetSummaryByFunctionAndOutput(?Ipcr $ipcr): array
     {
         if (!$ipcr) {
             return [];
@@ -44,7 +86,7 @@ trait ResolvesIpcrTargetScores
         return $targetSummaries;
     }
 
-    private function buildTargetQuantityByOutput(?Ipcr $ipcr): array
+    private function buildLegacyTargetQuantityByOutput(?Ipcr $ipcr): array
     {
         if (!$ipcr) {
             return [];
@@ -60,13 +102,198 @@ trait ResolvesIpcrTargetScores
                     continue;
                 }
 
-                $targetQuantities[$outputTitle] = is_numeric($mfo->target_quantity)
-                    ? (float) $mfo->target_quantity
-                    : null;
+                $targetQuantities[$outputTitle] = $this->normalizeTargetQuantityValue($mfo->target_quantity);
             }
         }
 
         return $targetQuantities;
+    }
+
+    private function buildLegacyTargetPayloadByIndicatorLookup(?Ipcr $ipcr): array
+    {
+        if (!$ipcr) {
+            return [];
+        }
+
+        $ipcr->loadMissing('unitWorkPlan.uwpFunctions.mfos.successIndicators');
+
+        $targets = [];
+        foreach ($ipcr->unitWorkPlan?->uwpFunctions ?? [] as $function) {
+            $functionId = (int) ($function->id ?? 0);
+
+            foreach ($function->mfos ?? [] as $mfo) {
+                $outputTitle = trim((string) ($mfo->title ?? ''));
+                if ($outputTitle === '') {
+                    continue;
+                }
+
+                foreach ($mfo->successIndicators ?? [] as $indicator) {
+                    $indicatorText = trim((string) ($indicator->indicator_text ?? ''));
+                    if ($indicatorText === '') {
+                        continue;
+                    }
+
+                    $lookupKey = $this->buildIndicatorRatingLookupKey($outputTitle, $indicatorText);
+                    $targetQuantity = $this->normalizeTargetQuantityValue(
+                        $indicator->target_quantity ?? $mfo->target_quantity
+                    );
+                    $targetTimeline = trim((string) (
+                        $indicator->target_timeline
+                        ?? $mfo->target_timeline
+                        ?? ''
+                    ));
+
+                    $targets[$lookupKey] = [
+                        'function_output_key' => $functionId . '||' . $outputTitle,
+                        'output_title' => $outputTitle,
+                        'indicator_text' => $indicatorText,
+                        'target_quantity' => $targetQuantity,
+                        'target_timeline' => $targetTimeline !== '' ? $targetTimeline : null,
+                        'target_summary' => $this->formatTargetSummary($targetQuantity, $targetTimeline),
+                    ];
+                }
+            }
+        }
+
+        return $targets;
+    }
+
+    private function buildTargetPayloadByIndicatorLookup(?Ipcr $ipcr): array
+    {
+        $legacyTargets = $this->buildLegacyTargetPayloadByIndicatorLookup($ipcr);
+        if (!$ipcr) {
+            return $legacyTargets;
+        }
+
+        $targets = [];
+        foreach ($this->fetchIpcrTargetItems($ipcr) as $item) {
+            $outputTitle = trim((string) ($item->output_title ?? ''));
+            $indicatorText = trim((string) ($item->indicator_text ?? ''));
+            if ($outputTitle === '' || $indicatorText === '') {
+                continue;
+            }
+
+            $lookupKey = $this->buildIndicatorRatingLookupKey($outputTitle, $indicatorText);
+            $legacy = $legacyTargets[$lookupKey] ?? [];
+
+            $targetQuantity = $this->normalizeTargetQuantityValue($item->target_quantity);
+            if ($targetQuantity === null) {
+                $targetQuantity = $legacy['target_quantity'] ?? null;
+            }
+
+            $targetTimeline = trim((string) ($item->target_timeline ?? ''));
+            if ($targetTimeline === '') {
+                $targetTimeline = trim((string) ($legacy['target_timeline'] ?? ''));
+            }
+
+            $targetSummary = trim((string) ($item->target_summary ?? ''));
+            if ($targetSummary === '') {
+                $targetSummary = $this->formatTargetSummary($targetQuantity, $targetTimeline);
+            }
+            if ($targetSummary === '') {
+                $targetSummary = trim((string) ($legacy['target_summary'] ?? ''));
+            }
+
+            $targets[$lookupKey] = [
+                'function_output_key' => (int) ($item->uwp_function_id ?? 0) . '||' . $outputTitle,
+                'output_title' => $outputTitle,
+                'indicator_text' => $indicatorText,
+                'target_quantity' => $targetQuantity,
+                'target_timeline' => $targetTimeline !== '' ? $targetTimeline : null,
+                'target_summary' => $targetSummary !== '' ? $targetSummary : null,
+            ];
+        }
+
+        foreach ($legacyTargets as $lookupKey => $payload) {
+            if (!isset($targets[$lookupKey])) {
+                $targets[$lookupKey] = $payload;
+            }
+        }
+
+        return $targets;
+    }
+
+    private function buildTargetSummaryByFunctionAndOutput(?Ipcr $ipcr): array
+    {
+        $legacySummaries = $this->buildLegacyTargetSummaryByFunctionAndOutput($ipcr);
+        $targetsByIndicator = $this->buildTargetPayloadByIndicatorLookup($ipcr);
+
+        if (empty($targetsByIndicator)) {
+            return $legacySummaries;
+        }
+
+        $groupedSummaries = [];
+        foreach ($targetsByIndicator as $payload) {
+            $groupKey = trim((string) ($payload['function_output_key'] ?? ''));
+            if ($groupKey === '') {
+                continue;
+            }
+
+            $summary = trim((string) ($payload['target_summary'] ?? ''));
+            if ($summary === '') {
+                continue;
+            }
+
+            if (!isset($groupedSummaries[$groupKey])) {
+                $groupedSummaries[$groupKey] = [];
+            }
+
+            if (!in_array($summary, $groupedSummaries[$groupKey], true)) {
+                $groupedSummaries[$groupKey][] = $summary;
+            }
+        }
+
+        $resolved = [];
+        foreach ($groupedSummaries as $groupKey => $summaries) {
+            $resolved[$groupKey] = count($summaries) === 1
+                ? $summaries[0]
+                : 'Multiple indicator targets';
+        }
+
+        foreach ($legacySummaries as $groupKey => $summary) {
+            if (!isset($resolved[$groupKey]) && trim((string) $summary) !== '') {
+                $resolved[$groupKey] = trim((string) $summary);
+            }
+        }
+
+        return $resolved;
+    }
+
+    private function buildTargetQuantityByOutput(?Ipcr $ipcr): array
+    {
+        $legacyTargetQuantities = $this->buildLegacyTargetQuantityByOutput($ipcr);
+        $targetsByIndicator = $this->buildTargetPayloadByIndicatorLookup($ipcr);
+
+        if (empty($targetsByIndicator)) {
+            return $legacyTargetQuantities;
+        }
+
+        $groupedTargets = [];
+        foreach ($targetsByIndicator as $payload) {
+            $outputTitle = trim((string) ($payload['output_title'] ?? ''));
+            if ($outputTitle === '') {
+                continue;
+            }
+
+            $quantity = $this->normalizeTargetQuantityValue($payload['target_quantity'] ?? null);
+            if ($quantity === null) {
+                continue;
+            }
+
+            if (!isset($groupedTargets[$outputTitle])) {
+                $groupedTargets[$outputTitle] = 0.0;
+            }
+
+            $groupedTargets[$outputTitle] += $quantity;
+        }
+
+        foreach ($legacyTargetQuantities as $outputTitle => $quantity) {
+            if (!isset($groupedTargets[$outputTitle])) {
+                $groupedTargets[$outputTitle] = $quantity;
+            }
+        }
+
+        return $groupedTargets;
     }
 
     private function buildIndicatorRatingLookupKey(string $outputTitle, string $indicatorText): string
@@ -110,6 +337,7 @@ trait ResolvesIpcrTargetScores
 
         [$startDate, $endDate] = $this->resolveScoringPeriodWindow($ipcr);
         $targetQuantityByOutput = $this->buildTargetQuantityByOutput($ipcr);
+        $targetPayloadByIndicator = $this->buildTargetPayloadByIndicatorLookup($ipcr);
         $resolvedEmployeeId = $employeeId ?: (int) ($ipcr->employee_id ?? 0);
 
         if ($resolvedEmployeeId <= 0) {
@@ -206,7 +434,7 @@ trait ResolvesIpcrTargetScores
                 (float) ($totals['qty'] ?? 0),
                 (float) ($totals['q_points'] ?? 0),
                 (float) ($totals['t_points'] ?? 0),
-                $targetQuantityByOutput[$outputTitle] ?? null
+                $targetPayloadByIndicator[$indicatorLookupKey]['target_quantity'] ?? null
             );
 
             if ($ratings !== null) {

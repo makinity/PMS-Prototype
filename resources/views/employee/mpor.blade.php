@@ -33,20 +33,6 @@
     @endphp
 
     <section class="space-y-6">
-        @if (session('success'))
-            <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if (session('info'))
-            <div class="rounded-xl border border-sky-500/30 bg-sky-500/10 px-4 py-3 text-sm text-sky-200">
-                {{ session('info') }}
-            </div>
-        @endif
-
-        <div id="mporAjaxAlertHost" class="space-y-3"></div>
-
         <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div class="min-w-0">
                 <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Monthly Performance Output Report</p>
@@ -151,77 +137,42 @@
                         </thead>
 
                         <tbody class="divide-y divide-slate-800 text-[0.75rem]">
-                            {{-- Core --}}
-                            <tr class="bg-slate-800/40 text-[0.65rem] uppercase tracking-[0.3em] text-slate-400">
-                                <td class="px-3 py-2 font-semibold text-slate-200" colspan="16">{{ $sectionLabels['core'] ?? 'Core Functions' }}</td>
-                            </tr>
-
-                            @forelse ($sectionRows['core'] ?? [] as $row)
-                                <tr>
-                                    <td class="px-3 py-3 font-semibold text-white">{{ $row['label'] }}</td>
-
-                                    {{-- qty --}}
-                                    <td class="border-l border-slate-800 px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qty.1', 0), 0) }}</td>
-                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qty.2', 0), 0) }}</td>
-                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qty.3', 0), 0) }}</td>
-                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qty.4', 0), 0) }}</td>
-                                    <td class="px-2 py-3 text-right font-semibold tabular-nums">{{ number_format(data_get($row, 'qtyTotal', 0), 0) }}</td>
-
-                                    {{-- qual --}}
-                                    <td class="border-l border-slate-800 px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qual.1', 0), 0) }}</td>
-                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qual.2', 0), 0) }}</td>
-                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qual.3', 0), 0) }}</td>
-                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qual.4', 0), 0) }}</td>
-                                    <td class="px-2 py-3 text-right font-semibold tabular-nums">{{ number_format(data_get($row, 'qualTotal', 0), 0) }}</td>
-
-                                    {{-- time --}}
-                                    <td class="border-l border-slate-800 px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'time.1', 0), 0) }}</td>
-                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'time.2', 0), 0) }}</td>
-                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'time.3', 0), 0) }}</td>
-                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'time.4', 0), 0) }}</td>
-                                    <td class="px-2 py-3 text-right font-semibold tabular-nums">{{ number_format(data_get($row, 'timeTotal', 0), 0) }}</td>
+                            @foreach ($sectionLabels as $sectionKey => $sectionLabel)
+                                <tr class="bg-slate-800/40 text-[0.65rem] uppercase tracking-[0.3em] text-slate-400">
+                                    <td class="px-3 py-2 font-semibold text-slate-200" colspan="16">{{ $sectionLabel }}</td>
                                 </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="16" class="px-3 py-6 text-center text-sm text-slate-500">No core entries available.</td>
-                                </tr>
-                            @endforelse
 
-                            {{-- Support --}}
-                            <tr class="bg-slate-800/40 text-[0.65rem] uppercase tracking-[0.3em] text-slate-400">
-                                <td class="px-3 py-2 font-semibold text-slate-200" colspan="16">{{ $sectionLabels['support'] ?? 'Support Functions' }}</td>
-                            </tr>
+                                @forelse ($sectionRows[$sectionKey] ?? [] as $row)
+                                    <tr>
+                                        <td class="px-3 py-3 font-semibold text-white">{{ $row['label'] }}</td>
 
-                            @forelse ($sectionRows['support'] ?? [] as $row)
-                                <tr>
-                                    <td class="px-3 py-3 font-semibold text-white">{{ $row['label'] }}</td>
+                                        {{-- qty --}}
+                                        <td class="border-l border-slate-800 px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qty.1', 0), 0) }}</td>
+                                        <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qty.2', 0), 0) }}</td>
+                                        <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qty.3', 0), 0) }}</td>
+                                        <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qty.4', 0), 0) }}</td>
+                                        <td class="px-2 py-3 text-right font-semibold tabular-nums">{{ number_format(data_get($row, 'qtyTotal', 0), 0) }}</td>
 
-                                    {{-- qty --}}
-                                    <td class="border-l border-slate-800 px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qty.1', 0), 0) }}</td>
-                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qty.2', 0), 0) }}</td>
-                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qty.3', 0), 0) }}</td>
-                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qty.4', 0), 0) }}</td>
-                                    <td class="px-2 py-3 text-right font-semibold tabular-nums">{{ number_format(data_get($row, 'qtyTotal', 0), 0) }}</td>
+                                        {{-- qual --}}
+                                        <td class="border-l border-slate-800 px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qual.1', 0), 0) }}</td>
+                                        <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qual.2', 0), 0) }}</td>
+                                        <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qual.3', 0), 0) }}</td>
+                                        <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qual.4', 0), 0) }}</td>
+                                        <td class="px-2 py-3 text-right font-semibold tabular-nums">{{ number_format(data_get($row, 'qualTotal', 0), 0) }}</td>
 
-                                    {{-- qual --}}
-                                    <td class="border-l border-slate-800 px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qual.1', 0), 0) }}</td>
-                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qual.2', 0), 0) }}</td>
-                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qual.3', 0), 0) }}</td>
-                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qual.4', 0), 0) }}</td>
-                                    <td class="px-2 py-3 text-right font-semibold tabular-nums">{{ number_format(data_get($row, 'qualTotal', 0), 0) }}</td>
-
-                                    {{-- time --}}
-                                    <td class="border-l border-slate-800 px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'time.1', 0), 0) }}</td>
-                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'time.2', 0), 0) }}</td>
-                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'time.3', 0), 0) }}</td>
-                                    <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'time.4', 0), 0) }}</td>
-                                    <td class="px-2 py-3 text-right font-semibold tabular-nums">{{ number_format(data_get($row, 'timeTotal', 0), 0) }}</td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="16" class="px-3 py-6 text-center text-sm text-slate-500">No support entries available.</td>
-                                </tr>
-                            @endforelse
+                                        {{-- time --}}
+                                        <td class="border-l border-slate-800 px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'time.1', 0), 0) }}</td>
+                                        <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'time.2', 0), 0) }}</td>
+                                        <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'time.3', 0), 0) }}</td>
+                                        <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'time.4', 0), 0) }}</td>
+                                        <td class="px-2 py-3 text-right font-semibold tabular-nums">{{ number_format(data_get($row, 'timeTotal', 0), 0) }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="16" class="px-3 py-6 text-center text-sm text-slate-500">No entries available.</td>
+                                    </tr>
+                                @endforelse
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
@@ -324,7 +275,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             const submitForm = document.getElementById('mporSubmitForm');
             const proceedButton = document.getElementById('mporProceedSubmissionBtn');
-            const alertHost = document.getElementById('mporAjaxAlertHost');
             const actionButtons = document.getElementById('mporActionButtons');
             const label = proceedButton?.querySelector('[data-button-label]');
             const spinner = proceedButton?.querySelector('[data-button-spinner]');
@@ -335,31 +285,22 @@
                 return;
             }
 
-            const clearAlert = () => {
-                if (alertHost) {
-                    alertHost.innerHTML = '';
-                }
-            };
+            const clearAlert = () => {};
 
             const renderAlert = (type, message) => {
-                if (!alertHost || !message) {
+                if (!message) {
                     return;
                 }
 
-                let classes = 'rounded-xl border px-4 py-3 text-sm';
-                if (type === 'success') {
-                    classes += ' border-emerald-500/30 bg-emerald-500/10 text-emerald-200';
-                } else if (type === 'info') {
-                    classes += ' border-sky-500/30 bg-sky-500/10 text-sky-200';
-                } else {
-                    classes += ' border-rose-500/30 bg-rose-500/10 text-rose-200';
+                if (window.PMSnackbar && !window.PMSnackbar.hasActive()) {
+                    window.PMSnackbar.show({
+                        type: String(type || 'info').toLowerCase(),
+                        message: String(message),
+                    });
+                    return;
                 }
 
-                const alert = document.createElement('div');
-                alert.className = classes;
-                alert.textContent = String(message);
-                alertHost.innerHTML = '';
-                alertHost.appendChild(alert);
+                alert(String(message));
             };
 
             const setLoading = (isLoading) => {

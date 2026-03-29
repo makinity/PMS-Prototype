@@ -382,22 +382,6 @@
             <main id="main-content" class="relative px-4 pb-12 pt-6 lg:px-8">
 
                 <div class="mx-auto max-w-7xl">
-                    @if (session('success'))
-                        <div class="w-full flex justify-center mt-6">
-                            <div class="emerald-alert w-full max-w-2xl rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-6 py-4 text-emerald-200 shadow-lg">
-                                <div class="flex items-center justify-between">
-                                    <span class="font-semibold">
-                                        {{ session('success') }}
-                                    </span>
-                                    <button type="button"
-                                            onclick="this.closest('.emerald-alert').remove()"
-                                            class="ml-4 opacity-70 hover:opacity-100">
-                                        ×
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    @endif
                     @yield('main-content')
                 </div>
             </main>
@@ -409,6 +393,7 @@
         @livewireScripts
     @endif
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    @include('partials.auth-snackbar')
     @stack('scripts')
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>

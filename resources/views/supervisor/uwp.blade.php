@@ -167,41 +167,49 @@
 
     {{-- SUCCESS INDICATORS MODAL (now includes Assigned Employees per indicator) --}}
     <div id="uwp-indicators-modal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 px-4 py-6">
-        <div class="w-full max-w-4xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
-            <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
-                <div>
+        <div class="w-full max-w-[1180px] rounded-[28px] border border-slate-800 bg-slate-900 p-6 shadow-2xl shadow-slate-950/40">
+            <div class="flex items-start justify-between gap-4 border-b border-slate-800 pb-5">
+                <div class="space-y-3">
                     <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Success Indicators</p>
-                    <h3 id="uwp-indicators-title" class="text-lg font-semibold text-white">--</h3>
-                    <p class="text-xs text-slate-400 mt-1">One output may have multiple success indicators. Each indicator can be assigned to a specific employee.</p>
+                    <h3 id="uwp-indicators-title" class="text-[2rem] font-semibold tracking-tight text-white">--</h3>
+                    <p class="max-w-4xl text-base leading-7 text-slate-400">
+                        {{ $canEdit
+                            ? 'Manage targets, standards, and assignments per indicator in one clean sheet.'
+                            : 'Read-only list of indicators for this output.' }}
+                    </p>
                 </div>
-                <button type="button" onclick="closeUwpIndicatorsModal()" class="text-slate-400 hover:text-white">
+                <button type="button" onclick="closeUwpIndicatorsModal()" class="text-3xl leading-none text-slate-400 transition hover:text-white">
                     <span class="sr-only">Close</span>
                     &times;
                 </button>
             </div>
 
-            <div class="mt-4 space-y-3">
+            <div class="mt-6 space-y-5">
                 @if ($canEdit)
-                    <div class="flex flex-wrap items-center justify-between gap-2">
-                        <span class="text-xs text-slate-400">Manage success indicators (one per line, scalable list).</span>
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <div class="space-y-1">
+                            <p class="text-sm font-medium text-slate-200">Manage success indicators directly in this sheet.</p>
+                            <p class="text-sm text-slate-500">Use short measurable statements, then set the quantity and timeline below.</p>
+                        </div>
                         <button type="button" id="uwp-add-indicator"
-                                class="inline-flex items-center gap-1 rounded-lg border border-blue-500/50 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-200 hover:bg-blue-500/20">
-                            <span class="fa-solid fa-plus text-[10px]"></span>
+                                class="inline-flex items-center gap-2 rounded-full bg-slate-800/90 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-700">
+                            <span class="fa-solid fa-plus text-[11px]"></span>
                             <span>Add Indicator</span>
                         </button>
                     </div>
                 @endif
 
-                <div class="overflow-hidden rounded-xl border border-slate-800 bg-slate-950/70">
-                    <div class="max-h-[340px] overflow-y-auto">
+                <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/60">
+                    <div class="max-h-[520px] overflow-y-auto">
                         <table class="w-full text-sm">
-                            <thead class="bg-slate-900/70 text-slate-200">
+                            <thead class="sticky top-0 z-10 bg-slate-900/95 text-slate-200 backdrop-blur">
                                 <tr>
-                                    <th class="px-4 py-3 text-left text-[11px] uppercase tracking-[0.2em] text-slate-400">Success Indicator</th>
-                                    <th class="px-4 py-3 text-center text-[11px] uppercase tracking-[0.2em] text-slate-400">Standards</th>
-                                    <th class="px-4 py-3 text-center text-[11px] uppercase tracking-[0.2em] text-slate-400">Assign Employee</th>
+                                    <th class="px-5 py-4 text-left text-[11px] uppercase tracking-[0.22em] text-slate-400">Success Indicator</th>
+                                    <th class="px-5 py-4 text-left text-[11px] uppercase tracking-[0.22em] text-slate-400">Target Summary</th>
+                                    <th class="px-5 py-4 text-center text-[11px] uppercase tracking-[0.22em] text-slate-400">Standards</th>
+                                    <th class="px-5 py-4 text-center text-[11px] uppercase tracking-[0.22em] text-slate-400">Assigned Employee</th>
                                     @if ($canEdit)
-                                        <th class="px-4 py-3 text-center text-[11px] uppercase tracking-[0.2em] text-slate-400">Actions</th>
+                                        <th class="px-5 py-4 text-center text-[11px] uppercase tracking-[0.22em] text-slate-400">Actions</th>
                                     @endif
                                 </tr>
                             </thead>
@@ -512,6 +520,7 @@
                 let activeFunctionIndex = null;
                 let activeMfoIndex = null;
                 let activeIndicators = [];
+                let activeEditingIndicatorIndex = null;
                 let activeAssignIndicatorIndex = null;
                 let activeRowConfirmId = null;
                 let activeFunctionConfirmId = null;
@@ -531,18 +540,18 @@
                                     title: 'E-Bank Scanning and Encoding of Revenue Transactions',
                                     target: 'Daily; all e-bank transactions processed within the same working day',
                                     indicators: [
-                                        { text: 'All e-bank transactions scanned and encoded daily', standards: [], assignees: [] },
-                                        { text: 'Indexing complete with no missing pages', standards: [], assignees: [] },
-                                        { text: 'Audit trail maintained within 24 hours', standards: [], assignees: [] },
+                                        { text: 'All e-bank transactions scanned and encoded daily', targetQuantity: 1200, targetTimeline: 'e-bank transactions processed within the semester', standards: [], assignees: [] },
+                                        { text: 'Indexing complete with no missing pages', targetQuantity: 1200, targetTimeline: 'e-bank transactions processed within the semester', standards: [], assignees: [] },
+                                        { text: 'Audit trail maintained within 24 hours', targetQuantity: 1200, targetTimeline: 'e-bank transactions processed within the semester', standards: [], assignees: [] },
                                     ],
                                 },
                                 {
                                     title: 'Processing of Over-the-Counter Revenue Transactions',
                                     target: 'Daily; 95% processed within the same working day',
                                     indicators: [
-                                        { text: 'Same-day verification of OTC transactions', standards: [], assignees: [] },
-                                        { text: '95% encoded within the business day', standards: [], assignees: [] },
-                                        { text: 'OR validation completed daily', standards: [], assignees: [] },
+                                        { text: 'Same-day verification of OTC transactions', targetQuantity: 3000, targetTimeline: 'OCR processed within the semester', standards: [], assignees: [] },
+                                        { text: '95% encoded within the business day', targetQuantity: 3000, targetTimeline: 'OCR processed within the semester', standards: [], assignees: [] },
+                                        { text: 'OR validation completed daily', targetQuantity: 3000, targetTimeline: 'OCR processed within the semester', standards: [], assignees: [] },
                                     ],
                                 },
                             ],
@@ -557,9 +566,9 @@
                                     title: 'Maintenance of revenue records and filing system',
                                     target: 'Quarterly; records validated and properly filed',
                                     indicators: [
-                                        { text: 'Weekly filing updated and retrievable', standards: [], assignees: [] },
-                                        { text: 'Digital backups synced monthly', standards: [], assignees: [] },
-                                        { text: 'Retrieval logs maintained for audits', standards: [], assignees: [] },
+                                        { text: 'Weekly filing updated and retrievable', targetQuantity: 2400, targetTimeline: 'records validated and properly filed within the semester', standards: [], assignees: [] },
+                                        { text: 'Digital backups synced monthly', targetQuantity: 2400, targetTimeline: 'records validated and properly filed within the semester', standards: [], assignees: [] },
+                                        { text: 'Retrieval logs maintained for audits', targetQuantity: 2400, targetTimeline: 'records validated and properly filed within the semester', standards: [], assignees: [] },
                                     ],
                                 },
                             ],
@@ -579,6 +588,13 @@
                         ? func.mfos.map((mfo) => ({
                             ...mfo,
                             targetQuantity: normalizeTargetQuantity(mfo?.targetQuantity ?? mfo?.target_quantity),
+                            indicators: Array.isArray(mfo?.indicators)
+                                ? mfo.indicators.map((indicator) => ({
+                                    ...indicator,
+                                    targetQuantity: normalizeTargetQuantity(indicator?.targetQuantity ?? indicator?.target_quantity),
+                                    targetTimeline: String(indicator?.targetTimeline ?? indicator?.target_timeline ?? '').trim(),
+                                }))
+                                : [],
                         }))
                         : [],
                 }));
@@ -772,12 +788,85 @@
                     return Array.isArray(indicator.standards) ? indicator.standards : [];
                 }
 
+                function getIndicatorTargetSummary(indicator) {
+                    const quantity = normalizeTargetQuantity(indicator?.targetQuantity ?? indicator?.target_quantity);
+                    const timeline = String(indicator?.targetTimeline ?? indicator?.target_timeline ?? '').trim();
+                    const parts = [];
+
+                    if (quantity !== null && quantity !== undefined && quantity !== '') {
+                        parts.push(String(quantity));
+                    }
+
+                    if (timeline) {
+                        parts.push(timeline);
+                    }
+
+                    return parts.join(' ').trim();
+                }
+
+                function deriveMfoTargetMeta(mfo) {
+                    const indicators = Array.isArray(mfo?.indicators) ? mfo.indicators : [];
+                    const summaries = indicators
+                        .map((indicator) => getIndicatorTargetSummary(indicator))
+                        .filter((value, index, array) => value && array.indexOf(value) === index);
+                    const totalQuantity = indicators.reduce((sum, indicator) => {
+                        const quantity = normalizeTargetQuantity(indicator?.targetQuantity ?? indicator?.target_quantity);
+                        return quantity === null ? sum : sum + quantity;
+                    }, 0);
+
+                    if (summaries.length === 1) {
+                        return {
+                            summary: summaries[0],
+                            targetQuantity: totalQuantity > 0 ? totalQuantity : normalizeTargetQuantity(mfo?.targetQuantity ?? mfo?.target_quantity),
+                        };
+                    }
+
+                    if (summaries.length > 1) {
+                        return {
+                            summary: 'Multiple indicator targets',
+                            targetQuantity: totalQuantity > 0 ? totalQuantity : null,
+                        };
+                    }
+
+                    const fallbackQuantity = normalizeTargetQuantity(mfo?.targetQuantity ?? mfo?.target_quantity);
+                    const fallbackTimeline = String(mfo?.target ?? mfo?.target_timeline ?? '').trim();
+                    const fallbackParts = [];
+
+                    if (fallbackQuantity !== null && fallbackQuantity !== undefined && fallbackQuantity !== '') {
+                        fallbackParts.push(String(fallbackQuantity));
+                    }
+
+                    if (fallbackTimeline) {
+                        fallbackParts.push(fallbackTimeline);
+                    }
+
+                    return {
+                        summary: fallbackParts.join(' ').trim(),
+                        targetQuantity: fallbackQuantity,
+                    };
+                }
+
                 function createIndicator(text) {
                     return {
                         text: text || 'New success indicator',
+                        targetQuantity: null,
+                        targetTimeline: '',
                         standards: [],
                         assignees: [],
                     };
+                }
+
+                function finalizeIndicatorValues(indicator) {
+                    if (!indicator) return;
+
+                    indicator.text = String(indicator.text || '').trim() || 'New success indicator';
+                    indicator.targetTimeline = String(indicator.targetTimeline || '').trim();
+                    indicator.targetQuantity = normalizeTargetQuantity(indicator.targetQuantity);
+
+                    if (!indicator._matrix) {
+                        indicator._matrix = seedStandardsForIndicator(indicator.text);
+                        indicator.standards = standardsMatrixToArray(indicator._matrix);
+                    }
                 }
 
                 function createMfo(title, target, targetQuantity, indicators) {
@@ -871,7 +960,6 @@
                             const indicatorCount = Array.isArray(mfo.indicators) ? mfo.indicators.length : 0;
                             const rowId = `${funcIndex}-${mfoIndex}`;
                             const isConfirmOpen = activeRowConfirmId === rowId;
-
                             return `
                                 <tr class="group hover:bg-slate-800/40 transition-colors" data-mfo-row-id="${rowId}">
                                     <td class="px-4 py-4">
@@ -895,34 +983,6 @@
                                             class="inline-flex items-center rounded-full border border-slate-700 bg-slate-900 px-3 py-1 text-xs font-semibold text-slate-300 transition hover:bg-slate-700/40 hover:border-slate-400/60 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 cursor-pointer">
                                             ${indicatorCount} indicator${indicatorCount === 1 ? '' : 's'}
                                         </button>
-                                    </td>
-
-                                    <td class="px-4 py-4">
-                                        <div class="flex gap-2">
-                                            <input
-                                                type="number"
-                                                data-mfo-target-quantity
-                                                data-function-index="${funcIndex}"
-                                                data-mfo-index="${mfoIndex}"
-                                                value="${mfo.targetQuantity ?? ''}"
-                                                placeholder="Qty"
-                                                style="background:#0f172a;color:#e5e7eb;"
-                                                class="w-24 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none ${mutedClass}"
-                                                ${inputDisabled}
-                                            >
-
-                                            <input
-                                                type="text"
-                                                data-mfo-target
-                                                data-function-index="${funcIndex}"
-                                                data-mfo-index="${mfoIndex}"
-                                                class="flex-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none ${mutedClass}"
-                                                style="background:#0f172a;color:#e5e7eb;"
-                                                placeholder="e.g., files per month"
-                                                value="${escapeHtml(mfo.target)}"
-                                                ${inputDisabled}
-                                            >
-                                        </div>
                                     </td>
 
                                     <td class="px-4 py-4 text-right">
@@ -968,7 +1028,7 @@
 
                         const emptyRow = `
                             <tr>
-                                <td colspan="4" class="px-4 py-6 text-center text-xs text-slate-500">
+                                <td colspan="3" class="px-4 py-6 text-center text-xs text-slate-500">
                                     No MFOs yet. Use "+ Add MFO" to add entries.
                                 </td>
                             </tr>
@@ -1063,7 +1123,6 @@
                                                     <tr>
                                                         <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">PPA / MFO</th>
                                                         <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Success Indicators</th>
-                                                        <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Target / Timeline</th>
                                                         <th class="px-4 py-3 text-right font-semibold uppercase text-[11px] tracking-wide">Actions</th>
                                                     </tr>
                                                 </thead>
@@ -1088,85 +1147,163 @@
                     indicatorsList.innerHTML = '';
 
                     list.forEach((indicator, idx) => {
+                        const isEditingIndicator = isDraft && activeEditingIndicatorIndex === idx;
                         const value = (indicator?.text || '').trim();
-                        if (!value) return;
+                        if (!value && !isEditingIndicator) return;
 
                         const tr = document.createElement('tr');
-                        tr.className = 'hover:bg-slate-900/40';
+                        tr.className = 'hover:bg-slate-900/40 transition-colors';
 
                         // Indicator text
                         const indicatorTd = document.createElement('td');
-                        indicatorTd.className = 'px-4 py-3 align-top';
-                        const indicatorWrap = document.createElement('div');
-                        indicatorWrap.className = 'space-y-1';
+                        indicatorTd.className = 'px-5 py-5 align-top';
+                        if (isEditingIndicator) {
+                            const input = document.createElement('input');
+                            input.type = 'text';
+                            input.placeholder = 'Enter success indicator';
+                            input.value = indicator?.text || '';
+                            input.dataset.indicatorEditInput = String(idx);
+                            input.className = 'w-full max-w-[340px] rounded-xl bg-slate-800/80 px-4 py-3 text-base text-slate-100 placeholder:text-slate-500 ring-1 ring-inset ring-slate-700 focus:ring-2 focus:ring-cyan-500/40 focus:outline-none';
+                            input.style.background = '#0f172a';
+                            input.style.color = '#e5e7eb';
+                            input.addEventListener('input', (event) => {
+                                indicator.text = String(event.target.value || '');
+                            });
+                            input.addEventListener('keydown', (event) => {
+                                if (event.key === 'Enter') {
+                                    event.preventDefault();
+                                    finishEditIndicator(idx);
+                                }
+                            });
+                            indicatorTd.appendChild(input);
+                        } else {
+                            const indicatorWrap = document.createElement('div');
+                            indicatorWrap.className = 'space-y-2';
 
-                        const textSpan = document.createElement('div');
-                        textSpan.className = 'text-slate-100';
-                        textSpan.textContent = value;
+                            const textSpan = document.createElement('div');
+                            textSpan.className = 'max-w-[320px] text-[16px] font-semibold leading-8 text-slate-100';
+                            textSpan.textContent = value;
 
-                        const hint = document.createElement('div');
-                        hint.className = 'text-[11px] text-slate-500';
-                        hint.textContent = 'Assigned per indicator (task-level).';
+                            const hint = document.createElement('div');
+                            hint.className = 'max-w-[320px] text-sm leading-6 text-slate-500';
 
-                        indicatorWrap.append(textSpan);
-                        indicatorWrap.append(hint);
-                        indicatorTd.appendChild(indicatorWrap);
+                            indicatorWrap.append(textSpan);
+                            indicatorWrap.append(hint);
+                            indicatorTd.appendChild(indicatorWrap);
+                        }
+
+                        const targetTd = document.createElement('td');
+                        targetTd.className = 'px-5 py-5 align-top';
+
+                        if (isEditingIndicator) {
+                            const targetWrap = document.createElement('div');
+                            targetWrap.className = 'max-w-[420px] grid gap-3 md:grid-cols-[128px_minmax(0,1fr)]';
+
+                            const quantityInput = document.createElement('input');
+                            quantityInput.type = 'number';
+                            quantityInput.placeholder = 'Quantity';
+                            quantityInput.value = indicator?.targetQuantity ?? '';
+                            quantityInput.className = 'w-full rounded-xl bg-slate-800/80 px-4 py-3 text-base text-slate-100 placeholder:text-slate-500 ring-1 ring-inset ring-slate-700 focus:ring-2 focus:ring-cyan-500/40 focus:outline-none';
+                            quantityInput.style.background = '#0f172a';
+                            quantityInput.style.color = '#e5e7eb';
+                            quantityInput.addEventListener('input', (event) => {
+                                indicator.targetQuantity = normalizeTargetQuantity(event.target.value);
+                            });
+                            quantityInput.addEventListener('keydown', (event) => {
+                                if (event.key === 'Enter') {
+                                    event.preventDefault();
+                                    finishEditIndicator(idx);
+                                }
+                            });
+
+                            const timelineInput = document.createElement('input');
+                            timelineInput.type = 'text';
+                            timelineInput.placeholder = 'Timeline / measure';
+                            timelineInput.value = indicator?.targetTimeline || '';
+                            timelineInput.className = 'w-full rounded-xl bg-slate-800/80 px-4 py-3 text-base text-slate-100 placeholder:text-slate-500 ring-1 ring-inset ring-slate-700 focus:ring-2 focus:ring-cyan-500/40 focus:outline-none';
+                            timelineInput.style.background = '#0f172a';
+                            timelineInput.style.color = '#e5e7eb';
+                            timelineInput.addEventListener('input', (event) => {
+                                indicator.targetTimeline = String(event.target.value || '').trim();
+                            });
+                            timelineInput.addEventListener('keydown', (event) => {
+                                if (event.key === 'Enter') {
+                                    event.preventDefault();
+                                    finishEditIndicator(idx);
+                                }
+                            });
+
+                            targetWrap.appendChild(quantityInput);
+                            targetWrap.appendChild(timelineInput);
+                            targetTd.appendChild(targetWrap);
+                        } else {
+                            const targetText = document.createElement('div');
+                            targetText.className = 'max-w-[360px] text-[15px] leading-7 text-slate-300';
+                            targetText.textContent = getIndicatorTargetSummary(indicator) || '--';
+                            targetTd.appendChild(targetText);
+                        }
 
                         // Standards column
                         const standardsTd = document.createElement('td');
-                        standardsTd.className = 'px-4 py-3 text-center align-top';
+                        standardsTd.className = 'px-5 py-5 text-center align-top';
+                        const standardsCount = getIndicatorStandardsArray(indicator).length;
 
                         const standardBtn = document.createElement('button');
                         standardBtn.type = 'button';
-                        standardBtn.className = 'inline-flex items-center justify-center rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[120px]';
+                        standardBtn.className = 'inline-flex items-center justify-center gap-2 rounded-full bg-slate-800/90 px-3.5 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-700 hover:text-white';
                         standardBtn.innerHTML = `
-                            <span class="inline-flex items-center gap-2">
-                                <span class="fa-regular fa-eye text-[12px]"></span>
-                                <span>Standards</span>
-                            </span>
+                            <span class="fa-regular fa-eye text-[13px]"></span>
+                            <span>${standardsCount > 0 ? `View Standards (${standardsCount})` : 'View Standards'}</span>
                         `;
                         standardBtn.addEventListener('click', () => openStandardsModal(idx));
                         standardsTd.appendChild(standardBtn);
 
                         // Assigned employee column
                         const assignedTd = document.createElement('td');
-                        assignedTd.className = 'px-4 py-3 text-center align-top';
+                        assignedTd.className = 'px-5 py-5 text-center align-top';
 
                         const assignedCount = getAssignedEmployees(indicator).length;
                         const assignBtn = document.createElement('button');
                         assignBtn.type = 'button';
-                        assignBtn.className = 'inline-flex items-center gap-2 text-xs font-semibold text-blue-400 transition-colors hover:text-blue-300 focus:outline-none';
+                        assignBtn.className = 'inline-flex items-center justify-center gap-2 rounded-full bg-sky-500/10 px-3.5 py-2 text-sm font-semibold text-sky-200 transition hover:bg-sky-500/20 hover:text-sky-100 focus:outline-none';
                         assignBtn.style.cursor = 'pointer';
                         assignBtn.innerHTML = `
-                            <span class="fa-regular fa-user text-[12px]"></span>
-                            <span>+ Assign</span>
-                            <span class="text-[11px] text-slate-400">( ${assignedCount} )</span>
+                            <span class="fa-regular fa-user text-[13px]"></span>
+                            <span>${isDraft ? '+ Assign' : 'View Assigned'}</span>
+                            <span class="text-sky-100/80">(${assignedCount})</span>
                         `;
                         assignBtn.addEventListener('click', () => openAssignedModalForIndicator(idx));
                         assignedTd.appendChild(assignBtn);
 
                         tr.appendChild(indicatorTd);
+                        tr.appendChild(targetTd);
                         tr.appendChild(standardsTd);
                         tr.appendChild(assignedTd);
 
                         // Draft actions (Edit/Delete only — assignment is handled by Assign Employee button)
                         if (isDraft) {
                             const actionsTd = document.createElement('td');
-                            actionsTd.className = 'px-4 py-3 text-center align-top';
+                            actionsTd.className = 'px-5 py-5 text-center align-top';
 
                             const actionsWrap = document.createElement('div');
-                            actionsWrap.className = 'inline-flex items-center gap-3 text-[11px] text-blue-200';
+                            actionsWrap.className = 'inline-flex items-center gap-2';
 
                             const editBtn = document.createElement('button');
                             editBtn.type = 'button';
-                            editBtn.textContent = 'Edit';
-                            editBtn.className = 'hover:text-blue-100 underline';
-                            editBtn.addEventListener('click', () => startEditIndicator(idx, value));
+                            editBtn.className = 'rounded-full bg-slate-800/90 px-3.5 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-700 hover:text-white';
+                            editBtn.textContent = isEditingIndicator ? 'Done' : 'Edit';
+                            editBtn.addEventListener('click', () => {
+                                if (isEditingIndicator) {
+                                    finishEditIndicator(idx);
+                                } else {
+                                    startEditIndicator(idx);
+                                }
+                            });
 
                             const delBtn = document.createElement('button');
                             delBtn.type = 'button';
+                            delBtn.className = 'rounded-full bg-rose-500/10 px-3.5 py-2 text-sm font-semibold text-rose-200 transition hover:bg-rose-500/20';
                             delBtn.textContent = 'Delete';
-                            delBtn.className = 'hover:text-blue-100 underline';
                             delBtn.addEventListener('click', () => deleteIndicator(idx));
 
                             actionsWrap.appendChild(editBtn);
@@ -1177,6 +1314,19 @@
 
                         indicatorsList.appendChild(tr);
                     });
+
+                    if (!indicatorsList.children.length) {
+                        const emptyRow = document.createElement('tr');
+                        emptyRow.innerHTML = `
+                            <td colspan="${isDraft ? 5 : 4}" class="px-6 py-12 text-center">
+                                <div class="space-y-2">
+                                    <p class="text-sm font-semibold text-slate-300">No success indicators yet.</p>
+                                    <p class="text-xs text-slate-500">Add at least one indicator to define targets, standards, and employee assignments for this output.</p>
+                                </div>
+                            </td>
+                        `;
+                        indicatorsList.appendChild(emptyRow);
+                    }
                 }
 
                 // ===== Assigned Modal (scoped to active indicator) =====
@@ -1433,58 +1583,39 @@
                 }
 
                 // ===== Indicator CRUD =====
-                function startEditIndicator(idx, currentValue) {
-                    if (!indicatorsList) return;
-                    const rows = Array.from(indicatorsList.children);
-                    const targetRow = rows[idx];
-                    if (!targetRow) return;
-
+                function startEditIndicator(idx) {
                     const indicator = activeIndicators[idx];
                     if (!indicator) return;
+                    if (activeEditingIndicatorIndex !== null && activeEditingIndicatorIndex !== idx) {
+                        finalizeIndicatorValues(activeIndicators[activeEditingIndicatorIndex]);
+                    }
 
-                    const firstTd = targetRow.querySelector('td');
-                    if (!firstTd) return;
+                    activeEditingIndicatorIndex = idx;
+                    renderIndicators(activeIndicators);
 
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.placeholder = 'Enter Success Indicator...';
-                    input.className = 'w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm ' +
-                                      'text-slate-100 placeholder:text-slate-500 focus:border-blue-500 ' +
-                                      'focus:ring-2 focus:ring-blue-500/40 focus:outline-none';
-                    input.style.background = '#0f172a';
-                    input.style.color = '#e5e7eb';
-                    input.value = currentValue || '';
-
-                    const prevAssignees = Array.isArray(indicator.assignees) ? [...indicator.assignees] : [];
-
-                    firstTd.innerHTML = '';
-                    firstTd.appendChild(input);
-                    input.focus();
-                    input.select();
-
-                    const commit = () => {
-                        const next = input.value.trim() || 'New success indicator';
-                        indicator.text = next;
-                        indicator.assignees = prevAssignees;
-
-                        if (!indicator._matrix) {
-                            indicator._matrix = seedStandardsForIndicator(next);
-                            indicator.standards = standardsMatrixToArray(indicator._matrix);
-                        }
-
-                        renderIndicators(activeIndicators);
-                    };
-
-                    input.addEventListener('blur', commit);
-                    input.addEventListener('keydown', (e) => {
-                        if (e.key === 'Enter') {
-                            e.preventDefault();
-                            commit();
-                        }
+                    requestAnimationFrame(() => {
+                        const input = indicatorsList?.querySelector(`[data-indicator-edit-input="${idx}"]`);
+                        if (!input) return;
+                        input.focus();
+                        input.select();
                     });
                 }
 
+                function finishEditIndicator(idx) {
+                    const indicator = activeIndicators[idx];
+                    if (!indicator) return;
+
+                    finalizeIndicatorValues(indicator);
+                    activeEditingIndicatorIndex = null;
+                    renderIndicators(activeIndicators);
+                }
+
                 function deleteIndicator(idx) {
+                    if (activeEditingIndicatorIndex === idx) {
+                        activeEditingIndicatorIndex = null;
+                    } else if (activeEditingIndicatorIndex !== null && idx < activeEditingIndicatorIndex) {
+                        activeEditingIndicatorIndex -= 1;
+                    }
                     activeIndicators.splice(idx, 1);
                     renderIndicators(activeIndicators);
                 }
@@ -1492,7 +1623,7 @@
                 function addIndicator() {
                     activeIndicators.push(createIndicator('New success indicator'));
                     renderIndicators(activeIndicators);
-                    startEditIndicator(activeIndicators.length - 1, 'New success indicator');
+                    startEditIndicator(activeIndicators.length - 1);
                 }
 
                 function openUwpIndicatorsModal(functionIndex, mfoIndex) {
@@ -1502,6 +1633,7 @@
 
                     activeFunctionIndex = functionIndex;
                     activeMfoIndex = mfoIndex;
+                    activeEditingIndicatorIndex = null;
                     if (!Array.isArray(mfo.indicators)) mfo.indicators = [];
                     activeIndicators = mfo.indicators;
 
@@ -1514,6 +1646,9 @@
                 }
 
                 window.closeUwpIndicatorsModal = function () {
+                    if (activeEditingIndicatorIndex !== null) {
+                        finalizeIndicatorValues(activeIndicators[activeEditingIndicatorIndex]);
+                    }
                     if (indicatorsModal) {
                         indicatorsModal.classList.add('hidden');
                         indicatorsModal.classList.remove('flex');
@@ -1521,6 +1656,7 @@
                     activeFunctionIndex = null;
                     activeMfoIndex = null;
                     activeIndicators = [];
+                    activeEditingIndicatorIndex = null;
                     renderFunctions();
                     document.body.classList.remove('overflow-hidden');
                 };
@@ -1603,16 +1739,23 @@
                         title: func.title,
                         type: func.type,
                         weight: func.weight,
-                        mfos: (func.mfos || []).map((mfo) => ({
-                            title: mfo.title,
-                            target_quantity: normalizeTargetQuantity(mfo.targetQuantity),
-                            target: mfo.target,
-                            indicators: (mfo.indicators || []).map((indicator) => ({
-                                text: indicator.text,
-                                standards: getIndicatorStandardsArray(indicator),
-                                assignees: Array.isArray(indicator.assignees) ? [...indicator.assignees] : [],
-                            })),
-                        })),
+                        mfos: (func.mfos || []).map((mfo) => {
+                            const targetMeta = deriveMfoTargetMeta(mfo);
+                            return {
+                                title: mfo.title,
+                                target_quantity: targetMeta.targetQuantity,
+                                target: targetMeta.summary === 'Multiple indicator targets'
+                                    ? 'Per success indicator'
+                                    : (String(mfo?.target ?? '').trim() || 'Per success indicator'),
+                                indicators: (mfo.indicators || []).map((indicator) => ({
+                                    text: indicator.text,
+                                    target_quantity: normalizeTargetQuantity(indicator.targetQuantity),
+                                    target_timeline: String(indicator.targetTimeline || '').trim(),
+                                    standards: getIndicatorStandardsArray(indicator),
+                                    assignees: Array.isArray(indicator.assignees) ? [...indicator.assignees] : [],
+                                })),
+                            };
+                        }),
                     }));
                 }
 
@@ -1627,6 +1770,7 @@
                         (func.mfos || []).forEach((mfo) => {
                             const titleText = (mfo.title || '').trim();
                             if (!titleText) return;
+                            const targetMeta = deriveMfoTargetMeta(mfo);
 
                             const successIndicators = (mfo.indicators || []).map((indicator) => {
                                 const description = (indicator.text || '').trim();
@@ -1640,7 +1784,8 @@
 
                                 return {
                                     description,
-                                    target_timeline: null,
+                                    target_quantity: normalizeTargetQuantity(indicator.targetQuantity),
+                                    target_timeline: String(indicator.targetTimeline || '').trim(),
                                     standards,
                                 };
                             }).filter(Boolean);
@@ -1648,8 +1793,8 @@
                             payload.push({
                                 function_code: functionCode,
                                 title: titleText,
-                                target_quantity: normalizeTargetQuantity(mfo.targetQuantity),
-                                target_summary: (mfo.target || '').trim(),
+                                target_quantity: targetMeta.targetQuantity,
+                                target_summary: targetMeta.summary,
                                 weight: weight,
                                 sort_order: sortOrder,
                                 success_indicators: successIndicators,

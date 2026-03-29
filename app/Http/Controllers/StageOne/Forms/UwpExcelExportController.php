@@ -38,12 +38,38 @@ class UwpExcelExportController extends Controller
 
         foreach ($uwp->uwpFunctions as $fn) {
             foreach ($fn->mfos as $mfo) {
+                $indicators = $mfo->successIndicators->map(function ($si) {
+                    return [
+                        'text' => (string) ($si->indicator_text ?? ''),
+                        'target_quantity' => is_numeric($si->target_quantity ?? null) ? (int) $si->target_quantity : null,
+                        'target_timeline' => trim((string) ($si->target_timeline ?? '')),
+                        'target_summary' => $this->buildTargetSummary(
+                            $si->target_quantity,
+                            (string) ($si->target_timeline ?? '')
+                        ),
+                    ];
+                })->filter(fn (array $indicator) => trim((string) ($indicator['text'] ?? '')) !== '')
+                    ->values()
+                    ->all();
+
+                $indicatorTargetQuantity = collect($indicators)
+                    ->sum(fn (array $indicator) => is_numeric($indicator['target_quantity'] ?? null) ? (int) $indicator['target_quantity'] : 0);
+                $indicatorTimelines = collect($indicators)
+                    ->pluck('target_timeline')
+                    ->filter(fn ($value) => trim((string) $value) !== '')
+                    ->unique()
+                    ->values()
+                    ->all();
+
                 $uwpData['outputs'][] = [
                     'mfo' => $mfo->title,
-                    'success_indicators' => $mfo->successIndicators
-                        ->pluck('indicator_text')
-                        ->toArray(),
-                    'target' => $mfo->target_timeline,
+                    'success_indicators' => $indicators,
+                    'target_quantity' => $indicatorTargetQuantity > 0
+                        ? $indicatorTargetQuantity
+                        : (is_numeric($mfo->target_quantity ?? null) ? (int) $mfo->target_quantity : null),
+                    'target' => count($indicatorTimelines) === 1
+                        ? $indicatorTimelines[0]
+                        : (count($indicatorTimelines) > 1 ? 'Multiple indicator targets' : trim((string) ($mfo->target_timeline ?? ''))),
                     'function' => ucfirst((string) $fn->function_type),
                     'function_type' => $fn->function_type,
                 ];
@@ -93,5 +119,12 @@ class UwpExcelExportController extends Controller
             Str::slug($uwp->performancePeriod?->name ?? 'Period') . '.xlsx'
         );
     }
-}
 
+    private function buildTargetSummary(mixed $targetQuantity, ?string $targetTimeline): string
+    {
+        $quantityText = is_numeric($targetQuantity) ? trim((string) $targetQuantity) : '';
+        $timelineText = trim((string) ($targetTimeline ?? ''));
+
+        return trim($quantityText . ' ' . $timelineText);
+    }
+}

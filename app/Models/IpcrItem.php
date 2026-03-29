@@ -12,14 +12,18 @@ class IpcrItem extends Model
     protected $fillable = [
         'ipcr_id',
         'uwp_function_id',
+        'uwp_success_indicator_id',
         'output_title',
         'function_type',
         'indicator_text',
+        'target_quantity',
+        'target_timeline',
         'target_summary',
         'standards_payload',
     ];
 
     protected $casts = [
+        'target_quantity' => 'integer',
         'standards_payload' => 'array',
     ];
 
@@ -31,5 +35,10 @@ class IpcrItem extends Model
     public function uwpFunction(): BelongsTo
     {
         return $this->belongsTo(UwpFunction::class, 'uwp_function_id');
+    }
+
+    public function uwpSuccessIndicator(): BelongsTo
+    {
+        return $this->belongsTo(UwpSuccessIndicator::class, 'uwp_success_indicator_id');
     }
 }

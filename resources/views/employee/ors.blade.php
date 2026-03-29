@@ -83,32 +83,6 @@
             <h1 class="text-2xl font-semibold text-white">Output Rating Sheet (ORS)</h1>
         </div>
 
-        @if (session('success'))
-            <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if (session('error'))
-            <div class="rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-                {{ session('error') }}
-            </div>
-        @endif
-
-        @if ($errors->any())
-            <div class="rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-                <ul class="list-disc pl-5 space-y-1">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
-        <div id="orsClientFlash" class="hidden"></div>
-
-
-
         <!-- Stats Overview (DEMO LOCKED: 4 tasks total) -->
         <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
             <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
@@ -745,8 +719,6 @@
             const daySummaryDateLabelEl = document.getElementById('daySummaryDateLabel');
             const daySummaryListEl = document.getElementById('daySummaryList');
             const daySummaryLogBtn = document.getElementById('daySummaryLogBtn');
-            const flashHostEl = document.getElementById('orsClientFlash');
-
             function summaryStateLabel(state) {
                 const key = String(state || '').toLowerCase();
                 return SUMMARY_STATE_LABELS[key] || (STATE_META[key]?.label || key || 'Unknown');
@@ -769,22 +741,15 @@
             }
 
             function clearFlash() {
-                if (!flashHostEl) return;
-                flashHostEl.className = 'hidden';
-                flashHostEl.innerHTML = '';
+                window.PMSnackbar?.clear();
             }
 
             function showFlash(type, message) {
-                if (!flashHostEl || !message) return;
-                const normalizedType = String(type || 'info').toLowerCase();
-                const className = normalizedType === 'success'
-                    ? 'rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200'
-                    : normalizedType === 'error'
-                        ? 'rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200'
-                        : 'rounded-xl border border-sky-500/30 bg-sky-500/10 px-4 py-3 text-sm text-sky-200';
-
-                flashHostEl.className = className;
-                flashHostEl.innerHTML = `<p>${escapeHtml(message)}</p>`;
+                if (!message) return;
+                window.PMSnackbar?.show({
+                    type: String(type || 'info').toLowerCase(),
+                    message,
+                });
             }
 
             function rebuildCalendarBuckets() {
@@ -1444,6 +1409,7 @@
                             task.evidenceFileName = null;
                             task.evidenceUploadedAt = null;
                         }
+                        syncQuantityFromInput(task);
                         openTaskDetails(task.id);
                     };
                 }
@@ -1543,7 +1509,7 @@
                 refreshCalendar();
                 refreshDaySummaryIfOpen(task);
                 updateActivePanel();
-                if (detailTaskId === taskId) openTaskDetails(taskId);
+                openTaskDetails(taskId);
                 return true;
             }
 
@@ -1622,7 +1588,7 @@
 
             async function stopTask(taskId) {
                 const task = getTaskById(taskId);
-                if (!task) return;
+                if (!task) return false;
 
                 if (isDbBackedTask(task)) {
                     try {
@@ -1655,7 +1621,6 @@
                 refreshCalendar();
                 refreshDaySummaryIfOpen(task);
                 updateActivePanel();
-                if (detailTaskId === taskId) openTaskDetails(taskId);
                 return true;
             }
 
@@ -1739,10 +1704,8 @@
                         refreshCalendar();
                         refreshDaySummaryIfOpen(task);
                         updateActivePanel();
-                        if (detailTaskId === taskId) openTaskDetails(taskId);
-                        if (data?.message) {
-                            showFlash('success', data.message);
-                        }
+                        closeOrsModal('taskDetailsModal');
+                        showFlash('success', 'Task submitted.');
                         return true;
                     } catch (error) {
                         const message = String(error?.message || 'Submit failed. Please try again.');
@@ -1777,7 +1740,7 @@
                 refreshCalendar();
                 refreshDaySummaryIfOpen(task);
                 updateActivePanel();
-                if (detailTaskId === taskId) openTaskDetails(taskId);
+                closeOrsModal('taskDetailsModal');
                 return true;
             }
 
@@ -1820,7 +1783,12 @@
                     task.state === 'paused' ? 'Resuming...' : 'Pausing...',
                     () => (task.state === 'paused' ? resumeTask(task.id) : pauseTask(task.id))
                 );
-                stopBtn.onclick = () => runWithLoading(stopBtn, 'Stopping...', () => stopTask(task.id));
+                stopBtn.onclick = () => runWithLoading(stopBtn, 'Stopping...', async () => {
+                    const ok = await stopTask(task.id);
+                    if (ok) {
+                        openTaskDetails(task.id);
+                    }
+                });
                 submitBtn.onclick = () => runWithLoading(submitBtn, 'Submitting...', () => submitTask(task.id));
             }
 
@@ -1978,12 +1946,15 @@
                             resetTaskOptions();
                             clearFieldErrors();
 
-                            refreshCalendar();
-                            refreshDaySummaryIfOpen(task);
-                            updateActivePanel();
+                            const autoStartOk = await startTask(task.id);
+                            if (!autoStartOk) {
+                                refreshCalendar();
+                                refreshDaySummaryIfOpen(task);
+                                updateActivePanel();
+                            }
 
                             closeOrsModal('orsTaskModal');
-                            showFlash('success', payload?.message || 'ORS task logged successfully.');
+                            showFlash('success', autoStartOk ? 'Logged task. Timer started.' : 'Logged task.');
                         } catch (error) {
                             const message = String(error?.message || 'Unexpected error while logging ORS task.');
                             showFlash('error', message);
@@ -2013,7 +1984,12 @@
             document.getElementById('taskDetailStopBtn')?.addEventListener('click', (e) => {
                 const taskId = String(e.currentTarget?.dataset?.taskId || '').trim();
                 if (!taskId) return;
-                runWithLoading(e.currentTarget, 'Stopping...', () => stopTask(taskId));
+                runWithLoading(e.currentTarget, 'Stopping...', async () => {
+                    const ok = await stopTask(taskId);
+                    if (ok) {
+                        openTaskDetails(taskId);
+                    }
+                });
             });
             document.getElementById('taskDetailSubmitBtn')?.addEventListener('click', (e) => {
                 const taskId = String(e.currentTarget?.dataset?.taskId || '').trim();

@@ -5,7 +5,6 @@ namespace App\Http\Controllers\StageTwo\Forms;
 use App\Exports\StageTwo\IpcrExcelExport;
 use App\Http\Controllers\Controller;
 use App\Models\Ipcr;
-use App\Models\OrsEntry;
 use App\Models\PerformancePeriod;
 use App\Support\ResolvesIpcrTargetScores;
 use Carbon\Carbon;
@@ -71,7 +70,7 @@ class IpcrExcelExportController extends Controller
 
     private function buildIpcr(Ipcr $ipcr): array
     {
-        $targetQuantityByOutput = $this->buildTargetQuantityByOutput($ipcr);
+        $targetPayloadByIndicator = $this->buildTargetPayloadByIndicatorLookup($ipcr);
         $sections = [
             'core' => [],
             'support' => [],
@@ -100,9 +99,13 @@ class IpcrExcelExportController extends Controller
             );
 
             if (!in_array($indicator, $existingIndicators, true)) {
+                $targetPayload = $targetPayloadByIndicator[
+                    $this->buildIndicatorRatingLookupKey($output, $indicator)
+                ] ?? [];
+
                 $sections[$section][$output]['indicators'][] = [
                     'text' => $indicator,
-                    'target_quantity' => $targetQuantityByOutput[$output] ?? null,
+                    'target_quantity' => $targetPayload['target_quantity'] ?? null,
                 ];
             }
         }
@@ -115,77 +118,10 @@ class IpcrExcelExportController extends Controller
 
     private function buildValuesByIndicator(Ipcr $ipcr): array
     {
-        [$startDate, $endDate] = $this->resolvePeriodWindow($ipcr);
-        $targetQuantityByOutput = $this->buildTargetQuantityByOutput($ipcr);
-
-        $entries = OrsEntry::query()
-            ->with([
-                'ipcrItem:id,output_title,function_type,indicator_text',
-                'monitoring:ors_entry_id,quality_rating,timeliness_rating,supervisor_id',
-            ])
-            ->where('employee_id', $ipcr->employee_id)
-            ->where('ipcr_id', $ipcr->id)
-            ->where('status', 'rated')
-            ->whereBetween('work_date', [$startDate->toDateString(), $endDate->toDateString()])
-            ->whereHas('monitoring', function ($q) {
-                $q->whereNotNull('quality_rating')
-                    ->whereNotNull('timeliness_rating');
-            })
-            ->orderBy('work_date')
-            ->get();
-
-        $aggregated = [];
-        foreach ($entries as $entry) {
-            $outputTitle = trim((string) data_get($entry, 'ipcrItem.output_title', ''));
-            $indicator = trim((string) data_get($entry, 'ipcrItem.indicator_text', ''));
-            if ($outputTitle === '' || $indicator === '') {
-                continue;
-            }
-
-            $quantity = is_numeric($entry->quantity) ? (float) $entry->quantity : 0.0;
-            if ($quantity <= 0) {
-                continue;
-            }
-
-            $qualityRating = (float) data_get($entry, 'monitoring.quality_rating', 0);
-            $timelinessRating = (float) data_get($entry, 'monitoring.timeliness_rating', 0);
-
-            $lookupKey = $this->buildIndicatorRatingLookupKey($outputTitle, $indicator);
-
-            if (!isset($aggregated[$lookupKey])) {
-                $aggregated[$lookupKey] = [
-                    'output' => $outputTitle,
-                    'indicator' => $indicator,
-                    'total_qty' => 0.0,
-                    'sum_q_points' => 0.0,
-                    'sum_t_points' => 0.0,
-                ];
-            }
-
-            $aggregated[$lookupKey]['total_qty'] += $quantity;
-            $aggregated[$lookupKey]['sum_q_points'] += ($quantity * $qualityRating);
-            $aggregated[$lookupKey]['sum_t_points'] += ($quantity * $timelinessRating);
-        }
-
+        [, $ratingsByIndicator] = $this->buildRatedIpcrPerformanceMaps($ipcr, (int) $ipcr->employee_id);
         $valuesByIndicator = [];
-        foreach ($aggregated as $lookupKey => $totals) {
-            $totalQty = (float) ($totals['total_qty'] ?? 0.0);
-            if ($totalQty <= 0) {
-                continue;
-            }
-
-            $outputTitle = trim((string) ($totals['output'] ?? ''));
-            $ratings = $this->buildPerformanceRatings(
-                $totalQty,
-                (float) ($totals['sum_q_points'] ?? 0.0),
-                (float) ($totals['sum_t_points'] ?? 0.0),
-                $targetQuantityByOutput[$outputTitle] ?? null
-            );
-
-            if ($ratings === null) {
-                continue;
-            }
-
+        foreach ($ratingsByIndicator as $lookupKey => $ratings) {
+            $totalQty = (float) ($ratings['qty'] ?? 0.0);
             $valuesByIndicator[$lookupKey] = [
                 'accomplishment' => 'Completed ' . $this->formatQuantity($totalQty) . ' output(s) for the period based on rated ORS totals.',
                 'q' => $ratings['q'],
@@ -315,7 +251,7 @@ class IpcrExcelExportController extends Controller
                 'employee:id,name,office_id',
                 'office:id,name',
                 'performancePeriod:id,name,start_date,end_date',
-                'items:id,ipcr_id,output_title,function_type,indicator_text,target_summary,standards_payload',
+                'items:id,ipcr_id,uwp_function_id,uwp_success_indicator_id,output_title,function_type,indicator_text,target_quantity,target_timeline,target_summary,standards_payload',
             ])
             ->where('employee_id', $user->id)
             ->whereIn('status', [Ipcr::STATUS_COMMITTED, Ipcr::STATUS_FOR_COMMITMENT]);
@@ -335,7 +271,7 @@ class IpcrExcelExportController extends Controller
                     'employee:id,name,office_id',
                     'office:id,name',
                     'performancePeriod:id,name,start_date,end_date',
-                    'items:id,ipcr_id,output_title,function_type,indicator_text,target_summary,standards_payload',
+                    'items:id,ipcr_id,uwp_function_id,uwp_success_indicator_id,output_title,function_type,indicator_text,target_quantity,target_timeline,target_summary,standards_payload',
                 ])
                 ->where('employee_id', $user->id)
                 ->whereIn('status', [Ipcr::STATUS_COMMITTED, Ipcr::STATUS_FOR_COMMITMENT])

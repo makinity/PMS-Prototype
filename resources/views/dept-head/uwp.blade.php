@@ -8,18 +8,6 @@
     </p>
 </div>
 
-@if (session('success'))
-    <div class="mb-4 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
-        {{ session('success') }}
-    </div>
-@endif
-
-@if (session('error'))
-    <div class="mb-4 rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-        {{ session('error') }}
-    </div>
-@endif
-
 {{-- Filters / Meta (Optional but useful) --}}
 <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-5 mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
     <div>
@@ -143,6 +131,8 @@
                                                 return [
                                                     'id' => $si->id,
                                                     'indicator_text' => $si->indicator_text,
+                                                    'target_quantity' => $si->target_quantity,
+                                                    'target_timeline' => $si->target_timeline,
                                                     'assignees' => $assignees,
                                                     'standards_by_rating' => $standardsByRating,
                                                 ];
@@ -256,7 +246,6 @@
                             <tr>
                                 <th class="px-5 py-4 text-left">PPA / MFO</th>
                                 <th class="px-5 py-4 text-center">Success Indicators</th>
-                                <th class="px-5 py-4 text-center">Timeline / Target</th>
                                 <th class="px-5 py-4 text-center">Function</th>
                             </tr>
                             </thead>
@@ -321,7 +310,7 @@
 </div>
 
 {{-- ========================= --}}
-{{-- MODAL: Success Indicators (3 columns incl. Assigned Employees) --}}
+{{-- MODAL: Success Indicators --}}
 {{-- ========================= --}}
 <div id="uwp-indicators-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 px-4 py-6">
     <div class="w-full max-w-4xl rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl overflow-hidden relative">
@@ -342,6 +331,7 @@
                         <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.2em] text-slate-400">
                             <tr>
                                 <th class="px-5 py-4 text-left">Success Indicator</th>
+                                <th class="px-5 py-4 text-left">Target Summary</th>
                                 <th class="px-5 py-4 text-center">Standards</th>
                                 <th class="px-5 py-4 text-left">Assigned Employee</th>
                             </tr>
@@ -830,10 +820,30 @@
         return list.length;
     }
 
+    function normalizeTargetQuantity(value) {
+        if (value === null || value === undefined || value === '') {
+            return '';
+        }
+
+        const numeric = Number(value);
+        if (!Number.isFinite(numeric)) {
+            return String(value).trim();
+        }
+
+        return Number.isInteger(numeric)
+            ? String(numeric)
+            : numeric.toFixed(2).replace(/\.00$/, '').replace(/(\.\d*[1-9])0+$/, '$1');
+    }
+
     function formatTargetTimelineDisplay(targetQuantity, targetTimeline) {
+        const summary = String(targetTimeline || '').trim();
+        if (summary.toLowerCase() === 'multiple indicator targets') {
+            return summary;
+        }
+
         const quantity = targetQuantity === null || targetQuantity === undefined || targetQuantity === ''
             ? ''
-            : String(targetQuantity).trim();
+            : normalizeTargetQuantity(targetQuantity);
         const timeline = targetTimeline === null || targetTimeline === undefined || targetTimeline === ''
             ? ''
             : String(targetTimeline).trim();
@@ -851,6 +861,29 @@
         }
 
         return '-';
+    }
+
+    function getIndicatorTargetSummary(indicator) {
+        return formatTargetTimelineDisplay(indicator?.target_quantity, indicator?.target_timeline);
+    }
+
+    function getMfoTargetSummary(mfo) {
+        const indicators = Array.isArray(mfo?.success_indicators) ? mfo.success_indicators : [];
+        const summaries = Array.from(new Set(
+            indicators
+                .map((indicator) => getIndicatorTargetSummary(indicator))
+                .filter((value) => String(value || '').trim() !== '' && value !== '-')
+        ));
+
+        if (summaries.length === 1) {
+            return summaries[0];
+        }
+
+        if (summaries.length > 1) {
+            return 'Multiple indicator targets';
+        }
+
+        return formatTargetTimelineDisplay(mfo?.target_quantity, mfo?.target_timeline);
     }
 
     function openIndicatorsModal(title, unit, mfoTitle, successIndicators) {
@@ -875,6 +908,10 @@
             const indicatorTd = document.createElement('td');
             indicatorTd.className = 'px-5 py-5 text-slate-100';
             indicatorTd.textContent = indicator;
+
+            const targetTd = document.createElement('td');
+            targetTd.className = 'px-5 py-5 text-slate-300';
+            targetTd.textContent = getIndicatorTargetSummary(si);
 
             const standardsTd = document.createElement('td');
             standardsTd.className = 'px-5 py-5 text-center';
@@ -902,7 +939,7 @@
             viewBtn.addEventListener('click', () => openAssigneesViewer(unit, mfoTitle, indicator));
             assigneesTd.appendChild(viewBtn);
 
-            tr.append(indicatorTd, standardsTd, assigneesTd);
+            tr.append(indicatorTd, targetTd, standardsTd, assigneesTd);
             tableBody.appendChild(tr);
         });
 
@@ -1007,15 +1044,11 @@
 
                 tdIndicators.appendChild(btn);
 
-                const tdTimeline = document.createElement('td');
-                tdTimeline.className = 'px-4 py-3 text-sm text-center text-slate-100';
-                tdTimeline.textContent = formatTargetTimelineDisplay(mfo.target_quantity, mfo.target_timeline);
-
                 const tdFunction = document.createElement('td');
                 tdFunction.className = 'px-4 py-3 text-sm text-center';
                 tdFunction.innerHTML = buildFunctionBadge(fn.function_type);
 
-                tr.append(tdTitle, tdIndicators, tdTimeline, tdFunction);
+                tr.append(tdTitle, tdIndicators, tdFunction);
                 outputsTbody.appendChild(tr);
             });
         });
@@ -1050,7 +1083,10 @@
 
             const url = String(form.dataset.endorseAction || '').trim();
             if (!url) {
-                alert('Endorse endpoint is missing.');
+                window.PMSnackbar?.show({
+                    type: 'error',
+                    message: 'Endorse endpoint is missing.',
+                });
                 return;
             }
 
@@ -1134,8 +1170,15 @@
                 }
 
                 closeReviewModalSafely();
+                window.PMSnackbar?.show({
+                    type: 'success',
+                    message: 'UWP endorsed.',
+                });
             } catch (error) {
-                alert(error?.message || 'Unable to endorse UWP right now. Please try again.');
+                window.PMSnackbar?.show({
+                    type: 'error',
+                    message: error?.message || 'Unable to endorse UWP right now. Please try again.',
+                });
             } finally {
                 setButtonLoading(btnEndorse, false);
                 if (btnReturn) {
@@ -1151,6 +1194,10 @@
             const remarksValue = (remarks?.value || '').trim();
             if (!remarksValue) {
                 remarks?.focus();
+                window.PMSnackbar?.show({
+                    type: 'error',
+                    message: 'Remarks are required before returning this UWP.',
+                });
                 return;
             }
 
@@ -1158,7 +1205,10 @@
 
             const url = String(form.dataset.returnAction || '').trim();
             if (!url) {
-                alert('Return endpoint is missing.');
+                window.PMSnackbar?.show({
+                    type: 'error',
+                    message: 'Return endpoint is missing.',
+                });
                 return;
             }
 
@@ -1241,8 +1291,15 @@
                     remarks.value = '';
                 }
                 closeReviewModalSafely();
+                window.PMSnackbar?.show({
+                    type: 'success',
+                    message: 'UWP returned to supervisor.',
+                });
             } catch (error) {
-                alert(error?.message || 'Unable to return UWP right now. Please try again.');
+                window.PMSnackbar?.show({
+                    type: 'error',
+                    message: error?.message || 'Unable to return UWP right now. Please try again.',
+                });
             } finally {
                 setButtonLoading(btnReturn, false);
                 if (btnEndorse) {

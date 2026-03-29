@@ -97,61 +97,8 @@
             </div>
         </div>
 
-        <!-- CORE FUNCTIONS -->
-        <div class="bg-gray-800 border border-gray-700 rounded-lg p-5 space-y-4">
-            <div class="flex justify-between items-start">
-                <div>
-                    <h2 class="font-semibold text-lg text-white">
-                        {{ $functionTypeLabels['core'] ?? 'Core Functions' }}
-                        <span class="text-sm text-gray-400">
-                            ({{ $functionHeaderMeta['core_percent'] ?? 80 }}%)
-                        </span>
-                    </h2>
-                </div>
-            </div>
-
-            <div class="overflow-x-auto">
-                <table class="min-w-full border border-gray-700 text-sm">
-                    <thead class="bg-gray-900">
-                        <tr>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white">Major Output</th>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white">Success Indicators</th>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white">Target Summary</th>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white">Timeline</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ipcr-core-tbody"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- SUPPORT FUNCTIONS -->
-        <div class="bg-gray-800 border border-gray-700 rounded-lg p-5 space-y-4">
-            <div class="flex justify-between items-start">
-                <div>
-                    <h2 class="font-semibold text-lg text-white">
-                        {{ $functionTypeLabels['support'] ?? 'Support Functions' }}
-                        <span class="text-sm text-gray-400">
-                            ({{ $functionHeaderMeta['support_percent'] ?? 20 }}%)
-                        </span>
-                    </h2>
-                </div>
-            </div>
-
-            <div class="overflow-x-auto">
-                <table class="min-w-full border border-gray-700 text-sm">
-                    <thead class="bg-gray-900">
-                        <tr>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white">Major Output</th>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white">Success Indicators</th>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white">Target Summary</th>
-                            <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white">Timeline</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ipcr-support-tbody"></tbody>
-                </table>
-            </div>
-        </div>
+        <!-- FUNCTION SECTIONS (DYNAMIC) -->
+        <div id="ipcr-function-sections" class="space-y-6"></div>
 
         <!-- COMMITMENT SECTION -->
         <div class="bg-gray-800 border border-gray-700 rounded-lg p-5">
@@ -241,8 +188,9 @@
                     <table class="w-full text-sm text-slate-200">
                         <thead class="sticky top-0 z-10 bg-slate-950 text-slate-300 text-xs uppercase">
                             <tr class="border-b border-slate-800">
-                                <th class="px-4 py-3 text-left w-[70%]">Indicator</th>
-                                <th class="px-4 py-3 text-left w-[30%]">Standards (Q/E/T)</th>
+                                <th class="px-4 py-3 text-left w-[44%]">Indicator</th>
+                                <th class="px-4 py-3 text-left w-[32%]">Target Summary</th>
+                                <th class="px-4 py-3 text-left w-[24%]">Standards (Q/E/T)</th>
                             </tr>
                         </thead>
                         <tbody id="ipcr-indicators-body" class="divide-y divide-slate-800">
@@ -309,6 +257,8 @@
     document.addEventListener('DOMContentLoaded', function () {
         const ipcr = @json($ipcr);
         const payload = @json($ipcrPayload);
+        const functionTypeLabels = @json($functionTypeLabels ?? []);
+        const functionHeaderMeta = @json($functionHeaderMeta ?? []);
 
         // --------- MODAL HELPERS (STACKED) ----------
         function getOpenModals() {
@@ -390,15 +340,39 @@
             return '<ul class="list-disc space-y-1 pl-5">' + arr.map(v => '<li>' + escapeHtml(v) + '</li>').join('') + '</ul>';
         }
 
+        function getIndicatorTargetSummary(indicator) {
+            const summary = String(indicator?.target_summary || '').trim();
+            if (summary !== '') return summary;
+
+            const quantity = indicator?.target_quantity;
+            const timeline = String(indicator?.target_timeline || '').trim();
+            const parts = [];
+
+            if (String(quantity ?? '').trim() !== '') {
+                parts.push(String(quantity));
+            }
+
+            if (timeline !== '') {
+                parts.push(timeline);
+            }
+
+            return parts.join(' ').trim() || '--';
+        }
+
+        function getAllFunctionRows() {
+            return Object.entries(payload || {})
+                .filter(([key, value]) => key !== 'status' && Array.isArray(value))
+                .flatMap(([, value]) => value);
+        }
+
         function findOutputByKey(key) {
-            const all = [...(payload.core || []), ...(payload.support || [])];
-            return all.find(x => String(x.key) === String(key));
+            return getAllFunctionRows().find(x => String(x.key) === String(key));
         }
 
         function buildIndicatorsRows(output) {
             const indicators = Array.isArray(output?.indicators) ? output.indicators : [];
             if (!indicators.length) {
-                return `<tr><td class="px-4 py-3 text-slate-300" colspan="2">No indicators available.</td></tr>`;
+                return `<tr><td class="px-4 py-3 text-slate-300" colspan="3">No indicators available.</td></tr>`;
             }
 
             return indicators.map((indicator, idx) => {
@@ -407,6 +381,9 @@
                     <tr class="hover:bg-slate-900/40">
                         <td class="px-4 py-3 align-top">
                             <p class="text-white">${escapeHtml(text)}</p>
+                        </td>
+                        <td class="px-4 py-3 align-top text-slate-300">
+                            ${escapeHtml(getIndicatorTargetSummary(indicator))}
                         </td>
                         <td class="px-4 py-3 align-top">
                             <button type="button"
@@ -476,7 +453,7 @@
             tbody.innerHTML = '';
 
             if (!Array.isArray(rows) || !rows.length) {
-                tbody.innerHTML = `<tr><td colspan="4" class="border border-gray-700 px-4 py-6 text-center text-gray-400">No IPCR targets found.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="3" class="border border-gray-700 px-4 py-6 text-center text-gray-400">No IPCR targets found.</td></tr>`;
                 return;
             }
 
@@ -499,7 +476,6 @@
                             <span>View (${indicatorCount})</span>
                         </button>
                     </td>
-                    <td class="border border-gray-700 px-4 py-3 text-gray-300">${escapeHtml(row.target_summary || '--')}</td>
                     <td class="border border-gray-700 px-4 py-3 text-gray-300">${escapeHtml(row.timeline || '--')}</td>
                 `;
                 tbody.appendChild(tr);
@@ -510,8 +486,98 @@
             });
         }
 
-        renderTableRows(payload.core || [], 'ipcr-core-tbody');
-        renderTableRows(payload.support || [], 'ipcr-support-tbody');
+        function normalizeFunctionType(type) {
+            const normalized = String(type || '').trim().toLowerCase();
+            return normalized !== '' ? normalized : 'custom';
+        }
+
+        function getFunctionSections() {
+            const entries = Object.entries(payload || {})
+                .filter(([key, value]) => key !== 'status' && Array.isArray(value));
+
+            const sectionMap = new Map();
+            entries.forEach(([key, value]) => {
+                sectionMap.set(normalizeFunctionType(key), value);
+            });
+
+            const ordered = [];
+            ['core', 'support'].forEach((type) => {
+                if (sectionMap.has(type)) {
+                    ordered.push([type, sectionMap.get(type)]);
+                    sectionMap.delete(type);
+                }
+            });
+
+            sectionMap.forEach((value, key) => {
+                ordered.push([key, value]);
+            });
+
+            return ordered;
+        }
+
+        function buildSectionLabel(type) {
+            if (functionTypeLabels[type]) {
+                return functionTypeLabels[type];
+            }
+
+            if (type === 'core') return 'Core Functions';
+            if (type === 'support') return 'Support Functions';
+            if (type === 'custom') return 'Custom Functions';
+
+            return (type || 'Other').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) + ' Functions';
+        }
+
+        function buildSectionPercent(type) {
+            const key = `${type}_percent`;
+            const raw = functionHeaderMeta?.[key];
+            const value = Number(raw);
+
+            return Number.isFinite(value) ? value : null;
+        }
+
+        function renderFunctionSections() {
+            const container = document.getElementById('ipcr-function-sections');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const sections = getFunctionSections();
+            if (!sections.length) return;
+
+            sections.forEach(([type, rows]) => {
+                const safeType = String(type).replace(/[^a-z0-9_-]/gi, '-');
+                const label = buildSectionLabel(type);
+                const percent = buildSectionPercent(type);
+                const percentLabel = Number.isFinite(percent) ? `(${percent}%)` : '';
+                const section = document.createElement('div');
+                section.className = 'bg-gray-800 border border-gray-700 rounded-lg p-5 space-y-4';
+                section.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h2 class="font-semibold text-lg text-white">
+                                ${escapeHtml(label)}
+                                ${percentLabel ? `<span class="text-sm text-gray-400">${escapeHtml(percentLabel)}</span>` : ''}
+                            </h2>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full border border-gray-700 text-sm">
+                            <thead class="bg-gray-900">
+                                <tr>
+                                    <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white">Major Output</th>
+                                    <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white">Success Indicators</th>
+                                    <th class="border border-gray-700 px-4 py-3 text-left font-medium text-white">Timeline</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ipcr-${safeType}-tbody"></tbody>
+                        </table>
+                    </div>
+                `;
+                container.appendChild(section);
+                renderTableRows(rows, `ipcr-${safeType}-tbody`);
+            });
+        }
+
+        renderFunctionSections();
 
         function setButtonLoading(button, isLoading, loadingText) {
             if (!button) return;

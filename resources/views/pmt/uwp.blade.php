@@ -6,13 +6,6 @@
     <p class="mt-1 text-sm text-slate-400">Final Stage I review of endorsed Unit Work Plans. Approval sets permanent lock.</p>
 </div>
 
-@if (session('success'))
-    <div class="mb-4 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">{{ session('success') }}</div>
-@endif
-@if (session('error'))
-    <div class="mb-4 rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">{{ session('error') }}</div>
-@endif
-
 <div class="mb-6 rounded-2xl border border-slate-800 bg-slate-900/80 p-5">
     <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
@@ -90,6 +83,8 @@
                                                 return [
                                                     'id' => $si->id,
                                                     'indicator_text' => $si->indicator_text,
+                                                    'target_quantity' => $si->target_quantity,
+                                                    'target_timeline' => $si->target_timeline,
                                                     'assignees' => $assignees,
                                                     'standards_by_rating' => $standardsByRating,
                                                 ];
@@ -173,7 +168,6 @@
                                 <tr>
                                     <th class="px-5 py-4 text-left">PPA / MFO</th>
                                     <th class="px-5 py-4 text-center">Success Indicators</th>
-                                    <th class="px-5 py-4 text-center">Timeline / Target</th>
                                     <th class="px-5 py-4 text-center">Function</th>
                                 </tr>
                             </thead>
@@ -245,6 +239,7 @@
                             <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.2em] text-slate-400">
                                 <tr>
                                     <th class="px-4 py-3 text-left">Success Indicator</th>
+                                    <th class="px-4 py-3 text-left">Target Summary</th>
                                     <th class="px-4 py-3 text-center">Standards</th>
                                     <th class="px-4 py-3 text-center">Assigned Employee</th>
                                 </tr>
@@ -479,10 +474,30 @@
         openModalById('pmt-review-modal');
     }
 
+    function normalizeTargetQuantity(value) {
+        if (value === null || value === undefined || value === '') {
+            return '';
+        }
+
+        const numeric = Number(value);
+        if (!Number.isFinite(numeric)) {
+            return String(value).trim();
+        }
+
+        return Number.isInteger(numeric)
+            ? String(numeric)
+            : numeric.toFixed(2).replace(/\.00$/, '').replace(/(\.\d*[1-9])0+$/, '$1');
+    }
+
     function formatTargetTimelineDisplay(targetQuantity, targetTimeline) {
+        const summary = String(targetTimeline || '').trim();
+        if (summary.toLowerCase() === 'multiple indicator targets') {
+            return summary;
+        }
+
         const quantity = targetQuantity === null || targetQuantity === undefined || targetQuantity === ''
             ? ''
-            : String(targetQuantity).trim();
+            : normalizeTargetQuantity(targetQuantity);
         const timeline = targetTimeline === null || targetTimeline === undefined || targetTimeline === ''
             ? ''
             : String(targetTimeline).trim();
@@ -500,6 +515,29 @@
         }
 
         return '—';
+    }
+
+    function getIndicatorTargetSummary(indicator) {
+        return formatTargetTimelineDisplay(indicator?.target_quantity, indicator?.target_timeline);
+    }
+
+    function getMfoTargetSummary(mfo) {
+        const indicators = Array.isArray(mfo?.success_indicators) ? mfo.success_indicators : [];
+        const summaries = Array.from(new Set(
+            indicators
+                .map((indicator) => getIndicatorTargetSummary(indicator))
+                .filter((value) => String(value || '').trim() !== '' && value !== '—')
+        ));
+
+        if (summaries.length === 1) {
+            return summaries[0];
+        }
+
+        if (summaries.length > 1) {
+            return 'Multiple indicator targets';
+        }
+
+        return formatTargetTimelineDisplay(mfo?.target_quantity, mfo?.target_timeline);
     }
 
     function renderOutputsTable(functions) {
@@ -528,15 +566,11 @@
                 indicatorsBtn.addEventListener('click', () => openIndicatorsModal(mfo.title || '--', selectedUwp?.office?.name || '—', indicators));
                 tdIndicators.appendChild(indicatorsBtn);
 
-                const tdTimeline = document.createElement('td');
-                tdTimeline.className = 'px-4 py-3 text-center text-slate-200';
-                tdTimeline.textContent = formatTargetTimelineDisplay(mfo.target_quantity, mfo.target_timeline);
-
                 const tdFn = document.createElement('td');
                 tdFn.className = 'px-4 py-3 text-center';
                 tdFn.innerHTML = functionBadge(fn.function_type);
 
-                tr.append(tdTitle, tdIndicators, tdTimeline, tdFn);
+                tr.append(tdTitle, tdIndicators, tdFn);
                 tbody.appendChild(tr);
             });
         });
@@ -562,6 +596,10 @@
             tdText.className = 'px-4 py-3 text-slate-100';
             tdText.textContent = text;
 
+            const tdTarget = document.createElement('td');
+            tdTarget.className = 'px-4 py-3 text-slate-300';
+            tdTarget.textContent = getIndicatorTargetSummary(indicator);
+
             const tdStandards = document.createElement('td');
             tdStandards.className = 'px-4 py-3 text-center';
             const standardsBtn = document.createElement('button');
@@ -580,7 +618,7 @@
             assigneesBtn.addEventListener('click', () => openAssigneesModal(mfoTitle, text, unitName, assignees));
             tdAssignees.appendChild(assigneesBtn);
 
-            tr.append(tdText, tdStandards, tdAssignees);
+            tr.append(tdText, tdTarget, tdStandards, tdAssignees);
             tbody.appendChild(tr);
         });
 
@@ -676,7 +714,10 @@
             event.preventDefault();
 
             if (!idInput || !idInput.value) {
-                alert('Please select a UWP from the list before approving.');
+                window.PMSnackbar?.show({
+                    type: 'error',
+                    message: 'Please select a UWP before approving.',
+                });
                 return;
             }
 
@@ -734,8 +775,15 @@
                 if (remarksError) remarksError.classList.add('hidden');
 
                 closeModalById('pmt-review-modal');
+                window.PMSnackbar?.show({
+                    type: 'success',
+                    message: 'UWP approved.',
+                });
             } catch (error) {
-                alert(error?.message || 'Unable to approve UWP.');
+                window.PMSnackbar?.show({
+                    type: 'error',
+                    message: error?.message || 'Unable to approve UWP.',
+                });
             } finally {
                 setButtonLoading(button, false);
                 if (returnButton) returnButton.disabled = false;
@@ -753,7 +801,10 @@
 
         button.addEventListener('click', async () => {
             if (!idInput || !idInput.value) {
-                alert('Please select a UWP from the list before returning.');
+                window.PMSnackbar?.show({
+                    type: 'error',
+                    message: 'Please select a UWP before returning.',
+                });
                 return;
             }
 
@@ -761,6 +812,10 @@
             if (!remarks) {
                 if (remarksError) remarksError.classList.remove('hidden');
                 remarksInput?.focus();
+                window.PMSnackbar?.show({
+                    type: 'error',
+                    message: 'Remarks are required before returning this UWP.',
+                });
                 return;
             }
 
@@ -823,8 +878,15 @@
                 if (remarksError) remarksError.classList.add('hidden');
 
                 closeModalById('pmt-review-modal');
+                window.PMSnackbar?.show({
+                    type: 'success',
+                    message: 'UWP returned to supervisor.',
+                });
             } catch (error) {
-                alert(error?.message || 'Unable to return UWP.');
+                window.PMSnackbar?.show({
+                    type: 'error',
+                    message: error?.message || 'Unable to return UWP.',
+                });
             } finally {
                 setButtonLoading(button, false);
                 if (approveButton) approveButton.disabled = false;

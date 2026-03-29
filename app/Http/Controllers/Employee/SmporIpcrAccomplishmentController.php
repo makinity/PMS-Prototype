@@ -148,41 +148,29 @@ class SmporIpcrAccomplishmentController extends Controller
                 'unitWorkPlan.uwpFunctions.mfos',
             ]);
 
-            $mfoTargetSummaryMap = [];
-            foreach ($ipcr->unitWorkPlan?->uwpFunctions ?? [] as $function) {
-                foreach ($function->mfos ?? [] as $mfo) {
-                    $mapKey = (int) $function->id . '||' . trim((string) ($mfo->title ?? ''));
-                    $mfoTargetSummaryMap[$mapKey] = $this->buildTargetSummary(
-                        $mfo->target_quantity,
-                        $mfo->target_timeline
-                    );
-                }
-            }
+            $targetSummaryByFunctionAndOutput = $this->buildTargetSummaryByFunctionAndOutput($ipcr);
 
-            $timelineLabel = (string) ($periodLabel ?? '—');
+            $timelineLabel = (string) ($periodLabel ?? 'â€”');
             $itemsByOutput = ($ipcr->items ?? collect())->groupBy(function ($item): string {
                 $outputTitle = trim((string) ($item->output_title ?? ''));
-                return $outputTitle !== '' ? $outputTitle : '—';
+                return $outputTitle !== '' ? $outputTitle : 'â€”';
             });
 
             $functions = $ipcr->unitWorkPlan?->uwpFunctions ?? collect();
             foreach ($functions as $function) {
-                $functionType = strtolower(trim((string) ($function->function_type ?? '')));
-                if ($functionType === '') {
-                    $functionType = 'support';
-                }
+                $functionType = $this->normalizeFunctionType((string) ($function->function_type ?? ''));
 
                 $sectionRows = [];
                 foreach ($itemsByOutput as $majorOutput => $outputItems) {
                     $matchingItems = $outputItems->filter(function ($item) use ($functionType): bool {
-                        return strtolower(trim((string) ($item->function_type ?? 'support'))) === $functionType;
+                        return $this->normalizeFunctionType((string) ($item->function_type ?? '')) === $functionType;
                     })->values();
 
                     if ($matchingItems->isEmpty()) {
                         continue;
                     }
 
-                    $targetSummary = '—';
+                    $targetSummary = 'â€”';
                     foreach ($matchingItems as $item) {
                         $candidateTarget = trim((string) ($item->target_summary ?? ''));
                         if ($candidateTarget !== '') {
@@ -193,7 +181,7 @@ class SmporIpcrAccomplishmentController extends Controller
 
                     $firstMatchingItem = $matchingItems->first();
                     $targetMapKey = (int) ($firstMatchingItem?->uwp_function_id ?? 0) . '||' . trim((string) $majorOutput);
-                    $targetSummary = $mfoTargetSummaryMap[$targetMapKey] ?? trim((string) $targetSummary);
+                    $targetSummary = $targetSummaryByFunctionAndOutput[$targetMapKey] ?? trim((string) $targetSummary);
 
                     $indicators = $matchingItems->map(function ($item): array {
                         $standardsPayload = $item->standards_payload;
@@ -205,7 +193,7 @@ class SmporIpcrAccomplishmentController extends Controller
                         }
 
                         return [
-                            'indicator_text' => trim((string) ($item->indicator_text ?? '')) ?: '—',
+                            'indicator_text' => trim((string) ($item->indicator_text ?? '')) ?: 'â€”',
                             'standards_payload' => $standardsPayload,
                             'q' => null,
                             'e' => null,
@@ -233,7 +221,7 @@ class SmporIpcrAccomplishmentController extends Controller
 
                 $ipcrSections[] = [
                     'function_type' => $functionType,
-                    'title' => trim((string) ($function->name ?? '')) ?: '—',
+                    'title' => trim((string) ($function->name ?? '')) ?: 'â€”',
                     'weight_percent' => isset($function->weight_percent) ? (float) $function->weight_percent : null,
                     'rows' => $sectionRows,
                 ];
@@ -450,118 +438,10 @@ class SmporIpcrAccomplishmentController extends Controller
             }
         }
 
-        $ipcrRatingsTotalsByOutput = [];
-        $ipcrRatingsTotalsByIndicator = [];
-
-        if ($ipcr && $user?->id) {
-            [$ipcrStartDate, $ipcrEndDate] = $this->resolvePeriodWindow($ipcr);
-
-            $ratedIpcrEntries = OrsEntry::query()
-                ->with([
-                    'monitoring:ors_entry_id,quality_rating,timeliness_rating',
-                    'ipcrItem:id,output_title,indicator_text',
-                ])
-                ->where('employee_id', $user->id)
-                ->where('ipcr_id', $ipcr->id)
-                ->where('status', 'rated')
-                ->whereBetween('work_date', [$ipcrStartDate->toDateString(), $ipcrEndDate->toDateString()])
-                ->whereHas('monitoring', function ($query) {
-                    $query->whereNotNull('quality_rating')
-                        ->whereNotNull('timeliness_rating');
-                })
-                ->get();
-
-            foreach ($ratedIpcrEntries as $entry) {
-                $monitoring = $entry->monitoring;
-                if (!$monitoring) {
-                    continue;
-                }
-
-                $quantity = (float) ($entry->quantity ?? 0);
-                if ($quantity <= 0) {
-                    continue;
-                }
-
-                $expectedOutput = trim((string) ($entry->ipcrItem?->output_title ?? ''));
-                if ($expectedOutput === '') {
-                    $expectedOutput = 'Unassigned Output';
-                }
-
-                $qualityPoints = $quantity * (float) $monitoring->quality_rating;
-                $timelinessPoints = $quantity * (float) $monitoring->timeliness_rating;
-
-                if (!isset($ipcrRatingsTotalsByOutput[$expectedOutput])) {
-                    $ipcrRatingsTotalsByOutput[$expectedOutput] = [
-                        'qty' => 0.0,
-                        'q_points' => 0.0,
-                        't_points' => 0.0,
-                    ];
-                }
-
-                $ipcrRatingsTotalsByOutput[$expectedOutput]['qty'] += $quantity;
-                $ipcrRatingsTotalsByOutput[$expectedOutput]['q_points'] += $qualityPoints;
-                $ipcrRatingsTotalsByOutput[$expectedOutput]['t_points'] += $timelinessPoints;
-
-                $indicatorText = trim((string) ($entry->ipcrItem?->indicator_text ?? ''));
-                if ($indicatorText === '') {
-                    continue;
-                }
-
-                $indicatorLookupKey = $this->buildIndicatorRatingLookupKey($expectedOutput, $indicatorText);
-                if (!isset($ipcrRatingsTotalsByIndicator[$indicatorLookupKey])) {
-                    $ipcrRatingsTotalsByIndicator[$indicatorLookupKey] = [
-                        'output' => $expectedOutput,
-                        'indicator_text' => $indicatorText,
-                        'qty' => 0.0,
-                        'q_points' => 0.0,
-                        't_points' => 0.0,
-                    ];
-                }
-
-                $ipcrRatingsTotalsByIndicator[$indicatorLookupKey]['qty'] += $quantity;
-                $ipcrRatingsTotalsByIndicator[$indicatorLookupKey]['q_points'] += $qualityPoints;
-                $ipcrRatingsTotalsByIndicator[$indicatorLookupKey]['t_points'] += $timelinessPoints;
-            }
-        }
-
-        $ipcrRatingsAvgByOutput = [];
-        foreach ($ipcrRatingsTotalsByOutput as $outputTitle => $totals) {
-            $ratedQty = (float) ($totals['qty'] ?? 0);
-            if ($ratedQty <= 0) {
-                continue;
-            }
-
-            $ratings = $this->buildPerformanceRatings(
-                $ratedQty,
-                (float) ($totals['q_points'] ?? 0),
-                (float) ($totals['t_points'] ?? 0),
-                $targetQuantityByOutput[$outputTitle] ?? null
-            );
-
-            if ($ratings !== null) {
-                $ipcrRatingsAvgByOutput[$outputTitle] = $ratings;
-            }
-        }
-
-        $ipcrRatingsAvgByIndicator = [];
-        foreach ($ipcrRatingsTotalsByIndicator as $indicatorLookupKey => $totals) {
-            $ratedQty = (float) ($totals['qty'] ?? 0);
-            if ($ratedQty <= 0) {
-                continue;
-            }
-
-            $outputTitle = trim((string) ($totals['output'] ?? ''));
-            $ratings = $this->buildPerformanceRatings(
-                $ratedQty,
-                (float) ($totals['q_points'] ?? 0),
-                (float) ($totals['t_points'] ?? 0),
-                $targetQuantityByOutput[$outputTitle] ?? null
-            );
-
-            if ($ratings !== null) {
-                $ipcrRatingsAvgByIndicator[$indicatorLookupKey] = $ratings;
-            }
-        }
+        [$ipcrRatingsAvgByOutput, $ipcrRatingsAvgByIndicator] = $this->buildRatedIpcrPerformanceMaps(
+            $ipcr,
+            $user?->id
+        );
 
         if (!empty($ipcrSections)) {
             foreach ($ipcrSections as $sectionIndex => $section) {
@@ -585,7 +465,7 @@ class SmporIpcrAccomplishmentController extends Controller
                     foreach ($rowIndicators as $indicatorIndex => $indicator) {
                         $indicatorText = trim((string) ($indicator['indicator_text'] ?? ''));
                         $indicatorLookupKey = $this->buildIndicatorRatingLookupKey($lookupOutput, $indicatorText);
-                        $indicatorRatings = $indicatorText !== '' && $indicatorText !== '—'
+                        $indicatorRatings = $indicatorText !== '' && $indicatorText !== 'â€”'
                             ? ($ipcrRatingsAvgByIndicator[$indicatorLookupKey] ?? null)
                             : null;
 
@@ -773,7 +653,12 @@ class SmporIpcrAccomplishmentController extends Controller
 
         foreach ($ipcr->unitWorkPlan->uwpFunctions as $function) {
             $functionType = $this->normalizeFunctionType((string) ($function->function_type ?? 'support'));
-            $defaultTitle = $functionType === 'core' ? 'CORE FUNCTION' : 'SUPPORT FUNCTION';
+            $defaultTitle = match ($functionType) {
+                'core' => 'CORE FUNCTION',
+                'support' => 'SUPPORT FUNCTION',
+                'custom' => 'CUSTOM FUNCTION',
+                default => strtoupper(str_replace('_', ' ', $functionType)) . ' FUNCTION',
+            };
             $candidateTitle = trim((string) ($function->name ?? ''));
             $title = $candidateTitle !== '' ? mb_strtoupper($candidateTitle) : $defaultTitle;
 
@@ -807,15 +692,11 @@ class SmporIpcrAccomplishmentController extends Controller
     {
         $value = strtolower(trim($functionType));
 
-        if ($value === 'support') {
-            return 'support';
+        if ($value === '') {
+            return 'custom';
         }
 
-        if ($value === 'core' || $value === 'strategic') {
-            return 'core';
-        }
-
-        return 'support';
+        return $value;
     }
 
     private function initializeMonthMap(array $monthLabels): array
@@ -908,15 +789,15 @@ class SmporIpcrAccomplishmentController extends Controller
             : $start->format('F Y') . '-' . $end->format('F Y');
 
         $office = $user->office()->with(['head:id,name', 'employees:id,name,role,office_id'])->first();
-        $officeName = (string) ($office?->name ?? '—');
-        $employeeName = (string) ($user->name ?? '—');
+        $officeName = (string) ($office?->name ?? 'â€”');
+        $employeeName = (string) ($user->name ?? 'â€”');
         $supervisorName = (string) ($office?->employees
             ?->firstWhere('role', 'supervisor')
-            ?->name ?? '—');
+            ?->name ?? 'â€”');
         $departmentHeadName = (string) (
             $office?->head?->name
             ?? $office?->employees?->firstWhere('role', 'dept-head')?->name
-            ?? '—'
+            ?? 'â€”'
         );
 
         $ipcr = Ipcr::query()
@@ -937,40 +818,54 @@ class SmporIpcrAccomplishmentController extends Controller
             ->orderByDesc('id')
             ->first();
 
-        $coreLabels = [];
-        $supportLabels = [];
-
-        $addExpectedOutput = static function (array &$labels, string $label): void {
-            $normalized = trim($label);
-            if ($normalized === '') {
-                return;
-            }
-
-            if (!in_array($normalized, $labels, true)) {
-                $labels[] = $normalized;
-            }
-        };
+        $sectionDefinitions = $this->buildSectionDefinitions($user?->id, $period->id);
+        $outputSectionMap = [];
 
         if ($ipcr) {
             foreach ($ipcr->items as $item) {
-                $label = (string) ($item->output_title ?? '');
-                $functionType = $this->normalizeFunctionType((string) ($item->function_type ?? 'support'));
+                $label = trim((string) ($item->output_title ?? ''));
+                if ($label === '') {
+                    continue;
+                }
 
-                if ($functionType === 'support') {
-                    $addExpectedOutput($supportLabels, $label);
-                } else {
-                    $addExpectedOutput($coreLabels, $label);
+                $functionType = $this->normalizeFunctionType((string) ($item->function_type ?? ''));
+                $outputSectionMap[$label] = $functionType;
+
+                if (!isset($sectionDefinitions[$functionType])) {
+                    $sectionDefinitions[$functionType] = [
+                        'title' => strtoupper(str_replace('_', ' ', $functionType)) . ' FUNCTION',
+                        'weight_percent' => 0.0,
+                        'sort_order' => 1000 + count($sectionDefinitions),
+                        'output_order' => [],
+                    ];
+                }
+
+                if (!in_array($label, $sectionDefinitions[$functionType]['output_order'], true)) {
+                    $sectionDefinitions[$functionType]['output_order'][] = $label;
                 }
             }
 
             foreach ($ipcr->unitWorkPlan?->uwpFunctions ?? collect() as $function) {
-                $functionType = $this->normalizeFunctionType((string) ($function->function_type ?? 'support'));
+                $functionType = $this->normalizeFunctionType((string) ($function->function_type ?? ''));
+
+                if (!isset($sectionDefinitions[$functionType])) {
+                    $sectionDefinitions[$functionType] = [
+                        'title' => strtoupper(str_replace('_', ' ', $functionType)) . ' FUNCTION',
+                        'weight_percent' => (float) ($function->weight_percent ?? 0),
+                        'sort_order' => is_null($function->sort_order) ? (1000 + count($sectionDefinitions)) : (int) $function->sort_order,
+                        'output_order' => [],
+                    ];
+                }
+
                 foreach ($function->mfos ?? [] as $mfo) {
-                    $label = (string) ($mfo->title ?? '');
-                    if ($functionType === 'support') {
-                        $addExpectedOutput($supportLabels, $label);
-                    } else {
-                        $addExpectedOutput($coreLabels, $label);
+                    $label = trim((string) ($mfo->title ?? ''));
+                    if ($label === '') {
+                        continue;
+                    }
+
+                    $outputSectionMap[$label] = $functionType;
+                    if (!in_array($label, $sectionDefinitions[$functionType]['output_order'], true)) {
+                        $sectionDefinitions[$functionType]['output_order'][] = $label;
                     }
                 }
             }
@@ -1144,9 +1039,22 @@ class SmporIpcrAccomplishmentController extends Controller
                     $aggregateMap[$label] = $initializeMonthlyBuckets();
                 }
 
-                $functionType = $this->normalizeFunctionType((string) ($entry->ipcrItem?->function_type ?? 'support'));
+                $functionType = $this->normalizeFunctionType((string) ($entry->ipcrItem?->function_type ?? ($outputSectionMap[$label] ?? 'custom')));
                 if (!isset($labelGroupMap[$label])) {
                     $labelGroupMap[$label] = $functionType;
+                }
+
+                if (!isset($sectionDefinitions[$functionType])) {
+                    $sectionDefinitions[$functionType] = [
+                        'title' => strtoupper(str_replace('_', ' ', $functionType)) . ' FUNCTION',
+                        'weight_percent' => 0.0,
+                        'sort_order' => 1000 + count($sectionDefinitions),
+                        'output_order' => [],
+                    ];
+                }
+
+                if (!in_array($label, $sectionDefinitions[$functionType]['output_order'], true)) {
+                    $sectionDefinitions[$functionType]['output_order'][] = $label;
                 }
 
                 $aggregateMap[$label][$monthSlotKey]['qty'] += $quantity;
@@ -1178,23 +1086,57 @@ class SmporIpcrAccomplishmentController extends Controller
             }
         }
 
-        foreach ($aggregateMap as $label => $months) {
-            $groupType = $labelGroupMap[$label] ?? 'support';
-            if ($groupType === 'support') {
-                $addExpectedOutput($supportLabels, $label);
-            } else {
-                $addExpectedOutput($coreLabels, $label);
+        uasort($sectionDefinitions, static function (array $left, array $right): int {
+            $leftOrder = (int) ($left['sort_order'] ?? 1000);
+            $rightOrder = (int) ($right['sort_order'] ?? 1000);
+
+            if ($leftOrder !== $rightOrder) {
+                return $leftOrder <=> $rightOrder;
             }
-        }
 
-        $coreRows = [];
-        foreach ($coreLabels as $label) {
-            $coreRows[] = $this->makeOutputRow($label, $aggregateMap[$label] ?? []);
-        }
+            return strnatcasecmp((string) ($left['title'] ?? ''), (string) ($right['title'] ?? ''));
+        });
 
-        $supportRows = [];
-        foreach ($supportLabels as $label) {
-            $supportRows[] = $this->makeOutputRow($label, $aggregateMap[$label] ?? []);
+        $sections = [];
+        foreach ($sectionDefinitions as $sectionType => $definition) {
+            $orderedLabels = [];
+            foreach (($definition['output_order'] ?? []) as $label) {
+                if (isset($aggregateMap[$label]) && !in_array($label, $orderedLabels, true)) {
+                    $orderedLabels[] = $label;
+                }
+            }
+
+            $remainingLabels = collect($aggregateMap)
+                ->keys()
+                ->filter(fn ($label) => ($labelGroupMap[$label] ?? $outputSectionMap[$label] ?? 'custom') === $sectionType)
+                ->reject(fn ($label) => in_array($label, $orderedLabels, true))
+                ->sort(static fn (string $a, string $b): int => strnatcasecmp($a, $b))
+                ->values()
+                ->all();
+
+            $labels = array_merge($orderedLabels, $remainingLabels);
+            if (empty($labels)) {
+                continue;
+            }
+
+            $rows = [];
+            foreach ($labels as $label) {
+                $rows[] = $this->makeOutputRow($label, $aggregateMap[$label] ?? []);
+            }
+
+            $weightPercent = (float) ($definition['weight_percent'] ?? 0);
+            $baseTitle = (string) ($definition['title'] ?? strtoupper(str_replace('_', ' ', $sectionType)) . ' FUNCTION');
+            if ($weightPercent > 0) {
+                $weightLabel = rtrim(rtrim(number_format($weightPercent, 2, '.', ''), '0'), '.');
+                $baseTitle .= ' (' . $weightLabel . '%)';
+            }
+
+            $sections[] = [
+                'function_type' => $sectionType,
+                'weight_percent' => $weightPercent,
+                'label' => $baseTitle,
+                'rows' => $rows,
+            ];
         }
 
         $aggregatePreview = collect($aggregateMap)
@@ -1215,8 +1157,7 @@ class SmporIpcrAccomplishmentController extends Controller
             'supervisor' => $supervisorName,
             'department_head' => $departmentHeadName,
             'employee' => $employeeName,
-            'core' => $coreRows,
-            'support' => $supportRows,
+            'sections' => $sections,
 
             'attendance' => [
                 'absence' => [
@@ -1340,11 +1281,9 @@ class SmporIpcrAccomplishmentController extends Controller
 
     private function buildIpcr(Ipcr $ipcr): array
     {
-        $targetQuantityByOutput = $this->buildTargetQuantityByOutput($ipcr);
-        $sections = [
-            'core' => [],
-            'support' => [],
-        ];
+        $targetPayloadByIndicator = $this->buildTargetPayloadByIndicatorLookup($ipcr);
+        $sectionDefinitions = $this->buildSectionDefinitions((int) $ipcr->employee_id, (int) $ipcr->performance_period_id);
+        $sections = [];
 
         foreach ($ipcr->items as $item) {
             $output = trim((string) ($item->output_title ?? ''));
@@ -1353,8 +1292,7 @@ class SmporIpcrAccomplishmentController extends Controller
                 continue;
             }
 
-            $functionType = strtolower(trim((string) ($item->function_type ?? '')));
-            $section = str_contains($functionType, 'support') ? 'support' : 'core';
+            $section = $this->normalizeFunctionType((string) ($item->function_type ?? ''));
 
             if (!isset($sections[$section][$output])) {
                 $sections[$section][$output] = [
@@ -1369,92 +1307,93 @@ class SmporIpcrAccomplishmentController extends Controller
             );
 
             if (!in_array($indicator, $existingIndicators, true)) {
+                $targetPayload = $targetPayloadByIndicator[
+                    $this->buildIndicatorRatingLookupKey($output, $indicator)
+                ] ?? [];
+
                 $sections[$section][$output]['indicators'][] = [
                     'text' => $indicator,
-                    'target_quantity' => $targetQuantityByOutput[$output] ?? null,
+                    'target_quantity' => $targetPayload['target_quantity'] ?? null,
                 ];
             }
         }
 
+        $sectionTypes = array_values(array_unique(array_merge(
+            array_keys($sectionDefinitions),
+            array_keys($sections)
+        )));
+
+        usort($sectionTypes, function (string $left, string $right) use ($sectionDefinitions): int {
+            $leftOrder = (int) ($sectionDefinitions[$left]['sort_order'] ?? 1000);
+            $rightOrder = (int) ($sectionDefinitions[$right]['sort_order'] ?? 1000);
+
+            if ($leftOrder !== $rightOrder) {
+                return $leftOrder <=> $rightOrder;
+            }
+
+            return strnatcasecmp($left, $right);
+        });
+
+        $normalizedSections = [];
+
+        foreach ($sectionTypes as $sectionType) {
+            $rowsMap = $sections[$sectionType] ?? [];
+            if (empty($rowsMap)) {
+                continue;
+            }
+
+            $sectionDefinition = $sectionDefinitions[$sectionType] ?? [];
+            $orderedOutputs = [];
+
+            if (!empty($sectionDefinition['output_order']) && is_array($sectionDefinition['output_order'])) {
+                foreach ($sectionDefinition['output_order'] as $outputTitle) {
+                    if (isset($rowsMap[$outputTitle])) {
+                        $orderedOutputs[] = $outputTitle;
+                    }
+                }
+            }
+
+            $remainingOutputs = array_values(array_diff(array_keys($rowsMap), $orderedOutputs));
+            usort($remainingOutputs, static fn (string $a, string $b): int => strnatcasecmp($a, $b));
+            $orderedOutputs = array_merge($orderedOutputs, $remainingOutputs);
+
+            $baseTitle = (string) ($sectionDefinition['title']
+                ?? strtoupper(str_replace('_', ' ', $sectionType)) . ' FUNCTION');
+            $weightPercent = (float) ($sectionDefinition['weight_percent'] ?? 0);
+            $label = $baseTitle;
+
+            if ($weightPercent > 0) {
+                $weightLabel = rtrim(rtrim(number_format($weightPercent, 2, '.', ''), '0'), '.');
+                $label .= ' (' . $weightLabel . '%)';
+            }
+
+            $items = [];
+            foreach ($orderedOutputs as $outputTitle) {
+                if (isset($rowsMap[$outputTitle])) {
+                    $items[] = $rowsMap[$outputTitle];
+                }
+            }
+
+            $normalizedSections[] = [
+                'type' => $sectionType,
+                'label' => $label,
+                'items' => $items,
+            ];
+        }
+
         return [
-            'core' => array_values($sections['core']),
-            'support' => array_values($sections['support']),
+            'sections' => $normalizedSections,
+            'core' => array_values($sections['core'] ?? []),
+            'support' => array_values($sections['support'] ?? []),
         ];
     }
 
     private function buildValuesByIndicator(Ipcr $ipcr): array
     {
-        [$startDate, $endDate] = $this->resolvePeriodWindow($ipcr);
-        $targetQuantityByOutput = $this->buildTargetQuantityByOutput($ipcr);
-
-        $entries = OrsEntry::query()
-            ->with([
-                'ipcrItem:id,output_title,function_type,indicator_text',
-                'monitoring:ors_entry_id,quality_rating,timeliness_rating,supervisor_id',
-            ])
-            ->where('employee_id', $ipcr->employee_id)
-            ->where('ipcr_id', $ipcr->id)
-            ->where('status', 'rated')
-            ->whereBetween('work_date', [$startDate->toDateString(), $endDate->toDateString()])
-            ->whereHas('monitoring', function ($q) {
-                $q->whereNotNull('quality_rating')
-                    ->whereNotNull('timeliness_rating');
-            })
-            ->orderBy('work_date')
-            ->get();
-
-        $aggregated = [];
-        foreach ($entries as $entry) {
-            $outputTitle = trim((string) data_get($entry, 'ipcrItem.output_title', ''));
-            $indicator = trim((string) data_get($entry, 'ipcrItem.indicator_text', ''));
-            if ($outputTitle === '' || $indicator === '') {
-                continue;
-            }
-
-            $quantity = is_numeric($entry->quantity) ? (float) $entry->quantity : 0.0;
-            if ($quantity <= 0) {
-                continue;
-            }
-
-            $qualityRating = (float) data_get($entry, 'monitoring.quality_rating', 0);
-            $timelinessRating = (float) data_get($entry, 'monitoring.timeliness_rating', 0);
-
-            $lookupKey = $this->buildIndicatorRatingLookupKey($outputTitle, $indicator);
-
-            if (!isset($aggregated[$lookupKey])) {
-                $aggregated[$lookupKey] = [
-                    'output' => $outputTitle,
-                    'indicator' => $indicator,
-                    'total_qty' => 0.0,
-                    'sum_q_points' => 0.0,
-                    'sum_t_points' => 0.0,
-                ];
-            }
-
-            $aggregated[$lookupKey]['total_qty'] += $quantity;
-            $aggregated[$lookupKey]['sum_q_points'] += ($quantity * $qualityRating);
-            $aggregated[$lookupKey]['sum_t_points'] += ($quantity * $timelinessRating);
-        }
-
+        [, $ratingsByIndicator] = $this->buildRatedIpcrPerformanceMaps($ipcr, (int) $ipcr->employee_id);
         $valuesByIndicator = [];
-        foreach ($aggregated as $lookupKey => $totals) {
-            $totalQty = (float) ($totals['total_qty'] ?? 0.0);
-            if ($totalQty <= 0) {
-                continue;
-            }
-
-            $outputTitle = trim((string) ($totals['output'] ?? ''));
-            $ratings = $this->buildPerformanceRatings(
-                $totalQty,
-                (float) ($totals['sum_q_points'] ?? 0.0),
-                (float) ($totals['sum_t_points'] ?? 0.0),
-                $targetQuantityByOutput[$outputTitle] ?? null
-            );
-
-            if ($ratings === null) {
-                continue;
-            }
-
+        foreach ($ratingsByIndicator as $lookupKey => $ratings) {
+            $totalQty = (float) ($ratings['qty'] ?? 0.0);
             $valuesByIndicator[$lookupKey] = [
                 'accomplishment' => 'Completed ' . $this->formatQuantity($totalQty) . ' output(s) for the period based on rated ORS totals.',
                 'q' => $ratings['q'],
@@ -1584,7 +1523,7 @@ class SmporIpcrAccomplishmentController extends Controller
                 'employee:id,name,office_id',
                 'office:id,name',
                 'performancePeriod:id,name,start_date,end_date',
-                'items:id,ipcr_id,output_title,function_type,indicator_text,target_summary,standards_payload',
+                'items:id,ipcr_id,uwp_function_id,uwp_success_indicator_id,output_title,function_type,indicator_text,target_quantity,target_timeline,target_summary,standards_payload',
             ])
             ->where('employee_id', $user->id)
             ->whereIn('status', [Ipcr::STATUS_COMMITTED, Ipcr::STATUS_FOR_COMMITMENT]);
@@ -1604,7 +1543,7 @@ class SmporIpcrAccomplishmentController extends Controller
                     'employee:id,name,office_id',
                     'office:id,name',
                     'performancePeriod:id,name,start_date,end_date',
-                    'items:id,ipcr_id,output_title,function_type,indicator_text,target_summary,standards_payload',
+                    'items:id,ipcr_id,uwp_function_id,uwp_success_indicator_id,output_title,function_type,indicator_text,target_quantity,target_timeline,target_summary,standards_payload',
                 ])
                 ->where('employee_id', $user->id)
                 ->whereIn('status', [Ipcr::STATUS_COMMITTED, Ipcr::STATUS_FOR_COMMITMENT])
@@ -1855,3 +1794,4 @@ class SmporIpcrAccomplishmentController extends Controller
         return back()->with('success', 'Accomplishments submitted successfully. Uploads and remarks are now read-only.');
     }
 }
+

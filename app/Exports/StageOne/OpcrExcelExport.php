@@ -41,12 +41,11 @@ class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
 
     private Opcr $opcrModel;
 
-    private array $opcrData = [
-        'core' => [],
-        'support' => [],
-    ];
+    private array $opcrData = [];
 
     private array $standards = [];
+    private array $sectionLabels = [];
+    private array $sectionMeta = [];
 
     public function __construct(Opcr $opcr)
     {
@@ -109,8 +108,20 @@ class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
         }
 
         foreach ($uwp->uwpFunctions as $function) {
-            $functionType = strtolower((string) ($function->function_type ?? ''));
-            $bucket = $functionType === 'support' ? 'support' : 'core';
+            $bucket = $this->normalizeFunctionType((string) ($function->function_type ?? ''));
+
+            if (!isset($this->sectionMeta[$bucket])) {
+                $this->sectionMeta[$bucket] = [
+                    'weight_percent' => 0.0,
+                    'sort_order' => is_null($function->sort_order) ? (1000 + count($this->sectionMeta)) : (int) $function->sort_order,
+                ];
+            }
+
+            $this->sectionMeta[$bucket]['weight_percent'] += (float) ($function->weight_percent ?? 0);
+
+            if (!isset($this->opcrData[$bucket])) {
+                $this->opcrData[$bucket] = [];
+            }
 
             foreach ($function->mfos as $mfo) {
                 $indicatorRows = [];
@@ -174,8 +185,10 @@ class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
         $this->writeTableHeader($sheet);
 
         $currentRow = self::TABLE_START_ROW;
-        $currentRow = $this->writeSection($sheet, 'core', 'A. CORE FUNCTIONS (80%)', $currentRow, true);
-        $currentRow = $this->writeSection($sheet, 'support', 'C. SUPPORT FUNCTIONS (20%)', $currentRow, false);
+        foreach ($this->buildSectionDefinitions() as $section) {
+            $includeRevenueRow = $section['type'] === 'core';
+            $currentRow = $this->writeSection($sheet, $section['type'], $section['label'], $currentRow, $includeRevenueRow);
+        }
 
         $lastRow = max($currentRow - 1, self::TABLE_SUBHEADER_ROW);
 
@@ -191,6 +204,8 @@ class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
 
         $this->applyVerticalBordersOnly($sheet, self::TABLE_START_ROW, $lastRow);
         $this->applySectionRowBorders($sheet, self::TABLE_START_ROW, $lastRow);
+
+        $this->writeFooterBlock($sheet, $lastRow + 1);
     }
 
     private function setupPage(Worksheet $sheet): void
@@ -450,12 +465,196 @@ class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
     {
         for ($r = $fromRow; $r <= $toRow; $r++) {
             $value = trim((string) $sheet->getCell("A{$r}")->getValue());
-            if (in_array($value, ['A. CORE FUNCTIONS (80%)', 'REVENUE', 'C. SUPPORT FUNCTIONS (20%)'], true)) {
+            if ($value === 'REVENUE' || in_array($value, $this->sectionLabels, true)) {
                 $sheet->getStyle("A{$r}:O{$r}")
                     ->getBorders()
                     ->getBottom()
                     ->setBorderStyle(Border::BORDER_THIN);
             }
+        }
+    }
+
+    private function buildSectionDefinitions(): array
+    {
+        $ordered = collect($this->opcrData)
+            ->filter(fn (array $rows): bool => !empty($rows))
+            ->keys()
+            ->sort(function (string $left, string $right): int {
+                $priority = static fn (string $type): int => match ($type) {
+                    'core' => 10,
+                    'support' => 20,
+                    default => 30,
+                };
+
+                $leftPriority = $priority($left);
+                $rightPriority = $priority($right);
+
+                if ($leftPriority !== $rightPriority) {
+                    return $leftPriority <=> $rightPriority;
+                }
+
+                $leftOrder = (int) ($this->sectionMeta[$left]['sort_order'] ?? 1000);
+                $rightOrder = (int) ($this->sectionMeta[$right]['sort_order'] ?? 1000);
+
+                if ($leftOrder !== $rightOrder) {
+                    return $leftOrder <=> $rightOrder;
+                }
+
+                return strnatcasecmp($left, $right);
+            })
+            ->values()
+            ->all();
+
+        $labels = [];
+        $sections = [];
+        foreach ($ordered as $index => $type) {
+            $label = $this->buildSectionLabel($type, $index);
+            $labels[] = $label;
+            $sections[] = [
+                'type' => $type,
+                'label' => $label,
+                'weight_percent' => (float) ($this->sectionMeta[$type]['weight_percent'] ?? 0),
+            ];
+        }
+
+        $this->sectionLabels = $labels;
+
+        return $sections;
+    }
+
+    private function buildSectionLabel(string $type, int $index): string
+    {
+        $prefix = chr(65 + $index);
+        $label = match ($type) {
+            'core' => 'CORE FUNCTIONS',
+            'support' => 'SUPPORT FUNCTIONS',
+            'custom' => 'CUSTOM FUNCTIONS',
+            default => strtoupper(str_replace('_', ' ', $type)) . ' FUNCTIONS',
+        };
+
+        $weightPercent = (float) ($this->sectionMeta[$type]['weight_percent'] ?? 0);
+        if ($weightPercent > 0) {
+            $weightLabel = rtrim(rtrim(number_format($weightPercent, 2, '.', ''), '0'), '.');
+            $label .= " ({$weightLabel}%)";
+        }
+
+        return "{$prefix}. {$label}";
+    }
+
+    private function normalizeFunctionType(string $type): string
+    {
+        $normalized = strtolower(trim($type));
+        return $normalized !== '' ? $normalized : 'custom';
+    }
+
+    private function writeFooterBlock(Worksheet $sheet, int $startRow): void
+    {
+        $row = $startRow;
+
+        foreach ($this->buildSectionDefinitions() as $section) {
+            $weightPercent = (float) ($section['weight_percent'] ?? 0);
+            $label = trim((string) ($section['label'] ?? ''));
+            $label = preg_replace('/^[A-Z]\.\s*/', '', $label ?? '') ?: 'FUNCTIONS';
+            $weightLabel = $weightPercent > 0
+                ? rtrim(rtrim(number_format($weightPercent, 2, '.', ''), '0'), '.')
+                : null;
+
+            $text = $weightLabel
+                ? "Weighted Average Rating for {$label}"
+                : "Weighted Average Rating for {$label}";
+
+            $sheet->mergeCells("A{$row}:J{$row}");
+            $sheet->mergeCells("K{$row}:O{$row}");
+            $sheet->setCellValue("A{$row}", $text);
+            $sheet->getStyle("A{$row}:O{$row}")->getAlignment()
+                ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+                ->setVertical(Alignment::VERTICAL_CENTER);
+            $sheet->getStyle("A{$row}:O{$row}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+            $row++;
+        }
+
+        foreach (['OVERALL RATING', 'ADJECTIVAL RATING'] as $label) {
+            $sheet->mergeCells("A{$row}:J{$row}");
+            $sheet->mergeCells("K{$row}:O{$row}");
+            $sheet->setCellValue("A{$row}", $label);
+            $sheet->getStyle("A{$row}:O{$row}")->getFont()->setBold(true);
+            $sheet->getStyle("A{$row}:O{$row}")->getAlignment()
+                ->setHorizontal(Alignment::HORIZONTAL_RIGHT)
+                ->setVertical(Alignment::VERTICAL_CENTER);
+            $sheet->getStyle("A{$row}:O{$row}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+            $row++;
+        }
+
+        $labelRow = $row;
+        $boxStartRow = $row + 1;
+        $boxEndRow = $row + 3;
+        $titleRow = $row + 4;
+
+        $discussedName = (string) ($this->opcrModel->unitWorkPlan?->office?->head?->name ?? '');
+        $assessedName = (string) ($this->opcrModel->approver?->name ?? '');
+        $approvedName = '';
+
+        $blocks = [
+            [
+                'label' => 'Discussed with and Agreed by:',
+                'range' => ['A', 'D'],
+                'name' => $discussedName,
+                'title' => 'PGDH',
+            ],
+            [
+                'label' => 'Date',
+                'range' => ['E', 'F'],
+                'name' => '',
+                'title' => '',
+            ],
+            [
+                'label' => 'Assessed by:',
+                'range' => ['G', 'I'],
+                'name' => $assessedName,
+                'title' => 'PMT Chairperson',
+            ],
+            [
+                'label' => 'Date',
+                'range' => ['J', 'J'],
+                'name' => '',
+                'title' => '',
+            ],
+            [
+                'label' => 'Final Rating Approved by:',
+                'range' => ['K', 'O'],
+                'name' => $approvedName,
+                'title' => 'Governor',
+            ],
+        ];
+
+        foreach ($blocks as $block) {
+            [$from, $to] = $block['range'];
+
+            $sheet->mergeCells("{$from}{$labelRow}:{$to}{$labelRow}");
+            $sheet->setCellValue("{$from}{$labelRow}", $block['label']);
+            $sheet->getStyle("{$from}{$labelRow}:{$to}{$labelRow}")->getAlignment()
+                ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+                ->setVertical(Alignment::VERTICAL_CENTER);
+            $sheet->getStyle("{$from}{$labelRow}:{$to}{$labelRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+
+            $sheet->mergeCells("{$from}{$boxStartRow}:{$to}{$boxEndRow}");
+            $sheet->setCellValue("{$from}{$boxStartRow}", $block['name']);
+            $sheet->getStyle("{$from}{$boxStartRow}:{$to}{$boxEndRow}")->getAlignment()
+                ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+                ->setVertical(Alignment::VERTICAL_CENTER)
+                ->setWrapText(true);
+            $sheet->getStyle("{$from}{$boxStartRow}:{$to}{$boxEndRow}")->getFill()
+                ->setFillType(Fill::FILL_SOLID)
+                ->getStartColor()
+                ->setRGB('D9D9D9');
+            $sheet->getStyle("{$from}{$boxStartRow}:{$to}{$boxEndRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+
+            $sheet->mergeCells("{$from}{$titleRow}:{$to}{$titleRow}");
+            $sheet->setCellValue("{$from}{$titleRow}", $block['title']);
+            $sheet->getStyle("{$from}{$titleRow}:{$to}{$titleRow}")->getAlignment()
+                ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+                ->setVertical(Alignment::VERTICAL_CENTER);
+            $sheet->getStyle("{$from}{$titleRow}:{$to}{$titleRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
         }
     }
 }

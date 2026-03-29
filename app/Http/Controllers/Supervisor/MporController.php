@@ -108,10 +108,8 @@ class MporController extends Controller
         $employeeName = $mpor->employee?->name ?? '--';
         $officeName = $mpor->employee?->office?->name ?? '--';
 
-        $sectionLabels = [
-            'core' => 'Core Functions (80%)',
-            'support' => 'Support Functions (20%)',
-        ];
+        $sectionLabels = [];
+        $functionWeights = [];
 
         // Fetch rated entries INCLUDED in MPOR computation:
         // - status rated
@@ -121,7 +119,8 @@ class MporController extends Controller
         // - must have ipcrItem (output_title + function_type)
         $ratedEntries = \App\Models\OrsEntry::query()
             ->with([
-                'ipcrItem:id,output_title,function_type,indicator_text',
+                'ipcrItem:id,output_title,function_type,indicator_text,uwp_function_id',
+                'ipcrItem.uwpFunction:id,function_type,weight_percent',
                 'monitoring:ors_entry_id,quality_rating,timeliness_rating',
             ])
             ->where('employee_id', $mpor->employee_id)
@@ -154,6 +153,40 @@ class MporController extends Controller
             );
         };
 
+        $functionWeights = $this->resolveFunctionWeights($ratedEntries);
+
+        $detectedTypes = $ratedEntries
+            ->map(fn ($entry) => $this->normalizeFunctionType((string) data_get($entry, 'ipcrItem.function_type', '')))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        $preferredOrder = ['core', 'support'];
+        $orderedTypes = [];
+        foreach ($preferredOrder as $preferred) {
+            if (in_array($preferred, $detectedTypes, true)) {
+                $orderedTypes[] = $preferred;
+            }
+        }
+        foreach ($detectedTypes as $type) {
+            if (!in_array($type, $orderedTypes, true)) {
+                $orderedTypes[] = $type;
+            }
+        }
+
+        foreach ($orderedTypes as $type) {
+            $sectionLabels[$type] = $this->formatFunctionLabel($type, $functionWeights[$type] ?? null);
+        }
+
+        if (empty($sectionLabels)) {
+            $defaultWeights = $this->defaultFunctionWeights();
+            $sectionLabels = [
+                'core' => $this->formatFunctionLabel('core', $defaultWeights['core'] ?? null),
+                'support' => $this->formatFunctionLabel('support', $defaultWeights['support'] ?? null),
+            ];
+        }
+
         // Build MPOR rows per output_title
         $mporRows = [];
 
@@ -168,8 +201,8 @@ class MporController extends Controller
                 continue;
             }
 
-            $functionType = strtolower(trim((string) data_get($entry, 'ipcrItem.function_type', '')));
-            $section = str_contains($functionType, 'support') ? 'support' : 'core';
+            $functionType = (string) data_get($entry, 'ipcrItem.function_type', '');
+            $section = $this->normalizeFunctionType($functionType);
 
             if (!isset($mporRows[$outputKey])) {
                 $mporRows[$outputKey] = [
@@ -202,7 +235,10 @@ class MporController extends Controller
             $mporRows[$outputKey]['time'][$week] += ($qty * $tRating);
         }
 
-        $sectionRows = ['core' => [], 'support' => []];
+        $sectionRows = [];
+        foreach (array_keys($sectionLabels) as $sectionKey) {
+            $sectionRows[$sectionKey] = [];
+        }
 
         foreach (array_values($mporRows) as $row) {
             $row['qtyTotal'] = array_sum($row['qty']);
@@ -213,7 +249,15 @@ class MporController extends Controller
                 continue;
             }
 
-            $sectionRows[$row['section'] === 'support' ? 'support' : 'core'][] = $row;
+            $sectionKey = (string) ($row['section'] ?? 'core');
+            if (!isset($sectionRows[$sectionKey])) {
+                $sectionRows[$sectionKey] = [];
+                $sectionLabels[$sectionKey] = $this->formatFunctionLabel(
+                    $sectionKey,
+                    $functionWeights[$sectionKey] ?? null
+                );
+            }
+            $sectionRows[$sectionKey][] = $row;
         }
 
         // Grand totals
@@ -258,6 +302,91 @@ class MporController extends Controller
                 'excluded' => $excludedCount,
             ],
         ]);
+    }
+
+    private function normalizeFunctionType(?string $type): string
+    {
+        $normalized = strtolower(trim((string) $type));
+
+        if ($normalized === '') {
+            return 'custom';
+        }
+
+        if (in_array($normalized, ['core', 'support', 'custom'], true)) {
+            return $normalized;
+        }
+
+        if (str_contains($normalized, 'support')) {
+            return 'support';
+        }
+
+        if (str_contains($normalized, 'core')) {
+            return 'core';
+        }
+
+        return $normalized;
+    }
+
+    private function formatFunctionLabel(string $type, ?float $weight = null): string
+    {
+        $base = match ($type) {
+            'core' => 'Core Functions',
+            'support' => 'Support Functions',
+            'custom' => 'Custom Functions',
+            default => ucwords(str_replace('_', ' ', $type)) . ' Functions',
+        };
+
+        if ($weight === null) {
+            return $base;
+        }
+
+        return sprintf('%s (%s%%)', $base, $this->formatWeightPercent($weight));
+    }
+
+    private function resolveFunctionWeights($entries): array
+    {
+        $weights = [];
+
+        $uniqueItems = $entries
+            ->pluck('ipcrItem')
+            ->filter()
+            ->unique('uwp_function_id')
+            ->values();
+
+        foreach ($uniqueItems as $item) {
+            $function = $item->uwpFunction;
+            $rawType = (string) ($function?->function_type ?? $item->function_type ?? '');
+            $type = $this->normalizeFunctionType($rawType);
+            if ($type === '') {
+                continue;
+            }
+            $weights[$type] = ($weights[$type] ?? 0) + (float) ($function?->weight_percent ?? 0);
+        }
+
+        if (empty($weights)) {
+            return $this->defaultFunctionWeights();
+        }
+
+        return $weights;
+    }
+
+    private function defaultFunctionWeights(): array
+    {
+        return [
+            'core' => 80.0,
+            'support' => 20.0,
+        ];
+    }
+
+    private function formatWeightPercent(float $value): string
+    {
+        $rounded = round($value, 2);
+        if (abs($rounded - round($rounded)) < 0.01) {
+            return (string) (int) round($rounded);
+        }
+
+        $formatted = number_format($rounded, 2, '.', '');
+        return rtrim(rtrim($formatted, '0'), '.');
     }
 
     public function endorse(Mpor $mpor)

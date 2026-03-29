@@ -38,6 +38,7 @@ class MporExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
     private array $payload;
     private array $coreRows = [];
     private array $supportRows = [];
+    private array $sections = [];
     private array $totals = [];
 
     public function __construct(array $payload)
@@ -45,6 +46,7 @@ class MporExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
         $this->payload = $payload;
         $this->coreRows = $this->normalizeRows($payload['core'] ?? []);
         $this->supportRows = $this->normalizeRows($payload['support'] ?? []);
+        $this->sections = $this->normalizeSections($payload);
 
         $coreTotals = $this->calculateSectionTotals($this->coreRows);
         $supportTotals = $this->calculateSectionTotals($this->supportRows);
@@ -114,11 +116,12 @@ class MporExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
         $this->writeTableHeader($sheet);
 
         $row = self::TABLE_START_ROW;
-        $row = $this->writeSectionHeader($sheet, $row, 'CORE FUNCTIONS (80%)');
-        $row = $this->writeOutputRows($sheet, $row, $this->coreRows);
-
-        $row = $this->writeSectionHeader($sheet, $row, 'SUPPORT FUNCTIONS (20%)');
-        $row = $this->writeOutputRows($sheet, $row, $this->supportRows);
+        foreach ($this->sections as $section) {
+            $label = (string) ($section['label'] ?? '');
+            $rows = is_array($section['rows'] ?? null) ? $section['rows'] : [];
+            $row = $this->writeSectionHeader($sheet, $row, $label !== '' ? $label : 'FUNCTIONS');
+            $row = $this->writeOutputRows($sheet, $row, $rows);
+        }
         $lastDataRow = max($row - 1, self::TABLE_START_ROW);
         $this->applyTableClosingBorder($sheet, $lastDataRow);
 
@@ -412,6 +415,41 @@ class MporExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
         }
 
         return $normalized;
+    }
+
+    private function normalizeSections(array $payload): array
+    {
+        $sections = [];
+
+        if (!empty($payload['sections']) && is_array($payload['sections'])) {
+            foreach ($payload['sections'] as $section) {
+                $label = (string) ($section['label'] ?? '');
+                $rows = $this->normalizeRows($section['rows'] ?? []);
+                $sections[] = [
+                    'label' => $label,
+                    'rows' => $rows,
+                ];
+            }
+
+            return $sections !== [] ? $sections : $this->fallbackCoreSupportSections();
+        }
+
+        return $this->fallbackCoreSupportSections();
+    }
+
+    private function fallbackCoreSupportSections(): array
+    {
+        $sections = [];
+        $sections[] = [
+            'label' => 'CORE FUNCTIONS (80%)',
+            'rows' => $this->coreRows,
+        ];
+        $sections[] = [
+            'label' => 'SUPPORT FUNCTIONS (20%)',
+            'rows' => $this->supportRows,
+        ];
+
+        return $sections;
     }
 
     private function normalizeWeeks(array $weeks): array

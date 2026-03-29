@@ -15,24 +15,6 @@
 @endphp
 
     <section class="space-y-6">
-        @if (session('success'))
-            <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if (session('info'))
-            <div class="rounded-xl border border-sky-500/30 bg-sky-500/10 px-4 py-3 text-sm text-sky-200">
-                {{ session('info') }}
-            </div>
-        @endif
-
-        @if ($errors->any())
-            <div class="rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-                {{ $errors->first() }}
-            </div>
-        @endif
-
         <!-- Page Header -->
         <div class="flex flex-wrap items-start justify-between gap-3">
             <div>
@@ -496,7 +478,6 @@
                                         <tr>
                                             <th class="px-4 py-3">Major Output</th>
                                             <th class="px-4 py-3">Success Indicators</th>
-                                            <th class="px-4 py-3">Target Summary</th>
                                             <th class="px-4 py-3">Timeline</th>
                                         </tr>
                                     </thead>
@@ -528,12 +509,11 @@
                                                         </span>
                                                     </a>
                                                 </td>
-                                                <td class="px-4 py-3 text-slate-300">{{ $row['target_summary'] ?? '—' }}</td>
                                                 <td class="px-4 py-3 text-slate-300">{{ $row['timeline'] ?? $periodLabelValue }}</td>
                                             </tr>
                                         @empty
                                             <tr class="bg-slate-900/40">
-                                                <td colspan="4" class="px-4 py-3 text-center text-slate-400">No outputs found for this section.</td>
+                                                <td colspan="3" class="px-4 py-3 text-center text-slate-400">No outputs found for this section.</td>
                                             </tr>
                                         @endforelse
                                     </tbody>

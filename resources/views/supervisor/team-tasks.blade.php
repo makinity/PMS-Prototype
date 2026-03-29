@@ -38,18 +38,6 @@
                 <span class="text-xs text-slate-400">Read-only supervision list</span>
             </div>
 
-            @if (session('success'))
-                <div class="mb-4 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
-                    {{ session('success') }}
-                </div>
-            @endif
-
-            @if (session('error'))
-                <div class="mb-4 rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-                    {{ session('error') }}
-                </div>
-            @endif
-
             <form method="GET" action="{{ route('supervisor.team-tasks') }}"
                 class="mb-4 grid grid-cols-1 gap-3 rounded-lg border border-slate-800 bg-slate-950/40 p-4 md:grid-cols-3">
                 <div>

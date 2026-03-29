@@ -140,7 +140,7 @@ class QarController extends Controller
             }
         }
 
-        $rows = collect($annexRowsMap)
+        $annexRows = collect($annexRowsMap)
             ->sortKeys()
             ->map(function (array $row): array {
                 $row['actual_performance'] = round((float) $row['actual_performance'], 2);
@@ -150,7 +150,7 @@ class QarController extends Controller
             ->values()
             ->all();
 
-        $state['qar_rows'] = $rows;
+        $state['qar_rows'] = $annexRows;
         $request->session()->put($sessionKey, $state);
 
         $uwpTargetTimelineMap = [];
@@ -208,7 +208,8 @@ class QarController extends Controller
 
             $ipcrQuery = Ipcr::query()
                 ->with([
-                    'items:id,ipcr_id,output_title,function_type,indicator_text,standards_payload',
+                    'items:id,ipcr_id,output_title,function_type,indicator_text,standards_payload,uwp_function_id',
+                    'items.uwpFunction:id,function_type,weight_percent',
                 ])
                 ->where('employee_id', $selectedMpor->employee_id)
                 ->whereIn('status', [Ipcr::STATUS_COMMITTED, Ipcr::STATUS_FOR_COMMITMENT]);
@@ -225,7 +226,8 @@ class QarController extends Controller
             if (!$ipcr) {
                 $ipcr = Ipcr::query()
                     ->with([
-                        'items:id,ipcr_id,output_title,function_type,indicator_text,standards_payload',
+                        'items:id,ipcr_id,output_title,function_type,indicator_text,standards_payload,uwp_function_id',
+                        'items.uwpFunction:id,function_type,weight_percent',
                     ])
                     ->where('employee_id', $selectedMpor->employee_id)
                     ->whereIn('status', [Ipcr::STATUS_COMMITTED, Ipcr::STATUS_FOR_COMMITMENT])
@@ -239,6 +241,34 @@ class QarController extends Controller
                     trim((string) preg_replace('/\s+/', ' ', $outputTitle))
                 );
             };
+
+            $functionWeights = $ipcr ? $this->resolveFunctionWeights($ipcr) : $this->defaultFunctionWeights();
+            $sectionOrder = ['core', 'support'];
+            $detectedTypes = $ipcr
+                ? $ipcr->items
+                    ->map(fn ($item) => $this->normalizeFunctionType((string) ($item->function_type ?? '')))
+                    ->filter()
+                    ->unique()
+                    ->values()
+                    ->all()
+                : [];
+
+            $orderedTypes = [];
+            foreach ($sectionOrder as $preferred) {
+                if (in_array($preferred, $detectedTypes, true)) {
+                    $orderedTypes[] = $preferred;
+                }
+            }
+            foreach ($detectedTypes as $type) {
+                if (!in_array($type, $orderedTypes, true)) {
+                    $orderedTypes[] = $type;
+                }
+            }
+
+            $sectionMeta = [];
+            foreach ($orderedTypes as $type) {
+                $sectionMeta[$type] = $this->buildSectionMeta($type, $functionWeights[$type] ?? null);
+            }
 
             $mporRows = [];
 
@@ -254,8 +284,8 @@ class QarController extends Controller
                         continue;
                     }
 
-                    $functionType = strtolower(trim((string) ($item->function_type ?? '')));
-                    $section = str_contains($functionType, 'support') ? 'support' : 'core';
+                    $functionType = (string) ($item->function_type ?? '');
+                    $section = $this->normalizeFunctionType($functionType);
 
                     if (!isset($mporRows[$outputKey])) {
                         $mporRows[$outputKey] = [
@@ -319,10 +349,10 @@ class QarController extends Controller
                 $mporRows[$outputKey]['time'][$week] += ($qty * $timelinessRating);
             }
 
-            $sectionRows = [
-                'core' => [],
-                'support' => [],
-            ];
+            $sectionRows = [];
+            foreach (array_keys($sectionMeta) as $sectionKey) {
+                $sectionRows[$sectionKey] = [];
+            }
 
             foreach (array_values($mporRows) as $row) {
                 $row['qtyTotal'] = array_sum($row['qty']);
@@ -333,10 +363,20 @@ class QarController extends Controller
                     continue;
                 }
 
-                $sectionRows[$row['section'] === 'support' ? 'support' : 'core'][] = $row;
+                $sectionKey = (string) ($row['section'] ?? 'core');
+                if (!isset($sectionRows[$sectionKey])) {
+                    $sectionRows[$sectionKey] = [];
+                    if (!isset($sectionMeta[$sectionKey])) {
+                        $sectionMeta[$sectionKey] = $this->buildSectionMeta(
+                            $sectionKey,
+                            $functionWeights[$sectionKey] ?? null
+                        );
+                    }
+                }
+                $sectionRows[$sectionKey][] = $row;
             }
 
-            foreach (['core', 'support'] as $sectionKey) {
+            foreach (array_keys($sectionRows) as $sectionKey) {
                 $sectionRows[$sectionKey] = collect($sectionRows[$sectionKey])
                     ->sortBy(fn (array $row) => strtolower((string) ($row['label'] ?? '')))
                     ->values()
@@ -399,18 +439,26 @@ class QarController extends Controller
             };
 
             $groups = [];
-            if (!empty($sectionRows['core'])) {
-                $groups[] = [
-                    'label' => 'CORE FUNCTIONS',
-                    'weight_label' => '80%',
-                    'rows' => $toModalRows($sectionRows['core']),
-                ];
+            $groupOrder = array_keys($sectionMeta);
+            if (empty($groupOrder)) {
+                $groupOrder = array_keys($sectionRows);
             }
-            if (!empty($sectionRows['support'])) {
+
+            foreach ($groupOrder as $sectionKey) {
+                $groupRows = $sectionRows[$sectionKey] ?? [];
+                if (empty($groupRows)) {
+                    continue;
+                }
+
+                $meta = $sectionMeta[$sectionKey] ?? $this->buildSectionMeta(
+                    $sectionKey,
+                    $functionWeights[$sectionKey] ?? null
+                );
+
                 $groups[] = [
-                    'label' => 'SUPPORT FUNCTIONS',
-                    'weight_label' => '20%',
-                    'rows' => $toModalRows($sectionRows['support']),
+                    'label' => $meta['label'] ?? 'FUNCTIONS',
+                    'weight_label' => $meta['weight_label'] ?? null,
+                    'rows' => $toModalRows($groupRows),
                 ];
             }
 
@@ -451,31 +499,31 @@ class QarController extends Controller
             return response()->json($selectedMporDetail);
         }
 
-        return view('dept-head.qar', compact(
-            'deptHeadName',
-            'office',
-            'officeId',
-            'period',
-            'quarterNumber',
-            'quarterKey',
-            'quarterLabel',
-            'allowedQuarterNumbers',
-            'allowedQuarterOptions',
-            'selectedQuarterNumber',
-            'incomingMpors',
-            'consolidatedMpors',
-            'generatedAt',
-            'status',
-            'approvedAt',
-            'pmtStatusLabel',
-            'rows',
-            'uwpTargetTimelineMap',
-            'includedMporCount',
-            'includedEmployeeCount',
-            'includedMonthsTotal',
-            'includedMonthsCount',
-            'selectedMporDetail'
-        ));
+        return view('dept-head.qar', [
+            'deptHeadName' => $deptHeadName,
+            'office' => $office,
+            'officeId' => $officeId,
+            'period' => $period,
+            'quarterNumber' => $quarterNumber,
+            'quarterKey' => $quarterKey,
+            'quarterLabel' => $quarterLabel,
+            'allowedQuarterNumbers' => $allowedQuarterNumbers,
+            'allowedQuarterOptions' => $allowedQuarterOptions,
+            'selectedQuarterNumber' => $selectedQuarterNumber,
+            'incomingMpors' => $incomingMpors,
+            'consolidatedMpors' => $consolidatedMpors,
+            'generatedAt' => $generatedAt,
+            'status' => $status,
+            'approvedAt' => $approvedAt,
+            'pmtStatusLabel' => $pmtStatusLabel,
+            'rows' => $annexRows,
+            'uwpTargetTimelineMap' => $uwpTargetTimelineMap,
+            'includedMporCount' => $includedMporCount,
+            'includedEmployeeCount' => $includedEmployeeCount,
+            'includedMonthsTotal' => $includedMonthsTotal,
+            'includedMonthsCount' => $includedMonthsCount,
+            'selectedMporDetail' => $selectedMporDetail,
+        ]);
     }
 
     public function endorse(Request $request)
@@ -664,6 +712,89 @@ class QarController extends Controller
         return redirect()
             ->route('dept-head.qar', ['q' => $quarterNumber])
             ->with('success', 'QAR endorsed and saved');
+    }
+
+    private function normalizeFunctionType(?string $type): string
+    {
+        $normalized = strtolower(trim((string) $type));
+
+        if ($normalized === '') {
+            return 'custom';
+        }
+
+        if (in_array($normalized, ['core', 'support', 'custom'], true)) {
+            return $normalized;
+        }
+
+        if (str_contains($normalized, 'support')) {
+            return 'support';
+        }
+
+        if (str_contains($normalized, 'core')) {
+            return 'core';
+        }
+
+        return $normalized;
+    }
+
+    private function buildSectionMeta(string $type, ?float $weight = null): array
+    {
+        $base = match ($type) {
+            'core' => 'CORE FUNCTIONS',
+            'support' => 'SUPPORT FUNCTIONS',
+            'custom' => 'CUSTOM FUNCTIONS',
+            default => strtoupper(ucwords(str_replace('_', ' ', $type)) . ' FUNCTIONS'),
+        };
+
+        return [
+            'label' => $base,
+            'weight_label' => $weight !== null ? $this->formatWeightPercent($weight) . '%' : null,
+        ];
+    }
+
+    private function resolveFunctionWeights(Ipcr $ipcr): array
+    {
+        $weights = [];
+
+        $uniqueFunctions = $ipcr->items
+            ->filter(fn ($item) => !is_null($item->uwp_function_id))
+            ->unique('uwp_function_id')
+            ->values();
+
+        foreach ($uniqueFunctions as $item) {
+            $function = $item->uwpFunction;
+            $rawType = (string) ($function?->function_type ?? $item->function_type ?? '');
+            $type = $this->normalizeFunctionType($rawType);
+            if ($type === '') {
+                continue;
+            }
+            $weights[$type] = ($weights[$type] ?? 0) + (float) ($function?->weight_percent ?? 0);
+        }
+
+        if (empty($weights)) {
+            return $this->defaultFunctionWeights();
+        }
+
+        return $weights;
+    }
+
+    private function defaultFunctionWeights(): array
+    {
+        return [
+            'core' => 80.0,
+            'support' => 20.0,
+        ];
+    }
+
+    private function formatWeightPercent(float $value): string
+    {
+        $rounded = round($value, 2);
+        if (abs($rounded - round($rounded)) < 0.01) {
+            return (string) (int) round($rounded);
+        }
+
+        $formatted = number_format($rounded, 2, '.', '');
+        return rtrim(rtrim($formatted, '0'), '.');
     }
 
     public function generate(Request $request)

@@ -215,6 +215,8 @@ class OpcrController extends Controller
             foreach ($uwp->uwpFunctions as $function) {
                 foreach ($function->mfos as $mfo) {
                     $indicators = [];
+                    $outputTargetQuantity = 0;
+                    $outputTargetTimelines = [];
 
                     foreach ($mfo->successIndicators as $si) {
                         $standardsByRating = [];
@@ -244,17 +246,40 @@ class OpcrController extends Controller
                             ->values()
                             ->all();
 
+                        $targetQuantity = is_numeric($si->target_quantity ?? null)
+                            ? (int) $si->target_quantity
+                            : null;
+                        $targetTimeline = trim((string) ($si->target_timeline ?? ''));
+
+                        if ($targetQuantity !== null && $targetQuantity > 0) {
+                            $outputTargetQuantity += $targetQuantity;
+                        }
+
+                        if ($targetTimeline !== '' && !in_array($targetTimeline, $outputTargetTimelines, true)) {
+                            $outputTargetTimelines[] = $targetTimeline;
+                        }
+
                         $indicators[] = [
                             'indicator_text' => $si->indicator_text,
+                            'target_quantity' => $targetQuantity,
+                            'target_timeline' => $targetTimeline,
                             'standards_by_rating' => $standardsByRating,
                             'assignees' => $assignees,
                         ];
                     }
 
+                    $outputTargetSummary = count($outputTargetTimelines) === 1
+                        ? $outputTargetTimelines[0]
+                        : (count($outputTargetTimelines) > 1
+                            ? 'Multiple indicator targets'
+                            : trim((string) ($mfo->target_timeline ?? '')));
+
                     $outputs[] = [
                         'title' => $mfo->title,
-                        'target_quantity' => $mfo->target_quantity,
-                        'target_summary' => $mfo->target_timeline,
+                        'target_quantity' => $outputTargetQuantity > 0
+                            ? $outputTargetQuantity
+                            : (is_numeric($mfo->target_quantity ?? null) ? (int) $mfo->target_quantity : null),
+                        'target_summary' => $outputTargetSummary,
                         'weight_percent' => $mfo->weight_percent ?? $function->weight_percent,
                         'function_type' => strtolower((string) $function->function_type),
                         'success_indicators' => $indicators,

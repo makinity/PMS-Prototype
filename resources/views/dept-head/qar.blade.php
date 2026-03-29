@@ -53,18 +53,6 @@
 
     <div id="qarPageRoot">
     <section class="space-y-6">
-        @if (session('success'))
-            <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if (session('info'))
-            <div class="rounded-xl border border-sky-500/30 bg-sky-500/10 px-4 py-3 text-sm text-sky-200">
-                {{ session('info') }}
-            </div>
-        @endif
-
         <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
                 <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Annex I - Office Quarterly Accomplishment Report</p>
@@ -263,14 +251,14 @@
                                     $targetTimeline = $uwpTargetTimelineMapSafe[$code] ?? ($row['target_timeline'] ?? '-');
                                 @endphp
                                 <tr>
-                                    <td class="px-4 py-3">{{ $row['ppa_code'] }}</td>
-                                    <td class="px-4 py-3">{{ $row['mfo'] }}</td>
-                                    <td class="px-4 py-3">{{ $row['indicator'] }}</td>
+                                    <td class="px-4 py-3">{{ $row['ppa_code'] ?? '-' }}</td>
+                                    <td class="px-4 py-3">{{ $row['mfo'] ?? '-' }}</td>
+                                    <td class="px-4 py-3">{{ $row['indicator'] ?? '-' }}</td>
                                     <td class="px-4 py-3 text-center">
                                         <p class="text-sm text-slate-200">{{ $targetTimeline }}</p>
                                     </td>
-                                    <td class="px-4 py-3 text-center font-semibold">{{ $row['actual_performance'] }}</td>
-                                    <td class="px-4 py-3">{{ $row['remarks'] }}</td>
+                                    <td class="px-4 py-3 text-center font-semibold">{{ $row['actual_performance'] ?? '-' }}</td>
+                                    <td class="px-4 py-3">{{ $row['remarks'] ?? '-' }}</td>
                                 </tr>
                             @empty
                                 <tr>
@@ -538,6 +526,32 @@
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function() {
+                const flashPayload = {
+                    success: @json(session('success')),
+                    info: @json(session('info')),
+                    error: @json(session('error')),
+                };
+
+                const showSnackbar = (type, message) => {
+                    if (!message) {
+                        return;
+                    }
+                    if (window.PMSnackbar && !window.PMSnackbar.hasActive()) {
+                        window.PMSnackbar.show({
+                            type: String(type || 'info').toLowerCase(),
+                            message: String(message),
+                        });
+                        return;
+                    }
+                    alert(String(message));
+                };
+
+                Object.entries(flashPayload).forEach(([type, message]) => {
+                    if (message) {
+                        showSnackbar(type, message);
+                    }
+                });
+
                 let qarQuarterLoading = false;
                 const preselectedId = @json((int) request('mpor_id', 0));
                 const mporShowUrlTpl = @json(route('dept-head.qar', [

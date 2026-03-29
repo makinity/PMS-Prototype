@@ -41,6 +41,7 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
     private Ipcr $ipcr;
     private array $groupedItems;
     private array $targetQuantityByOutput;
+    private array $sectionLabels = [];
 
     public function __construct(Ipcr $ipcr)
     {
@@ -103,8 +104,9 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
         $this->writeTableHeader($sheet);
 
         $currentRow = self::TABLE_START_ROW;
-        $currentRow = $this->writeSection($sheet, 'core', 'A. CORE FUNCTIONS (80%)', $currentRow);
-        $currentRow = $this->writeSection($sheet, 'support', 'B. SUPPORT FUNCTIONS (20%)', $currentRow);
+        foreach ($this->buildSectionDefinitions() as $section) {
+            $currentRow = $this->writeSection($sheet, $section['type'], $section['label'], $currentRow);
+        }
 
         $lastRow = max($currentRow - 1, self::TABLE_SUBHEADER_ROW);
 
@@ -333,6 +335,7 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
         $grouped = [
             'core' => [],
             'support' => [],
+            'custom' => [],
         ];
 
         foreach ($this->ipcr->items as $item) {
@@ -355,6 +358,7 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
         return [
             'core' => array_values($grouped['core']),
             'support' => array_values($grouped['support']),
+            'custom' => array_values($grouped['custom']),
         ];
     }
 
@@ -362,9 +366,9 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
     {
         $indicatorText = trim((string) ($item->indicator_text ?? ''));
         $outputTitle = trim((string) ($item->output_title ?? ''));
-        $targetQuantity = $outputTitle !== ''
-            ? ($this->targetQuantityByOutput[$outputTitle] ?? null)
-            : null;
+        $targetQuantity = is_numeric($item->target_quantity ?? null)
+            ? (float) $item->target_quantity
+            : ($outputTitle !== '' ? ($this->targetQuantityByOutput[$outputTitle] ?? null) : null);
 
         if (!is_numeric($targetQuantity)) {
             return $indicatorText;
@@ -444,7 +448,15 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
     {
         $normalized = strtolower(trim($type));
 
-        return $normalized === 'support' ? 'support' : 'core';
+        if ($normalized === 'support') {
+            return 'support';
+        }
+
+        if ($normalized === 'core') {
+            return 'core';
+        }
+
+        return 'custom';
     }
 
     private function estimateRowHeight(string ...$cells): float
@@ -492,13 +504,60 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
     {
         for ($r = $fromRow; $r <= $toRow; $r++) {
             $value = trim((string) $sheet->getCell("A{$r}")->getValue());
-            if (in_array($value, ['A. CORE FUNCTIONS (80%)', 'B. SUPPORT FUNCTIONS (20%)'], true)) {
+            if (in_array($value, $this->sectionLabels, true)) {
                 $sheet->getStyle("A{$r}:N{$r}")
                     ->getBorders()
                     ->getBottom()
                     ->setBorderStyle(Border::BORDER_THIN);
             }
         }
+    }
+
+    private function buildSectionDefinitions(): array
+    {
+        $types = [];
+        foreach ($this->groupedItems as $type => $rows) {
+            if (!empty($rows)) {
+                $types[$type] = true;
+            }
+        }
+
+        $ordered = [];
+        foreach (['core', 'support'] as $preferred) {
+            if (isset($types[$preferred])) {
+                $ordered[] = $preferred;
+                unset($types[$preferred]);
+            }
+        }
+
+        foreach (array_keys($types) as $remaining) {
+            $ordered[] = $remaining;
+        }
+
+        $labels = [];
+        $sections = [];
+        foreach ($ordered as $index => $type) {
+            $label = $this->buildSectionLabel($type, $index);
+            $labels[] = $label;
+            $sections[] = ['type' => $type, 'label' => $label];
+        }
+
+        $this->sectionLabels = $labels;
+
+        return $sections;
+    }
+
+    private function buildSectionLabel(string $type, int $index): string
+    {
+        $prefix = chr(65 + $index);
+        $label = match ($type) {
+            'core' => 'CORE FUNCTIONS (80%)',
+            'support' => 'SUPPORT FUNCTIONS (20%)',
+            'custom' => 'CUSTOM FUNCTIONS',
+            default => strtoupper(str_replace('_', ' ', $type)) . ' FUNCTIONS',
+        };
+
+        return "{$prefix}. {$label}";
     }
 
     private function buildTargetQuantityByOutput(): array

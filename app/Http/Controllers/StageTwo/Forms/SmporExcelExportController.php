@@ -1,4 +1,4 @@
-<?php
+ï»¿<?php
 
 namespace App\Http\Controllers\StageTwo\Forms;
 
@@ -95,13 +95,13 @@ class SmporExcelExportController extends Controller
             : $start->format('F Y') . '-' . $end->format('F Y');
 
         $office = $user->office()->with(['head:id,name', 'employees:id,name,role,office_id'])->first();
-        $officeName = (string) ($office?->name ?? '—');
-        $employeeName = (string) ($user->name ?? '—');
-        $supervisorName = (string) ($office?->employees?->firstWhere('role', 'supervisor')?->name ?? '—');
+        $officeName = (string) ($office?->name ?? 'â€”');
+        $employeeName = (string) ($user->name ?? 'â€”');
+        $supervisorName = (string) ($office?->employees?->firstWhere('role', 'supervisor')?->name ?? 'â€”');
         $departmentHeadName = (string) (
             $office?->head?->name
             ?? $office?->employees?->firstWhere('role', 'dept-head')?->name
-            ?? '—'
+            ?? 'â€”'
         );
 
         $ipcr = Ipcr::query()
@@ -111,10 +111,13 @@ class SmporExcelExportController extends Controller
                 'items:id,ipcr_id,output_title,function_type',
                 'unitWorkPlan.uwpFunctions' => function ($query): void {
                     $query
+                        ->select('id', 'unit_work_plan_id', 'name', 'function_type', 'weight_percent', 'sort_order')
                         ->orderBy('sort_order')
                         ->with([
                             'mfos' => function ($mfoQuery): void {
-                                $mfoQuery->orderBy('sort_order');
+                                $mfoQuery
+                                    ->select('id', 'uwp_function_id', 'title', 'sort_order')
+                                    ->orderBy('sort_order');
                             },
                         ]);
                 },
@@ -122,41 +125,54 @@ class SmporExcelExportController extends Controller
             ->orderByDesc('id')
             ->first();
 
-        $coreLabels = [];
-        $supportLabels = [];
-
-        $addExpectedOutput = static function (array &$labels, string $label): void {
-            $normalized = trim($label);
-            if ($normalized === '') {
-                return;
-            }
-
-            if (!in_array($normalized, $labels, true)) {
-                $labels[] = $normalized;
-            }
-        };
+        $sectionDefinitions = $this->buildSectionDefinitions($ipcr);
+        $outputSectionMap = [];
 
         if ($ipcr) {
             foreach ($ipcr->items as $item) {
-                $label = (string) ($item->output_title ?? '');
-                $functionType = $this->normalizeFunctionType((string) ($item->function_type ?? 'support'));
+                $label = trim((string) ($item->output_title ?? ''));
+                if ($label === '') {
+                    continue;
+                }
 
-                if ($functionType === 'support') {
-                    $addExpectedOutput($supportLabels, $label);
-                } else {
-                    $addExpectedOutput($coreLabels, $label);
+                $functionType = $this->normalizeFunctionType((string) ($item->function_type ?? ''));
+                $outputSectionMap[$label] = $functionType;
+
+                if (!isset($sectionDefinitions[$functionType])) {
+                    $sectionDefinitions[$functionType] = [
+                        'function_type' => $functionType,
+                        'weight_percent' => 0.0,
+                        'sort_order' => 1000 + count($sectionDefinitions),
+                        'output_order' => [],
+                    ];
+                }
+
+                if (!in_array($label, $sectionDefinitions[$functionType]['output_order'], true)) {
+                    $sectionDefinitions[$functionType]['output_order'][] = $label;
                 }
             }
 
             foreach ($ipcr->unitWorkPlan?->uwpFunctions ?? collect() as $function) {
-                $functionType = $this->normalizeFunctionType((string) ($function->function_type ?? 'support'));
+                $functionType = $this->normalizeFunctionType((string) ($function->function_type ?? ''));
+
+                if (!isset($sectionDefinitions[$functionType])) {
+                    $sectionDefinitions[$functionType] = [
+                        'function_type' => $functionType,
+                        'weight_percent' => (float) ($function->weight_percent ?? 0),
+                        'sort_order' => is_null($function->sort_order) ? (1000 + count($sectionDefinitions)) : (int) $function->sort_order,
+                        'output_order' => [],
+                    ];
+                }
 
                 foreach ($function->mfos ?? [] as $mfo) {
-                    $label = (string) ($mfo->title ?? '');
-                    if ($functionType === 'support') {
-                        $addExpectedOutput($supportLabels, $label);
-                    } else {
-                        $addExpectedOutput($coreLabels, $label);
+                    $label = trim((string) ($mfo->title ?? ''));
+                    if ($label === '') {
+                        continue;
+                    }
+
+                    $outputSectionMap[$label] = $functionType;
+                    if (!in_array($label, $sectionDefinitions[$functionType]['output_order'], true)) {
+                        $sectionDefinitions[$functionType]['output_order'][] = $label;
                     }
                 }
             }
@@ -182,7 +198,7 @@ class SmporExcelExportController extends Controller
             $mpors = Mpor::query()
                 ->where('employee_id', $user->id)
                 ->where('office_id', $user->office_id)
-                ->whereIn('status', ['submitted']) // keep submitted for current Stage II flow
+                ->whereIn('status', ['submitted'])
                 ->whereBetween('month', [$rangeStartMonth, $rangeEndMonth])
                 ->orderBy('month')
                 ->get();
@@ -224,9 +240,22 @@ class SmporExcelExportController extends Controller
                         $aggregateMap[$label] = $initializeMonthlyBuckets();
                     }
 
-                    $functionType = $this->normalizeFunctionType((string) ($entry->ipcrItem?->function_type ?? 'support'));
+                    $functionType = $this->normalizeFunctionType((string) ($entry->ipcrItem?->function_type ?? ($outputSectionMap[$label] ?? 'custom')));
                     if (!isset($labelGroupMap[$label])) {
                         $labelGroupMap[$label] = $functionType;
+                    }
+
+                    if (!isset($sectionDefinitions[$functionType])) {
+                        $sectionDefinitions[$functionType] = [
+                            'function_type' => $functionType,
+                            'weight_percent' => 0.0,
+                            'sort_order' => 1000 + count($sectionDefinitions),
+                            'output_order' => [],
+                        ];
+                    }
+
+                    if (!in_array($label, $sectionDefinitions[$functionType]['output_order'], true)) {
+                        $sectionDefinitions[$functionType]['output_order'][] = $label;
                     }
 
                     $qualityPoints = $quantity * (float) $monitoring->quality_rating;
@@ -239,26 +268,53 @@ class SmporExcelExportController extends Controller
             }
         }
 
-        foreach ($aggregateMap as $label => $months) {
-            $functionType = $labelGroupMap[$label] ?? 'support';
-            if ($functionType === 'support') {
-                $addExpectedOutput($supportLabels, $label);
-            } else {
-                $addExpectedOutput($coreLabels, $label);
+        uasort($sectionDefinitions, static function (array $left, array $right): int {
+            $leftOrder = (int) ($left['sort_order'] ?? 1000);
+            $rightOrder = (int) ($right['sort_order'] ?? 1000);
+
+            if ($leftOrder !== $rightOrder) {
+                return $leftOrder <=> $rightOrder;
             }
-        }
 
-        usort($coreLabels, static fn (string $a, string $b): int => strnatcasecmp($a, $b));
-        usort($supportLabels, static fn (string $a, string $b): int => strnatcasecmp($a, $b));
+            return strnatcasecmp(
+                (string) ($left['function_type'] ?? ''),
+                (string) ($right['function_type'] ?? '')
+            );
+        });
 
-        $coreRows = [];
-        foreach ($coreLabels as $label) {
-            $coreRows[] = $this->makeOutputRow($label, $aggregateMap[$label] ?? []);
-        }
+        $sections = [];
+        foreach ($sectionDefinitions as $functionType => $definition) {
+            $orderedLabels = [];
+            foreach ($definition['output_order'] ?? [] as $label) {
+                if (isset($aggregateMap[$label]) && !in_array($label, $orderedLabels, true)) {
+                    $orderedLabels[] = $label;
+                }
+            }
 
-        $supportRows = [];
-        foreach ($supportLabels as $label) {
-            $supportRows[] = $this->makeOutputRow($label, $aggregateMap[$label] ?? []);
+            $remainingLabels = collect($aggregateMap)
+                ->keys()
+                ->filter(fn ($label) => ($labelGroupMap[$label] ?? $outputSectionMap[$label] ?? 'custom') === $functionType)
+                ->reject(fn ($label) => in_array($label, $orderedLabels, true))
+                ->sort(static fn (string $left, string $right): int => strnatcasecmp($left, $right))
+                ->values()
+                ->all();
+
+            $labels = array_merge($orderedLabels, $remainingLabels);
+            if (empty($labels)) {
+                continue;
+            }
+
+            $rows = [];
+            foreach ($labels as $label) {
+                $rows[] = $this->makeOutputRow($label, $aggregateMap[$label] ?? []);
+            }
+
+            $sections[] = [
+                'function_type' => $functionType,
+                'weight_percent' => (float) ($definition['weight_percent'] ?? 0),
+                'label' => $this->buildSectionLabel($functionType, $definition['weight_percent'] ?? null),
+                'rows' => $rows,
+            ];
         }
 
         return [
@@ -268,8 +324,7 @@ class SmporExcelExportController extends Controller
             'supervisor' => $supervisorName,
             'department_head' => $departmentHeadName,
             'employee' => $employeeName,
-            'core' => $coreRows,
-            'support' => $supportRows,
+            'sections' => $sections,
             'attendance' => [
                 'absence' => [
                     'jan' => 0,
@@ -333,15 +388,69 @@ class SmporExcelExportController extends Controller
     {
         $value = strtolower(trim($functionType));
 
-        if ($value === 'support') {
-            return 'support';
+        return $value !== '' ? $value : 'custom';
+    }
+
+    private function buildSectionDefinitions(?Ipcr $ipcr): array
+    {
+        if (!$ipcr?->unitWorkPlan) {
+            return [];
         }
 
-        if ($value === 'core' || $value === 'strategic') {
-            return 'core';
+        $definitions = [];
+        $fallbackSortOrder = 1000;
+
+        foreach ($ipcr->unitWorkPlan->uwpFunctions as $function) {
+            $functionType = $this->normalizeFunctionType((string) ($function->function_type ?? ''));
+
+            if (!isset($definitions[$functionType])) {
+                $definitions[$functionType] = [
+                    'function_type' => $functionType,
+                    'weight_percent' => 0.0,
+                    'sort_order' => is_null($function->sort_order) ? $fallbackSortOrder++ : (int) $function->sort_order,
+                    'output_order' => [],
+                ];
+            }
+
+            $definitions[$functionType]['weight_percent'] += (float) ($function->weight_percent ?? 0);
+
+            foreach ($function->mfos ?? [] as $mfo) {
+                $label = trim((string) ($mfo->title ?? ''));
+                if ($label === '') {
+                    continue;
+                }
+
+                if (!in_array($label, $definitions[$functionType]['output_order'], true)) {
+                    $definitions[$functionType]['output_order'][] = $label;
+                }
+            }
         }
 
-        return 'support';
+        return $definitions;
+    }
+
+    private function buildSectionLabel(string $functionType, ?float $weightPercent): string
+    {
+        $baseLabel = match ($functionType) {
+            'core' => 'CORE FUNCTION',
+            'support' => 'SUPPORT FUNCTIONS',
+            'custom' => 'CUSTOM FUNCTIONS',
+            default => strtoupper(str_replace('_', ' ', $functionType)) . ' FUNCTIONS',
+        };
+
+        $weight = (float) ($weightPercent ?? 0);
+        if ($weight <= 0) {
+            return $baseLabel;
+        }
+
+        return sprintf('%s (%s%%)', $baseLabel, $this->formatWeightPercent($weight));
+    }
+
+    private function formatWeightPercent(float $value): string
+    {
+        $formatted = number_format($value, 2, '.', '');
+
+        return rtrim(rtrim($formatted, '0'), '.');
     }
 
     private function buildFilename(array $payload, bool $preview): string

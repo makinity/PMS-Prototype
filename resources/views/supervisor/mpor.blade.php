@@ -9,18 +9,6 @@
     @endphp
 
     <section class="space-y-6">
-        @if (session('success'))
-            <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if (session('error'))
-            <div class="rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-                {{ session('error') }}
-            </div>
-        @endif
-
         <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div class="min-w-0">
                 <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Stage II</p>
@@ -419,27 +407,30 @@
             }
 
             function renderTable(sectionLabels, sectionRows) {
-                const coreLabel = sectionLabels?.core ?? 'Core Functions';
-                const supportLabel = sectionLabels?.support ?? 'Support Functions';
+                const labels = sectionLabels && typeof sectionLabels === 'object'
+                    ? Object.entries(sectionLabels)
+                    : [];
 
-                const coreRows = Array.isArray(sectionRows?.core) ? sectionRows.core : [];
-                const supportRows = Array.isArray(sectionRows?.support) ? sectionRows.support : [];
+                const sections = labels.length > 0
+                    ? labels
+                    : Object.keys(sectionRows || {}).map((key) => [key, `${String(key || 'Functions').toUpperCase()} FUNCTIONS`]);
 
                 let html = '';
 
-                html += buildSectionRow(coreLabel);
-                if (coreRows.length > 0) {
-                    html += coreRows.map((row) => buildRow(row)).join('');
-                } else {
-                    html += '<tr><td colspan="16" class="px-3 py-6 text-center text-sm text-slate-500">No core entries available.</td></tr>';
+                if (sections.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="16" class="px-3 py-6 text-center text-sm text-slate-500">No entries available.</td></tr>';
+                    return;
                 }
 
-                html += buildSectionRow(supportLabel);
-                if (supportRows.length > 0) {
-                    html += supportRows.map((row) => buildRow(row)).join('');
-                } else {
-                    html += '<tr><td colspan="16" class="px-3 py-6 text-center text-sm text-slate-500">No support entries available.</td></tr>';
-                }
+                sections.forEach(([key, label]) => {
+                    const rows = Array.isArray(sectionRows?.[key]) ? sectionRows[key] : [];
+                    html += buildSectionRow(label || 'Functions');
+                    if (rows.length > 0) {
+                        html += rows.map((row) => buildRow(row)).join('');
+                    } else {
+                        html += '<tr><td colspan="16" class="px-3 py-6 text-center text-sm text-slate-500">No entries available.</td></tr>';
+                    }
+                });
 
                 tbody.innerHTML = html;
             }

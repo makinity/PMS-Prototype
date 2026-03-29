@@ -684,15 +684,25 @@ class UnitWorkPlanController extends Controller
                 continue;
             }
 
-            $indicators = $this->normalizeIndicatorsPayload($mfoPayload['indicators'] ?? $mfoPayload['success_indicators'] ?? []);
-            $targetQuantity = $this->normalizeTargetQuantity(
+            $fallbackTargetQuantity = $this->normalizeTargetQuantity(
                 $mfoPayload['target_quantity'] ?? $mfoPayload['targetQuantity'] ?? null
+            );
+            $fallbackTargetTimeline = (string) ($mfoPayload['target'] ?? $mfoPayload['target_timeline'] ?? '');
+            $indicators = $this->normalizeIndicatorsPayload(
+                $mfoPayload['indicators'] ?? $mfoPayload['success_indicators'] ?? [],
+                $fallbackTargetQuantity,
+                $fallbackTargetTimeline
+            );
+            $derivedTargets = $this->deriveMfoTargetsFromIndicators(
+                $indicators,
+                $fallbackTargetQuantity,
+                $fallbackTargetTimeline
             );
 
             $mfos[] = [
                 'title' => $title,
-                'target_quantity' => $targetQuantity,
-                'target_timeline' => (string) ($mfoPayload['target'] ?? $mfoPayload['target_timeline'] ?? ''),
+                'target_quantity' => $derivedTargets['target_quantity'],
+                'target_timeline' => $derivedTargets['target_timeline'],
                 'weight_percent' => isset($mfoPayload['weight_percent']) ? (float) $mfoPayload['weight_percent'] : null,
                 'sort_order' => (int) ($mfoPayload['sort_order'] ?? $sortOrder),
                 'indicators' => $indicators,
@@ -736,15 +746,25 @@ class UnitWorkPlanController extends Controller
                 continue;
             }
 
-            $indicators = $this->normalizeIndicatorsPayload($mfoPayload['success_indicators'] ?? []);
-            $targetQuantity = $this->normalizeTargetQuantity(
+            $fallbackTargetQuantity = $this->normalizeTargetQuantity(
                 $mfoPayload['target_quantity'] ?? $mfoPayload['targetQuantity'] ?? null
+            );
+            $fallbackTargetTimeline = (string) ($mfoPayload['target_summary'] ?? $mfoPayload['target_timeline'] ?? '');
+            $indicators = $this->normalizeIndicatorsPayload(
+                $mfoPayload['success_indicators'] ?? [],
+                $fallbackTargetQuantity,
+                $fallbackTargetTimeline
+            );
+            $derivedTargets = $this->deriveMfoTargetsFromIndicators(
+                $indicators,
+                $fallbackTargetQuantity,
+                $fallbackTargetTimeline
             );
 
             $functions[$functionCode]['mfos'][] = [
                 'title' => $title,
-                'target_quantity' => $targetQuantity,
-                'target_timeline' => (string) ($mfoPayload['target_summary'] ?? ''),
+                'target_quantity' => $derivedTargets['target_quantity'],
+                'target_timeline' => $derivedTargets['target_timeline'],
                 'weight_percent' => isset($mfoPayload['weight']) ? (float) $mfoPayload['weight'] : null,
                 'sort_order' => (int) ($mfoPayload['sort_order'] ?? count($functions[$functionCode]['mfos']) + 1),
                 'indicators' => $indicators,
@@ -767,7 +787,50 @@ class UnitWorkPlanController extends Controller
         return max(0, (int) $value);
     }
 
-    private function normalizeIndicatorsPayload(array $indicatorsPayload): array
+    private function deriveMfoTargetsFromIndicators(
+        array $indicators,
+        mixed $fallbackTargetQuantity = null,
+        ?string $fallbackTargetTimeline = null
+    ): array {
+        $quantities = [];
+        $timelines = [];
+
+        foreach ($indicators as $indicator) {
+            $quantity = $this->normalizeTargetQuantity($indicator['target_quantity'] ?? null);
+            if ($quantity !== null) {
+                $quantities[] = $quantity;
+            }
+
+            $timeline = trim((string) ($indicator['target_timeline'] ?? ''));
+            if ($timeline !== '') {
+                $timelines[] = $timeline;
+            }
+        }
+
+        $targetQuantity = !empty($quantities)
+            ? array_sum($quantities)
+            : $this->normalizeTargetQuantity($fallbackTargetQuantity);
+
+        $uniqueTimelines = array_values(array_unique($timelines));
+        if (count($uniqueTimelines) === 1) {
+            $targetTimeline = $uniqueTimelines[0];
+        } elseif (!empty($quantities) || !empty($timelines)) {
+            $targetTimeline = 'Per success indicator';
+        } else {
+            $targetTimeline = trim((string) ($fallbackTargetTimeline ?? ''));
+        }
+
+        return [
+            'target_quantity' => $targetQuantity,
+            'target_timeline' => $targetTimeline,
+        ];
+    }
+
+    private function normalizeIndicatorsPayload(
+        array $indicatorsPayload,
+        mixed $fallbackTargetQuantity = null,
+        ?string $fallbackTargetTimeline = null
+    ): array
     {
         $indicators = [];
         $sortOrder = 1;
@@ -783,9 +846,20 @@ class UnitWorkPlanController extends Controller
             }
 
             $standards = $this->normalizeStandardsPayload($indicatorPayload['standards'] ?? []);
+            $targetQuantity = $this->normalizeTargetQuantity(
+                $indicatorPayload['target_quantity'] ?? $indicatorPayload['targetQuantity'] ?? $fallbackTargetQuantity
+            );
+            $targetTimeline = trim((string) (
+                $indicatorPayload['target_timeline']
+                ?? $indicatorPayload['target']
+                ?? $fallbackTargetTimeline
+                ?? ''
+            ));
 
             $indicators[] = [
                 'indicator_text' => $text,
+                'target_quantity' => $targetQuantity,
+                'target_timeline' => $targetTimeline,
                 'sort_order' => (int) ($indicatorPayload['sort_order'] ?? $sortOrder),
                 'standards' => $standards,
                 'assignees' => $indicatorPayload['assignees'] ?? [],
@@ -956,14 +1030,27 @@ class UnitWorkPlanController extends Controller
                         continue;
                     }
 
-                    $targetQuantity = $this->normalizeTargetQuantity(
+                    $fallbackTargetQuantity = $this->normalizeTargetQuantity(
                         $mfoPayload['target_quantity'] ?? $mfoPayload['targetQuantity'] ?? null
+                    );
+                    $fallbackTargetTimeline = (string) ($mfoPayload['target_timeline'] ?? $mfoPayload['target'] ?? '');
+                    $indicators = is_array($mfoPayload['indicators'] ?? null)
+                        ? $this->normalizeIndicatorsPayload(
+                            $mfoPayload['indicators'],
+                            $fallbackTargetQuantity,
+                            $fallbackTargetTimeline
+                        )
+                        : [];
+                    $derivedTargets = $this->deriveMfoTargetsFromIndicators(
+                        $indicators,
+                        $fallbackTargetQuantity,
+                        $fallbackTargetTimeline
                     );
 
                     $mfo = $function->mfos()->create([
                         'title' => $title,
-                        'target_quantity' => $targetQuantity,
-                        'target_timeline' => (string) ($mfoPayload['target_timeline'] ?? ''),
+                        'target_quantity' => $derivedTargets['target_quantity'],
+                        'target_timeline' => $derivedTargets['target_timeline'],
                         'weight_percent' => isset($mfoPayload['weight_percent']) ? (float) $mfoPayload['weight_percent'] : null,
                         'sort_order' => (int) ($mfoPayload['sort_order'] ?? $mfoOrder),
                     ]);
@@ -971,10 +1058,6 @@ class UnitWorkPlanController extends Controller
                     $mfoOrder++;
 
                     $indicatorOrder = 1;
-                    $indicators = is_array($mfoPayload['indicators'] ?? null)
-                        ? $mfoPayload['indicators']
-                        : [];
-
                     foreach ($indicators as $indicatorPayload) {
                         if (!is_array($indicatorPayload)) {
                             continue;
@@ -987,6 +1070,8 @@ class UnitWorkPlanController extends Controller
 
                         $indicator = $mfo->successIndicators()->create([
                             'indicator_text' => $text,
+                            'target_quantity' => $this->normalizeTargetQuantity($indicatorPayload['target_quantity'] ?? null),
+                            'target_timeline' => trim((string) ($indicatorPayload['target_timeline'] ?? '')),
                             'sort_order' => (int) ($indicatorPayload['sort_order'] ?? $indicatorOrder),
                         ]);
 
@@ -1097,6 +1182,8 @@ class UnitWorkPlanController extends Controller
                                     ->map(function ($indicator) {
                                         return [
                                             'text' => (string) $indicator->indicator_text,
+                                            'targetQuantity' => $this->normalizeTargetQuantity($indicator->target_quantity),
+                                            'targetTimeline' => (string) ($indicator->target_timeline ?? ''),
                                             'standards' => $indicator->qetStandards
                                                 ->sortBy([['rating', 'desc'], ['dimension', 'asc']])
                                                 ->values()
@@ -1314,6 +1401,8 @@ class UnitWorkPlanController extends Controller
                                     return [
                                         'id' => $indicator->id,
                                         'indicator_text' => $indicator->indicator_text,
+                                        'target_quantity' => $this->normalizeTargetQuantity($indicator->target_quantity),
+                                        'target_timeline' => $indicator->target_timeline,
                                         'qet_standards' => $indicator->qetStandards->map(function ($standard) {
                                             return [
                                                 'id' => $standard->id,

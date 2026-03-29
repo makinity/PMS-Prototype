@@ -39,14 +39,12 @@ class SmporExcelExport implements FromArray, WithStyles, WithColumnWidths, WithT
     private const MONTH_LABELS = ['Jan', 'Feb', 'March', 'April', 'May', 'June', 'Total', 'Average'];
 
     private array $payload;
-    private array $coreRows = [];
-    private array $supportRows = [];
+    private array $sections = [];
 
     public function __construct(array $payload)
     {
         $this->payload = $payload;
-        $this->coreRows = $this->normalizeRows($payload['core'] ?? []);
-        $this->supportRows = $this->normalizeRows($payload['support'] ?? []);
+        $this->sections = $this->normalizeSections($payload);
     }
 
     public function array(): array
@@ -116,13 +114,14 @@ class SmporExcelExport implements FromArray, WithStyles, WithColumnWidths, WithT
         $this->writeTableHeader($sheet);
 
         $row = self::TABLE_START_ROW;
-        $row = $this->writeSectionHeader($sheet, $row, 'CORE FUNCTION (80%)');
-        [$row, $coreLastRow] = $this->writeOutputRows($sheet, $row, $this->coreRows);
+        $lastDataRow = self::TABLE_START_ROW;
 
-        $row = $this->writeSectionHeader($sheet, $row, 'SUPPORT FUNCTIONS (20%)');
-        [$row, $supportLastRow] = $this->writeOutputRows($sheet, $row, $this->supportRows);
+        foreach ($this->sections as $section) {
+            $row = $this->writeSectionHeader($sheet, $row, (string) ($section['label'] ?? 'FUNCTIONS'));
+            [$row, $sectionLastRow] = $this->writeOutputRows($sheet, $row, $section['rows'] ?? []);
+            $lastDataRow = max($lastDataRow, $sectionLastRow);
+        }
 
-        $lastDataRow = max($coreLastRow, $supportLastRow, self::TABLE_START_ROW);
         $this->applyTableClosingBorder($sheet, $lastDataRow);
 
         $row = $this->writeAttendanceBlock($sheet, $row + 1);
@@ -426,6 +425,41 @@ class SmporExcelExport implements FromArray, WithStyles, WithColumnWidths, WithT
         return $normalized;
     }
 
+    private function normalizeSections(array $payload): array
+    {
+        $sections = [];
+        $payloadSections = is_array($payload['sections'] ?? null) ? $payload['sections'] : [];
+
+        foreach ($payloadSections as $section) {
+            $rows = $this->normalizeRows(is_array($section['rows'] ?? null) ? $section['rows'] : []);
+            if (empty($rows)) {
+                continue;
+            }
+
+            $sections[] = [
+                'label' => (string) ($section['label'] ?? 'FUNCTIONS'),
+                'rows' => $rows,
+            ];
+        }
+
+        if (!empty($sections)) {
+            return $sections;
+        }
+
+        $legacySections = [
+            [
+                'label' => 'CORE FUNCTION (80%)',
+                'rows' => $this->normalizeRows($payload['core'] ?? []),
+            ],
+            [
+                'label' => 'SUPPORT FUNCTIONS (20%)',
+                'rows' => $this->normalizeRows($payload['support'] ?? []),
+            ],
+        ];
+
+        return array_values(array_filter($legacySections, static fn (array $section): bool => !empty($section['rows'])));
+    }
+
     private function normalizeMonths(array $months): array
     {
         $normalized = [];
@@ -483,5 +517,4 @@ class SmporExcelExport implements FromArray, WithStyles, WithColumnWidths, WithT
         return self::BASE_ROW_HEIGHT + max(0, $lines - 1) * self::LINE_HEIGHT;
     }
 }
-
 

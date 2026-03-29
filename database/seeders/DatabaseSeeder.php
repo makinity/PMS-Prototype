@@ -294,10 +294,24 @@ class DatabaseSeeder extends Seeder
                             'sort_order' => $mfoData['sort_order'],
                         ]);
 
-                        foreach ($mfoData['indicators'] as $indicatorSort => $indicatorText) {
+                        foreach ($mfoData['indicators'] as $indicatorSort => $indicatorSeed) {
+                            $indicatorText = is_array($indicatorSeed)
+                                ? trim((string) ($indicatorSeed['indicator_text'] ?? $indicatorSeed['text'] ?? ''))
+                                : trim((string) $indicatorSeed);
+
+                            if ($indicatorText === '') {
+                                continue;
+                            }
+
                             $indicator = UwpSuccessIndicator::query()->create([
                                 'uwp_mfo_id' => $mfo->id,
                                 'indicator_text' => $indicatorText,
+                                'target_quantity' => is_array($indicatorSeed)
+                                    ? ($indicatorSeed['target_quantity'] ?? $mfoData['target_quantity'] ?? null)
+                                    : ($mfoData['target_quantity'] ?? null),
+                                'target_timeline' => is_array($indicatorSeed)
+                                    ? ($indicatorSeed['target_timeline'] ?? $mfoData['target_timeline'] ?? null)
+                                    : ($mfoData['target_timeline'] ?? null),
                                 'sort_order' => $indicatorSort + 1,
                             ]);
 

@@ -17,30 +17,6 @@
     @endphp
 
     <section class="space-y-6">
-        @if (session('success'))
-            <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if (session('info'))
-            <div class="rounded-xl border border-sky-500/30 bg-sky-500/10 px-4 py-3 text-sm text-sky-200">
-                {{ session('info') }}
-            </div>
-        @endif
-
-        @if (!empty($infoMessage ?? null))
-            <div class="rounded-xl border border-sky-500/30 bg-sky-500/10 px-4 py-3 text-sm text-sky-200">
-                {{ $infoMessage }}
-            </div>
-        @endif
-
-        @if ($errors->any())
-            <div class="rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-                {{ $errors->first() }}
-            </div>
-        @endif
-
         <div class="flex flex-wrap items-start justify-between gap-3">
             <div>
                 <h1 class="text-2xl font-bold text-white">Accomplishment Review</h1>
@@ -356,6 +332,15 @@
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', () => {
+                @if (!empty($infoMessage ?? null))
+                    if (window.PMSnackbar && !window.PMSnackbar.hasActive()) {
+                        window.PMSnackbar.show({
+                            type: 'info',
+                            message: @json((string) $infoMessage),
+                        });
+                    }
+                @endif
+
                 const payloadScript = document.getElementById('pmt-submissions-json');
                 const previewModals = Array.from(document.querySelectorAll('[data-preview-modal]'));
                 const openPreviewStack = [];

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Employee;
 
 use App\Http\Controllers\Controller;
+use App\Support\ResolvesIpcrTargetScores;
 use Illuminate\Http\Request;
 use App\Models\Ipcr;
 use App\Models\PerformancePeriod;
@@ -11,6 +12,8 @@ use Illuminate\Support\Facades\DB;
 
 class IpcrTargetController extends Controller
 {
+    use ResolvesIpcrTargetScores;
+
     public function index(Request $request)
     {
         $user = Auth::user();
@@ -42,8 +45,6 @@ class IpcrTargetController extends Controller
 
         $payload = [
             'status' => $ipcr?->status,
-            'core' => [],
-            'support' => [],
         ];
 
         $functionHeaderMeta = [
@@ -57,16 +58,7 @@ class IpcrTargetController extends Controller
         ];
 
         if ($ipcr) {
-            $mfoTargetSummaryMap = [];
-            foreach ($ipcr->unitWorkPlan?->uwpFunctions ?? [] as $function) {
-                foreach ($function->mfos ?? [] as $mfo) {
-                    $mapKey = (int) $function->id . '||' . trim((string) ($mfo->title ?? ''));
-                    $mfoTargetSummaryMap[$mapKey] = $this->buildTargetSummary(
-                        $mfo->target_quantity,
-                        $mfo->target_timeline
-                    );
-                }
-            }
+            $targetSummaryByFunctionAndOutput = $this->buildTargetSummaryByFunctionAndOutput($ipcr);
 
             $functions = $ipcr->ipcrItems
                 ->pluck('uwpFunction')
@@ -75,18 +67,18 @@ class IpcrTargetController extends Controller
                 ->values();
 
             if ($functions->isNotEmpty()) {
-                $functionHeaderMeta = [
-                    'core_percent' => (float) $functions->sum(function ($function) {
-                        return strtolower(trim((string) ($function->function_type ?? ''))) === 'support'
-                            ? 0
-                            : (float) ($function->weight_percent ?? 0);
-                    }),
-                    'support_percent' => (float) $functions->sum(function ($function) {
-                        return strtolower(trim((string) ($function->function_type ?? ''))) === 'support'
-                            ? (float) ($function->weight_percent ?? 0)
-                            : 0;
-                    }),
-                ];
+                $functionHeaderMeta = [];
+                $functionTypeLabels = [];
+
+                foreach ($functions as $function) {
+                    $type = $this->normalizeFunctionType((string) ($function->function_type ?? 'custom'));
+                    $key = $type . '_percent';
+                    $functionHeaderMeta[$key] = ($functionHeaderMeta[$key] ?? 0) + (float) ($function->weight_percent ?? 0);
+
+                    if (!isset($functionTypeLabels[$type])) {
+                        $functionTypeLabels[$type] = $this->formatFunctionTypeLabel($type);
+                    }
+                }
             }
 
             $groups = [];
@@ -100,8 +92,8 @@ class IpcrTargetController extends Controller
                 ->values();
 
             foreach ($items as $item) {
-                $groupFunctionType = strtolower(trim((string) ($item->uwpFunction?->function_type ?? $item->function_type)));
-                $groupType = $groupFunctionType === 'support' ? 'support' : 'core';
+                $groupFunctionType = (string) ($item->uwpFunction?->function_type ?? $item->function_type);
+                $groupType = $this->normalizeFunctionType($groupFunctionType);
                 $outputTitle = (string) ($item->output_title ?? '');
                 $groupKey = $groupType . '||' . $outputTitle;
 
@@ -116,8 +108,7 @@ class IpcrTargetController extends Controller
                 $groups[$groupKey]['items'][] = $item;
             }
 
-            $coreIndex = 0;
-            $supportIndex = 0;
+            $typeIndex = [];
 
             foreach ($groups as $group) {
                 $functionType = $group['type'];
@@ -132,7 +123,7 @@ class IpcrTargetController extends Controller
                     })?->target_summary ?? ''
                 );
 
-                $targetSummary = $mfoTargetSummaryMap[$targetMapKey] ?? '';
+                $targetSummary = $targetSummaryByFunctionAndOutput[$targetMapKey] ?? '';
                 if ($targetSummary === '') {
                     $targetSummary = trim($storedTargetSummary);
                 }
@@ -174,14 +165,26 @@ class IpcrTargetController extends Controller
                         ];
                     }
 
+                    $targetQuantity = $row->target_quantity;
+                    $targetTimeline = (string) ($row->target_timeline ?? '');
+                    $targetSummary = trim((string) ($row->target_summary ?? ''));
+
+                    if ($targetSummary === '') {
+                        $targetSummary = $this->buildTargetSummary($targetQuantity, $targetTimeline);
+                    }
+
                     return [
                         'indicator_text' => (string) $row->indicator_text,
+                        'target_quantity' => $targetQuantity,
+                        'target_timeline' => $targetTimeline,
+                        'target_summary' => $targetSummary,
                         'standards_by_rating' => $normalized,
                     ];
                 })->values()->all();
 
+                $typeIndex[$functionType] = $typeIndex[$functionType] ?? 0;
                 $entry = [
-                    'key' => $functionType === 'support' ? ('support_' . $supportIndex++) : ('core_' . $coreIndex++),
+                    'key' => $functionType . '_' . $typeIndex[$functionType]++,
                     'output_title' => $outputTitle,
                     'target_summary' => $targetSummary,
                     'timeline' => (string) ($ipcr->performancePeriod?->name ?? ''),
@@ -189,11 +192,8 @@ class IpcrTargetController extends Controller
                     'indicators' => $indicators,
                 ];
 
-                if ($functionType === 'support') {
-                    $payload['support'][] = $entry;
-                } else {
-                    $payload['core'][] = $entry;
-                }
+                $payload[$functionType] = $payload[$functionType] ?? [];
+                $payload[$functionType][] = $entry;
             }
         }
 
@@ -217,6 +217,27 @@ class IpcrTargetController extends Controller
         $timelineText = trim((string) ($targetTimeline ?? ''));
 
         return trim($quantityText . ' ' . $timelineText);
+    }
+
+    private function normalizeFunctionType(?string $type): string
+    {
+        $normalized = strtolower(trim((string) $type));
+
+        if (in_array($normalized, ['core', 'support', 'custom'], true)) {
+            return $normalized;
+        }
+
+        return $normalized !== '' ? $normalized : 'custom';
+    }
+
+    private function formatFunctionTypeLabel(string $type): string
+    {
+        return match ($type) {
+            'core' => 'Core Functions',
+            'support' => 'Support Functions',
+            'custom' => 'Custom Functions',
+            default => ucwords(str_replace('_', ' ', $type)) . ' Functions',
+        };
     }
 
     public function commit(Request $request)
