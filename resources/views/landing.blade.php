@@ -14,31 +14,31 @@
 <body class="bg-gray-900">
     <!-- Sticky Navigation -->
     <nav id="mainNav" class="sticky-nav">
-        <div class="max-w-screen-xl mx-auto px-4 py-3">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center">
+        <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <div class="flex items-center justify-between gap-3 lg:gap-6">
+                <div class="flex min-w-0 items-center gap-3">
+                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center shrink-0">
                         <i class="fas fa-chart-line text-white"></i>
                     </div>
-                    <div class="flex flex-col">
-                        <span class="text-lg font-bold text-white whitespace-nowrap">Performance Management</span>
-                        <span class="bg-purple-900 text-purple-200 text-xs font-medium px-2 py-0.5 rounded mt-1">HR Ecosystem</span>
+                    <div class="min-w-0 flex flex-col">
+                        <span class="text-base sm:text-lg font-bold text-white leading-tight sm:whitespace-nowrap">Performance Management</span>
+                        <span class="mt-1 inline-flex w-fit rounded bg-purple-900 px-2 py-0.5 text-xs font-medium text-purple-200">HR Ecosystem</span>
                     </div>
                 </div>
 
                 <!-- Mobile menu button -->
-                <button id="mobileMenuBtn" class="mobile-menu-btn md:hidden">
+                <button id="mobileMenuBtn" type="button" class="mobile-menu-btn lg:hidden" aria-expanded="false" aria-controls="mobileMenu" aria-label="Toggle navigation menu">
                     <i class="fas fa-bars"></i>
                 </button>
 
                 <!-- Desktop Menu -->
-                <div class="hidden md:flex items-center space-x-8">
+                <div class="nav-desktop hidden lg:flex items-center space-x-6 xl:space-x-8">
                     <a href="#overview" class="text-gray-300 hover:text-white transition-colors">Overview</a>
                     <a href="#systems" class="text-gray-300 hover:text-white transition-colors">HR Systems</a>
                     <a href="#features" class="text-gray-300 hover:text-white transition-colors">Features</a>
                 </div>
 
-                <div class="hidden md:flex items-center space-x-4">
+                <div class="nav-actions hidden lg:flex items-center space-x-3 xl:space-x-4">
                     <button id="loginModalBtn" class="border border-gray-600 text-gray-300 hover:border-purple-500 hover:text-purple-300 px-4 py-2 rounded-lg font-medium transition-all">
                         <i class="fas fa-sign-in-alt mr-2"></i>Login
                     </button>
@@ -49,7 +49,7 @@
             </div>
 
             <!-- Mobile Menu -->
-            <div id="mobileMenu" class="mobile-menu">
+            <div id="mobileMenu" class="mobile-menu lg:hidden" aria-hidden="true">
                 <a href="#overview" class="mobile-menu-link">Overview</a>
                 <a href="#systems" class="mobile-menu-link">HR Systems</a>
                 <a href="#features" class="mobile-menu-link">Features</a>
@@ -66,19 +66,19 @@
     </nav>
 
     <!-- Hero Section -->
-    <section class="hero-gradient pt-16 pb-12 md:pt-20 md:pb-16">
-        <div class="max-w-screen-xl mx-auto px-4">
-            <div class="text-center mb-8 md:mb-12 fade-in-up">
-                <div class="pms-badge mb-4 md:mb-6">
-                    <span class="bg-purple-600 text-white text-xs font-bold px-2 py-1 rounded mr-2">Core HR System</span>
+    <section class="hero-gradient pt-14 pb-12 md:pt-20 md:pb-16">
+        <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto max-w-5xl text-center mb-8 md:mb-12 fade-in-up">
+                <div class="pms-badge mx-auto mb-4 md:mb-6">
+                    <span class="bg-purple-600 text-white text-xs font-bold px-2 py-1 rounded">Core HR System</span>
                     <span class="text-sm">Part of the Integrated HR Ecosystem</span>
                 </div>
 
-                <h1 class="text-3xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6">
+                <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-4 md:mb-6">
                     Centralize Employee <span class="highlight-pms">Performance</span> Tracking
                 </h1>
 
-                <p class="text-lg md:text-xl text-gray-300 mb-6 md:mb-8 max-w-3xl mx-auto leading-relaxed">
+                <p class="text-base sm:text-lg md:text-xl text-gray-300 mb-6 md:mb-8 max-w-4xl mx-auto leading-relaxed">
                     The <span class="font-semibold text-purple-300">Performance Management System (PMS)</span> is the heart of your HR ecosystem,
                     receiving data from Hiring Management, evaluating employee performance, and intelligently routing
                     employees to development or recognition programs.
@@ -86,7 +86,7 @@
             </div>
 
             <div class="text-center fade-in-up">
-                <button id="accountActivationModalBtn2" class="btn-gradient px-6 py-3 md:px-8 md:py-4 rounded-xl font-bold text-base md:text-lg w-full md:w-auto">
+                <button id="accountActivationModalBtn2" class="btn-gradient px-6 py-3 md:px-8 md:py-4 rounded-xl font-bold text-base md:text-lg w-full sm:w-auto">
                     <i class="fas fa-user-check mr-2 md:mr-3"></i> Activate Your PMS Account
                 </button>
                 <p class="mt-3 md:mt-4 text-gray-400 text-sm">Access granted to employees after hiring process completion</p>
@@ -96,7 +96,7 @@
 
     <!-- Stats Section -->
     <section id="overview" class="py-12 md:py-16 bg-gray-900/50">
-        <div class="max-w-screen-xl mx-auto px-4">
+        <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 class="text-2xl md:text-3xl font-bold text-center mb-8 md:mb-12 fade-in-up">Why <span class="highlight-pms">PMS</span> is Essential</h2>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
@@ -129,7 +129,7 @@
 
     <!-- HR Systems Integration Section -->
     <section id="systems" class="py-12 md:py-16">
-        <div class="max-w-screen-xl mx-auto px-4">
+        <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 class="text-2xl md:text-3xl font-bold text-center mb-3 md:mb-4 fade-in-up">Integrated <span class="highlight-pms">HR Ecosystem</span></h2>
             <p class="text-lg md:text-xl text-gray-400 text-center mb-8 md:mb-12 max-w-3xl mx-auto fade-in-up">
                 Performance Management System works seamlessly with other HR systems to provide complete employee lifecycle management.
@@ -156,7 +156,7 @@
 
                 <!-- PMS Card (Highlighted) -->
                 <div class="system-card pms-card fade-in-up relative">
-                    <div class="pms-card-badge absolute -top-2 -right-2 md:-top-3 md:-right-3">
+                    <div class="pms-card-badge mb-4 flex justify-start sm:justify-end md:absolute md:-top-3 md:-right-3 md:mb-0">
                         <span class="pms-badge-pill bg-gradient-to-r from-purple-600 to-blue-600 text-white text-xs font-bold px-2 py-0.5 md:px-3 md:py-1 rounded-full">YOU ARE HERE</span>
                     </div>
                     <div class="flex items-center mb-4">
@@ -169,7 +169,7 @@
                         </div>
                     </div>
                     <p class="text-gray-300 text-sm mb-4">Evaluates employee performance, tracks KPIs, and analyzes development needs. Acts as the central hub in the HR ecosystem.</p>
-                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4">
                         <div class="text-sm">
                             <div class="text-emerald-400">Receives from:</div>
                             <div class="text-xs text-gray-500">Hiring Management System</div>
@@ -227,7 +227,7 @@
 
     <!-- Features Section -->
     <section id="features" class="py-12 md:py-16 bg-gray-900/50">
-        <div class="max-w-screen-xl mx-auto px-4">
+        <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-8 md:mb-12 fade-in-up">
                 <h2 class="text-2xl md:text-3xl font-bold mb-3 md:mb-4"><span class="highlight-pms">PMS</span> Core Features</h2>
                 <p class="text-lg md:text-xl text-gray-400 max-w-3xl mx-auto">Comprehensive tools to evaluate, track, and enhance employee performance within the HR ecosystem.</p>
@@ -270,7 +270,7 @@
                     <div class="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-gradient-to-br from-purple-600/20 to-blue-600/20 flex items-center justify-center mb-4 md:mb-6">
                         <i class="fas fa-exchange-alt text-xl md:text-2xl text-violet-400"></i>
                     </div>
-                    <h3 class="text-lg md:text-xl font-bold mb-2 md:mb-3">360° Feedback Integration</h3>
+                    <h3 class="text-lg md:text-xl font-bold mb-2 md:mb-3">360-Degree Feedback Integration</h3>
                     <p class="text-gray-400 text-sm md:text-base">Collect comprehensive feedback from peers, supervisors, and subordinates.</p>
                 </div>
 
@@ -288,7 +288,7 @@
     <!-- CTA Section -->
     <section class="py-12 md:py-20 relative overflow-hidden">
         <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-purple-900/10 to-blue-900/10"></div>
-        <div class="max-w-screen-xl mx-auto px-4 relative z-10">
+        <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="text-center fade-in-up">
                 <h2 class="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 md:mb-6">Ready to Optimize Employee Performance?</h2>
                 <p class="text-lg md:text-xl text-gray-400 mb-6 md:mb-10 max-w-3xl mx-auto">
@@ -296,10 +296,10 @@
                 </p>
 
                 <div class="flex flex-col md:flex-row justify-center gap-4 md:gap-6">
-                    <button id="accountActivationModalBtn3" class="btn-gradient px-6 py-3 md:px-8 md:py-4 rounded-xl font-bold text-base md:text-lg">
+                    <button id="accountActivationModalBtn3" class="btn-gradient w-full sm:w-auto px-6 py-3 md:px-8 md:py-4 rounded-xl font-bold text-base md:text-lg">
                         <i class="fas fa-user-check mr-2 md:mr-3"></i> Activate PMS Account
                     </button>
-                    <button id="loginModalBtn2" class="border border-purple-500 text-purple-300 hover:bg-purple-500/10 px-6 py-3 md:px-8 md:py-4 rounded-xl font-bold text-base md:text-lg">
+                    <button id="loginModalBtn2" class="border border-purple-500 text-purple-300 hover:bg-purple-500/10 w-full sm:w-auto px-6 py-3 md:px-8 md:py-4 rounded-xl font-bold text-base md:text-lg">
                         <i class="fas fa-sign-in-alt mr-2 md:mr-3"></i> Login to PMS
                     </button>
                 </div>
@@ -313,7 +313,7 @@
 
     <!-- Footer -->
     <footer class="bg-gray-900 border-t border-gray-800 py-6 md:py-8">
-        <div class="max-w-screen-xl mx-auto px-4">
+        <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row justify-between items-center">
                 <div class="mb-6 md:mb-0 text-center md:text-left">
                     <div class="flex items-center space-x-3 mb-4 justify-center md:justify-start">
@@ -330,7 +330,7 @@
 
                 <div class="text-gray-500 text-sm text-center md:text-right">
                     {{-- DUMMY_DATA: replace with dynamic value --}}
-                    <p>© 2024 Performance Management System. HR Ecosystem v2.0</p>
+                    <p>&copy; 2024 Performance Management System. HR Ecosystem v2.0</p>
                     <div class="mt-2 flex flex-wrap justify-center md:justify-end gap-2">
                         <span class="bg-gray-800 px-2 py-1 rounded text-xs">Integrated with HMS</span>
                         <span class="bg-gray-800 px-2 py-1 rounded text-xs">Connected to LND</span>
@@ -369,7 +369,7 @@
                             <label for="password" class="block mb-2 text-sm font-medium text-gray-300">Password</label>
                             <input type="password" name="password" id="password" placeholder="Your Password" class="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg block w-full p-3">
                         </div>
-                        <div class="flex justify-between items-center">
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                             <div class="flex items-center">
                                 <input id="remember" name="remember" type="checkbox" class="w-4 h-4 rounded bg-gray-700 border-gray-600">
                                 <label for="remember" class="ms-2 text-sm font-medium text-gray-300">Remember me</label>
@@ -404,7 +404,7 @@
                         <div>
                             <h3 class="text-lg md:text-xl font-semibold text-white" id="modalTitle">Activate PMS Account</h3>
                             <!-- Step Indicator -->
-                            <div class="flex items-center space-x-2 mt-1">
+                            <div class="flex flex-wrap items-center gap-2 mt-1">
                                 <div class="flex items-center">
                                     <div class="step-indicator active" data-step="1">1</div>
                                     <div class="h-0.5 w-4 bg-gray-600 mx-1"></div>
@@ -449,7 +449,7 @@
                                 </p>
                             </div>
 
-                            <div class="flex justify-between space-x-3">
+                            <div class="flex flex-col sm:flex-row gap-3">
                                 <button type="button" class="border border-gray-600 text-gray-300 hover:border-gray-500 hover:text-white px-4 py-2 rounded-lg font-medium transition-all flex-1" data-modal-hide="accountActivationModal">
                                     Cancel
                                 </button>

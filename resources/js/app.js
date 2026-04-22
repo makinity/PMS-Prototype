@@ -12,22 +12,31 @@ const loginModalBtnMobile = document.getElementById('loginModalBtnMobile');
 const accountActivationModalBtnMobile = document.getElementById('accountActivationModalBtnMobile');
 const body = document.body;
 
-function toggleMobileMenu() {
-    const isActive = mobileMenu.classList.contains('active');
-
-    if (isActive) {
-        // Close menu
-        mobileMenu.classList.remove('active');
-        body.classList.remove('menu-open');
-        mobileMenuBtn.querySelector('i').classList.remove('fa-times');
-        mobileMenuBtn.querySelector('i').classList.add('fa-bars');
-    } else {
-        // Open menu
-        mobileMenu.classList.add('active');
-        body.classList.add('menu-open');
-        mobileMenuBtn.querySelector('i').classList.remove('fa-bars');
-        mobileMenuBtn.querySelector('i').classList.add('fa-times');
+function setMobileMenuState(isOpen) {
+    if (!mobileMenuBtn || !mobileMenu) {
+        return;
     }
+
+    mobileMenu.classList.toggle('active', isOpen);
+    mobileMenu.setAttribute('aria-hidden', String(!isOpen));
+    body.classList.toggle('menu-open', isOpen);
+    mobileMenuBtn.setAttribute('aria-expanded', String(isOpen));
+
+    const icon = mobileMenuBtn.querySelector('i');
+    if (!icon) {
+        return;
+    }
+
+    icon.classList.toggle('fa-bars', !isOpen);
+    icon.classList.toggle('fa-times', isOpen);
+}
+
+function toggleMobileMenu() {
+    setMobileMenuState(!mobileMenu.classList.contains('active'));
+}
+
+function closeMobileMenu() {
+    setMobileMenuState(false);
 }
 
 if (mobileMenuBtn && mobileMenu) {
@@ -39,45 +48,43 @@ if (mobileMenuBtn && mobileMenu) {
     // Close mobile menu when clicking links
     mobileMenu.querySelectorAll('a, button').forEach(element => {
         element.addEventListener('click', function() {
-            mobileMenu.classList.remove('active');
-            body.classList.remove('menu-open');
-            if (mobileMenuBtn) {
-                mobileMenuBtn.querySelector('i').classList.remove('fa-times');
-                mobileMenuBtn.querySelector('i').classList.add('fa-bars');
-            }
+            closeMobileMenu();
         });
     });
 
     // Close mobile menu when clicking outside
     document.addEventListener('click', function(event) {
         if (!mobileMenu.contains(event.target) && !mobileMenuBtn.contains(event.target)) {
-            mobileMenu.classList.remove('active');
-            body.classList.remove('menu-open');
-            if (mobileMenuBtn) {
-                mobileMenuBtn.querySelector('i').classList.remove('fa-times');
-                mobileMenuBtn.querySelector('i').classList.add('fa-bars');
-            }
+            closeMobileMenu();
         }
     });
 
     // Close mobile menu on scroll
     window.addEventListener('scroll', function() {
         if (mobileMenu && mobileMenu.classList.contains('active')) {
-            mobileMenu.classList.remove('active');
-            body.classList.remove('menu-open');
-            if (mobileMenuBtn) {
-                mobileMenuBtn.querySelector('i').classList.remove('fa-times');
-                mobileMenuBtn.querySelector('i').classList.add('fa-bars');
-            }
+            closeMobileMenu();
         }
     });
 
     // Close menu on escape key
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && mobileMenu.classList.contains('active')) {
-            toggleMobileMenu();
+            closeMobileMenu();
         }
     });
+
+    const desktopNavMediaQuery = window.matchMedia('(min-width: 1024px)');
+    const handleDesktopNav = event => {
+        if (event.matches) {
+            closeMobileMenu();
+        }
+    };
+
+    if (desktopNavMediaQuery.addEventListener) {
+        desktopNavMediaQuery.addEventListener('change', handleDesktopNav);
+    } else {
+        desktopNavMediaQuery.addListener(handleDesktopNav);
+    }
 }
 
 // Sticky nav scroll effect
@@ -144,7 +151,7 @@ if (modalOverlays.length) {
 // Close mobile menu when opening modals
 function closeMobileMenuForModal() {
     if (mobileMenu && mobileMenu.classList.contains('active')) {
-        toggleMobileMenu();
+        closeMobileMenu();
     }
 }
 
