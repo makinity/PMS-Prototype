@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Office Quarterly Accomplishment Report - LBAC Form No. 3</title>
     <style>
-        @page { size: A4 portrait; margin: 14mm; }
+        @page { size: Legal landscape; margin: 14mm; }
         body { font-family: Arial, sans-serif; font-size: 11px; color: #000; }
         h1, h2, h3, h4 { margin: 4px 0; }
         table { width: 100%; border-collapse: collapse; margin-top: 8px; }
@@ -22,8 +22,9 @@
         <div><strong>Office Quarterly Accomplishment Report</strong></div>
         <div><strong>LBAC Form No. 3</strong></div>
         <h3 style="margin-top:6px;">QUARTERLY PHYSICAL REPORT OF OPERATIONS</h3>
-        <div style="margin-top:4px;">For the Quarter Ending: <u>June 30, 2026</u></div>
-        <div>Department / Office: <u>Revenue Collection Unit</u></div>
+        <div style="margin-top:4px;">For the Quarter Ending: <u>{{ $quarterEndingLabel }}</u></div>
+        <div>Department / Office: <u>{{ $officeName }}</u></div>
+        <div style="margin-top:4px;">Performance Period: {{ $periodName }} ({{ $periodRange }})</div>
     </div>
 
     <table style="margin-top:12px;">
@@ -34,56 +35,30 @@
                 <th style="width: 24%;">Performance Indicator</th>
                 <th style="width: 14%;">Target Output</th>
                 <th style="width: 10%;">Actual Performance</th>
-                <th style="width: 10%;">Variance as of June 30, 2026</th>
+                <th style="width: 10%;">Variance as of {{ $quarterEndingLabel }}</th>
                 <th style="width: 10%;">Remarks</th>
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td>&nbsp;</td>
-                <td>E-Bank Scanning and Encoding of Revenue Transactions</td>
-                <td>
-                    <ul class="bullet">
-                        <li>All e-bank transactions scanned and encoded daily</li>
-                        <li>Indexing complete with no missing pages</li>
-                        <li>Audit trail maintained within 24 hours</li>
-                    </ul>
-                </td>
-                <td>Daily / Same working day processing</td>
-                <td class="center">1</td>
-                <td class="center">—</td>
-                <td>Based on MPOR (Jan–Jun 2026)</td>
-            </tr>
-            <tr>
-                <td>&nbsp;</td>
-                <td>Processing of Over-the-Counter Revenue Transactions</td>
-                <td>
-                    <ul class="bullet">
-                        <li>Same-day verification of OTC transactions</li>
-                        <li>95% encoded within business day</li>
-                        <li>OR validation completed daily</li>
-                    </ul>
-                </td>
-                <td>Daily / Same working day processing</td>
-                <td class="center">1</td>
-                <td class="center">—</td>
-                <td>Based on MPOR (Jan–Jun 2026)</td>
-            </tr>
-            <tr>
-                <td>&nbsp;</td>
-                <td>Maintenance of Revenue Records Filing System</td>
-                <td>
-                    <ul class="bullet">
-                        <li>Weekly filing updated and retrievable</li>
-                        <li>Digital backups synced monthly</li>
-                        <li>Retrieval logs maintained for audits</li>
-                    </ul>
-                </td>
-                <td>Quarterly validation</td>
-                <td class="center">0</td>
-                <td class="center">—</td>
-                <td>No output logged for the period</td>
-            </tr>
+            @forelse($qarHeader->rows as $row)
+                <tr>
+                    <td>{{ $row->ppa_code }}</td>
+                    <td>{{ $row->mfo_title }}</td>
+                    <td>{!! nl2br(e($row->indicator_text)) !!}</td>
+                    <td>{{ $row->target_timeline }}</td>
+                    <td class="center">
+                        {{ (int) round((float) $row->actual_performance) }}
+                    </td>
+                    <td class="center">&mdash;</td>
+                    <td>{{ $row->remarks }}</td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="7" class="center">
+                        No QAR rows found.
+                    </td>
+                </tr>
+            @endforelse
         </tbody>
     </table>
 

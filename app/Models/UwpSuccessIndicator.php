@@ -13,10 +13,13 @@ class UwpSuccessIndicator extends Model
     protected $fillable = [
         'uwp_mfo_id',
         'indicator_text',
+        'target_quantity',
+        'target_timeline',
         'sort_order',
     ];
 
     protected $casts = [
+        'target_quantity' => 'integer',
         'sort_order' => 'integer',
     ];
 

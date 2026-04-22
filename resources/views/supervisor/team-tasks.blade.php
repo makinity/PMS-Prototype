@@ -1,6 +1,20 @@
 @extends('layouts.supervisor')
 
 @section('main-content')
+    @php
+        $selectedStatus = strtolower((string) request('status', 'all'));
+        $selectedEmployee = (string) request('employee_id', '');
+
+        $statusOptions = collect(['all', 'draft', 'recording', 'submitted', 'rated']);
+
+        $statusMeta = [
+            'draft' => 'bg-amber-900/40 border border-amber-700/40 text-amber-200',
+            'recording' => 'bg-blue-900/40 border border-blue-700/40 text-blue-200',
+            'submitted' => 'bg-emerald-900/40 border border-emerald-700/40 text-emerald-300',
+            'rated' => 'bg-cyan-900/40 border border-cyan-700/40 text-cyan-300',
+        ];
+    @endphp
+
     <div class="mb-8 p-6 rounded-xl bg-gradient-to-r from-gray-900 to-gray-800 border border-gray-700 shadow-lg">
         <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
@@ -21,62 +35,100 @@
         <div class="xl:col-span-2 p-6 rounded-xl bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 shadow-lg">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-semibold text-white">Active Work Queue</h2>
-                <span class="text-xs text-slate-400">Static oversight list</span>
+                <span class="text-xs text-slate-400">Read-only supervision list</span>
             </div>
+
+            <form method="GET" action="{{ route('supervisor.team-tasks') }}"
+                class="mb-4 grid grid-cols-1 gap-3 rounded-lg border border-slate-800 bg-slate-950/40 p-4 md:grid-cols-3">
+                <div>
+                    <label for="status" class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Status</label>
+                    <select id="status" name="status"
+                    style="background:#0f172a;color:#e5e7eb;"
+                        class="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-slate-200">
+                        @foreach ($statusOptions as $statusOption)
+                            <option value="{{ $statusOption }}" @selected($selectedStatus === $statusOption)>
+                                {{ $statusOption === 'all' ? 'All' : ucfirst($statusOption) }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div>
+                    <label for="employee_id" class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Employee</label>
+                    <select id="employee_id" name="employee_id"
+                    style="background:#0f172a;color:#e5e7eb;"
+                        class="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-slate-200">
+                        <option value="">All employees</option>
+                        @foreach ($teamEmployees as $teamEmployee)
+                            <option value="{{ $teamEmployee->id }}" @selected($selectedEmployee === (string) $teamEmployee->id)>
+                                {{ $teamEmployee->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="flex items-end gap-2">
+                    <button type="submit"
+                        class="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500">
+                        Apply Filters
+                    </button>
+                    <a href="{{ route('supervisor.team-tasks') }}"
+                        class="rounded-lg border border-slate-700 px-4 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-800">
+                        Reset
+                    </a>
+                </div>
+            </form>
+
             <div class="overflow-hidden rounded-lg border border-gray-800">
+                <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-800 text-sm">
                     <thead class="bg-gray-900/70 text-slate-300">
                         <tr>
-                            <th class="px-4 py-3 text-left font-semibold">Task</th>
-                            <th class="px-4 py-3 text-left font-semibold">Owner</th>
-                            <th class="px-4 py-3 text-left font-semibold">Due</th>
+                            <th class="px-4 py-3 text-left font-semibold">Employee</th>
+                            <th class="px-4 py-3 text-left font-semibold">Task / Indicator</th>
+                            <th class="px-4 py-3 text-left font-semibold">Work Date</th>
                             <th class="px-4 py-3 text-left font-semibold">Status</th>
-                            <th class="px-4 py-3 text-left font-semibold">Risk</th>
+                            <th class="px-4 py-3 text-left font-semibold">Quantity</th>
+                            <th class="px-4 py-3 text-left font-semibold">Action</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-800 text-slate-200">
-                        {{-- DUMMY_DATA: replace with dynamic value --}}
-                        <tr class="hover:bg-slate-900/60">
-                            <td class="px-4 py-3 font-medium text-white">E-Bank Scanning</td>
-                            <td class="px-4 py-3">Ramon Reyes</td>
-                            <td class="px-4 py-3">Today</td>
-                            <td class="px-4 py-3">
-                                <span class="px-3 py-1 rounded-full bg-emerald-900/40 border border-emerald-700/40 text-emerald-300 text-xs font-semibold">On Track</span>
-                            </td>
-                            <td class="px-4 py-3 text-xs text-emerald-300">Low</td>
-                        </tr>
-                        {{-- DUMMY_DATA: replace with dynamic value --}}
-                        <tr class="hover:bg-slate-900/60">
-                            <td class="px-4 py-3 font-medium text-white">Document Indexing Review</td>
-                            <td class="px-4 py-3">Paula Dizon</td>
-                            <td class="px-4 py-3">Tomorrow</td>
-                            <td class="px-4 py-3">
-                                <span class="px-3 py-1 rounded-full bg-blue-900/40 border border-blue-700/40 text-blue-200 text-xs font-semibold">In Progress</span>
-                            </td>
-                            <td class="px-4 py-3 text-xs text-amber-300">Watch</td>
-                        </tr>
-                        {{-- DUMMY_DATA: replace with dynamic value --}}
-                        <tr class="hover:bg-slate-900/60">
-                            <td class="px-4 py-3 font-medium text-white">Physical Records Audit</td>
-                            <td class="px-4 py-3">Liza Mendoza</td>
-                            <td class="px-4 py-3">Fri</td>
-                            <td class="px-4 py-3">
-                                <span class="px-3 py-1 rounded-full bg-amber-900/40 border border-amber-700/40 text-amber-200 text-xs font-semibold">At Risk</span>
-                            </td>
-                            <td class="px-4 py-3 text-xs text-amber-300">Needs update</td>
-                        </tr>
-                        {{-- DUMMY_DATA: replace with dynamic value --}}
-                        <tr class="hover:bg-slate-900/60">
-                            <td class="px-4 py-3 font-medium text-white">Records Access Permission Cleanup</td>
-                            <td class="px-4 py-3">Marco Villanueva</td>
-                            <td class="px-4 py-3">Mon</td>
-                            <td class="px-4 py-3">
-                                <span class="px-3 py-1 rounded-full bg-rose-900/40 border border-rose-700/40 text-rose-200 text-xs font-semibold">Delayed</span>
-                            </td>
-                            <td class="px-4 py-3 text-xs text-rose-300">Escalation flagged</td>
-                        </tr>
+                        @forelse ($entries as $entry)
+                            @php
+                                $taskLabel = ($entry->ipcrItem->output_title ?? '—') . ' — ' . ($entry->ipcrItem->indicator_text ?? '');
+                                $status = strtolower((string) ($entry->status ?? 'draft'));
+                                $statusBadge = $statusMeta[$status] ?? 'bg-slate-800 border border-slate-700 text-slate-200';
+                            @endphp
+                            <tr class="hover:bg-slate-900/60">
+                                <td class="px-4 py-3 text-white">{{ $entry->employee->name ?? '—' }}</td>
+                                <td class="px-4 py-3 text-slate-100">{{ $taskLabel }}</td>
+                                <td class="px-4 py-3">{{ $entry->work_date ?? '—' }}</td>
+                                <td class="px-4 py-3">
+                                    <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $statusBadge }}">
+                                        {{ ucfirst($status) }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3">{{ $entry->quantity ?: '—' }}</td>
+                                <td class="px-4 py-3">
+                                    <a href="{{ route('supervisor.team-tasks.monitor', $entry) }}"
+                                        class="inline-flex items-center rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-500">
+                                        Monitor
+                                    </a>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="px-4 py-8 text-center text-sm text-slate-400">
+                                    No ORS entries found for the selected filters.
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
+                </div>
+            </div>
+            <div class="mt-4">
+                {{ $entries->links() }}
             </div>
         </div>
 

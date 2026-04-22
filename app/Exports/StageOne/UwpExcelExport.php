@@ -41,6 +41,7 @@ class UwpExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTit
 
     private array $uwp;
     private array $standards;
+    private array $sectionLabels = [];
 
     public function __construct(array $uwp, array $standards)
     {
@@ -95,8 +96,9 @@ class UwpExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTit
         $this->writeTableHeader($sheet);
 
         $currentRow = self::TABLE_START_ROW;
-        $currentRow = $this->writeSection($sheet, 'core', 'A. CORE FUNCTIONS (80%)', $currentRow);
-        $currentRow = $this->writeSection($sheet, 'support', 'B. SUPPORT FUNCTIONS (20%)', $currentRow);
+        foreach ($this->buildSectionDefinitions() as $section) {
+            $currentRow = $this->writeSection($sheet, $section['type'], $section['label'], $currentRow);
+        }
 
         $lastRow = max($currentRow - 1, self::TABLE_RATING_ROW);
 
@@ -211,10 +213,10 @@ class UwpExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTit
 
         $row = $startRow + 1;
 
-        $outputs = Arr::where(
-            $this->uwp['outputs'] ?? [],
-            fn ($r) => Str::contains(Str::lower($r['function'] ?? ''), $type)
-        );
+        $outputs = Arr::where($this->uwp['outputs'] ?? [], function ($row) use ($type) {
+            $normalized = $this->normalizeFunctionType($row['function_type'] ?? null, $row['function'] ?? null);
+            return $normalized === $type;
+        });
 
         foreach ($outputs as $output) {
             $indicators = $output['success_indicators'] ?? [];
@@ -225,9 +227,20 @@ class UwpExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTit
             $mfoStart = $row;
 
             foreach ($indicators as $indicator) {
+                $indicatorText = is_array($indicator)
+                    ? trim((string) ($indicator['text'] ?? $indicator['indicator_text'] ?? ''))
+                    : trim((string) $indicator);
+                $indicatorTargetSummary = is_array($indicator)
+                    ? trim((string) ($indicator['target_summary'] ?? ''))
+                    : '';
+                $indicatorCellText = $indicatorText;
+                if ($indicatorCellText !== '' && $indicatorTargetSummary !== '') {
+                    $indicatorCellText .= "\nTarget: {$indicatorTargetSummary}";
+                }
+
                 // PPA/MFO only on first row (merge later)
                 $sheet->setCellValue("A{$row}", '');
-                $sheet->setCellValue("B{$row}", $indicator);
+                $sheet->setCellValue("B{$row}", $indicatorCellText);
 
                 // Allotted Budget blank (locked demo)
                 $sheet->setCellValue("C{$row}", '');
@@ -236,7 +249,7 @@ class UwpExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTit
                 $stdTexts = [];
                 foreach (self::RATINGS as $rating) {
                     $col = self::STANDARDS_COLUMNS[$rating];
-                    $text = (string) ($this->formatStandards($indicator, $rating) ?? '');
+                    $text = (string) ($this->formatStandards($indicatorText, $rating) ?? '');
                     $sheet->setCellValue("{$col}{$row}", $text);
                     $sheet->getStyle("{$col}{$row}")->getAlignment()->setWrapText(true);
                     $stdTexts[] = $text;
@@ -249,7 +262,7 @@ class UwpExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTit
 
                 // Auto row height (IPCR approach)
                 $sheet->getRowDimension($row)->setRowHeight(
-                    $this->estimateRowHeight($indicator, ...$stdTexts)
+                    $this->estimateRowHeight($indicatorCellText, ...$stdTexts)
                 );
 
                 $row++;
@@ -342,12 +355,78 @@ class UwpExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTit
     {
         for ($r = $fromRow; $r <= $toRow; $r++) {
             $value = trim((string) $sheet->getCell("A{$r}")->getValue());
-            if (in_array($value, ['A. CORE FUNCTIONS (80%)', 'B. SUPPORT FUNCTIONS (20%)'], true)) {
+            if (in_array($value, $this->sectionLabels, true)) {
                 $sheet->getStyle("A{$r}:H{$r}")
                     ->getBorders()
                     ->getBottom()
                     ->setBorderStyle(Border::BORDER_THIN);
             }
         }
+    }
+
+    private function buildSectionDefinitions(): array
+    {
+        $types = [];
+        foreach ($this->uwp['outputs'] ?? [] as $output) {
+            $type = $this->normalizeFunctionType($output['function_type'] ?? null, $output['function'] ?? null);
+            $types[$type] = true;
+        }
+
+        $ordered = [];
+        foreach (['core', 'support'] as $preferred) {
+            if (isset($types[$preferred])) {
+                $ordered[] = $preferred;
+                unset($types[$preferred]);
+            }
+        }
+
+        foreach (array_keys($types) as $remaining) {
+            $ordered[] = $remaining;
+        }
+
+        $labels = [];
+        $sections = [];
+        foreach ($ordered as $index => $type) {
+            $label = $this->buildSectionLabel($type, $index);
+            $labels[] = $label;
+            $sections[] = ['type' => $type, 'label' => $label];
+        }
+
+        $this->sectionLabels = $labels;
+
+        return $sections;
+    }
+
+    private function buildSectionLabel(string $type, int $index): string
+    {
+        $prefix = chr(65 + $index);
+        $label = match ($type) {
+            'core' => 'CORE FUNCTIONS (80%)',
+            'support' => 'SUPPORT FUNCTIONS (20%)',
+            'custom' => 'CUSTOM FUNCTIONS',
+            default => strtoupper(str_replace('_', ' ', $type)) . ' FUNCTIONS',
+        };
+
+        return "{$prefix}. {$label}";
+    }
+
+    private function normalizeFunctionType(?string $type, ?string $fallback): string
+    {
+        $normalized = strtolower(trim((string) $type));
+        if (in_array($normalized, ['core', 'support', 'custom'], true)) {
+            return $normalized;
+        }
+
+        $fallbackText = strtolower(trim((string) $fallback));
+        if ($fallbackText !== '') {
+            if (Str::contains($fallbackText, 'support')) {
+                return 'support';
+            }
+            if (Str::contains($fallbackText, 'core')) {
+                return 'core';
+            }
+        }
+
+        return 'custom';
     }
 }

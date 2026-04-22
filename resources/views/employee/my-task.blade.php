@@ -5,11 +5,6 @@
 
         <div>
             <h1 class="mt-1 text-2xl font-bold text-white">My Tasks</h1>
-            <p class="mt-1 text-sm text-gray-400">
-                Read-only mirror of ORS entries.
-                <span class="block">Tasks are created and submitted in ORS.</span>
-                <span class="block">This page mirrors ORS status and declared quantity only.</span>
-            </p>
         </div>
 
         <div class="flex flex-wrap gap-3">
@@ -19,6 +14,7 @@
                 <option value="draft" class="bg-gray-700">Draft</option>
                 <option value="recording" class="bg-gray-700">Recording</option>
                 <option value="submitted" class="bg-gray-700">Submitted</option>
+                <option value="rated" class="bg-gray-700">Rated</option>
                 <option value="missing" class="bg-gray-700">Missing / Overdue</option>
                 <option value="returned" class="bg-gray-700">Returned</option>
             </select>
@@ -38,7 +34,7 @@
                             <th class="px-4 py-3 text-left font-medium text-white">Task</th>
                             <th class="px-4 py-3 text-left font-medium text-white">Date</th>
                             <th class="px-4 py-3 text-left font-medium text-white">Status</th>
-                            <th class="px-4 py-3 text-left font-medium text-white">Output State</th>
+                            <th class="px-4 py-3 text-left font-medium text-white">Evidence</th>
                             <th class="px-4 py-3 text-left font-medium text-white">Quantity (ORS)</th>
                             <th class="px-4 py-3 text-left font-medium text-white">Action</th>
                         </tr>
@@ -82,7 +78,7 @@
                         <div class="grid gap-4 md:grid-cols-2">
                             <div>
                                 <p class="text-xs uppercase tracking-wide text-gray-500">Employee</p>
-                                <p class="text-sm font-medium text-white">Ramon Reyes</p>
+                                <p class="text-sm font-medium text-white">{{ $employeeName ?? 'Ramon Reyes' }}</p>
                             </div>
                             <div>
                                 <p class="text-xs uppercase tracking-wide text-gray-500">Task / Indicator</p>
@@ -97,10 +93,6 @@
                                 <p id="mvDate" class="text-sm font-medium text-white">--</p>
                             </div>
                             <div>
-                                <p class="text-xs uppercase tracking-wide text-gray-500">Client Request ID</p>
-                                <p id="mvRequestId" class="text-sm font-medium text-white">--</p>
-                            </div>
-                            <div>
                                 <p class="text-xs uppercase tracking-wide text-gray-500">Status</p>
                                 <p id="mvStatus" class="text-sm font-medium text-white">--</p>
                             </div>
@@ -109,16 +101,30 @@
                                 <p id="mvOutputState" class="text-sm font-medium text-white">--</p>
                             </div>
                             <div>
-                                <p class="text-xs uppercase tracking-wide text-gray-500">Output Type</p>
-                                <p id="mvOutputType" class="text-sm font-medium text-white">--</p>
-                            </div>
-                            <div>
                                 <p class="text-xs uppercase tracking-wide text-gray-500">Quantity (ORS)</p>
                                 <p id="mvQuantity" class="text-sm font-medium text-white">--</p>
                             </div>
                             <div>
                                 <p class="text-xs uppercase tracking-wide text-gray-500">Evidence</p>
-                                <p id="mvEvidence" class="text-sm font-medium text-white">--</p>
+                                <div class="flex items-center gap-2">
+                                    <p id="mvEvidence" class="text-sm font-medium text-white">--</p>
+                                    <button id="mvViewEvidenceBtn"
+                                        type="button"
+                                        class="hidden inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 text-gray-200 transition hover:bg-slate-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4"
+                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M2.458 12C3.732 7.943 7.523 5 12 5
+                                                   c4.477 0 8.268 2.943 9.542 7
+                                                   -1.274 4.057-5.065 7-9.542 7
+                                                   -4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                    </button>
+                                </div>
                                 <p id="mvEvidenceFile" class="mt-1 text-xs text-gray-400">--</p>
                             </div>
                             <div>
@@ -174,11 +180,11 @@
                             class="rounded-lg border border-gray-600 px-4 py-2 text-sm font-medium text-gray-200 transition hover:bg-gray-800">
                             Close
                         </button>
-                        <a href="{{ route('employee.ors.export.pdf') }}" id="exportOrsBtn"
+                        <a href="{{ route('employee.ors.export.pdf') }}"
+                            id="exportOrsBtn"
                             title="Export available only after supervisor validation"
-                            class="pointer-events-none cursor-not-allowed rounded-lg border border-gray-600 px-4 py-2 text-sm font-medium text-gray-200 opacity-50"
-                            aria-disabled="true">
-                            Export ORS
+                            class="rounded-lg border border-gray-600 px-4 py-2 text-sm font-medium text-gray-200 opacity-50 cursor-not-allowed pointer-events-none">
+                                Preview
                         </a>
                         <a href="{{ route('employee.ors') }}"
                             class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-500">
@@ -189,106 +195,126 @@
             </div>
         </div>
 
+        <div id="evidence-preview-modal"
+            class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 px-4 py-6">
+            <div class="flex max-h-[90vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl border border-gray-700 bg-gray-900 shadow-xl">
+                <div class="flex items-center justify-between border-b border-gray-700 px-5 py-3">
+                    <div class="flex items-center gap-3">
+                        <div id="evFileIcon"
+                            class="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-800 text-gray-200">
+                        </div>
+                        <div>
+                            <p id="evFileName" class="text-sm font-semibold text-white">Evidence</p>
+                            <p id="evFileMeta" class="text-xs text-gray-400">--</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button id="evZoomOut"
+                            class="rounded-lg border border-gray-700 bg-gray-800 px-3 py-1.5 text-xs font-semibold text-gray-200 hover:bg-gray-700">
+                            -
+                        </button>
+                        <button id="evZoomReset"
+                            class="rounded-lg border border-gray-700 bg-gray-800 px-3 py-1.5 text-xs font-semibold text-gray-200 hover:bg-gray-700">
+                            100%
+                        </button>
+                        <button id="evZoomIn"
+                            class="rounded-lg border border-gray-700 bg-gray-800 px-3 py-1.5 text-xs font-semibold text-gray-200 hover:bg-gray-700">
+                            +
+                        </button>
+
+                        <a id="evDownloadBtn"
+                            class="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-500"
+                            href="#"
+                            target="_blank"
+                            rel="noopener">
+                            Download
+                        </a>
+
+                        <button id="closeEvidencePreview"
+                            class="ml-2 inline-flex h-9 w-9 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white">
+                            x
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid min-h-0 flex-1 md:grid-cols-[18rem_minmax(0,1fr)]">
+                    <div class="overflow-y-auto border-b border-gray-700 bg-gray-900/70 p-4 md:border-b-0 md:border-r">
+                        <p class="text-xs uppercase tracking-wide text-gray-500">Evidence Files</p>
+                        <div id="evEvidenceList" class="mt-3 space-y-2">
+                            <p class="text-sm text-gray-400">No evidence found.</p>
+                        </div>
+                    </div>
+
+                    <div class="min-h-0 bg-black">
+                        <div id="evidencePreviewWrapper"
+                            class="relative flex h-[70vh] items-center justify-center overflow-auto bg-black">
+                            <img id="evidenceImage"
+                                class="hidden max-h-full max-w-full origin-center object-contain transition-transform duration-200 ease-out"
+                                alt="Evidence preview" />
+
+                            <iframe id="evidenceIframe"
+                                class="hidden h-full w-full border-0 bg-black"
+                                allowfullscreen></iframe>
+
+                            <div id="evidenceNoPreview"
+                                class="hidden text-center text-slate-400">
+                                <p class="text-sm font-medium">Preview not available for this file type.</p>
+                                <p class="mt-2 text-xs">Use the Download button to open the document.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <script>
             (function () {
-                const tasks = [
-                    {
-                        id: 'task-jan-02',
-                        title: 'Same-day verification of OTC transactions',
-                        date: '2026-01-02',
-                        requestId: 'REQ-2026-002',
-                        uwpOutputId: 'otc_processing',
-                        uwpOutputLabel: 'Processing of Over-the-Counter Revenue Transactions',
-                        output: 'Official Receipt (OR)',
-                        quantity: '12 transactions',
-                        state: 'submitted',
-                        durationMs: 2 * 60 * 60 * 1000,
-                        startTime: null,
-                        output_state: 'submitted',
-                        evidenceRequired: true,
-                        evidenceAttached: true,
-                        evidenceFileName: 'REQ-2026-002_OR.pdf',
-                        evidenceUploadedAt: new Date('2026-01-02T10:15:00'),
-                        submittedAt: new Date('2026-01-02T10:15:00'),
-                        supervisorName: 'Carlo D. Beray',
-                        supervisorQuality: '5',
-                        supervisorTimeliness: '5',
-                        supervisorRemarks: 'All Goods',
-                        notes: '--',
-                    },
-                    {
-                        id: 'task-jan-04',
-                        title: 'All e-bank transactions scanned and encoded daily',
-                        date: '2026-01-04',
-                        requestId: 'REQ-2026-004',
-                        uwpOutputId: 'ebank_scanning',
-                        uwpOutputLabel: 'E-Bank Scanning and Encoding of Revenue Transactions',
-                        output: 'Bank Statement Form (BSF-01)',
-                        quantity: '1 daily batch',
-                        state: 'submitted',
-                        durationMs: 90 * 60 * 1000,
-                        startTime: null,
-                        output_state: 'submitted',
-                        evidenceRequired: true,
-                        evidenceAttached: true,
-                        evidenceFileName: 'REQ-2026-004_BSF-01.pdf',
-                        evidenceUploadedAt: new Date('2026-01-04T15:20:00'),
-                        submittedAt: new Date('2026-01-04T15:20:00'),
-                        supervisorName: 'Carlo D. Beray',
-                        supervisorQuality: '5',
-                        supervisorTimeliness: '5',
-                        supervisorRemarks: 'All Goods',
-                        notes: '--',
-                    },
-                    {
-                        id: 'task-jan-05',
-                        title: 'OR validation completed daily',
-                        date: '2026-01-05',
-                        requestId: 'REQ-2026-005',
-                        uwpOutputId: 'otc_processing',
-                        uwpOutputLabel: 'Processing of Over-the-Counter Revenue Transactions',
-                        output: 'Official Receipt (OR)',
-                        quantity: '6 receipts validated',
-                        state: 'recording',
-                        durationMs: 18 * 60 * 1000,
-                        startTime: null,
-                        output_state: 'none',
-                        evidenceRequired: true,
-                        evidenceAttached: false,
-                        evidenceFileName: null,
-                        evidenceUploadedAt: null,
-                        submittedAt: null,
-                        supervisorName: null,
-                        supervisorQuality: null,
-                        supervisorTimeliness: null,
-                        supervisorRemarks: null,
-                        notes: 'Active timer',
-                    },
-                    {
-                        id: 'task-jan-06',
-                        title: 'Retrieval logs maintained for audit purposes',
-                        date: '2026-01-06',
-                        requestId: 'REQ-2026-006',
-                        uwpOutputId: 'records_maintenance',
-                        uwpOutputLabel: 'Maintenance of revenue records and filing system',
-                        output: 'Records Inventory Checklist',
-                        quantity: '--',
-                        state: 'missing',
-                        durationMs: 0,
-                        startTime: null,
-                        output_state: 'none',
-                        evidenceRequired: true,
-                        evidenceAttached: false,
-                        evidenceFileName: null,
-                        evidenceUploadedAt: null,
-                        submittedAt: null,
-                        supervisorName: null,
-                        supervisorQuality: null,
-                        supervisorTimeliness: null,
-                        supervisorRemarks: null,
-                        notes: 'No ORS entry submitted for the day',
-                    },
-                ];
+                const rawTasks = @json($orsEntries ?? []);
+                const evidencesEndpointTemplate = @json(route('stage2.my_tasks.evidences', ['orsEntry' => '__ENTRY__']));
+                const exportOrsBaseUrl = @json(route('employee.ors.export.pdf'));
+
+                const tasks = Array.isArray(rawTasks)
+                    ? rawTasks.map((entry) => {
+                        const status = String(entry?.status || 'draft').toLowerCase();
+                        const submittedAt = entry?.submitted_at ? new Date(entry.submitted_at) : null;
+                        const startedAt = entry?.started_at ? new Date(entry.started_at) : null;
+                        const stoppedAt = entry?.stopped_at ? new Date(entry.stopped_at) : null;
+                        const evidences = Array.isArray(entry?.evidences) ? entry.evidences : [];
+                        const firstEvidence = evidences.length ? evidences[0] : null;
+                        const firstEvidenceUploadedAt = firstEvidence?.uploaded_at ? new Date(firstEvidence.uploaded_at) : null;
+
+                        return {
+                            id: String(entry?.id ?? ''),
+                            title: String(entry?.ipcr_item?.indicator_text || '--'),
+                            date: String(entry?.work_date || ''),
+                            uwpOutputLabel: String(entry?.ipcr_item?.output_title || '--'),
+                            quantity: entry?.quantity || '--',
+                            state: status,
+                            durationMs: Number(entry?.total_seconds || 0) * 1000,
+                            startTime: startedAt && !Number.isNaN(startedAt.getTime()) ? startedAt : null,
+                            stoppedAt: stoppedAt && !Number.isNaN(stoppedAt.getTime()) ? stoppedAt : null,
+                            output_state: (status === 'submitted' || status === 'rated') ? 'submitted' : 'none',
+                            hasEvidence: evidences.length > 0,
+                            evidenceCount: evidences.length,
+                            evidenceFileName: firstEvidence?.file_name || null,
+                            evidenceFilePath: firstEvidence?.file_path || null,
+                            evidenceMimeType: firstEvidence?.mime_type || null,
+                            evidenceUploadedAt: firstEvidenceUploadedAt && !Number.isNaN(firstEvidenceUploadedAt.getTime())
+                                ? firstEvidenceUploadedAt
+                                : null,
+                            submittedAt: submittedAt && !Number.isNaN(submittedAt.getTime()) ? submittedAt : null,
+                            notes: entry?.notes || '--',
+                            monitoring: entry?.monitoring ? {
+                                supervisor_name: entry.monitoring?.supervisor?.name || '--',
+                                quality_rating: entry.monitoring?.quality_rating ?? null,
+                                timeliness_rating: entry.monitoring?.timeliness_rating ?? null,
+                                remarks: entry.monitoring?.remarks || null,
+                                rated_at: entry.monitoring?.rated_at || null,
+                            } : null,
+                        };
+                    })
+                    : [];
 
                 const tbody = document.getElementById('myTasksTbody');
                 const statusFilter = document.getElementById('myTasksStatusFilter');
@@ -297,14 +323,33 @@
                 const modal = document.getElementById('task-view-modal');
                 const closeTopBtn = document.getElementById('closeTaskViewTop');
                 const closeBottomBtn = document.getElementById('closeTaskViewBottom');
+                const exportOrsBtn = document.getElementById('exportOrsBtn');
+                const viewEvidenceBtn = document.getElementById('mvViewEvidenceBtn');
+
+                const evidenceModal = document.getElementById('evidence-preview-modal');
+                const evFileIcon = document.getElementById('evFileIcon');
+                const evFileName = document.getElementById('evFileName');
+                const evFileMeta = document.getElementById('evFileMeta');
+                const evEvidenceList = document.getElementById('evEvidenceList');
+                const evidenceImage = document.getElementById('evidenceImage');
+                const evidenceIframe = document.getElementById('evidenceIframe');
+                const evidenceNoPreview = document.getElementById('evidenceNoPreview');
+                const evDownloadBtn = document.getElementById('evDownloadBtn');
+                const evZoomIn = document.getElementById('evZoomIn');
+                const evZoomOut = document.getElementById('evZoomOut');
+                const evZoomReset = document.getElementById('evZoomReset');
+                const closeEvidencePreview = document.getElementById('closeEvidencePreview');
+
+                let currentZoom = 1;
+                let currentEvidenceUrl = null;
+                let currentEvidenceDownloadUrl = null;
+                let selectedEvidenceId = null;
 
                 const fields = {
                     task: document.getElementById('mvTask'),
                     mfo: document.getElementById('mvMfo'),
                     date: document.getElementById('mvDate'),
-                    requestId: document.getElementById('mvRequestId'),
                     status: document.getElementById('mvStatus'),
-                    outputType: document.getElementById('mvOutputType'),
                     outputState: document.getElementById('mvOutputState'),
                     quantity: document.getElementById('mvQuantity'),
                     evidence: document.getElementById('mvEvidence'),
@@ -339,6 +384,20 @@
                     });
                 }
 
+                function formatFileSize(bytes) {
+                    const value = Number(bytes || 0);
+                    if (!Number.isFinite(value) || value <= 0) return '--';
+                    if (value < 1024) return `${Math.round(value)} B`;
+                    if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KB`;
+                    return `${(value / (1024 * 1024)).toFixed(1)} MB`;
+                }
+
+                function updateBodyScrollLock() {
+                    const taskModalOpen = modal && !modal.classList.contains('hidden');
+                    const previewModalOpen = evidenceModal && !evidenceModal.classList.contains('hidden');
+                    document.body.classList.toggle('overflow-hidden', Boolean(taskModalOpen || previewModalOpen));
+                }
+
                 function formatDuration(ms) {
                     const totalSeconds = Math.max(0, Math.floor((ms || 0) / 1000));
                     const hours = Math.floor(totalSeconds / 3600);
@@ -346,18 +405,75 @@
                     return `${hours}h ${minutes}m`;
                 }
 
+                function evidencesEndpoint(entryId) {
+                    return evidencesEndpointTemplate.replace('__ENTRY__', encodeURIComponent(String(entryId || '')));
+                }
+
+                function fileTypeInfo(mimeType, fileName) {
+                    const mime = String(mimeType || '').toLowerCase();
+                    const name = String(fileName || '').toLowerCase();
+                    const ext = name.includes('.') ? name.split('.').pop() : '';
+
+                    const isPdf = mime === 'application/pdf' || ext === 'pdf';
+                    const isImage = mime.startsWith('image/') || ['jpg', 'jpeg', 'png'].includes(ext);
+                    const isDoc = ['doc', 'docx'].includes(ext)
+                        || mime === 'application/msword'
+                        || mime === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+                    const isXls = ext === 'xlsx'
+                        || mime === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+
+                    if (isPdf) return { type: 'pdf', label: 'PDF', previewable: true };
+                    if (isImage) return { type: 'image', label: 'Image', previewable: true };
+                    if (isDoc) return { type: 'doc', label: 'Document', previewable: false };
+                    if (isXls) return { type: 'xls', label: 'Spreadsheet', previewable: false };
+
+                    return { type: 'doc', label: 'Document', previewable: false };
+                }
+
+                function setEvIcon(type) {
+                    if (!evFileIcon) return;
+                    if (type === 'pdf') {
+                        evFileIcon.textContent = 'PDF';
+                        return;
+                    }
+                    if (type === 'image') {
+                        evFileIcon.textContent = 'IMG';
+                        return;
+                    }
+                    if (type === 'xls') {
+                        evFileIcon.textContent = 'XLS';
+                        return;
+                    }
+                    evFileIcon.textContent = 'DOC';
+                }
+
+                function applyZoom() {
+                    if (evZoomReset) evZoomReset.textContent = `${Math.round(currentZoom * 100)}%`;
+                    if (!evidenceImage || evidenceImage.classList.contains('hidden')) return;
+                    evidenceImage.style.transform = `scale(${currentZoom})`;
+                }
+
+                function setZoomControlsEnabled(previewable) {
+                    const zoomButtons = [evZoomIn, evZoomOut, evZoomReset];
+                    zoomButtons.forEach((btn) => {
+                        if (!btn) return;
+                        btn.classList.toggle('hidden', !previewable);
+                        btn.disabled = !previewable;
+                    });
+                }
+
                 function statusLabel(state) {
                     switch (state) {
                         case 'submitted':
                             return 'Submitted (Locked)';
+                        case 'rated':
+                            return 'Rated (Locked)';
+                        case 'draft':
+                            return 'Draft (Stopped)';
                         case 'recording':
                             return 'Recording';
                         case 'paused':
                             return 'Paused';
-                        case 'draft':
-                            return 'Draft';
-                        case 'missing':
-                            return 'Missing / Overdue';
                         default:
                             return '--';
                     }
@@ -373,14 +489,14 @@
                 function statusChipClasses(state) {
                     switch (state) {
                         case 'submitted':
-                            return 'bg-violet-900 text-violet-300';
+                            return 'bg-blue-900 text-blue-300';
+                        case 'rated':
+                            return 'bg-cyan-900 text-cyan-300';
                         case 'recording':
                         case 'paused':
                             return 'bg-amber-900 text-amber-300';
                         case 'draft':
                             return 'bg-slate-700 text-slate-200';
-                        case 'missing':
-                            return 'bg-red-900 text-red-300';
                         default:
                             return 'bg-slate-700 text-slate-200';
                     }
@@ -444,8 +560,8 @@
                                 </span>
                             </td>
                             <td class="px-4 py-3">
-                                <span class="text-xs font-medium ${task.state === 'missing' ? 'text-red-300' : (task.output_state === 'submitted' ? 'text-emerald-300' : 'text-amber-300')}">
-                                    ${outputStateLabel(task)}
+                                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${task.hasEvidence ? 'bg-emerald-900 text-emerald-300' : 'bg-slate-700 text-slate-200'}">
+                                    ${task.hasEvidence ? 'Attached' : 'None'}
                                 </span>
                             </td>
                             <td class="px-4 py-3 text-gray-300">${quantityLabel(task.quantity)}</td>
@@ -470,6 +586,36 @@
                     if (fields.supRemarks) fields.supRemarks.textContent = '--';
                 }
 
+                function setExportButton(task) {
+                    if (!exportOrsBtn) return;
+
+                    const canExport = Boolean(
+                        task &&
+                        task.id &&
+                        (
+                            String(task.state || '').toLowerCase() === 'rated' ||
+                            task?.monitoring?.rated_at
+                        )
+                    );
+
+                    if (!canExport) {
+                        exportOrsBtn.classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none', 'border-gray-600', 'text-gray-200');
+                        exportOrsBtn.classList.remove('border-emerald-600', 'bg-emerald-600', 'text-white', 'hover:bg-emerald-500');
+                        exportOrsBtn.href = '#';
+                        exportOrsBtn.title = 'Export available only after supervisor validation';
+                        exportOrsBtn.removeAttribute('target');
+                        exportOrsBtn.removeAttribute('rel');
+                        return;
+                    }
+
+                    exportOrsBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none', 'border-gray-600', 'text-gray-200');
+                    exportOrsBtn.classList.add('border-emerald-600', 'bg-emerald-600', 'text-white', 'hover:bg-emerald-500');
+                    exportOrsBtn.href = `${exportOrsBaseUrl}?ors_entry_id=${encodeURIComponent(task.id)}`;
+                    exportOrsBtn.title = 'Export ORS (PDF)';
+                    exportOrsBtn.setAttribute('target', '_blank');
+                    exportOrsBtn.setAttribute('rel', 'noopener');
+                }
+
                 function openTaskViewModal(taskId) {
                     const task = tasks.find((item) => item.id === taskId);
                     if (!task || !modal) return;
@@ -477,57 +623,305 @@
                     fields.task.textContent = task.title || '--';
                     fields.mfo.textContent = task.uwpOutputLabel || '--';
                     fields.date.textContent = formatDateHuman(task.date);
-                    fields.requestId.textContent = task.requestId && String(task.requestId).trim() ? task.requestId : '--';
                     fields.status.textContent = statusLabel(task.state);
-                    fields.outputType.textContent = task.output || '--';
                     fields.outputState.textContent = outputStateLabel(task);
                     fields.quantity.textContent = quantityLabel(task.quantity);
 
-                    if (task.evidenceAttached) {
+                    if (task.hasEvidence) {
                         fields.evidence.textContent = 'Attached';
-                        fields.evidenceFile.textContent = `${task.evidenceFileName || '--'}${task.evidenceUploadedAt ? ` (${formatDateTime(task.evidenceUploadedAt)})` : ''}`;
+                        fields.evidenceFile.textContent = task.evidenceCount > 1
+                            ? `${task.evidenceCount} files attached`
+                            : (task.evidenceFileName || '--');
+                        if (viewEvidenceBtn) {
+                            viewEvidenceBtn.classList.remove('hidden');
+                            viewEvidenceBtn.dataset.entryId = task.id;
+                            viewEvidenceBtn.onclick = () => openEvidencePreview(task);
+                        }
                     } else {
                         fields.evidence.textContent = 'None';
                         fields.evidenceFile.textContent = '--';
+                        if (viewEvidenceBtn) {
+                            viewEvidenceBtn.classList.add('hidden');
+                            delete viewEvidenceBtn.dataset.entryId;
+                            viewEvidenceBtn.onclick = null;
+                        }
                     }
 
                     fields.submittedAt.textContent = formatDateTime(task.submittedAt);
                     fields.duration.textContent = task.durationMs || task.startTime ? formatDuration(computeElapsed(task)) : '--';
                     fields.notes.textContent = task.notes || '--';
-
-                    const isSubmitted = task.state === 'submitted';
-                    if (fields.supervisorSection) {
-                        fields.supervisorSection.classList.toggle('hidden', !isSubmitted);
+                    resetSupervisorMonitoring();
+                    const mon = task.monitoring;
+                    if (mon && (mon.quality_rating || mon.timeliness_rating || mon.remarks || mon.rated_at)) {
+                        if (fields.supervisorSection) fields.supervisorSection.classList.remove('hidden');
+                        if (fields.supName) fields.supName.textContent = mon.supervisor_name || '--';
+                        if (fields.supQuality) fields.supQuality.textContent = mon.quality_rating ? String(mon.quality_rating) : '--';
+                        if (fields.supTimeliness) fields.supTimeliness.textContent = mon.timeliness_rating ? String(mon.timeliness_rating) : '--';
+                        if (fields.supRemarks) fields.supRemarks.textContent = (mon.remarks && String(mon.remarks).trim()) ? mon.remarks : '--';
                     }
-
-                    if (isSubmitted) {
-                        if (fields.supName) fields.supName.textContent = task.supervisorName || '--';
-                        if (fields.supQuality) fields.supQuality.textContent = task.supervisorQuality ?? '--';
-                        if (fields.supTimeliness) fields.supTimeliness.textContent = task.supervisorTimeliness ?? '--';
-                        if (fields.supRemarks) fields.supRemarks.textContent = task.supervisorRemarks || '--';
-                    } else {
-                        resetSupervisorMonitoring();
-                    }
+                    setExportButton(task);
 
                     modal.classList.remove('hidden');
                     modal.classList.add('flex');
-                    document.body.classList.add('overflow-hidden');
+                    updateBodyScrollLock();
                 }
 
                 function closeTaskViewModal() {
                     if (!modal) return;
+                    if (evidenceModal && !evidenceModal.classList.contains('hidden')) {
+                        closeEvidenceModal();
+                    }
                     resetSupervisorMonitoring();
                     if (fields.mfo) fields.mfo.textContent = '--';
-                    if (fields.requestId) fields.requestId.textContent = '--';
+                    if (viewEvidenceBtn) {
+                        viewEvidenceBtn.classList.add('hidden');
+                        delete viewEvidenceBtn.dataset.entryId;
+                        viewEvidenceBtn.onclick = null;
+                    }
+                    setExportButton(null);
                     modal.classList.add('hidden');
                     modal.classList.remove('flex');
-                    document.body.classList.remove('overflow-hidden');
+                    updateBodyScrollLock();
+                }
+
+                function setEvidenceListMessage(message) {
+                    if (!evEvidenceList) return;
+                    evEvidenceList.innerHTML = `<p class="text-sm text-gray-400">${message}</p>`;
+                }
+
+                function selectEvidence(evidence, allEvidences = []) {
+                    if (!evidence) return;
+
+                    selectedEvidenceId = String(evidence.id || '');
+                    currentEvidenceUrl = evidence.view_url || null;
+                    currentEvidenceDownloadUrl = evidence.download_url || null;
+
+                    const info = fileTypeInfo(evidence.mime_type, evidence.file_name);
+                    const mime = String(evidence.mime_type || '').toLowerCase();
+                    const isImagePreview = Boolean(currentEvidenceUrl) && (mime.startsWith('image/') || info.type === 'image');
+                    const isPdfPreview = Boolean(currentEvidenceUrl) && (mime === 'application/pdf' || info.type === 'pdf');
+
+                    setEvIcon(info.type);
+                    setZoomControlsEnabled(isImagePreview);
+
+                    if (evFileName) {
+                        evFileName.textContent = evidence.file_name || 'Evidence';
+                    }
+
+                    if (evFileMeta) {
+                        const uploadedText = evidence.uploaded_at ? ` | ${formatDateTime(evidence.uploaded_at)}` : '';
+                        const sizeText = formatFileSize(evidence.file_size);
+                        evFileMeta.textContent = `${info.label}${sizeText !== '--' ? ` | ${sizeText}` : ''}${uploadedText}`;
+                    }
+
+                    if (evDownloadBtn) {
+                        evDownloadBtn.href = currentEvidenceDownloadUrl || '#';
+                        evDownloadBtn.setAttribute('target', '_blank');
+                        evDownloadBtn.setAttribute('rel', 'noopener');
+                    }
+
+                    if (evidenceImage) {
+                        evidenceImage.classList.add('hidden');
+                        evidenceImage.removeAttribute('src');
+                        evidenceImage.style.transform = 'scale(1)';
+                    }
+
+                    if (evidenceIframe) {
+                        evidenceIframe.classList.add('hidden');
+                        evidenceIframe.src = 'about:blank';
+                    }
+
+                    if (evidenceNoPreview) {
+                        evidenceNoPreview.classList.add('hidden');
+                    }
+
+                    if (evidenceImage && isImagePreview) {
+                        evidenceImage.src = currentEvidenceUrl;
+                        evidenceImage.classList.remove('hidden');
+                    } else if (evidenceIframe && isPdfPreview) {
+                        evidenceIframe.src = currentEvidenceUrl;
+                        evidenceIframe.classList.remove('hidden');
+                        evidenceIframe.removeAttribute('aria-hidden');
+                    } else if (evidenceNoPreview) {
+                        evidenceNoPreview.classList.remove('hidden');
+                    }
+
+                    evEvidenceList?.querySelectorAll('button[data-evidence-id]').forEach((btn) => {
+                        const isActive = btn.dataset.evidenceId === selectedEvidenceId;
+                        btn.classList.toggle('border-blue-500/70', isActive);
+                        btn.classList.toggle('bg-blue-500/10', isActive);
+                        btn.classList.toggle('border-gray-700', !isActive);
+                        btn.classList.toggle('bg-gray-800/70', !isActive);
+                    });
+
+                    currentZoom = 1;
+                    applyZoom();
+                }
+
+                function renderEvidenceList(evidences) {
+                    if (!evEvidenceList) return;
+
+                    evEvidenceList.innerHTML = '';
+
+                    evidences.forEach((evidence) => {
+                        const info = fileTypeInfo(evidence.mime_type, evidence.file_name);
+                        const button = document.createElement('button');
+                        button.type = 'button';
+                        button.dataset.evidenceId = String(evidence.id || '');
+                        button.className =
+                            'w-full rounded-lg border border-gray-700 bg-gray-800/70 px-3 py-2 text-left transition hover:border-blue-500/60 hover:bg-gray-800';
+
+                        const header = document.createElement('div');
+                        header.className = 'flex items-center gap-2';
+
+                        const typeBadge = document.createElement('span');
+                        typeBadge.className = 'inline-flex min-w-[2.2rem] justify-center rounded border border-gray-600 bg-gray-900 px-1.5 py-0.5 text-[10px] font-semibold text-gray-300';
+                        typeBadge.textContent = info.type === 'pdf'
+                            ? 'PDF'
+                            : (info.type === 'image' ? 'IMG' : (info.type === 'xls' ? 'XLS' : 'DOC'));
+
+                        const title = document.createElement('p');
+                        title.className = 'truncate text-sm font-medium text-white';
+                        title.textContent = evidence.file_name || 'Unnamed evidence';
+
+                        const meta = document.createElement('p');
+                        meta.className = 'mt-1 text-xs text-gray-400';
+                        const sizeText = formatFileSize(evidence.file_size);
+                        const uploadedText = evidence.uploaded_at ? formatDateTime(evidence.uploaded_at) : '--';
+                        const parts = [info.label];
+                        if (sizeText !== '--') parts.push(sizeText);
+                        if (uploadedText !== '--') parts.push(uploadedText);
+                        meta.textContent = parts.join(' | ');
+
+                        header.appendChild(typeBadge);
+                        header.appendChild(title);
+                        button.appendChild(header);
+                        button.appendChild(meta);
+                        button.addEventListener('click', () => selectEvidence(evidence, evidences));
+
+                        evEvidenceList.appendChild(button);
+                    });
+                }
+
+                async function openEvidencePreview(task) {
+                    if (!task?.id || !evidenceModal) return;
+
+                    evidenceModal.classList.remove('hidden');
+                    evidenceModal.classList.add('flex');
+                    updateBodyScrollLock();
+
+                    setEvidenceListMessage('Loading evidence...');
+                    selectedEvidenceId = null;
+                    currentEvidenceUrl = null;
+                    currentEvidenceDownloadUrl = null;
+
+                    if (evFileName) evFileName.textContent = 'Evidence';
+                    if (evFileMeta) evFileMeta.textContent = '--';
+                    if (evFileIcon) evFileIcon.textContent = '--';
+
+                    if (evidenceImage) {
+                        evidenceImage.removeAttribute('src');
+                        evidenceImage.classList.add('hidden');
+                        evidenceImage.style.transform = 'scale(1)';
+                    }
+
+                    if (evidenceIframe) {
+                        evidenceIframe.src = 'about:blank';
+                        evidenceIframe.classList.add('hidden');
+                        evidenceIframe.setAttribute('aria-hidden', 'true');
+                    }
+
+                    if (evidenceNoPreview) {
+                        evidenceNoPreview.classList.add('hidden');
+                    }
+
+                    if (evDownloadBtn) {
+                        evDownloadBtn.href = '#';
+                        evDownloadBtn.setAttribute('target', '_blank');
+                        evDownloadBtn.setAttribute('rel', 'noopener');
+                    }
+
+                    currentZoom = 1;
+                    applyZoom();
+                    setZoomControlsEnabled(false);
+
+                    try {
+                        const response = await fetch(evidencesEndpoint(task.id), {
+                            headers: {
+                                Accept: 'application/json',
+                            },
+                        });
+
+                        const payload = await response.json().catch(() => ([]));
+                        if (!response.ok) {
+                            throw new Error(payload?.message || 'Failed to load evidence.');
+                        }
+
+                        const evidences = Array.isArray(payload) ? payload : [];
+                        if (!evidences.length) {
+                            setEvidenceListMessage('No evidence found.');
+                            if (evidenceNoPreview) {
+                                evidenceNoPreview.classList.remove('hidden');
+                            }
+                            return;
+                        }
+
+                        renderEvidenceList(evidences);
+                        selectEvidence(evidences[0], evidences);
+                    } catch (error) {
+                        setEvidenceListMessage('Unable to load evidence.');
+                        if (evidenceNoPreview) {
+                            evidenceNoPreview.classList.remove('hidden');
+                        }
+                        alert(error?.message || 'Failed to load evidence.');
+                    }
+                }
+
+                function closeEvidenceModal() {
+                    if (!evidenceModal) return;
+
+                    currentEvidenceUrl = null;
+                    currentEvidenceDownloadUrl = null;
+                    selectedEvidenceId = null;
+                    currentZoom = 1;
+                    applyZoom();
+
+                    if (evEvidenceList) {
+                        evEvidenceList.innerHTML = '<p class="text-sm text-gray-400">No evidence found.</p>';
+                    }
+                    if (evidenceImage) {
+                        evidenceImage.removeAttribute('src');
+                        evidenceImage.classList.add('hidden');
+                        evidenceImage.style.transform = 'scale(1)';
+                    }
+
+                    if (evidenceIframe) {
+                        evidenceIframe.src = 'about:blank';
+                        evidenceIframe.classList.add('hidden');
+                        evidenceIframe.setAttribute('aria-hidden', 'true');
+                    }
+                    if (evidenceNoPreview) {
+                        evidenceNoPreview.classList.add('hidden');
+                    }
+                    if (evDownloadBtn) {
+                        evDownloadBtn.href = '#';
+                        evDownloadBtn.setAttribute('target', '_blank');
+                        evDownloadBtn.setAttribute('rel', 'noopener');
+                    }
+                    if (evFileName) evFileName.textContent = 'Evidence';
+                    if (evFileMeta) evFileMeta.textContent = '--';
+                    if (evFileIcon) evFileIcon.textContent = '--';
+                    setZoomControlsEnabled(false);
+
+                    evidenceModal.classList.add('hidden');
+                    evidenceModal.classList.remove('flex');
+                    updateBodyScrollLock();
                 }
 
                 tbody?.addEventListener('click', (event) => {
-                    const button = event.target.closest('button[data-task-id]');
-                    if (!button) return;
-                    openTaskViewModal(button.dataset.taskId);
+                    const detailButton = event.target.closest('button[data-task-id]');
+                    if (!detailButton) return;
+                    openTaskViewModal(detailButton.dataset.taskId);
                 });
 
                 statusFilter?.addEventListener('change', renderRows);
@@ -536,18 +930,49 @@
                 closeTopBtn?.addEventListener('click', closeTaskViewModal);
                 closeBottomBtn?.addEventListener('click', closeTaskViewModal);
 
+                evZoomIn?.addEventListener('click', () => {
+                    currentZoom = Math.min(2, currentZoom + 0.1);
+                    applyZoom();
+                });
+
+                evZoomOut?.addEventListener('click', () => {
+                    currentZoom = Math.max(0.5, currentZoom - 0.1);
+                    applyZoom();
+                });
+
+                evZoomReset?.addEventListener('click', () => {
+                    currentZoom = 1;
+                    applyZoom();
+                });
+
+                closeEvidencePreview?.addEventListener('click', closeEvidenceModal);
+
                 modal?.addEventListener('click', (event) => {
                     if (event.target === modal) {
                         closeTaskViewModal();
                     }
                 });
 
+                evidenceModal?.addEventListener('click', (event) => {
+                    if (event.target === evidenceModal) {
+                        closeEvidenceModal();
+                    }
+                });
+
                 document.addEventListener('keydown', (event) => {
-                    if (event.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
+                    if (event.key !== 'Escape') return;
+
+                    if (evidenceModal && !evidenceModal.classList.contains('hidden')) {
+                        closeEvidenceModal();
+                        return;
+                    }
+
+                    if (modal && !modal.classList.contains('hidden')) {
                         closeTaskViewModal();
                     }
                 });
 
+                setExportButton(null);
                 renderRows();
             })();
         </script>

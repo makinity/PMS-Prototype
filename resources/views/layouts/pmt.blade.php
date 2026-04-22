@@ -149,8 +149,8 @@
             $isPmtOpcrApproval = request()->routeIs('pmt.opcr');
             $isSMPOR = request()->routeIs('pmt.smpor');
             $isIPCR = request()->routeIs('pmt.ipcr');
-            $isQAR = request()->routeIs('pmt.qar.index');
-            $isDeptHeadIPCRSMPORReview = request()->routeIs('pmt.smpor-ipcr-review');
+            $isQAR = request()->routeIs('pmt.qar');
+            $isDeptHeadAccReview = request()->routeIs('pmt.acc-review');
             $isRD = request()->routeIs('pmt.rewards');
             $isIPCRCalibOVR = request()->routeIs('pmt.ipcr-calib-overview');
             $isFinalCalib = request()->routeIs('pmt.final-calib');
@@ -271,16 +271,16 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('pmt.qar.index') }}" class="sidebar-link" @if($isQAR) aria-current="page" @endif>
+                                <a href="{{ route('pmt.qar') }}" class="sidebar-link" @if($isQAR) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-user-check"></i>
                                     <span>QAR validation</span>
                                 </a>
                             </li>
 
                             <li>
-                                <a href="{{ route('pmt.smpor-ipcr-review') }}" class="sidebar-link" @if($isDeptHeadIPCRSMPORReview) aria-current="page" @endif>
+                                <a href="{{ route('pmt.acc-review') }}" class="sidebar-link" @if($isDeptHeadAccReview) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-star-half-stroke"></i>
-                                    <span>SMPOR & IPCR Review</span>
+                                    <span>Accomplishment Review</span>
                                 </a>
                             </li>
                             <li>
@@ -352,6 +352,7 @@
         @livewireScripts
     @endif
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    @include('partials.auth-snackbar')
     @stack('scripts')
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>

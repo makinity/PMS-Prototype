@@ -27,6 +27,7 @@
             $isUnitWorkPlan = request()->routeIs('dept-head.uwp');
             $isOpcr = request()->routeIs('dept-head.opcr');
             $isQar = request()->routeIs('dept-head.qar');
+            $isDeptHeadAccReview = request()->routeIs('dept-head.acc-review');
             $isSMPOR = request()->routeIs('dept-head.smpor');
             $isDeptHeadIPCRSMPORReview = request()->routeIs('dept-head.smpor-ipcr-review');
             $isIPCR = request()->routeIs('pmt.ipcr');
@@ -143,6 +144,13 @@
                             </li>
 
                             <li>
+                                <a href="{{ route('dept-head.acc-review') }}" class="sidebar-link" @if($isDeptHeadAccReview) aria-current="page" @endif>
+                                    <i class="sidebar-icon fa-solid fa-star-half-stroke"></i>
+                                    <span>Accomplishment Review</span>
+                                </a>
+                            </li>
+
+                            <li>
                                 <a href="{{ route('dept-head.smpor-ipcr-review') }}" class="sidebar-link" @if($isDeptHeadIPCRSMPORReview) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-star-half-stroke"></i>
                                     <span>SMPOR & IPCR Review</span>
@@ -210,6 +218,7 @@
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
     <!-- Font Awesome -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    @include('partials.auth-snackbar')
     @stack('scripts')
 </body>
 </html>

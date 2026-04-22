@@ -2,8 +2,8 @@
 
 namespace App\Exports\StageOne;
 
-use Illuminate\Support\Arr;
-use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
+use App\Models\Ipcr;
+use App\Models\IpcrItem;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
@@ -14,6 +14,7 @@ use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTitle, WithEvents
@@ -21,30 +22,9 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
     use Exportable;
 
     private const RATINGS = [5, 4, 3, 2, 1];
-    private const BASE_ROW_HEIGHT = 22;      // minimum readable row height
-    private const LINE_HEIGHT = 14;          // per wrapped text line
-    private const CHARS_PER_LINE = 45;       // tuned for your column widths
-
-
-    private function estimateRowHeight(string ...$cells): float
-    {
-        $maxLines = 1;
-
-        foreach ($cells as $text) {
-            $text = trim((string) $text);
-            if ($text === '') {
-                continue;
-            }
-
-            // count manual line breaks + wrapped lines
-            $lines = substr_count($text, "\n") + 1;
-            $wrapped = (int) ceil(mb_strlen($text) / self::CHARS_PER_LINE);
-
-            $maxLines = max($maxLines, $lines, $wrapped);
-        }
-
-        return self::BASE_ROW_HEIGHT + ($maxLines - 1) * self::LINE_HEIGHT;
-    }
+    private const BASE_ROW_HEIGHT = 22;
+    private const LINE_HEIGHT = 14;
+    private const CHARS_PER_LINE = 45;
 
     private const STANDARDS_COLUMNS = [
         5 => 'J',
@@ -58,13 +38,16 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
     private const TABLE_SUBHEADER_ROW = 16;
     private const TABLE_START_ROW = 18;
 
-    private array $ipcr;
-    private array $standards;
+    private Ipcr $ipcr;
+    private array $groupedItems;
+    private array $targetQuantityByOutput;
+    private array $sectionLabels = [];
 
-    public function __construct(array $ipcr, array $standards)
+    public function __construct(Ipcr $ipcr)
     {
         $this->ipcr = $ipcr;
-        $this->standards = $standards;
+        $this->groupedItems = $this->groupItemsBySection();
+        $this->targetQuantityByOutput = $this->buildTargetQuantityByOutput();
     }
 
     public function array(): array
@@ -86,13 +69,10 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
             'B' => 37.89,
             'C' => 8.33,
             'D' => 9.11,
-
-            // Rating columns (Q/E/T/A) -> consistent width
             'E' => 9.0,
             'F' => 9.0,
             'G' => 9.0,
             'H' => 9.0,
-
             'I' => 9.0,
             'J' => 13.44,
             'K' => 13.0,
@@ -124,28 +104,24 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
         $this->writeTableHeader($sheet);
 
         $currentRow = self::TABLE_START_ROW;
-
-        $currentRow = $this->writeSection($sheet, 'core', 'A. CORE FUNCTIONS (80%)', $currentRow);
-        $currentRow = $this->writeSection($sheet, 'support', 'B. SUPPORT FUNCTIONS (20%)', $currentRow);
+        foreach ($this->buildSectionDefinitions() as $section) {
+            $currentRow = $this->writeSection($sheet, $section['type'], $section['label'], $currentRow);
+        }
 
         $lastRow = max($currentRow - 1, self::TABLE_SUBHEADER_ROW);
 
-
-        $sheet->getStyle("A" . self::TABLE_HEADER_ROW . ":N{$lastRow}")
+        $sheet->getStyle('A' . self::TABLE_HEADER_ROW . ":N{$lastRow}")
             ->getAlignment()
             ->setVertical(Alignment::VERTICAL_TOP)
             ->setWrapText(true);
 
-
         $this->applyVerticalBordersOnly($sheet, self::TABLE_HEADER_ROW, $lastRow);
 
-        // Keep header block boxed
-        $sheet->getStyle("A" . self::TABLE_HEADER_ROW . ":N" . self::TABLE_SUBHEADER_ROW)
+        $sheet->getStyle('A' . self::TABLE_HEADER_ROW . ':N' . self::TABLE_SUBHEADER_ROW)
             ->getBorders()
             ->getAllBorders()
             ->setBorderStyle(Border::BORDER_THIN);
 
-        // Ensure section rows have bottom border (green line feel)
         $this->applySectionRowBorders($sheet, self::TABLE_START_ROW, $lastRow);
     }
 
@@ -159,13 +135,19 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
 
     private function writeManualHeader(Worksheet $sheet): void
     {
+        $employeeName = strtoupper((string) ($this->ipcr->employee?->name ?? 'EMPLOYEE'));
+        $officeName = strtoupper((string) ($this->ipcr->office?->name ?? 'OFFICE'));
+        $periodName = strtoupper((string) ($this->ipcr->performancePeriod?->name ?? 'PERIOD'));
+        $reviewedBy = strtoupper((string) ($this->ipcr->opcr?->unitWorkPlan?->creator?->name ?? 'SUPERVISOR'));
+        $approvedBy = strtoupper((string) ($this->ipcr->office?->head?->name ?? 'DEPARTMENT HEAD'));
+
         $sheet->mergeCells('A1:N1');
         $sheet->setCellValue('A1', 'INDIVIDUAL PERFORMANCE COMMITMENT AND REVIEW (IPCR)');
 
         $sheet->mergeCells('A3:N3');
         $sheet->setCellValue(
             'A3',
-            'I RAMON REYES, of REVENUE COLLECTION UNIT section of REVENUE COLLECTION UNIT, commit to deliver and agree to be rated on the attainment of the following targets in accordance with the indicated measures for the period JANUARY – JUNE 2026.'
+            "I {$employeeName}, of {$officeName} section of {$officeName}, commit to deliver and agree to be rated on the attainment of the following targets in accordance with the indicated measures for the period {$periodName}."
         );
 
         $sheet->mergeCells('A10:C10');
@@ -181,16 +163,16 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
         $sheet->setCellValue('M10', 'Date');
 
         $sheet->mergeCells('A11:C11');
-        $sheet->setCellValue('A11', 'CARLO D. BERAY');
+        $sheet->setCellValue('A11', $reviewedBy);
 
         $sheet->mergeCells('G11:L11');
-        $sheet->setCellValue('G11', 'DEPT-HEAD');
+        $sheet->setCellValue('G11', $approvedBy);
 
         $sheet->mergeCells('A13:C13');
-        $sheet->setCellValue('A13', 'Division Head');
+        $sheet->setCellValue('A13', 'Supervisor');
 
         $sheet->mergeCells('G13:L13');
-        $sheet->setCellValue('G13', 'PGDH');
+        $sheet->setCellValue('G13', 'Department Head');
 
         $sheet->getStyle('A1:N1')->getFont()->setBold(true);
         $sheet->getStyle('A1:N1')->getAlignment()
@@ -235,7 +217,7 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
             $sheet->setCellValue($col . self::TABLE_SUBHEADER_ROW, $text);
         }
 
-        $headerRange = "A" . self::TABLE_HEADER_ROW . ":N" . self::TABLE_SUBHEADER_ROW;
+        $headerRange = 'A' . self::TABLE_HEADER_ROW . ':N' . self::TABLE_SUBHEADER_ROW;
 
         $sheet->getStyle($headerRange)->getFont()->setBold(true);
         $sheet->getStyle($headerRange)->getAlignment()
@@ -267,7 +249,6 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
             ->setHorizontal(Alignment::HORIZONTAL_LEFT)
             ->setVertical(Alignment::VERTICAL_CENTER);
 
-        // Green-line feel (bottom border only)
         $sheet->getStyle("A{$startRow}:N{$startRow}")
             ->getBorders()
             ->getBottom()
@@ -275,64 +256,55 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
 
         $row = $startRow + 1;
 
-        return $this->writeIndicatorsFlat($sheet, $row, $this->ipcr[$type] ?? [], $this->standards);
+        return $this->writeIndicatorsFlat($sheet, $row, $this->groupedItems[$type] ?? []);
     }
 
-    private function writeIndicatorsFlat(Worksheet $sheet, int $row, array $items, array $standards): int
+    private function writeIndicatorsFlat(Worksheet $sheet, int $row, array $groupedOutputs): int
     {
-        foreach ($items as $item) {
-            $indicators = $item['indicators'] ?? [];
-            if (empty($indicators)) {
+        foreach ($groupedOutputs as $outputGroup) {
+            $items = $outputGroup['items'] ?? [];
+            if (empty($items)) {
                 continue;
             }
 
             $startRow = $row;
-            $indicatorCount = count($indicators);
 
-            foreach ($indicators as $index => $indicator) {
-                // OUTPUT (first row only, merged later)
-                $sheet->setCellValue("A{$row}", $index === 0 ? ($item['output'] ?? '') : '');
-                $sheet->setCellValue("B{$row}", $indicator);
+            foreach ($items as $index => $item) {
+                $sheet->setCellValue("A{$row}", $index === 0 ? ($outputGroup['output'] ?? '') : '');
+                $sheet->setCellValue("B{$row}", $this->buildIndicatorCellText($item));
 
-                // 6 Months Summary (blank)
                 $sheet->setCellValue("C{$row}", '');
                 $sheet->setCellValue("D{$row}", '');
                 $sheet->mergeCells("C{$row}:D{$row}");
 
-                // Ratings
                 $sheet->setCellValue("E{$row}", '');
                 $sheet->setCellValue("F{$row}", '');
                 $sheet->setCellValue("G{$row}", '');
                 $sheet->setCellValue(
                     "H{$row}",
-                    '=IF(COUNTA(E'.$row.':G'.$row.')=0,"",AVERAGE(E'.$row.':G'.$row.'))'
+                    '=IF(COUNTA(E' . $row . ':G' . $row . ')=0,"",AVERAGE(E' . $row . ':G' . $row . '))'
                 );
 
-                // Remarks
                 $sheet->setCellValue("I{$row}", '');
 
-                // Standards
                 $stdTexts = [];
                 foreach (self::RATINGS as $rating) {
                     $col = self::STANDARDS_COLUMNS[$rating];
-                    $text = $this->formatStdBlock($standards, $indicator, $rating);
+                    $text = $this->formatStdBlock($item, $rating);
                     $sheet->setCellValue("{$col}{$row}", $text);
                     $sheet->getStyle("{$col}{$row}")->getAlignment()->setWrapText(true);
                     $stdTexts[] = $text;
                 }
 
-                // Wrapping / alignment
                 $sheet->getStyle("B{$row}")->getAlignment()->setWrapText(true);
                 $sheet->getStyle("E{$row}:H{$row}")
                     ->getAlignment()
                     ->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-                // Vertical borders only
                 $this->applyRowVerticalBorders($sheet, $row);
 
-                // ✅ AUTO ROW HEIGHT (this is the key)
                 $sheet->getRowDimension($row)->setRowHeight(
-                    $this->estimateRowHeight($indicator, ...$stdTexts)
+                    $this->estimateRowHeight($this->buildIndicatorCellText($item), ...$stdTexts)
                 );
 
                 $row++;
@@ -340,7 +312,6 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
 
             $endRow = $row - 1;
 
-            // Merge OUTPUT column
             if ($endRow > $startRow) {
                 $sheet->mergeCells("A{$startRow}:A{$endRow}");
                 $sheet->getStyle("A{$startRow}:A{$endRow}")
@@ -350,7 +321,6 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
                     ->setWrapText(true);
             }
 
-            // Green boundary line (KEEP)
             $sheet->getStyle("A{$endRow}:N{$endRow}")
                 ->getBorders()
                 ->getBottom()
@@ -360,14 +330,60 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
         return $row;
     }
 
-
-    private function formatStdBlock(array $standards, string $indicator, int $rating): string
+    private function groupItemsBySection(): array
     {
-        $entry = $standards[$indicator][$rating] ?? ['q' => [], 'e' => [], 't' => []];
+        $grouped = [
+            'core' => [],
+            'support' => [],
+            'custom' => [],
+        ];
 
-        $q = $this->formatDimension(Arr::wrap($entry['q'] ?? []));
-        $e = $this->formatDimension(Arr::wrap($entry['e'] ?? []));
-        $t = $this->formatDimension(Arr::wrap($entry['t'] ?? []));
+        foreach ($this->ipcr->items as $item) {
+            $type = $this->normalizeFunctionType((string) ($item->function_type ?? ''));
+            $outputTitle = trim((string) ($item->output_title ?? ''));
+            if ($outputTitle === '') {
+                $outputTitle = 'Untitled Output';
+            }
+
+            if (!isset($grouped[$type][$outputTitle])) {
+                $grouped[$type][$outputTitle] = [
+                    'output' => $outputTitle,
+                    'items' => [],
+                ];
+            }
+
+            $grouped[$type][$outputTitle]['items'][] = $item;
+        }
+
+        return [
+            'core' => array_values($grouped['core']),
+            'support' => array_values($grouped['support']),
+            'custom' => array_values($grouped['custom']),
+        ];
+    }
+
+    private function buildIndicatorCellText(IpcrItem $item): string
+    {
+        $indicatorText = trim((string) ($item->indicator_text ?? ''));
+        $outputTitle = trim((string) ($item->output_title ?? ''));
+        $targetQuantity = is_numeric($item->target_quantity ?? null)
+            ? (float) $item->target_quantity
+            : ($outputTitle !== '' ? ($this->targetQuantityByOutput[$outputTitle] ?? null) : null);
+
+        if (!is_numeric($targetQuantity)) {
+            return $indicatorText;
+        }
+
+        return $indicatorText . "\nTarget: " . $this->formatTargetQuantity((float) $targetQuantity);
+    }
+
+    private function formatStdBlock(IpcrItem $item, int $rating): string
+    {
+        $entry = $this->extractStandardsPerRating($item->standards_payload, $rating);
+
+        $q = $this->formatDimension($entry['q']);
+        $e = $this->formatDimension($entry['e']);
+        $t = $this->formatDimension($entry['t']);
 
         return implode("\n", [
             "Q = {$q}",
@@ -376,16 +392,91 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
         ]);
     }
 
-    private function formatDimension(array $values): string
+    private function extractStandardsPerRating(mixed $payload, int $rating): array
     {
-        $values = array_filter($values, fn ($v) => $v !== null && $v !== '');
-        if (empty($values)) {
-            return '—';
+        if (is_string($payload)) {
+            $decoded = json_decode($payload, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $payload = $decoded;
+            }
         }
 
-        return implode('; ', array_map(fn ($v) => trim((string) $v), $values));
+        if (!is_array($payload)) {
+            return ['q' => [], 'e' => [], 't' => []];
+        }
+
+        $bucket = $payload[(string) $rating] ?? $payload[$rating] ?? [];
+        if (!is_array($bucket)) {
+            $bucket = [];
+        }
+
+        return [
+            'q' => $this->normalizeStandardsValue($bucket['Q'] ?? $bucket['q'] ?? []),
+            'e' => $this->normalizeStandardsValue($bucket['E'] ?? $bucket['e'] ?? []),
+            't' => $this->normalizeStandardsValue($bucket['T'] ?? $bucket['t'] ?? []),
+        ];
     }
 
+    private function normalizeStandardsValue(mixed $value): array
+    {
+        if ($value === null || $value === '') {
+            return [];
+        }
+
+        if (is_array($value)) {
+            return array_values(array_filter(
+                array_map(static fn ($entry) => trim((string) $entry), $value),
+                static fn ($entry) => $entry !== ''
+            ));
+        }
+
+        $stringValue = trim((string) $value);
+
+        return $stringValue === '' ? [] : [$stringValue];
+    }
+
+    private function formatDimension(array $values): string
+    {
+        if (empty($values)) {
+            return '--';
+        }
+
+        return implode('; ', $values);
+    }
+
+    private function normalizeFunctionType(string $type): string
+    {
+        $normalized = strtolower(trim($type));
+
+        if ($normalized === 'support') {
+            return 'support';
+        }
+
+        if ($normalized === 'core') {
+            return 'core';
+        }
+
+        return 'custom';
+    }
+
+    private function estimateRowHeight(string ...$cells): float
+    {
+        $maxLines = 1;
+
+        foreach ($cells as $text) {
+            $text = trim((string) $text);
+            if ($text === '') {
+                continue;
+            }
+
+            $lines = substr_count($text, "\n") + 1;
+            $wrapped = (int) ceil(mb_strlen($text) / self::CHARS_PER_LINE);
+
+            $maxLines = max($maxLines, $lines, $wrapped);
+        }
+
+        return self::BASE_ROW_HEIGHT + ($maxLines - 1) * self::LINE_HEIGHT;
+    }
 
     private function applyVerticalBordersOnly(Worksheet $sheet, int $fromRow, int $toRow): void
     {
@@ -396,7 +487,6 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
 
     private function applyRowVerticalBorders(Worksheet $sheet, int $row): void
     {
-        // Apply left/right borders per cell (A..N), no top/bottom.
         foreach (range('A', 'N') as $col) {
             $sheet->getStyle("{$col}{$row}")
                 ->getBorders()
@@ -414,12 +504,92 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
     {
         for ($r = $fromRow; $r <= $toRow; $r++) {
             $value = trim((string) $sheet->getCell("A{$r}")->getValue());
-            if (in_array($value, ['A. CORE FUNCTIONS (80%)', 'B. SUPPORT FUNCTIONS (20%)'], true)) {
+            if (in_array($value, $this->sectionLabels, true)) {
                 $sheet->getStyle("A{$r}:N{$r}")
                     ->getBorders()
                     ->getBottom()
                     ->setBorderStyle(Border::BORDER_THIN);
             }
         }
+    }
+
+    private function buildSectionDefinitions(): array
+    {
+        $types = [];
+        foreach ($this->groupedItems as $type => $rows) {
+            if (!empty($rows)) {
+                $types[$type] = true;
+            }
+        }
+
+        $ordered = [];
+        foreach (['core', 'support'] as $preferred) {
+            if (isset($types[$preferred])) {
+                $ordered[] = $preferred;
+                unset($types[$preferred]);
+            }
+        }
+
+        foreach (array_keys($types) as $remaining) {
+            $ordered[] = $remaining;
+        }
+
+        $labels = [];
+        $sections = [];
+        foreach ($ordered as $index => $type) {
+            $label = $this->buildSectionLabel($type, $index);
+            $labels[] = $label;
+            $sections[] = ['type' => $type, 'label' => $label];
+        }
+
+        $this->sectionLabels = $labels;
+
+        return $sections;
+    }
+
+    private function buildSectionLabel(string $type, int $index): string
+    {
+        $prefix = chr(65 + $index);
+        $label = match ($type) {
+            'core' => 'CORE FUNCTIONS (80%)',
+            'support' => 'SUPPORT FUNCTIONS (20%)',
+            'custom' => 'CUSTOM FUNCTIONS',
+            default => strtoupper(str_replace('_', ' ', $type)) . ' FUNCTIONS',
+        };
+
+        return "{$prefix}. {$label}";
+    }
+
+    private function buildTargetQuantityByOutput(): array
+    {
+        $this->ipcr->loadMissing([
+            'unitWorkPlan.uwpFunctions.mfos',
+            'opcr.unitWorkPlan.uwpFunctions.mfos',
+        ]);
+
+        $targetQuantities = [];
+        $unitWorkPlan = $this->ipcr->unitWorkPlan ?? $this->ipcr->opcr?->unitWorkPlan;
+
+        foreach ($unitWorkPlan?->uwpFunctions ?? [] as $function) {
+            foreach ($function->mfos ?? [] as $mfo) {
+                $outputTitle = trim((string) ($mfo->title ?? ''));
+                if ($outputTitle === '' || !is_numeric($mfo->target_quantity)) {
+                    continue;
+                }
+
+                $targetQuantities[$outputTitle] = (float) $mfo->target_quantity;
+            }
+        }
+
+        return $targetQuantities;
+    }
+
+    private function formatTargetQuantity(float $quantity): string
+    {
+        if (fmod($quantity, 1.0) === 0.0) {
+            return (string) (int) $quantity;
+        }
+
+        return rtrim(rtrim(number_format($quantity, 2, '.', ''), '0'), '.');
     }
 }

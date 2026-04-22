@@ -1,6 +1,10 @@
 @extends('layouts.employee')
 
 @section('main-content')
+    @php
+        $orsGate = $orsGate ?? ['blocked' => true, 'reason' => 'ORS unavailable.'];
+        $orsOptions = $orsOptions ?? [];
+    @endphp
 
     <style>
         #ors-calendar .fc-col-header-cell {
@@ -10,6 +14,48 @@
         #ors-calendar .fc-col-header-cell-cushion,
         #ors-calendar .fc-daygrid-day-number {
             color: #e2e8f0;
+        }
+
+        #ors-calendar .fc-daygrid-day-events {
+            margin-top: 4px;
+        }
+
+        #ors-calendar .fc-daygrid-event {
+            margin: 4px 6px;
+            border-radius: 9999px;
+            padding: 2px 8px;
+            font-size: 11px;
+            line-height: 1.1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        #ors-calendar .fc-daygrid-more-link {
+            color: #93c5fd;
+            font-size: 12px;
+        }
+
+        #ors-calendar .fc-daygrid-day-frame {
+            min-height: 110px;
+        }
+
+        #ors-calendar .fc-daygrid-event.ors-summary-event {
+            background: rgba(59, 130, 246, 0.18);
+            border: 1px solid rgba(59, 130, 246, 0.45);
+            color: #dbeafe;
+        }
+
+        #ors-calendar .fc-daygrid-event.ors-summary-event.is-rated {
+            background: rgba(6, 182, 212, 0.18);
+            border: 1px solid rgba(6, 182, 212, 0.45);
+            color: #cffafe;
+        }
+
+        #ors-calendar .fc-daygrid-event.ors-summary-event.is-submitted {
+            background: rgba(59, 130, 246, 0.18);
+            border: 1px solid rgba(59, 130, 246, 0.45);
+            color: #dbeafe;
         }
 
         .status-chip {
@@ -35,77 +81,28 @@
         <!-- Page Header -->
         <div class="space-y-1">
             <h1 class="text-2xl font-semibold text-white">Output Rating Sheet (ORS)</h1>
-            <p class="text-sm text-slate-400">
-                ORS is the single source of truth for task creation, timing, output submission, and the only trigger for MPOR.
-                My Tasks, Submit Output, MPOR, and SMPOR are read-only mirrors.
-            </p>
-        </div>
-
-        <!-- Color Legend -->
-        <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-            <div class="grid grid-cols-1 gap-3 text-xs sm:grid-cols-2 lg:grid-cols-3">
-                <div class="flex items-center gap-2">
-                    <span class="status-chip border-amber-500/60 bg-amber-500/10 text-amber-200">
-                        <span class="status-dot bg-amber-500"></span>
-                        Recording (auto-timer)
-                    </span>
-                    <span class="text-slate-400">Not editable</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="status-chip border-amber-300/60 bg-amber-300/10 text-amber-100">
-                        <span class="status-dot bg-amber-300"></span>
-                        Draft (stopped)
-                    </span>
-                    <span class="text-slate-400">Editable</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="status-chip border-blue-500/60 bg-blue-500/10 text-blue-100">
-                        <span class="status-dot bg-blue-500"></span>
-                        Submitted (locked)
-                    </span>
-                    <span class="text-slate-400">Not editable</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="status-chip border-emerald-500/60 bg-emerald-500/10 text-emerald-100">
-                        <span class="status-dot bg-emerald-500"></span>
-                        Submitted (Locked) – mirrored in MPOR
-                    </span>
-                    <span class="text-slate-400">Not editable</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="status-chip border-red-500/60 bg-red-500/10 text-red-100">
-                        <span class="status-dot bg-red-500"></span>
-                        Missing / Overdue
-                    </span>
-                    <span class="text-slate-400">Not editable</span>
-                </div>
-            </div>
-            <p class="mt-3 text-[11px] text-slate-400">
-                Stopped entries remain drafts until submitted. Submitting happens once, inside ORS, and locks the entry (sent to supervisor/MPOR).
-                Downstream pages mirror state only; no secondary submission exists.
-            </p>
         </div>
 
         <!-- Stats Overview (DEMO LOCKED: 4 tasks total) -->
         <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
             <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">This Week</p>
-                <p class="mt-1 text-2xl font-semibold text-white">4</p>
+                <p class="mt-1 text-2xl font-semibold text-white">{{ $orsStats['thisWeek'] ?? 0 }}</p>
                 <p class="text-xs text-slate-400">Tasks logged (ORS)</p>
             </div>
             <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Drafts</p>
-                <p class="mt-1 text-2xl font-semibold text-amber-300">0</p>
+                <p class="mt-1 text-2xl font-semibold text-amber-300">{{ $orsStats['drafts'] ?? 0 }}</p>
                 <p class="text-xs text-slate-400">Need submission</p>
             </div>
             <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Submitted</p>
-                <p class="mt-1 text-2xl font-semibold text-blue-300">2</p>
+                <p class="mt-1 text-2xl font-semibold text-blue-300">{{ $orsStats['submitted'] ?? 0 }}</p>
                 <p class="text-xs text-slate-400">Eligible for MPOR summary</p>
             </div>
             <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Validated</p>
-                <p class="mt-1 text-2xl font-semibold text-emerald-300">0</p>
+                <p class="mt-1 text-2xl font-semibold text-emerald-300">{{ $orsStats['validated'] ?? 0 }}</p>
                 <p class="text-xs text-slate-400">In SMPOR</p>
             </div>
         </div>
@@ -115,9 +112,6 @@
             <div class="flex flex-wrap items-start justify-between gap-4">
                 <div>
                     <h2 class="text-lg font-semibold text-white">Task Tracking (single source)</h2>
-                    <p class="text-sm text-slate-400">
-                        ORS is the only place to start, stop, and submit. Only one entry can be recording at a time; paused entries still block new starts.
-                    </p>
                 </div>
                 <span class="rounded-full border border-emerald-600/60 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300">
                     ONE ACTIVE TIMER
@@ -153,12 +147,14 @@
                     <button id="activePauseBtn"
                             type="button"
                             class="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-slate-800">
-                        Pause
+                        <span data-button-label>Pause</span>
+                        <span data-button-spinner class="hidden h-3 w-3 animate-spin rounded-full border-2 border-slate-500/40 border-t-slate-200"></span>
                     </button>
                     <button id="activeStopBtn"
                             type="button"
                             class="inline-flex items-center gap-2 rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-100 hover:border-amber-500 hover:bg-amber-500/20">
-                        Stop (Draft)
+                        <span data-button-label>Stop (Draft)</span>
+                        <span data-button-spinner class="hidden h-3 w-3 animate-spin rounded-full border-2 border-amber-200/30 border-t-amber-100"></span>
                     </button>
                     <button id="activeSubmitBtn"
                             type="button"
@@ -180,23 +176,14 @@
             <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
                 <div>
                     <h2 class="text-lg font-semibold text-white">ORS Calendar</h2>
-                    <p class="text-sm text-slate-400">
-                        Supports multiple tasks per day. Click an entry to start, pause, stop, or submit. Locked entries open read-only.
-                    </p>
                 </div>
-                <button id="openLogTaskBtn"
-                        type="button"
+                <button type="button"
+                        id="openLogTaskBtn"
                         class="inline-flex items-center gap-2 rounded-lg bg-blue-500 px-3 py-1.5 text-xs font-semibold text-slate-900 hover:bg-blue-600">
                     Log Task
                 </button>
             </div>
             <div id="ors-calendar"></div>
-        </div>
-
-        <!-- System Notice -->
-        <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-4 text-xs text-slate-400">
-            ORS captures timing and submissions once. Manual duration entry is disabled. After submission, entries are locked and visible in MPOR -> SMPOR.
-            My Tasks and Submit Output remain read-only displays of ORS state.
         </div>
 
     </section>
@@ -217,14 +204,19 @@
                 </p>
             </div>
 
-            <form class="space-y-3">
+            @php
+                $orsModalBlocked = (bool) ($orsGate['blocked'] ?? false) || empty($orsOptions);
+            @endphp
+            <form id="ors-log-form" class="space-y-3" method="POST" action="{{ route('stage2.ors.store') }}">
+                @csrf
 
                 <!-- DATE -->
                 <div>
                     <label class="text-[11px] uppercase text-slate-400">Date</label>
                     <input id="orsSelectedDate"
+                        name="work_date"
                         type="text"
-                        disabled
+                        readonly
                         class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-400">
                 </div>
 
@@ -234,19 +226,20 @@
                         UWP Output / Major Final Output
                     </label>
                     <select id="orsUwpOutput"
+                        name="uwp_output_key"
                         class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200"
+                        @disabled($orsModalBlocked)
                         required>
                         <option value="">Select approved UWP output</option>
-                        <option value="ebank_scanning">
-                            E-Bank Scanning and Encoding of Revenue Transactions
-                        </option>
-                        <option value="otc_processing">
-                            Processing of Over-the-Counter Revenue Transactions
-                        </option>
-                        <option value="records_maintenance">
-                            Maintenance of revenue records and filing system
-                        </option>
+                        @foreach($orsOptions as $opt)
+                            <option value="{{ $opt['output_key'] ?? '' }}">
+                                {{ $opt['output_title'] ?? 'Untitled Output' }}
+                            </option>
+                        @endforeach
                     </select>
+                    <p id="orsModalGateNote" class="mt-1 text-[11px] text-amber-300 {{ $orsModalBlocked ? '' : 'hidden' }}">
+                        ORS locked: {{ $orsGate['reason'] ?? 'No committed IPCR targets available.' }}
+                    </p>
 
                 </div>
 
@@ -256,46 +249,39 @@
                         Task / Activity
                     </label>
                     <select id="orsTaskType"
+                        name="ipcr_item_id"
                         class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200"
+                        @disabled($orsModalBlocked)
                         required>
                         <option value="">Select task / activity</option>
                     </select>
 
                 </div>
 
-                <!-- CLIENT REQUEST ID -->
+                <!-- SUPERVISOR -->
                 <div>
                     <label class="text-[11px] uppercase text-slate-400">
-                        Client Request ID (optional)
+                        Supervisor
                     </label>
-                    <input id="orsRequestId"
-                        type="text"
-                        placeholder="REQ-2026-00123"
-                        class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
-                </div>
-
-                <!-- FORM / OUTPUT -->
-                <div>
-                    <label class="text-[11px] uppercase text-slate-400">
-                        Form / Output Type
-                    </label>
-
-                    <select id="orsOutput"
-                            class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200"
-                            required>
-                        <option value="">Select form/output</option>
-                        <option value="bsf_01">Bank Statement Form (BSF-01)</option>
-                        <option value="official_receipt">Official Receipt (OR)</option>
-                        <option value="scanned_doc">Scanned Supporting Document</option>
-                        <option value="records_checklist">Records Inventory Checklist</option>
+                    <select id="orsSupervisorId"
+                        name="supervisor_id"
+                        class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200"
+                        @disabled($orsModalBlocked)
+                        required>
+                        <option value="">Select supervisor</option>
+                        @foreach(($supervisors ?? []) as $supervisor)
+                            <option value="{{ is_array($supervisor) ? ($supervisor['id'] ?? '') : ($supervisor->id ?? '') }}">
+                                {{ is_array($supervisor) ? ($supervisor['name'] ?? '--') : ($supervisor->name ?? '--') }}
+                            </option>
+                        @endforeach
                     </select>
-
                 </div>
 
                 <!-- NOTES -->
                 <div>
                     <label class="text-[11px] uppercase text-slate-400">Notes (optional)</label>
                     <textarea id="orsNotes"
+                            name="notes"
                             rows="2"
                             class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200"
                             placeholder="Exceptions, clarifications, or additional context"></textarea>
@@ -317,22 +303,16 @@
                     </button>
 
                     <button
+                        id="orsLogTaskSubmitBtn"
                         type="submit"
-                        data-admin-loading="true"
-                        data-loading-text="Logging..."
-                        class="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-1.5
-                            text-xs font-semibold text-slate-900 hover:bg-emerald-600">
-
-                        <span data-button-spinner
-                            class="hidden h-3 w-3 animate-spin rounded-full
-                                    border-2 border-emerald-900/30 border-t-emerald-900"></span>
-
+                        class="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-1.5 text-xs font-semibold text-slate-900 hover:bg-emerald-600">
                         <span data-button-label>Log Task</span>
+                        <span data-button-spinner class="hidden h-3 w-3 animate-spin rounded-full border-2 border-emerald-900/30 border-t-emerald-900"></span>
                     </button>
 
                 </div>
-
             </form>
+
         </div>
     </div>
 
@@ -342,8 +322,10 @@
         role="dialog"
         aria-modal="true"
         class="ors-modal fixed inset-0 z-[60] hidden flex items-start justify-center overflow-y-auto bg-black/60 px-4 py-6 sm:px-6">
-        <div class="w-full max-w-[95vw] sm:max-w-xl md:max-w-2xl lg:max-w-3xl max-h-[calc(100vh-3rem)] overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-xl">
-            <div class="sticky top-0 z-10 border-b border-slate-800 bg-slate-900/95 p-5 backdrop-blur">
+        <div class="flex w-full max-w-[95vw] sm:max-w-xl md:max-w-2xl lg:max-w-3xl
+            max-h-[calc(100vh-3rem)] flex-col overflow-hidden
+            rounded-2xl border border-slate-800 bg-slate-900 shadow-xl">
+            <div class="shrink-0 border-b border-slate-800 bg-slate-900/95 p-5 backdrop-blur">
                 <div class="flex items-start justify-between">
                     <div>
                         <h2 class="text-lg font-semibold text-white" id="taskDetailTitle">Task Details</h2>
@@ -357,21 +339,14 @@
 
                 <div class="mt-3 flex flex-wrap gap-2 text-xs">
                     <span id="taskDetailStatusBadge" class="status-chip border-slate-700 bg-slate-800 text-slate-200">--</span>
-                    <span id="taskDetailLockBadge" class="hidden status-chip border-emerald-500/60 bg-emerald-500/10 text-emerald-100">
-                        Submitted (Locked)
-                    </span>
                 </div>
             </div>
 
-            <div class="max-h-[calc(100vh-12rem)] overflow-y-auto p-5">
+            <div class="flex-1 overflow-y-auto p-5 pb-24">
                 <div class="grid grid-cols-1 gap-3 text-sm md:grid-cols-2">
                     <div>
                         <p class="text-xs text-slate-400">Supervisor</p>
                         <p class="text-slate-200" id="taskDetailClient">--</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-slate-400">Request ID</p>
-                        <p class="text-slate-200" id="taskDetailRequest">--</p>
                     </div>
                     <div class="md:col-span-2">
                         <p class="text-xs text-slate-400">MFO / UWP Output</p>
@@ -388,20 +363,12 @@
                         </p>
                     </div>
                     <div>
-                        <p class="text-xs text-slate-400">Output Type</p>
-                        <p class="text-slate-200" id="taskDetailOutput">--</p>
-                    </div>
-                    <div>
                         <p class="text-xs text-slate-400">Status</p>
                         <p class="text-slate-200" id="taskDetailStatusText">--</p>
                     </div>
                     <div>
                         <p class="text-xs text-slate-400">Duration</p>
                         <p class="text-slate-200" id="taskDetailDuration">--</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-slate-400">Performance Rating</p>
-                        <p class="text-slate-200" id="taskDetailRating">--</p>
                     </div>
                     <div class="md:col-span-2">
                         <p class="text-xs text-slate-400">Notes</p>
@@ -435,12 +402,13 @@
                     </div>
 
                     <div class="mt-3 space-y-2">
-                        <label class="text-xs text-slate-300">Output Upload (part of ORS submission)</label>
+                        <label class="text-xs text-slate-300">Output Upload (multiple files allowed)</label>
                         <input id="taskDetailUpload"
                             type="file"
+                            multiple
                             class="block w-full rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-xs text-slate-200 file:mr-3 file:rounded-md file:border-0 file:bg-slate-800 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-slate-200">
                         <p class="text-[11px] text-slate-400">
-                            Submission occurs once inside ORS. After submit, the entry is locked and visible in My Tasks (read-only) and MPOR/SMPOR.
+                            You can upload multiple evidence files. After submit, the entry is locked and visible in My Tasks (read-only) and MPOR/SMPOR.
                         </p>
                     </div>
 
@@ -449,22 +417,25 @@
                                 type="button"
                                 class="inline-flex items-center gap-2 rounded-lg border border-blue-500/60 bg-blue-500/10 px-3 py-1.5 text-xs font-semibold text-blue-100 hover:bg-blue-500/20">
                             <span data-button-label>Start Task</span>
-                            <span data-button-spinner class="hidden h-3 w-3 animate-spin rounded-full border-2 border-blue-200/40 border-t-blue-200"></span>
+                            <span data-button-spinner class="hidden h-3 w-3 animate-spin rounded-full border-2 border-blue-200/30 border-t-blue-100"></span>
                         </button>
                         <button id="taskDetailPauseBtn"
                                 type="button"
-                                class="hidden rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-slate-800">
-                            Pause
+                                class="hidden inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-slate-800">
+                            <span data-button-label>Pause</span>
+                            <span data-button-spinner class="hidden h-3 w-3 animate-spin rounded-full border-2 border-slate-500/40 border-t-slate-200"></span>
                         </button>
                         <button id="taskDetailResumeBtn"
                                 type="button"
-                                class="hidden rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-100 hover:bg-amber-500/20">
-                            Resume
+                                class="hidden inline-flex items-center gap-2 rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-100 hover:bg-amber-500/20">
+                            <span data-button-label>Resume</span>
+                            <span data-button-spinner class="hidden h-3 w-3 animate-spin rounded-full border-2 border-amber-200/30 border-t-amber-100"></span>
                         </button>
                         <button id="taskDetailStopBtn"
                                 type="button"
-                                class="hidden rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-100 hover:bg-amber-500/20">
-                            Stop (Draft)
+                                class="hidden inline-flex items-center gap-2 rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-100 hover:bg-amber-500/20">
+                            <span data-button-label>Stop (Draft)</span>
+                            <span data-button-spinner class="hidden h-3 w-3 animate-spin rounded-full border-2 border-amber-200/30 border-t-amber-100"></span>
                         </button>
                         <button id="taskDetailSubmitBtn"
                                 type="button"
@@ -483,10 +454,45 @@
                 </div>
             </div>
 
-            <div class="sticky bottom-0 z-10 flex justify-end gap-2 border-t border-slate-800 bg-slate-900/95 p-4 backdrop-blur">
+            <div class="shrink-0 flex justify-end gap-2 border-t border-slate-800 bg-slate-900/95 p-4 backdrop-blur">
                 <button onclick="closeOrsModal('taskDetailsModal')"
                         class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800">
                     Close
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Day Summary Modal -->
+    <div id="orsDaySummaryModal"
+        role="dialog"
+        aria-modal="true"
+        class="ors-modal fixed inset-0 z-[59] hidden flex items-center justify-center overflow-y-auto bg-black/60 px-4 py-6 sm:px-6">
+        <div class="flex w-full max-w-[95vw] sm:max-w-xl md:max-w-2xl max-h-[calc(100vh-3rem)] flex-col overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-xl">
+            <div class="shrink-0 border-b border-slate-800 bg-slate-900/95 p-5 backdrop-blur">
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <h2 class="text-lg font-semibold text-white">ORS Entries</h2>
+                        <p id="daySummaryDateLabel" class="text-xs text-slate-400">--</p>
+                        <p class="text-[11px] text-slate-500">Select an entry to view details.</p>
+                    </div>
+                    <button type="button" onclick="closeOrsModal('orsDaySummaryModal')" class="text-slate-400 hover:text-white">
+                        x
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-5">
+                <div id="daySummaryList" class="space-y-4"></div>
+            </div>
+
+            <div class="shrink-0 flex items-center justify-between gap-2 border-t border-slate-800 bg-slate-900/95 p-4 backdrop-blur">
+                <button type="button" onclick="closeOrsModal('orsDaySummaryModal')" class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800">
+                    Close
+                </button>
+                <button id="daySummaryLogBtn" type="button" class="rounded-lg bg-blue-500 px-4 py-2 text-xs font-semibold text-slate-900 hover:bg-blue-600">
+                    Log Task for this date
                 </button>
             </div>
         </div>
@@ -495,139 +501,123 @@
     @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
     <script>
+        window.__ORS = {
+            csrf: "{{ csrf_token() }}",
+            submitUrlTemplate: "{{ route('stage2.ors.submit', ['orsEntry' => '__ID__']) }}"
+        };
+
         document.addEventListener('DOMContentLoaded', function () {
             const STATE_META = {
                 recording: { label: 'Recording', color: '#f59e0b', badge: 'border-amber-500/60 bg-amber-500/10 text-amber-200', editable: false },
                 paused: { label: 'Paused', color: '#f59e0b', badge: 'border-amber-500/60 bg-amber-500/10 text-amber-200', editable: false },
                 draft: { label: 'Draft (Stopped)', color: '#fbbf24', badge: 'border-amber-300/60 bg-amber-300/10 text-amber-100', editable: true },
                 submitted: { label: 'Submitted (Locked)', color: '#3b82f6', badge: 'border-blue-500/60 bg-blue-500/10 text-blue-100', editable: false },
+                rated: { label: 'Rated (Locked)', color: '#06b6d4', badge: 'border-cyan-500/60 bg-cyan-500/10 text-cyan-100', editable: false },
                 locked: { label: 'Submitted (Locked)', color: '#10b981', badge: 'border-emerald-500/60 bg-emerald-500/10 text-emerald-100', editable: false },
                 missing: { label: 'Missing / Overdue', color: '#ef4444', badge: 'border-red-500/60 bg-red-500/10 text-red-100', editable: false },
             };
 
-            const UWP_INDICATORS = {
-                ebank_scanning: [
-                    'All e-bank transactions scanned and encoded daily',
-                    'Indexing complete with no missing pages',
-                    'Audit trail maintained within 24 hours',
-                ],
-                otc_processing: [
-                    'Same-day verification of OTC transactions',
-                    '95% encoded within the business day',
-                    'OR validation completed daily',
-                ],
-                records_maintenance: [
-                    'Weekly filing updated and retrievable',
-                    'Digital backups synced monthly',
-                    'Retrieval logs maintained for audit purposes',
-                ],
+            const orsGate = @json($orsGate);
+            const orsOptions = @json($orsOptions);
+            const orsOptionsByKey = Array.isArray(orsOptions)
+                ? orsOptions.reduce((carry, option) => {
+                    const key = String(option?.output_key || '').trim();
+                    if (key) carry[key] = option;
+                    return carry;
+                }, {})
+                : {};
+            const orsConfig = window.__ORS || {};
+            const orsBaseUrl = @json(url('/employee/ors'));
+            const ORS_ACTIONS = {
+                submit: String(orsConfig.submitUrlTemplate || ''),
+            };
+            const ORS_ROUTES = {
+                start: (id) => `${orsBaseUrl}/${encodeURIComponent(String(id))}/start`,
+                pause: (id) => `${orsBaseUrl}/${encodeURIComponent(String(id))}/pause`,
+                resume: (id) => `${orsBaseUrl}/${encodeURIComponent(String(id))}/resume`,
+                stop: (id) => `${orsBaseUrl}/${encodeURIComponent(String(id))}/stop`,
             };
 
-            /**
-             * DEMO LOCKED DATASET (Stage II) — Employee Assigned: Ramon Reyes ONLY
-             * Required statuses:
-             * - Jan 2, 2026: Submitted (Locked) — Same-day verification of OTC transactions
-             * - Jan 4, 2026: Submitted (Locked) — All e-bank transactions scanned and encoded daily
-             * - Jan 5, 2026: Recording — OR validation completed daily
-             * - Jan 6, 2026: Missing / Overdue — Retrieval logs maintained for audit purposes
-             */
-            let tasks = [
-                {
-                    id: 'task-jan-02',
-                    title: 'Same-day verification of OTC transactions',
-                    date: '2026-01-02',
-                    client: 'Revenue Collection Unit',
-                    requestId: 'REQ-2026-002',
-                    uwpOutputId: 'otc_processing',
-                    uwpOutputLabel: 'Processing of Over-the-Counter Revenue Transactions',
-                    output: 'Official Receipt (OR)',
-                    notes: 'Demo: Same-day OTC verification completed and submitted.',
-                    quantity: '12 transactions',
-                    rating: '--',
-                    state: 'submitted',
-                    output_state: 'submitted',
-                    submittedAt: new Date('2026-01-02T10:15:00'),
-                    evidenceRequired: true,
-                    evidenceAttached: true,
-                    evidenceFileName: 'REQ-2026-002_OR.pdf',
-                    evidenceUploadedAt: new Date('2026-01-02T10:15:00'),
-                    startTime: null,
-                    durationMs: 2 * 60 * 60 * 1000
-                },
-                {
-                    id: 'task-jan-04',
-                    title: 'All e-bank transactions scanned and encoded daily',
-                    date: '2026-01-04',
-                    client: 'Revenue Collection Unit',
-                    requestId: 'REQ-2026-004',
-                    uwpOutputId: 'ebank_scanning',
-                    uwpOutputLabel: 'E-Bank Scanning and Encoding of Revenue Transactions',
-                    output: 'Bank Statement Form (BSF-01)',
-                    notes: 'Demo: E-bank scanning submitted with evidence (BSF-01).',
-                    quantity: '1 daily batch',
-                    rating: '--',
-                    state: 'submitted',
-                    output_state: 'submitted',
-                    submittedAt: new Date('2026-01-04T15:20:00'),
-                    evidenceRequired: true,
-                    evidenceAttached: true,
-                    evidenceFileName: 'REQ-2026-004_BSF-01.pdf',
-                    evidenceUploadedAt: new Date('2026-01-04T15:20:00'),
-                    startTime: null,
-                    durationMs: 90 * 60 * 1000
-                },
-                {
-                    id: 'task-jan-05',
-                    title: 'OR validation completed daily',
-                    date: '2026-01-05',
-                    client: 'Revenue Collection Unit',
-                    requestId: 'REQ-2026-005',
-                    uwpOutputId: 'otc_processing',
-                    uwpOutputLabel: 'Processing of Over-the-Counter Revenue Transactions',
-                    output: 'Official Receipt (OR)',
-                    notes: 'Demo: OR validation is currently in progress.',
-                    quantity: '6 receipts validated',
-                    rating: '--',
-                    state: 'recording',
-                    output_state: 'none',
-                    submittedAt: null,
-                    evidenceRequired: true,
-                    evidenceAttached: false,
-                    evidenceFileName: null,
-                    evidenceUploadedAt: null,
-                    // make it look active without depending on user clock too much
-                    startTime: new Date(Date.now() - (18 * 60 * 1000)), // started 18 minutes ago
-                    durationMs: 0
-                },
-                {
-                    id: 'task-jan-06',
-                    title: 'Retrieval logs maintained for audit purposes',
-                    date: '2026-01-06',
-                    client: 'Revenue Collection Unit',
-                    requestId: 'REQ-2026-006',
-                    uwpOutputId: 'records_maintenance',
-                    uwpOutputLabel: 'Maintenance of revenue records and filing system',
-                    output: 'Records Inventory Checklist',
-                    notes: 'Demo: No ORS entry submitted — flagged as Missing / Overdue.',
-                    quantity: '',
-                    rating: '--',
-                    state: 'missing',
-                    output_state: 'none',
-                    submittedAt: null,
-                    evidenceRequired: true,
-                    evidenceAttached: false,
-                    evidenceFileName: null,
-                    evidenceUploadedAt: null,
-                    startTime: null,
-                    durationMs: 0
-                },
-            ];
+            function actionUrl(template, id) {
+                const encodedId = encodeURIComponent(String(id));
+                return String(template).replace(/:id|%3Aid|__ID__/gi, encodedId);
+            }
+
+            async function postOrsAction(url) {
+                const csrfToken = String(orsConfig.csrf || '')
+                    || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+                    || document.querySelector('#ors-log-form input[name="_token"]')?.value
+                    || '';
+
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                });
+
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    const firstValidation = data?.errors
+                        ? Object.values(data.errors)[0]?.[0]
+                        : null;
+                    const msg = firstValidation || data?.message || 'Request failed.';
+                    throw new Error(msg);
+                }
+                return data;
+            }
+
+            const dbTasksRaw = @json($orsEntries ?? []);
+
+            const tasksFromDb = Array.isArray(dbTasksRaw)
+                ? dbTasksRaw.map((entry) => {
+                    const rawState = String(entry?.state || 'draft').toLowerCase();
+                    const state = rawState === 'validated' ? 'locked' : rawState;
+                    const submittedAt = entry?.submittedAt ? new Date(entry.submittedAt) : null;
+                    const totalSeconds = Number(entry?.totalSeconds ?? entry?.durationSeconds ?? 0);
+                    const startedAt = entry?.startedAt ? new Date(entry.startedAt) : null;
+                    const stoppedAt = entry?.stoppedAt ? new Date(entry.stoppedAt) : null;
+                    const supervisorIdValue = entry?.supervisorId ?? entry?.supervisor_id ?? null;
+                    const supervisorNameValue = String(entry?.supervisorName ?? entry?.supervisor_name ?? '').trim();
+
+                    return {
+                        id: String(entry?.id ?? `task-db-${Date.now()}`),
+                        title: String(entry?.title || '--'),
+                        date: String(entry?.date || ''),
+                        client: 'Revenue Collection Unit',
+                        uwpOutputId: '',
+                        uwpOutputLabel: String(entry?.uwpOutputLabel || '--'),
+                        notes: String(entry?.notes || 'No notes'),
+                        quantity: String(entry?.quantity || ''),
+                        supervisorId: supervisorIdValue === null || supervisorIdValue === undefined || String(supervisorIdValue).trim() === ''
+                            ? null
+                            : String(supervisorIdValue),
+                        supervisorName: supervisorNameValue !== '' ? supervisorNameValue : null,
+                        rating: '--',
+                        state: state,
+                        output_state: (state === 'submitted' || state === 'rated' || state === 'locked') ? 'submitted' : 'none',
+                        submittedAt: submittedAt,
+                        evidenceRequired: true,
+                        evidenceAttached: Boolean(entry?.evidenceAttached),
+                        evidenceCount: Number(entry?.evidenceCount || 0),
+                        evidenceFileName: null,
+                        evidenceUploadedAt: null,
+                        totalSeconds: Number.isFinite(totalSeconds) ? totalSeconds : 0,
+                        startedAt: startedAt && !Number.isNaN(startedAt.getTime()) ? startedAt : null,
+                        stoppedAt: stoppedAt && !Number.isNaN(stoppedAt.getTime()) ? stoppedAt : null,
+                    };
+                })
+                : [];
+
+            let tasks = Array.isArray(tasksFromDb) ? tasksFromDb : [];
 
             const TASK_DEFAULTS = {
                 output_state: 'none',
                 submittedAt: null,
                 evidenceRequired: true,
                 evidenceAttached: false,
+                evidenceCount: 0,
                 evidenceFileName: null,
                 evidenceUploadedAt: null,
             };
@@ -637,45 +627,164 @@
                 ...task,
                 submittedAt: task.submittedAt ? new Date(task.submittedAt) : null,
                 evidenceUploadedAt: task.evidenceUploadedAt ? new Date(task.evidenceUploadedAt) : null,
+                startedAt: task.startedAt ? new Date(task.startedAt) : null,
+                stoppedAt: task.stoppedAt ? new Date(task.stoppedAt) : null,
             }));
 
             const uwpSelect = document.getElementById('orsUwpOutput');
             const taskSelect = document.getElementById('orsTaskType');
+            const ipcrItemHidden = document.getElementById('orsIpcrItemIdHidden');
+            const gateNote = document.getElementById('orsModalGateNote');
 
-            function resetTaskOptions() {
+            function resetTaskOptions(placeholder = 'Select task / activity') {
                 if (!taskSelect) return;
-                taskSelect.innerHTML = '<option value="">Select task / activity</option>';
+                taskSelect.innerHTML = '';
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.textContent = placeholder;
+                taskSelect.appendChild(opt);
+                taskSelect.value = '';
+                if (ipcrItemHidden) ipcrItemHidden.value = '';
             }
 
             function populateTaskOptions(outputKey) {
-                resetTaskOptions();
-                const indicators = UWP_INDICATORS[outputKey] || [];
+                if (!taskSelect) return;
+                resetTaskOptions('Select task / activity');
+
+                const selectedOutput = orsOptionsByKey[String(outputKey || '').trim()] || null;
+                const indicators = Array.isArray(selectedOutput?.indicators) ? selectedOutput.indicators : [];
+
                 indicators.forEach((indicator) => {
+                    const indicatorId = String(indicator?.ipcr_item_id || '').trim();
+                    const indicatorLabel = String(indicator?.indicator_text || '').trim();
+                    if (!indicatorId || !indicatorLabel) return;
+
                     const opt = document.createElement('option');
-                    opt.value = indicator;
-                    opt.textContent = indicator;
+                    opt.value = indicatorId;
+                    opt.textContent = indicatorLabel;
                     taskSelect.appendChild(opt);
                 });
             }
 
             if (uwpSelect && taskSelect) {
                 resetTaskOptions();
-                uwpSelect.addEventListener('change', () => {
-                    populateTaskOptions(uwpSelect.value);
-                });
+
+                const shouldDisable = Boolean(orsGate?.blocked) || !Array.isArray(orsOptions) || orsOptions.length === 0;
+                if (shouldDisable) {
+                    const reason = String(orsGate?.reason || 'No committed IPCR targets available.');
+                    uwpSelect.disabled = true;
+                    taskSelect.disabled = true;
+                    if (gateNote) {
+                        gateNote.textContent = `ORS locked: ${reason}`;
+                        gateNote.classList.remove('hidden');
+                    }
+                    if (uwpSelect.options.length > 0) {
+                        uwpSelect.options[0].textContent = `ORS locked: ${reason}`;
+                    }
+                    resetTaskOptions('Task selection unavailable');
+                } else {
+                    if (gateNote) {
+                        gateNote.classList.add('hidden');
+                    }
+
+                    uwpSelect.addEventListener('change', () => {
+                        populateTaskOptions(uwpSelect.value);
+                    });
+                    taskSelect.addEventListener('change', () => {
+                        if (ipcrItemHidden) {
+                            ipcrItemHidden.value = taskSelect.value || '';
+                        }
+                    });
+                }
             }
 
             // DEMO: exactly one active timer -> Jan 5 recording
             let activeTaskId = tasks.find(t => t.state === 'recording' || t.state === 'paused')?.id || null;
             let detailTaskId = null;
+            let __returnToModalId = null;
+            let daySummaryDate = null;
+            let daySummaryStatusFilter = null;
+            let byDate = {};
+            let byDateStatus = {};
+
+            const SUMMARY_STATE_LABELS = {
+                draft: 'Draft',
+                recording: 'Recording',
+                paused: 'Paused',
+                submitted: 'Submitted',
+                rated: 'Rated',
+                locked: 'Submitted',
+            };
+
+            const daySummaryDateLabelEl = document.getElementById('daySummaryDateLabel');
+            const daySummaryListEl = document.getElementById('daySummaryList');
+            const daySummaryLogBtn = document.getElementById('daySummaryLogBtn');
+            function summaryStateLabel(state) {
+                const key = String(state || '').toLowerCase();
+                return SUMMARY_STATE_LABELS[key] || (STATE_META[key]?.label || key || 'Unknown');
+            }
+
+            function formatDateLabel(dateStr) {
+                if (!dateStr) return '--';
+                const parsed = new Date(`${dateStr}T00:00:00`);
+                if (Number.isNaN(parsed.getTime())) return dateStr;
+                return parsed.toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' });
+            }
+
+            function escapeHtml(value) {
+                return String(value ?? '')
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;');
+            }
+
+            function clearFlash() {
+                window.PMSnackbar?.clear();
+            }
+
+            function showFlash(type, message) {
+                if (!message) return;
+                window.PMSnackbar?.show({
+                    type: String(type || 'info').toLowerCase(),
+                    message,
+                });
+            }
+
+            function rebuildCalendarBuckets() {
+                byDate = {};
+                byDateStatus = {};
+
+                tasks.forEach((task) => {
+                    const dateKey = String(task?.date || '').trim();
+                    if (!dateKey) return;
+
+                    const stateKey = String(task?.state || 'draft').toLowerCase();
+                    if (stateKey === 'missing') return;
+
+                    if (!byDate[dateKey]) byDate[dateKey] = [];
+                    byDate[dateKey].push(task);
+
+                    if (!byDateStatus[dateKey]) byDateStatus[dateKey] = {};
+                    if (!byDateStatus[dateKey][stateKey]) byDateStatus[dateKey][stateKey] = [];
+                    byDateStatus[dateKey][stateKey].push(task);
+                });
+            }
 
             const calendarEl = document.getElementById('ors-calendar');
+            const today = new Date();
+            const currentYmd = today.toISOString().slice(0, 10);
             const calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
-                initialDate: '2026-01-01',
+                initialDate: currentYmd,
                 height: 'auto',
                 contentHeight: 600,
                 dayMaxEventRows: 3,
+                dayMaxEvents: true,
+                moreLinkClick: 'popover',
+                eventDisplay: 'block',
+                fixedWeekCount: false,
                 headerToolbar: {
                     left: 'prev,next today',
                     center: 'title',
@@ -686,19 +795,42 @@
                 dayHeaderClassNames: 'text-slate-300',
                 dayCellClassNames: 'hover:bg-slate-800/30',
                 dateClick(info) {
-                    document.getElementById('orsSelectedDate').value = info.dateStr;
+                    const dateStr = info.dateStr;
+                    if (Array.isArray(byDate[dateStr]) && byDate[dateStr].length > 0) {
+                        openDaySummaryModal(dateStr, null);
+                        return;
+                    }
+
+                    const dateInput = document.getElementById('orsSelectedDate');
+                    if (dateInput) dateInput.value = dateStr;
                     openOrsModal('orsTaskModal');
                 },
                 eventClick(info) {
+                    const props = info.event.extendedProps || {};
+                    if (props.type === 'summary') {
+                        openDaySummaryModal(props.date, props.status || null);
+                        return;
+                    }
                     openTaskDetails(info.event.id);
                 },
                 events: [],
                 eventContent(arg) {
-                    const meta = STATE_META[arg.event.extendedProps.state] || STATE_META.draft;
+                    const props = arg.event.extendedProps || {};
+                    if (props.type === 'summary') {
+                        const stateKey = String(props.status || '').toLowerCase();
+                        const count = Number(props.count || 0);
+                        const labelText = `${summaryStateLabel(stateKey)} (${count})`;
+
+                        const wrapper = document.createElement('div');
+                        wrapper.textContent = labelText;
+                        return { domNodes: [wrapper] };
+                    }
+
+                    const meta = STATE_META[props.state] || STATE_META.draft;
                     const label = meta.label.length > 16 ? meta.label.substring(0, 13) + '...' : meta.label;
                     const title = arg.event.title.length > 28 ? arg.event.title.substring(0, 25) + '...' : arg.event.title;
                     const wrapper = document.createElement('div');
-                    wrapper.classList.add('text-[11px]', 'leading-tight', 'px-1', 'py-[2px]');
+                    wrapper.classList.add('text-[11px]', 'leading-tight', 'px-1', 'py-[1px]');
                     wrapper.innerHTML = `
                         <div class="flex items-center justify-between gap-1">
                             <span class="text-slate-100">${title}</span>
@@ -726,6 +858,19 @@
                 updateModalState();
             };
 
+            window.openOrsModalStack = function (modalId) {
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.classList.remove('hidden');
+                }
+                updateModalState();
+            };
+
+            function isModalOpen(id) {
+                const el = document.getElementById(id);
+                return Boolean(el) && !el.classList.contains('hidden');
+            }
+
             window.closeOrsModal = function (modalId) {
                 const modal = document.getElementById(modalId);
                 if (modal) {
@@ -737,6 +882,13 @@
                         syncQuantityFromInput(currentTask);
                     }
                     detailTaskId = null;
+                    if (__returnToModalId === 'orsDaySummaryModal') {
+                        __returnToModalId = null;
+                    }
+                }
+                if (modalId === 'orsDaySummaryModal') {
+                    daySummaryStatusFilter = null;
+                    daySummaryDate = null;
                 }
                 updateModalState();
             };
@@ -751,6 +903,11 @@
 
             document.addEventListener('keydown', function (event) {
                 if (event.key === 'Escape') {
+                    const taskDetailsModal = document.getElementById('taskDetailsModal');
+                    if (taskDetailsModal && !taskDetailsModal.classList.contains('hidden')) {
+                        closeOrsModal('taskDetailsModal');
+                        return;
+                    }
                     orsModals.forEach((modal) => modal.classList.add('hidden'));
                     updateModalState();
                 }
@@ -776,12 +933,155 @@
                 }
             }
 
+            const orsLogForm = document.getElementById('ors-log-form');
+            const orsLogTaskSubmitBtn = document.getElementById('orsLogTaskSubmitBtn');
+
             function getTaskById(id) {
                 return tasks.find((t) => t.id === id);
             }
 
+            function isDbBackedTask(task) {
+                return /^\d+$/.test(String(task?.id ?? '').trim());
+            }
+
+            function normalizeTaskState(state) {
+                const normalized = String(state || 'draft').toLowerCase();
+                return normalized === 'validated' ? 'locked' : normalized;
+            }
+
+            function normalizeServerEntry(entry, fallback = {}) {
+                if (!entry || typeof entry !== 'object') return null;
+
+                const id = entry.id ?? fallback.id ?? null;
+                if (id === null || id === undefined || String(id).trim() === '') return null;
+
+                const state = normalizeTaskState(entry.status ?? entry.state ?? fallback.state ?? 'draft');
+                const evidenceCount = Number(
+                    entry.evidenceCount
+                    ?? entry.evidence_count
+                    ?? fallback.evidenceCount
+                    ?? 0
+                );
+                const evidenceAttached = Boolean(
+                    entry.evidenceAttached
+                    ?? entry.evidence_attached
+                    ?? fallback.evidenceAttached
+                    ?? (evidenceCount > 0)
+                );
+                const submittedAtValue = entry.submittedAt ?? entry.submitted_at ?? fallback.submittedAt ?? null;
+                const startedAtValue = entry.startedAt ?? entry.started_at ?? fallback.startedAt ?? null;
+                const stoppedAtValue = entry.stoppedAt ?? entry.stopped_at ?? fallback.stoppedAt ?? null;
+                const supervisorIdValue = entry.supervisor_id ?? entry.supervisorId ?? fallback.supervisorId ?? null;
+                const supervisorNameValue = String(entry.supervisor_name ?? entry.supervisorName ?? fallback.supervisorName ?? '').trim();
+                const totalSecondsValue = Number(
+                    entry.totalSeconds
+                    ?? entry.total_seconds
+                    ?? entry.durationSeconds
+                    ?? entry.duration_seconds
+                    ?? fallback.totalSeconds
+                    ?? 0
+                );
+
+                return {
+                    id: String(id),
+                    title: String(entry.title ?? entry.task_name ?? fallback.title ?? '--'),
+                    date: String(entry.date ?? entry.work_date ?? fallback.date ?? ''),
+                    client: String(entry.client ?? fallback.client ?? 'Revenue Collection Unit'),
+                    uwpOutputId: String(entry.uwp_output_key ?? fallback.uwpOutputId ?? ''),
+                    uwpOutputLabel: String(entry.uwp_output_label ?? entry.uwpOutputLabel ?? fallback.uwpOutputLabel ?? '--'),
+                    notes: String(entry.notes ?? fallback.notes ?? 'No notes'),
+                    quantity: String(entry.quantity ?? fallback.quantity ?? ''),
+                    supervisorId: supervisorIdValue === null || supervisorIdValue === undefined || String(supervisorIdValue).trim() === ''
+                        ? null
+                        : String(supervisorIdValue),
+                    supervisorName: supervisorNameValue !== '' ? supervisorNameValue : null,
+                    rating: String(fallback.rating ?? '--'),
+                    state: state,
+                    output_state: ['submitted', 'rated', 'locked'].includes(state) ? 'submitted' : 'none',
+                    submittedAt: submittedAtValue ? new Date(submittedAtValue) : null,
+                    evidenceRequired: true,
+                    evidenceAttached: evidenceAttached,
+                    evidenceCount: Number.isFinite(evidenceCount) ? evidenceCount : 0,
+                    evidenceFileName: entry?.evidence?.file_name ?? fallback.evidenceFileName ?? null,
+                    evidenceUploadedAt: entry?.evidence?.uploaded_at
+                        ? new Date(entry.evidence.uploaded_at)
+                        : (fallback.evidenceUploadedAt ? new Date(fallback.evidenceUploadedAt) : null),
+                    totalSeconds: Number.isFinite(totalSecondsValue) ? totalSecondsValue : 0,
+                    startedAt: startedAtValue ? new Date(startedAtValue) : null,
+                    stoppedAt: stoppedAtValue ? new Date(stoppedAtValue) : null,
+                };
+            }
+
+            function applyServerEntryToTask(task, entry) {
+                if (!task) return;
+                const normalized = normalizeServerEntry(entry, task);
+                if (!normalized) return;
+                Object.assign(task, normalized);
+
+                if (task.state === 'recording' || task.state === 'paused') {
+                    activeTaskId = task.id;
+                } else if (activeTaskId === task.id) {
+                    activeTaskId = null;
+                }
+            }
+
+            function clearFieldErrors() {
+                const fieldIds = [
+                    'orsSelectedDate',
+                    'orsUwpOutput',
+                    'orsTaskType',
+                    'orsSupervisorId',
+                    'orsNotes',
+                ];
+
+                fieldIds.forEach((id) => {
+                    const field = document.getElementById(id);
+                    field?.classList.remove('border-rose-500/50');
+                });
+
+                document.getElementById('orsLogFormErrors')?.remove();
+            }
+
+            function showFieldErrors(errorsObj) {
+                clearFieldErrors();
+                if (!orsLogForm || !errorsObj || typeof errorsObj !== 'object') {
+                    return;
+                }
+
+                const fieldMap = {
+                    work_date: 'orsSelectedDate',
+                    uwp_output_key: 'orsUwpOutput',
+                    ipcr_item_id: 'orsTaskType',
+                    supervisor_id: 'orsSupervisorId',
+                    notes: 'orsNotes',
+                };
+
+                const allMessages = [];
+                Object.entries(errorsObj).forEach(([key, messages]) => {
+                    const keyBase = String(key).split('.')[0];
+                    const fieldId = fieldMap[key] || fieldMap[keyBase];
+                    if (fieldId) {
+                        const fieldEl = document.getElementById(fieldId);
+                        fieldEl?.classList.add('border-rose-500/50');
+                    }
+
+                    const list = Array.isArray(messages) ? messages : [messages];
+                    list.forEach((msg) => {
+                        if (msg) allMessages.push(String(msg));
+                    });
+                });
+
+                if (allMessages.length === 0) return;
+
+                const box = document.createElement('div');
+                box.id = 'orsLogFormErrors';
+                box.className = 'rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-200';
+                box.innerHTML = `<ul class="list-disc space-y-1 pl-4">${allMessages.map((msg) => `<li>${escapeHtml(msg)}</li>`).join('')}</ul>`;
+                orsLogForm.prepend(box);
+            }
+
             function isLockedState(state) {
-                return state === 'submitted' || state === 'locked';
+                return state === 'submitted' || state === 'rated' || state === 'locked';
             }
 
             function syncQuantityFromInput(task) {
@@ -797,12 +1097,16 @@
 
             function formatDuration(ms) {
                 const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+
                 const hours = Math.floor(totalSeconds / 3600);
                 const minutes = Math.floor((totalSeconds % 3600) / 60);
-                if (hours === 0) {
-                    return `${minutes}m`;
+                const seconds = totalSeconds % 60;
+
+                if (hours > 0) {
+                    return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
                 }
-                return `${hours}h ${minutes}m`;
+
+                return `${minutes}:${String(seconds).padStart(2, '0')}`;
             }
 
             function formatTime(dateObj) {
@@ -824,6 +1128,15 @@
             }
 
             function computeElapsed(task) {
+                if (typeof task.totalSeconds === 'number' || task.startedAt) {
+                    const baseMs = Math.max(0, Number(task.totalSeconds || 0)) * 1000;
+                    const startedAt = task.startedAt instanceof Date ? task.startedAt : (task.startedAt ? new Date(task.startedAt) : null);
+                    if (task.state === 'recording' && startedAt && !Number.isNaN(startedAt.getTime())) {
+                        return baseMs + (Date.now() - startedAt.getTime());
+                    }
+                    return baseMs;
+                }
+
                 const base = task.durationMs || 0;
                 if (task.state === 'recording' && task.startTime) {
                     return base + (Date.now() - task.startTime.getTime());
@@ -832,25 +1145,165 @@
             }
 
             function refreshCalendar() {
+                rebuildCalendarBuckets();
                 calendar.removeAllEvents();
-                tasks.forEach((task) => {
-                    const meta = STATE_META[task.state] || STATE_META.draft;
-                    calendar.addEvent({
-                        id: task.id,
-                        title: task.title,
-                        start: task.date,
-                        color: meta.color,
-                        extendedProps: {
-                            state: task.state,
-                            client: task.client,
-                            requestId: task.requestId,
-                            output: task.output,
-                            notes: task.notes,
-                            duration: formatDuration(computeElapsed(task)),
-                            rating: task.rating || '--'
-                        }
-                    });
+
+                const stateOrder = ['recording', 'paused', 'draft', 'submitted', 'rated', 'locked'];
+                const stateIndex = (state) => {
+                    const idx = stateOrder.indexOf(state);
+                    return idx === -1 ? Number.MAX_SAFE_INTEGER : idx;
+                };
+
+                Object.keys(byDateStatus).sort().forEach((dateKey) => {
+                    const statusMap = byDateStatus[dateKey] || {};
+                    Object.keys(statusMap)
+                        .sort((left, right) => stateIndex(left) - stateIndex(right) || left.localeCompare(right))
+                        .forEach((stateKey) => {
+                            const count = Array.isArray(statusMap[stateKey]) ? statusMap[stateKey].length : 0;
+                            if (count <= 0) return;
+
+                            calendar.addEvent({
+                                id: `sum-${dateKey}-${stateKey}`,
+                                title: `${summaryStateLabel(stateKey)} (${count})`,
+                                start: dateKey,
+                                allDay: true,
+                                classNames: ['ors-summary-event', `is-${stateKey}`],
+                                extendedProps: {
+                                    type: 'summary',
+                                    date: dateKey,
+                                    status: stateKey,
+                                    count: count,
+                                }
+                            });
+                        });
                 });
+            }
+
+            function openDaySummaryModal(dateStr, statusFilter = null, skipOpen = false) {
+                const dateKey = String(dateStr || '').trim();
+                if (!dateKey) return;
+
+                daySummaryDate = dateKey;
+                daySummaryStatusFilter = statusFilter ? String(statusFilter).toLowerCase() : null;
+                const filterKey = daySummaryStatusFilter;
+                if (daySummaryDateLabelEl) {
+                    daySummaryDateLabelEl.textContent = filterKey
+                        ? `${formatDateLabel(dateKey)} - ${summaryStateLabel(filterKey)}`
+                        : formatDateLabel(dateKey);
+                }
+
+                if (!daySummaryListEl) {
+                    if (!skipOpen) {
+                        openOrsModal('orsDaySummaryModal');
+                    }
+                    return;
+                }
+
+                daySummaryListEl.innerHTML = '';
+
+                const statusMap = byDateStatus[dateKey] || {};
+                const stateOrder = ['recording', 'paused', 'draft', 'submitted', 'rated', 'locked'];
+                let statusKeys = filterKey ? [filterKey] : Object.keys(statusMap);
+                statusKeys = statusKeys
+                    .filter((stateKey) => Array.isArray(statusMap[stateKey]) && statusMap[stateKey].length > 0)
+                    .sort((left, right) => {
+                        const l = stateOrder.indexOf(left);
+                        const r = stateOrder.indexOf(right);
+                        const li = l === -1 ? Number.MAX_SAFE_INTEGER : l;
+                        const ri = r === -1 ? Number.MAX_SAFE_INTEGER : r;
+                        return li - ri || left.localeCompare(right);
+                    });
+
+                if (statusKeys.length === 0) {
+                    const empty = document.createElement('p');
+                    empty.className = 'rounded-lg border border-slate-800 bg-slate-950/60 px-3 py-2 text-sm text-slate-300';
+                    empty.textContent = 'No ORS entries for this date.';
+                    daySummaryListEl.appendChild(empty);
+                } else {
+                    statusKeys.forEach((stateKey) => {
+                        const meta = STATE_META[stateKey] || STATE_META.draft;
+                        const entries = statusMap[stateKey];
+
+                        const section = document.createElement('div');
+                        section.className = 'rounded-xl border border-slate-800 bg-slate-950/40 p-3';
+
+                        if (!filterKey) {
+                            const header = document.createElement('div');
+                            header.className = 'mb-2 flex items-center justify-between';
+                            header.innerHTML = `
+                                <span class="text-sm font-semibold text-white">${summaryStateLabel(stateKey)}</span>
+                                <span class="rounded-full border px-2 py-[2px] text-[11px]" style="color:${meta.color}; border-color:${meta.color};">${entries.length}</span>
+                            `;
+                            section.appendChild(header);
+                        }
+
+                        const list = document.createElement('div');
+                        list.className = 'space-y-2';
+
+                        entries.forEach((entry) => {
+                            const itemBtn = document.createElement('button');
+                            itemBtn.type = 'button';
+                            itemBtn.className = 'w-full rounded-lg border border-slate-800 bg-slate-900/50 px-3 py-2 text-left hover:bg-slate-800';
+                            itemBtn.innerHTML = `
+                                <div class="flex items-start justify-between gap-2">
+                                    <div class="min-w-0">
+                                        <p class="truncate text-sm font-semibold text-white">${entry.title || '--'}</p>
+                                        <p class="mt-1 text-[11px] text-slate-400">
+                                            Duration: <span class="ors-day-duration" data-task-id="${entry.id}">
+                                                ${formatDuration(computeElapsed(entry))}
+                                            </span>
+                                        </p>
+                                    </div>
+                                    <div class="shrink-0 text-right">
+                                        <span class="rounded-full border px-2 py-[2px] text-[11px]" style="color:${meta.color}; border-color:${meta.color};">${summaryStateLabel(stateKey)}</span>
+                                        <p class="mt-1 text-[11px] ${entry.evidenceAttached ? 'text-emerald-300' : 'text-slate-400'}">${entry.evidenceAttached ? 'Evidence' : 'No evidence'}</p>
+                                    </div>
+                                </div>
+                            `;
+                            itemBtn.addEventListener('click', () => {
+                                __returnToModalId = 'orsDaySummaryModal';
+                                openTaskDetails(entry.id);
+                            });
+                            list.appendChild(itemBtn);
+                        });
+
+                        section.appendChild(list);
+                        daySummaryListEl.appendChild(section);
+                    });
+                }
+
+                if (!skipOpen) {
+                    openOrsModal('orsDaySummaryModal');
+                }
+            }
+
+            function refreshDaySummaryIfOpen(changedTask = null) {
+                if (!isModalOpen('orsDaySummaryModal') || !daySummaryDate) {
+                    return;
+                }
+
+                if (changedTask) {
+                    const changedTaskDate = String(changedTask?.date || '').trim();
+                    if (changedTaskDate !== String(daySummaryDate || '').trim()) {
+                        return;
+                    }
+                }
+
+                const currentFilter = daySummaryStatusFilter ? String(daySummaryStatusFilter).toLowerCase() : null;
+                const dateKey = String(daySummaryDate || '').trim();
+                const statusMap = byDateStatus[dateKey] || {};
+                const hasAny = Object.values(statusMap).some((arr) => Array.isArray(arr) && arr.length > 0);
+                const hasFiltered = currentFilter
+                    ? (Array.isArray(statusMap[currentFilter]) && statusMap[currentFilter].length > 0)
+                    : hasAny;
+
+                if (currentFilter && !hasFiltered && hasAny) {
+                    daySummaryStatusFilter = null;
+                    openDaySummaryModal(dateKey, null, true);
+                    return;
+                }
+
+                openDaySummaryModal(dateKey, currentFilter, true);
             }
 
             function setStatusBadge(element, state) {
@@ -879,13 +1332,10 @@
 
                 document.getElementById('taskDetailTitle').textContent = task.title || '--';
                 document.getElementById('taskDetailDate').textContent = `Date: ${task.date || '--'}`;
-                document.getElementById('taskDetailClient').textContent = task.client || '--';
-                document.getElementById('taskDetailRequest').textContent = task.requestId || '--';
+                document.getElementById('taskDetailClient').textContent = task.supervisorName || '--';
                 document.getElementById('taskDetailMfo').textContent = task.uwpOutputLabel || '--';
-                document.getElementById('taskDetailOutput').textContent = task.output || '--';
                 document.getElementById('taskDetailStatusText').textContent = (STATE_META[task.state] || STATE_META.draft).label;
                 document.getElementById('taskDetailDuration').textContent = formatDuration(computeElapsed(task));
-                document.getElementById('taskDetailRating').textContent = task.rating || '--';
                 document.getElementById('taskDetailNotes').textContent = task.notes || '--';
 
                 const outputStateEl = document.getElementById('taskDetailOutputState');
@@ -915,11 +1365,15 @@
 
                 const evidenceFileEl = document.getElementById('taskDetailEvidenceFile');
                 if (evidenceFileEl) {
-                    if (task.evidenceAttached && task.evidenceFileName) {
+                    if (task.evidenceAttached) {
+                        const evidenceCount = Number(task.evidenceCount || 0);
+                        const label = evidenceCount > 1
+                            ? `${evidenceCount} files attached`
+                            : (task.evidenceFileName || (evidenceCount === 1 ? '1 file attached' : '--'));
                         const uploadedAtText = task.evidenceUploadedAt
                             ? ` (${formatDateTime(task.evidenceUploadedAt)})`
                             : '';
-                        evidenceFileEl.textContent = `${task.evidenceFileName}${uploadedAtText}`;
+                        evidenceFileEl.textContent = `${label}${uploadedAtText}`;
                     } else {
                         evidenceFileEl.textContent = '--';
                     }
@@ -943,21 +1397,37 @@
                     uploadInput.classList.toggle('opacity-70', uploadDisabled);
                     uploadInput.onchange = function () {
                         if (uploadDisabled) return;
-                        const file = this.files && this.files[0] ? this.files[0] : null;
-                        if (file) {
+                        const files = Array.from(this.files || []);
+                        if (files.length > 0) {
                             task.evidenceAttached = true;
-                            task.evidenceFileName = file.name;
+                            task.evidenceCount = files.length;
+                            task.evidenceFileName = files.length === 1 ? files[0].name : `${files.length} files selected`;
                             task.evidenceUploadedAt = new Date();
-                        } else {
+                        } else if (!task.evidenceAttached && Number(task.evidenceCount || 0) <= 0) {
                             task.evidenceAttached = false;
+                            task.evidenceCount = 0;
                             task.evidenceFileName = null;
                             task.evidenceUploadedAt = null;
                         }
+                        syncQuantityFromInput(task);
                         openTaskDetails(task.id);
                     };
                 }
 
                 setStatusBadge(document.getElementById('taskDetailStatusBadge'), task.state);
+
+                [
+                    'taskDetailStartBtn',
+                    'taskDetailPauseBtn',
+                    'taskDetailResumeBtn',
+                    'taskDetailStopBtn',
+                    'taskDetailSubmitBtn',
+                ].forEach((buttonId) => {
+                    const button = document.getElementById(buttonId);
+                    if (button) {
+                        button.dataset.taskId = String(task.id);
+                    }
+                });
 
                 const lockBadge = document.getElementById('taskDetailLockBadge');
                 const lockMsg = document.getElementById('taskDetailLockMessage');
@@ -998,97 +1468,279 @@
                 toggleAction(document.getElementById('taskDetailStopBtn'), task.state === 'recording' || task.state === 'paused');
                 toggleAction(document.getElementById('taskDetailSubmitBtn'), !locked && (task.state === 'draft' || isMissing));
 
-                openOrsModal('taskDetailsModal');
+                if (__returnToModalId === 'orsDaySummaryModal') {
+                    openOrsModalStack('taskDetailsModal');
+                } else {
+                    openOrsModal('taskDetailsModal');
+                }
             }
 
-            function startTask(taskId) {
+            async function startTask(taskId) {
                 const task = getTaskById(taskId);
                 if (!task) return false;
-                if (activeTaskId && activeTaskId !== taskId) return false;
                 if (isLockedState(task.state)) return false;
 
-                task.state = 'recording';
-                task.startTime = new Date();
-                activeTaskId = taskId;
+                if (isDbBackedTask(task)) {
+                    try {
+                        const data = await postOrsAction(ORS_ROUTES.start(task.id));
+                        if (!data?.ok || !data?.entry) {
+                            throw new Error('Unable to start task.');
+                        }
+                        applyServerEntryToTask(task, data.entry);
+                        if (data?.message) {
+                            showFlash('success', data.message);
+                        }
+                    } catch (error) {
+                        const rawMessage = String(error?.message || 'Unable to start task.');
+                        const message = rawMessage.toLowerCase().includes('currently recording')
+                            ? 'Only one task can be recording at a time.'
+                            : rawMessage;
+                        showFlash('error', message);
+                        alert(message);
+                        return false;
+                    }
+                } else {
+                    if (activeTaskId && activeTaskId !== taskId) return false;
+                    task.state = 'recording';
+                    task.startTime = new Date();
+                    activeTaskId = taskId;
+                }
 
                 refreshCalendar();
+                refreshDaySummaryIfOpen(task);
+                updateActivePanel();
+                openTaskDetails(taskId);
+                return true;
+            }
+
+            async function pauseTask(taskId) {
+                const task = getTaskById(taskId);
+                if (!task || task.state !== 'recording') return;
+
+                if (isDbBackedTask(task)) {
+                    try {
+                        const data = await postOrsAction(ORS_ROUTES.pause(task.id));
+                        if (!data?.ok || !data?.entry) {
+                            throw new Error('Unable to pause task.');
+                        }
+                        applyServerEntryToTask(task, data.entry);
+                        if (data?.message) {
+                            showFlash('success', data.message);
+                        }
+                    } catch (error) {
+                        const message = String(error?.message || 'Unable to pause task.');
+                        showFlash('error', message);
+                        alert(message);
+                        return false;
+                    }
+                } else {
+                    if (task.startTime) {
+                        task.durationMs = (task.durationMs || 0) + (Date.now() - task.startTime.getTime());
+                    }
+                    task.startTime = null;
+                    task.state = 'paused';
+                    activeTaskId = taskId;
+                }
+
+                refreshCalendar();
+                refreshDaySummaryIfOpen(task);
                 updateActivePanel();
                 if (detailTaskId === taskId) openTaskDetails(taskId);
                 return true;
             }
 
-            function pauseTask(taskId) {
-                const task = getTaskById(taskId);
-                if (!task || task.state !== 'recording') return;
-                if (task.startTime) {
-                    task.durationMs = (task.durationMs || 0) + (Date.now() - task.startTime.getTime());
-                }
-                task.startTime = null;
-                task.state = 'paused';
-                activeTaskId = taskId;
-
-                refreshCalendar();
-                updateActivePanel();
-                if (detailTaskId === taskId) openTaskDetails(taskId);
-            }
-
-            function resumeTask(taskId) {
+            async function resumeTask(taskId) {
                 const task = getTaskById(taskId);
                 if (!task || task.state !== 'paused') return;
-                if (activeTaskId && activeTaskId !== taskId) return;
 
-                task.startTime = new Date();
-                task.state = 'recording';
-                activeTaskId = taskId;
-
-                refreshCalendar();
-                updateActivePanel();
-                if (detailTaskId === taskId) openTaskDetails(taskId);
-            }
-
-            function stopTask(taskId) {
-                const task = getTaskById(taskId);
-                if (!task) return;
-                syncQuantityFromInput(task);
-
-                if (task.state === 'recording' && task.startTime) {
-                    task.durationMs = (task.durationMs || 0) + (Date.now() - task.startTime.getTime());
+                if (isDbBackedTask(task)) {
+                    try {
+                        const data = await postOrsAction(ORS_ROUTES.resume(task.id));
+                        if (!data?.ok || !data?.entry) {
+                            throw new Error('Unable to resume task.');
+                        }
+                        applyServerEntryToTask(task, data.entry);
+                        if (data?.message) {
+                            showFlash('success', data.message);
+                        }
+                    } catch (error) {
+                        const rawMessage = String(error?.message || 'Unable to resume task.');
+                        const message = rawMessage.toLowerCase().includes('currently recording')
+                            ? 'Only one task can be recording at a time.'
+                            : rawMessage;
+                        showFlash('error', message);
+                        alert(message);
+                        return false;
+                    }
+                } else {
+                    if (activeTaskId && activeTaskId !== taskId) return false;
+                    task.startTime = new Date();
+                    task.state = 'recording';
+                    activeTaskId = taskId;
                 }
-                task.startTime = null;
-                task.state = 'draft';
-
-                if (activeTaskId === taskId) activeTaskId = null;
 
                 refreshCalendar();
+                refreshDaySummaryIfOpen(task);
                 updateActivePanel();
                 if (detailTaskId === taskId) openTaskDetails(taskId);
+                return true;
             }
 
-            function submitTask(taskId) {
+            async function stopTask(taskId) {
                 const task = getTaskById(taskId);
                 if (!task) return false;
-                if (task.state === 'recording') return false;
+
+                if (isDbBackedTask(task)) {
+                    try {
+                        const data = await postOrsAction(ORS_ROUTES.stop(task.id));
+                        if (!data?.ok || !data?.entry) {
+                            throw new Error('Unable to stop task.');
+                        }
+                        applyServerEntryToTask(task, data.entry);
+                        if (data?.message) {
+                            showFlash('success', data.message);
+                        }
+                    } catch (error) {
+                        const message = String(error?.message || 'Unable to stop task.');
+                        showFlash('error', message);
+                        alert(message);
+                        return false;
+                    }
+                } else {
+                    syncQuantityFromInput(task);
+
+                    if (task.state === 'recording' && task.startTime) {
+                        task.durationMs = (task.durationMs || 0) + (Date.now() - task.startTime.getTime());
+                    }
+                    task.startTime = null;
+                    task.state = 'draft';
+
+                    if (activeTaskId === taskId) activeTaskId = null;
+                }
+
+                refreshCalendar();
+                refreshDaySummaryIfOpen(task);
+                updateActivePanel();
+                return true;
+            }
+
+            async function submitTask(taskId) {
+                const task = getTaskById(taskId);
+                if (!task) return false;
                 if (isLockedState(task.state)) return false;
+
                 const qtyValue = syncQuantityFromInput(task);
                 if (!qtyValue) {
                     alert('Quantity is required before submitting an ORS entry.');
                     return false;
                 }
-                if (task.evidenceRequired && !task.evidenceAttached) {
+
+                const uploadInput = document.getElementById('taskDetailUpload');
+                const selectedFiles = Array.from(uploadInput?.files || []);
+                const hasSelectedFiles = selectedFiles.length > 0;
+                const hasExistingEvidence = Boolean(task.evidenceAttached) || Number(task.evidenceCount || 0) > 0;
+                if (!hasSelectedFiles && !hasExistingEvidence) {
                     alert('Evidence attachment is required before submitting an ORS entry.');
                     return false;
                 }
 
+                if (isDbBackedTask(task)) {
+                    try {
+                        const url = actionUrl(ORS_ACTIONS.submit, task.id);
+                        if (!url) {
+                            throw new Error('Submit route is not configured.');
+                        }
+
+                        const fd = new FormData();
+                        fd.append('quantity', qtyValue);
+                        selectedFiles.forEach((file) => {
+                            fd.append('evidence[]', file);
+                        });
+
+                        const res = await fetch(url, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': String(orsConfig.csrf || ''),
+                                'Accept': 'application/json',
+                            },
+                            body: fd,
+                        });
+
+                        const data = await res.json().catch(() => ({}));
+                        if (!res.ok) {
+                            const firstValidation = data?.errors
+                                ? Object.values(data.errors)[0]?.[0]
+                                : null;
+                            throw new Error(firstValidation || data?.message || 'Submit failed. Please try again.');
+                        }
+
+                        if (!data?.ok) {
+                            throw new Error('Unable to submit ORS entry.');
+                        }
+
+                        task.quantity = qtyValue;
+                        task.state = 'submitted';
+                        task.output_state = 'submitted';
+                        task.submittedAt = data?.submitted_at ? new Date(data.submitted_at) : new Date();
+                        task.startedAt = null;
+                        task.stoppedAt = data?.locked_at ? new Date(data.locked_at) : new Date();
+                        task.totalSeconds = Number(data?.total_seconds || 0);
+                        task.evidenceCount = Number(data?.evidence_count || task.evidenceCount || 0);
+                        task.evidenceAttached = task.evidenceCount > 0 || hasExistingEvidence || hasSelectedFiles;
+                        if (task.evidenceCount > 1) {
+                            task.evidenceFileName = `${task.evidenceCount} files attached`;
+                        } else {
+                            task.evidenceFileName = data?.evidence?.file_name
+                                || (selectedFiles.length === 1 ? selectedFiles[0].name : task.evidenceFileName);
+                        }
+                        task.evidenceUploadedAt = data?.evidence?.uploaded_at
+                            ? new Date(data.evidence.uploaded_at)
+                            : (hasSelectedFiles ? new Date() : task.evidenceUploadedAt);
+                        if (uploadInput) {
+                            uploadInput.value = '';
+                        }
+                        if (activeTaskId === taskId) activeTaskId = null;
+
+                        refreshCalendar();
+                        refreshDaySummaryIfOpen(task);
+                        updateActivePanel();
+                        closeOrsModal('taskDetailsModal');
+                        showFlash('success', 'Task submitted.');
+                        return true;
+                    } catch (error) {
+                        const message = String(error?.message || 'Submit failed. Please try again.');
+                        showFlash('error', message);
+                        alert(message);
+                        return false;
+                    }
+                }
+
+                task.quantity = qtyValue;
                 task.state = 'submitted';
                 task.output_state = 'submitted';
                 task.submittedAt = new Date();
-                task.startTime = null;
-
+                task.startedAt = null;
+                task.stoppedAt = new Date();
+                if (hasSelectedFiles) {
+                    task.evidenceCount = selectedFiles.length;
+                    task.evidenceAttached = true;
+                    task.evidenceFileName = selectedFiles.length > 1
+                        ? `${selectedFiles.length} files attached`
+                        : selectedFiles[0].name;
+                    task.evidenceUploadedAt = new Date();
+                } else {
+                    task.evidenceAttached = hasExistingEvidence;
+                    task.evidenceCount = Number(task.evidenceCount || (hasExistingEvidence ? 1 : 0));
+                }
+                if (uploadInput) {
+                    uploadInput.value = '';
+                }
                 if (activeTaskId === taskId) activeTaskId = null;
 
                 refreshCalendar();
+                refreshDaySummaryIfOpen(task);
                 updateActivePanel();
-                if (detailTaskId === taskId) openTaskDetails(taskId);
+                closeOrsModal('taskDetailsModal');
                 return true;
             }
 
@@ -1112,7 +1764,7 @@
                 activeCard.classList.remove('hidden');
 
                 nameEl.textContent = task.title || '--';
-                startEl.textContent = formatTime(task.startTime);
+                startEl.textContent = formatTime(task.startedAt || task.startTime);
                 elapsedEl.textContent = formatDuration(computeElapsed(task));
                 statusEl.textContent = task.state === 'paused' ? 'Paused' : 'Recording';
                 statusEl.className = 'font-semibold ' + (task.state === 'paused' ? 'text-amber-200' : 'text-amber-300');
@@ -1121,9 +1773,22 @@
                 const stopBtn = document.getElementById('activeStopBtn');
                 const submitBtn = document.getElementById('activeSubmitBtn');
 
-                pauseBtn.textContent = task.state === 'paused' ? 'Resume' : 'Pause';
-                pauseBtn.onclick = () => task.state === 'paused' ? resumeTask(task.id) : pauseTask(task.id);
-                stopBtn.onclick = () => stopTask(task.id);
+                const pauseLabel = pauseBtn?.querySelector('[data-button-label]');
+                if (pauseLabel) {
+                    pauseLabel.textContent = task.state === 'paused' ? 'Resume' : 'Pause';
+                }
+
+                pauseBtn.onclick = () => runWithLoading(
+                    pauseBtn,
+                    task.state === 'paused' ? 'Resuming...' : 'Pausing...',
+                    () => (task.state === 'paused' ? resumeTask(task.id) : pauseTask(task.id))
+                );
+                stopBtn.onclick = () => runWithLoading(stopBtn, 'Stopping...', async () => {
+                    const ok = await stopTask(task.id);
+                    if (ok) {
+                        openTaskDetails(task.id);
+                    }
+                });
                 submitBtn.onclick = () => runWithLoading(submitBtn, 'Submitting...', () => submitTask(task.id));
             }
 
@@ -1135,129 +1800,201 @@
                 if (durationEl) durationEl.textContent = formatDuration(computeElapsed(task));
             }
 
-            function wireTaskForm() {
-                const taskForm = document.querySelector('#orsTaskModal form');
-                if (!taskForm) return;
+            function updateDaySummaryDurations() {
+                if (!isModalOpen('orsDaySummaryModal')) return;
 
-                taskForm.addEventListener('submit', function (e) {
-                    e.preventDefault();
+                const nodes = document.querySelectorAll('#daySummaryList .ors-day-duration[data-task-id]');
+                if (!nodes.length) return;
 
-                    const selectedDate = document.getElementById('orsSelectedDate').value;
-                    const uwpOutputSelect = document.getElementById('orsUwpOutput');
-                    const taskTypeSelect = document.getElementById('orsTaskType');
-                    const outputSelect = document.getElementById('orsOutput');
-                    const requestInput = document.getElementById('orsRequestId');
-                    const notesInput = document.getElementById('orsNotes');
-                    const submitBtn = taskForm.querySelector('button[type="submit"]');
+                nodes.forEach((node) => {
+                    const taskId = String(node.getAttribute('data-task-id') || '').trim();
+                    if (!taskId) return;
 
-                    const uwpOutputKey = uwpOutputSelect ? uwpOutputSelect.value : '';
-                    const uwpOutputLabel = (uwpOutputSelect && uwpOutputSelect.selectedIndex > -1)
-                        ? uwpOutputSelect.options[uwpOutputSelect.selectedIndex].text
-                        : '';
-                    const taskType = taskTypeSelect ? taskTypeSelect.value : '';
-                    const outputType = outputSelect ? outputSelect.value : '';
-                    const requestId = requestInput ? requestInput.value.trim() : '';
-                    const validIndicators = UWP_INDICATORS[uwpOutputKey] || [];
+                    const task = getTaskById(taskId);
+                    if (!task) return;
 
-                    if (!uwpOutputKey || !taskType || !selectedDate || !outputType) {
-                        alert('Select a valid UWP output and task / activity.');
-                        return;
-                    }
-                    if (!validIndicators.includes(taskType)) {
-                        alert('Task / activity must match the selected UWP output.');
-                        return;
-                    }
+                    if (String(task.state).toLowerCase() !== 'recording') return;
 
-                    setButtonLoading(submitBtn, true, 'Logging...');
-
-                    setTimeout(() => {
-                        const currentActive = activeTaskId ? getTaskById(activeTaskId) : null;
-                        if (currentActive && currentActive.state === 'recording') {
-                            if (currentActive.startTime) {
-                                currentActive.durationMs = (currentActive.durationMs || 0) + (Date.now() - currentActive.startTime.getTime());
-                            }
-                            currentActive.startTime = null;
-                            currentActive.state = 'draft';
-                            activeTaskId = null;
-                        }
-
-                        const newTask = {
-                            id: `task-${Date.now()}`,
-                            title: taskTypeSelect.options[taskTypeSelect.selectedIndex].text,
-                            date: selectedDate,
-                            client: 'Revenue Collection Unit',
-                            requestId: requestId,
-                            output: outputSelect.options[outputSelect.selectedIndex].text,
-                            uwpOutputId: uwpOutputKey,
-                            uwpOutputLabel: uwpOutputLabel,
-                            notes: notesInput && notesInput.value ? notesInput.value : 'No notes',
-                            quantity: '',
-                            rating: '--',
-                            state: 'recording',
-                            output_state: 'none',
-                            submittedAt: null,
-                            evidenceRequired: true,
-                            evidenceAttached: false,
-                            evidenceFileName: null,
-                            evidenceUploadedAt: null,
-                            startTime: new Date(),
-                            durationMs: 0
-                        };
-
-                        tasks.push(newTask);
-                        activeTaskId = newTask.id;
-
-                        refreshCalendar();
-                        if (calendar && selectedDate) calendar.gotoDate(selectedDate);
-                        updateActivePanel();
-
-                        closeOrsModal('orsTaskModal');
-                        taskForm.reset();
-                        document.getElementById('orsSelectedDate').value = '';
-                        setButtonLoading(submitBtn, false);
-
-                        openTaskDetails(newTask.id);
-                    }, 400);
+                    node.textContent = formatDuration(computeElapsed(task));
                 });
             }
 
             function wireLogButton() {
                 const btn = document.getElementById('openLogTaskBtn');
                 if (!btn) return;
+
                 btn.addEventListener('click', () => {
                     const today = new Date().toISOString().split('T')[0];
-                    document.getElementById('orsSelectedDate').value = today;
+
+                    const dateInput = document.getElementById('orsSelectedDate');
+                    if (dateInput) dateInput.value = today;
+
                     openOrsModal('orsTaskModal');
                 });
             }
 
-            wireTaskForm();
+            function wireDaySummaryLogButton() {
+                if (!daySummaryLogBtn) return;
+                daySummaryLogBtn.addEventListener('click', () => {
+                    if (!daySummaryDate) return;
+                    const dateInput = document.getElementById('orsSelectedDate');
+                    if (dateInput) dateInput.value = daySummaryDate;
+                    openOrsModal('orsTaskModal');
+                });
+            }
+
             wireLogButton();
+            wireDaySummaryLogButton();
             refreshCalendar();
             updateActivePanel();
 
             setInterval(() => {
                 if (activeTaskId) updateActivePanel();
                 if (detailTaskId) updateDetailElapsed();
+                updateDaySummaryDurations();
             }, 1000);
 
-            function runWithLoading(button, loadingText, actionFn) {
+            async function runWithLoading(button, loadingText, actionFn) {
                 if (!button || typeof actionFn !== 'function') return;
+                if (button.dataset.loadingActive === 'true') return;
+
+                button.dataset.loadingActive = 'true';
                 setButtonLoading(button, true, loadingText);
-                setTimeout(() => {
-                    actionFn();
+
+                try {
+                    await actionFn();
+                } finally {
                     setButtonLoading(button, false);
-                }, 150);
+                    delete button.dataset.loadingActive;
+                }
+            }
+
+            if (orsLogForm && orsLogTaskSubmitBtn) {
+                orsLogForm.addEventListener('submit', async (event) => {
+                    event.preventDefault();
+                    if (orsLogForm.dataset.loadingActive === 'true') return;
+
+                    clearFlash();
+                    clearFieldErrors();
+
+                    await runWithLoading(orsLogTaskSubmitBtn, 'Logging...', async () => {
+                        orsLogForm.dataset.loadingActive = 'true';
+                        try {
+                            const csrfToken = String(orsConfig.csrf || '')
+                                || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+                                || document.querySelector('#ors-log-form input[name="_token"]')?.value
+                                || '';
+
+                            const formData = new FormData(orsLogForm);
+                            const response = await fetch(orsLogForm.action, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': csrfToken,
+                                    'Accept': 'application/json',
+                                },
+                                body: formData,
+                            });
+
+                            const payload = await response.json().catch(() => null);
+                            if (!response.ok) {
+                                if (response.status === 422 && payload?.errors) {
+                                    showFieldErrors(payload.errors);
+                                    showFlash('error', payload?.message || 'Please correct the highlighted fields.');
+                                    return;
+                                }
+
+                                showFlash('error', payload?.message || 'Unable to log ORS task. Please try again.');
+                                return;
+                            }
+
+                            const entry = payload?.entry ?? payload;
+                            const supervisorSelect = document.getElementById('orsSupervisorId');
+                            const selectedSupervisorId = String(supervisorSelect?.value || '').trim();
+                            const selectedSupervisorName = selectedSupervisorId !== ''
+                                ? String(supervisorSelect?.selectedOptions?.[0]?.textContent || '').trim()
+                                : '';
+                            const fallback = {
+                                date: String(document.getElementById('orsSelectedDate')?.value || ''),
+                                uwpOutputId: String(document.getElementById('orsUwpOutput')?.value || ''),
+                                uwpOutputLabel: document.getElementById('orsUwpOutput')?.selectedOptions?.[0]?.textContent?.trim() || '--',
+                                notes: String(document.getElementById('orsNotes')?.value || ''),
+                                supervisorId: selectedSupervisorId !== '' ? selectedSupervisorId : null,
+                                supervisorName: selectedSupervisorName !== '' ? selectedSupervisorName : null,
+                                quantity: '',
+                                state: 'draft',
+                            };
+
+                            const task = normalizeServerEntry(entry, fallback);
+                            if (!task) {
+                                showFlash('error', payload?.message || 'Unable to parse ORS task response.');
+                                return;
+                            }
+
+                            const existingTaskIndex = tasks.findIndex((item) => String(item.id) === String(task.id));
+                            if (existingTaskIndex >= 0) {
+                                tasks[existingTaskIndex] = { ...tasks[existingTaskIndex], ...task };
+                            } else {
+                                tasks.push(task);
+                            }
+
+                            const selectedDateValue = String(document.getElementById('orsSelectedDate')?.value || task.date || '');
+                            orsLogForm.reset();
+                            const dateInput = document.getElementById('orsSelectedDate');
+                            if (dateInput && selectedDateValue) {
+                                dateInput.value = selectedDateValue;
+                            }
+                            resetTaskOptions();
+                            clearFieldErrors();
+
+                            const autoStartOk = await startTask(task.id);
+                            if (!autoStartOk) {
+                                refreshCalendar();
+                                refreshDaySummaryIfOpen(task);
+                                updateActivePanel();
+                            }
+
+                            closeOrsModal('orsTaskModal');
+                            showFlash('success', autoStartOk ? 'Logged task. Timer started.' : 'Logged task.');
+                        } catch (error) {
+                            const message = String(error?.message || 'Unexpected error while logging ORS task.');
+                            showFlash('error', message);
+                            alert(message);
+                        } finally {
+                            delete orsLogForm.dataset.loadingActive;
+                        }
+                    });
+                });
             }
 
             document.getElementById('taskDetailStartBtn')?.addEventListener('click', (e) => {
-                runWithLoading(e.currentTarget, 'Starting...', () => startTask(detailTaskId));
+                const taskId = String(e.currentTarget?.dataset?.taskId || '').trim();
+                if (!taskId) return;
+                runWithLoading(e.currentTarget, 'Starting...', () => startTask(taskId));
             });
-            document.getElementById('taskDetailPauseBtn')?.addEventListener('click', () => pauseTask(detailTaskId));
-            document.getElementById('taskDetailResumeBtn')?.addEventListener('click', () => resumeTask(detailTaskId));
-            document.getElementById('taskDetailStopBtn')?.addEventListener('click', () => stopTask(detailTaskId));
+            document.getElementById('taskDetailPauseBtn')?.addEventListener('click', (e) => {
+                const taskId = String(e.currentTarget?.dataset?.taskId || '').trim();
+                if (!taskId) return;
+                runWithLoading(e.currentTarget, 'Pausing...', () => pauseTask(taskId));
+            });
+            document.getElementById('taskDetailResumeBtn')?.addEventListener('click', (e) => {
+                const taskId = String(e.currentTarget?.dataset?.taskId || '').trim();
+                if (!taskId) return;
+                runWithLoading(e.currentTarget, 'Resuming...', () => resumeTask(taskId));
+            });
+            document.getElementById('taskDetailStopBtn')?.addEventListener('click', (e) => {
+                const taskId = String(e.currentTarget?.dataset?.taskId || '').trim();
+                if (!taskId) return;
+                runWithLoading(e.currentTarget, 'Stopping...', async () => {
+                    const ok = await stopTask(taskId);
+                    if (ok) {
+                        openTaskDetails(taskId);
+                    }
+                });
+            });
             document.getElementById('taskDetailSubmitBtn')?.addEventListener('click', (e) => {
-                runWithLoading(e.currentTarget, 'Submitting...', () => submitTask(detailTaskId));
+                const taskId = String(e.currentTarget?.dataset?.taskId || '').trim();
+                if (!taskId) return;
+                runWithLoading(e.currentTarget, 'Submitting...', () => submitTask(taskId));
             });
         });
     </script>

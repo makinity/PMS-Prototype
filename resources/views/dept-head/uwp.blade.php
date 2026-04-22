@@ -27,6 +27,9 @@
                 focus:ring-2 focus:ring-blue-500/40 focus:outline-none"
             style="background:#0f172a;color:#e5e7eb;"
         />
+        @php
+            $statusFilter = strtolower((string) ($selectedStatus ?? request('status', '')));
+        @endphp
         <form method="GET" action="{{ route('dept-head.uwp.index') }}">
             <select
                 name="status"
@@ -34,11 +37,11 @@
                 style="background:#0f172a;color:#e5e7eb;"
                 class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2
                 text-sm text-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                <option value="" {{ request('status') === null || request('status') === '' ? 'selected' : '' }}>All Status</option>
-                <option value="submitted" {{ request('status') === 'submitted' ? 'selected' : '' }}>Submitted</option>
-                <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>Draft</option>
-                <option value="endorsed" {{ request('status') === 'endorsed' ? 'selected' : '' }}>Endorsed</option>
-                <option value="returned" {{ request('status') === 'returned' ? 'selected' : '' }}>Returned</option>
+                <option value="" {{ $statusFilter === '' ? 'selected' : '' }}>All Status</option>
+                <option value="submitted" {{ $statusFilter === 'submitted' ? 'selected' : '' }}>Submitted</option>
+                <option value="endorsed" {{ $statusFilter === 'endorsed' ? 'selected' : '' }}>Endorsed</option>
+                <option value="pmt_approved" {{ $statusFilter === 'pmt_approved' ? 'selected' : '' }}>PMT Approved</option>
+                <option value="returned" {{ $statusFilter === 'returned' ? 'selected' : '' }}>Returned</option>
             </select>
         </form>
     </div>
@@ -71,6 +74,9 @@
                         $payload = [
                             'id' => $uwp->id,
                             'status' => $uwp->status,
+                            'return_remarks' => (string) ($uwp->return_remarks ?? ''),
+                            'returned_at' => optional($uwp->returned_at)->toDateTimeString(),
+                            'returned_by_role' => (string) ($uwp->returned_by_role ?? ''),
                             'office' => [
                                 'id' => $uwp->office?->id,
                                 'name' => $uwp->office?->name,
@@ -97,6 +103,7 @@
                                         return [
                                             'id' => $mfo->id,
                                             'title' => $mfo->title,
+                                            'target_quantity' => $mfo->target_quantity,
                                             'target_timeline' => $mfo->target_timeline,
                                             'weight_percent' => (string) ($mfo->weight_percent ?? ''),
                                             'success_indicators' => $mfo->successIndicators->map(function ($si) {
@@ -124,6 +131,8 @@
                                                 return [
                                                     'id' => $si->id,
                                                     'indicator_text' => $si->indicator_text,
+                                                    'target_quantity' => $si->target_quantity,
+                                                    'target_timeline' => $si->target_timeline,
                                                     'assignees' => $assignees,
                                                     'standards_by_rating' => $standardsByRating,
                                                 ];
@@ -134,15 +143,18 @@
                             })->values()->all(),
                         ];
 
-                        $badge = match($uwp->status) {
+                        $statusKey = strtolower(str_replace('-', '_', (string) ($uwp->status ?? '')));
+                        $badge = match($statusKey) {
+                            'returned' => ['bg'=>'bg-rose-500/10', 'text'=>'text-rose-300', 'border'=>'border-rose-500/20', 'label'=>'Returned'],
                             'submitted' => ['bg'=>'bg-blue-500/10', 'text'=>'text-blue-300', 'border'=>'border-blue-500/20', 'label'=>'Submitted'],
-                            'endorsed' => ['bg'=>'bg-emerald-500/10', 'text'=>'text-emerald-300', 'border'=>'border-emerald-500/20', 'label'=>'Endorsed'],
+                            'endorsed' => ['bg'=>'bg-violet-500/10', 'text'=>'text-violet-300', 'border'=>'border-violet-500/20', 'label'=>'Endorsed'],
+                            'approved', 'pmt_approved' => ['bg'=>'bg-emerald-500/10', 'text'=>'text-emerald-300', 'border'=>'border-emerald-500/20', 'label'=>'Approved'],
                             'draft' => ['bg'=>'bg-slate-500/10', 'text'=>'text-slate-200', 'border'=>'border-slate-500/20', 'label'=>'Draft'],
-                            default => ['bg'=>'bg-amber-500/10', 'text'=>'text-amber-300', 'border'=>'border-amber-500/20', 'label'=>ucwords(str_replace('_',' ', $uwp->status ?? 'Unknown'))],
+                            default => ['bg'=>'bg-amber-500/10', 'text'=>'text-amber-300', 'border'=>'border-amber-500/20', 'label'=>ucwords(str_replace('_',' ', $statusKey !== '' ? $statusKey : 'unknown'))],
                         };
                     @endphp
 
-                    <tr class="hover:bg-slate-800/40 transition">
+                    <tr class="hover:bg-slate-800/40 transition" data-uwp-row="{{ (int) $uwp->id }}" data-uwp-row-id="{{ (int) $uwp->id }}">
                         <td class="px-4 py-3 text-sm text-slate-100 font-medium">
                             {{ $uwp->office?->name ?? '—' }}
                         </td>
@@ -153,14 +165,14 @@
                             Unit-Level Plan
                         </td>
                         <td class="px-4 py-3 text-sm text-center">
-                            <span class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full {{ $badge['bg'] }} {{ $badge['text'] }} border {{ $badge['border'] }}">
+                            <span data-status-badge class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full {{ $badge['bg'] }} {{ $badge['text'] }} border {{ $badge['border'] }}">
                                 {{ $badge['label'] }}
                             </span>
                         </td>
                         <td class="px-4 py-3 text-sm text-center">
                             <button type="button"
-                                data-modal-target="uwp-review-modal"
-                                data-modal-toggle="uwp-review-modal"
+                                data-review-btn
+                                data-uwp-id="{{ (int) $uwp->id }}"
                                 data-uwp='@json($payload)'
                                 class="inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg
                                 border border-blue-500 text-blue-400 hover:bg-blue-500/10 transition">
@@ -182,84 +194,104 @@
 
 {{-- Review UWP Modal (Flowbite-style) --}}
 <div id="uwp-review-modal" data-modal-container tabindex="-1" aria-hidden="true"
-     class="fixed inset-0 z-50 hidden flex items-center justify-center">
-    <div class="absolute inset-0 bg-slate-950/80 backdrop-blur" data-modal-hide="uwp-review-modal"></div>
-    <div class="relative z-10 w-full max-w-5xl px-4">
-        <div class="w-full overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl">
-            <div class="flex items-start justify-between gap-4 border-b border-slate-800 px-6 py-4">
-                <div class="space-y-2">
-                    <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Unit Work Plan</p>
-                    <h3 class="text-lg font-semibold text-white">Review UWP</h3>
-                    <div class="grid grid-cols-1 gap-3 text-sm text-slate-300 sm:grid-cols-2">
-                        <div>
-                            <p class="text-xs uppercase tracking-wide text-slate-500">Office / Unit</p>
-                            <p id="uwp-modal-office" class="font-medium text-slate-100">—</p>
-                        </div>
-                        <div>
-                            <p class="text-xs uppercase tracking-wide text-slate-500">Supervisor</p>
-                            <p id="uwp-modal-supervisor" class="font-medium text-slate-100">—</p>
-                        </div>
-                        <div>
-                            <p class="text-xs uppercase tracking-wide text-slate-500">Performance Period</p>
-                            <p id="uwp-modal-period" class="font-medium text-slate-100">—</p>
-                        </div>
-                        <div>
-                            <p class="text-xs uppercase tracking-wide text-slate-500">UWP Status</p>
-                            <p id="uwp-modal-status" class="font-medium text-slate-100">—</p>
-                        </div>
-                    </div>
+     class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/70 backdrop-blur-sm overflow-y-auto">
+    <div class="w-full max-w-5xl px-6 my-10">
+        <div class="rounded-2xl border border-slate-800 bg-slate-950 text-slate-100 max-h-[85vh] overflow-y-auto">
+            <div class="flex items-start justify-between gap-4 border-b border-slate-800 px-8 py-6">
+                <div>
+                    <h2 class="text-xl font-semibold">Unit Work Plan</h2>
+                    <p id="uwp-modal-subtitle" class="mt-1 text-sm text-slate-400">Select a UWP to view details</p>
+                    <span id="uwp-modal-period" class="hidden">-</span>
                 </div>
-                <button type="button" data-modal-hide="uwp-review-modal"
-                        class="text-slate-400 transition hover:text-white">
-                    <i class="fa-solid fa-xmark text-lg"></i>
+                <button type="button" data-review-close
+                        class="inline-flex items-center justify-center rounded-lg border border-slate-800 bg-slate-950/60 px-2.5 py-2 text-slate-400 transition hover:bg-slate-900 hover:text-white">
+                    <i class="fa-solid fa-xmark text-sm"></i>
                 </button>
             </div>
 
-            <div class="px-6 py-5 space-y-5 max-h-[70vh] overflow-y-auto">
-                <div class="rounded-xl border border-slate-800 bg-slate-900/70">
-                    <div class="border-b border-slate-800 px-4 py-3">
-                        <h4 class="text-sm font-medium text-slate-100">Planned Outputs</h4>
-                        <p class="text-xs text-slate-400 mt-1">Read-only reference for review.</p>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full">
-                            <thead class="bg-slate-800/50">
+            <div class="flex items-stretch gap-10 border-b border-slate-800 px-8 py-6">
+                <div class="w-1/4">
+                    <p class="text-xs uppercase tracking-widest text-slate-500">Office / Unit</p>
+                    <p id="uwp-modal-office" class="mt-1 font-medium">-</p>
+                </div>
+
+                <div class="w-1/4">
+                    <p class="text-xs uppercase tracking-widest text-slate-500">Supervisor</p>
+                    <p id="uwp-modal-supervisor" class="mt-1 font-medium">-</p>
+                </div>
+
+                <div class="w-1/4">
+                    <p class="text-xs uppercase tracking-widest text-slate-500">Department Head</p>
+                    <p id="uwp-modal-dept-head" class="mt-1 font-medium">-</p>
+                </div>
+
+                <div class="w-1/4">
+                    <p class="text-xs uppercase tracking-widest text-slate-500">Status</p>
+                    <span id="uwp-modal-status" class="mt-2 inline-flex rounded-full border px-3 py-1 text-xs font-semibold">-</span>
+                </div>
+            </div>
+
+            <div id="uwp-return-remarks-wrap" class="hidden mx-8 mt-6 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-rose-200">
+                <p class="text-sm font-semibold">Returned Remarks</p>
+                <p id="uwp-return-remarks-meta" class="mt-1 text-xs text-rose-200/80"></p>
+                <div id="uwp-return-remarks-text" class="mt-2 whitespace-pre-line text-sm text-rose-100">-</div>
+            </div>
+
+            <div class="px-8 py-6">
+                <h3 class="mb-4 text-sm font-semibold uppercase tracking-widest text-slate-400">Planned Outputs</h3>
+                <div class="overflow-hidden rounded-xl border border-slate-800">
+                    <div class="max-h-[42vh] overflow-y-auto overflow-x-auto">
+                        <table class="min-w-full text-sm text-slate-200">
+                            <thead class="bg-slate-900/60 text-xs uppercase tracking-widest text-slate-400">
                             <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium uppercase text-slate-400">PPA / MFO</th>
-                                <th class="px-4 py-3 text-center text-xs font-medium uppercase text-slate-400">Success Indicators</th>
-                                <th class="px-4 py-3 text-center text-xs font-medium uppercase text-slate-400">Timeline / Target</th>
-                                <th class="px-4 py-3 text-center text-xs font-medium uppercase text-slate-400">Function</th>
+                                <th class="px-5 py-4 text-left">PPA / MFO</th>
+                                <th class="px-5 py-4 text-center">Success Indicators</th>
+                                <th class="px-5 py-4 text-center">Function</th>
                             </tr>
                             </thead>
-                            <tbody id="uwp-outputs-tbody" class="divide-y divide-slate-800"></tbody>
+                            <tbody id="uwp-outputs-tbody" class="divide-y divide-slate-800 bg-slate-950"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <div class="flex flex-col gap-4 border-t border-slate-800 px-6 py-4">
-                <form id="uwp-review-form" method="POST" action="{{ route('dept-head.uwp.review') }}">
-                    @csrf
-                    <input type="hidden" name="unit_work_plan_id" id="uwp-modal-uwp-id" value="">
-                    <input type="hidden" name="action" id="uwp-modal-action" value="">
+            <form id="uwp-review-form"
+                  method="POST"
+                  action="{{ route('dept-head.uwp.review') }}"
+                  data-endorse-action="{{ route('dept-head.uwp.review') }}"
+                  data-return-action="{{ route('dept-head.uwp.return') }}">
+                @csrf
+                <input type="hidden" name="unit_work_plan_id" id="uwp-modal-uwp-id" value="">
+                <input type="hidden" name="action" id="uwp-modal-action" value="">
 
-                    <div class="space-y-2">
-                        <label class="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                            Review Remarks <span class="text-slate-500">(required if returning)</span>
-                        </label>
-                        <textarea
-                            name="remarks"
-                            id="uwp-modal-remarks"
-                            rows="3"
-                            class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                            style="background:#0f172a;color:#e5e7eb;"
-                            placeholder="Add clear instructions or justification for your decision..."></textarea>
-                    </div>
+                <div class="px-8 pb-6 space-y-2">
+                    <label class="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                        Review Remarks (required if returning)
+                    </label>
+                    <textarea
+                        name="remarks"
+                        id="uwp-modal-remarks"
+                        rows="3"
+                        class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        style="background:#0f172a;color:#e5e7eb;"
+                        placeholder="Add clear instructions or justification for your decision..."></textarea>
+                    <p class="text-[11px] text-slate-500 mt-2">
+                        Ensure targets, indicators, and weights are correct before endorsing to PMT.
+                    </p>
+                </div>
 
-                    <div class="flex flex-wrap items-center justify-end gap-3">
-                        <button type="button" data-modal-hide="uwp-review-modal"
-                                class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-slate-800/80">
-                            Cancel
+                <div class="flex items-center justify-between border-t border-slate-800 px-8 py-5">
+                    <p class="text-xs text-slate-500">Department Head can endorse or return submitted UWPs only.</p>
+                    <div class="flex items-center gap-3">
+                        <button type="button" data-review-close class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">Close</button>
+
+                        <button type="button"
+                            id="btn-return-uwp"
+                            data-admin-loading="true"
+                            data-loading-text="Returning..."
+                            class="inline-flex items-center gap-2 rounded-lg border border-rose-500/30 bg-rose-600/10 px-4 py-2 text-sm font-semibold text-rose-200 transition hover:bg-rose-600/20">
+                            <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-rose-200/40 border-t-rose-200"></span>
+                            <span data-button-label>Return to Supervisor</span>
                         </button>
 
                         <button type="button"
@@ -268,27 +300,17 @@
                                 data-loading-text="Processing..."
                                 class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-emerald-900/40 transition hover:bg-emerald-500">
                             <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"></span>
-                            <span data-button-label>Endorse & Forward to PMT</span>
-                        </button>
-
-                        <button type="button"
-                                id="btn-return-uwp"
-                                data-admin-loading="true"
-                                data-loading-text="Returning..."
-                                class="inline-flex items-center gap-2 rounded-lg border border-rose-500/30 bg-rose-600/10 px-4 py-2 text-sm font-semibold text-rose-200 transition hover:bg-rose-600/20">
-                            <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-rose-200/40 border-t-rose-200"></span>
-                            <span data-button-label>Return for Revision</span>
+                            <span data-button-label>Endorse to PMT</span>
                         </button>
                     </div>
-                </form>
-            </div>
-
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
 {{-- ========================= --}}
-{{-- MODAL: Success Indicators (3 columns incl. Assigned Employees) --}}
+{{-- MODAL: Success Indicators --}}
 {{-- ========================= --}}
 <div id="uwp-indicators-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 px-4 py-6">
     <div class="w-full max-w-4xl rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl overflow-hidden relative">
@@ -309,6 +331,7 @@
                         <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.2em] text-slate-400">
                             <tr>
                                 <th class="px-5 py-4 text-left">Success Indicator</th>
+                                <th class="px-5 py-4 text-left">Target Summary</th>
                                 <th class="px-5 py-4 text-center">Standards</th>
                                 <th class="px-5 py-4 text-left">Assigned Employee</th>
                             </tr>
@@ -517,8 +540,45 @@
     function closeModal(modal) {
         if (!modal) return;
         modal.classList.add('hidden');
-        modal.classList.remove('flex');
+        clearFlowbiteBackdrops();
+    }
+
+    function cleanupFlowbiteBackdrop() {
+        document.querySelectorAll('[modal-backdrop], [data-modal-backdrop], .modal-backdrop').forEach((el) => el.remove());
+        document.querySelectorAll('body > div').forEach((el) => {
+            if (!(el instanceof HTMLDivElement)) return;
+            const className = String(el.className || '');
+            const looksLikeFlowbiteBackdrop =
+                className.includes('bg-gray-900/50') &&
+                className.includes('fixed') &&
+                className.includes('inset-0') &&
+                className.includes('z-40');
+
+            if (looksLikeFlowbiteBackdrop) {
+                el.remove();
+            }
+        });
         document.body.classList.remove(bodyOverflowClass);
+    }
+
+    function clearFlowbiteBackdrops() {
+        cleanupFlowbiteBackdrop();
+    }
+
+    function closeReviewModalSafely() {
+        const modal = document.getElementById('uwp-review-modal');
+        if (modal) {
+            modal.classList.add('hidden');
+        }
+
+        const ids = ['uwp-indicators-modal', 'uwp-standards-viewer-modal', 'uwp-assignees-viewer-modal'];
+        ids.forEach((id) => {
+            const m = document.getElementById(id);
+            if (!m) return;
+            m.classList.add('hidden');
+        });
+
+        clearFlowbiteBackdrops();
     }
 
     function openStandardsViewer(mfoTitle, indicatorText) {
@@ -596,7 +656,36 @@
         indicatorStandardsBody = document.getElementById('uwp-standards-table-body');
         standardsModal = document.getElementById('uwp-standards-viewer-modal');
         assigneesModal = document.getElementById('uwp-assignees-viewer-modal');
+        const indicatorsModal = document.getElementById('uwp-indicators-modal');
+        const reviewModal = document.getElementById('uwp-review-modal');
 
+        if (reviewModal && !reviewModal.classList.contains('flex')) {
+            reviewModal.classList.add('flex');
+        }
+
+        document.querySelectorAll('[data-review-close]').forEach((btn) => {
+            btn.addEventListener('click', () => closeReviewModalSafely());
+        });
+
+        reviewModal?.addEventListener('click', (event) => {
+            if (event.target === reviewModal) {
+                closeReviewModalSafely();
+            }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key !== 'Escape') return;
+            window.setTimeout(() => {
+                const modalEl = document.getElementById('uwp-review-modal');
+                if (modalEl?.classList.contains('hidden')) {
+                    cleanupFlowbiteBackdrop();
+                }
+            }, 0);
+        });
+
+        document.querySelectorAll('[data-modal-hide="uwp-indicators-modal"]').forEach((btn) => {
+            btn.addEventListener('click', () => closeModal(indicatorsModal));
+        });
         document.querySelectorAll('[data-modal-hide="uwp-standards-viewer-modal"]').forEach((btn) => {
             btn.addEventListener('click', () => closeModal(standardsModal));
         });
@@ -604,6 +693,9 @@
             btn.addEventListener('click', () => closeModal(assigneesModal));
         });
 
+        indicatorsModal?.addEventListener('click', (event) => {
+            if (event.target === indicatorsModal) closeModal(indicatorsModal);
+        });
         standardsModal?.addEventListener('click', (event) => {
             if (event.target === standardsModal) closeModal(standardsModal);
         });
@@ -621,10 +713,95 @@
             .replaceAll("'", '&#039;');
     }
 
+    function normalizeStatusKey(status) {
+        return String(status || '').toLowerCase().replaceAll('-', '_');
+    }
+
     function labelStatus(status) {
-        const s = String(status || '').toLowerCase();
-        if (!s) return '—';
+        const s = normalizeStatusKey(status);
+        if (!s) return '-';
         return s.replaceAll('_', ' ').replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+    function statusBadgeClass(status) {
+        const s = normalizeStatusKey(status);
+        if (s === 'returned') {
+            return 'border-rose-500/30 bg-rose-500/10 text-rose-300';
+        }
+        if (s === 'submitted') {
+            return 'border-blue-500/30 bg-blue-500/10 text-blue-300';
+        }
+        if (s === 'endorsed') {
+            return 'border-violet-500/30 bg-violet-500/10 text-violet-300';
+        }
+        if (s === 'approved' || s === 'pmt_approved') {
+            return 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300';
+        }
+        if (s === 'draft') {
+            return 'border-slate-500/30 bg-slate-500/10 text-slate-200';
+        }
+
+        return 'border-slate-500/30 bg-slate-500/10 text-slate-200';
+    }
+
+    function setButtonLoading(buttonEl, isLoading) {
+        if (!buttonEl) return;
+
+        const spinner = buttonEl.querySelector('[data-button-spinner]');
+        const label = buttonEl.querySelector('[data-button-label]');
+
+        if (label && !buttonEl.dataset.originalLabel) {
+            buttonEl.dataset.originalLabel = label.textContent;
+        }
+
+        if (isLoading) {
+            buttonEl.disabled = true;
+            buttonEl.classList.add('opacity-80', 'cursor-not-allowed');
+            if (spinner) spinner.classList.remove('hidden');
+            if (label) label.textContent = buttonEl.dataset.loadingText || 'Processing...';
+            return;
+        }
+
+        buttonEl.disabled = false;
+        buttonEl.classList.remove('opacity-80', 'cursor-not-allowed');
+        if (spinner) spinner.classList.add('hidden');
+        if (label && buttonEl.dataset.originalLabel) {
+            label.textContent = buttonEl.dataset.originalLabel;
+        }
+    }
+
+    function updateDeptHeadListRow(uwpId, newStatus, options = {}) {
+        const row = document.querySelector(`[data-uwp-row-id="${uwpId}"]`) || document.querySelector(`[data-uwp-row="${uwpId}"]`);
+        if (!row) return;
+
+        const statusKey = normalizeStatusKey(newStatus);
+        const statusBadge = row.querySelector('[data-status-badge]');
+        if (statusBadge) {
+            statusBadge.className = `inline-flex items-center px-3 py-1 text-xs font-medium rounded-full border ${statusBadgeClass(statusKey)}`;
+            statusBadge.textContent = labelStatus(statusKey);
+        }
+
+        const reviewBtn = row.querySelector(`[data-uwp-id="${uwpId}"][data-uwp]`) || row.querySelector('[data-review-btn]');
+        if (!reviewBtn) return;
+
+        try {
+            const payload = JSON.parse(reviewBtn.getAttribute('data-uwp') || '{}');
+            payload.status = statusKey;
+
+            if (statusKey === 'returned') {
+                payload.return_remarks = options.return_remarks ?? payload.return_remarks ?? '';
+                payload.returned_at = options.returned_at ?? payload.returned_at ?? new Date().toISOString();
+                payload.returned_by_role = 'dept-head';
+            } else {
+                if (Object.prototype.hasOwnProperty.call(options, 'return_remarks')) payload.return_remarks = options.return_remarks;
+                if (Object.prototype.hasOwnProperty.call(options, 'returned_at')) payload.returned_at = options.returned_at;
+                if (Object.prototype.hasOwnProperty.call(options, 'returned_by_role')) payload.returned_by_role = options.returned_by_role;
+            }
+
+            reviewBtn.setAttribute('data-uwp', JSON.stringify(payload));
+        } catch (_) {
+            // Keep existing payload if malformed
+        }
     }
 
     function buildFunctionBadge(fnType) {
@@ -641,6 +818,72 @@
     function computeIndicatorCount(mfo) {
         const list = (mfo && Array.isArray(mfo.success_indicators)) ? mfo.success_indicators : [];
         return list.length;
+    }
+
+    function normalizeTargetQuantity(value) {
+        if (value === null || value === undefined || value === '') {
+            return '';
+        }
+
+        const numeric = Number(value);
+        if (!Number.isFinite(numeric)) {
+            return String(value).trim();
+        }
+
+        return Number.isInteger(numeric)
+            ? String(numeric)
+            : numeric.toFixed(2).replace(/\.00$/, '').replace(/(\.\d*[1-9])0+$/, '$1');
+    }
+
+    function formatTargetTimelineDisplay(targetQuantity, targetTimeline) {
+        const summary = String(targetTimeline || '').trim();
+        if (summary.toLowerCase() === 'multiple indicator targets') {
+            return summary;
+        }
+
+        const quantity = targetQuantity === null || targetQuantity === undefined || targetQuantity === ''
+            ? ''
+            : normalizeTargetQuantity(targetQuantity);
+        const timeline = targetTimeline === null || targetTimeline === undefined || targetTimeline === ''
+            ? ''
+            : String(targetTimeline).trim();
+
+        if (quantity !== '' && timeline !== '') {
+            return `${quantity} ${timeline}`.trim();
+        }
+
+        if (quantity !== '') {
+            return quantity;
+        }
+
+        if (timeline !== '') {
+            return timeline;
+        }
+
+        return '-';
+    }
+
+    function getIndicatorTargetSummary(indicator) {
+        return formatTargetTimelineDisplay(indicator?.target_quantity, indicator?.target_timeline);
+    }
+
+    function getMfoTargetSummary(mfo) {
+        const indicators = Array.isArray(mfo?.success_indicators) ? mfo.success_indicators : [];
+        const summaries = Array.from(new Set(
+            indicators
+                .map((indicator) => getIndicatorTargetSummary(indicator))
+                .filter((value) => String(value || '').trim() !== '' && value !== '-')
+        ));
+
+        if (summaries.length === 1) {
+            return summaries[0];
+        }
+
+        if (summaries.length > 1) {
+            return 'Multiple indicator targets';
+        }
+
+        return formatTargetTimelineDisplay(mfo?.target_quantity, mfo?.target_timeline);
     }
 
     function openIndicatorsModal(title, unit, mfoTitle, successIndicators) {
@@ -665,6 +908,10 @@
             const indicatorTd = document.createElement('td');
             indicatorTd.className = 'px-5 py-5 text-slate-100';
             indicatorTd.textContent = indicator;
+
+            const targetTd = document.createElement('td');
+            targetTd.className = 'px-5 py-5 text-slate-300';
+            targetTd.textContent = getIndicatorTargetSummary(si);
 
             const standardsTd = document.createElement('td');
             standardsTd.className = 'px-5 py-5 text-center';
@@ -692,7 +939,7 @@
             viewBtn.addEventListener('click', () => openAssigneesViewer(unit, mfoTitle, indicator));
             assigneesTd.appendChild(viewBtn);
 
-            tr.append(indicatorTd, standardsTd, assigneesTd);
+            tr.append(indicatorTd, targetTd, standardsTd, assigneesTd);
             tableBody.appendChild(tr);
         });
 
@@ -705,17 +952,57 @@
         const idEl = document.getElementById('uwp-modal-uwp-id');
         if (idEl) idEl.value = selectedUwp?.id || '';
 
+        const officeName = selectedUwp?.office?.name || '-';
+        const supervisorName = selectedUwp?.supervisor?.name || '-';
+        const periodName = selectedUwp?.period?.name || '-';
+        const deptHeadName = selectedUwp?.department_head?.name || '-';
+        const statusKey = String(selectedUwp?.status || '').toLowerCase();
+
         const officeEl = document.getElementById('uwp-modal-office');
-        if (officeEl) officeEl.textContent = selectedUwp?.office?.name || '—';
+        if (officeEl) officeEl.textContent = officeName;
 
         const supEl = document.getElementById('uwp-modal-supervisor');
-        if (supEl) supEl.textContent = selectedUwp?.supervisor?.name || '—';
+        if (supEl) supEl.textContent = supervisorName;
 
         const periodEl = document.getElementById('uwp-modal-period');
-        if (periodEl) periodEl.textContent = selectedUwp?.period?.name || '—';
+        if (periodEl) periodEl.textContent = periodName;
+
+        const subtitleEl = document.getElementById('uwp-modal-subtitle');
+        if (subtitleEl) subtitleEl.textContent = `${officeName} \u2022 ${periodName}`;
+
+        const deptHeadEl = document.getElementById('uwp-modal-dept-head');
+        if (deptHeadEl) deptHeadEl.textContent = deptHeadName;
 
         const statusEl = document.getElementById('uwp-modal-status');
-        if (statusEl) statusEl.textContent = labelStatus(selectedUwp?.status);
+        if (statusEl) {
+            statusEl.className = `mt-2 inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${statusBadgeClass(statusKey)}`;
+            statusEl.textContent = labelStatus(statusKey);
+        }
+
+        const returnWrap = document.getElementById('uwp-return-remarks-wrap');
+        const returnText = document.getElementById('uwp-return-remarks-text');
+        const returnMeta = document.getElementById('uwp-return-remarks-meta');
+        const returnRemarks = String(selectedUwp?.return_remarks || '').trim();
+        const returnedAt = String(selectedUwp?.returned_at || '').trim();
+        const returnedByRole = String(selectedUwp?.returned_by_role || '').trim().toLowerCase();
+
+        if (returnWrap && returnText && returnMeta) {
+            if (statusKey === 'returned' && returnRemarks !== '') {
+                const roleLabel = returnedByRole === 'pmt'
+                    ? 'Returned by PMT'
+                    : returnedByRole === 'dept-head'
+                        ? 'Returned by Department Head'
+                        : 'Returned for Revision';
+
+                returnWrap.classList.remove('hidden');
+                returnText.textContent = returnRemarks;
+                returnMeta.textContent = returnedAt ? `${roleLabel} \u2022 ${returnedAt}` : roleLabel;
+            } else {
+                returnWrap.classList.add('hidden');
+                returnText.textContent = '-';
+                returnMeta.textContent = '';
+            }
+        }
 
         const outputsTbody = document.getElementById('uwp-outputs-tbody');
         if (!outputsTbody) return;
@@ -757,65 +1044,270 @@
 
                 tdIndicators.appendChild(btn);
 
-                const tdTimeline = document.createElement('td');
-                tdTimeline.className = 'px-4 py-3 text-sm text-center text-slate-100';
-                tdTimeline.textContent = mfo.target_timeline || '—';
-
                 const tdFunction = document.createElement('td');
                 tdFunction.className = 'px-4 py-3 text-sm text-center';
                 tdFunction.innerHTML = buildFunctionBadge(fn.function_type);
 
-                tr.append(tdTitle, tdIndicators, tdTimeline, tdFunction);
+                tr.append(tdTitle, tdIndicators, tdFunction);
                 outputsTbody.appendChild(tr);
             });
         });
     }
 
     function initReviewModalTriggers() {
-        const triggers = document.querySelectorAll('[data-modal-target="uwp-review-modal"][data-uwp]');
-        triggers.forEach((btn) => {
-            btn.addEventListener('click', () => {
+        if (!document.body.dataset.uwpReviewDelegated) {
+            document.addEventListener('click', (event) => {
+                const btn = event.target.closest('[data-review-btn][data-uwp]');
+                if (!btn) return;
+
                 let uwp = null;
                 try {
                     uwp = JSON.parse(btn.getAttribute('data-uwp') || 'null');
-                } catch (e) {
+                } catch (_) {
                     uwp = null;
                 }
                 hydrateReviewModal(uwp);
+                showModal(document.getElementById('uwp-review-modal'));
             });
-        });
-
-        document.querySelectorAll('[data-modal-hide="uwp-indicators-modal"]').forEach((button) => {
-            const modal = document.getElementById('uwp-indicators-modal');
-            button.addEventListener('click', () => closeModal(modal));
-        });
-
-        const indicatorsModal = document.getElementById('uwp-indicators-modal');
-        indicatorsModal?.addEventListener('click', (event) => {
-            if (event.target === indicatorsModal) closeModal(indicatorsModal);
-        });
+            document.body.dataset.uwpReviewDelegated = 'true';
+        }
 
         const btnEndorse = document.getElementById('btn-endorse-uwp');
         const btnReturn = document.getElementById('btn-return-uwp');
-        const actionInput = document.getElementById('uwp-modal-action');
         const remarks = document.getElementById('uwp-modal-remarks');
         const form = document.getElementById('uwp-review-form');
 
-        btnEndorse?.addEventListener('click', () => {
+        btnEndorse?.addEventListener('click', async () => {
             if (!form) return;
-            if (actionInput) actionInput.value = 'endorse';
-            form.submit();
-        });
+            if (btnEndorse.disabled) return;
 
-        btnReturn?.addEventListener('click', () => {
-            if (!form) return;
-            const val = (remarks?.value || '').trim();
-            if (!val) {
-                remarks?.focus();
+            const url = String(form.dataset.endorseAction || '').trim();
+            if (!url) {
+                window.PMSnackbar?.show({
+                    type: 'error',
+                    message: 'Endorse endpoint is missing.',
+                });
                 return;
             }
-            if (actionInput) actionInput.value = 'return';
-            form.submit();
+
+            setButtonLoading(btnEndorse, true);
+            if (btnReturn) {
+                btnReturn.disabled = true;
+                btnReturn.classList.add('opacity-80', 'cursor-not-allowed');
+            }
+
+            try {
+                const csrfToken =
+                    document.querySelector('meta[name="csrf-token"]')?.content ||
+                    form.querySelector('input[name="_token"]')?.value ||
+                    '';
+                const uwpIdValue = String(selectedUwp?.id || document.getElementById('uwp-modal-uwp-id')?.value || '').trim();
+
+                const fd = new FormData();
+                fd.append('_token', csrfToken);
+                fd.append('unit_work_plan_id', uwpIdValue);
+                fd.append('action', 'endorse');
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: fd,
+                });
+
+                let data = {};
+                try {
+                    data = await response.json();
+                } catch (_) {
+                    data = {};
+                }
+
+                if (!response.ok || !data?.success) {
+                    throw new Error(data?.message || data?.error || 'Unable to endorse UWP');
+                }
+
+                const endorsedAt = data?.endorsed_at || new Date().toISOString();
+                const endorsedStatus = data?.status || 'endorsed';
+                const uwpId = Number(selectedUwp?.id || data?.uwp_id || uwpIdValue || 0);
+
+                if (!selectedUwp) selectedUwp = {};
+                selectedUwp.id = selectedUwp.id || uwpId;
+                selectedUwp.status = endorsedStatus;
+                selectedUwp.endorsed_at = endorsedAt;
+                selectedUwp.return_remarks = '';
+                selectedUwp.returned_at = null;
+                selectedUwp.returned_by_role = null;
+
+                hydrateReviewModal(selectedUwp);
+                updateDeptHeadListRow(selectedUwp.id || uwpId, endorsedStatus, {
+                    return_remarks: '',
+                    returned_at: null,
+                    returned_by_role: null,
+                });
+
+                const row = document.querySelector(`[data-uwp-row-id="${uwpId}"]`) || document.querySelector(`[data-uwp-row="${uwpId}"]`);
+                const reviewBtn = row?.querySelector(`[data-uwp-id="${uwpId}"][data-uwp]`) || row?.querySelector('[data-review-btn][data-uwp]');
+                if (reviewBtn) {
+                    let nextPayload = {};
+                    try {
+                        nextPayload = JSON.parse(reviewBtn.getAttribute('data-uwp') || '{}');
+                    } catch (_) {
+                        nextPayload = {};
+                    }
+                    nextPayload.status = normalizeStatusKey(endorsedStatus);
+                    nextPayload.endorsed_at = endorsedAt;
+                    nextPayload.return_remarks = '';
+                    nextPayload.returned_at = null;
+                    nextPayload.returned_by_role = null;
+                    reviewBtn.setAttribute('data-uwp', JSON.stringify(nextPayload));
+                }
+
+                if (remarks) {
+                    remarks.value = '';
+                }
+
+                closeReviewModalSafely();
+                window.PMSnackbar?.show({
+                    type: 'success',
+                    message: 'UWP endorsed.',
+                });
+            } catch (error) {
+                window.PMSnackbar?.show({
+                    type: 'error',
+                    message: error?.message || 'Unable to endorse UWP right now. Please try again.',
+                });
+            } finally {
+                setButtonLoading(btnEndorse, false);
+                if (btnReturn) {
+                    btnReturn.disabled = false;
+                    btnReturn.classList.remove('opacity-80', 'cursor-not-allowed');
+                }
+                clearFlowbiteBackdrops();
+            }
+        });
+
+        btnReturn?.addEventListener('click', async () => {
+            if (!form) return;
+            const remarksValue = (remarks?.value || '').trim();
+            if (!remarksValue) {
+                remarks?.focus();
+                window.PMSnackbar?.show({
+                    type: 'error',
+                    message: 'Remarks are required before returning this UWP.',
+                });
+                return;
+            }
+
+            if (btnReturn.disabled) return;
+
+            const url = String(form.dataset.returnAction || '').trim();
+            if (!url) {
+                window.PMSnackbar?.show({
+                    type: 'error',
+                    message: 'Return endpoint is missing.',
+                });
+                return;
+            }
+
+            setButtonLoading(btnReturn, true);
+            if (btnEndorse) {
+                btnEndorse.disabled = true;
+                btnEndorse.classList.add('opacity-80', 'cursor-not-allowed');
+            }
+
+            try {
+                const csrfToken =
+                    document.querySelector('meta[name="csrf-token"]')?.content ||
+                    form.querySelector('input[name="_token"]')?.value ||
+                    '';
+                const uwpIdValue = String(selectedUwp?.id || document.getElementById('uwp-modal-uwp-id')?.value || '').trim();
+
+                const fd = new FormData();
+                fd.append('_token', csrfToken);
+                fd.append('unit_work_plan_id', uwpIdValue);
+                fd.append('remarks', remarksValue);
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: fd,
+                });
+
+                let data = {};
+                try {
+                    data = await response.json();
+                } catch (_) {
+                    data = {};
+                }
+
+                if (!response.ok || !data?.success) {
+                    throw new Error(data?.message || data?.error || 'Unable to return UWP');
+                }
+
+                const returnedAt = data?.returned_at || new Date().toISOString();
+                const remarksText = data?.return_remarks || remarksValue;
+                const returnedByRole = data?.returned_by_role || 'dept-head';
+                const returnedStatus = data?.status || 'returned';
+                const uwpId = Number(selectedUwp?.id || data?.uwp_id || uwpIdValue || 0);
+
+                if (!selectedUwp) selectedUwp = {};
+                selectedUwp.id = selectedUwp.id || uwpId;
+                selectedUwp.status = returnedStatus;
+                selectedUwp.return_remarks = remarksText;
+                selectedUwp.returned_at = returnedAt;
+                selectedUwp.returned_by_role = returnedByRole;
+
+                hydrateReviewModal(selectedUwp);
+                updateDeptHeadListRow(selectedUwp.id || uwpId, returnedStatus, {
+                    return_remarks: selectedUwp.return_remarks,
+                    returned_at: selectedUwp.returned_at,
+                    returned_by_role: selectedUwp.returned_by_role,
+                });
+
+                const row = document.querySelector(`[data-uwp-row-id="${uwpId}"]`) || document.querySelector(`[data-uwp-row="${uwpId}"]`);
+                const reviewBtn = row?.querySelector(`[data-uwp-id="${uwpId}"][data-uwp]`) || row?.querySelector('[data-review-btn][data-uwp]');
+                if (reviewBtn) {
+                    let nextPayload = {};
+                    try {
+                        nextPayload = JSON.parse(reviewBtn.getAttribute('data-uwp') || '{}');
+                    } catch (_) {
+                        nextPayload = {};
+                    }
+                    nextPayload.status = normalizeStatusKey(returnedStatus);
+                    nextPayload.return_remarks = remarksText;
+                    nextPayload.returned_at = returnedAt;
+                    nextPayload.returned_by_role = returnedByRole;
+                    reviewBtn.setAttribute('data-uwp', JSON.stringify(nextPayload));
+                }
+
+                if (remarks) {
+                    remarks.value = '';
+                }
+                closeReviewModalSafely();
+                window.PMSnackbar?.show({
+                    type: 'success',
+                    message: 'UWP returned to supervisor.',
+                });
+            } catch (error) {
+                window.PMSnackbar?.show({
+                    type: 'error',
+                    message: error?.message || 'Unable to return UWP right now. Please try again.',
+                });
+            } finally {
+                setButtonLoading(btnReturn, false);
+                if (btnEndorse) {
+                    btnEndorse.disabled = false;
+                    btnEndorse.classList.remove('opacity-80', 'cursor-not-allowed');
+                }
+                clearFlowbiteBackdrops();
+            }
         });
     }
 

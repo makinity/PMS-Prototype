@@ -51,7 +51,7 @@
 
                         <tbody class="divide-y divide-slate-800">
                             @foreach ($lists as $list)
-                                <tr class="hover:bg-slate-900/50 transition">
+                                <tr class="hover:bg-slate-900/50 transition" data-uwp-row="{{ (int) $list->id }}">
                                     <td class="px-4 py-3">
                                         {{ $list->office?->name ?? '—' }}
                                     </td>
@@ -73,6 +73,7 @@
                                         @endphp
 
                                         <span
+                                            data-status-badge
                                             class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold {{ $statusClass }}">
                                             {{ ucfirst(str_replace('_', ' ', $list->status)) }}
                                         </span>
@@ -80,33 +81,58 @@
 
                                     <td class="px-4 py-3 text-center">
                                         @php
-                                            $isDraftAndUnlocked = strtolower((string) $list->status) === 'draft' && is_null($list->locked_at);
+                                            $isEditable = in_array(strtolower((string) $list->status), ['draft', 'returned'], true) && is_null($list->locked_at);
+                                            $previewPayload = [
+                                                'id' => (int) $list->id,
+                                                'status' => (string) $list->status,
+                                                'return_remarks' => (string) ($list->return_remarks ?? ''),
+                                                'returned_at' => optional($list->returned_at)->toDateTimeString(),
+                                            ];
                                         @endphp
+
+                                        <a href="{{ route('supervisor.uwp', ['uwp_id' => $list->id]) }}"
+                                           aria-label="Open Unit Work Plan"
+                                           title="{{ $isEditable ? 'Open for editing' : 'Open read-only' }}"
+                                           class="inline-flex items-center justify-center rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-white">
+                                            <i class="fa-regular fa-pen-to-square text-sm"></i>
+                                        </a>
 
                                         <button type="button"
                                                 aria-label="View Unit Work Plan"
                                                 title="View Unit Work Plan"
-                                                onclick="showUwpPreview({{ $list->id }})"
+                                                data-uwp-preview-btn
+                                                data-uwp='@json($previewPayload)'
+                                                onclick="showUwpPreview({{ $list->id }}, this)"
                                                 class="inline-flex items-center justify-center rounded-lg
                                                     p-2 text-slate-400 hover:text-white
                                                     hover:bg-slate-800 transition">
                                             <i class="fa-regular fa-eye text-sm"></i>
                                         </button>
 
-                                        @if ($isDraftAndUnlocked)
-                                            <form method="POST"
-                                                  action="{{ route('supervisor.uwp.submit', ['id' => $list->id]) }}"
-                                                  class="inline-flex"
-                                                  onsubmit="return submitRowUwp(this);">
-                                                @csrf
-                                                <button type="submit"
-                                                        data-admin-loading="true"
-                                                        data-loading-text="Submitting..."
-                                                        class="ml-2 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-blue-500">
-                                                    <span data-button-label>Submit for Approval</span>
-                                                    <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
-                                                </button>
-                                            </form>
+                                        @if ($isEditable)
+                                            <button type="button"
+                                                    aria-label="Delete Unit Work Plan"
+                                                    title="Delete Unit Work Plan"
+                                                    data-delete-btn
+                                                    onclick='openDeleteUwpModal(
+                                                        {{ (int) $list->id }},
+                                                        @json($list->office?->name ?? "--"),
+                                                        @json($list->performancePeriod?->name ?? "--"),
+                                                        @json(ucfirst(str_replace("_", " ", (string) $list->status))),
+                                                        {{ is_null($list->locked_at) ? 'false' : 'true' }}
+                                                    )'
+                                                    class="inline-flex items-center justify-center rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-rose-300">
+                                                <i class="fa-regular fa-trash-can text-sm"></i>
+                                            </button>
+                                        @else
+                                            <button type="button"
+                                                    aria-label="Delete Unit Work Plan"
+                                                    title="Only Draft/Returned & unlocked can be deleted"
+                                                    data-delete-btn
+                                                    disabled
+                                                    class="inline-flex cursor-not-allowed items-center justify-center rounded-lg p-2 text-slate-500 opacity-40">
+                                                <i class="fa-regular fa-trash-can text-sm"></i>
+                                            </button>
                                         @endif
                                     </td>
                                 </tr>
@@ -125,8 +151,8 @@
     ===================================== --}}
 
     <!-- UWP Preview Modal -->
-    <div id="uwpPreviewModal" class="fixed inset-0 z-50 hidden bg-black/70 backdrop-blur-sm overflow-y-auto">
-        <div class="mx-auto my-10 w-full max-w-5xl px-6">
+    <div id="uwpPreviewModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/70 backdrop-blur-sm overflow-y-auto">
+        <div class="w-full max-w-5xl px-6">
             <div class="rounded-2xl border border-slate-800 bg-slate-950 text-slate-100">
 
                 <!-- HEADER -->
@@ -162,6 +188,12 @@
                     </div>
                 </div>
 
+                <div id="uwp-return-remarks-wrap" class="hidden mx-8 mt-6 rounded-xl border border-rose-500/20 bg-rose-500/5 p-4">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-rose-200">Returned Remarks</p>
+                    <p id="uwp-return-remarks-text" class="mt-2 whitespace-pre-wrap text-sm text-slate-100">—</p>
+                    <p id="uwp-return-remarks-meta" class="mt-2 text-[11px] text-slate-400"></p>
+                </div>
+
                 <!-- PLANNED OUTPUTS -->
                 <div class="px-8 py-6">
                     <h3 class="mb-4 text-sm font-semibold uppercase tracking-widest text-slate-400">
@@ -175,8 +207,8 @@
 
                 <!-- FOOTER -->
                 <div class="flex gap-4 justify-end border-t border-slate-800 px-8 py-5">
-                    <a id="modalExportExcelLink" href="#"
-                        class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800">
+                    <a id="modalExportExcelLink" href="#" aria-disabled="true"
+                        class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800 opacity-50 cursor-not-allowed pointer-events-none">
                         Export Excel
                     </a>
                     <button type="submit"
@@ -193,8 +225,8 @@
     </div>
 
     <!-- Success Indicators Modal -->
-    <div id="successIndicatorsModal" class="fixed inset-0 z-50 hidden bg-black/70 backdrop-blur-sm overflow-y-auto">
-        <div class="mx-auto my-16 w-full max-w-5xl px-6">
+    <div id="successIndicatorsModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/70 backdrop-blur-sm overflow-y-auto">
+        <div class="w-full max-w-5xl px-6">
             <div class="rounded-2xl border border-slate-800 bg-slate-950 text-slate-100">
 
                 <!-- HEADER -->
@@ -214,6 +246,7 @@
                             <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.2em] text-slate-400">
                                 <tr>
                                     <th class="px-4 py-3 text-left">Success Indicator</th>
+                                    <th class="px-4 py-3 text-left">Target Summary</th>
                                     <th class="px-4 py-3 text-center">Standards</th>
                                     <th class="px-4 py-3 text-center">Assigned Employee</th>
                                 </tr>
@@ -237,8 +270,8 @@
     </div>
 
     <!-- Assignments Modal (for multiple employees) -->
-<div id="assignmentsModal" class="fixed inset-0 z-50 hidden bg-black/70 backdrop-blur-sm overflow-y-auto">
-    <div class="mx-auto my-16 w-full max-w-2xl px-6">
+<div id="assignmentsModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/70 backdrop-blur-sm overflow-y-auto">
+    <div class="w-full max-w-2xl px-6">
         <div class="rounded-2xl border border-slate-800 bg-slate-950 text-slate-100">
 
             <!-- HEADER -->
@@ -283,8 +316,8 @@
 </div>
 
     <!-- Standards Modal -->
-    <div id="indicatorStandardsModal" class="fixed inset-0 z-50 hidden bg-black/70 backdrop-blur-sm overflow-y-auto">
-        <div class="mx-auto my-16 w-full max-w-3xl px-6">
+    <div id="indicatorStandardsModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/70 backdrop-blur-sm overflow-y-auto">
+        <div class="w-full max-w-3xl px-6">
             <div class="rounded-2xl border border-slate-800 bg-slate-950 text-slate-100">
                 <div class="border-b border-slate-800 px-6 py-5">
                     <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Standards (Q/E/T)</p>
@@ -323,16 +356,136 @@
         </div>
     </div>
 
+    <!-- Delete UWP Confirmation Modal -->
+    <div id="deleteUwpModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/70 backdrop-blur-sm overflow-y-auto">
+        <div class="w-full max-w-xl px-6">
+            <div class="rounded-2xl border border-slate-800 bg-slate-950 text-slate-100">
+                <div class="border-b border-slate-800 px-6 py-5">
+                    <p class="text-xs uppercase tracking-[0.2em] text-rose-300">Delete Unit Work Plan</p>
+                    <h3 class="text-lg font-semibold">Delete this UWP?</h3>
+                    <p class="mt-1 text-sm text-slate-400">This action is permanent and cannot be undone.</p>
+                </div>
+
+                <div class="space-y-3 px-6 py-5 text-sm text-slate-200">
+                    <div class="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+                        <p><span class="text-slate-400">Office / Unit:</span> <span id="deleteUwpOffice">--</span></p>
+                        <p class="mt-1"><span class="text-slate-400">Performance Period:</span> <span id="deleteUwpPeriod">--</span></p>
+                        <p class="mt-1"><span class="text-slate-400">Status:</span> <span id="deleteUwpStatus">--</span></p>
+                    </div>
+                    <p class="text-xs text-rose-300/90">Only Draft/Returned and unlocked UWP records can be deleted.</p>
+                </div>
+
+                <form id="delete-uwp-form" method="POST" action="" class="flex items-center justify-end gap-3 border-t border-slate-800 px-6 py-4">
+                    @csrf
+                    @method('DELETE')
+                    <button type="button"
+                            onclick="closeDeleteUwpModal()"
+                            class="rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-slate-200 hover:bg-slate-800">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                            id="deleteUwpConfirmBtn"
+                            data-delete-loading="true"
+                            data-loading-text="Deleting..."
+                            class="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-500">
+                        <span data-button-label>Delete</span>
+                        <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script>
         window.uwpPreviewBaseUrl = "{{ route('supervisor.uwp.show', ['id' => '__ID__']) }}";
         window.uwpSubmitBaseUrl = "{{ route('supervisor.uwp.submit', ['id' => '__ID__']) }}";
-        window.uwpExportBaseUrl = "{{ route('uwp.export', ['uwp' => '__ID__']) }}";
+        window.uwpExportBaseUrl = "{{ route('uwp.excel.export', ['uwp' => '__ID__']) }}";
+        window.uwpDeleteBaseUrl = "{{ route('supervisor.uwp.destroy', ['id' => '__ID__']) }}";
     </script>
     @push('scripts')
         <script>
             let currentUwpId = null;
-            function showUwpPreview(uwpId) {
+            let selectedUwp = null;
+
+            function normalizeTargetQuantity(value) {
+                if (value === null || value === undefined || value === '') {
+                    return '';
+                }
+
+                const numeric = Number(value);
+                if (!Number.isFinite(numeric)) {
+                    return String(value).trim();
+                }
+
+                return Number.isInteger(numeric)
+                    ? String(numeric)
+                    : numeric.toFixed(2).replace(/\.00$/, '').replace(/(\.\d*[1-9])0+$/, '$1');
+            }
+
+            function formatTargetTimelineDisplay(targetQuantity, targetTimeline) {
+                const summary = String(targetTimeline || '').trim();
+                if (summary.toLowerCase() === 'multiple indicator targets') {
+                    return summary;
+                }
+
+                const quantity = targetQuantity === null || targetQuantity === undefined || targetQuantity === ''
+                    ? ''
+                    : normalizeTargetQuantity(targetQuantity);
+                const timeline = targetTimeline === null || targetTimeline === undefined || targetTimeline === ''
+                    ? ''
+                    : String(targetTimeline).trim();
+
+                if (quantity !== '' && timeline !== '') {
+                    return `${quantity} ${timeline}`.trim();
+                }
+
+                if (quantity !== '') {
+                    return quantity;
+                }
+
+                if (timeline !== '') {
+                    return timeline;
+                }
+
+                return 'Not specified';
+            }
+
+            function getIndicatorTargetSummary(indicator) {
+                return formatTargetTimelineDisplay(
+                    indicator?.targetQuantity ?? indicator?.target_quantity,
+                    indicator?.targetTimeline ?? indicator?.target_timeline
+                );
+            }
+
+            function getMfoTargetSummary(mfo) {
+                const indicators = Array.isArray(mfo?.success_indicators) ? mfo.success_indicators : [];
+                const summaries = Array.from(new Set(
+                    indicators
+                        .map((indicator) => getIndicatorTargetSummary(indicator))
+                        .filter((value) => String(value || '').trim() !== '' && value !== 'Not specified')
+                ));
+
+                if (summaries.length === 1) {
+                    return summaries[0];
+                }
+
+                if (summaries.length > 1) {
+                    return 'Multiple indicator targets';
+                }
+
+                return formatTargetTimelineDisplay(mfo?.target_quantity, mfo?.target_timeline);
+            }
+
+            function showUwpPreview(uwpId, trigger = null) {
                 currentUwpId = uwpId;
+                selectedUwp = null;
+                if (trigger) {
+                    try {
+                        selectedUwp = JSON.parse(trigger.getAttribute('data-uwp') || 'null');
+                    } catch (error) {
+                        selectedUwp = null;
+                    }
+                }
                 updateExportLink(uwpId);
 
                 document.getElementById('uwpPreviewModal').classList.remove('hidden');
@@ -345,6 +498,12 @@
                 document.getElementById('modalSupervisor').textContent = 'Loading...';
                 document.getElementById('modalDeptHead').textContent = 'Loading...';
                 document.getElementById('modalStatus').textContent = 'LOADING';
+                const remarksWrap = document.getElementById('uwp-return-remarks-wrap');
+                const remarksText = document.getElementById('uwp-return-remarks-text');
+                const remarksMeta = document.getElementById('uwp-return-remarks-meta');
+                if (remarksWrap) remarksWrap.classList.add('hidden');
+                if (remarksText) remarksText.textContent = '—';
+                if (remarksMeta) remarksMeta.textContent = '';
 
                 const url = window.uwpPreviewBaseUrl.replace('__ID__', uwpId);
                 console.log('Fetching UWP from:', url);
@@ -377,9 +536,7 @@
             }
 
             function populateUwpModal(uwpData) {
-                if (uwpData.id) {
-                    updateExportLink(uwpData.id);
-                }
+                updateExportLink(uwpData?.id || currentUwpId);
 
                 document.getElementById('modalOfficeUnit').textContent = uwpData.office?.name || 'N/A';
                 document.getElementById('modalUwpSubtitle').textContent =
@@ -389,7 +546,8 @@
                 document.getElementById('modalDeptHead').textContent = uwpData.department_head?.name || 'Not Assigned';
 
                 const statusBadge = document.getElementById('modalStatus');
-                const status = uwpData.status || 'draft';
+                const status = uwpData.status || selectedUwp?.status || 'draft';
+                const normalizedStatus = String(status).toLowerCase();
                 const isLocked = !!uwpData.locked_at;
                 statusBadge.textContent = status.replace('_', ' ').toUpperCase();
 
@@ -403,17 +561,35 @@
                     'returned': ['bg-rose-500/15', 'text-rose-400', 'border-rose-500/30']
                 };
 
-                const classes = statusColors[status] || ['bg-gray-500/15', 'text-gray-400', 'border-gray-500/30'];
+                const classes = statusColors[normalizedStatus] || ['bg-gray-500/15', 'text-gray-400', 'border-gray-500/30'];
                 classes.forEach(cls => statusBadge.classList.add(cls));
 
                 const submitButton = document.querySelector('[data-submit-uwp-btn]');
                 if (submitButton) {
-                    if (status === 'draft' && !isLocked) {
+                    if ((normalizedStatus === 'draft' || normalizedStatus === 'returned') && !isLocked) {
                         submitButton.classList.remove('hidden');
                         submitButton.disabled = false;
                         submitButton.querySelector('[data-button-label]').textContent = 'Submit for Approval';
                     } else {
                         submitButton.classList.add('hidden');
+                    }
+                }
+
+                const wrap = document.getElementById('uwp-return-remarks-wrap');
+                const txt = document.getElementById('uwp-return-remarks-text');
+                const meta = document.getElementById('uwp-return-remarks-meta');
+                const remarks = String(uwpData.return_remarks ?? selectedUwp?.return_remarks ?? '').trim();
+                const returnedAt = String(uwpData.returned_at ?? selectedUwp?.returned_at ?? '').trim();
+
+                if (wrap && txt && meta) {
+                    if (normalizedStatus === 'returned' && remarks) {
+                        wrap.classList.remove('hidden');
+                        txt.textContent = remarks;
+                        meta.textContent = returnedAt ? ('Returned at: ' + returnedAt) : '';
+                    } else {
+                        wrap.classList.add('hidden');
+                        txt.textContent = '—';
+                        meta.textContent = '';
                     }
                 }
 
@@ -445,7 +621,6 @@
                             <tr>
                                 <th class="px-5 py-4">PPA / MFO</th>
                                 <th class="px-5 py-4 text-center">Success Indicators</th>
-                                <th class="px-5 py-4">Target / Timeline</th>
                                 <th class="px-5 py-4 text-center">Function</th>
                             </tr>
                         </thead>
@@ -472,9 +647,6 @@
                                     </button>
                                 </div>
                             </td>
-                            <td class="px-5 py-5 text-slate-300">
-                                ${mfo.target_timeline || 'Not specified'}
-                            </td>
                             <td class="px-5 py-5 text-center">
                                 <span class="rounded-full border border-${functionColor}-500/40 px-3 py-1 text-xs font-semibold text-${functionColor}-400">
                                     ${functionType}
@@ -497,7 +669,7 @@
             // ====================================
             function submitUwpForApproval() {
                 if (!currentUwpId) {
-                    showNotification('No UWP selected to submit.', 'error');
+                    alert('No UWP selected to submit.');
                     return;
                 }
 
@@ -540,8 +712,7 @@
                     console.log('Success response:', data);
 
                     if (data.success) {
-                        showNotification(data.message || 'UWP submitted successfully!', 'success');
-
+                        const submittedId = currentUwpId;
 
                         const statusBadge = document.getElementById('modalStatus');
                         if (statusBadge) {
@@ -552,16 +723,16 @@
                         submitButton.classList.add('hidden');
 
                         setTimeout(() => {
+                            updateListRowAfterSubmit(submittedId);
                             closeModal('uwpPreviewModal');
-                            location.reload();
-                        }, 1500);
+                        }, 600);
                     } else {
                         throw new Error(data.error || 'Failed to submit UWP');
                     }
                 })
                 .catch(error => {
                     console.error('Error submitting UWP:', error);
-                    showNotification(error.message || 'Error submitting UWP. Please try again.', 'error');
+                    alert(error.message || 'Error submitting UWP. Please try again.');
 
                     resetSubmitButton();
                 });
@@ -575,6 +746,37 @@
                     const buttonSpinner = submitButton.querySelector('[data-button-spinner]');
                     if (buttonLabel) buttonLabel.textContent = 'Submit for Approval';
                     if (buttonSpinner) buttonSpinner.classList.add('hidden');
+                }
+            }
+
+            function updateListRowAfterSubmit(uwpId) {
+                const row = document.querySelector(`[data-uwp-row="${uwpId}"]`);
+                if (!row) return;
+
+                const statusBadge = row.querySelector('[data-status-badge]');
+                if (statusBadge) {
+                    statusBadge.textContent = 'Submitted';
+                    statusBadge.className = 'inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold border-blue-500/30 bg-blue-500/10 text-blue-300';
+                }
+
+                const deleteBtn = row.querySelector('[data-delete-btn]');
+                if (deleteBtn) {
+                    deleteBtn.disabled = true;
+                    deleteBtn.title = 'Only Draft/Returned & unlocked can be deleted';
+                    deleteBtn.className = 'inline-flex cursor-not-allowed items-center justify-center rounded-lg p-2 text-slate-500 opacity-40';
+                }
+
+                const previewBtn = row.querySelector('[data-uwp-preview-btn]');
+                if (previewBtn) {
+                    try {
+                        const payload = JSON.parse(previewBtn.getAttribute('data-uwp') || '{}');
+                        payload.status = 'submitted';
+                        payload.return_remarks = '';
+                        payload.returned_at = null;
+                        previewBtn.setAttribute('data-uwp', JSON.stringify(payload));
+                    } catch (error) {
+                        // Keep existing payload if malformed
+                    }
                 }
             }
 
@@ -598,6 +800,60 @@
                 return true;
             }
 
+            function setDeleteButtonLoading(isLoading) {
+                const button = document.getElementById('deleteUwpConfirmBtn');
+                if (!button) return;
+
+                const label = button.querySelector('[data-button-label]');
+                const spinner = button.querySelector('[data-button-spinner]');
+                const loadingText = button.dataset.loadingText || 'Deleting...';
+
+                button.disabled = !!isLoading;
+                if (label) {
+                    label.textContent = isLoading ? loadingText : 'Delete';
+                }
+                if (spinner) {
+                    spinner.classList.toggle('hidden', !isLoading);
+                }
+            }
+
+            function openDeleteUwpModal(uwpId, officeName, periodName, status, isLocked) {
+                const normalizedStatus = String(status || '').toLowerCase();
+                const locked = isLocked === true || isLocked === 'true' || isLocked === 1 || isLocked === '1';
+                const deletable = (normalizedStatus === 'draft' || normalizedStatus === 'returned') && !locked;
+
+                if (!deletable) {
+                    alert('Only Draft/Returned & unlocked UWP can be deleted.');
+                    return;
+                }
+
+                document.getElementById('deleteUwpOffice').textContent = officeName || '--';
+                document.getElementById('deleteUwpPeriod').textContent = periodName || '--';
+                document.getElementById('deleteUwpStatus').textContent = status || '--';
+                const deleteForm = document.getElementById('delete-uwp-form');
+                if (deleteForm) {
+                    deleteForm.action = window.uwpDeleteBaseUrl.replace('__ID__', String(uwpId));
+                }
+                setDeleteButtonLoading(false);
+
+                const modal = document.getElementById('deleteUwpModal');
+                if (modal) {
+                    modal.classList.remove('hidden');
+                }
+            }
+
+            function closeDeleteUwpModal() {
+                setDeleteButtonLoading(false);
+                const deleteForm = document.getElementById('delete-uwp-form');
+                if (deleteForm) {
+                    deleteForm.action = '';
+                }
+                const modal = document.getElementById('deleteUwpModal');
+                if (modal) {
+                    modal.classList.add('hidden');
+                }
+            }
+
             // ====================================
             // MODAL FUNCTIONS
             // ====================================
@@ -613,7 +869,7 @@
                 if (!indicators || indicators.length === 0) {
                     indicatorsBody.innerHTML = `
                         <tr>
-                            <td colspan="3" class="px-4 py-8 text-center text-slate-400">
+                            <td colspan="4" class="px-4 py-8 text-center text-slate-400">
                                 No success indicators found for this MFO.
                             </td>
                         </tr>
@@ -630,6 +886,9 @@
                             <tr>
                                 <td class="px-4 py-4 text-slate-100">
                                     ${indicator.indicator_text || 'Unnamed Indicator'}
+                                </td>
+                                <td class="px-4 py-4 text-slate-300">
+                                    ${getIndicatorTargetSummary(indicator)}
                                 </td>
                                 <td class="px-4 py-4 text-center">
                                     <button
@@ -794,12 +1053,26 @@
                 const exportLink = document.getElementById('modalExportExcelLink');
                 if (!exportLink) return;
 
-                if (!uwpId) {
+                const parsedId = Number(uwpId);
+                const hasValidId = Number.isFinite(parsedId) && parsedId > 0;
+
+                if (!hasValidId) {
                     exportLink.setAttribute('href', '#');
+                    exportLink.setAttribute('aria-disabled', 'true');
+                    exportLink.classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
                     return;
                 }
 
-                exportLink.setAttribute('href', window.uwpExportBaseUrl.replace('__ID__', uwpId));
+                const baseUrl = String(window.uwpExportBaseUrl || '');
+                let exportUrl = baseUrl.replace('__ID__', String(parsedId));
+                if (exportUrl === baseUrl) {
+                    // Fallback in case placeholder was URL-encoded by route() helper.
+                    exportUrl = baseUrl.replace('%5F%5FID%5F%5F', String(parsedId));
+                }
+
+                exportLink.setAttribute('href', exportUrl);
+                exportLink.removeAttribute('aria-disabled');
+                exportLink.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
             }
 
             function closeModal(modalId) {
@@ -808,41 +1081,6 @@
                     currentUwpId = null;
                     resetSubmitButton();
                 }
-            }
-
-            function showNotification(message, type = 'success') {
-                const existingContainer = document.getElementById('notification-container');
-                if (existingContainer) {
-                    existingContainer.remove();
-                }
-
-                const container = document.createElement('div');
-                container.id = 'notification-container';
-                container.className = 'fixed top-4 right-4 z-50 flex flex-col gap-2';
-                document.body.appendChild(container);
-
-                const notification = document.createElement('div');
-                notification.className = `px-4 py-3 rounded-lg text-sm font-semibold shadow-lg flex items-center justify-between min-w-[300px] ${
-                    type === 'success'
-                        ? 'bg-emerald-500/20 border border-emerald-500/30 text-emerald-200'
-                        : 'bg-red-500/20 border border-red-500/30 text-red-200'
-                }`;
-
-                notification.innerHTML = `
-                    <span>${message}</span>
-                    <button onclick="this.parentElement.remove()" class="ml-3 text-current opacity-70 hover:opacity-100">×</button>
-                `;
-
-                container.appendChild(notification);
-
-                setTimeout(() => {
-                    if (notification.parentNode) {
-                        notification.remove();
-                        if (container.children.length === 0) {
-                            container.remove();
-                        }
-                    }
-                }, 5000);
             }
 
             // ====================================
@@ -859,23 +1097,38 @@
                     });
                 }
 
+                const deleteForm = document.getElementById('delete-uwp-form');
+                if (deleteForm) {
+                    deleteForm.addEventListener('submit', function() {
+                        setDeleteButtonLoading(true);
+                    });
+                }
+
                 window.addEventListener('click', function(event) {
-                    const modals = ['uwpPreviewModal', 'successIndicatorsModal', 'indicatorStandardsModal', 'assignmentsModal'];
+                    const modals = ['uwpPreviewModal', 'successIndicatorsModal', 'indicatorStandardsModal', 'assignmentsModal', 'deleteUwpModal'];
                     modals.forEach(modalId => {
                         const modal = document.getElementById(modalId);
                         if (event.target === modal) {
-                            closeModal(modalId);
+                            if (modalId === 'deleteUwpModal') {
+                                closeDeleteUwpModal();
+                            } else {
+                                closeModal(modalId);
+                            }
                         }
                     });
                 });
 
                 window.addEventListener('keydown', function(event) {
                     if (event.key === 'Escape') {
-                        const modals = ['uwpPreviewModal', 'successIndicatorsModal', 'indicatorStandardsModal', 'assignmentsModal'];
+                        const modals = ['uwpPreviewModal', 'successIndicatorsModal', 'indicatorStandardsModal', 'assignmentsModal', 'deleteUwpModal'];
                         modals.forEach(modalId => {
                             const modal = document.getElementById(modalId);
                             if (!modal.classList.contains('hidden')) {
-                                closeModal(modalId);
+                                if (modalId === 'deleteUwpModal') {
+                                    closeDeleteUwpModal();
+                                } else {
+                                    closeModal(modalId);
+                                }
                             }
                         });
                     }

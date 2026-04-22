@@ -1,0 +1,1797 @@
+<?php
+
+namespace App\Http\Controllers\Employee;
+
+use App\Exports\StageTwo\IpcrExcelExport;
+use App\Exports\StageTwo\SmporExcelExport;
+use App\Http\Controllers\Controller;
+use App\Models\AccomplishmentSubmission;
+use App\Models\Ipcr;
+use App\Models\Mpor;
+use App\Models\OrsEntry;
+use App\Models\PerformancePeriod;
+use App\Models\QarHeader;
+use App\Support\ResolvesIpcrTargetScores;
+use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
+
+class SmporIpcrAccomplishmentController extends Controller
+{
+    use ResolvesIpcrTargetScores;
+
+    public function index(Request $request)
+    {
+        $user = $request->user();
+
+        $employeeName = (string) ($user?->name ?? '-');
+        $officeName = (string) ($user?->office?->name ?? '-');
+
+        $period = PerformancePeriod::query()
+            ->where('is_active', 1)
+            ->first();
+
+        $submissionStatus = 'draft';
+        $submittedAtLabel = '-';
+        $attachmentNames = [];
+        $remarksValue = '';
+        $smporRows = [];
+        $smporMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+        $smporTotals = [
+            'quantity' => 0,
+            'quality_points' => 0,
+            'timeliness_points' => 0,
+            'monthly_quantity' => array_fill_keys($smporMonths, 0.0),
+            'monthly_quality_points' => array_fill_keys($smporMonths, 0.0),
+            'monthly_timeliness_points' => array_fill_keys($smporMonths, 0.0),
+        ];
+        $ipcrRows = [];
+        $ipcrSections = [];
+        $smporSections = [];
+        $smporSourceLabel = 'Submitted MPORs';
+        $smporModeLabel = 'Preview (monitoring-only)';
+
+        if (!$period) {
+            $periodLabel = '-';
+            $request->session()->flash('info', 'No active performance period is configured.');
+
+            return view('employee.accomplishment-submission', compact(
+                'employeeName',
+                'officeName',
+                'periodLabel',
+                'submissionStatus',
+                'submittedAtLabel',
+                'attachmentNames',
+                'remarksValue',
+                'smporRows',
+                'smporTotals',
+                'ipcrRows',
+                'ipcrSections',
+                'smporMonths',
+                'smporSections',
+                'smporSourceLabel',
+                'smporModeLabel',
+            ));
+        }
+
+        $periodLabel = (string) ($period->name ?? '-');
+        $monthKeys = [];
+
+        $submission = null;
+        if ($user?->id && $period?->id) {
+            $submission = AccomplishmentSubmission::query()
+                ->where('employee_id', $user->id)
+                ->where('performance_period_id', $period->id)
+                ->with(['mpors:id,employee_id,office_id,month,status'])
+                ->first();
+
+            if ($submission) {
+                $submissionStatus = (string) ($submission->status ?? 'draft');
+                $submittedAtLabel = $submission->submitted_at
+                    ? $submission->submitted_at->format('M d, Y h:i A')
+                    : '-';
+
+                $remarksValue = (string) ($submission->employee_remarks ?? '');
+                $attachmentNames = collect($submission->attachments ?? [])
+                    ->pluck('original_name')
+                    ->filter()
+                    ->values()
+                    ->all();
+            }
+        }
+
+        if (!empty($period->start_date) && !empty($period->end_date)) {
+            $start = Carbon::parse($period->start_date);
+            $end = Carbon::parse($period->end_date);
+
+            if ($end->lt($start)) {
+                [$start, $end] = [$end, $start];
+            }
+
+            $periodLabel = $start->format('F Y') . ' - ' . $end->format('F Y');
+            $smporMonths = [];
+
+            $cursor = $start->copy()->startOfMonth();
+            $lastMonth = $end->copy()->startOfMonth();
+
+            while ($cursor->lte($lastMonth)) {
+                $monthKeys[] = $cursor->format('Y-m');
+                $smporMonths[] = $cursor->format('M');
+                $cursor->addMonth();
+            }
+        }
+
+        $smporTotals['monthly_quantity'] = array_fill_keys($smporMonths, 0.0);
+        $smporTotals['monthly_quality_points'] = array_fill_keys($smporMonths, 0.0);
+        $smporTotals['monthly_timeliness_points'] = array_fill_keys($smporMonths, 0.0);
+        $rangeStartYm = !empty($monthKeys) ? (string) $monthKeys[0] : null;
+        $rangeEndYm = !empty($monthKeys) ? (string) $monthKeys[count($monthKeys) - 1] : null;
+
+        $ipcr = null;
+        if ($user?->id) {
+            $ipcr = Ipcr::query()
+                ->where('employee_id', $user->id)
+                ->where('performance_period_id', $period->id)
+                ->with(['items'])
+                ->first();
+        }
+
+        if ($ipcr) {
+            $ipcr->load([
+                'unitWorkPlan.uwpFunctions' => function ($query): void {
+                    $query->orderBy('sort_order');
+                },
+                'unitWorkPlan.uwpFunctions.mfos',
+            ]);
+
+            $targetSummaryByFunctionAndOutput = $this->buildTargetSummaryByFunctionAndOutput($ipcr);
+
+            $timelineLabel = (string) ($periodLabel ?? 'â€”');
+            $itemsByOutput = ($ipcr->items ?? collect())->groupBy(function ($item): string {
+                $outputTitle = trim((string) ($item->output_title ?? ''));
+                return $outputTitle !== '' ? $outputTitle : 'â€”';
+            });
+
+            $functions = $ipcr->unitWorkPlan?->uwpFunctions ?? collect();
+            foreach ($functions as $function) {
+                $functionType = $this->normalizeFunctionType((string) ($function->function_type ?? ''));
+
+                $sectionRows = [];
+                foreach ($itemsByOutput as $majorOutput => $outputItems) {
+                    $matchingItems = $outputItems->filter(function ($item) use ($functionType): bool {
+                        return $this->normalizeFunctionType((string) ($item->function_type ?? '')) === $functionType;
+                    })->values();
+
+                    if ($matchingItems->isEmpty()) {
+                        continue;
+                    }
+
+                    $targetSummary = 'â€”';
+                    foreach ($matchingItems as $item) {
+                        $candidateTarget = trim((string) ($item->target_summary ?? ''));
+                        if ($candidateTarget !== '') {
+                            $targetSummary = $candidateTarget;
+                            break;
+                        }
+                    }
+
+                    $firstMatchingItem = $matchingItems->first();
+                    $targetMapKey = (int) ($firstMatchingItem?->uwp_function_id ?? 0) . '||' . trim((string) $majorOutput);
+                    $targetSummary = $targetSummaryByFunctionAndOutput[$targetMapKey] ?? trim((string) $targetSummary);
+
+                    $indicators = $matchingItems->map(function ($item): array {
+                        $standardsPayload = $item->standards_payload;
+                        if (is_string($standardsPayload)) {
+                            $decoded = json_decode($standardsPayload, true);
+                            $standardsPayload = is_array($decoded) ? $decoded : [];
+                        } elseif (!is_array($standardsPayload)) {
+                            $standardsPayload = [];
+                        }
+
+                        return [
+                            'indicator_text' => trim((string) ($item->indicator_text ?? '')) ?: 'â€”',
+                            'standards_payload' => $standardsPayload,
+                            'q' => null,
+                            'e' => null,
+                            't' => null,
+                            'a' => null,
+                        ];
+                    })->values()->all();
+
+                    $sectionRows[] = [
+                        'major_output' => (string) $majorOutput,
+                        'target_summary' => $targetSummary,
+                        'timeline' => $timelineLabel,
+                        'indicators_count' => count($indicators),
+                        'indicators' => $indicators,
+                    ];
+                }
+
+                if (empty($sectionRows)) {
+                    continue;
+                }
+
+                usort($sectionRows, static function (array $left, array $right): int {
+                    return strnatcasecmp((string) ($left['major_output'] ?? ''), (string) ($right['major_output'] ?? ''));
+                });
+
+                $ipcrSections[] = [
+                    'function_type' => $functionType,
+                    'title' => trim((string) ($function->name ?? '')) ?: 'â€”',
+                    'weight_percent' => isset($function->weight_percent) ? (float) $function->weight_percent : null,
+                    'rows' => $sectionRows,
+                ];
+            }
+        }
+
+        $selectedMpors = collect();
+        $usingOfficialDataset = false;
+        $pmtApprovedStatus = defined(QarHeader::class . '::STATUS_PMT_APPROVED')
+            ? constant(QarHeader::class . '::STATUS_PMT_APPROVED')
+            : 'pmt_approved';
+
+        if (
+            $submission
+            && in_array(strtolower((string) $submission->status), [
+                'submitted_to_supervisor',
+                'supervisor_endorsed',
+                'dept_head_endorsed',
+                'pmt_approved',
+            ], true)
+            && $submission->mpors->isNotEmpty()
+        ) {
+            $selectedMpors = $submission->mpors->sortBy('month')->values();
+            $usingOfficialDataset = strtolower((string) $submission->dataset_source) === 'qar_official';
+            $smporModeLabel = $usingOfficialDataset ? 'Official (Submitted Snapshot)' : 'Preview (Submitted Snapshot)';
+            $smporSourceLabel = $usingOfficialDataset ? 'QAR-linked MPORs (snapshot)' : 'Submitted MPORs (snapshot)';
+        }
+
+        if ($selectedMpors->isEmpty() && $user?->office_id) {
+            $qar = QarHeader::query()
+                ->where('office_id', $user->office_id)
+                ->where('performance_period_id', $period->id)
+                ->where('status', $pmtApprovedStatus)
+                ->with(['mporLinks:id,qar_header_id,mpor_id'])
+                ->orderByDesc('approved_at')
+                ->orderByDesc('id')
+                ->first();
+
+            $officialMporIds = $qar?->mporLinks
+                ? $qar->mporLinks->pluck('mpor_id')->filter()->unique()->values()
+                : collect();
+
+            if ($officialMporIds->isNotEmpty()) {
+                $officialMporBaseQuery = Mpor::query()
+                    ->whereIn('id', $officialMporIds)
+                    ->where('office_id', $user->office_id);
+
+                if ($user?->id) {
+                    $officialMporBaseQuery->where('employee_id', $user->id);
+                }
+
+                $selectedMpors = collect();
+
+                if ($rangeStartYm && $rangeEndYm) {
+                    $selectedMpors = (clone $officialMporBaseQuery)
+                        ->whereBetween(DB::raw('LEFT(month, 7)'), [$rangeStartYm, $rangeEndYm])
+                        ->orderBy('month')
+                        ->get();
+                }
+
+                if ($selectedMpors->isEmpty()) {
+                    $selectedMpors = $officialMporBaseQuery
+                        ->orderBy('month')
+                        ->get();
+                }
+
+                if ($selectedMpors->isNotEmpty()) {
+                    $usingOfficialDataset = true;
+                    $smporModeLabel = 'Official (PMT-approved QAR)';
+                    $smporSourceLabel = 'QAR-linked MPORs';
+                }
+            }
+        }
+
+        if ($selectedMpors->isEmpty() && !$usingOfficialDataset && $user?->id && $user?->office_id) {
+            $previewMporQuery = Mpor::query()
+                ->where('employee_id', $user->id)
+                ->where('office_id', $user->office_id)
+                ->whereIn('status', ['submitted']);
+
+            if ($rangeStartYm && $rangeEndYm) {
+                $previewMporQuery->whereBetween(DB::raw('LEFT(month, 7)'), [$rangeStartYm, $rangeEndYm]);
+            }
+
+            $selectedMpors = $previewMporQuery
+                ->orderBy('month')
+                ->get();
+        }
+
+
+        $targetQuantityByOutput = $this->buildTargetQuantityByOutput($ipcr);
+        $aggregatesBySection = [];
+        $aggregatesByOutput = [];
+        $ipcrRatingsTotalsByOutput = [];
+        $ipcrRatingsTotalsByIndicator = [];
+
+        foreach ($selectedMpors as $mpor) {
+            $ratedEntries = $mpor->ratedOrsEntriesForMonth()
+                ->with(['monitoring', 'ipcrItem'])
+                ->get();
+
+            foreach ($ratedEntries as $entry) {
+                $monitoring = $entry->monitoring;
+                if (!$monitoring || is_null($monitoring->quality_rating) || is_null($monitoring->timeliness_rating)) {
+                    continue;
+                }
+
+                $quantity = (float) ($entry->quantity ?? 0);
+                if ($quantity <= 0) {
+                    continue;
+                }
+
+                $workDate = !empty($entry->work_date) ? Carbon::parse($entry->work_date) : null;
+                if (!$workDate) {
+                    continue;
+                }
+
+                $monthKey = $workDate->format('Y-m');
+                if (!empty($monthKeys) && !in_array($monthKey, $monthKeys, true)) {
+                    continue;
+                }
+
+                $monthLabel = $workDate->format('M');
+                if (!in_array($monthLabel, $smporMonths, true)) {
+                    continue;
+                }
+
+                $expectedOutput = trim((string) ($entry->ipcrItem?->output_title ?? ''));
+                if ($expectedOutput === '') {
+                    $expectedOutput = 'Unassigned Output';
+                }
+
+                $functionType = $this->normalizeFunctionType((string) ($entry->ipcrItem?->function_type ?? 'support'));
+
+                if (!isset($aggregatesBySection[$functionType][$expectedOutput])) {
+                    $aggregatesBySection[$functionType][$expectedOutput] = [
+                        'expected_output' => $expectedOutput,
+                        'quantity' => $this->initializeMonthMap($smporMonths),
+                        'quality' => $this->initializeMonthMap($smporMonths),
+                        'timeliness' => $this->initializeMonthMap($smporMonths),
+                        'quantity_total' => 0.0,
+                        'quality_total' => 0.0,
+                        'timeliness_total' => 0.0,
+                    ];
+                }
+
+                if (!isset($aggregatesByOutput[$expectedOutput])) {
+                    $aggregatesByOutput[$expectedOutput] = [
+                        'mfo' => $expectedOutput,
+                        'total_quantity' => 0.0,
+                        'total_quality_points' => 0.0,
+                        'total_timeliness_points' => 0.0,
+                        'monthly_quantity' => $this->initializeMonthMap($smporMonths),
+                        'monthly_quality_points' => $this->initializeMonthMap($smporMonths),
+                        'monthly_timeliness_points' => $this->initializeMonthMap($smporMonths),
+                    ];
+                }
+
+                $qualityPoints = $quantity * (float) $monitoring->quality_rating;
+                $timelinessPoints = $quantity * (float) $monitoring->timeliness_rating;
+
+                $aggregatesBySection[$functionType][$expectedOutput]['quantity'][$monthLabel] += $quantity;
+                $aggregatesBySection[$functionType][$expectedOutput]['quality'][$monthLabel] += $qualityPoints;
+                $aggregatesBySection[$functionType][$expectedOutput]['timeliness'][$monthLabel] += $timelinessPoints;
+                $aggregatesBySection[$functionType][$expectedOutput]['quantity_total'] += $quantity;
+                $aggregatesBySection[$functionType][$expectedOutput]['quality_total'] += $qualityPoints;
+                $aggregatesBySection[$functionType][$expectedOutput]['timeliness_total'] += $timelinessPoints;
+
+                $aggregatesByOutput[$expectedOutput]['total_quantity'] += $quantity;
+                $aggregatesByOutput[$expectedOutput]['total_quality_points'] += $qualityPoints;
+                $aggregatesByOutput[$expectedOutput]['total_timeliness_points'] += $timelinessPoints;
+                $aggregatesByOutput[$expectedOutput]['monthly_quantity'][$monthLabel] += $quantity;
+                $aggregatesByOutput[$expectedOutput]['monthly_quality_points'][$monthLabel] += $qualityPoints;
+                $aggregatesByOutput[$expectedOutput]['monthly_timeliness_points'][$monthLabel] += $timelinessPoints;
+
+                $smporTotals['quantity'] += $quantity;
+                $smporTotals['quality_points'] += $qualityPoints;
+                $smporTotals['timeliness_points'] += $timelinessPoints;
+                $smporTotals['monthly_quantity'][$monthLabel] += $quantity;
+                $smporTotals['monthly_quality_points'][$monthLabel] += $qualityPoints;
+                $smporTotals['monthly_timeliness_points'][$monthLabel] += $timelinessPoints;
+
+                if (!isset($ipcrRatingsTotalsByOutput[$expectedOutput])) {
+                    $ipcrRatingsTotalsByOutput[$expectedOutput] = [
+                        'qty' => 0.0,
+                        'q_points' => 0.0,
+                        't_points' => 0.0,
+                    ];
+                }
+
+                $ipcrRatingsTotalsByOutput[$expectedOutput]['qty'] += $quantity;
+                $ipcrRatingsTotalsByOutput[$expectedOutput]['q_points'] += $qualityPoints;
+                $ipcrRatingsTotalsByOutput[$expectedOutput]['t_points'] += $timelinessPoints;
+
+                // Per-indicator accumulator (weighted by quantity).
+                $indicatorText = trim((string) ($entry->ipcrItem?->indicator_text ?? ''));
+                if ($indicatorText !== '') {
+                    $indicatorLookupKey = $this->buildIndicatorRatingLookupKey($expectedOutput, $indicatorText);
+
+                    if (!isset($ipcrRatingsTotalsByIndicator[$indicatorLookupKey])) {
+                        $ipcrRatingsTotalsByIndicator[$indicatorLookupKey] = [
+                            'output' => $expectedOutput,
+                            'indicator_text' => $indicatorText,
+                            'qty' => 0.0,
+                            'q_points' => 0.0,
+                            't_points' => 0.0,
+                        ];
+                    }
+
+                    $ipcrRatingsTotalsByIndicator[$indicatorLookupKey]['qty'] += $quantity;
+                    $ipcrRatingsTotalsByIndicator[$indicatorLookupKey]['q_points'] += $qualityPoints;
+                    $ipcrRatingsTotalsByIndicator[$indicatorLookupKey]['t_points'] += $timelinessPoints;
+                }
+            }
+        }
+
+        [$ipcrRatingsAvgByOutput, $ipcrRatingsAvgByIndicator] = $this->buildRatedIpcrPerformanceMaps(
+            $ipcr,
+            $user?->id
+        );
+
+        if (!empty($ipcrSections)) {
+            foreach ($ipcrSections as $sectionIndex => $section) {
+                $rows = is_array($section['rows'] ?? null) ? $section['rows'] : [];
+
+                foreach ($rows as $rowIndex => $row) {
+                    $majorOutput = trim((string) ($row['major_output'] ?? ''));
+                    $lookupOutput = preg_match('/[\pL\pN]/u', $majorOutput)
+                        ? $majorOutput
+                        : 'Unassigned Output';
+
+                    $ratings = $ipcrRatingsAvgByOutput[$lookupOutput] ?? null;
+
+                    $ipcrSections[$sectionIndex]['rows'][$rowIndex]['q'] = $ratings ? (float) $ratings['q'] : null;
+                    $ipcrSections[$sectionIndex]['rows'][$rowIndex]['e'] = $ratings ? (float) $ratings['e'] : null;
+                    $ipcrSections[$sectionIndex]['rows'][$rowIndex]['t'] = $ratings ? (float) $ratings['t'] : null;
+                    $ipcrSections[$sectionIndex]['rows'][$rowIndex]['a'] = $ratings ? (float) $ratings['a'] : null;
+                    $ipcrSections[$sectionIndex]['rows'][$rowIndex]['rated_qty'] = $ratings ? (float) $ratings['qty'] : null;
+
+                    $rowIndicators = is_array($row['indicators'] ?? null) ? $row['indicators'] : [];
+                    foreach ($rowIndicators as $indicatorIndex => $indicator) {
+                        $indicatorText = trim((string) ($indicator['indicator_text'] ?? ''));
+                        $indicatorLookupKey = $this->buildIndicatorRatingLookupKey($lookupOutput, $indicatorText);
+                        $indicatorRatings = $indicatorText !== '' && $indicatorText !== 'â€”'
+                            ? ($ipcrRatingsAvgByIndicator[$indicatorLookupKey] ?? null)
+                            : null;
+
+                        $ipcrSections[$sectionIndex]['rows'][$rowIndex]['indicators'][$indicatorIndex]['q'] = $indicatorRatings ? (float) $indicatorRatings['q'] : null;
+                        $ipcrSections[$sectionIndex]['rows'][$rowIndex]['indicators'][$indicatorIndex]['e'] = $indicatorRatings ? (float) $indicatorRatings['e'] : null;
+                        $ipcrSections[$sectionIndex]['rows'][$rowIndex]['indicators'][$indicatorIndex]['t'] = $indicatorRatings ? (float) $indicatorRatings['t'] : null;
+                        $ipcrSections[$sectionIndex]['rows'][$rowIndex]['indicators'][$indicatorIndex]['a'] = $indicatorRatings ? (float) $indicatorRatings['a'] : null;
+                        $ipcrSections[$sectionIndex]['rows'][$rowIndex]['indicators'][$indicatorIndex]['rated_qty'] = $indicatorRatings ? (float) $indicatorRatings['qty'] : null;
+                    }
+                }
+            }
+        }
+
+        $sectionDefinitions = $this->buildSectionDefinitions($user?->id, $period->id);
+        $sectionTypes = array_values(array_unique(array_merge(
+            array_keys($sectionDefinitions),
+            array_keys($aggregatesBySection)
+        )));
+
+        usort($sectionTypes, function (string $left, string $right) use ($sectionDefinitions): int {
+            $leftOrder = $sectionDefinitions[$left]['sort_order']
+                ?? ($left === 'core' ? 10 : ($left === 'support' ? 20 : 30));
+            $rightOrder = $sectionDefinitions[$right]['sort_order']
+                ?? ($right === 'core' ? 10 : ($right === 'support' ? 20 : 30));
+
+            if ($leftOrder === $rightOrder) {
+                return strnatcasecmp($left, $right);
+            }
+
+            return $leftOrder <=> $rightOrder;
+        });
+
+        foreach ($sectionTypes as $sectionType) {
+            $rowsMap = $aggregatesBySection[$sectionType] ?? [];
+            $sectionDefinition = $sectionDefinitions[$sectionType] ?? null;
+
+            $orderedOutputs = [];
+            if (!empty($sectionDefinition['output_order']) && is_array($sectionDefinition['output_order'])) {
+                foreach ($sectionDefinition['output_order'] as $outputTitle) {
+                    if (isset($rowsMap[$outputTitle])) {
+                        $orderedOutputs[] = $outputTitle;
+                    }
+                }
+            }
+
+            $remainingOutputs = array_values(array_diff(array_keys($rowsMap), $orderedOutputs));
+            usort($remainingOutputs, static fn (string $a, string $b): int => strnatcasecmp($a, $b));
+            $orderedOutputs = array_merge($orderedOutputs, $remainingOutputs);
+
+            $sectionRows = [];
+            $sectionTotals = [
+                'quantity_total' => 0.0,
+                'quality_total' => 0.0,
+                'quality_avg' => 0.0,
+                'timeliness_total' => 0.0,
+                'timeliness_avg' => 0.0,
+            ];
+
+            foreach ($orderedOutputs as $outputTitle) {
+                $row = $rowsMap[$outputTitle];
+                $quantityTotal = (float) ($row['quantity_total'] ?? 0);
+                $qualityTotal = (float) ($row['quality_total'] ?? 0);
+                $timelinessTotal = (float) ($row['timeliness_total'] ?? 0);
+
+                $qualityAvg = $quantityTotal > 0 ? $qualityTotal / $quantityTotal : 0.0;
+                $timelinessAvg = $quantityTotal > 0 ? $timelinessTotal / $quantityTotal : 0.0;
+
+                $sectionRows[] = [
+                    'expected_output' => $row['expected_output'],
+                    'quantity' => $this->normalizeMonthMap($row['quantity'] ?? [], $smporMonths),
+                    'quality' => $this->normalizeMonthMap($row['quality'] ?? [], $smporMonths),
+                    'timeliness' => $this->normalizeMonthMap($row['timeliness'] ?? [], $smporMonths),
+                    'quantity_total' => $quantityTotal,
+                    'quality_total' => $qualityTotal,
+                    'quality_avg' => $qualityAvg,
+                    'timeliness_total' => $timelinessTotal,
+                    'timeliness_avg' => $timelinessAvg,
+                ];
+
+                $sectionTotals['quantity_total'] += $quantityTotal;
+                $sectionTotals['quality_total'] += $qualityTotal;
+                $sectionTotals['timeliness_total'] += $timelinessTotal;
+            }
+
+            if ($sectionTotals['quantity_total'] > 0) {
+                $sectionTotals['quality_avg'] = $sectionTotals['quality_total'] / $sectionTotals['quantity_total'];
+                $sectionTotals['timeliness_avg'] = $sectionTotals['timeliness_total'] / $sectionTotals['quantity_total'];
+            }
+
+            $baseTitle = $sectionDefinition['title']
+                ?? ($sectionType === 'core' ? 'CORE FUNCTION' : 'SUPPORT FUNCTION');
+            $weightPercent = $sectionDefinition['weight_percent']
+                ?? ($sectionType === 'core' ? 80.0 : ($sectionType === 'support' ? 20.0 : 0.0));
+
+            $title = $baseTitle;
+            if ((float) $weightPercent > 0) {
+                $weightLabel = rtrim(rtrim(number_format((float) $weightPercent, 2, '.', ''), '0'), '.');
+                $title = $baseTitle . ' (' . $weightLabel . '%)';
+            }
+
+            $smporSections[] = [
+                'title' => $title,
+                'function_type' => $sectionType,
+                'weight_percent' => (float) $weightPercent,
+                'rows' => $sectionRows,
+                'totals' => $sectionTotals,
+            ];
+        }
+
+        if (!empty($aggregatesByOutput)) {
+            ksort($aggregatesByOutput, SORT_NATURAL | SORT_FLAG_CASE);
+            $smporRows = array_values($aggregatesByOutput);
+
+            foreach ($smporRows as $smporRow) {
+                $totalQuantity = (float) ($smporRow['total_quantity'] ?? 0);
+                $totalQuantityLabel = fmod($totalQuantity, 1.0) === 0.0
+                    ? (string) (int) $totalQuantity
+                    : rtrim(rtrim(number_format($totalQuantity, 2, '.', ''), '0'), '.');
+
+                $ipcrRows[] = [
+                    'mfo' => (string) ($smporRow['mfo'] ?? 'Unassigned MFO'),
+                    'accomplishment_summary' => "Completed {$totalQuantityLabel} output(s) for the period based on submitted MPOR totals.",
+                    'evidence_label' => $totalQuantity > 0 ? 'Attached (reference)' : '-',
+                ];
+            }
+        }
+
+        return view('employee.accomplishment-submission', compact(
+            'employeeName',
+            'officeName',
+            'periodLabel',
+            'submissionStatus',
+            'submittedAtLabel',
+            'attachmentNames',
+            'remarksValue',
+            'smporRows',
+            'smporTotals',
+            'ipcrRows',
+            'ipcrSections',
+            'smporMonths',
+            'smporSections',
+            'smporSourceLabel',
+            'smporModeLabel',
+        ));
+    }
+
+    private function buildSectionDefinitions(?int $employeeId, ?int $periodId): array
+    {
+        if (!$employeeId || !$periodId) {
+            return [];
+        }
+
+        $ipcr = Ipcr::query()
+            ->where('employee_id', $employeeId)
+            ->where('performance_period_id', $periodId)
+            ->whereIn('status', [Ipcr::STATUS_COMMITTED, Ipcr::STATUS_FOR_COMMITMENT])
+            ->with([
+                'unitWorkPlan.uwpFunctions' => function ($functionQuery): void {
+                    $functionQuery
+                        ->orderBy('sort_order')
+                        ->with([
+                            'mfos' => function ($mfoQuery): void {
+                                $mfoQuery->orderBy('sort_order');
+                            },
+                        ]);
+                },
+            ])
+            ->orderByRaw(
+                "CASE
+                    WHEN status = ? THEN 0
+                    WHEN status = ? THEN 1
+                    ELSE 2
+                END",
+                [Ipcr::STATUS_COMMITTED, Ipcr::STATUS_FOR_COMMITMENT]
+            )
+            ->orderByDesc('id')
+            ->first();
+
+        if (!$ipcr?->unitWorkPlan) {
+            return [];
+        }
+
+        $definitions = [];
+        $fallbackSortOrder = 100;
+
+        foreach ($ipcr->unitWorkPlan->uwpFunctions as $function) {
+            $functionType = $this->normalizeFunctionType((string) ($function->function_type ?? 'support'));
+            $defaultTitle = match ($functionType) {
+                'core' => 'CORE FUNCTION',
+                'support' => 'SUPPORT FUNCTION',
+                'custom' => 'CUSTOM FUNCTION',
+                default => strtoupper(str_replace('_', ' ', $functionType)) . ' FUNCTION',
+            };
+            $candidateTitle = trim((string) ($function->name ?? ''));
+            $title = $candidateTitle !== '' ? mb_strtoupper($candidateTitle) : $defaultTitle;
+
+            if (!isset($definitions[$functionType])) {
+                $definitions[$functionType] = [
+                    'title' => $title,
+                    'weight_percent' => 0.0,
+                    'sort_order' => is_null($function->sort_order) ? $fallbackSortOrder++ : (int) $function->sort_order,
+                    'output_order' => [],
+                ];
+            }
+
+            $definitions[$functionType]['weight_percent'] += (float) ($function->weight_percent ?? 0);
+
+            foreach ($function->mfos as $mfo) {
+                $outputTitle = trim((string) ($mfo->title ?? ''));
+                if ($outputTitle === '') {
+                    continue;
+                }
+
+                if (!in_array($outputTitle, $definitions[$functionType]['output_order'], true)) {
+                    $definitions[$functionType]['output_order'][] = $outputTitle;
+                }
+            }
+        }
+
+        return $definitions;
+    }
+
+    private function normalizeFunctionType(string $functionType): string
+    {
+        $value = strtolower(trim($functionType));
+
+        if ($value === '') {
+            return 'custom';
+        }
+
+        return $value;
+    }
+
+    private function initializeMonthMap(array $monthLabels): array
+    {
+        $map = [];
+        foreach ($monthLabels as $label) {
+            $map[$label] = 0.0;
+        }
+
+        return $map;
+    }
+
+    private function normalizeMonthMap(array $values, array $monthLabels): array
+    {
+        $normalized = $this->initializeMonthMap($monthLabels);
+        foreach ($values as $label => $value) {
+            if (array_key_exists($label, $normalized)) {
+                $normalized[$label] = (float) $value;
+            }
+        }
+
+        return $normalized;
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $payload = $this->buildPayload();
+        if (is_null($payload)) {
+            return redirect()->back();
+        }
+
+        return Excel::download(
+            new SmporExcelExport($payload),
+            $this->buildFilename($payload, false)
+        );
+    }
+
+    private function buildPayload(): ?array
+    {
+        $user = auth()->user();
+        if (!$user) {
+            session()->flash('info', 'Unable to resolve employee account for SMPOR export.');
+            return null;
+        }
+
+        $period = PerformancePeriod::query()
+            ->where('is_active', 1)
+            ->first();
+
+        if (!$period) {
+            session()->flash('info', 'No active performance period is configured.');
+            return null;
+        }
+
+        $start = $period->start_date
+            ? Carbon::parse($period->start_date)->startOfMonth()
+            : Carbon::now()->startOfYear();
+        $end = $period->end_date
+            ? Carbon::parse($period->end_date)->startOfMonth()
+            : $start->copy()->addMonths(5);
+
+        if ($end->lt($start)) {
+            [$start, $end] = [$end, $start];
+        }
+
+        $rangeMonthMap = [];
+        $exportMonthKeys = ['jan', 'feb', 'mar', 'apr', 'may', 'jun'];
+        $cursor = $start->copy();
+
+        while ($cursor->lte($end) && count($rangeMonthMap) < 6) {
+            $slotKey = $exportMonthKeys[count($rangeMonthMap)];
+            $rangeMonthMap[$cursor->format('Y-m')] = $slotKey;
+            $cursor->addMonth();
+        }
+
+        if (empty($rangeMonthMap)) {
+            $cursor = $start->copy();
+            while (count($rangeMonthMap) < 6) {
+                $slotKey = $exportMonthKeys[count($rangeMonthMap)];
+                $rangeMonthMap[$cursor->format('Y-m')] = $slotKey;
+                $cursor->addMonth();
+            }
+        }
+
+        $rangeStartMonth = array_key_first($rangeMonthMap);
+        $rangeEndMonth = array_key_last($rangeMonthMap);
+
+        $semestralPeriodLabel = $start->year === $end->year
+            ? $start->format('F') . '-' . $end->format('F Y')
+            : $start->format('F Y') . '-' . $end->format('F Y');
+
+        $office = $user->office()->with(['head:id,name', 'employees:id,name,role,office_id'])->first();
+        $officeName = (string) ($office?->name ?? 'â€”');
+        $employeeName = (string) ($user->name ?? 'â€”');
+        $supervisorName = (string) ($office?->employees
+            ?->firstWhere('role', 'supervisor')
+            ?->name ?? 'â€”');
+        $departmentHeadName = (string) (
+            $office?->head?->name
+            ?? $office?->employees?->firstWhere('role', 'dept-head')?->name
+            ?? 'â€”'
+        );
+
+        $ipcr = Ipcr::query()
+            ->where('employee_id', $user->id)
+            ->where('performance_period_id', $period->id)
+            ->with([
+                'items',
+                'unitWorkPlan.uwpFunctions' => function ($query): void {
+                    $query
+                        ->orderBy('sort_order')
+                        ->with([
+                            'mfos' => function ($mfoQuery): void {
+                                $mfoQuery->orderBy('sort_order');
+                            },
+                        ]);
+                },
+            ])
+            ->orderByDesc('id')
+            ->first();
+
+        $sectionDefinitions = $this->buildSectionDefinitions($user?->id, $period->id);
+        $outputSectionMap = [];
+
+        if ($ipcr) {
+            foreach ($ipcr->items as $item) {
+                $label = trim((string) ($item->output_title ?? ''));
+                if ($label === '') {
+                    continue;
+                }
+
+                $functionType = $this->normalizeFunctionType((string) ($item->function_type ?? ''));
+                $outputSectionMap[$label] = $functionType;
+
+                if (!isset($sectionDefinitions[$functionType])) {
+                    $sectionDefinitions[$functionType] = [
+                        'title' => strtoupper(str_replace('_', ' ', $functionType)) . ' FUNCTION',
+                        'weight_percent' => 0.0,
+                        'sort_order' => 1000 + count($sectionDefinitions),
+                        'output_order' => [],
+                    ];
+                }
+
+                if (!in_array($label, $sectionDefinitions[$functionType]['output_order'], true)) {
+                    $sectionDefinitions[$functionType]['output_order'][] = $label;
+                }
+            }
+
+            foreach ($ipcr->unitWorkPlan?->uwpFunctions ?? collect() as $function) {
+                $functionType = $this->normalizeFunctionType((string) ($function->function_type ?? ''));
+
+                if (!isset($sectionDefinitions[$functionType])) {
+                    $sectionDefinitions[$functionType] = [
+                        'title' => strtoupper(str_replace('_', ' ', $functionType)) . ' FUNCTION',
+                        'weight_percent' => (float) ($function->weight_percent ?? 0),
+                        'sort_order' => is_null($function->sort_order) ? (1000 + count($sectionDefinitions)) : (int) $function->sort_order,
+                        'output_order' => [],
+                    ];
+                }
+
+                foreach ($function->mfos ?? [] as $mfo) {
+                    $label = trim((string) ($mfo->title ?? ''));
+                    if ($label === '') {
+                        continue;
+                    }
+
+                    $outputSectionMap[$label] = $functionType;
+                    if (!in_array($label, $sectionDefinitions[$functionType]['output_order'], true)) {
+                        $sectionDefinitions[$functionType]['output_order'][] = $label;
+                    }
+                }
+            }
+        }
+
+        $initializeMonthlyBuckets = static function () use ($exportMonthKeys): array {
+            $months = [];
+            foreach ($exportMonthKeys as $monthKey) {
+                $months[$monthKey] = [
+                    'qty' => 0.0,
+                    'q_points' => 0.0,
+                    't_points' => 0.0,
+                ];
+            }
+
+            return $months;
+        };
+
+        $aggregateMap = [];
+        $labelGroupMap = [];
+        $selectedMpors = collect();
+        $usingOfficialDataset = false;
+        $pmtApprovedStatus = defined(QarHeader::class . '::STATUS_PMT_APPROVED')
+            ? constant(QarHeader::class . '::STATUS_PMT_APPROVED')
+            : 'pmt_approved';
+
+        if ($user->office_id && $rangeStartMonth && $rangeEndMonth) {
+            $qar = QarHeader::query()
+                ->where('office_id', $user->office_id)
+                ->where('performance_period_id', $period->id)
+                ->where('status', $pmtApprovedStatus)
+                ->with(['mporLinks:id,qar_header_id,mpor_id'])
+                ->orderByDesc('approved_at')
+                ->orderByDesc('id')
+                ->first();
+
+            $officialMporIds = $qar?->mporLinks
+                ? $qar->mporLinks->pluck('mpor_id')->filter()->unique()->values()
+                : collect();
+
+            if ($officialMporIds->isNotEmpty()) {
+                $officialMporQuery = Mpor::query()
+                    ->whereIn('id', $officialMporIds)
+                    ->where('office_id', $user->office_id);
+
+                if ($user?->id) {
+                    $officialMporQuery->where('employee_id', $user->id);
+                }
+
+                $selectedMpors = $officialMporQuery
+                    ->whereBetween(DB::raw('LEFT(month, 7)'), [$rangeStartMonth, $rangeEndMonth])
+                    ->orderBy('month')
+                    ->get();
+
+                $usingOfficialDataset = $selectedMpors->isNotEmpty();
+            }
+        }
+
+        if (!$usingOfficialDataset && $user?->id && $user?->office_id && $rangeStartMonth && $rangeEndMonth) {
+            $selectedMpors = Mpor::query()
+                ->where('employee_id', $user->id)
+                ->where('office_id', $user->office_id)
+                ->whereIn('status', ['submitted'])
+                ->whereBetween(DB::raw('LEFT(month, 7)'), [$rangeStartMonth, $rangeEndMonth])
+                ->orderBy('month')
+                ->get();
+
+        }
+
+        $totalRatedEntries = 0;
+        $sampleLogged = false;
+
+        foreach ($selectedMpors as $mpor) {
+            $rawMonth = trim((string) $mpor->month);
+            $monthKey = substr($rawMonth, 0, 7);
+
+            try {
+                $parsedYm = Carbon::createFromFormat('Y-m', $monthKey)->format('Y-m');
+            } catch (\Throwable) {
+                try {
+                    $parsedYm = Carbon::parse($rawMonth)->format('Y-m');
+                } catch (\Throwable) {
+                    continue;
+                }
+            }
+
+            $monthSlotKey = $rangeMonthMap[$parsedYm] ?? null;
+
+            if (!$monthSlotKey) {
+                continue;
+            }
+
+            $ratedEntries = $mpor->ratedOrsEntriesForMonth()
+                ->with(['monitoring', 'ipcrItem'])
+                ->get();
+            $totalRatedEntries += $ratedEntries->count();
+
+            $ratedSample = $ratedEntries->take(3)->map(static function ($entry): array {
+                return [
+                    'id' => $entry->id,
+                    'status' => $entry->status,
+                    'quantity' => $entry->quantity,
+                    'work_date' => $entry->work_date,
+                    'ipcr_item_id' => $entry->ipcr_item_id ?? $entry->ipcrItem?->id,
+                    'monitoring_id' => $entry->monitoring->id ?? null,
+                    'monitoring_exists' => (bool) $entry->monitoring,
+                    'quality_rating' => $entry->monitoring->quality_rating ?? null,
+                    'timeliness_rating' => $entry->monitoring->timeliness_rating ?? null,
+                ];
+            })->values()->all();
+
+            try {
+                $monthStart = Carbon::createFromFormat('Y-m', $parsedYm)->startOfMonth()->toDateString();
+                $monthEnd = Carbon::createFromFormat('Y-m', $parsedYm)->endOfMonth()->toDateString();
+
+                $rawOrsSamples = OrsEntry::query()
+                    ->where('employee_id', (int) ($mpor->employee_id ?: $user->id))
+                    ->whereBetween('work_date', [$monthStart, $monthEnd])
+                    ->take(3)
+                    ->get(['id', 'status', 'quantity', 'work_date', 'monitoring_id', 'ipcr_item_id'])
+                    ->toArray();
+
+            } catch (\Throwable $exception) {
+                logger()->info('SMPOR EXPORT DEBUG RAW ORS SAMPLE FAILED', [
+                    'mpor_id' => $mpor->id,
+                    'message' => $exception->getMessage(),
+                ]);
+            }
+
+            if ($ratedEntries->isEmpty() && !$sampleLogged) {
+                try {
+                    $monthStart = Carbon::createFromFormat('Y-m', $parsedYm)->startOfMonth()->toDateString();
+                    $monthEnd = Carbon::createFromFormat('Y-m', $parsedYm)->endOfMonth()->toDateString();
+
+                    $orsSamples = OrsEntry::query()
+                        ->where('employee_id', (int) ($mpor->employee_id ?: $user->id))
+                        ->whereBetween('work_date', [$monthStart, $monthEnd])
+                        ->take(3)
+                        ->get(['id', 'status', 'quantity', 'work_date'])
+                        ->toArray();
+                    $sampleLogged = true;
+                } catch (\Throwable $exception) {
+                    logger()->info('SMPOR EXPORT ORS SAMPLE FAILED', [
+                        'mpor_id' => $mpor->id,
+                        'message' => $exception->getMessage(),
+                    ]);
+                }
+            }
+
+            foreach ($ratedEntries as $entry) {
+                $monitoring = $entry->monitoring;
+                $quantity = (float) ($entry->quantity ?? 0);
+                $qualityRating = (float) ($monitoring?->quality_rating ?? 0);
+                $timelinessRating = (float) ($monitoring?->timeliness_rating ?? 0);
+
+                if (!$monitoring || is_null($monitoring->quality_rating) || is_null($monitoring->timeliness_rating) || $quantity <= 0) {
+                    continue;
+                }
+
+                $label = trim((string) (
+                    $entry->ipcrItem?->output_title
+                    ?? ($entry->mfo_title ?? null)
+                    ?? ($entry->mfo ?? null)
+                    ?? ''
+                ));
+                if ($label === '') {
+                    $label = 'Unassigned Output';
+                }
+
+                if (!isset($aggregateMap[$label])) {
+                    $aggregateMap[$label] = $initializeMonthlyBuckets();
+                }
+
+                $functionType = $this->normalizeFunctionType((string) ($entry->ipcrItem?->function_type ?? ($outputSectionMap[$label] ?? 'custom')));
+                if (!isset($labelGroupMap[$label])) {
+                    $labelGroupMap[$label] = $functionType;
+                }
+
+                if (!isset($sectionDefinitions[$functionType])) {
+                    $sectionDefinitions[$functionType] = [
+                        'title' => strtoupper(str_replace('_', ' ', $functionType)) . ' FUNCTION',
+                        'weight_percent' => 0.0,
+                        'sort_order' => 1000 + count($sectionDefinitions),
+                        'output_order' => [],
+                    ];
+                }
+
+                if (!in_array($label, $sectionDefinitions[$functionType]['output_order'], true)) {
+                    $sectionDefinitions[$functionType]['output_order'][] = $label;
+                }
+
+                $aggregateMap[$label][$monthSlotKey]['qty'] += $quantity;
+                $aggregateMap[$label][$monthSlotKey]['q_points'] += $quantity * $qualityRating;
+                $aggregateMap[$label][$monthSlotKey]['t_points'] += $quantity * $timelinessRating;
+            }
+        }
+
+        if ($totalRatedEntries === 0 && !$sampleLogged && $selectedMpors->isNotEmpty()) {
+            $firstMpor = $selectedMpors->first();
+            $fallbackRawMonth = trim((string) ($firstMpor->month ?? ''));
+            try {
+                $fallbackYm = Carbon::parse($fallbackRawMonth)->format('Y-m');
+                $monthStart = Carbon::createFromFormat('Y-m', $fallbackYm)->startOfMonth()->toDateString();
+                $monthEnd = Carbon::createFromFormat('Y-m', $fallbackYm)->endOfMonth()->toDateString();
+
+                $orsSamples = OrsEntry::query()
+                    ->where('employee_id', (int) ($firstMpor->employee_id ?: $user->id))
+                    ->whereBetween('work_date', [$monthStart, $monthEnd])
+                    ->take(3)
+                    ->get(['id', 'status', 'quantity', 'work_date'])
+                    ->toArray();
+
+            } catch (\Throwable $exception) {
+                logger()->info('SMPOR EXPORT ORS SAMPLE FAILED', [
+                    'mpor_id' => $firstMpor->id,
+                    'message' => $exception->getMessage(),
+                ]);
+            }
+        }
+
+        uasort($sectionDefinitions, static function (array $left, array $right): int {
+            $leftOrder = (int) ($left['sort_order'] ?? 1000);
+            $rightOrder = (int) ($right['sort_order'] ?? 1000);
+
+            if ($leftOrder !== $rightOrder) {
+                return $leftOrder <=> $rightOrder;
+            }
+
+            return strnatcasecmp((string) ($left['title'] ?? ''), (string) ($right['title'] ?? ''));
+        });
+
+        $sections = [];
+        foreach ($sectionDefinitions as $sectionType => $definition) {
+            $orderedLabels = [];
+            foreach (($definition['output_order'] ?? []) as $label) {
+                if (isset($aggregateMap[$label]) && !in_array($label, $orderedLabels, true)) {
+                    $orderedLabels[] = $label;
+                }
+            }
+
+            $remainingLabels = collect($aggregateMap)
+                ->keys()
+                ->filter(fn ($label) => ($labelGroupMap[$label] ?? $outputSectionMap[$label] ?? 'custom') === $sectionType)
+                ->reject(fn ($label) => in_array($label, $orderedLabels, true))
+                ->sort(static fn (string $a, string $b): int => strnatcasecmp($a, $b))
+                ->values()
+                ->all();
+
+            $labels = array_merge($orderedLabels, $remainingLabels);
+            if (empty($labels)) {
+                continue;
+            }
+
+            $rows = [];
+            foreach ($labels as $label) {
+                $rows[] = $this->makeOutputRow($label, $aggregateMap[$label] ?? []);
+            }
+
+            $weightPercent = (float) ($definition['weight_percent'] ?? 0);
+            $baseTitle = (string) ($definition['title'] ?? strtoupper(str_replace('_', ' ', $sectionType)) . ' FUNCTION');
+            if ($weightPercent > 0) {
+                $weightLabel = rtrim(rtrim(number_format($weightPercent, 2, '.', ''), '0'), '.');
+                $baseTitle .= ' (' . $weightLabel . '%)';
+            }
+
+            $sections[] = [
+                'function_type' => $sectionType,
+                'weight_percent' => $weightPercent,
+                'label' => $baseTitle,
+                'rows' => $rows,
+            ];
+        }
+
+        $aggregatePreview = collect($aggregateMap)
+            ->take(5)
+            ->map(static function (array $monthBuckets, string $label): array {
+                return [
+                    'label' => $label,
+                    'months' => $monthBuckets,
+                ];
+            })
+            ->values()
+            ->all();
+
+        return [
+            'name' => $employeeName,
+            'office' => $officeName,
+            'semestral_period' => $semestralPeriodLabel,
+            'supervisor' => $supervisorName,
+            'department_head' => $departmentHeadName,
+            'employee' => $employeeName,
+            'sections' => $sections,
+
+            'attendance' => [
+                'absence' => [
+                    'jan' => 0,
+                    'feb' => 0,
+                    'mar' => 0,
+                    'apr' => 0,
+                    'may' => 0,
+                    'jun' => 0,
+                    'total' => 0,
+                ],
+                'tardiness' => [
+                    'jan' => 0,
+                    'feb' => 0,
+                    'mar' => 0,
+                    'apr' => 0,
+                    'may' => 0,
+                    'jun' => 0,
+                    'total' => 0,
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * $monthValues supports either:
+     *  - ['jan' => 12]  (qty only)
+     *  - ['jan' => ['qty'=>12,'q_points'=>60,'t_points'=>60]] (explicit per-band values)
+     */
+    private function makeOutputRow(string $label, array $monthValues): array
+    {
+        $months = [];
+        $keys = ['jan', 'feb', 'mar', 'apr', 'may', 'jun'];
+
+        foreach ($keys as $key) {
+            $value = $monthValues[$key] ?? 0;
+
+            if (is_array($value)) {
+                $qty = (int) round((float) ($value['qty'] ?? 0));
+                $qPoints = (int) round((float) ($value['q_points'] ?? 0));
+                $tPoints = (int) round((float) ($value['t_points'] ?? 0));
+            } else {
+                $qty = (int) round((float) $value);
+                $qPoints = 0;
+                $tPoints = 0;
+            }
+
+            $months[$key] = [
+                'qty' => $qty,
+                'q_points' => $qPoints,
+                't_points' => $tPoints,
+            ];
+        }
+
+        return [
+            'label' => $label,
+            'months' => $months,
+        ];
+    }
+
+    private function buildFilename(array $payload, bool $preview): string
+    {
+        $office = Str::slug((string) ($payload['office'] ?? 'Office'), '_');
+        $period = Str::slug((string) ($payload['semestral_period'] ?? 'Semestral_Period'), '_');
+        $suffix = $preview ? '_Preview' : '';
+
+        return "SMPOR_{$office}_{$period}{$suffix}.xlsx";
+    }
+
+    public function exportIpcrExcel(Request $request)
+    {
+        $ipcrModel = $this->resolveEmployeeIpcr($request);
+        $ipcr = $this->buildIpcr($ipcrModel);
+        $standards = $this->buildStandardsFromIpcrOrFail($ipcrModel);
+        $valuesByIndicator = $this->buildValuesByIndicator($ipcrModel);
+        $meta = $this->buildMeta($request, $ipcrModel);
+
+        return Excel::download(
+            new IpcrExcelExport($ipcr, $standards, $valuesByIndicator, $meta),
+            $this->buildIpcrFilename($meta, false)
+        );
+    }
+
+    public function previewExcel(Request $request)
+    {
+        $ipcrModel = $this->resolveEmployeeIpcr($request);
+        $ipcr = $this->buildIpcr($ipcrModel);
+        $standards = $this->buildStandardsFromIpcrOrFail($ipcrModel);
+        $valuesByIndicator = $this->buildValuesByIndicator($ipcrModel);
+        $meta = $this->buildMeta($request, $ipcrModel);
+
+        return Excel::download(
+            new IpcrExcelExport($ipcr, $standards, $valuesByIndicator),
+            $this->buildFilename($meta, true)
+        );
+    }
+
+    private function buildMeta(Request $request, Ipcr $ipcr): array
+    {
+        $user = $request->user();
+        $office = (string) ($ipcr->office?->name ?? $user?->office?->name ?? 'Office');
+
+        $periodLabel = 'Period';
+        if ($ipcr->performancePeriod) {
+            $periodName = trim((string) ($ipcr->performancePeriod->name ?? ''));
+            if ($periodName !== '') {
+                $periodLabel = $periodName;
+            } elseif ($ipcr->performancePeriod->start_date && $ipcr->performancePeriod->end_date) {
+                $start = Carbon::parse($ipcr->performancePeriod->start_date)->format('M d, Y');
+                $end = Carbon::parse($ipcr->performancePeriod->end_date)->format('M d, Y');
+                $periodLabel = "{$start} - {$end}";
+            }
+        }
+
+        return [
+            'employee' => (string) ($ipcr->employee?->name ?? $user?->name ?? 'Employee'),
+            'office' => $office,
+            'period' => $periodLabel,
+        ];
+    }
+
+    private function buildIpcr(Ipcr $ipcr): array
+    {
+        $targetPayloadByIndicator = $this->buildTargetPayloadByIndicatorLookup($ipcr);
+        $sectionDefinitions = $this->buildSectionDefinitions((int) $ipcr->employee_id, (int) $ipcr->performance_period_id);
+        $sections = [];
+
+        foreach ($ipcr->items as $item) {
+            $output = trim((string) ($item->output_title ?? ''));
+            $indicator = trim((string) ($item->indicator_text ?? ''));
+            if ($output === '' || $indicator === '') {
+                continue;
+            }
+
+            $section = $this->normalizeFunctionType((string) ($item->function_type ?? ''));
+
+            if (!isset($sections[$section][$output])) {
+                $sections[$section][$output] = [
+                    'output' => $output,
+                    'indicators' => [],
+                ];
+            }
+
+            $existingIndicators = array_map(
+                static fn ($entry) => is_array($entry) ? (string) ($entry['text'] ?? '') : (string) $entry,
+                $sections[$section][$output]['indicators']
+            );
+
+            if (!in_array($indicator, $existingIndicators, true)) {
+                $targetPayload = $targetPayloadByIndicator[
+                    $this->buildIndicatorRatingLookupKey($output, $indicator)
+                ] ?? [];
+
+                $sections[$section][$output]['indicators'][] = [
+                    'text' => $indicator,
+                    'target_quantity' => $targetPayload['target_quantity'] ?? null,
+                ];
+            }
+        }
+
+        $sectionTypes = array_values(array_unique(array_merge(
+            array_keys($sectionDefinitions),
+            array_keys($sections)
+        )));
+
+        usort($sectionTypes, function (string $left, string $right) use ($sectionDefinitions): int {
+            $leftOrder = (int) ($sectionDefinitions[$left]['sort_order'] ?? 1000);
+            $rightOrder = (int) ($sectionDefinitions[$right]['sort_order'] ?? 1000);
+
+            if ($leftOrder !== $rightOrder) {
+                return $leftOrder <=> $rightOrder;
+            }
+
+            return strnatcasecmp($left, $right);
+        });
+
+        $normalizedSections = [];
+
+        foreach ($sectionTypes as $sectionType) {
+            $rowsMap = $sections[$sectionType] ?? [];
+            if (empty($rowsMap)) {
+                continue;
+            }
+
+            $sectionDefinition = $sectionDefinitions[$sectionType] ?? [];
+            $orderedOutputs = [];
+
+            if (!empty($sectionDefinition['output_order']) && is_array($sectionDefinition['output_order'])) {
+                foreach ($sectionDefinition['output_order'] as $outputTitle) {
+                    if (isset($rowsMap[$outputTitle])) {
+                        $orderedOutputs[] = $outputTitle;
+                    }
+                }
+            }
+
+            $remainingOutputs = array_values(array_diff(array_keys($rowsMap), $orderedOutputs));
+            usort($remainingOutputs, static fn (string $a, string $b): int => strnatcasecmp($a, $b));
+            $orderedOutputs = array_merge($orderedOutputs, $remainingOutputs);
+
+            $baseTitle = (string) ($sectionDefinition['title']
+                ?? strtoupper(str_replace('_', ' ', $sectionType)) . ' FUNCTION');
+            $weightPercent = (float) ($sectionDefinition['weight_percent'] ?? 0);
+            $label = $baseTitle;
+
+            if ($weightPercent > 0) {
+                $weightLabel = rtrim(rtrim(number_format($weightPercent, 2, '.', ''), '0'), '.');
+                $label .= ' (' . $weightLabel . '%)';
+            }
+
+            $items = [];
+            foreach ($orderedOutputs as $outputTitle) {
+                if (isset($rowsMap[$outputTitle])) {
+                    $items[] = $rowsMap[$outputTitle];
+                }
+            }
+
+            $normalizedSections[] = [
+                'type' => $sectionType,
+                'label' => $label,
+                'items' => $items,
+            ];
+        }
+
+        return [
+            'sections' => $normalizedSections,
+            'core' => array_values($sections['core'] ?? []),
+            'support' => array_values($sections['support'] ?? []),
+        ];
+    }
+
+    private function buildValuesByIndicator(Ipcr $ipcr): array
+    {
+        [, $ratingsByIndicator] = $this->buildRatedIpcrPerformanceMaps($ipcr, (int) $ipcr->employee_id);
+        $valuesByIndicator = [];
+        foreach ($ratingsByIndicator as $lookupKey => $ratings) {
+            $totalQty = (float) ($ratings['qty'] ?? 0.0);
+            $valuesByIndicator[$lookupKey] = [
+                'accomplishment' => 'Completed ' . $this->formatQuantity($totalQty) . ' output(s) for the period based on rated ORS totals.',
+                'q' => $ratings['q'],
+                'e' => $ratings['e'],
+                't' => $ratings['t'],
+                'a' => $ratings['a'],
+                'remarks' => 'Derived from rated ORS entries; supervisor ratings applied (Stage II).',
+            ];
+        }
+
+        return $valuesByIndicator;
+    }
+
+    private function buildStandardsFromIpcrOrFail(Ipcr $ipcr): array
+    {
+        $allIndicators = [];
+        foreach ($ipcr->items as $item) {
+            $indicator = trim((string) ($item->indicator_text ?? ''));
+            if ($indicator !== '') {
+                $allIndicators[$indicator] = true;
+            }
+        }
+
+        $standards = [];
+
+        foreach ($ipcr->items as $item) {
+            $indicator = trim((string) ($item->indicator_text ?? ''));
+            if ($indicator === '' || isset($standards[$indicator])) {
+                continue;
+            }
+
+            $rawPayload = $item->standards_payload;
+            $payload = null;
+
+            if (is_string($rawPayload)) {
+                $decoded = json_decode($rawPayload, true);
+                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                    $payload = $decoded;
+                }
+            } elseif (is_array($rawPayload)) {
+                $payload = $rawPayload;
+            }
+
+            if (!is_array($payload) || empty($payload)) {
+                continue;
+            }
+
+            $normalized = [];
+            foreach ([5, 4, 3, 2, 1] as $rating) {
+                $bucket = $payload[(string) $rating] ?? $payload[$rating] ?? [];
+                if (!is_array($bucket)) {
+                    $bucket = [];
+                }
+
+                $bucketUpper = [];
+                foreach ($bucket as $key => $value) {
+                    $bucketUpper[strtoupper((string) $key)] = $value;
+                }
+
+                $normalized[$rating] = [
+                    'q' => $this->normalizeStandardsDimension($bucketUpper['Q'] ?? null),
+                    'e' => $this->normalizeStandardsDimension($bucketUpper['E'] ?? null),
+                    't' => $this->normalizeStandardsDimension($bucketUpper['T'] ?? null),
+                ];
+            }
+
+            $standards[$indicator] = $normalized;
+        }
+
+        $missingIndicators = [];
+        foreach (array_keys($allIndicators) as $indicator) {
+            if (!isset($standards[$indicator])) {
+                $missingIndicators[] = $indicator;
+            }
+        }
+
+        if (!empty($missingIndicators)) {
+            abort(422, 'IPCR export requires standards_payload for all indicators. Missing/invalid for: ' . implode(', ', $missingIndicators));
+        }
+
+        if (empty($standards)) {
+            abort(422, 'IPCR export requires standards_payload for all indicators. Missing/invalid for: (no indicators)');
+        }
+
+        return $standards;
+    }
+
+    private function normalizeStandardsDimension(mixed $value): array
+    {
+        if (is_array($value)) {
+            return array_values(array_filter(array_map(
+                fn ($v) => trim((string) $v),
+                $value
+            ), fn ($v) => $v !== ''));
+        }
+
+        $text = trim((string) $value);
+        if ($text === '') {
+            return [];
+        }
+
+        return [$text];
+    }
+
+    private function buildIpcrFilename(array $meta, bool $preview): string
+    {
+        $employee = Str::slug((string) ($meta['employee'] ?? 'Employee'), '_');
+        $office = Str::slug((string) ($meta['office'] ?? 'Office'), '_');
+        $period = Str::slug((string) ($meta['period'] ?? 'Period'), '_');
+        $suffix = $preview ? '_Preview' : '';
+
+        return "IPCR_{$employee}_{$office}_{$period}{$suffix}.xlsx";
+    }
+
+    private function resolveEmployeeIpcr(Request $request): Ipcr
+    {
+        $user = $request->user();
+        abort_unless($user, 403);
+
+        $activePeriod = PerformancePeriod::query()
+            ->where('is_active', true)
+            ->orderByDesc('start_date')
+            ->first();
+
+        $query = Ipcr::query()
+            ->with([
+                'employee:id,name,office_id',
+                'office:id,name',
+                'performancePeriod:id,name,start_date,end_date',
+                'items:id,ipcr_id,uwp_function_id,uwp_success_indicator_id,output_title,function_type,indicator_text,target_quantity,target_timeline,target_summary,standards_payload',
+            ])
+            ->where('employee_id', $user->id)
+            ->whereIn('status', [Ipcr::STATUS_COMMITTED, Ipcr::STATUS_FOR_COMMITMENT]);
+
+        if ($activePeriod) {
+            $query->where('performance_period_id', $activePeriod->id);
+        }
+
+        $ipcr = $query
+            ->orderByDesc('generated_at')
+            ->orderByDesc('id')
+            ->first();
+
+        if (!$ipcr && $activePeriod) {
+            $ipcr = Ipcr::query()
+                ->with([
+                    'employee:id,name,office_id',
+                    'office:id,name',
+                    'performancePeriod:id,name,start_date,end_date',
+                    'items:id,ipcr_id,uwp_function_id,uwp_success_indicator_id,output_title,function_type,indicator_text,target_quantity,target_timeline,target_summary,standards_payload',
+                ])
+                ->where('employee_id', $user->id)
+                ->whereIn('status', [Ipcr::STATUS_COMMITTED, Ipcr::STATUS_FOR_COMMITMENT])
+                ->orderByDesc('generated_at')
+                ->orderByDesc('id')
+                ->first();
+        }
+
+        abort_if(!$ipcr, 404, 'No IPCR found for export.');
+
+        return $ipcr;
+    }
+
+    private function buildTargetSummary($targetQuantity, ?string $targetTimeline): string
+    {
+        $quantityText = $targetQuantity === null ? '' : trim((string) $targetQuantity);
+        $timelineText = trim((string) ($targetTimeline ?? ''));
+
+        return trim($quantityText . ' ' . $timelineText);
+    }
+
+    private function resolvePeriodWindow(Ipcr $ipcr): array
+    {
+        $start = $ipcr->performancePeriod?->start_date
+            ? Carbon::parse($ipcr->performancePeriod->start_date)
+            : null;
+        $end = $ipcr->performancePeriod?->end_date
+            ? Carbon::parse($ipcr->performancePeriod->end_date)
+            : null;
+
+        if (!$start || !$end) {
+            $fallback = PerformancePeriod::query()
+                ->whereKey($ipcr->performance_period_id)
+                ->orWhere('is_active', true)
+                ->orderByDesc('start_date')
+                ->first();
+
+            if ($fallback?->start_date && $fallback?->end_date) {
+                $start = Carbon::parse($fallback->start_date);
+                $end = Carbon::parse($fallback->end_date);
+            }
+        }
+
+        if (!$start || !$end) {
+            $start = now()->startOfMonth();
+            $end = now()->endOfMonth();
+        }
+
+        return [$start->copy()->startOfDay(), $end->copy()->endOfDay()];
+    }
+
+    private function formatQuantity(float $quantity): string
+    {
+        if (fmod($quantity, 1.0) === 0.0) {
+            return (string) (int) $quantity;
+        }
+
+        return rtrim(rtrim(number_format($quantity, 2, '.', ''), '0'), '.');
+    }
+
+    public function submit(Request $request)
+    {
+        $user = $request->user();
+        abort_unless($user, 403);
+
+        $period = PerformancePeriod::query()->where('is_active', 1)->first();
+        if (!$period) {
+            return back()->with('info', 'No active performance period is configured.');
+        }
+
+        $ipcr = Ipcr::query()
+            ->where('employee_id', $user->id)
+            ->where('performance_period_id', $period->id)
+            ->with(['items'])
+            ->orderByDesc('id')
+            ->first();
+
+        if (!$ipcr) {
+            return back()->withErrors(['No IPCR found for this performance period.']);
+        }
+
+        $validated = $request->validate([
+            'remarks' => ['nullable', 'string', 'max:5000'],
+            'supporting_files' => ['nullable', 'array'],
+            'supporting_files.*' => ['file', 'max:51200'],
+        ]);
+
+        $existing = AccomplishmentSubmission::query()
+            ->where('employee_id', $user->id)
+            ->where('performance_period_id', $period->id)
+            ->first();
+
+        $existingStatus = strtolower((string) ($existing->status ?? 'draft'));
+        if ($existing && !in_array($existingStatus, ['draft', 'returned_to_employee'], true)) {
+            return back()->with('info', 'You already submitted your accomplishments for this period.');
+        }
+
+        $monthKeys = [];
+        if (!empty($period->start_date) && !empty($period->end_date)) {
+            $start = Carbon::parse($period->start_date)->startOfMonth();
+            $end = Carbon::parse($period->end_date)->startOfMonth();
+            if ($end->lt($start)) {
+                [$start, $end] = [$end, $start];
+            }
+
+            $cursor = $start->copy();
+            while ($cursor->lte($end)) {
+                $monthKeys[] = $cursor->format('Y-m');
+                $cursor->addMonth();
+            }
+        }
+
+        $datasetSource = 'submitted_mpor_preview';
+        $qarHeaderId = null;
+        $selectedMpors = collect();
+
+        $pmtApprovedStatus = defined(QarHeader::class . '::STATUS_PMT_APPROVED')
+            ? constant(QarHeader::class . '::STATUS_PMT_APPROVED')
+            : 'pmt_approved';
+
+        if ($user->office_id) {
+            $qar = QarHeader::query()
+                ->where('office_id', $user->office_id)
+                ->where('performance_period_id', $period->id)
+                ->where('status', $pmtApprovedStatus)
+                ->with(['mporLinks:id,qar_header_id,mpor_id'])
+                ->orderByDesc('approved_at')
+                ->orderByDesc('id')
+                ->first();
+
+            $officialMporIds = $qar?->mporLinks
+                ? $qar->mporLinks->pluck('mpor_id')->filter()->unique()->values()
+                : collect();
+
+            if ($qar && $officialMporIds->isNotEmpty()) {
+                $officialQuery = Mpor::query()
+                    ->whereIn('id', $officialMporIds)
+                    ->where('office_id', $user->office_id)
+                    ->where('employee_id', $user->id);
+
+                if (!empty($monthKeys)) {
+                    $officialQuery->where(function ($q) use ($monthKeys) {
+                        foreach ($monthKeys as $ym) {
+                            $q->orWhere('month', 'like', $ym . '%');
+                        }
+                    });
+                }
+
+                $selectedMpors = $officialQuery->orderBy('month')->get();
+
+                if ($selectedMpors->isNotEmpty()) {
+                    $datasetSource = 'qar_official';
+                    $qarHeaderId = $qar->id;
+                }
+            }
+        }
+
+        if ($selectedMpors->isEmpty()) {
+            $previewQuery = Mpor::query()
+                ->where('employee_id', $user->id)
+                ->where('office_id', $user->office_id)
+                ->whereIn('status', ['submitted']);
+
+            if (!empty($monthKeys)) {
+                $previewQuery->where(function ($q) use ($monthKeys) {
+                    foreach ($monthKeys as $ym) {
+                        $q->orWhere('month', 'like', $ym . '%');
+                    }
+                });
+            }
+
+            $selectedMpors = $previewQuery->orderBy('month')->get();
+        }
+
+        if ($selectedMpors->isEmpty()) {
+            return back()->withErrors([
+                'No eligible MPORs found to submit. Please make sure you have submitted MPORs with rated ORS entries for this period.',
+            ]);
+        }
+
+        $office = $user->office()->with(['head:id,name', 'employees:id,name,role,office_id'])->first();
+        $supervisorId = (int) ($office?->employees?->firstWhere('role', 'supervisor')?->id ?? 0) ?: null;
+        $deptHeadId = (int) ($office?->head?->id ?? $office?->employees?->firstWhere('role', 'dept-head')?->id ?? 0) ?: null;
+
+        DB::beginTransaction();
+
+        try {
+            $attachmentsPayload = [];
+
+            $files = $request->file('supporting_files', []);
+            if (!is_array($files)) {
+                $files = [];
+            }
+
+            foreach ($files as $file) {
+                if (!$file || !$file->isValid()) {
+                    continue;
+                }
+
+                $originalName = $file->getClientOriginalName();
+                $storedPath = $file->store(
+                    "accomplishment_submissions/period_{$period->id}/employee_{$user->id}",
+                    'public'
+                );
+
+                $attachmentsPayload[] = [
+                    'original_name' => $originalName,
+                    'path' => $storedPath,
+                    'size' => $file->getSize(),
+                    'mime' => $file->getMimeType(),
+                ];
+            }
+
+            $submission = AccomplishmentSubmission::updateOrCreate(
+                [
+                    'employee_id' => $user->id,
+                    'performance_period_id' => $period->id,
+                ],
+                [
+                    'office_id' => $user->office_id,
+                    'ipcr_id' => $ipcr->id,
+                    'dataset_source' => $datasetSource,
+                    'qar_header_id' => $qarHeaderId,
+                    'status' => 'submitted_to_supervisor',
+                    'employee_remarks' => $validated['remarks'] ?? null,
+                    'attachments' => !empty($attachmentsPayload) ? $attachmentsPayload : null,
+                    'submitted_at' => now(),
+                    'supervisor_id' => $supervisorId,
+                    'supervisor_remarks' => null,
+                    'supervisor_action_at' => null,
+                    'dept_head_id' => $deptHeadId,
+                    'dept_head_remarks' => null,
+                    'dept_head_action_at' => null,
+                    'pmt_id' => null,
+                    'pmt_remarks' => null,
+                    'pmt_action_at' => null,
+                ]
+            );
+
+            $submission->mpors()->sync($selectedMpors->pluck('id')->all());
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return back()->withErrors(['Submission failed: ' . $e->getMessage()]);
+        }
+
+        return back()->with('success', 'Accomplishments submitted successfully. Uploads and remarks are now read-only.');
+    }
+}
+

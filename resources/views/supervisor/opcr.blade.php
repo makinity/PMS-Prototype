@@ -6,7 +6,7 @@
         <div>
             <h1 class="text-2xl font-semibold text-white">Office Performance Commitment and Review (OPCR)</h1>
             <p class="text-sm text-slate-400">Stage I - Performance Planning and Commitment</p>
-            <p class="text-xs text-slate-500">Supervisor generates OPCR based on PMT-approved UWP and submits it for Department Head review.</p>
+            <p class="text-xs text-slate-500">Supervisor generates OPCR from PMT-approved UWP, submits to Department Head, and handles returned revisions.</p>
         </div>
 
         <button type="button"
@@ -17,14 +17,6 @@
             Create OPCR
         </button>
     </div>
-
-    @if (session('success'))
-        <div class="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">{{ session('success') }}</div>
-    @endif
-
-    @if (session('error'))
-        <div class="rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">{{ session('error') }}</div>
-    @endif
 
     <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
         <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
@@ -55,8 +47,15 @@
                             $uwp = $opcr->unitWorkPlan;
                             $payload = $opcrPayloads[$opcr->id] ?? null;
                             $outputsCount = is_array($payload['derived_outputs'] ?? null) ? count($payload['derived_outputs']) : 0;
+                            $status = strtolower((string) $opcr->status);
+                            $canSubmit = $status === \App\Models\Opcr::STATUS_DRAFT;
+                            $submitDisabledTitle = $status === \App\Models\Opcr::STATUS_RETURNED
+                                ? 'Returned — revise UWP and regenerate OPCR.'
+                                : 'Only Draft OPCR can be submitted';
                             $statusMeta = match ($opcr->status) {
-                                \App\Models\Opcr::STATUS_FOR_REVIEW => ['label' => 'For Department Head Review', 'class' => 'border-amber-500/30 bg-amber-500/10 text-amber-200'],
+                                \App\Models\Opcr::STATUS_DRAFT => ['label' => 'Draft', 'class' => 'border-slate-500/30 bg-slate-500/10 text-slate-200'],
+                                \App\Models\Opcr::STATUS_SUBMITTED => ['label' => 'Submitted', 'class' => 'border-amber-500/30 bg-amber-500/10 text-amber-200'],
+                                \App\Models\Opcr::STATUS_RETURNED => ['label' => 'Returned', 'class' => 'border-rose-500/30 bg-rose-500/10 text-rose-200'],
                                 \App\Models\Opcr::STATUS_APPROVED => ['label' => 'Approved', 'class' => 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200'],
                                 default => ['label' => ucwords(str_replace('_', ' ', (string) $opcr->status)), 'class' => 'border-slate-500/30 bg-slate-500/10 text-slate-200'],
                             };
@@ -72,14 +71,39 @@
                                 </span>
                             </td>
                             <td class="px-4 py-3">
-                                <button type="button"
-                                        data-direct="true"
-                                        data-opens-modal="view-opcr-modal"
-                                        data-opcr='@json($payload)'
-                                        class="text-blue-400 hover:text-blue-300 {{ $payload ? '' : 'opacity-60 pointer-events-none' }}"
-                                        {{ $payload ? '' : 'disabled' }}>
-                                    View
-                                </button>
+                                <div class="flex flex-wrap items-center gap-3">
+                                    <button type="button"
+                                            data-direct="true"
+                                            data-opens-modal="view-opcr-modal"
+                                            data-opcr='@json($payload)'
+                                            class="text-blue-400 hover:text-blue-300 {{ $payload ? '' : 'opacity-60 pointer-events-none' }}"
+                                            {{ $payload ? '' : 'disabled' }}>
+                                        View
+                                    </button>
+
+                                    @if ($canSubmit)
+                                        <form method="POST" action="{{ route('stage1.opcr.submit', ['opcr' => $opcr->id]) }}">
+                                            @csrf
+                                            <button type="submit"
+                                                    data-submit-loading
+                                                    data-loading-text="Submitting..."
+                                                    class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-500">
+                                                <span data-button-label>Submit</span>
+                                                <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                                            </button>
+                                        </form>
+                                    @else
+                                        <button type="button"
+                                                disabled
+                                                title="{{ $submitDisabledTitle }}"
+                                                class="inline-flex cursor-not-allowed items-center gap-2 rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-500 opacity-50">
+                                            Submit
+                                        </button>
+                                    @endif
+                                </div>
+                                @if ($status === \App\Models\Opcr::STATUS_RETURNED)
+                                    <p class="mt-2 text-[11px] text-rose-300">Returned — revise UWP and regenerate OPCR.</p>
+                                @endif
                             </td>
                         </tr>
                     @empty
@@ -128,7 +152,7 @@
                                 <tr>
                                     <th class="py-2 text-left">Output</th>
                                     <th class="py-2 text-left">Success Indicators</th>
-                                    <th class="py-2 text-left">Timeline / Target</th>
+                                    <th class="py-2 text-left">Target Summary</th>
                                     <th class="py-2 pr-4 text-left">Weight</th>
                                     <th class="py-2 pl-4 text-left">Function</th>
                                 </tr>
@@ -223,6 +247,7 @@
                         <thead class="bg-slate-900/60 text-xs uppercase tracking-[0.22em] text-slate-500">
                             <tr>
                                 <th class="px-5 py-4 text-left">Success Indicator</th>
+                                <th class="px-5 py-4 text-left">Target Summary</th>
                                 <th class="px-5 py-4 text-center">Standards</th>
                                 <th class="px-5 py-4 text-center">Assigned Employee</th>
                             </tr>
@@ -321,16 +346,53 @@ document.addEventListener('DOMContentLoaded', function () {
         .replaceAll('"', '&quot;')
         .replaceAll("'", '&#039;');
 
+    const formatTargetSummaryDisplay = (targetQuantity, targetTimeline) => {
+        const summary = String(targetTimeline || '').trim();
+        if (summary.toLowerCase() === 'multiple indicator targets') {
+            return summary;
+        }
+
+        const quantity = targetQuantity === null || targetQuantity === undefined || targetQuantity === ''
+            ? ''
+            : String(targetQuantity).trim();
+        const timeline = targetTimeline === null || targetTimeline === undefined || targetTimeline === ''
+            ? ''
+            : String(targetTimeline).trim();
+
+        if (quantity !== '' && timeline !== '') {
+            return `${quantity} ${timeline}`.trim();
+        }
+
+        if (quantity !== '') {
+            return quantity;
+        }
+
+        if (timeline !== '') {
+            return timeline;
+        }
+
+        return '-';
+    };
+
+    const getIndicatorTargetSummary = (indicator) => formatTargetSummaryDisplay(
+        indicator?.target_quantity,
+        indicator?.target_timeline
+    );
+
     const statusLabel = (status) => {
         const key = String(status || '').toLowerCase();
-        if (key === 'for_dept_head_review') return 'For Department Head Review';
+        if (key === 'draft') return 'Draft';
+        if (key === 'submitted') return 'Submitted';
+        if (key === 'returned') return 'Returned';
         if (key === 'approved') return 'Approved';
         return key ? key.replaceAll('_', ' ').replace(/\b\w/g, (char) => char.toUpperCase()) : '�';
     };
 
     const statusClass = (status) => {
         const key = String(status || '').toLowerCase();
-        if (key === 'for_dept_head_review') return 'border-amber-500/30 bg-amber-500/10 text-amber-200';
+        if (key === 'draft') return 'border-slate-500/30 bg-slate-500/10 text-slate-200';
+        if (key === 'submitted') return 'border-amber-500/30 bg-amber-500/10 text-amber-200';
+        if (key === 'returned') return 'border-rose-500/30 bg-rose-500/10 text-rose-200';
         if (key === 'approved') return 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200';
         return 'border-slate-500/30 bg-slate-500/10 text-slate-200';
     };
@@ -456,6 +518,10 @@ document.addEventListener('DOMContentLoaded', function () {
             tdIndicator.className = 'px-5 py-4 text-slate-100';
             tdIndicator.textContent = indicatorText;
 
+            const tdTarget = document.createElement('td');
+            tdTarget.className = 'px-5 py-4 text-slate-300';
+            tdTarget.textContent = getIndicatorTargetSummary(indicator);
+
             const tdStandards = document.createElement('td');
             tdStandards.className = 'px-5 py-4 text-center';
             const standardsBtn = document.createElement('button');
@@ -474,12 +540,12 @@ document.addEventListener('DOMContentLoaded', function () {
             assigneeBtn.addEventListener('click', () => renderAssigneesModal(mfoTitle, indicatorText, assignees));
             tdAssignee.appendChild(assigneeBtn);
 
-            tr.append(tdIndicator, tdStandards, tdAssignee);
+            tr.append(tdIndicator, tdTarget, tdStandards, tdAssignee);
             tbody.appendChild(tr);
         });
 
         if (!tbody.children.length) {
-            tbody.innerHTML = '<tr><td colspan="3" class="px-4 py-6 text-center text-slate-400">No success indicators found.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-6 text-center text-slate-400">No success indicators found.</td></tr>';
         }
 
         openModal('uwp-indicators-modal');
@@ -504,7 +570,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         <i class="fa-regular fa-eye text-sm"></i><span>(${indicators.length})</span>
                     </button>
                 </td>
-                <td class="px-4 py-4 text-slate-200">${escapeHtml(output?.target_timeline || '�')}</td>
+                <td class="px-4 py-4 text-slate-200">${escapeHtml(formatTargetSummaryDisplay(output?.target_quantity, output?.target_summary ?? output?.target_timeline))}</td>
                 <td class="px-4 py-4 text-slate-200">${output?.weight_percent !== null && output?.weight_percent !== undefined && output?.weight_percent !== '' ? escapeHtml(String(output.weight_percent) + '%') : '�'}</td>
                 <td class="px-4 py-4">${functionBadge(output?.function_type)}</td>
             `;
@@ -544,7 +610,7 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('viewOpcrPeriodInline').textContent = payload?.period?.name || '�';
 
         const badge = document.getElementById('viewOpcrStatus');
-        const status = payload?.opcr_status || 'for_dept_head_review';
+        const status = payload?.opcr_status || 'draft';
         badge.textContent = statusLabel(status);
         badge.className = 'rounded-full border px-3 py-1 text-xs font-semibold ' + statusClass(status);
 
@@ -602,6 +668,29 @@ document.addEventListener('DOMContentLoaded', function () {
         closeModal(openModals[openModals.length - 1]);
     });
 
+    document.querySelectorAll('form').forEach((form) => {
+        if (form.id === 'generate-opcr-form') {
+            return;
+        }
+
+        form.addEventListener('submit', () => {
+            const submitBtn = form.querySelector('[data-submit-loading]');
+            if (!submitBtn) return;
+
+            const label = submitBtn.querySelector('[data-button-label]');
+            const spinner = submitBtn.querySelector('[data-button-spinner]');
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-70', 'cursor-wait');
+
+            if (label) {
+                label.textContent = submitBtn.dataset.loadingText || 'Submitting...';
+            }
+            if (spinner) {
+                spinner.classList.remove('hidden');
+            }
+        });
+    });
+
     const generateForm = document.getElementById('generate-opcr-form');
     const generateButton = document.getElementById('generate-opcr-button');
     generateForm?.addEventListener('submit', (event) => {
@@ -630,3 +719,4 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 @endpush
 @endsection
+

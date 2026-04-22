@@ -3,8 +3,22 @@
         $status = $status ?? 'Draft';
         $statusKey = strtolower((string) $status);
         $isDraft = $statusKey === 'draft';
+        $isReturned = $statusKey === 'returned';
         $isLocked = (bool) ($locked_at ?? $lockedAt ?? false);
-        $canEdit = $isDraft && !$isLocked;
+        $canEdit = ($isDraft || $isReturned) && !$isLocked;
+        $selectedUwpId = $uwp->id ?? null;
+        $selectedOfficeId = old('office_id', $selectedOfficeId ?? auth()->user()->office_id);
+        $activePeriod = $periods->firstWhere('is_active', true);
+        $selectedPerformancePeriodId = old('performance_period_id', $selectedPerformancePeriodId ?? optional($activePeriod)->id);
+        $assignedData = collect($officeEmployees ?? [])
+            ->map(fn ($u) => [
+                'id' => $u->id,
+                'name' => $u->name,
+                'office_id' => $u->office_id,
+                'unit' => auth()->user()->office->name ?? '',
+            ])
+            ->values()
+            ->all();
     @endphp
 @section('main-content')
     <section class="space-y-6">
@@ -15,8 +29,22 @@
             </a>
         </div>
 
+        @if($uwp && $uwp->status === 'returned' && $uwp->return_remarks)
+            <div class="mb-4 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-amber-200">
+                <p class="text-sm font-semibold">
+                    Returned by {{ $uwp->returned_by_role === 'pmt' ? 'PMT' : 'Department Head' }}
+                </p>
+                <p class="mt-1 text-xs text-amber-200/80">
+                    {{ optional($uwp->returned_at)->format('M d, Y h:i A') }}
+                    @if($uwp->returnedByUser) &bull; {{ $uwp->returnedByUser->name }} @endif
+                </p>
+                <div class="mt-2 whitespace-pre-line text-sm text-amber-100">{{ $uwp->return_remarks }}</div>
+            </div>
+        @endif
+
         <form id="uwp-form" method="POST">
             @csrf
+            <input type="hidden" name="uwp_id" id="uwp_id" value="{{ old('uwp_id', $selectedUwpId) }}">
             <input type="hidden" name="mfos_payload" id="mfos_payload">
             <input type="hidden" name="assignments_payload" id="assignments_payload">
             <input type="hidden" name="functions_payload" id="functions_payload">
@@ -25,9 +53,13 @@
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div class="space-y-1">
                     <p class="text-sm font-semibold text-white">Planning details</p>
-                    <p class="text-xs text-slate-400">Define commitments for the period. Editing is allowed only while in Draft.</p>
+                    <p class="text-xs text-slate-400">Define commitments for the period. Editing is allowed only while in Draft/Returned.</p>
                     @if ($canEdit)
-                        <p class="text-xs text-emerald-300/90">Draft mode: you can add/remove MFOs.</p>
+                        @if ($isReturned)
+                            <p class="text-xs text-amber-300/90">Returned: revise required before re-submission.</p>
+                        @else
+                            <p class="text-xs text-emerald-300/90">Draft mode: you can add/remove MFOs.</p>
+                        @endif
                     @else
                         <span class="inline-flex items-center rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[11px] font-semibold text-amber-200">Locked: read-only after submission.</span>
                     @endif
@@ -37,7 +69,7 @@
                         <span class="inline-flex items-center gap-1 rounded-full border border-blue-500/30 bg-blue-500/10 px-2.5 py-1 font-semibold text-blue-200">
                             Status: {{ $status }}
                         </span>
-                        <span class="text-[10px] text-slate-500">Draft: editable · Submitted: read-only</span>
+                        <span class="text-[10px] text-slate-500">Draft/Returned: editable · Submitted: read-only</span>
                     </div>
                 </div>
             </div>
@@ -52,7 +84,7 @@
                             {{ auth()->user()->office->name ?? 'No office assigned' }}
                         </div>
                         <!-- Hidden field to submit the office_id -->
-                        <input type="hidden" name="office_id" value="{{ auth()->user()->office_id }}">
+                        <input type="hidden" name="office_id" value="{{ $selectedOfficeId }}">
                     @else
                         <!-- Admins/Dept heads: Still show dropdown -->
                         <select
@@ -65,7 +97,7 @@
                         >
                             @foreach($offices as $office)
                                 <option value="{{ $office->id }}"
-                                    {{ old('office_id', 1) == $office->id ? 'selected' : '' }}>
+                                    {{ (int) old('office_id', $selectedOfficeId) === (int) $office->id ? 'selected' : '' }}>
                                     {{ $office->name }}
                                 </option>
                             @endforeach
@@ -85,7 +117,7 @@
                     >
                         @foreach($periods as $period)
                             <option value="{{ $period->id }}"
-                                {{ $period->is_active ? 'selected' : '' }}>
+                                {{ (int) $selectedPerformancePeriodId === (int) $period->id ? 'selected' : '' }}>
                                 {{ $period->name }}
                             </option>
                         @endforeach
@@ -111,7 +143,7 @@
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <div class="space-y-1">
                         <p class="text-xs text-slate-400">Once submitted, this plan becomes read-only until reviewed.</p>
-                        <span class="text-[11px] text-slate-500">UWP remains editable only while in Draft.</span>
+                        <span class="text-[11px] text-slate-500">UWP remains editable only while in Draft/Returned.</span>
                     </div>
                     <div class="flex flex-wrap items-center gap-3">
                         <button type="button"
@@ -135,41 +167,49 @@
 
     {{-- SUCCESS INDICATORS MODAL (now includes Assigned Employees per indicator) --}}
     <div id="uwp-indicators-modal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 px-4 py-6">
-        <div class="w-full max-w-4xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
-            <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
-                <div>
+        <div class="w-full max-w-[1180px] rounded-[28px] border border-slate-800 bg-slate-900 p-6 shadow-2xl shadow-slate-950/40">
+            <div class="flex items-start justify-between gap-4 border-b border-slate-800 pb-5">
+                <div class="space-y-3">
                     <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Success Indicators</p>
-                    <h3 id="uwp-indicators-title" class="text-lg font-semibold text-white">--</h3>
-                    <p class="text-xs text-slate-400 mt-1">One output may have multiple success indicators. Each indicator can be assigned to a specific employee.</p>
+                    <h3 id="uwp-indicators-title" class="text-[2rem] font-semibold tracking-tight text-white">--</h3>
+                    <p class="max-w-4xl text-base leading-7 text-slate-400">
+                        {{ $canEdit
+                            ? 'Manage targets, standards, and assignments per indicator in one clean sheet.'
+                            : 'Read-only list of indicators for this output.' }}
+                    </p>
                 </div>
-                <button type="button" onclick="closeUwpIndicatorsModal()" class="text-slate-400 hover:text-white">
+                <button type="button" onclick="closeUwpIndicatorsModal()" class="text-3xl leading-none text-slate-400 transition hover:text-white">
                     <span class="sr-only">Close</span>
                     &times;
                 </button>
             </div>
 
-            <div class="mt-4 space-y-3">
+            <div class="mt-6 space-y-5">
                 @if ($canEdit)
-                    <div class="flex flex-wrap items-center justify-between gap-2">
-                        <span class="text-xs text-slate-400">Manage success indicators (one per line, scalable list).</span>
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <div class="space-y-1">
+                            <p class="text-sm font-medium text-slate-200">Manage success indicators directly in this sheet.</p>
+                            <p class="text-sm text-slate-500">Use short measurable statements, then set the quantity and timeline below.</p>
+                        </div>
                         <button type="button" id="uwp-add-indicator"
-                                class="inline-flex items-center gap-1 rounded-lg border border-blue-500/50 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-200 hover:bg-blue-500/20">
-                            <span class="fa-solid fa-plus text-[10px]"></span>
+                                class="inline-flex items-center gap-2 rounded-full bg-slate-800/90 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-700">
+                            <span class="fa-solid fa-plus text-[11px]"></span>
                             <span>Add Indicator</span>
                         </button>
                     </div>
                 @endif
 
-                <div class="overflow-hidden rounded-xl border border-slate-800 bg-slate-950/70">
-                    <div class="max-h-[340px] overflow-y-auto">
+                <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/60">
+                    <div class="max-h-[520px] overflow-y-auto">
                         <table class="w-full text-sm">
-                            <thead class="bg-slate-900/70 text-slate-200">
+                            <thead class="sticky top-0 z-10 bg-slate-900/95 text-slate-200 backdrop-blur">
                                 <tr>
-                                    <th class="px-4 py-3 text-left text-[11px] uppercase tracking-[0.2em] text-slate-400">Success Indicator</th>
-                                    <th class="px-4 py-3 text-center text-[11px] uppercase tracking-[0.2em] text-slate-400">Standards</th>
-                                    <th class="px-4 py-3 text-center text-[11px] uppercase tracking-[0.2em] text-slate-400">Assign Employee</th>
+                                    <th class="px-5 py-4 text-left text-[11px] uppercase tracking-[0.22em] text-slate-400">Success Indicator</th>
+                                    <th class="px-5 py-4 text-left text-[11px] uppercase tracking-[0.22em] text-slate-400">Target Summary</th>
+                                    <th class="px-5 py-4 text-center text-[11px] uppercase tracking-[0.22em] text-slate-400">Standards</th>
+                                    <th class="px-5 py-4 text-center text-[11px] uppercase tracking-[0.22em] text-slate-400">Assigned Employee</th>
                                     @if ($canEdit)
-                                        <th class="px-4 py-3 text-center text-[11px] uppercase tracking-[0.2em] text-slate-400">Actions</th>
+                                        <th class="px-5 py-4 text-center text-[11px] uppercase tracking-[0.22em] text-slate-400">Actions</th>
                                     @endif
                                 </tr>
                             </thead>
@@ -314,19 +354,10 @@
                     </table>
                 </div>
 
-                <p id="uwp-assigned-empty" class="text-[12px] text-slate-500 hidden">No employees available (demo).</p>
+                <p id="uwp-assigned-empty" class="text-[12px] text-slate-500 hidden">No employees available...</p>
             </div>
 
             <div class="mt-4 flex items-center justify-end gap-3 border-t border-slate-800 pt-3">
-                @if ($canEdit)
-                    <button type="button"
-                            id="uwp-save-assignments"
-                            class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500">
-                        <span data-button-label>Save Assignment</span>
-                        <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
-                    </button>
-                @endif
-
                 <button type="button"
                         class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800"
                         onclick="closeAssignedModal()">
@@ -470,6 +501,7 @@
 
                 const unitSelect = document.getElementById('uwp-office-unit');
                 const uwpForm = document.getElementById('uwp-form');
+                const uwpIdInput = document.getElementById('uwp_id');
                 const mfosPayloadInput = document.getElementById('mfos_payload');
                 const assignmentsPayloadInput = document.getElementById('assignments_payload');
                 const functionsPayloadInput = document.getElementById('functions_payload');
@@ -477,31 +509,27 @@
                 const addFunctionBtn = document.getElementById('uwp-add-function');
                 const submitUwpBtn = document.querySelector('[data-submit-uwp-btn]');
 
-                const saveDraftUrl = @json(route('supervisor.uwp.saveDraftData'));
-                const submitUwpUrl = @json(route('supervisor.uwp.submitData'));
+                const selectedUwpId = @json($selectedUwpId);
+                const saveDraftUrl = selectedUwpId
+                    ? @json(route('supervisor.uwp.saveDraftData.byId', ['id' => '__ID__'])).replace('__ID__', String(selectedUwpId))
+                    : @json(route('supervisor.uwp.saveDraftData'));
+                const submitUwpUrl = selectedUwpId
+                    ? @json(route('supervisor.uwp.submitData.byId', ['id' => '__ID__'])).replace('__ID__', String(selectedUwpId))
+                    : @json(route('supervisor.uwp.submitData'));
 
                 let activeFunctionIndex = null;
                 let activeMfoIndex = null;
                 let activeIndicators = [];
+                let activeEditingIndicatorIndex = null;
                 let activeAssignIndicatorIndex = null;
                 let activeRowConfirmId = null;
                 let activeFunctionConfirmId = null;
 
-                const assignedData = {
-                    'Revenue Collection Unit': [
-                        { name: 'Ramon Reyes', unit: 'Revenue Collection Unit' },
-                    ],
-                    'Records Management Unit': [],
-                    'Administrative Services Unit': [],
-                    'Human Resource Management Unit': [],
-                    'General Services Unit': [],
-                    'Planning and Development Unit': [],
-                };
+                const assignedData = @json($assignedData);
 
                 const isDraft = {{ $canEdit ? 'true' : 'false' }};
 
-                const uwpState = {
-                    functions: [
+                const seededFunctions = [
                         {
                             title: 'Core Functions',
                             type: 'core',
@@ -512,18 +540,18 @@
                                     title: 'E-Bank Scanning and Encoding of Revenue Transactions',
                                     target: 'Daily; all e-bank transactions processed within the same working day',
                                     indicators: [
-                                        { text: 'All e-bank transactions scanned and encoded daily', standards: [], assignees: [] },
-                                        { text: 'Indexing complete with no missing pages', standards: [], assignees: [] },
-                                        { text: 'Audit trail maintained within 24 hours', standards: [], assignees: [] },
+                                        { text: 'All e-bank transactions scanned and encoded daily', targetQuantity: 1200, targetTimeline: 'e-bank transactions processed within the semester', standards: [], assignees: [] },
+                                        { text: 'Indexing complete with no missing pages', targetQuantity: 1200, targetTimeline: 'e-bank transactions processed within the semester', standards: [], assignees: [] },
+                                        { text: 'Audit trail maintained within 24 hours', targetQuantity: 1200, targetTimeline: 'e-bank transactions processed within the semester', standards: [], assignees: [] },
                                     ],
                                 },
                                 {
                                     title: 'Processing of Over-the-Counter Revenue Transactions',
                                     target: 'Daily; 95% processed within the same working day',
                                     indicators: [
-                                        { text: 'Same-day verification of OTC transactions', standards: [], assignees: [] },
-                                        { text: '95% encoded within the business day', standards: [], assignees: [] },
-                                        { text: 'OR validation completed daily', standards: [], assignees: [] },
+                                        { text: 'Same-day verification of OTC transactions', targetQuantity: 3000, targetTimeline: 'OCR processed within the semester', standards: [], assignees: [] },
+                                        { text: '95% encoded within the business day', targetQuantity: 3000, targetTimeline: 'OCR processed within the semester', standards: [], assignees: [] },
+                                        { text: 'OR validation completed daily', targetQuantity: 3000, targetTimeline: 'OCR processed within the semester', standards: [], assignees: [] },
                                     ],
                                 },
                             ],
@@ -538,15 +566,38 @@
                                     title: 'Maintenance of revenue records and filing system',
                                     target: 'Quarterly; records validated and properly filed',
                                     indicators: [
-                                        { text: 'Weekly filing updated and retrievable', standards: [], assignees: [] },
-                                        { text: 'Digital backups synced monthly', standards: [], assignees: [] },
-                                        { text: 'Retrieval logs maintained for audits', standards: [], assignees: [] },
+                                        { text: 'Weekly filing updated and retrievable', targetQuantity: 2400, targetTimeline: 'records validated and properly filed within the semester', standards: [], assignees: [] },
+                                        { text: 'Digital backups synced monthly', targetQuantity: 2400, targetTimeline: 'records validated and properly filed within the semester', standards: [], assignees: [] },
+                                        { text: 'Retrieval logs maintained for audits', targetQuantity: 2400, targetTimeline: 'records validated and properly filed within the semester', standards: [], assignees: [] },
                                     ],
                                 },
                             ],
                         },
-                    ],
+                    ];
+
+                const serverFunctions = @json($initialFunctions ?? null);
+                const uwpState = {
+                    functions: Array.isArray(serverFunctions) && serverFunctions.length > 0
+                        ? serverFunctions
+                        : (selectedUwpId ? seededFunctions : []),
                 };
+
+                uwpState.functions = (uwpState.functions || []).map((func) => ({
+                    ...func,
+                    mfos: Array.isArray(func?.mfos)
+                        ? func.mfos.map((mfo) => ({
+                            ...mfo,
+                            targetQuantity: normalizeTargetQuantity(mfo?.targetQuantity ?? mfo?.target_quantity),
+                            indicators: Array.isArray(mfo?.indicators)
+                                ? mfo.indicators.map((indicator) => ({
+                                    ...indicator,
+                                    targetQuantity: normalizeTargetQuantity(indicator?.targetQuantity ?? indicator?.target_quantity),
+                                    targetTimeline: String(indicator?.targetTimeline ?? indicator?.target_timeline ?? '').trim(),
+                                }))
+                                : [],
+                        }))
+                        : [],
+                }));
 
                 const standardsSeedMap = {
                     'All e-bank transactions scanned and encoded daily': {
@@ -656,10 +707,30 @@
                     return Math.min(max, Math.max(min, num));
                 }
 
+                function normalizeTargetQuantity(value) {
+                    if (value === null || value === undefined || value === '') return null;
+
+                    const num = Number(value);
+                    if (!Number.isFinite(num)) return null;
+
+                    return Math.max(0, Math.trunc(num));
+                }
+
+                const supervisorOfficeName = @json(auth()->user()->office->name ?? '');
+
                 function getSelectedUnitLabel() {
-                    if (!unitSelect) return 'Revenue Collection Unit';
+                    if (!unitSelect) return supervisorOfficeName || 'Office / Unit';
                     const option = unitSelect.options[unitSelect.selectedIndex];
-                    return option ? option.text : 'Revenue Collection Unit';
+                    return option ? option.text : (supervisorOfficeName || 'Office / Unit');
+                }
+
+                function getSelectedOfficeId() {
+                    const hidden = document.querySelector('input[name="office_id"]');
+                    if (hidden && hidden.value) return Number(hidden.value);
+
+                    if (unitSelect && unitSelect.value) return Number(unitSelect.value);
+
+                    return 0;
                 }
 
                 function getFunctionDescription(func) {
@@ -717,18 +788,92 @@
                     return Array.isArray(indicator.standards) ? indicator.standards : [];
                 }
 
+                function getIndicatorTargetSummary(indicator) {
+                    const quantity = normalizeTargetQuantity(indicator?.targetQuantity ?? indicator?.target_quantity);
+                    const timeline = String(indicator?.targetTimeline ?? indicator?.target_timeline ?? '').trim();
+                    const parts = [];
+
+                    if (quantity !== null && quantity !== undefined && quantity !== '') {
+                        parts.push(String(quantity));
+                    }
+
+                    if (timeline) {
+                        parts.push(timeline);
+                    }
+
+                    return parts.join(' ').trim();
+                }
+
+                function deriveMfoTargetMeta(mfo) {
+                    const indicators = Array.isArray(mfo?.indicators) ? mfo.indicators : [];
+                    const summaries = indicators
+                        .map((indicator) => getIndicatorTargetSummary(indicator))
+                        .filter((value, index, array) => value && array.indexOf(value) === index);
+                    const totalQuantity = indicators.reduce((sum, indicator) => {
+                        const quantity = normalizeTargetQuantity(indicator?.targetQuantity ?? indicator?.target_quantity);
+                        return quantity === null ? sum : sum + quantity;
+                    }, 0);
+
+                    if (summaries.length === 1) {
+                        return {
+                            summary: summaries[0],
+                            targetQuantity: totalQuantity > 0 ? totalQuantity : normalizeTargetQuantity(mfo?.targetQuantity ?? mfo?.target_quantity),
+                        };
+                    }
+
+                    if (summaries.length > 1) {
+                        return {
+                            summary: 'Multiple indicator targets',
+                            targetQuantity: totalQuantity > 0 ? totalQuantity : null,
+                        };
+                    }
+
+                    const fallbackQuantity = normalizeTargetQuantity(mfo?.targetQuantity ?? mfo?.target_quantity);
+                    const fallbackTimeline = String(mfo?.target ?? mfo?.target_timeline ?? '').trim();
+                    const fallbackParts = [];
+
+                    if (fallbackQuantity !== null && fallbackQuantity !== undefined && fallbackQuantity !== '') {
+                        fallbackParts.push(String(fallbackQuantity));
+                    }
+
+                    if (fallbackTimeline) {
+                        fallbackParts.push(fallbackTimeline);
+                    }
+
+                    return {
+                        summary: fallbackParts.join(' ').trim(),
+                        targetQuantity: fallbackQuantity,
+                    };
+                }
+
                 function createIndicator(text) {
                     return {
                         text: text || 'New success indicator',
+                        targetQuantity: null,
+                        targetTimeline: '',
                         standards: [],
                         assignees: [],
                     };
                 }
 
-                function createMfo(title, target, indicators) {
+                function finalizeIndicatorValues(indicator) {
+                    if (!indicator) return;
+
+                    indicator.text = String(indicator.text || '').trim() || 'New success indicator';
+                    indicator.targetTimeline = String(indicator.targetTimeline || '').trim();
+                    indicator.targetQuantity = normalizeTargetQuantity(indicator.targetQuantity);
+
+                    if (!indicator._matrix) {
+                        indicator._matrix = seedStandardsForIndicator(indicator.text);
+                        indicator.standards = standardsMatrixToArray(indicator._matrix);
+                    }
+                }
+
+                function createMfo(title, target, targetQuantity, indicators) {
                     return {
                         title: title || '',
                         target: target || '',
+                        targetQuantity: normalizeTargetQuantity(targetQuantity),
                         indicators: Array.isArray(indicators) ? indicators : [],
                     };
                 }
@@ -744,49 +889,77 @@
                     };
                 }
 
+                function normalizeFunctionType(type) {
+                    const value = String(type || '').toLowerCase();
+                    return ['core', 'support', 'custom'].includes(value) ? value : 'custom';
+                }
+
+                function isFunctionTypeTaken(type, exceptIndex = -1) {
+                    const normalized = normalizeFunctionType(type);
+                    if (!['core', 'support'].includes(normalized)) return false;
+
+                    return uwpState.functions.some((func, idx) => {
+                        if (idx === exceptIndex) return false;
+                        return normalizeFunctionType(func?.type) === normalized;
+                    });
+                }
+
+                function resolveFunctionTypeSelection(type, currentIndex) {
+                    const normalized = normalizeFunctionType(type);
+                    if (!['core', 'support'].includes(normalized)) {
+                        return 'custom';
+                    }
+
+                    if (isFunctionTypeTaken(normalized, currentIndex)) {
+                        return 'custom';
+                    }
+
+                    return normalized;
+                }
+
                 function getAssignedEmployees(indicator) {
                     if (!indicator) return [];
                     return Array.isArray(indicator.assignees) ? [...indicator.assignees] : [];
                 }
 
-                function isEmployeeAssigned(indicator, employeeName) {
-                    if (!indicator || !employeeName) return false;
-                    return getAssignedEmployees(indicator).includes(employeeName);
+                function isEmployeeAssigned(indicator, employeeId) {
+                    return getAssignedEmployees(indicator).includes(Number(employeeId));
                 }
 
-                function assignEmployee(indicator, employeeName) {
-                    if (!indicator || !employeeName) return;
+                function assignEmployee(indicator, employeeId) {
+                    employeeId = Number(employeeId);
+                    if (!employeeId) return;
                     indicator.assignees = Array.isArray(indicator.assignees) ? indicator.assignees : [];
-                    if (!indicator.assignees.includes(employeeName)) {
-                        indicator.assignees.push(employeeName);
-                    }
+                    if (!indicator.assignees.includes(employeeId)) indicator.assignees.push(employeeId);
                 }
 
-                function unassignEmployee(indicator, employeeName) {
-                    if (!indicator || !employeeName) return;
+                function unassignEmployee(indicator, employeeId) {
+                    employeeId = Number(employeeId);
+                    if (!employeeId) return;
                     indicator.assignees = Array.isArray(indicator.assignees) ? indicator.assignees : [];
-                    const index = indicator.assignees.indexOf(employeeName);
-                    if (index !== -1) {
-                        indicator.assignees.splice(index, 1);
-                    }
+                    const idx = indicator.assignees.indexOf(employeeId);
+                    if (idx !== -1) indicator.assignees.splice(idx, 1);
                 }
 
                 function renderFunctions() {
                     if (!functionsWrapper) return;
 
                     const html = uwpState.functions.map((func, funcIndex) => {
+                        const functionType = normalizeFunctionType(func.type);
+                        func.type = functionType;
                         const weightValue = Number(func.weight || 0);
                         const description = getFunctionDescription(func);
                         const inputDisabled = isDraft ? '' : 'disabled';
                         const mutedClass = isDraft ? '' : 'opacity-60 pointer-events-none';
-                        const canDeleteFunction = isDraft;
+                        const canDeleteFunction = isDraft && functionType === 'custom';
+                        const coreTakenByOther = isFunctionTypeTaken('core', funcIndex);
+                        const supportTakenByOther = isFunctionTypeTaken('support', funcIndex);
                         const isFunctionConfirmOpen = activeFunctionConfirmId === funcIndex;
 
                         const mfoRows = (func.mfos || []).map((mfo, mfoIndex) => {
                             const indicatorCount = Array.isArray(mfo.indicators) ? mfo.indicators.length : 0;
                             const rowId = `${funcIndex}-${mfoIndex}`;
                             const isConfirmOpen = activeRowConfirmId === rowId;
-
                             return `
                                 <tr class="group hover:bg-slate-800/40 transition-colors" data-mfo-row-id="${rowId}">
                                     <td class="px-4 py-4">
@@ -810,18 +983,6 @@
                                             class="inline-flex items-center rounded-full border border-slate-700 bg-slate-900 px-3 py-1 text-xs font-semibold text-slate-300 transition hover:bg-slate-700/40 hover:border-slate-400/60 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 cursor-pointer">
                                             ${indicatorCount} indicator${indicatorCount === 1 ? '' : 's'}
                                         </button>
-                                    </td>
-
-                                    <td class="px-4 py-4">
-                                        <textarea
-                                            data-mfo-target
-                                            data-function-index="${funcIndex}"
-                                            data-mfo-index="${mfoIndex}"
-                                            rows="2"
-                                            class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none ${mutedClass}"
-                                            style="background:#0f172a;color:#e5e7eb;"
-                                            placeholder="e.g., Monthly; 1,200 files"
-                                            ${inputDisabled}>${escapeHtml(mfo.target)}</textarea>
                                     </td>
 
                                     <td class="px-4 py-4 text-right">
@@ -867,7 +1028,7 @@
 
                         const emptyRow = `
                             <tr>
-                                <td colspan="4" class="px-4 py-6 text-center text-xs text-slate-500">
+                                <td colspan="3" class="px-4 py-6 text-center text-xs text-slate-500">
                                     No MFOs yet. Use "+ Add MFO" to add entries.
                                 </td>
                             </tr>
@@ -894,6 +1055,17 @@
                                         }
                                     </div>
                                     <div class="flex flex-wrap items-center justify-end gap-2">
+                                        <select
+                                            data-function-type
+                                            data-function-index="${funcIndex}"
+                                            class="rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none ${mutedClass}"
+                                            style="background:#0f172a;color:#e5e7eb;"
+                                            ${inputDisabled}>
+                                            <option value="core" ${functionType === 'core' ? 'selected' : ''} ${functionType !== 'core' && coreTakenByOther ? 'disabled' : ''}>Core</option>
+                                            <option value="support" ${functionType === 'support' ? 'selected' : ''} ${functionType !== 'support' && supportTakenByOther ? 'disabled' : ''}>Support</option>
+                                            <option value="custom" ${functionType === 'custom' ? 'selected' : ''}>Custom</option>
+                                        </select>
+
                                         <input type="number" min="0" max="100"
                                             data-function-weight
                                             data-function-index="${funcIndex}"
@@ -951,7 +1123,6 @@
                                                     <tr>
                                                         <th class="px-4 py-3 text-left font-semibold uppercase text-[11px] tracking-wide">PPA / MFO</th>
                                                         <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Success Indicators</th>
-                                                        <th class="px-4 py-3 text-center font-semibold uppercase text-[11px] tracking-wide">Target / Timeline</th>
                                                         <th class="px-4 py-3 text-right font-semibold uppercase text-[11px] tracking-wide">Actions</th>
                                                     </tr>
                                                 </thead>
@@ -976,85 +1147,163 @@
                     indicatorsList.innerHTML = '';
 
                     list.forEach((indicator, idx) => {
+                        const isEditingIndicator = isDraft && activeEditingIndicatorIndex === idx;
                         const value = (indicator?.text || '').trim();
-                        if (!value) return;
+                        if (!value && !isEditingIndicator) return;
 
                         const tr = document.createElement('tr');
-                        tr.className = 'hover:bg-slate-900/40';
+                        tr.className = 'hover:bg-slate-900/40 transition-colors';
 
                         // Indicator text
                         const indicatorTd = document.createElement('td');
-                        indicatorTd.className = 'px-4 py-3 align-top';
-                        const indicatorWrap = document.createElement('div');
-                        indicatorWrap.className = 'space-y-1';
+                        indicatorTd.className = 'px-5 py-5 align-top';
+                        if (isEditingIndicator) {
+                            const input = document.createElement('input');
+                            input.type = 'text';
+                            input.placeholder = 'Enter success indicator';
+                            input.value = indicator?.text || '';
+                            input.dataset.indicatorEditInput = String(idx);
+                            input.className = 'w-full max-w-[340px] rounded-xl bg-slate-800/80 px-4 py-3 text-base text-slate-100 placeholder:text-slate-500 ring-1 ring-inset ring-slate-700 focus:ring-2 focus:ring-cyan-500/40 focus:outline-none';
+                            input.style.background = '#0f172a';
+                            input.style.color = '#e5e7eb';
+                            input.addEventListener('input', (event) => {
+                                indicator.text = String(event.target.value || '');
+                            });
+                            input.addEventListener('keydown', (event) => {
+                                if (event.key === 'Enter') {
+                                    event.preventDefault();
+                                    finishEditIndicator(idx);
+                                }
+                            });
+                            indicatorTd.appendChild(input);
+                        } else {
+                            const indicatorWrap = document.createElement('div');
+                            indicatorWrap.className = 'space-y-2';
 
-                        const textSpan = document.createElement('div');
-                        textSpan.className = 'text-slate-100';
-                        textSpan.textContent = value;
+                            const textSpan = document.createElement('div');
+                            textSpan.className = 'max-w-[320px] text-[16px] font-semibold leading-8 text-slate-100';
+                            textSpan.textContent = value;
 
-                        const hint = document.createElement('div');
-                        hint.className = 'text-[11px] text-slate-500';
-                        hint.textContent = 'Assigned per indicator (task-level).';
+                            const hint = document.createElement('div');
+                            hint.className = 'max-w-[320px] text-sm leading-6 text-slate-500';
 
-                        indicatorWrap.append(textSpan);
-                        indicatorWrap.append(hint);
-                        indicatorTd.appendChild(indicatorWrap);
+                            indicatorWrap.append(textSpan);
+                            indicatorWrap.append(hint);
+                            indicatorTd.appendChild(indicatorWrap);
+                        }
+
+                        const targetTd = document.createElement('td');
+                        targetTd.className = 'px-5 py-5 align-top';
+
+                        if (isEditingIndicator) {
+                            const targetWrap = document.createElement('div');
+                            targetWrap.className = 'max-w-[420px] grid gap-3 md:grid-cols-[128px_minmax(0,1fr)]';
+
+                            const quantityInput = document.createElement('input');
+                            quantityInput.type = 'number';
+                            quantityInput.placeholder = 'Quantity';
+                            quantityInput.value = indicator?.targetQuantity ?? '';
+                            quantityInput.className = 'w-full rounded-xl bg-slate-800/80 px-4 py-3 text-base text-slate-100 placeholder:text-slate-500 ring-1 ring-inset ring-slate-700 focus:ring-2 focus:ring-cyan-500/40 focus:outline-none';
+                            quantityInput.style.background = '#0f172a';
+                            quantityInput.style.color = '#e5e7eb';
+                            quantityInput.addEventListener('input', (event) => {
+                                indicator.targetQuantity = normalizeTargetQuantity(event.target.value);
+                            });
+                            quantityInput.addEventListener('keydown', (event) => {
+                                if (event.key === 'Enter') {
+                                    event.preventDefault();
+                                    finishEditIndicator(idx);
+                                }
+                            });
+
+                            const timelineInput = document.createElement('input');
+                            timelineInput.type = 'text';
+                            timelineInput.placeholder = 'Timeline / measure';
+                            timelineInput.value = indicator?.targetTimeline || '';
+                            timelineInput.className = 'w-full rounded-xl bg-slate-800/80 px-4 py-3 text-base text-slate-100 placeholder:text-slate-500 ring-1 ring-inset ring-slate-700 focus:ring-2 focus:ring-cyan-500/40 focus:outline-none';
+                            timelineInput.style.background = '#0f172a';
+                            timelineInput.style.color = '#e5e7eb';
+                            timelineInput.addEventListener('input', (event) => {
+                                indicator.targetTimeline = String(event.target.value || '').trim();
+                            });
+                            timelineInput.addEventListener('keydown', (event) => {
+                                if (event.key === 'Enter') {
+                                    event.preventDefault();
+                                    finishEditIndicator(idx);
+                                }
+                            });
+
+                            targetWrap.appendChild(quantityInput);
+                            targetWrap.appendChild(timelineInput);
+                            targetTd.appendChild(targetWrap);
+                        } else {
+                            const targetText = document.createElement('div');
+                            targetText.className = 'max-w-[360px] text-[15px] leading-7 text-slate-300';
+                            targetText.textContent = getIndicatorTargetSummary(indicator) || '--';
+                            targetTd.appendChild(targetText);
+                        }
 
                         // Standards column
                         const standardsTd = document.createElement('td');
-                        standardsTd.className = 'px-4 py-3 text-center align-top';
+                        standardsTd.className = 'px-5 py-5 text-center align-top';
+                        const standardsCount = getIndicatorStandardsArray(indicator).length;
 
                         const standardBtn = document.createElement('button');
                         standardBtn.type = 'button';
-                        standardBtn.className = 'inline-flex items-center justify-center rounded-lg border border-transparent bg-slate-900/60 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-slate-700 hover:text-white hover:bg-slate-800/80 min-w-[120px]';
+                        standardBtn.className = 'inline-flex items-center justify-center gap-2 rounded-full bg-slate-800/90 px-3.5 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-700 hover:text-white';
                         standardBtn.innerHTML = `
-                            <span class="inline-flex items-center gap-2">
-                                <span class="fa-regular fa-eye text-[12px]"></span>
-                                <span>Standards</span>
-                            </span>
+                            <span class="fa-regular fa-eye text-[13px]"></span>
+                            <span>${standardsCount > 0 ? `View Standards (${standardsCount})` : 'View Standards'}</span>
                         `;
                         standardBtn.addEventListener('click', () => openStandardsModal(idx));
                         standardsTd.appendChild(standardBtn);
 
                         // Assigned employee column
                         const assignedTd = document.createElement('td');
-                        assignedTd.className = 'px-4 py-3 text-center align-top';
+                        assignedTd.className = 'px-5 py-5 text-center align-top';
 
                         const assignedCount = getAssignedEmployees(indicator).length;
                         const assignBtn = document.createElement('button');
                         assignBtn.type = 'button';
-                        assignBtn.className = 'inline-flex items-center gap-2 text-xs font-semibold text-blue-400 transition-colors hover:text-blue-300 focus:outline-none';
+                        assignBtn.className = 'inline-flex items-center justify-center gap-2 rounded-full bg-sky-500/10 px-3.5 py-2 text-sm font-semibold text-sky-200 transition hover:bg-sky-500/20 hover:text-sky-100 focus:outline-none';
                         assignBtn.style.cursor = 'pointer';
                         assignBtn.innerHTML = `
-                            <span class="fa-regular fa-user text-[12px]"></span>
-                            <span>+ Assign</span>
-                            <span class="text-[11px] text-slate-400">( ${assignedCount} )</span>
+                            <span class="fa-regular fa-user text-[13px]"></span>
+                            <span>${isDraft ? '+ Assign' : 'View Assigned'}</span>
+                            <span class="text-sky-100/80">(${assignedCount})</span>
                         `;
                         assignBtn.addEventListener('click', () => openAssignedModalForIndicator(idx));
                         assignedTd.appendChild(assignBtn);
 
                         tr.appendChild(indicatorTd);
+                        tr.appendChild(targetTd);
                         tr.appendChild(standardsTd);
                         tr.appendChild(assignedTd);
 
                         // Draft actions (Edit/Delete only — assignment is handled by Assign Employee button)
                         if (isDraft) {
                             const actionsTd = document.createElement('td');
-                            actionsTd.className = 'px-4 py-3 text-center align-top';
+                            actionsTd.className = 'px-5 py-5 text-center align-top';
 
                             const actionsWrap = document.createElement('div');
-                            actionsWrap.className = 'inline-flex items-center gap-3 text-[11px] text-blue-200';
+                            actionsWrap.className = 'inline-flex items-center gap-2';
 
                             const editBtn = document.createElement('button');
                             editBtn.type = 'button';
-                            editBtn.textContent = 'Edit';
-                            editBtn.className = 'hover:text-blue-100 underline';
-                            editBtn.addEventListener('click', () => startEditIndicator(idx, value));
+                            editBtn.className = 'rounded-full bg-slate-800/90 px-3.5 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-700 hover:text-white';
+                            editBtn.textContent = isEditingIndicator ? 'Done' : 'Edit';
+                            editBtn.addEventListener('click', () => {
+                                if (isEditingIndicator) {
+                                    finishEditIndicator(idx);
+                                } else {
+                                    startEditIndicator(idx);
+                                }
+                            });
 
                             const delBtn = document.createElement('button');
                             delBtn.type = 'button';
+                            delBtn.className = 'rounded-full bg-rose-500/10 px-3.5 py-2 text-sm font-semibold text-rose-200 transition hover:bg-rose-500/20';
                             delBtn.textContent = 'Delete';
-                            delBtn.className = 'hover:text-blue-100 underline';
                             delBtn.addEventListener('click', () => deleteIndicator(idx));
 
                             actionsWrap.appendChild(editBtn);
@@ -1065,6 +1314,19 @@
 
                         indicatorsList.appendChild(tr);
                     });
+
+                    if (!indicatorsList.children.length) {
+                        const emptyRow = document.createElement('tr');
+                        emptyRow.innerHTML = `
+                            <td colspan="${isDraft ? 5 : 4}" class="px-6 py-12 text-center">
+                                <div class="space-y-2">
+                                    <p class="text-sm font-semibold text-slate-300">No success indicators yet.</p>
+                                    <p class="text-xs text-slate-500">Add at least one indicator to define targets, standards, and employee assignments for this output.</p>
+                                </div>
+                            </td>
+                        `;
+                        indicatorsList.appendChild(emptyRow);
+                    }
                 }
 
                 // ===== Assigned Modal (scoped to active indicator) =====
@@ -1077,7 +1339,8 @@
                     assignedIndicator.textContent = indicatorText || '---';
 
                     assignedList.innerHTML = '';
-                    const rows = assignedData[unit] || [];
+                    const officeId = getSelectedOfficeId();
+                    const rows = (assignedData || []).filter(e => Number(e.office_id) === Number(officeId));
                     if (!rows.length) {
                         assignedEmpty.classList.remove('hidden');
                         return;
@@ -1099,7 +1362,8 @@
                         const statusTd = document.createElement('td');
                         statusTd.className = 'px-4 py-2';
 
-                        const isAssigned = isEmployeeAssigned(indicator, emp.name);
+                        const isAssigned = isEmployeeAssigned(indicator, emp.id);
+
                         const badge = document.createElement('span');
                         badge.className = `inline-flex items-center px-2 py-1 text-[11px] font-semibold rounded-full border ${
                             isAssigned ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-200' : 'border-slate-600 bg-slate-800 text-slate-300'
@@ -1126,13 +1390,11 @@
                             toggle.textContent = isAssigned ? 'Unassign' : 'Assign';
 
                             toggle.addEventListener('click', () => {
-                                if (!indicator) return;
-                                if (isEmployeeAssigned(indicator, emp.name)) {
-                                    unassignEmployee(indicator, emp.name);
+                                if (isEmployeeAssigned(indicator, emp.id)) {
+                                    unassignEmployee(indicator, emp.id);
                                 } else {
-                                    assignEmployee(indicator, emp.name);
+                                    assignEmployee(indicator, emp.id);
                                 }
-
                                 renderAssigned(unit);
                                 renderIndicators(activeIndicators);
                             });
@@ -1321,58 +1583,39 @@
                 }
 
                 // ===== Indicator CRUD =====
-                function startEditIndicator(idx, currentValue) {
-                    if (!indicatorsList) return;
-                    const rows = Array.from(indicatorsList.children);
-                    const targetRow = rows[idx];
-                    if (!targetRow) return;
-
+                function startEditIndicator(idx) {
                     const indicator = activeIndicators[idx];
                     if (!indicator) return;
+                    if (activeEditingIndicatorIndex !== null && activeEditingIndicatorIndex !== idx) {
+                        finalizeIndicatorValues(activeIndicators[activeEditingIndicatorIndex]);
+                    }
 
-                    const firstTd = targetRow.querySelector('td');
-                    if (!firstTd) return;
+                    activeEditingIndicatorIndex = idx;
+                    renderIndicators(activeIndicators);
 
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.placeholder = 'Enter Success Indicator...';
-                    input.className = 'w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm ' +
-                                      'text-slate-100 placeholder:text-slate-500 focus:border-blue-500 ' +
-                                      'focus:ring-2 focus:ring-blue-500/40 focus:outline-none';
-                    input.style.background = '#0f172a';
-                    input.style.color = '#e5e7eb';
-                    input.value = currentValue || '';
-
-                    const prevAssignees = Array.isArray(indicator.assignees) ? [...indicator.assignees] : [];
-
-                    firstTd.innerHTML = '';
-                    firstTd.appendChild(input);
-                    input.focus();
-                    input.select();
-
-                    const commit = () => {
-                        const next = input.value.trim() || 'New success indicator';
-                        indicator.text = next;
-                        indicator.assignees = prevAssignees;
-
-                        if (!indicator._matrix) {
-                            indicator._matrix = seedStandardsForIndicator(next);
-                            indicator.standards = standardsMatrixToArray(indicator._matrix);
-                        }
-
-                        renderIndicators(activeIndicators);
-                    };
-
-                    input.addEventListener('blur', commit);
-                    input.addEventListener('keydown', (e) => {
-                        if (e.key === 'Enter') {
-                            e.preventDefault();
-                            commit();
-                        }
+                    requestAnimationFrame(() => {
+                        const input = indicatorsList?.querySelector(`[data-indicator-edit-input="${idx}"]`);
+                        if (!input) return;
+                        input.focus();
+                        input.select();
                     });
                 }
 
+                function finishEditIndicator(idx) {
+                    const indicator = activeIndicators[idx];
+                    if (!indicator) return;
+
+                    finalizeIndicatorValues(indicator);
+                    activeEditingIndicatorIndex = null;
+                    renderIndicators(activeIndicators);
+                }
+
                 function deleteIndicator(idx) {
+                    if (activeEditingIndicatorIndex === idx) {
+                        activeEditingIndicatorIndex = null;
+                    } else if (activeEditingIndicatorIndex !== null && idx < activeEditingIndicatorIndex) {
+                        activeEditingIndicatorIndex -= 1;
+                    }
                     activeIndicators.splice(idx, 1);
                     renderIndicators(activeIndicators);
                 }
@@ -1380,7 +1623,7 @@
                 function addIndicator() {
                     activeIndicators.push(createIndicator('New success indicator'));
                     renderIndicators(activeIndicators);
-                    startEditIndicator(activeIndicators.length - 1, 'New success indicator');
+                    startEditIndicator(activeIndicators.length - 1);
                 }
 
                 function openUwpIndicatorsModal(functionIndex, mfoIndex) {
@@ -1390,6 +1633,7 @@
 
                     activeFunctionIndex = functionIndex;
                     activeMfoIndex = mfoIndex;
+                    activeEditingIndicatorIndex = null;
                     if (!Array.isArray(mfo.indicators)) mfo.indicators = [];
                     activeIndicators = mfo.indicators;
 
@@ -1402,6 +1646,9 @@
                 }
 
                 window.closeUwpIndicatorsModal = function () {
+                    if (activeEditingIndicatorIndex !== null) {
+                        finalizeIndicatorValues(activeIndicators[activeEditingIndicatorIndex]);
+                    }
                     if (indicatorsModal) {
                         indicatorsModal.classList.add('hidden');
                         indicatorsModal.classList.remove('flex');
@@ -1409,6 +1656,7 @@
                     activeFunctionIndex = null;
                     activeMfoIndex = null;
                     activeIndicators = [];
+                    activeEditingIndicatorIndex = null;
                     renderFunctions();
                     document.body.classList.remove('overflow-hidden');
                 };
@@ -1440,7 +1688,7 @@
                     const func = uwpState.functions[functionIndex];
                     if (!func) return;
                     func.mfos = Array.isArray(func.mfos) ? func.mfos : [];
-                    func.mfos.push(createMfo('', '', []));
+                    func.mfos.push(createMfo('', '', null, []));
                     renderFunctions();
                 }
 
@@ -1491,15 +1739,23 @@
                         title: func.title,
                         type: func.type,
                         weight: func.weight,
-                        mfos: (func.mfos || []).map((mfo) => ({
-                            title: mfo.title,
-                            target: mfo.target,
-                            indicators: (mfo.indicators || []).map((indicator) => ({
-                                text: indicator.text,
-                                standards: getIndicatorStandardsArray(indicator),
-                                assignees: Array.isArray(indicator.assignees) ? [...indicator.assignees] : [],
-                            })),
-                        })),
+                        mfos: (func.mfos || []).map((mfo) => {
+                            const targetMeta = deriveMfoTargetMeta(mfo);
+                            return {
+                                title: mfo.title,
+                                target_quantity: targetMeta.targetQuantity,
+                                target: targetMeta.summary === 'Multiple indicator targets'
+                                    ? 'Per success indicator'
+                                    : (String(mfo?.target ?? '').trim() || 'Per success indicator'),
+                                indicators: (mfo.indicators || []).map((indicator) => ({
+                                    text: indicator.text,
+                                    target_quantity: normalizeTargetQuantity(indicator.targetQuantity),
+                                    target_timeline: String(indicator.targetTimeline || '').trim(),
+                                    standards: getIndicatorStandardsArray(indicator),
+                                    assignees: Array.isArray(indicator.assignees) ? [...indicator.assignees] : [],
+                                })),
+                            };
+                        }),
                     }));
                 }
 
@@ -1508,12 +1764,13 @@
                     let sortOrder = 1;
 
                     uwpState.functions.forEach((func) => {
-                        const functionCode = func.type === 'custom' ? 'support' : func.type;
+                        const functionCode = ['core', 'support', 'custom'].includes(func.type) ? func.type : 'custom';
                         const weight = Number(func.weight || 0);
 
                         (func.mfos || []).forEach((mfo) => {
                             const titleText = (mfo.title || '').trim();
                             if (!titleText) return;
+                            const targetMeta = deriveMfoTargetMeta(mfo);
 
                             const successIndicators = (mfo.indicators || []).map((indicator) => {
                                 const description = (indicator.text || '').trim();
@@ -1527,7 +1784,8 @@
 
                                 return {
                                     description,
-                                    target_timeline: null,
+                                    target_quantity: normalizeTargetQuantity(indicator.targetQuantity),
+                                    target_timeline: String(indicator.targetTimeline || '').trim(),
                                     standards,
                                 };
                             }).filter(Boolean);
@@ -1535,7 +1793,8 @@
                             payload.push({
                                 function_code: functionCode,
                                 title: titleText,
-                                target_summary: (mfo.target || '').trim(),
+                                target_quantity: targetMeta.targetQuantity,
+                                target_summary: targetMeta.summary,
                                 weight: weight,
                                 sort_order: sortOrder,
                                 success_indicators: successIndicators,
@@ -1564,6 +1823,9 @@
 
                 function submitUwp(actionUrl) {
                     if (!uwpForm || !actionUrl) return;
+                    if (uwpIdInput && selectedUwpId && !uwpIdInput.value) {
+                        uwpIdInput.value = String(selectedUwpId);
+                    }
                     if (functionsPayloadInput) {
                         functionsPayloadInput.value = JSON.stringify(buildFunctionsPayload());
                     }
@@ -1605,6 +1867,13 @@
                             if (mfo) mfo.title = target.value;
                         }
 
+                        if (target.matches('[data-mfo-target-quantity]')) {
+                            const funcIdx = Number(target.dataset.functionIndex);
+                            const mfoIdx = Number(target.dataset.mfoIndex);
+                            const mfo = uwpState.functions[funcIdx]?.mfos?.[mfoIdx];
+                            if (mfo) mfo.targetQuantity = normalizeTargetQuantity(target.value);
+                        }
+
                         if (target.matches('[data-mfo-target]')) {
                             const funcIdx = Number(target.dataset.functionIndex);
                             const mfoIdx = Number(target.dataset.mfoIndex);
@@ -1618,7 +1887,14 @@
                         if (target.matches('[data-function-type]')) {
                             const idx = Number(target.dataset.functionIndex);
                             if (!Number.isNaN(idx) && uwpState.functions[idx]) {
-                                uwpState.functions[idx].type = target.value;
+                                const selectedType = normalizeFunctionType(target.value);
+                                const resolvedType = resolveFunctionTypeSelection(selectedType, idx);
+                                uwpState.functions[idx].type = resolvedType;
+                                uwpState.functions[idx].isCustom = resolvedType === 'custom';
+                                if (resolvedType !== selectedType) {
+                                    target.value = resolvedType;
+                                }
+                                renderFunctions();
                             }
                         }
                     });

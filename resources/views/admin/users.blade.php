@@ -1,379 +1,592 @@
 @extends('layouts.admin')
 
 @section('main-content')
-    <section class="space-y-6 admin-page">
-        <div class="flex flex-wrap items-center justify-between gap-4">
-            <div>
-                <h1 class="text-2xl font-semibold text-white">Users</h1>
-                <p class="text-sm text-slate-400">Manage accounts, roles, and access across the system.</p>
-            </div>
-            <div class="flex flex-wrap gap-2">
-                <button type="button"
-                        data-admin-action
-                        data-action-title="Invite user"
-                        data-action-message="Send an invite link with the selected role and access scope."
-                        data-action-confirm="Send invite"
-                        class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-500">
-                    <i class="fa-solid fa-user-plus"></i>
-                    Invite User
-                </button>
-                <button type="button"
-                        data-admin-action
-                        data-action-title="Bulk import"
-                        data-action-message="Upload a CSV file to provision multiple user accounts."
-                        data-action-confirm="Upload CSV"
-                        class="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-200 hover:bg-slate-800">
-                    <i class="fa-solid fa-file-arrow-up"></i>
-                    Bulk Import
-                </button>
-            </div>
+    @php
+        if (!isset($users) || !isset($offices) || !isset($filters)) {
+            $payload = \App\Http\Controllers\Admin\UsersController::buildIndexPayload(request());
+            $users = $payload['users'];
+            $offices = $payload['offices'];
+            $filters = $payload['filters'];
+        }
+
+        $indexUrl = \Illuminate\Support\Facades\Route::has('admin.users') ? route('admin.users') : url()->current();
+        $canUpdateRoute = \Illuminate\Support\Facades\Route::has('admin.users.update');
+        $canToggleRoute = \Illuminate\Support\Facades\Route::has('admin.users.toggle-active');
+        $canResetRoute = \Illuminate\Support\Facades\Route::has('admin.users.reset-password');
+        $updateRouteTemplate = $canUpdateRoute ? route('admin.users.update', ['user' => '__ID__']) : '';
+        $toggleRouteTemplate = $canToggleRoute ? route('admin.users.toggle-active', ['user' => '__ID__']) : '';
+        $resetRouteTemplate = $canResetRoute ? route('admin.users.reset-password', ['user' => '__ID__']) : '';
+    @endphp
+
+    <section class="space-y-4 px-3 md:px-6">
+        <div class="min-w-0 rounded-xl border border-white/10 bg-gray-800/90 p-4 shadow-sm">
+            <h1 class="text-lg font-semibold text-gray-100 sm:text-xl">Users Management</h1>
+            <p class="mt-1 text-sm text-gray-300">Manage roles, offices, and activation status.</p>
         </div>
 
-        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-            <div class="flex flex-wrap items-end gap-3">
-                <div class="min-w-[220px] flex-1">
-                    <label class="text-xs uppercase text-slate-400">Search</label>
-                    <input type="text"
-                           placeholder="Search name or email"
-                           class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500">
-                </div>
-                <div>
-                    <label class="text-xs uppercase text-slate-400">Role</label>
-                    {{-- DUMMY_DATA: replace with dynamic value --}}
-                    <select class="manager-filter-select mt-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
-                        <option>All Roles</option>
-                        <option>Employee</option>
-                        <option>Manager</option>
-                        <option>Admin</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="text-xs uppercase text-slate-400">Status</label>
-                    {{-- DUMMY_DATA: replace with dynamic value --}}
-                    <select class="manager-filter-select mt-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
-                        <option>All Status</option>
-                        <option>Active</option>
-                        <option>Pending Invite</option>
-                        <option>Suspended</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="text-xs uppercase text-slate-400">Department</label>
-                    {{-- DUMMY_DATA: replace with dynamic value --}}
-                    <select class="manager-filter-select mt-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200">
-                        <option>All Departments</option>
-                        <option>Operations</option>
-                        <option>Finance</option>
-                        <option>IT Support</option>
-                        <option>HR</option>
-                    </select>
-                </div>
+        @if (session('temporary_password'))
+            <div class="rounded-xl border border-amber-700/40 bg-amber-900/20 px-4 py-3 text-sm text-amber-200">
+                Temporary password for <span class="font-semibold">{{ session('temporary_password_user') }}</span>:
+                <span class="font-mono font-semibold">{{ session('temporary_password') }}</span>
             </div>
+        @endif
+
+        <div class="min-w-0 rounded-xl border border-white/10 bg-gray-800/90 p-4 shadow-sm">
+            <form method="GET" action="{{ $indexUrl }}" class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
+                <div class="min-w-0 xl:col-span-2">
+                    <label for="filterSearch" class="mb-1 block text-xs uppercase tracking-wide text-gray-400">Search</label>
+                    <input
+                        id="filterSearch"
+                        type="text"
+                        name="search"
+                        value="{{ $filters['search'] ?? '' }}"
+                        placeholder="Name, email, employee ID"
+                        style="background:#0f172a;color:#e5e7eb;"
+                        class="w-full rounded-lg border border-white/10 bg-gray-900/60 px-3 py-2 text-sm text-gray-100 outline-none focus:border-blue-500" />
+                </div>
+
+                <div>
+                    <label for="filterRole" class="mb-1 block text-xs uppercase tracking-wide text-gray-400">Role</label>
+                    <select
+                        id="filterRole"
+                        name="role"
+                        style="background:#0f172a;color:#e5e7eb;"
+                        class="w-full rounded-lg border border-white/10 bg-gray-900/60 px-3 py-2 text-sm text-gray-100 outline-none focus:border-blue-500">
+                        <option value="">All Roles</option>
+                        <option value="employee" @selected(($filters['role'] ?? '') === 'employee')>Employee</option>
+                        <option value="supervisor" @selected(($filters['role'] ?? '') === 'supervisor')>Supervisor</option>
+                        <option value="dept-head" @selected(($filters['role'] ?? '') === 'dept-head')>Dept Head</option>
+                        <option value="pmt" @selected(($filters['role'] ?? '') === 'pmt')>PMT</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="filterOffice" class="mb-1 block text-xs uppercase tracking-wide text-gray-400">Office</label>
+                    <select
+                        id="filterOffice"
+                        name="office_id"
+                        style="background:#0f172a;color:#e5e7eb;"
+                        class="w-full rounded-lg border border-white/10 bg-gray-900/60 px-3 py-2 text-sm text-gray-100 outline-none focus:border-blue-500">
+                        <option value="">All Offices</option>
+                        @foreach ($offices as $office)
+                            <option value="{{ $office->id }}" @selected((string) ($filters['office_id'] ?? '') === (string) $office->id)>
+                                {{ $office->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div>
+                    <label for="filterStatus" class="mb-1 block text-xs uppercase tracking-wide text-gray-400">Status</label>
+                    <select
+                        id="filterStatus"
+                        name="status"
+                        style="background:#0f172a;color:#e5e7eb;"
+                        class="w-full rounded-lg border border-white/10 bg-gray-900/60 px-3 py-2 text-sm text-gray-100 outline-none focus:border-blue-500">
+                        <option value="all" @selected(($filters['status'] ?? 'all') === 'all')>All Statuses</option>
+                        <option value="active" @selected(($filters['status'] ?? '') === 'active')>Active</option>
+                        <option value="pending" @selected(($filters['status'] ?? '') === 'pending')>Pending Activation</option>
+                        <option value="disabled" @selected(($filters['status'] ?? '') === 'disabled')>Disabled</option>
+                    </select>
+                </div>
+
+                <div class="md:col-span-2 xl:col-span-5">
+                    <button type="submit" class="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500">
+                        Apply Filters
+                    </button>
+                </div>
+            </form>
         </div>
 
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
-            <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-                <p class="text-xs text-slate-400">Total Users</p>
-                {{-- DUMMY_DATA: replace with dynamic value --}}
-                <p class="mt-2 text-2xl font-semibold text-white">1,247</p>
-                <p class="text-xs text-slate-500">Across all units</p>
-            </div>
-            <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-                <p class="text-xs text-slate-400">Active</p>
-                {{-- DUMMY_DATA: replace with dynamic value --}}
-                <p class="mt-2 text-2xl font-semibold text-emerald-400">1,096</p>
-                <p class="text-xs text-slate-500">Online in last 7 days</p>
-            </div>
-            <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-                <p class="text-xs text-slate-400">Pending Invites</p>
-                {{-- DUMMY_DATA: replace with dynamic value --}}
-                <p class="mt-2 text-2xl font-semibold text-amber-300">38</p>
-                <p class="text-xs text-slate-500">Awaiting activation</p>
-            </div>
-            <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-                <p class="text-xs text-slate-400">Suspended</p>
-                {{-- DUMMY_DATA: replace with dynamic value --}}
-                <p class="mt-2 text-2xl font-semibold text-rose-300">12</p>
-                <p class="text-xs text-slate-500">Manual review required</p>
-            </div>
-        </div>
-
-        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
+        <div class="min-w-0 rounded-xl border border-white/10 bg-gray-800/90 shadow-sm">
             <div class="overflow-x-auto">
-                <table class="w-full text-sm text-slate-300">
-                    <thead class="text-xs uppercase text-slate-500">
+                <table class="min-w-full divide-y divide-white/10 text-xs sm:text-sm">
+                    <thead class="bg-gray-900/70 text-[11px] uppercase tracking-wide text-gray-400 sm:text-xs">
                         <tr>
-                            <th class="px-4 py-2 text-left">User</th>
-                            <th class="px-4 py-2 text-left">Role</th>
-                            <th class="px-4 py-2 text-left">Department</th>
-                            <th class="px-4 py-2 text-left">Status</th>
-                            <th class="px-4 py-2 text-left">Last Login</th>
-                            <th class="px-4 py-2 text-left">Actions</th>
+                            <th class="px-4 py-3 text-left">Employee ID</th>
+                            <th class="px-4 py-3 text-left">Name</th>
+                            <th class="px-4 py-3 text-left">Position</th>
+                            <th class="px-4 py-3 text-left">Activation Status</th>
+                            <th class="px-4 py-3 text-right">Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        {{-- DUMMY_DATA: replace with dynamic value --}}
-                        <tr class="border-t border-slate-800 hover:bg-slate-800/50">
-                            <td class="px-4 py-3">
-                                <p class="font-medium text-white">Juan Dela Cruz</p>
-                                <p class="text-xs text-slate-500">juan.delacruz@email.com</p>
-                            </td>
-                            <td class="px-4 py-3">Employee</td>
-                            <td class="px-4 py-3">Operations</td>
-                            <td class="px-4 py-3">
-                                <span class="rounded-full bg-emerald-500/20 px-2 py-1 text-xs text-emerald-400">Active</span>
-                            </td>
-                            <td class="px-4 py-3 text-slate-400">Today, 9:12 AM</td>
-                            <td class="px-4 py-3">
-                                <button type="button"
-                                        data-admin-action
-                                        data-action-title="View user profile"
-                                        data-action-message="Open user profile, access logs, and task history."
-                                        data-action-confirm="Open profile"
-                                        class="text-blue-400 hover:text-blue-300">
-                                    View
-                                </button>
-                            </td>
-                        </tr>
-                        {{-- DUMMY_DATA: replace with dynamic value --}}
-                        <tr class="border-t border-slate-800 hover:bg-slate-800/50">
-                            <td class="px-4 py-3">
-                                <p class="font-medium text-white">Maria Santos</p>
-                                <p class="text-xs text-slate-500">maria.santos@email.com</p>
-                            </td>
-                            <td class="px-4 py-3">Manager</td>
-                            <td class="px-4 py-3">Operations</td>
-                            <td class="px-4 py-3">
-                                <span class="rounded-full bg-amber-500/20 px-2 py-1 text-xs text-amber-300">Pending Invite</span>
-                            </td>
-                            <td class="px-4 py-3 text-slate-400">Invite sent 2 days ago</td>
-                            <td class="px-4 py-3 flex items-center gap-3">
-                                <button type="button"
-                                        data-admin-action
-                                        data-action-title="Resend invite"
-                                        data-action-message="Resend activation link to the user."
-                                        data-action-confirm="Resend"
-                                        class="text-blue-400 hover:text-blue-300">
-                                    Resend
-                                </button>
-                                <button type="button"
-                                        data-admin-action
-                                        data-action-title="Cancel invite"
-                                        data-action-message="Revoke the pending invite and remove access."
-                                        data-action-confirm="Cancel invite"
-                                        class="text-rose-300 hover:text-rose-200">
-                                    Cancel
-                                </button>
-                            </td>
-                        </tr>
-                        {{-- DUMMY_DATA: replace with dynamic value --}}
-                        <tr class="border-t border-slate-800 hover:bg-slate-800/50">
-                            <td class="px-4 py-3">
-                                <p class="font-medium text-white">Pedro Reyes</p>
-                                <p class="text-xs text-slate-500">pedro.reyes@email.com</p>
-                            </td>
-                            <td class="px-4 py-3">Employee</td>
-                            <td class="px-4 py-3">Finance</td>
-                            <td class="px-4 py-3">
-                                <span class="rounded-full bg-rose-500/20 px-2 py-1 text-xs text-rose-300">Suspended</span>
-                            </td>
-                            <td class="px-4 py-3 text-slate-400">Last login 5 days ago</td>
-                            <td class="px-4 py-3 flex items-center gap-3">
-                                <button type="button"
-                                        data-admin-action
-                                        data-action-title="Restore access"
-                                        data-action-message="Reactivate this account and restore access."
-                                        data-action-confirm="Restore"
-                                        class="text-emerald-300 hover:text-emerald-200">
-                                    Restore
-                                </button>
-                                <button type="button"
-                                        data-admin-action
-                                        data-action-title="Force password reset"
-                                        data-action-message="Require the user to reset the password on next login."
-                                        data-action-confirm="Force reset"
-                                        class="text-blue-400 hover:text-blue-300">
-                                    Reset
-                                </button>
-                            </td>
-                        </tr>
+                    <tbody class="divide-y divide-white/10 text-gray-200">
+                        @forelse ($users as $user)
+                            @php
+                                $statusLabel = $user->is_active
+                                    ? 'Active'
+                                    : (is_null($user->activated_at) ? 'Pending Activation' : 'Disabled');
+                                $statusClasses = $user->is_active
+                                    ? 'border border-emerald-600/50 bg-emerald-500/10 text-emerald-300'
+                                    : (is_null($user->activated_at)
+                                        ? 'border border-amber-600/50 bg-amber-500/10 text-amber-300'
+                                        : 'border border-rose-600/50 bg-rose-500/10 text-rose-300');
+                            @endphp
+                            <tr>
+                                <td class="px-4 py-3 text-gray-300">{{ $user->employee_id ?: '--' }}</td>
+                                <td class="px-4 py-3">
+                                    <p class="font-medium text-gray-100">{{ $user->name }}</p>
+                                </td>
+                                <td class="px-4 py-3 text-gray-300">{{ $user->position ?: '--' }}</td>
+                                <td class="px-4 py-3">
+                                    <span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold {{ $statusClasses }}">
+                                        {{ $statusLabel }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="flex justify-end">
+                                        <button
+                                            type="button"
+                                            data-open-user-modal
+                                            data-id="{{ $user->id }}"
+                                            data-employee-id="{{ $user->employee_id ?? '' }}"
+                                            data-name="{{ $user->name }}"
+                                            data-email="{{ $user->email }}"
+                                            data-role="{{ strtolower((string) $user->role) }}"
+                                            data-office="{{ $user->office?->name ?? '' }}"
+                                            data-office-id="{{ $user->office_id ?? '' }}"
+                                            data-position="{{ $user->position ?? '' }}"
+                                            data-is-active="{{ $user->is_active ? 1 : 0 }}"
+                                            data-activated-at="{{ $user->activated_at ? $user->activated_at->format('M d, Y h:i A') : '' }}"
+                                            class="rounded-lg border border-gray-500 px-3 py-1.5 text-xs font-semibold text-gray-100 hover:bg-gray-700/60">
+                                            View
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="px-4 py-10 text-center text-sm text-gray-400">
+                                    No users found.
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
-        </div>
 
-        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-            <div class="flex items-start justify-between gap-4">
-                <div>
-                    <h2 class="text-lg font-semibold text-white">Access Requests</h2>
-                    <p class="text-sm text-slate-400">Pending approvals for elevated access and role changes.</p>
-                </div>
-                <span class="rounded-full border border-slate-700 px-3 py-1 text-xs text-slate-300">3 pending</span>
-            </div>
-            <div class="mt-4 space-y-3 text-sm text-slate-300">
-                <div class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-                    <div>
-                        <p class="font-medium text-white">Request: Manager role for Ana Lim</p>
-                        <p class="text-xs text-slate-500">Requested by HR - 2 hours ago</p>
-                    </div>
-                    <div class="flex gap-2">
-                        <button type="button"
-                                data-admin-loading="true"
-                                data-loading-text="Approving..."
-                                class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-500">
-                            <span data-button-label>Approve</span>
-                            <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
-                        </button>
-                        <button type="button"
-                                data-admin-action
-                                data-action-title="Reject access request"
-                                data-action-message="Reject the request and notify the requester."
-                                data-action-confirm="Reject"
-                                class="rounded-lg border border-slate-700 px-3 py-1.5 text-xs text-slate-200 hover:bg-slate-800">
-                            Reject
-                        </button>
-                    </div>
-                </div>
-                <div class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-                    <div>
-                        <p class="font-medium text-white">Request: Temporary admin for Miguel Castro</p>
-                        <p class="text-xs text-slate-500">Requested by IT Support - Yesterday</p>
-                    </div>
-                    <div class="flex gap-2">
-                        <button type="button"
-                                data-admin-loading="true"
-                                data-loading-text="Approving..."
-                                class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-500">
-                            <span data-button-label>Approve</span>
-                            <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
-                        </button>
-                        <button type="button"
-                                data-admin-action
-                                data-action-title="Reject access request"
-                                data-action-message="Reject the request and provide a reason."
-                                data-action-confirm="Reject"
-                                class="rounded-lg border border-slate-700 px-3 py-1.5 text-xs text-slate-200 hover:bg-slate-800">
-                            Reject
-                        </button>
-                    </div>
-                </div>
+            <div class="border-t border-white/10 px-4 py-3">
+                {{ $users->links() }}
             </div>
         </div>
     </section>
 
-    <div id="admin-action-modal" role="dialog" aria-modal="true" class="fixed inset-0 z-[70] hidden flex items-center justify-center bg-black/60 px-4 py-6">
-        <div class="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
-            <div class="flex items-start justify-between">
-                <div>
-                    <h2 id="admin-action-title" class="text-lg font-semibold text-white">Action</h2>
-                    <p id="admin-action-body" class="mt-1 text-sm text-slate-400">Prototype action preview.</p>
-                </div>
-                <button type="button" data-admin-modal-close class="text-slate-400 hover:text-white">x</button>
+    <div id="userDetailsModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 px-3 py-6">
+        <div class="w-full max-w-2xl overflow-hidden rounded-2xl border border-white/10 bg-gray-900/95 shadow-xl">
+            <div class="flex items-center justify-between border-b border-white/10 px-5 py-4">
+                <h2 class="text-base font-semibold text-gray-100">User Details</h2>
+                <button type="button" id="closeUserModalTop" class="rounded-lg px-2 py-1 text-gray-400 hover:bg-gray-800 hover:text-white">x</button>
             </div>
-            <div class="mt-6 flex justify-end gap-2">
-                <button type="button" data-admin-modal-close class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800">Close</button>
-                <button type="button" id="admin-action-confirm" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500">
-                    <span data-button-label>Proceed</span>
-                    <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+
+            <div class="max-h-[80vh] overflow-y-auto break-words px-5 py-4">
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div>
+                        <p class="text-xs uppercase tracking-wide text-gray-400">Employee ID</p>
+                        <p id="vmEmployeeId" class="mt-1 text-sm font-medium text-gray-100">--</p>
+                    </div>
+                    <div>
+                        <p class="text-xs uppercase tracking-wide text-gray-400">Name</p>
+                        <p id="vmName" class="mt-1 text-sm font-medium text-gray-100">--</p>
+                    </div>
+                    <div>
+                        <p class="text-xs uppercase tracking-wide text-gray-400">Email</p>
+                        <p id="vmEmail" class="mt-1 text-sm font-medium text-gray-100">--</p>
+                    </div>
+                    <div>
+                        <p class="text-xs uppercase tracking-wide text-gray-400">Role</p>
+                        <span id="vmRole" class="mt-1 inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold">--</span>
+                    </div>
+                    <div>
+                        <p class="text-xs uppercase tracking-wide text-gray-400">Office</p>
+                        <p id="vmOffice" class="mt-1 text-sm font-medium text-gray-100">N/A</p>
+                    </div>
+                    <div>
+                        <p class="text-xs uppercase tracking-wide text-gray-400">Position</p>
+                        <p id="vmPosition" class="mt-1 text-sm font-medium text-gray-100">--</p>
+                    </div>
+                    <div>
+                        <p class="text-xs uppercase tracking-wide text-gray-400">Account Status</p>
+                        <span id="vmAccountStatus" class="mt-1 inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold">--</span>
+                    </div>
+                    <div>
+                        <p class="text-xs uppercase tracking-wide text-gray-400">Activation Status</p>
+                        <span id="vmActivationStatus" class="mt-1 inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold">--</span>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <p class="text-xs uppercase tracking-wide text-gray-400">Activated At</p>
+                        <p id="vmActivatedAt" class="mt-1 text-sm font-medium text-gray-100">--</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-end gap-2 border-t border-white/10 px-5 py-4">
+                <form id="modalToggleForm" action="#" method="POST">
+                    @csrf
+                    <button type="submit" id="modalToggleBtn" class="rounded-lg px-4 py-2 text-sm font-medium">Toggle</button>
+                </form>
+
+                <form id="modalResetForm" action="#" method="POST" onsubmit="return confirm('Reset password for this user?');">
+                    @csrf
+                    <button type="submit" id="modalResetBtn" class="rounded-lg border border-amber-500/60 bg-amber-500/10 px-4 py-2 text-sm font-medium text-amber-300 hover:bg-amber-500/20">
+                        Reset Password
+                    </button>
+                </form>
+
+                <button type="button" id="openEditUserFromDetails" class="rounded-lg border border-gray-500 px-4 py-2 text-sm font-medium text-gray-100 hover:bg-gray-700/60">
+                    Edit
+                </button>
+
+                <button type="button" id="closeUserModalBottom" class="rounded-lg border border-white/10 px-4 py-2 text-sm font-medium text-gray-200 hover:bg-gray-800">
+                    Close
                 </button>
             </div>
         </div>
     </div>
 
+    <div id="userEditModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 px-3 py-6">
+        <div class="w-full max-w-2xl overflow-hidden rounded-2xl border border-white/10 bg-gray-900/95 shadow-xl">
+            <div class="flex items-center justify-between border-b border-white/10 px-5 py-4">
+                <h2 class="text-base font-semibold text-gray-100">Edit User</h2>
+                <button type="button" id="closeUserEditTop" class="rounded-lg px-2 py-1 text-gray-400 hover:bg-gray-800 hover:text-white">x</button>
+            </div>
+
+            <div class="max-h-[80vh] overflow-y-auto break-words px-5 py-4">
+                <form id="userEditForm" action="#" method="POST" class="space-y-4">
+                    @csrf
+                    @method('PUT')
+
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <div>
+                            <label for="editName" class="mb-1 block text-xs uppercase tracking-wide text-gray-400">Name</label>
+                            <input id="editName" name="name" type="text" required
+                                class="w-full rounded-lg border border-white/10 bg-gray-800 px-3 py-2 text-sm text-gray-100 outline-none focus:border-blue-500" />
+                        </div>
+                        <div>
+                            <label for="editEmail" class="mb-1 block text-xs uppercase tracking-wide text-gray-400">Email</label>
+                            <input id="editEmail" name="email" type="email" required
+                                class="w-full rounded-lg border border-white/10 bg-gray-800 px-3 py-2 text-sm text-gray-100 outline-none focus:border-blue-500" />
+                        </div>
+                        <div>
+                            <label for="editRole" class="mb-1 block text-xs uppercase tracking-wide text-gray-400">Role</label>
+                            <select id="editRole" name="role" required
+                                class="w-full rounded-lg border border-white/10 bg-gray-800 px-3 py-2 text-sm text-gray-100 outline-none focus:border-blue-500">
+                                <option value="employee">Employee</option>
+                                <option value="supervisor">Supervisor</option>
+                                <option value="dept-head">Dept Head</option>
+                                <option value="pmt">PMT</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="editOffice" class="mb-1 block text-xs uppercase tracking-wide text-gray-400">Office</label>
+                            <select id="editOffice" name="office_id"
+                                class="w-full rounded-lg border border-white/10 bg-gray-800 px-3 py-2 text-sm text-gray-100 outline-none focus:border-blue-500">
+                                <option value="">Select office...</option>
+                                @foreach ($offices as $office)
+                                    <option value="{{ $office->id }}">{{ $office->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label for="editPosition" class="mb-1 block text-xs uppercase tracking-wide text-gray-400">Position</label>
+                            <input id="editPosition" name="position" type="text"
+                                class="w-full rounded-lg border border-white/10 bg-gray-800 px-3 py-2 text-sm text-gray-100 outline-none focus:border-blue-500" />
+                        </div>
+                    </div>
+
+                    <p id="editOfficeHint" class="text-xs text-gray-400">
+                        Required for Employee/Supervisor/Dept Head. PMT has no office.
+                    </p>
+                    <p id="deptHeadWarning" class="hidden rounded-lg border border-amber-700/40 bg-amber-900/20 px-3 py-2 text-xs text-amber-200">
+                        Only one Dept Head per Office is allowed. If another exists, saving will fail.
+                    </p>
+
+                    <div class="flex flex-wrap items-center justify-end gap-2 border-t border-white/10 pt-4">
+                        <button type="button" id="closeUserEditBottom" class="rounded-lg border border-white/10 px-4 py-2 text-sm font-medium text-gray-200 hover:bg-gray-800">
+                            Close
+                        </button>
+                        <button type="submit" id="saveUserEditBtn" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500">
+                            Save
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     @push('scripts')
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const modal = document.getElementById('admin-action-modal');
-        const title = document.getElementById('admin-action-title');
-        const body = document.getElementById('admin-action-body');
-        const confirmBtn = document.getElementById('admin-action-confirm');
+        <script>
+            (function () {
+                const detailsModal = document.getElementById('userDetailsModal');
+                const editModal = document.getElementById('userEditModal');
 
-        if (!modal || !title || !body || !confirmBtn) {
-            return;
-        }
+                const toggleForm = document.getElementById('modalToggleForm');
+                const resetForm = document.getElementById('modalResetForm');
+                const toggleBtn = document.getElementById('modalToggleBtn');
+                const resetBtn = document.getElementById('modalResetBtn');
+                const openEditFromDetailsBtn = document.getElementById('openEditUserFromDetails');
 
-        function setButtonLoading(button, isLoading, loadingText) {
-            if (!button) {
-                return;
-            }
-            const label = button.querySelector('[data-button-label]');
-            const spinner = button.querySelector('[data-button-spinner]');
-            if (label && !button.dataset.originalLabel) {
-                button.dataset.originalLabel = label.textContent.trim();
-            }
+                const editForm = document.getElementById('userEditForm');
+                const editNameInput = document.getElementById('editName');
+                const editEmailInput = document.getElementById('editEmail');
+                const editRoleSelect = document.getElementById('editRole');
+                const editOfficeSelect = document.getElementById('editOffice');
+                const editPositionInput = document.getElementById('editPosition');
+                const editOfficeHint = document.getElementById('editOfficeHint');
+                const deptHeadWarning = document.getElementById('deptHeadWarning');
+                const saveUserEditBtn = document.getElementById('saveUserEditBtn');
 
-            if (isLoading) {
-                button.disabled = true;
-                button.classList.add('opacity-70', 'cursor-wait');
-                if (spinner) {
-                    spinner.classList.remove('hidden');
+                const fields = {
+                    employeeId: document.getElementById('vmEmployeeId'),
+                    name: document.getElementById('vmName'),
+                    email: document.getElementById('vmEmail'),
+                    role: document.getElementById('vmRole'),
+                    office: document.getElementById('vmOffice'),
+                    position: document.getElementById('vmPosition'),
+                    accountStatus: document.getElementById('vmAccountStatus'),
+                    activationStatus: document.getElementById('vmActivationStatus'),
+                    activatedAt: document.getElementById('vmActivatedAt'),
+                };
+
+                let currentUserData = null;
+
+                const updateUrlTemplate = @json($updateRouteTemplate);
+                const toggleUrlTemplate = @json($toggleRouteTemplate);
+                const resetUrlTemplate = @json($resetRouteTemplate);
+
+                function buildUrl(template, id) {
+                    const encodedToken = encodeURIComponent('__ID__');
+                    let actionUrl = template.replace('__ID__', encodeURIComponent(id));
+                    actionUrl = actionUrl.replace(encodedToken, encodeURIComponent(id));
+
+                    return actionUrl;
                 }
-                if (label && loadingText) {
-                    label.textContent = loadingText;
+
+                function refreshBodyLock() {
+                    const anyOpen = !(detailsModal?.classList.contains('hidden') ?? true)
+                        || !(editModal?.classList.contains('hidden') ?? true);
+                    document.body.classList.toggle('overflow-hidden', anyOpen);
                 }
-            } else {
-                button.disabled = false;
-                button.classList.remove('opacity-70', 'cursor-wait');
-                if (spinner) {
-                    spinner.classList.add('hidden');
+
+                function setBadgeClasses(element, type, key) {
+                    if (!element) return;
+
+                    let classes = 'border border-gray-600/60 bg-gray-700/60 text-gray-200';
+
+                    if (type === 'role') {
+                        classes = {
+                            employee: 'border border-gray-600/60 bg-gray-700/60 text-gray-200',
+                            supervisor: 'border border-blue-600/50 bg-blue-500/10 text-blue-300',
+                            'dept-head': 'border border-purple-600/50 bg-purple-500/10 text-purple-300',
+                            pmt: 'border border-amber-600/50 bg-amber-500/10 text-amber-300',
+                        }[key] || classes;
+                    }
+
+                    if (type === 'account') {
+                        classes = key === 'active'
+                            ? 'border border-emerald-600/50 bg-emerald-500/10 text-emerald-300'
+                            : 'border border-rose-600/50 bg-rose-500/10 text-rose-300';
+                    }
+
+                    if (type === 'activation') {
+                        classes = key === 'activated'
+                            ? 'border border-emerald-600/50 bg-emerald-500/10 text-emerald-300'
+                            : 'border border-amber-600/50 bg-amber-500/10 text-amber-300';
+                    }
+
+                    element.className = `mt-1 inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold ${classes}`;
                 }
-                if (label && button.dataset.originalLabel) {
-                    label.textContent = button.dataset.originalLabel;
+
+                function normalizeUserData(source) {
+                    const dataset = source?.dataset ? source.dataset : source || {};
+
+                    return {
+                        id: String(dataset.id || ''),
+                        employee_id: String(dataset.employeeId || dataset.employee_id || ''),
+                        name: String(dataset.name || ''),
+                        email: String(dataset.email || ''),
+                        role: String(dataset.role || '').toLowerCase(),
+                        office: String(dataset.office || ''),
+                        office_id: String(dataset.officeId || dataset.office_id || ''),
+                        position: String(dataset.position || ''),
+                        is_active: Number(dataset.isActive || dataset.is_active || 0) === 1,
+                        activated_at: String(dataset.activatedAt || dataset.activated_at || ''),
+                    };
                 }
-            }
-        }
 
-        function closeModal() {
-            modal.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
-            setButtonLoading(confirmBtn, false);
-        }
+                function applyOfficeRuleByRole(roleValue) {
+                    const role = String(roleValue || '').toLowerCase();
+                    const isPmt = role === 'pmt';
 
-        function openModal(trigger) {
-            const label = confirmBtn.querySelector('[data-button-label]');
-            title.textContent = trigger.dataset.actionTitle || 'Action';
-            body.textContent = trigger.dataset.actionMessage || 'Prototype action preview.';
-            if (label) {
-                label.textContent = trigger.dataset.actionConfirm || 'Proceed';
-                confirmBtn.dataset.originalLabel = label.textContent.trim();
-            }
-            confirmBtn.dataset.loadingText = trigger.dataset.actionLoading || 'Working...';
-            setButtonLoading(confirmBtn, false);
-            modal.classList.remove('hidden');
-            document.body.classList.add('overflow-hidden');
-        }
+                    if (!editOfficeSelect) return;
 
-        document.querySelectorAll('[data-admin-action]').forEach((button) => {
-            button.addEventListener('click', function (event) {
-                event.preventDefault();
-                openModal(button);
-            });
-        });
+                    if (isPmt) {
+                        editOfficeSelect.value = '';
+                        editOfficeSelect.disabled = true;
+                        editOfficeSelect.required = false;
+                        if (editOfficeHint) editOfficeHint.textContent = 'N/A for PMT.';
+                    } else {
+                        editOfficeSelect.disabled = false;
+                        editOfficeSelect.required = true;
+                        if (editOfficeHint) editOfficeHint.textContent = 'Required for Employee/Supervisor/Dept Head. PMT has no office.';
+                    }
 
-        modal.addEventListener('click', function (event) {
-            if (event.target === modal) {
-                closeModal();
-            }
-        });
+                    if (deptHeadWarning) {
+                        deptHeadWarning.classList.toggle('hidden', role !== 'dept-head');
+                    }
+                }
 
-        modal.querySelectorAll('[data-admin-modal-close]').forEach((button) => {
-            button.addEventListener('click', closeModal);
-        });
+                function openUserDetailsModal(button) {
+                    if (!button || !detailsModal) return;
 
-        confirmBtn.addEventListener('click', function () {
-            setButtonLoading(confirmBtn, true, confirmBtn.dataset.loadingText || 'Working...');
-            setTimeout(() => {
-                setButtonLoading(confirmBtn, false);
-                closeModal();
-            }, 1200);
-        });
+                    currentUserData = normalizeUserData(button);
 
-        document.addEventListener('keydown', function (event) {
-            if (event.key === 'Escape') {
-                closeModal();
-            }
-        });
-    });
-    </script>
+                    const userId = currentUserData.id;
+                    const employeeId = currentUserData.employee_id || '--';
+                    const name = currentUserData.name || '--';
+                    const email = currentUserData.email || '--';
+                    const role = currentUserData.role;
+                    const office = currentUserData.office.trim();
+                    const position = currentUserData.position.trim();
+                    const isActive = currentUserData.is_active;
+                    const activatedAt = currentUserData.activated_at.trim();
+
+                    fields.employeeId.textContent = employeeId;
+                    fields.name.textContent = name;
+                    fields.email.textContent = email;
+                    fields.office.textContent = office || 'N/A';
+                    fields.position.textContent = position || '--';
+                    fields.activatedAt.textContent = activatedAt || '--';
+
+                    fields.role.textContent = role ? role.toUpperCase() : '--';
+                    setBadgeClasses(fields.role, 'role', role);
+
+                    fields.accountStatus.textContent = isActive ? 'Active' : 'Inactive';
+                    setBadgeClasses(fields.accountStatus, 'account', isActive ? 'active' : 'inactive');
+
+                    const activationState = activatedAt ? 'activated' : 'pending';
+                    fields.activationStatus.textContent = activationState === 'activated' ? 'Activated' : 'Pending';
+                    setBadgeClasses(fields.activationStatus, 'activation', activationState);
+
+                    if (toggleUrlTemplate && userId && toggleForm && toggleBtn) {
+                        toggleForm.action = buildUrl(toggleUrlTemplate, userId);
+                        toggleBtn.disabled = false;
+                        toggleBtn.textContent = isActive ? 'Deactivate' : 'Activate';
+                        toggleBtn.className = isActive
+                            ? 'rounded-lg border border-rose-500/60 bg-rose-500/10 px-4 py-2 text-sm font-medium text-rose-300 hover:bg-rose-500/20'
+                            : 'rounded-lg border border-emerald-500/60 bg-emerald-500/10 px-4 py-2 text-sm font-medium text-emerald-300 hover:bg-emerald-500/20';
+                        toggleBtn.title = '';
+                    } else if (toggleBtn) {
+                        toggleBtn.disabled = true;
+                        toggleBtn.textContent = 'Toggle Status';
+                        toggleBtn.className = 'cursor-not-allowed rounded-lg border border-gray-600 px-4 py-2 text-sm font-medium text-gray-500 opacity-70';
+                        toggleBtn.title = 'Route admin.users.toggle-active not available.';
+                    }
+
+                    if (resetUrlTemplate && userId && resetForm && resetBtn) {
+                        resetForm.action = buildUrl(resetUrlTemplate, userId);
+                        resetBtn.disabled = false;
+                        resetBtn.className = 'rounded-lg border border-amber-500/60 bg-amber-500/10 px-4 py-2 text-sm font-medium text-amber-300 hover:bg-amber-500/20';
+                        resetBtn.title = '';
+                    } else if (resetBtn) {
+                        resetBtn.disabled = true;
+                        resetBtn.className = 'cursor-not-allowed rounded-lg border border-gray-600 px-4 py-2 text-sm font-medium text-gray-500 opacity-70';
+                        resetBtn.title = 'Route admin.users.reset-password not available.';
+                    }
+
+                    detailsModal.classList.remove('hidden');
+                    detailsModal.classList.add('flex');
+                    refreshBodyLock();
+                }
+
+                function closeUserDetailsModal() {
+                    if (!detailsModal) return;
+                    detailsModal.classList.add('hidden');
+                    detailsModal.classList.remove('flex');
+                    refreshBodyLock();
+                }
+
+                function openUserEditModal(userDataFromViewModalOrButton) {
+                    if (!editModal || !editForm || !editNameInput || !editEmailInput || !editRoleSelect || !editOfficeSelect || !editPositionInput) return;
+
+                    const userData = normalizeUserData(userDataFromViewModalOrButton);
+                    if (!userData.id) return;
+
+                    currentUserData = userData;
+
+                    if (updateUrlTemplate) {
+                        editForm.action = buildUrl(updateUrlTemplate, userData.id);
+                        if (saveUserEditBtn) {
+                            saveUserEditBtn.disabled = false;
+                            saveUserEditBtn.classList.remove('opacity-60', 'cursor-not-allowed');
+                            saveUserEditBtn.title = '';
+                        }
+                    } else if (saveUserEditBtn) {
+                        saveUserEditBtn.disabled = true;
+                        saveUserEditBtn.classList.add('opacity-60', 'cursor-not-allowed');
+                        saveUserEditBtn.title = 'Route admin.users.update not available.';
+                    }
+
+                    editNameInput.value = userData.name || '';
+                    editEmailInput.value = userData.email || '';
+                    editRoleSelect.value = userData.role || 'employee';
+                    editOfficeSelect.value = userData.office_id || '';
+                    editPositionInput.value = userData.position || '';
+
+                    applyOfficeRuleByRole(editRoleSelect.value);
+                    closeUserDetailsModal();
+
+                    editModal.classList.remove('hidden');
+                    editModal.classList.add('flex');
+                    refreshBodyLock();
+                }
+
+                function closeUserEditModal() {
+                    if (!editModal) return;
+                    editModal.classList.add('hidden');
+                    editModal.classList.remove('flex');
+                    refreshBodyLock();
+                }
+
+                document.querySelectorAll('[data-open-user-modal]').forEach((button) => {
+                    button.addEventListener('click', () => openUserDetailsModal(button));
+                });
+
+                openEditFromDetailsBtn?.addEventListener('click', () => {
+                    if (!currentUserData) return;
+                    openUserEditModal(currentUserData);
+                });
+
+                editRoleSelect?.addEventListener('change', () => {
+                    applyOfficeRuleByRole(editRoleSelect.value);
+                });
+
+                document.getElementById('closeUserModalTop')?.addEventListener('click', closeUserDetailsModal);
+                document.getElementById('closeUserModalBottom')?.addEventListener('click', closeUserDetailsModal);
+                document.getElementById('closeUserEditTop')?.addEventListener('click', closeUserEditModal);
+                document.getElementById('closeUserEditBottom')?.addEventListener('click', closeUserEditModal);
+
+                detailsModal?.addEventListener('click', (event) => {
+                    if (event.target === detailsModal) {
+                        closeUserDetailsModal();
+                    }
+                });
+
+                editModal?.addEventListener('click', (event) => {
+                    if (event.target === editModal) {
+                        closeUserEditModal();
+                    }
+                });
+
+                document.addEventListener('keydown', (event) => {
+                    if (event.key === 'Escape') {
+                        if (!(editModal?.classList.contains('hidden') ?? true)) {
+                            closeUserEditModal();
+                            return;
+                        }
+                        closeUserDetailsModal();
+                    }
+                });
+            })();
+        </script>
     @endpush
 @endsection

@@ -5,11 +5,15 @@
         $statusMeta = [
             'draft' => [
                 'label' => 'Draft',
-                'badge' => 'border-violet-500/40 bg-violet-500/10 text-violet-200',
+                'badge' => 'border-amber-500/40 bg-amber-500/10 text-amber-200',
             ],
-            'dept_head_approved' => [
-                'label' => 'Dept Head Approved',
+            'dept_head_endorsed' => [
+                'label' => 'Dept Head Endorsed',
                 'badge' => 'border-emerald-500/40 bg-emerald-500/10 text-emerald-200',
+            ],
+            'pmt_approved' => [
+                'label' => 'PMT Approved',
+                'badge' => 'border-sky-500/40 bg-sky-500/10 text-sky-200',
             ],
         ];
 
@@ -18,15 +22,16 @@
         $incomingMporsSafe = $incomingMpors ?? [];
         $consolidatedMporsSafe = $consolidatedMpors ?? [];
         $rowsSafe = $rows ?? [];
+        $allowedQuarterOptionsSafe = is_array($allowedQuarterOptions ?? null) ? $allowedQuarterOptions : [];
+        $selectedQuarterNumberSafe = (int) ($selectedQuarterNumber ?? 0);
 
-        $isApproved = $status === 'dept_head_approved';
+        $isEndorsed = in_array($status, ['dept_head_endorsed', 'pmt_approved'], true);
         $hasIncoming = !empty($incomingMporsSafe);
         $hasConsolidated = !empty($consolidatedMporsSafe);
 
-        $canGenerate = ! $isApproved;
-        $canApprove = ! $isApproved && !empty($generatedAt) && $hasConsolidated;
+        $canEndorse = ($status === 'draft') && $hasConsolidated;
 
-        $approvedDateLabel = $isApproved && !empty($approvedAt)
+        $approvedDateLabel = $isEndorsed && !empty($approvedAt)
             ? \Illuminate\Support\Carbon::parse($approvedAt)->format('M d, Y g:i A')
             : '-';
 
@@ -35,28 +40,25 @@
             : '-';
 
         $uwpTargetTimelineMapSafe = $uwpTargetTimelineMap ?? [];
-        $mporDummyDetailsSafe = $mporDummyDetails ?? [];
+        $selectedMporDetailSafe = $selectedMporDetail ?? [];
+        $selectedGroups = is_array($selectedMporDetailSafe['groups'] ?? null) ? $selectedMporDetailSafe['groups'] : [];
+        $selectedSummary = is_array($selectedMporDetailSafe['summary'] ?? null) ? $selectedMporDetailSafe['summary'] : [];
+        $selectedConfirmed = is_array($selectedMporDetailSafe['confirmed'] ?? null) ? $selectedMporDetailSafe['confirmed'] : [];
+        $selectedEmployeeName = $selectedMporDetailSafe['employee_name'] ?? '--';
+        $selectedOfficeDivision = $selectedMporDetailSafe['office_division'] ?? $office;
+        $selectedMonthLabel = $selectedMporDetailSafe['month_label'] ?? '--';
+        $selectedStatusLabel = $selectedMporDetailSafe['status'] ?? 'Submitted (Locked)';
+        $selectedSubmittedAt = $selectedMporDetailSafe['submitted_at'] ?? '-';
     @endphp
 
+    <div id="qarPageRoot">
     <section class="space-y-6">
-        @if (session('success'))
-            <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if (session('info'))
-            <div class="rounded-xl border border-sky-500/30 bg-sky-500/10 px-4 py-3 text-sm text-sky-200">
-                {{ session('info') }}
-            </div>
-        @endif
-
         <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
                 <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Annex I - Office Quarterly Accomplishment Report</p>
                 <h1 class="mt-1 text-2xl font-bold text-white">Office Quarterly Accomplishment Report (QAR)</h1>
                 <p class="mt-1 text-sm text-slate-400">
-                    Review incoming submitted MPORs, consolidate into QAR snapshot, then approve for PMT validation.
+                    Approved MPORs automatically populate this QAR snapshot for PMT validation.
                 </p>
             </div>
 
@@ -68,7 +70,7 @@
                     </div>
                     <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-3">
                         <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Quarter</p>
-                        <p class="mt-1 text-sm font-semibold text-white">{{ $quarter }}</p>
+                        <p class="mt-1 text-sm font-semibold text-white">{{ $quarterLabel ?? '-' }}</p>
                     </div>
                     <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-3">
                         <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Status</p>
@@ -78,17 +80,25 @@
                     </div>
                 </div>
 
-                <div class="flex justify-end">
-                    <form id="qarResetForm" method="POST" action="{{ route('dept-head.qar.reset') }}">
-                        @csrf
-                        <button type="submit"
-                            id="qarResetBtn"
-                            class="inline-flex items-center gap-2 rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs font-semibold text-rose-200 transition hover:bg-rose-500/20">
-                            <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
-                            <span data-button-label>Reset Prototype</span>
-                        </button>
-                    </form>
-                </div>
+                @if (!empty($allowedQuarterOptionsSafe))
+                    <div class="flex flex-wrap justify-end gap-2">
+                        @foreach ($allowedQuarterOptionsSafe as $option)
+                            @php
+                                $qValue = (int) ($option['value'] ?? 0);
+                                $isQuarterSelected = $qValue === $selectedQuarterNumberSafe;
+                            @endphp
+                            <a href="{{ route('dept-head.qar', ['q' => $qValue]) }}"
+                                data-qar-quarter-link
+                                class="{{ $isQuarterSelected ? 'border-sky-500/50 bg-sky-500/10 text-sky-200' : 'border-slate-700 bg-slate-900/60 text-slate-300 hover:bg-slate-800' }} rounded-lg border px-3 py-1.5 text-xs font-semibold transition">
+                                {{ $option['label'] ?? ('Q' . $qValue) }}
+                            </a>
+                        @endforeach
+                    </div>
+                    <div id="qarQuarterLoading" class="hidden mt-2 text-xs text-slate-400">
+                        Loading quarter...
+                    </div>
+                @endif
+
             </div>
         </div>
 
@@ -96,65 +106,78 @@
             <div class="flex flex-wrap items-start justify-between gap-3">
                 <div>
                     <h2 class="text-lg font-semibold text-white">A) Incoming MPORs</h2>
-                    <p class="text-xs text-slate-400">Received submitted MPORs waiting for QAR consolidation.</p>
+                    <p class="text-xs text-slate-400">Approved MPORs received for automatic QAR population.</p>
                 </div>
             </div>
 
-            <div class="mt-3 overflow-x-auto">
-                <table class="min-w-full divide-y divide-slate-800 text-sm">
-                    <thead>
-                        <tr class="bg-slate-950/60 text-left text-xs uppercase tracking-[0.2em] text-slate-400">
-                            <th class="px-4 py-3">Employee</th>
-                            <th class="px-4 py-3">Month</th>
-                            <th class="px-4 py-3">Status</th>
-                            <th class="px-4 py-3">Notes</th>
-                            <th class="px-4 py-3 text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-800 text-slate-200">
-                        @forelse ($incomingMporsSafe as $mpor)
-                            <tr>
-                                <td class="px-4 py-3 font-semibold text-white">{{ $mpor['employee'] ?? '-' }}</td>
-                                <td class="px-4 py-3">{{ $mpor['month'] ?? '-' }}</td>
-                                <td class="px-4 py-3">
-                                    <span class="inline-flex rounded-full border border-slate-700 bg-slate-950/40 px-2 py-1 text-xs font-semibold text-slate-200">
-                                        {{ $mpor['status'] ?? '-' }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-3 text-slate-300">Ready for consolidation</td>
-                                <td class="px-4 py-3">
-                                    <div class="flex items-center justify-center gap-2">
-                                        <button type="button"
+            <div class="mt-3 max-h-[45vh] overflow-y-auto pr-2 overscroll-contain">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-800 text-sm">
+                        <thead>
+                            <tr class="bg-slate-950/60 text-left text-xs uppercase tracking-[0.2em] text-slate-400">
+                                <th class="px-4 py-3">Employee</th>
+                                <th class="px-4 py-3">Month</th>
+                                <th class="px-4 py-3">Status</th>
+                                <th class="px-4 py-3">Notes</th>
+                                <th class="px-4 py-3 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800 text-slate-200">
+                            @forelse ($incomingMporsSafe as $mpor)
+                                <tr>
+                                    <td class="px-4 py-3 font-semibold text-white">{{ $mpor['employee'] ?? '-' }}</td>
+                                    <td class="px-4 py-3">{{ $mpor['month'] ?? '-' }}</td>
+                                    <td class="px-4 py-3">
+                                        @php
+                                            $mporStatusKey = strtolower(trim((string) ($mpor['status'] ?? '')));
+                                            $mporBadgeClass = match ($mporStatusKey) {
+                                                'approved' => 'border-emerald-500/40 bg-emerald-500/10 text-emerald-200',
+                                                'draft' => 'border-amber-500/40 bg-amber-500/10 text-amber-200',
+                                                default => 'border-slate-700 bg-slate-950/40 text-slate-200',
+                                            };
+                                        @endphp
+
+                                        <span class="inline-flex rounded-full border px-2 py-1 text-xs font-semibold {{ $mporBadgeClass }}">
+                                            {{ $mpor['status'] ?? '-' }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3 text-slate-300">Auto-populated to QAR</td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center justify-center gap-2">
+                                        <button
+                                            type="button"
+                                            data-view-mpor
+                                            data-mpor-id="{{ (int) ($mpor['id'] ?? 0) }}"
                                             data-modal-target="qarViewMporModal"
                                             data-modal-toggle="qarViewMporModal"
-                                            data-mpor-view-trigger="1"
-                                            data-mpor-key="{{ \Illuminate\Support\Str::slug(($mpor['employee'] ?? 'unknown') . '-' . ($mpor['month'] ?? 'unknown')) }}"
-                                            class="rounded-lg border border-slate-700 bg-slate-900/50 px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:bg-slate-800">
+                                            class="rounded-lg border border-slate-700 bg-slate-900/50 px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:bg-slate-800"
+                                        >
                                             View
                                         </button>
                                     </div>
                                 </td>
                             </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5" class="px-4 py-6 text-center text-sm text-slate-400">
-                                    No incoming MPORs yet.
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="px-4 py-6 text-center text-sm text-slate-400">
+                                        No incoming MPORs yet.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
         <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
             <div class="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                    <h2 class="text-lg font-semibold text-white">B) Consolidation Summary</h2>
-                    <p class="text-xs text-slate-400">Snapshot based on consolidated MPORs only.</p>
+                    <h2 class="text-lg font-semibold text-white">B) QAR Summary</h2>
+                    <p class="text-xs text-slate-400">Snapshot auto-populated from approved MPORs.</p>
                 </div>
                 <div class="text-right text-xs text-slate-500">
-                    <p>Last consolidated: {{ $generatedDateLabel }}</p>
+                    <p>Last updated: {{ $generatedDateLabel }}</p>
                 </div>
             </div>
 
@@ -173,20 +196,22 @@
                 </div>
                 <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                     <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Data Source</p>
-                    <p class="mt-1 text-sm font-semibold text-white">Consolidated MPOR snapshot</p>
+                    <p class="mt-1 text-sm font-semibold text-white">Approved MPOR snapshot</p>
                 </div>
             </div>
 
             <div class="mt-4 rounded-xl border border-slate-800 bg-slate-950/60 p-3">
-                <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Consolidated MPOR Records</p>
+                <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Approved MPOR Records</p>
                 @if ($hasConsolidated)
-                    <ul class="mt-2 space-y-1 text-sm text-slate-300">
-                        @foreach ($consolidatedMporsSafe as $mpor)
-                            <li>- {{ $mpor['employee'] ?? '-' }} - {{ $mpor['month'] ?? '-' }} - {{ $mpor['status'] ?? '-' }}</li>
-                        @endforeach
-                    </ul>
+                    <div class="mt-2 max-h-40 overflow-y-auto pr-2 overscroll-contain">
+                        <ul class="space-y-1 text-sm text-slate-300">
+                            @foreach ($consolidatedMporsSafe as $mpor)
+                                <li>- {{ $mpor['employee'] ?? '-' }} - {{ $mpor['month'] ?? '-' }} - {{ $mpor['status'] ?? '-' }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
                 @else
-                    <p class="mt-2 text-sm text-slate-400">No consolidated snapshot yet. Consolidate incoming MPORs first.</p>
+                    <p class="mt-2 text-sm text-slate-400">No approved MPORs yet for this quarter.</p>
                 @endif
             </div>
         </div>
@@ -194,55 +219,57 @@
         <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
             <div class="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                    <h2 class="text-lg font-semibold text-white">C) Annex I Consolidated QAR</h2>
-                    <p class="text-xs text-slate-400">Rows appear only after consolidation.</p>
+                    <h2 class="text-lg font-semibold text-white">C) Annex I QAR</h2>
+                    <p class="text-xs text-slate-400">Rows are auto-populated from approved MPORs.</p>
                 </div>
                 <button type="button"
                     data-modal-target="qarApproveConfirmModal"
                     data-modal-toggle="qarApproveConfirmModal"
-                    @disabled(!$canApprove)
+                    @disabled(!$canEndorse)
                     class="rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-200 transition hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-60">
-                    Approve QAR
+                    Endorse QAR
                 </button>
             </div>
 
-            <div class="mt-3 overflow-x-auto">
-                <table class="min-w-full divide-y divide-slate-800 text-sm">
-                    <thead>
-                        <tr class="bg-slate-950/60 text-left text-xs uppercase tracking-[0.2em] text-slate-400">
-                            <th class="px-4 py-3">PPA Code</th>
-                            <th class="px-4 py-3">MFO/PPA</th>
-                            <th class="px-4 py-3">Performance Indicator</th>
-                            <th class="px-4 py-3 text-center">Target / Timeline</th>
-                            <th class="px-4 py-3 text-center">Actual Performance</th>
-                            <th class="px-4 py-3">Remarks</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-800 text-slate-200">
-                        @forelse ($rowsSafe as $row)
-                            @php
-                                $code = (string) ($row['ppa_code'] ?? '');
-                                $targetTimeline = $uwpTargetTimelineMapSafe[$code] ?? ($row['target_timeline'] ?? '-');
-                            @endphp
-                            <tr>
-                                <td class="px-4 py-3">{{ $row['ppa_code'] }}</td>
-                                <td class="px-4 py-3">{{ $row['mfo'] }}</td>
-                                <td class="px-4 py-3">{{ $row['indicator'] }}</td>
-                                <td class="px-4 py-3 text-center">
-                                    <p class="text-sm text-slate-200">{{ $targetTimeline }}</p>
-                                </td>
-                                <td class="px-4 py-3 text-center font-semibold">{{ $row['actual_performance'] }}</td>
-                                <td class="px-4 py-3">{{ $row['remarks'] }}</td>
+            <div class="mt-3 max-h-[65vh] overflow-y-auto pr-2 overscroll-contain scroll-smooth">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-800 text-sm">
+                        <thead>
+                            <tr class="bg-slate-950/60 text-left text-xs uppercase tracking-[0.2em] text-slate-400">
+                                <th class="px-4 py-3">PPA Code</th>
+                                <th class="px-4 py-3">MFO/PPA</th>
+                                <th class="px-4 py-3">Performance Indicator</th>
+                                <th class="px-4 py-3 text-center">Target / Timeline</th>
+                                <th class="px-4 py-3 text-center">Actual Performance</th>
+                                <th class="px-4 py-3">Remarks</th>
                             </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="px-4 py-6 text-center text-sm text-slate-400">
-                                    QAR rows are empty. Consolidate incoming MPORs first.
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800 text-slate-200">
+                            @forelse ($rowsSafe as $row)
+                                @php
+                                    $code = (string) ($row['ppa_code'] ?? '');
+                                    $targetTimeline = $uwpTargetTimelineMapSafe[$code] ?? ($row['target_timeline'] ?? '-');
+                                @endphp
+                                <tr>
+                                    <td class="px-4 py-3">{{ $row['ppa_code'] ?? '-' }}</td>
+                                    <td class="px-4 py-3">{{ $row['mfo'] ?? '-' }}</td>
+                                    <td class="px-4 py-3">{{ $row['indicator'] ?? '-' }}</td>
+                                    <td class="px-4 py-3 text-center">
+                                        <p class="text-sm text-slate-200">{{ $targetTimeline }}</p>
+                                    </td>
+                                    <td class="px-4 py-3 text-center font-semibold">{{ $row['actual_performance'] ?? '-' }}</td>
+                                    <td class="px-4 py-3">{{ $row['remarks'] ?? '-' }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="px-4 py-6 text-center text-sm text-slate-400">
+                                        QAR rows are empty. No approved MPOR data found.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <div class="mt-4 grid gap-4 sm:grid-cols-2">
@@ -261,50 +288,12 @@
         </div>
     </section>
 
-    <div id="qarGenerateConfirmModal" tabindex="-1" aria-hidden="true"
-        class="fixed left-0 right-0 top-0 z-50 hidden h-[calc(100%-1rem)] max-h-full w-full items-center justify-center overflow-y-auto overflow-x-hidden md:inset-0">
-        <div class="relative max-h-full w-full max-w-lg p-4">
-            <div class="relative rounded-2xl border border-slate-800 bg-slate-900 shadow-lg">
-                <div class="flex items-start justify-between border-b border-slate-800 p-5">
-                    <h3 class="text-lg font-semibold text-white">Consolidate to QAR</h3>
-                    <button type="button" data-modal-hide="qarGenerateConfirmModal"
-                        class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-800 hover:text-white">
-                        <span class="sr-only">Close modal</span>
-                        <i class="fa-solid fa-xmark text-sm"></i>
-                    </button>
-                </div>
-                <div class="space-y-3 p-5 text-sm text-slate-300">
-                    <p>
-                        Consolidate incoming MPORs for <span class="font-semibold text-white">{{ $quarter }}</span> -
-                        <span class="font-semibold text-white">{{ $office }}</span>?
-                    </p>
-                    <p>
-                        This will build a consolidated QAR snapshot from the current incoming MPOR list.
-                    </p>
-                </div>
-                <form id="qarGenerateForm" method="POST" action="{{ route('dept-head.qar.generate') }}"
-                    class="flex items-center justify-end gap-2 border-t border-slate-800 p-5">
-                    @csrf
-                    <button type="button" data-modal-hide="qarGenerateConfirmModal"
-                        class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 transition hover:bg-slate-800">
-                        Cancel
-                    </button>
-                    <button type="submit" id="qarGenerateProceedBtn"
-                        class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500">
-                        <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
-                        <span data-button-label>Proceed Consolidate</span>
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-
         <div id="qarApproveConfirmModal" tabindex="-1" aria-hidden="true"
         class="fixed left-0 right-0 top-0 z-50 hidden h-[calc(100%-1rem)] max-h-full w-full items-center justify-center overflow-y-auto overflow-x-hidden md:inset-0">
         <div class="relative max-h-full w-full max-w-lg p-4">
             <div class="relative rounded-2xl border border-slate-800 bg-slate-900 shadow-lg">
                 <div class="flex items-start justify-between border-b border-slate-800 p-5">
-                    <h3 class="text-lg font-semibold text-white">Approve QAR</h3>
+                    <h3 class="text-lg font-semibold text-white">Endorse QAR</h3>
                     <button type="button" data-modal-hide="qarApproveConfirmModal"
                         class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-800 hover:text-white">
                         <span class="sr-only">Close modal</span>
@@ -312,12 +301,13 @@
                     </button>
                 </div>
                 <div class="space-y-3 p-5 text-sm text-slate-300">
-                    <p>Approve this consolidated QAR for PMT validation?</p>
-                    <p>Once approved, QAR becomes read-only at Dept Head level.</p>
+                    <p>Endorse this QAR for PMT validation?</p>
+                    <p>Once endorsed, QAR becomes read-only at Dept Head level.</p>
                 </div>
-                <form id="qarApproveForm" method="POST" action="{{ route('dept-head.qar.approve') }}"
+                <form id="qarEndorseForm" method="POST" action="{{ route('dept-head.qar.endorse') }}"
                     class="flex items-center justify-end gap-2 border-t border-slate-800 p-5">
                     @csrf
+                    <input type="hidden" name="q" value="{{ $selectedQuarterNumberSafe }}">
                     <button type="button" data-modal-hide="qarApproveConfirmModal"
                         class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 transition hover:bg-slate-800">
                         Cancel
@@ -325,7 +315,7 @@
                     <button type="submit" id="qarApproveProceedBtn"
                         class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500">
                         <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
-                        <span data-button-label>Proceed Approve</span>
+                        <span data-button-label>Proceed Endorse</span>
                     </button>
                 </form>
             </div>
@@ -342,13 +332,12 @@
                         <p class="mt-1 text-xs text-slate-400">Read-only mirror of locked ORS entries with supervisor ratings.</p>
                         <p class="mt-2 text-xs text-slate-500">
                             Submitted at:
-                            <span data-bind="submitted_at" class="text-slate-300">--</span>
+                            <span id="qarModalSubmittedAt" class="text-slate-300">{{ $selectedSubmittedAt }}</span>
                         </p>
                     </div>
                     <div class="flex items-start gap-2">
-                        <span data-bind="status"
-                            class="inline-flex rounded-full border border-slate-700 bg-slate-950/40 px-2 py-1 text-xs font-semibold text-slate-200">
-                            Submitted (Locked)
+                        <span id="qarModalStatusBadge" class="inline-flex rounded-full border border-slate-700 bg-slate-950/40 px-2 py-1 text-xs font-semibold text-slate-200">
+                            {{ $selectedStatusLabel }}
                         </span>
                         <button type="button" data-modal-hide="qarViewMporModal"
                             class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-800 hover:text-white">
@@ -359,18 +348,21 @@
                 </div>
 
                 <div class="space-y-5 p-5 text-sm text-slate-300">
+                    <div id="qarModalLoading" class="hidden rounded-xl border border-slate-800 bg-slate-950/60 p-3 text-sm text-slate-300">
+                        Loading MPOR...
+                    </div>
                     <div class="grid gap-3 sm:grid-cols-3">
                         <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
                             <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Name</p>
-                            <p data-bind="employee_name" class="mt-1 text-sm font-semibold text-white">--</p>
+                            <p id="qarModalEmployeeName" class="mt-1 text-sm font-semibold text-white">{{ $selectedEmployeeName }}</p>
                         </div>
                         <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
                             <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Office / Division</p>
-                            <p data-bind="office_division" class="mt-1 text-sm font-semibold text-white">--</p>
+                            <p id="qarModalOfficeDivision" class="mt-1 text-sm font-semibold text-white">{{ $selectedOfficeDivision }}</p>
                         </div>
                         <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
                             <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Month</p>
-                            <p data-bind="month_label" class="mt-1 text-sm font-semibold text-white">--</p>
+                            <p id="qarModalMonthLabel" class="mt-1 text-sm font-semibold text-white">{{ $selectedMonthLabel }}</p>
                         </div>
                     </div>
 
@@ -403,12 +395,62 @@
                                             <th class="px-2 py-1 text-right font-semibold">Total</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="mporGridTbody" class="divide-y divide-slate-800"></tbody>
+                                    <tbody id="qarModalGridBody" class="divide-y divide-slate-800">
+                                        @forelse ($selectedGroups as $group)
+                                            @php
+                                                $groupRows = is_array($group['rows'] ?? null) ? $group['rows'] : [];
+                                            @endphp
+                                            <tr class="bg-slate-900/60 text-[0.65rem] uppercase tracking-[0.3em] text-slate-400">
+                                                <td class="px-3 py-2 font-semibold text-slate-200" colspan="16">
+                                                    {{ ($group['label'] ?? 'GROUP') . (!empty($group['weight_label']) ? ' (' . $group['weight_label'] . ')' : '') }}
+                                                </td>
+                                            </tr>
+
+                                            @forelse ($groupRows as $row)
+                                                @php
+                                                    $eff = is_array($row['eff'] ?? null) ? $row['eff'] : [];
+                                                    $qual = is_array($row['qual'] ?? null) ? $row['qual'] : [];
+                                                    $time = is_array($row['time'] ?? null) ? $row['time'] : [];
+                                                @endphp
+                                                <tr class="text-slate-200">
+                                                    <td class="px-3 py-2 font-medium text-white">{{ $row['task_title'] ?? '-' }}</td>
+
+                                                    <td class="border-l border-slate-800 px-2 py-2 text-right tabular-nums">{{ $eff['w1'] ?? 0 }}</td>
+                                                    <td class="px-2 py-2 text-right tabular-nums">{{ $eff['w2'] ?? 0 }}</td>
+                                                    <td class="px-2 py-2 text-right tabular-nums">{{ $eff['w3'] ?? 0 }}</td>
+                                                    <td class="px-2 py-2 text-right tabular-nums">{{ $eff['w4'] ?? 0 }}</td>
+                                                    <td class="px-2 py-2 text-right font-semibold text-white tabular-nums">{{ $eff['total'] ?? 0 }}</td>
+
+                                                    <td class="border-l border-slate-800 px-2 py-2 text-right tabular-nums">{{ $qual['w1'] ?? 0 }}</td>
+                                                    <td class="px-2 py-2 text-right tabular-nums">{{ $qual['w2'] ?? 0 }}</td>
+                                                    <td class="px-2 py-2 text-right tabular-nums">{{ $qual['w3'] ?? 0 }}</td>
+                                                    <td class="px-2 py-2 text-right tabular-nums">{{ $qual['w4'] ?? 0 }}</td>
+                                                    <td class="px-2 py-2 text-right font-semibold text-white tabular-nums">{{ $qual['total'] ?? 0 }}</td>
+
+                                                    <td class="border-l border-slate-800 px-2 py-2 text-right tabular-nums">{{ $time['w1'] ?? 0 }}</td>
+                                                    <td class="px-2 py-2 text-right tabular-nums">{{ $time['w2'] ?? 0 }}</td>
+                                                    <td class="px-2 py-2 text-right tabular-nums">{{ $time['w3'] ?? 0 }}</td>
+                                                    <td class="px-2 py-2 text-right tabular-nums">{{ $time['w4'] ?? 0 }}</td>
+                                                    <td class="px-2 py-2 text-right font-semibold text-white tabular-nums">{{ $time['total'] ?? 0 }}</td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="16" class="px-3 py-2 text-sm text-slate-400">No rows found for this group.</td>
+                                                </tr>
+                                            @endforelse
+                                        @empty
+                                            <tr>
+                                                <td colspan="16" class="px-4 py-5 text-center text-sm text-slate-400">
+                                                    No MPOR grid rows available.
+                                                </td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
                                 </table>
                             </div>
 
                             <p class="mt-3 text-xs text-slate-400">
-                                Stage II demo: MPOR points = Quantity &times; Supervisor Rating (Q/T). Batch quantities are treated as single units.
+                                Stage II: MPOR points = Quantity &times; Supervisor Rating (Q/T). Derived from rated ORS entries.
                             </p>
 
                             <div class="mt-4 grid gap-4 lg:grid-cols-2">
@@ -417,21 +459,21 @@
                                         <span>Week 1</span><span>Week 2</span><span>Week 3</span><span>Week 4</span><span>Total</span>
                                     </div>
                                     <div class="mt-2 grid grid-cols-5 text-center text-sm font-semibold text-white">
-                                        <span id="mporWeek1">0</span>
-                                        <span id="mporWeek2">0</span>
-                                        <span id="mporWeek3">0</span>
-                                        <span id="mporWeek4">0</span>
-                                        <span id="mporGrand">0</span>
+                                        <span id="qarModalWeek1">{{ $selectedSummary['week1_total'] ?? 0 }}</span>
+                                        <span id="qarModalWeek2">{{ $selectedSummary['week2_total'] ?? 0 }}</span>
+                                        <span id="qarModalWeek3">{{ $selectedSummary['week3_total'] ?? 0 }}</span>
+                                        <span id="qarModalWeek4">{{ $selectedSummary['week4_total'] ?? 0 }}</span>
+                                        <span id="qarModalGrandTotal">{{ $selectedSummary['grand_total'] ?? 0 }}</span>
                                     </div>
                                     <div class="my-5 border-t border-slate-700/70"></div>
                                     <div class="space-y-2 text-[0.65rem] tracking-[0.2em] text-slate-500">
                                         <div class="flex items-center justify-between gap-3">
                                             <span class="min-w-0">Included ORS Entries (Rated)</span>
-                                            <span id="mporIncluded" class="shrink-0 font-semibold text-white">0</span>
+                                            <span id="qarModalIncluded" class="shrink-0 font-semibold text-white">{{ $selectedSummary['included_entries'] ?? 0 }}</span>
                                         </div>
                                         <div class="flex items-center justify-between gap-3">
                                             <span class="min-w-0">Excluded Entries (Unrated/Draft/Missing)</span>
-                                            <span id="mporExcluded" class="shrink-0 font-semibold text-white">0</span>
+                                            <span id="qarModalExcluded" class="shrink-0 font-semibold text-white">{{ $selectedSummary['excluded_entries'] ?? 0 }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -444,12 +486,12 @@
                                     <div class="mt-4 grid gap-3 sm:grid-cols-2">
                                         <div class="space-y-1 rounded-xl border border-slate-800 bg-slate-900/40 p-3 text-center">
                                             <p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">Supervisor</p>
-                                            <p id="mporSupervisorName" class="text-sm font-semibold text-white normal-case tracking-normal">--</p>
+                                            <p id="qarModalSupervisorName" class="text-sm font-semibold text-white normal-case tracking-normal">{{ $selectedConfirmed['supervisor_name'] ?? '--' }}</p>
                                             <p class="text-[0.6rem] text-slate-500 normal-case tracking-normal">Signature over printed name</p>
                                         </div>
                                         <div class="space-y-1 rounded-xl border border-slate-800 bg-slate-900/40 p-3 text-center">
                                             <p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">Employee</p>
-                                            <p id="mporEmployeeConfirmName" class="text-sm font-semibold text-white normal-case tracking-normal">--</p>
+                                            <p id="qarModalEmployeeConfirmName" class="text-sm font-semibold text-white normal-case tracking-normal">{{ $selectedConfirmed['employee_name'] ?? '--' }}</p>
                                             <p class="text-[0.6rem] text-slate-500 normal-case tracking-normal">Signature over printed name</p>
                                         </div>
                                     </div>
@@ -460,14 +502,6 @@
                 </div>
 
                 <div class="flex items-center justify-end border-t border-slate-800 p-5">
-                    <button type="button"
-                        data-modal-hide="qarViewMporModal"
-                        data-modal-target="qarGenerateConfirmModal"
-                        data-modal-toggle="qarGenerateConfirmModal"
-                        @disabled(!$canGenerate)
-                        class="mr-2 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60">
-                        Consolidate to QAR
-                    </button>
                     <button type="button" data-modal-hide="qarViewMporModal"
                         class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 transition hover:bg-slate-800">
                         Close
@@ -477,17 +511,330 @@
         </div>
     </div>
 
-    <script type="application/json" id="mporDummyJson">{!! json_encode($mporDummyDetailsSafe) !!}</script>
+    @if (request()->filled('mpor_id') && $hasIncoming)
+        <button type="button"
+            id="qarAutoOpenViewModal"
+            class="hidden"
+            data-mpor-id="{{ (int) request('mpor_id', 0) }}"
+            data-modal-target="qarViewMporModal"
+            data-modal-toggle="qarViewMporModal">
+            Open MPOR View
+        </button>
+    @endif
+    </div>
 
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                const bindLoadingSubmit = (formId, buttonId, loadingLabel) => {
-                    const form = document.getElementById(formId);
-                    const button = document.getElementById(buttonId);
+                const flashPayload = {
+                    success: @json(session('success')),
+                    info: @json(session('info')),
+                    error: @json(session('error')),
+                };
+
+                const showSnackbar = (type, message) => {
+                    if (!message) {
+                        return;
+                    }
+                    if (window.PMSnackbar && !window.PMSnackbar.hasActive()) {
+                        window.PMSnackbar.show({
+                            type: String(type || 'info').toLowerCase(),
+                            message: String(message),
+                        });
+                        return;
+                    }
+                    alert(String(message));
+                };
+
+                Object.entries(flashPayload).forEach(([type, message]) => {
+                    if (message) {
+                        showSnackbar(type, message);
+                    }
+                });
+
+                let qarQuarterLoading = false;
+                const preselectedId = @json((int) request('mpor_id', 0));
+                const mporShowUrlTpl = @json(route('dept-head.qar', [
+                    'q' => $selectedQuarterNumberSafe,
+                    'mpor_id' => '__ID__'
+                ]));
+
+                const setQuarterLoading = (isLoading) => {
+                    const loadingEl = document.getElementById('qarQuarterLoading');
+                    if (!loadingEl) {
+                        return;
+                    }
+                    loadingEl.classList.toggle('hidden', !isLoading);
+                };
+
+                const setModalLoading = (isLoading, message = 'Loading MPOR...') => {
+                    const loadingEl = document.getElementById('qarModalLoading');
+                    if (!loadingEl) {
+                        return;
+                    }
+
+                    loadingEl.textContent = message || 'Loading MPOR...';
+                    loadingEl.classList.toggle('hidden', !isLoading);
+                };
+
+                const closeModalById = (modalId) => {
+                    const modalEl = document.getElementById(modalId);
+                    if (!modalEl) return;
+
+                    try {
+                        const inst = window.FlowbiteInstances?.getInstance?.('Modal', modalEl);
+                        if (inst && typeof inst.hide === 'function') {
+                            inst.hide();
+                        } else {
+                            modalEl.classList.add('hidden');
+                            modalEl.setAttribute('aria-hidden', 'true');
+                        }
+                    } catch (e) {
+                        modalEl.classList.add('hidden');
+                        modalEl.setAttribute('aria-hidden', 'true');
+                    }
+
+                    document.body.classList.remove('overflow-hidden');
+                    document.querySelectorAll('[modal-backdrop]').forEach((el) => el.remove());
+                };
+
+                const replaceQarRootFromHtml = (html, { pushUrl = '' } = {}) => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+
+                    const returnedRoot = doc.getElementById('qarPageRoot');
+                    const currentRoot = document.getElementById('qarPageRoot');
+
+                    if (!returnedRoot || !currentRoot) {
+                        return false;
+                    }
+
+                    currentRoot.innerHTML = returnedRoot.innerHTML;
+
+                    if (pushUrl) {
+                        history.pushState({}, '', pushUrl);
+                    }
+
+                    initQarBindings(document);
+                    return true;
+                };
+
+                const escapeHtml = (value) => {
+                    return String(value ?? '')
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;')
+                        .replace(/"/g, '&quot;')
+                        .replace(/'/g, '&#039;');
+                };
+
+                const ensureObject = (value) => {
+                    return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+                };
+
+                const setTextById = (id, value, fallback = '--') => {
+                    const el = document.getElementById(id);
+                    if (!el) {
+                        return;
+                    }
+                    el.textContent = value ?? fallback;
+                };
+
+                const renderGroups = (groupsInput) => {
+                    const groups = Array.isArray(groupsInput) ? groupsInput : [];
+                    if (!groups.length) {
+                        return `
+                            <tr>
+                                <td colspan="16" class="px-4 py-5 text-center text-sm text-slate-400">
+                                    No MPOR grid rows available.
+                                </td>
+                            </tr>
+                        `;
+                    }
+
+                    return groups.map((group) => {
+                        const groupData = ensureObject(group);
+                        const rows = Array.isArray(groupData.rows) ? groupData.rows : [];
+                        const label = groupData.label ?? 'GROUP';
+                        const weightLabel = groupData.weight_label ? ` (${groupData.weight_label})` : '';
+
+                        let html = `
+                            <tr class="bg-slate-900/60 text-[0.65rem] uppercase tracking-[0.3em] text-slate-400">
+                                <td class="px-3 py-2 font-semibold text-slate-200" colspan="16">${escapeHtml(label)}${escapeHtml(weightLabel)}</td>
+                            </tr>
+                        `;
+
+                        if (!rows.length) {
+                            html += `
+                                <tr>
+                                    <td colspan="16" class="px-3 py-2 text-sm text-slate-400">No rows found for this group.</td>
+                                </tr>
+                            `;
+                            return html;
+                        }
+
+                        rows.forEach((row) => {
+                            const rowData = ensureObject(row);
+                            const eff = ensureObject(rowData.eff);
+                            const qual = ensureObject(rowData.qual);
+                            const time = ensureObject(rowData.time);
+                            const val = (obj, key) => escapeHtml(obj[key] ?? 0);
+
+                            html += `
+                                <tr class="text-slate-200">
+                                    <td class="px-3 py-2 font-medium text-white">${escapeHtml(rowData.task_title ?? '-')}</td>
+
+                                    <td class="border-l border-slate-800 px-2 py-2 text-right tabular-nums">${val(eff, 'w1')}</td>
+                                    <td class="px-2 py-2 text-right tabular-nums">${val(eff, 'w2')}</td>
+                                    <td class="px-2 py-2 text-right tabular-nums">${val(eff, 'w3')}</td>
+                                    <td class="px-2 py-2 text-right tabular-nums">${val(eff, 'w4')}</td>
+                                    <td class="px-2 py-2 text-right font-semibold text-white tabular-nums">${val(eff, 'total')}</td>
+
+                                    <td class="border-l border-slate-800 px-2 py-2 text-right tabular-nums">${val(qual, 'w1')}</td>
+                                    <td class="px-2 py-2 text-right tabular-nums">${val(qual, 'w2')}</td>
+                                    <td class="px-2 py-2 text-right tabular-nums">${val(qual, 'w3')}</td>
+                                    <td class="px-2 py-2 text-right tabular-nums">${val(qual, 'w4')}</td>
+                                    <td class="px-2 py-2 text-right font-semibold text-white tabular-nums">${val(qual, 'total')}</td>
+
+                                    <td class="border-l border-slate-800 px-2 py-2 text-right tabular-nums">${val(time, 'w1')}</td>
+                                    <td class="px-2 py-2 text-right tabular-nums">${val(time, 'w2')}</td>
+                                    <td class="px-2 py-2 text-right tabular-nums">${val(time, 'w3')}</td>
+                                    <td class="px-2 py-2 text-right tabular-nums">${val(time, 'w4')}</td>
+                                    <td class="px-2 py-2 text-right font-semibold text-white tabular-nums">${val(time, 'total')}</td>
+                                </tr>
+                            `;
+                        });
+
+                        return html;
+                    }).join('');
+                };
+
+                const applyMporToModal = (payloadInput) => {
+                    const payload = ensureObject(payloadInput);
+                    const meta = ensureObject(payload.meta);
+                    const summary = ensureObject(payload.summary);
+                    const confirmed = ensureObject(payload.confirmed);
+
+                    const statusValue = payload.status_label
+                        ?? meta.status_label
+                        ?? payload.status
+                        ?? meta.status
+                        ?? '--';
+
+                    const submittedAtValue = payload.submitted_at_label
+                        ?? payload.submitted_at
+                        ?? payload.submittedAt
+                        ?? meta.submitted_at_label
+                        ?? meta.submitted_at
+                        ?? meta.submittedAt
+                        ?? '--';
+
+                    const employeeNameValue = payload.employee_name
+                        ?? payload.employeeName
+                        ?? meta.employee_name
+                        ?? meta.employeeName
+                        ?? '--';
+
+                    const officeDivisionValue = payload.office_division
+                        ?? payload.officeDivision
+                        ?? meta.office_division
+                        ?? meta.officeDivision
+                        ?? '--';
+
+                    const monthLabelValue = payload.month_label
+                        ?? payload.monthLabel
+                        ?? meta.month_label
+                        ?? meta.monthLabel
+                        ?? '--';
+
+                    const groups = Array.isArray(payload.groups)
+                        ? payload.groups
+                        : (Array.isArray(meta.groups) ? meta.groups : []);
+
+                    const summarySource = Object.keys(summary).length
+                        ? summary
+                        : ensureObject(meta.summary);
+
+                    const confirmedSource = Object.keys(confirmed).length
+                        ? confirmed
+                        : ensureObject(meta.confirmed);
+
+                    setTextById('qarModalSubmittedAt', submittedAtValue, '--');
+                    setTextById('qarModalStatusBadge', statusValue, '--');
+                    setTextById('qarModalEmployeeName', employeeNameValue, '--');
+                    setTextById('qarModalOfficeDivision', officeDivisionValue, '--');
+                    setTextById('qarModalMonthLabel', monthLabelValue, '--');
+
+                    setTextById('qarModalWeek1', summarySource.week1_total ?? 0, '0');
+                    setTextById('qarModalWeek2', summarySource.week2_total ?? 0, '0');
+                    setTextById('qarModalWeek3', summarySource.week3_total ?? 0, '0');
+                    setTextById('qarModalWeek4', summarySource.week4_total ?? 0, '0');
+                    setTextById('qarModalGrandTotal', summarySource.grand_total ?? 0, '0');
+                    setTextById('qarModalIncluded', summarySource.included_entries ?? 0, '0');
+                    setTextById('qarModalExcluded', summarySource.excluded_entries ?? 0, '0');
+
+                    setTextById(
+                        'qarModalSupervisorName',
+                        confirmedSource.supervisor_name ?? confirmedSource.supervisorName ?? '--',
+                        '--'
+                    );
+                    setTextById(
+                        'qarModalEmployeeConfirmName',
+                        confirmedSource.employee_name ?? confirmedSource.employeeName ?? '--',
+                        '--'
+                    );
+
+                    const gridBody = document.getElementById('qarModalGridBody');
+                    if (gridBody) {
+                        gridBody.innerHTML = renderGroups(groups);
+                    }
+                };
+
+                const loadMpor = async (mporId) => {
+                    if (!mporShowUrlTpl) {
+                        setModalLoading(true, 'Unable to load MPOR details.');
+                        return;
+                    }
+
+                    const normalizedId = parseInt(String(mporId ?? '').trim(), 10);
+                    if (!Number.isFinite(normalizedId) || normalizedId <= 0) {
+                        setModalLoading(true, 'Unable to load MPOR details.');
+                        return;
+                    }
+
+                    setModalLoading(true, 'Loading MPOR...');
+
+                    try {
+                        const url = mporShowUrlTpl.replace('__ID__', encodeURIComponent(String(normalizedId)));
+                        const response = await fetch(url, {
+                            headers: {
+                                'Accept': 'application/json',
+                            },
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Unable to load MPOR details.');
+                        }
+
+                        const payload = await response.json();
+                        applyMporToModal(payload);
+                        setModalLoading(false, 'Loading MPOR...');
+                    } catch (error) {
+                        setModalLoading(true, 'Unable to load MPOR details.');
+                    }
+                };
+
+                const bindLoadingSubmit = (formId, buttonId, loadingLabel, root = document) => {
+                    const form = root.querySelector(`#${formId}`);
+                    const button = root.querySelector(`#${buttonId}`);
                     if (!form || !button) {
                         return;
                     }
+
+                    if (form.dataset.loadingBound === 'true') {
+                        return;
+                    }
+                    form.dataset.loadingBound = 'true';
 
                     const spinner = button.querySelector('[data-button-spinner]');
                     const label = button.querySelector('[data-button-label]');
@@ -506,180 +853,174 @@
                     });
                 };
 
-                bindLoadingSubmit('qarGenerateForm', 'qarGenerateProceedBtn', 'Consolidating...');
-                bindLoadingSubmit('qarApproveForm', 'qarApproveProceedBtn', 'Approving...');
-                bindLoadingSubmit('qarResetForm', 'qarResetBtn', 'Resetting...');
+                const bindAjaxEndorse = (root = document) => {
+                    const form = root.querySelector('#qarEndorseForm');
+                    if (!form) return;
 
-                const mporJsonEl = document.getElementById('mporDummyJson');
-                let mporData = {};
+                    if (form.dataset.ajaxBound === 'true') return;
+                    form.dataset.ajaxBound = 'true';
 
-                try {
-                    mporData = JSON.parse(mporJsonEl?.textContent || '{}');
-                } catch (error) {
-                    mporData = {};
-                }
-
-                const mporGridTbody = document.getElementById('mporGridTbody');
-                const mporWeek1 = document.getElementById('mporWeek1');
-                const mporWeek2 = document.getElementById('mporWeek2');
-                const mporWeek3 = document.getElementById('mporWeek3');
-                const mporWeek4 = document.getElementById('mporWeek4');
-                const mporGrand = document.getElementById('mporGrand');
-                const mporIncluded = document.getElementById('mporIncluded');
-                const mporExcluded = document.getElementById('mporExcluded');
-                const mporSupervisorName = document.getElementById('mporSupervisorName');
-                const mporEmployeeConfirmName = document.getElementById('mporEmployeeConfirmName');
-
-                const escapeHtml = (value) => String(value ?? '')
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;')
-                    .replace(/"/g, '&quot;')
-                    .replace(/'/g, '&#039;');
-
-                const setBoundText = (key, value) => {
-                    document.querySelectorAll(`[data-bind="${key}"]`).forEach((el) => {
-                        el.textContent = value ?? '-';
-                    });
-                };
-
-                const buildMetricCells = (metric, withLeftBorder) => {
-                    const safeMetric = metric || {};
-                    const keys = ['w1', 'w2', 'w3', 'w4', 'total'];
-
-                    return keys.map((key, index) => {
-                        const classes = ['px-2', 'py-2', 'text-right', 'tabular-nums'];
-                        if (index === 0 && withLeftBorder) {
-                            classes.push('border-l', 'border-slate-800');
-                        }
-                        if (key === 'total') {
-                            classes.push('font-semibold', 'text-white');
-                        } else {
-                            classes.push('text-slate-200');
-                        }
-
-                        return `<td class="${classes.join(' ')}">${escapeHtml(safeMetric[key] ?? 0)}</td>`;
-                    }).join('');
-                };
-
-                const renderMporGrid = (groups) => {
-                    if (!mporGridTbody) {
-                        return;
-                    }
-
-                    if (!Array.isArray(groups) || groups.length === 0) {
-                        mporGridTbody.innerHTML = `
-                            <tr>
-                                <td colspan="16" class="px-4 py-5 text-center text-sm text-slate-400">
-                                    No MPOR grid rows available.
-                                </td>
-                            </tr>
-                        `;
-                        return;
-                    }
-
-                    const html = [];
-
-                    groups.forEach((group) => {
-                        const groupLabel = `${group?.label || 'GROUP'}${group?.weight_label ? ` (${group.weight_label})` : ''}`;
-                        html.push(`
-                            <tr class="bg-slate-900/60 text-[0.65rem] uppercase tracking-[0.3em] text-slate-400">
-                                <td class="px-3 py-2 font-semibold text-slate-200" colspan="16">${escapeHtml(groupLabel)}</td>
-                            </tr>
-                        `);
-
-                        const rows = Array.isArray(group?.rows) ? group.rows : [];
-                        if (!rows.length) {
-                            html.push(`
-                                <tr>
-                                    <td colspan="16" class="px-3 py-2 text-sm text-slate-400">No rows found for this group.</td>
-                                </tr>
-                            `);
+                    form.addEventListener('submit', async (e) => {
+                        // If already submitting, do nothing
+                        if (form.dataset.submitting === 'true') {
+                            e.preventDefault();
                             return;
                         }
 
-                        rows.forEach((row) => {
-                            html.push(`
-                                <tr class="text-slate-200">
-                                    <td class="px-3 py-2 font-medium text-white">${escapeHtml(row?.task_title || '-')}</td>
-                                    ${buildMetricCells(row?.eff, true)}
-                                    ${buildMetricCells(row?.qual, true)}
-                                    ${buildMetricCells(row?.time, true)}
-                                </tr>
-                            `);
+                        e.preventDefault();
+                        form.dataset.submitting = 'true';
+
+                        try {
+                            const action = form.getAttribute('action');
+                            if (!action) {
+                                throw new Error('Missing action.');
+                            }
+
+                            const token = form.querySelector('input[name="_token"]')?.value || '';
+
+                            const response = await fetch(action, {
+                                method: 'POST',
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'Accept': 'text/html',
+                                    ...(token ? { 'X-CSRF-TOKEN': token } : {}),
+                                },
+                                body: new FormData(form),
+                                redirect: 'follow',
+                            });
+
+                            if (!response.ok) {
+                                throw new Error('Request failed.');
+                            }
+
+                            const html = await response.text();
+
+                            // Use current URL (after endorse redirect it will be the QAR page)
+                            const updated = replaceQarRootFromHtml(html, { pushUrl: location.href });
+
+                            if (!updated) {
+                                // if we can't patch DOM, fallback to hard reload
+                                window.location.href = action;
+                                return;
+                            }
+
+                            closeModalById('qarApproveConfirmModal');
+                        } catch (err) {
+                            // fallback to normal page reload
+                            const action = form.getAttribute('action');
+                            window.location.href = action || location.href;
+                        } finally {
+                            form.dataset.submitting = 'false';
+                        }
+                    });
+                };
+
+                const initQarBindings = (root = document) => {
+                    if (typeof window.initFlowbite === 'function') {
+                        window.initFlowbite();
+                    }
+
+                    bindLoadingSubmit('qarEndorseForm', 'qarApproveProceedBtn', 'Endorsing...', root);
+                    bindAjaxEndorse(root);
+
+                    root.querySelectorAll('[data-view-mpor]').forEach((button) => {
+                        if (button.dataset.bound === 'true') {
+                            return;
+                        }
+                        button.dataset.bound = 'true';
+
+                        button.addEventListener('click', function() {
+                            const mporId = button.getAttribute('data-mpor-id');
+                            loadMpor(mporId);
                         });
                     });
 
-                    mporGridTbody.innerHTML = html.join('');
-                };
+                    const autoOpenViewButton = root.querySelector('#qarAutoOpenViewModal');
+                    if (autoOpenViewButton && autoOpenViewButton.dataset.autoOpened !== 'true') {
+                        autoOpenViewButton.dataset.autoOpened = 'true';
+                        const autoOpenId = parseInt(
+                            String(autoOpenViewButton.getAttribute('data-mpor-id') || preselectedId || 0),
+                            10
+                        );
+                        if (Number.isFinite(autoOpenId) && autoOpenId > 0) {
+                            loadMpor(autoOpenId);
+                        }
+                        window.setTimeout(() => {
+                            autoOpenViewButton.click();
+                        }, 80);
+                    }
 
-                const fillSummary = (summary) => {
-                    if (mporWeek1) {
-                        mporWeek1.textContent = String(summary?.week1_total ?? 0);
-                    }
-                    if (mporWeek2) {
-                        mporWeek2.textContent = String(summary?.week2_total ?? 0);
-                    }
-                    if (mporWeek3) {
-                        mporWeek3.textContent = String(summary?.week3_total ?? 0);
-                    }
-                    if (mporWeek4) {
-                        mporWeek4.textContent = String(summary?.week4_total ?? 0);
-                    }
-                    if (mporGrand) {
-                        mporGrand.textContent = String(summary?.grand_total ?? 0);
-                    }
-                    if (mporIncluded) {
-                        mporIncluded.textContent = String(summary?.included_entries ?? 0);
-                    }
-                    if (mporExcluded) {
-                        mporExcluded.textContent = String(summary?.excluded_entries ?? 0);
-                    }
-                };
-
-                const fillConfirmed = (confirmed) => {
-                    if (mporSupervisorName) {
-                        mporSupervisorName.textContent = confirmed?.supervisor_name || '--';
-                    }
-                    if (mporEmployeeConfirmName) {
-                        mporEmployeeConfirmName.textContent = confirmed?.employee_name || '--';
-                    }
-                };
-
-                const fillViewModal = (detail) => {
-                    const safe = {
-                        employee_name: detail?.employee_name || '-',
-                        office_division: detail?.office_division || '-',
-                        month_label: detail?.month_label || '-',
-                        status: detail?.status || 'Submitted (Locked)',
-                        submitted_at: detail?.submitted_at || '-',
-                        groups: Array.isArray(detail?.groups) ? detail.groups : [],
-                        summary: detail?.summary || {},
-                        confirmed: detail?.confirmed || {},
-                    };
-
-                    setBoundText('employee_name', safe.employee_name);
-                    setBoundText('office_division', safe.office_division);
-                    setBoundText('month_label', safe.month_label);
-                    setBoundText('status', safe.status);
-                    setBoundText('submitted_at', safe.submitted_at);
-
-                    renderMporGrid(safe.groups);
-                    fillSummary(safe.summary);
-                    fillConfirmed(safe.confirmed);
-                };
-
-                const viewButtons = document.querySelectorAll('[data-mpor-view-trigger][data-mpor-key]');
-                viewButtons.forEach((button) => {
-                    button.addEventListener('click', () => {
-                        const key = button.getAttribute('data-mpor-key') || '';
-                        const detail = mporData[key] || Object.values(mporData)[0] || null;
-                        if (!detail) {
+                    root.querySelectorAll('[data-qar-quarter-link]').forEach((link) => {
+                        if (link.dataset.bound === 'true') {
                             return;
                         }
-                        fillViewModal(detail);
+                        link.dataset.bound = 'true';
+
+                        link.addEventListener('click', function(event) {
+                            event.preventDefault();
+                            const href = link.getAttribute('href');
+                            if (!href) {
+                                return;
+                            }
+                            loadQuarter(href, { push: true });
+                        });
                     });
-                });
+                };
+
+                const loadQuarter = async (url, { push = true } = {}) => {
+                    if (!url || qarQuarterLoading) {
+                        return;
+                    }
+
+                    qarQuarterLoading = true;
+                    setQuarterLoading(true);
+
+                    try {
+                        const response = await fetch(url, {
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'text/html',
+                            },
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Failed to load quarter.');
+                        }
+
+                        const html = await response.text();
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        const returnedRoot = doc.getElementById('qarPageRoot');
+                        const currentRoot = document.getElementById('qarPageRoot');
+
+                        if (!returnedRoot || !currentRoot) {
+                            window.location.href = url;
+                            return;
+                        }
+
+                        currentRoot.innerHTML = returnedRoot.innerHTML;
+
+                        if (push) {
+                            history.pushState({}, '', url);
+                        }
+
+                        initQarBindings(document);
+                    } catch (error) {
+                        window.location.href = url;
+                    } finally {
+                        qarQuarterLoading = false;
+                        setQuarterLoading(false);
+                    }
+                };
+
+                if (!window.__qarPopStateBound) {
+                    window.__qarPopStateBound = true;
+                    window.addEventListener('popstate', () => {
+                        loadQuarter(location.href, { push: false });
+                    });
+                }
+
+                initQarBindings(document);
             });
         </script>
     @endpush

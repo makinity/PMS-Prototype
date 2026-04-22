@@ -151,6 +151,7 @@
             $isSupervisorIPCRTARGET = request()->routeIs('supervisor.ipcr-target');
             $isSupervisorOPCR = request()->routeIs('supervisor.opcr');
             $isSupervisorMPOR = request()->routeIs('supervisor.mpor');
+            $isSupervisorEmpAcc = request()->routeIs('supervisor.employee-submissions');
             $isSupervisorMPORValidation = request()->routeIs('supervisor.mpor-validation');
             $isSupervisorORS = request()->routeIs('supervisor.ors-monitoring');
             $isSupervisorOverdueAlerts = request()->routeIs('supervisor.overdue-alerts');
@@ -199,16 +200,16 @@
                         <button type="button" id="manager-user-menu-button" data-dropdown-toggle="manager-user-menu" class="flex items-center gap-3 rounded-full border border-slate-800 bg-slate-900/70 px-2 py-1.5 text-left text-slate-100 shadow-sm transition hover:bg-slate-800">
                             <span class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 via-blue-600 to-emerald-500 text-xs font-semibold text-white shadow-sm">CB</span>
                             <span class="hidden sm:block">
-                                <span class="block text-sm font-semibold text-white">Carlo D. Beray</span>
-                                <span class="block text-xs text-slate-400">Unit Supervisor · Records Management Unit</span>
+                                <span class="block text-sm font-semibold text-white">{{ Auth::user()->name }}</span>
+                                <span class="block text-xs text-slate-400">{{ Auth::user()->office->name }}</span>
                             </span>
                             <i class="fa-solid fa-chevron-down hidden text-xs text-slate-500 sm:block"></i>
                         </button>
                         <div id="manager-user-menu" class="z-50 hidden w-56 divide-y divide-slate-800 rounded-2xl bg-slate-900 shadow-lg ring-1 ring-slate-800">
                             <div class="px-4 py-3">
                                 <p class="text-xs font-semibold uppercase tracking-widest text-slate-400">Signed in as</p>
-                                <p class="mt-1 text-sm font-semibold text-white">Carlo D. Beray</p>
-                                <p class="text-xs text-slate-400">Unit Supervisor · Records Management Unit</p>
+                                <p class="mt-1 text-sm font-semibold text-white">{{ Auth::user()->name }}</p>
+                                <p class="text-xs text-slate-400">{{ Auth::user()->position }}</p>
                             </div>
                             <ul class="py-2 text-sm text-slate-200" aria-labelledby="manager-user-menu-button">
                                 <li><a href="#" class="block px-4 py-2 transition hover:bg-slate-800">Profile</a></li>
@@ -275,9 +276,9 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('supervisor.smpor-ipcr-review') }}" class="sidebar-link" @if($isSupervisorIPCRSMPORReview) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-star-half-stroke"></i>
-                                    <span>SMPOR & IPCR Review</span>
+                                <a href="{{ route('supervisor.employee-submissions') }}" class="sidebar-link" @if($isSupervisorEmpAcc) aria-current="page" @endif>
+                                    <i class="sidebar-icon fa-solid fa-file-lines"></i>
+                                    <span>Accomplishment Review</span>
                                 </a>
                             </li>
                             <li>
@@ -378,7 +379,8 @@
 
         <!-- Main Content -->
         <div class="pt-2 sm:ml-72">
-            <main id="main-content" class="px-4 pb-12 pt-6 lg:px-8">
+            <main id="main-content" class="relative px-4 pb-12 pt-6 lg:px-8">
+
                 <div class="mx-auto max-w-7xl">
                     @yield('main-content')
                 </div>
@@ -391,6 +393,7 @@
         @livewireScripts
     @endif
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    @include('partials.auth-snackbar')
     @stack('scripts')
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>

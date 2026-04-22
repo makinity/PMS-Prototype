@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -47,6 +48,11 @@ class User extends Authenticatable
     public function supervisedOffice()
     {
         return $this->hasOne(Office::class, 'head_id');
+    }
+
+    public function orsSupervisedEntries(): HasMany
+    {
+        return $this->hasMany(OrsEntry::class, 'supervisor_id');
     }
 
     public function isSupervisor()

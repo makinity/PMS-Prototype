@@ -22,6 +22,8 @@
     <div class="min-h-screen">
         @php
             $isAdminDashboard = request()->routeIs('admin.dashboard');
+            $isAdminPRF = request()->routeIs('admin.performance-period');
+            $isAdminOffice = request()->routeIs('admin.office');
             $isAdminUsers = request()->routeIs('admin.users');
             $isAdminRoles = request()->routeIs('admin.roles');
             $isAdminOPCR = request()->routeIs('admin.opcr');
@@ -118,6 +120,18 @@
                     <div>
                         <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">User Management</p>
                         <ul class="mt-2 space-y-1 menu-stagger">
+                            <li>
+                                <a href="{{ route('admin.performance-period') }}" class="sidebar-link" @if($isAdminPRF) aria-current="page" @endif>
+                                    <i class="sidebar-icon fa-solid fa-arrows-rotate"></i>
+                                    <span>Performance Period</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.office') }}" class="sidebar-link" @if($isAdminOffice) aria-current="page" @endif>
+                                    <i class="sidebar-icon fa-solid fa-building"></i>
+                                    <span>Offices</span>
+                                </a>
+                            </li>
                             <li>
                                 <a href="{{ route('admin.users') }}" class="sidebar-link" @if($isAdminUsers) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-users"></i>
@@ -251,6 +265,7 @@
     @endif
     <!-- Font Awesome -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    @include('partials.auth-snackbar')
     @stack('scripts')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
 </body>

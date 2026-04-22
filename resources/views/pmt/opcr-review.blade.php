@@ -11,14 +11,6 @@
         </div>
     </div>
 
-    @if (session('success'))
-        <div class="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">{{ session('success') }}</div>
-    @endif
-
-    @if (session('error'))
-        <div class="rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">{{ session('error') }}</div>
-    @endif
-
     <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
         <div class="mb-4 flex flex-wrap items-end justify-between gap-4">
             <div>
@@ -33,10 +25,12 @@
                         onchange="this.form.submit()"
                         style="background:#0f172a;color:#e5e7eb;"
                         class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none">
-                    <option value="endorsed" {{ $selectedStatus === 'endorsed' ? 'selected' : '' }}>For PMT Review</option>
-                    <option value="approved" {{ $selectedStatus === 'approved' ? 'selected' : '' }}>Final Approved</option>
-                    <option value="returned" {{ $selectedStatus === 'returned' ? 'selected' : '' }}>Returned</option>
+                    <option value="" {{ $selectedStatus === '' ? 'selected' : '' }}>All Status</option>
                     <option value="submitted" {{ $selectedStatus === 'submitted' ? 'selected' : '' }}>Submitted</option>
+                    <option value="endorsed" {{ $selectedStatus === 'endorsed' ? 'selected' : '' }}>Endorsed</option>
+                    <option value="approved" {{ $selectedStatus === 'approved' ? 'selected' : '' }}>Approved</option>
+                    <option value="returned" {{ $selectedStatus === 'returned' ? 'selected' : '' }}>Returned</option>
+
                 </select>
             </form>
         </div>
@@ -58,8 +52,8 @@
                             $payload = $opcrPayloads[$opcr->id] ?? null;
                             $isReviewable = in_array(strtolower((string) $opcr->status), ['endorsed', 'for_pmt_review'], true);
                             $statusMeta = match (strtolower((string) $opcr->status)) {
-                                'endorsed', 'for_pmt_review' => ['label' => 'For PMT Review', 'class' => 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'],
-                                'approved' => ['label' => 'Final Approved', 'class' => 'border-cyan-500/30 bg-cyan-500/10 text-cyan-300'],
+                                'endorsed', 'for_pmt_review' => ['label' => 'Endorsed', 'class' => 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'],
+                                'approved' => ['label' => 'Approved', 'class' => 'border-cyan-500/30 bg-cyan-500/10 text-cyan-300'],
                                 'returned' => ['label' => 'Returned', 'class' => 'border-rose-500/30 bg-rose-500/10 text-rose-300'],
                                 default => ['label' => 'Submitted', 'class' => 'border-amber-500/30 bg-amber-500/20 text-amber-300'],
                             };
@@ -198,6 +192,7 @@
                         <thead class="bg-slate-900/70 text-xs uppercase text-slate-300">
                             <tr class="border-b border-slate-800">
                                 <th class="w-[56%] px-4 py-3 text-left">Success Indicator</th>
+                                <th class="w-[24%] px-4 py-3 text-left">Target Summary</th>
                                 <th class="w-[20%] px-4 py-3 text-left">Standards</th>
                                 <th class="w-[24%] px-4 py-3 text-left">Assigned Employee</th>
                             </tr>
@@ -288,6 +283,38 @@ document.addEventListener('DOMContentLoaded', function () {
         .replaceAll('"', '&quot;')
         .replaceAll("'", '&#039;');
 
+    const formatTargetSummaryDisplay = (targetQuantity, targetSummary) => {
+        const quantity = targetQuantity === null || targetQuantity === undefined || targetQuantity === ''
+            ? ''
+            : String(targetQuantity).trim();
+        const summary = targetSummary === null || targetSummary === undefined || targetSummary === ''
+            ? ''
+            : String(targetSummary).trim();
+
+        if (summary.toLowerCase() === 'multiple indicator targets') {
+            return summary;
+        }
+
+        if (quantity !== '' && summary !== '') {
+            return `${quantity} ${summary}`.trim();
+        }
+
+        if (quantity !== '') {
+            return quantity;
+        }
+
+        if (summary !== '') {
+            return summary;
+        }
+
+        return '-';
+    };
+
+    const getIndicatorTargetSummary = (indicator) => formatTargetSummaryDisplay(
+        indicator?.target_quantity,
+        indicator?.target_timeline
+    );
+
     const parseJson = (raw) => {
         try { return JSON.parse(raw); } catch (e) { return null; }
     };
@@ -374,7 +401,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         <span class="text-xs">(${indicators.length})</span>
                     </button>
                 </td>
-                <td class="px-4 py-3 align-top text-slate-200">${escapeHtml(output.target_summary || '-')}</td>
+                <td class="px-4 py-3 align-top text-slate-200">${escapeHtml(formatTargetSummaryDisplay(output.target_quantity, output.target_summary))}</td>
                 <td class="px-4 py-3 align-top text-slate-200">${output.weight_percent !== null && output.weight_percent !== undefined && output.weight_percent !== '' ? escapeHtml(String(output.weight_percent) + '%') : '-'}</td>
                 <td class="px-4 py-3 align-top">${functionBadge(output.function_type)}</td>
             `;
@@ -472,6 +499,7 @@ document.addEventListener('DOMContentLoaded', function () {
             tr.className = 'hover:bg-slate-900/40';
             tr.innerHTML = `
                 <td class="px-4 py-3 align-top text-slate-100">${escapeHtml(indicatorText)}</td>
+                <td class="px-4 py-3 align-top text-slate-300">${escapeHtml(getIndicatorTargetSummary(indicator))}</td>
                 <td class="px-4 py-3 align-top">
                     <button type="button" class="inline-flex items-center gap-2 text-blue-300 hover:text-blue-200" data-standards-btn>
                         <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
@@ -504,7 +532,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         if (!tbody.children.length) {
-            tbody.innerHTML = '<tr><td colspan="3" class="px-4 py-6 text-center text-slate-400">No indicators found.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-6 text-center text-slate-400">No indicators found.</td></tr>';
         }
 
         openModal('dh-indicators-modal');

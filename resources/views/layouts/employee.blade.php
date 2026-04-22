@@ -71,16 +71,16 @@
                         <button type="button" id="employee-user-menu-button" data-dropdown-toggle="employee-user-menu" class="flex items-center gap-3 rounded-full border border-slate-800 bg-slate-900/70 px-2 py-1.5 text-left text-slate-100 shadow-sm transition hover:bg-slate-800">
                             <span class="flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold text-white shadow-sm" style="background: linear-gradient(135deg, #0284c7, #2563eb, #10b981);">RR</span>
                             <span class="hidden sm:block">
-                                <span class="block text-sm font-semibold text-white">Ramon Reyes</span>
-                                <span class="block text-xs text-slate-400">Records Management Officer</span>
+                                <span class="block text-sm font-semibold text-white">{{ Auth::user()->name }}</span>
+                                <span class="block text-xs text-slate-400">{{ Auth::user()->office->name }}</span>
                             </span>
                             <i class="fa-solid fa-chevron-down hidden text-xs text-slate-500 sm:block"></i>
                         </button>
                         <div id="employee-user-menu" class="z-50 hidden w-56 divide-y divide-slate-800 rounded-2xl bg-slate-900 shadow-lg ring-1 ring-slate-800">
                             <div class="px-4 py-3">
                                 <p class="text-xs font-semibold uppercase tracking-widest text-slate-400">Signed in as</p>
-                                <p class="mt-1 text-sm font-semibold text-white">Ramon Reyes</p>
-                                <p class="text-xs text-slate-400">Records Management Officer</p>
+                                <p class="mt-1 text-sm font-semibold text-white">{{ Auth::user()->name }}</p>
+                                <p class="text-xs text-slate-400">{{ Auth::user()->position }}</p>
                             </div>
                             <ul class="py-2 text-sm text-slate-200" aria-labelledby="employee-user-menu-button">
                                 <li><a href="#" class="block px-4 py-2 transition hover:bg-slate-800">My profile</a></li>
@@ -222,6 +222,7 @@
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
     <!-- Font Awesome -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    @include('partials.auth-snackbar')
     @stack('scripts')
 </body>
 </html>
