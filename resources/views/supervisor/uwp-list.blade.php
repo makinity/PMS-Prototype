@@ -264,6 +264,11 @@
                             <p class="text-sm font-semibold uppercase tracking-[0.22em] text-slate-400">Planned Outputs</p>
                             <span id="workspaceModalOutputCountBadge" class="text-sm font-semibold text-blue-300">0</span>
                         </div>
+                        <div class="flex border-b border-slate-800 px-2 pt-2">
+                            <button type="button" data-preview-function-tab="all" class="flex-1 border-b-2 border-blue-400 pb-2 text-xs font-semibold text-white transition">All</button>
+                            <button type="button" data-preview-function-tab="core" class="flex-1 border-b-2 border-transparent pb-2 text-xs font-medium text-slate-400 transition hover:text-slate-300">Core</button>
+                            <button type="button" data-preview-function-tab="support" class="flex-1 border-b-2 border-transparent pb-2 text-xs font-medium text-slate-400 transition hover:text-slate-300">Support</button>
+                        </div>
                         <div id="workspaceModalOutputList" class="min-h-0 space-y-2 overflow-y-auto px-2 py-2"></div>
                     </aside>
 
@@ -272,7 +277,7 @@
                             <div class="flex flex-wrap items-center gap-3">
                                 <h3 id="workspaceModalDetailTitle" class="text-lg font-semibold leading-tight text-white">No output selected</h3>
                                 <span id="workspaceModalDetailFunction" class="hidden rounded-md border px-2 py-1 text-xs font-medium"></span>
-                                <span id="workspaceModalDetailWeight" class="text-sm font-semibold text-slate-300"></span>
+                                <span id="workspaceModalDetailWeight" class="hidden text-sm font-semibold text-slate-300"></span>
                             </div>
                         </div>
 
@@ -287,11 +292,11 @@
 
                         <div class="min-h-0 flex-1 overflow-y-auto px-6 py-4">
                             <div data-supervisor-preview-panel="overview" class="space-y-5">
-                                <div>
+                                <div class="hidden">
                                     <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Target Summary</p>
                                     <p id="workspaceModalTargetSummary" class="mt-2 text-lg leading-snug text-white">-</p>
                                 </div>
-                                <div class="grid gap-5 sm:grid-cols-2">
+                                <div class="hidden grid gap-5 sm:grid-cols-2">
                                     <div><p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Function Type</p><div id="workspaceModalFunctionCopy" class="mt-2"></div></div>
                                     <div><p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Weight</p><p id="workspaceModalWeightCopy" class="mt-2 text-lg font-semibold text-white">-</p></div>
                                 </div>
@@ -318,7 +323,7 @@
                             </div>
 
                             <div data-supervisor-preview-panel="standards" class="hidden space-y-4">
-                                <div><p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Selected Indicator</p><p id="workspaceModalStandardsIndicator" class="mt-1.5 text-base font-semibold text-white">-</p></div>
+                                <div class="hidden"><p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Selected Indicator</p><p id="workspaceModalStandardsIndicator" class="mt-1.5 text-base font-semibold text-white">-</p></div>
                                 <div class="overflow-hidden rounded-xl border border-slate-800">
                                     <table class="min-w-full text-sm text-slate-100">
                                         <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.22em] text-slate-400">
@@ -330,7 +335,7 @@
                             </div>
 
                             <div data-supervisor-preview-panel="assignees" class="hidden space-y-4">
-                                <div><p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Selected Indicator</p><p id="workspaceModalAssigneesIndicator" class="mt-1.5 text-base font-semibold text-white">-</p></div>
+                                <div class="hidden"><p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Selected Indicator</p><p id="workspaceModalAssigneesIndicator" class="mt-1.5 text-base font-semibold text-white">-</p></div>
                                 <div class="overflow-hidden rounded-xl border border-slate-800">
                                     <table class="w-full text-sm text-slate-100">
                                         <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.2em] text-slate-400">
@@ -566,6 +571,7 @@
             let selectedPreviewOutputIndex = 0;
             let selectedPreviewIndicatorIndex = 0;
             let activePreviewTab = 'overview';
+            let activePreviewFunctionTab = 'all';
 
             function normalizeTargetQuantity(value) {
                 if (value === null || value === undefined || value === '') {
@@ -902,6 +908,18 @@
                 });
             }
 
+            function setPreviewFunctionTab(tabName) {
+                activePreviewFunctionTab = tabName || 'all';
+                document.querySelectorAll('[data-preview-function-tab]').forEach((button) => {
+                    const active = button.getAttribute('data-preview-function-tab') === activePreviewFunctionTab;
+                    button.classList.toggle('border-blue-400', active);
+                    button.classList.toggle('text-white', active);
+                    button.classList.toggle('border-transparent', !active);
+                    button.classList.toggle('text-slate-400', !active);
+                });
+                renderPreviewOutputList();
+            }
+
             function renderPreviewStandards() {
                 const indicator = getSelectedPreviewIndicator();
                 const tbody = document.getElementById('workspaceIndicatorStandardsBody');
@@ -1004,7 +1022,6 @@
                     item.className = `flex w-full items-start justify-between rounded-xl border px-4 py-3 text-left transition ${isSelected ? 'border-blue-500/30 bg-blue-500/10' : 'border-slate-800 bg-slate-950/50 hover:bg-slate-900/60'}`;
                     item.innerHTML = `
                         <span class="pr-4 text-sm text-slate-100">${indicator?.indicator_text || '-'}</span>
-                        <span class="rounded-md bg-slate-900 px-3 py-1 text-xs text-slate-400">${getIndicatorTargetSummary(indicator)}</span>
                     `;
                     item.addEventListener('click', () => {
                         selectedPreviewIndicatorIndex = index;
@@ -1030,11 +1047,26 @@
                 if (!container || !countInline || !countBadge) return;
 
                 const outputs = getPreviewOutputs();
-                countInline.textContent = `${outputs.length} output${outputs.length === 1 ? '' : 's'}`;
-                countBadge.textContent = String(outputs.length);
+                
+                let filteredOutputs = outputs;
+                if (activePreviewFunctionTab !== 'all') {
+                    filteredOutputs = outputs.filter(o => {
+                        const ft = String(o.function_type || '').toLowerCase();
+                        return ft.includes(activePreviewFunctionTab);
+                    });
+                }
+
+                countInline.textContent = `${filteredOutputs.length} output${filteredOutputs.length === 1 ? '' : 's'}`;
+                countBadge.textContent = String(filteredOutputs.length);
                 container.innerHTML = '';
 
-                outputs.forEach((output, index) => {
+                if (filteredOutputs.length === 0) {
+                    container.innerHTML = '<p class="p-4 text-center text-sm text-slate-500">No outputs found.</p>';
+                    return;
+                }
+
+                filteredOutputs.forEach((output) => {
+                    const index = outputs.indexOf(output);
                     const active = index === selectedPreviewOutputIndex;
                     const indicatorCount = Array.isArray(output?.success_indicators) ? output.success_indicators.length : 0;
                     const button = document.createElement('button');
@@ -1043,8 +1075,6 @@
                     button.innerHTML = `
                         <div class="line-clamp-2 text-base font-semibold leading-snug text-white">${output.title || '-'}</div>
                         <div class="mt-2 flex flex-wrap items-center gap-2">
-                            ${buildFunctionBadge(output.function_type)}
-                            <span class="text-sm font-semibold text-slate-200">${output.weight_percent !== '' ? `${output.weight_percent}%` : '-'}</span>
                             <span class="text-xs text-slate-500">${indicatorCount} indicator${indicatorCount === 1 ? '' : 's'}</span>
                         </div>
                     `;
@@ -1676,6 +1706,15 @@
                     button.addEventListener('click', () => {
                         setPreviewTab(button.getAttribute('data-supervisor-preview-tab') || 'overview');
                         renderPreviewDetail();
+                    });
+                });
+
+                document.querySelectorAll('[data-preview-function-tab]').forEach((button) => {
+                    button.addEventListener('click', () => {
+                        selectedPreviewOutputIndex = 0;
+                        selectedPreviewIndicatorIndex = 0;
+                        setPreviewFunctionTab(button.getAttribute('data-preview-function-tab') || 'all');
+                        renderPreviewModal();
                     });
                 });
 
