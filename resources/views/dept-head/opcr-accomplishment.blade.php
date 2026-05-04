@@ -3,6 +3,7 @@
 @section('main-content')
 @php
     $canSubmitFinalRating = $currentOpcr && $opcrStatus === \App\Models\Opcr::STATUS_APPROVED && $hasRatings;
+    $computedSummary = $currentOpcrPayload['computed_summary'] ?? null;
 @endphp
 
 <section class="space-y-6">
@@ -62,11 +63,24 @@
                             \App\Models\Opcr::STATUS_SUBMITTED => 'border-amber-500/30 bg-amber-500/10 text-amber-300',
                             \App\Models\Opcr::STATUS_ENDORSED => 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300',
                             \App\Models\Opcr::STATUS_APPROVED => 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300',
+                            \App\Models\Opcr::STATUS_PENDING_PMT_CALIBRATION => 'border-sky-500/30 bg-sky-500/10 text-sky-300',
+                            \App\Models\Opcr::STATUS_APPROVED_BY_PMT => 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300',
+                            \App\Models\Opcr::STATUS_ADJUSTED_BY_PMT => 'border-violet-500/30 bg-violet-500/10 text-violet-300',
+                            \App\Models\Opcr::STATUS_RELEASED_BY_PMT => 'border-cyan-500/30 bg-cyan-500/10 text-cyan-300',
+                            \App\Models\Opcr::STATUS_RETURNED_BY_PMT => 'border-rose-500/30 bg-rose-500/10 text-rose-300',
                             \App\Models\Opcr::STATUS_RETURNED => 'border-rose-500/30 bg-rose-500/10 text-rose-300',
                             default => 'border-slate-500/30 bg-slate-500/10 text-slate-300',
                         };
+                        $statusLabel = match ($opcrStatus) {
+                            \App\Models\Opcr::STATUS_PENDING_PMT_CALIBRATION => 'Pending PMT Calibration',
+                            \App\Models\Opcr::STATUS_APPROVED_BY_PMT => 'Calibrated (Approved)',
+                            \App\Models\Opcr::STATUS_ADJUSTED_BY_PMT => 'Calibrated (Adjusted)',
+                            \App\Models\Opcr::STATUS_RELEASED_BY_PMT => 'Officially Released',
+                            \App\Models\Opcr::STATUS_RETURNED_BY_PMT => 'Returned by PMT',
+                            default => ucwords(str_replace('_', ' ', $opcrStatus)),
+                        };
                     @endphp
-                    <span class="rounded-full border px-3 py-1 {{ $statusBadge }}">{{ ucwords(str_replace('_', ' ', $opcrStatus)) }}</span>
+                    <span class="rounded-full border px-3 py-1 {{ $statusBadge }}">{{ $statusLabel }}</span>
                 @endif
             </div>
         </div>
@@ -140,12 +154,36 @@
         </div>
     </section>
 
-    @if ($currentOpcr && ($currentOpcr->final_score || $hasRatings))
+    @if ($currentOpcr && $computedSummary && $computedSummary['is_ready'])
     <div class="grid gap-6 lg:grid-cols-2">
         <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-6">
-            <h3 class="text-sm font-semibold uppercase tracking-wider text-slate-400">Office Performance Summary</h3>
+            <h3 class="text-sm font-semibold uppercase tracking-wider text-slate-400">Office Overall Rating</h3>
             <div class="mt-4 space-y-4">
                 <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                    <span class="text-slate-300">Core Weighted Score</span>
+                    <span class="font-semibold text-white">{{ number_format((float) $computedSummary['core_weighted'], 2) }}</span>
+                </div>
+                <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                    <span class="text-slate-300">Support Weighted Score</span>
+                    <span class="font-semibold text-white">{{ number_format((float) $computedSummary['support_weighted'], 2) }}</span>
+                </div>
+                <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                    <span class="text-slate-300">Computed Overall Rating</span>
+                    <span class="font-semibold text-blue-300">{{ number_format((float) $computedSummary['overall_score'], 2) }}</span>
+                </div>
+                <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                    <span class="text-slate-300">Computed Adjectival Rating</span>
+                    <span class="font-semibold text-white">{{ $computedSummary['adjectival_rating'] }}</span>
+                </div>
+                <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                    <span class="text-slate-300">Status</span>
+                    @if ($computedSummary['is_provisional'])
+                        <span class="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-300">Provisional</span>
+                    @else
+                        <span class="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300">Complete</span>
+                    @endif
+                </div>
+                <div class="flex items-center justify-between">
                     <span class="text-slate-300">Total Staff Calibrated</span>
                     @php
                         $officeIpcrs = \App\Models\Ipcr::where('opcr_id', $currentOpcr->id)
@@ -155,19 +193,6 @@
                         $totalStaff = \App\Models\Ipcr::where('opcr_id', $currentOpcr->id)->count();
                     @endphp
                     <span class="font-semibold text-white">{{ $calibratedCount }} / {{ $totalStaff }}</span>
-                </div>
-                <div class="flex items-center justify-between">
-                    <span class="text-slate-300">Current Computed Average</span>
-                    <div class="text-right">
-                        @php
-                            $officeIpcrs = \App\Models\Ipcr::where('opcr_id', $currentOpcr->id)
-                                ->whereIn('status', [\App\Models\Ipcr::STATUS_APPROVED_BY_PMT, \App\Models\Ipcr::STATUS_ADJUSTED_BY_PMT, \App\Models\Ipcr::STATUS_RELEASED_BY_PMT])
-                                ->get();
-                            $validScores = $officeIpcrs->map(fn($i) => (float)($i->pmt_adjusted_score ?? $i->final_score ?? 0))->filter(fn($s) => $s > 0);
-                            $avg = $validScores->isNotEmpty() ? $validScores->average() : 0;
-                        @endphp
-                        <span class="text-2xl font-black text-blue-400">{{ number_format($avg, 2) }}</span>
-                    </div>
                 </div>
             </div>
         </div>
@@ -185,10 +210,13 @@
                     <div class="h-4 w-4 rounded-full bg-amber-500"></div>
                     <div>
                         <p class="text-sm font-bold text-white">AWAITING FINAL REVIEW</p>
-                        <p class="text-xs text-slate-400">Ready for PMT final approval once submitted.</p>
+                        <p class="text-xs text-slate-400">Computed office rating is ready for PMT review once submitted.</p>
                     </div>
                 @endif
             </div>
+            @if ($computedSummary['is_provisional'])
+                <p class="mt-4 text-xs text-amber-300">This office rating is provisional because either the core or support bucket has no rated OPCR rows yet.</p>
+            @endif
         </div>
     </div>
     @endif

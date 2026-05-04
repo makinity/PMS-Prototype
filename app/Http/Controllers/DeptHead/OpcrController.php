@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Opcr;
 use App\Models\PerformancePeriod;
 use App\Models\UnitWorkPlan;
+use App\Services\OpcrOfficeRatingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -243,16 +244,14 @@ class OpcrController extends Controller
             }
         }
 
-        $validScores = $ipcrs->map(function ($ipcr) {
-            return $ipcr->pmt_adjusted_score ?? $ipcr->final_score;
-        })->filter(fn ($score) => $score !== null && is_numeric($score));
+        $payload = $this->buildPayload($model);
+        $computedSummary = $payload['computed_summary'] ?? app(OpcrOfficeRatingService::class)->calculate($model, $payload['outputs'] ?? []);
 
-        $computedAverage = $validScores->isNotEmpty() ? $validScores->average() : null;
-
-        DB::transaction(function () use ($model, $computedAverage) {
+        DB::transaction(function () use ($model, $computedSummary) {
             $model->forceFill([
                 'status' => Opcr::STATUS_PENDING_PMT_CALIBRATION,
-                'final_score' => $computedAverage,
+                'final_score' => $computedSummary['is_ready'] ? $computedSummary['overall_score'] : null,
+                'adjectival_rating' => $computedSummary['is_ready'] ? $computedSummary['adjectival_rating'] : null,
             ])->save();
         });
 
@@ -470,11 +469,14 @@ class OpcrController extends Controller
             }
         }
 
+        $computedSummary = app(OpcrOfficeRatingService::class)->calculate($opcr, $outputs);
+
         return [
             'opcr' => [
                 'id' => $opcr->id,
                 'status' => $opcr->status,
                 'final_score' => $opcr->final_score,
+                'adjectival_rating' => $opcr->adjectival_rating,
                 'office' => [
                     'id' => $opcr->office?->id ?? $fallbackUwp?->office?->id,
                     'name' => $opcr->office?->name ?? $fallbackUwp?->office?->name,
@@ -489,6 +491,7 @@ class OpcrController extends Controller
                 ],
             ],
             'outputs' => $outputs,
+            'computed_summary' => $computedSummary,
         ];
     }
 

@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Pmt;
 use App\Http\Controllers\Controller;
 use App\Models\Opcr;
 use App\Models\PerformancePeriod;
+use App\Services\OpcrOfficeRatingService;
+use App\Services\PerformanceRatingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -205,6 +207,39 @@ class OfficeCalibrationController extends Controller
         $sources = $opcr->sourceUnitWorkPlans();
         $fallbackUwp = $sources->first() ?: $opcr->unitWorkPlan;
         $outputs = [];
+        $ipcrAccomplishments = [];
+
+        $officeIpcrs = \App\Models\Ipcr::where('opcr_id', $opcr->id)
+            ->whereIn('status', [
+                \App\Models\Ipcr::STATUS_APPROVED_BY_PMT,
+                \App\Models\Ipcr::STATUS_ADJUSTED_BY_PMT,
+                \App\Models\Ipcr::STATUS_RELEASED_BY_PMT,
+            ])
+            ->get();
+
+        $ratingService = app(PerformanceRatingService::class);
+
+        foreach ($officeIpcrs as $ipcr) {
+            [$ratingsByOutput, $ratingsByIndicator] = $ratingService->buildRatedIpcrPerformanceMaps($ipcr);
+
+            foreach ($ratingsByOutput as $title => $ratings) {
+                if (!isset($ipcrAccomplishments[$title])) {
+                    $ipcrAccomplishments[$title] = [
+                        'qty' => 0.0,
+                        'q_sum' => 0.0,
+                        'e_points' => 0.0,
+                        't_sum' => 0.0,
+                        'count' => 0,
+                    ];
+                }
+
+                $ipcrAccomplishments[$title]['qty'] += (float) ($ratings['qty'] ?? 0);
+                $ipcrAccomplishments[$title]['q_sum'] += (float) ($ratings['q'] ?? 0);
+                $ipcrAccomplishments[$title]['e_points'] += (float) (($ratings['e'] ?? 0) * ($ratings['qty'] ?? 0));
+                $ipcrAccomplishments[$title]['t_sum'] += (float) ($ratings['t'] ?? 0);
+                $ipcrAccomplishments[$title]['count']++;
+            }
+        }
 
         foreach ($sources as $uwp) {
             $uwp->loadMissing([
@@ -275,6 +310,17 @@ class OfficeCalibrationController extends Controller
                             ? 'Multiple indicator targets'
                             : trim((string) ($mfo->target_timeline ?? '')));
 
+                    $outputTitle = trim((string) ($mfo->title ?? ''));
+                    $acc = $ipcrAccomplishments[$outputTitle] ?? null;
+                    $actualQty = $acc ? (float) $acc['qty'] : 0.0;
+                    $empCount = $acc ? (int) $acc['count'] : 0;
+                    $actualQ = ($acc && $empCount > 0) ? round($acc['q_sum'] / $empCount, 2) : 0.0;
+                    $actualE = ($acc && $actualQty > 0) ? round($acc['e_points'] / $actualQty, 2) : 0.0;
+                    $actualT = ($acc && $empCount > 0) ? round($acc['t_sum'] / $empCount, 2) : 0.0;
+                    $actualAvg = ($actualQ > 0 || $actualE > 0 || $actualT > 0)
+                        ? round(($actualQ + $actualE + $actualT) / 3, 2)
+                        : 0.0;
+
                     $outputs[] = [
                         'title' => $mfo->title,
                         'source_uwp_id' => $uwp->id,
@@ -286,15 +332,24 @@ class OfficeCalibrationController extends Controller
                         'weight_percent' => $mfo->weight_percent ?? $function->weight_percent,
                         'function_type' => strtolower((string) $function->function_type),
                         'success_indicators' => $indicators,
+                        'actual_quantity' => $actualQty,
+                        'actual_q' => $actualQ,
+                        'actual_e' => $actualE,
+                        'actual_t' => $actualT,
+                        'actual_avg' => $actualAvg,
                     ];
                 }
             }
         }
 
+        $computedSummary = app(OpcrOfficeRatingService::class)->calculate($opcr, $outputs);
+
         return [
             'opcr' => [
                 'id' => $opcr->id,
                 'status' => $opcr->status,
+                'final_score' => $opcr->final_score,
+                'adjectival_rating' => $opcr->adjectival_rating,
                 'office' => [
                     'id' => $opcr->office?->id ?? $fallbackUwp?->office?->id,
                     'name' => $opcr->office?->name ?? $fallbackUwp?->office?->name,
@@ -309,6 +364,7 @@ class OfficeCalibrationController extends Controller
                 ],
             ],
             'outputs' => $outputs,
+            'computed_summary' => $computedSummary,
         ];
     }
 

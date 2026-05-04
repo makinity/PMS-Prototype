@@ -4,6 +4,7 @@ namespace App\Exports\StageThree;
 
 use App\Models\Opcr;
 use App\Models\Ipcr;
+use App\Services\OpcrOfficeRatingService;
 use App\Services\PerformanceRatingService;
 use Illuminate\Support\Arr;
 use Maatwebsite\Excel\Concerns\Exportable;
@@ -47,11 +48,14 @@ class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
     private array $sectionLabels = [];
     private array $sectionMeta = [];
     private PerformanceRatingService $ratingService;
+    private OpcrOfficeRatingService $officeRatingService;
+    private array $computedSummary = [];
 
     public function __construct(Opcr $opcr)
     {
         $this->opcrModel = $opcr;
         $this->ratingService = app(PerformanceRatingService::class);
+        $this->officeRatingService = app(OpcrOfficeRatingService::class);
         $this->hydrateFromModel();
     }
 
@@ -172,6 +176,18 @@ class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
                 }
             }
         }
+
+        $ratingRows = [];
+        foreach ($this->opcrData as $bucket => $items) {
+            foreach ($items as $item) {
+                $ratingRows[] = [
+                    'function_type' => $bucket,
+                    'actual_avg' => $item['a'] ?? 0,
+                ];
+            }
+        }
+
+        $this->computedSummary = $this->officeRatingService->calculateFromOutputs($ratingRows);
     }
 
     private function populateTemplate(Worksheet $sheet): void
@@ -304,10 +320,31 @@ class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
 
     private function writeFooterBlock(Worksheet $sheet, int $row): void
     {
-        $sheet->mergeCells("A$row:J$row"); $sheet->setCellValue("A$row", "FINAL OVERALL RATING");
-        $finalScore = \App\Models\Ipcr::where('opcr_id', $this->opcrModel->id)->whereNotNull('final_score')->avg('final_score') ?? 0;
-        $sheet->setCellValue("I$row", round($finalScore, 2));
-        $sheet->getStyle("A$row:O$row")->getFont()->setBold(true);
-        $sheet->getStyle("A$row:O$row")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $coreWeighted = (float) ($this->computedSummary['core_weighted'] ?? 0);
+        $supportWeighted = (float) ($this->computedSummary['support_weighted'] ?? 0);
+        $overallScore = (float) ($this->computedSummary['overall_score'] ?? 0);
+        $adjectival = (string) ($this->computedSummary['adjectival_rating'] ?? 'N/A');
+
+        $sheet->mergeCells("A$row:H$row");
+        $sheet->setCellValue("A$row", 'Weighted Average Rating for Core Functions (80%)');
+        $sheet->setCellValue("I$row", round($coreWeighted, 2));
+
+        $row++;
+        $sheet->mergeCells("A$row:H$row");
+        $sheet->setCellValue("A$row", 'Weighted Average Rating for Support Functions (20%)');
+        $sheet->setCellValue("I$row", round($supportWeighted, 2));
+
+        $row++;
+        $sheet->mergeCells("A$row:H$row");
+        $sheet->setCellValue("A$row", 'OVERALL RATING');
+        $sheet->setCellValue("I$row", round($overallScore, 2));
+
+        $row++;
+        $sheet->mergeCells("A$row:H$row");
+        $sheet->setCellValue("A$row", 'ADJECTIVAL RATING');
+        $sheet->setCellValue("I$row", $adjectival);
+
+        $sheet->getStyle('A' . ($row - 3) . ":O$row")->getFont()->setBold(true);
+        $sheet->getStyle('A' . ($row - 3) . ":O$row")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
     }
 }

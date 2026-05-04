@@ -42,6 +42,7 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
     private array $groupedItems;
     private array $targetQuantityByOutput;
     private array $sectionLabels = [];
+    private array $sectionRanges = [];
 
     public function __construct(Ipcr $ipcr)
     {
@@ -105,7 +106,13 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
 
         $currentRow = self::TABLE_START_ROW;
         foreach ($this->buildSectionDefinitions() as $section) {
-            $currentRow = $this->writeSection($sheet, $section['type'], $section['label'], $currentRow);
+            $currentRow = $this->writeSection(
+                $sheet,
+                $section['type'],
+                $section['label'],
+                $currentRow,
+                (float) ($section['weight_percent'] ?? 0)
+            );
         }
 
         $lastRow = max($currentRow - 1, self::TABLE_SUBHEADER_ROW);
@@ -123,6 +130,7 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
             ->setBorderStyle(Border::BORDER_THIN);
 
         $this->applySectionRowBorders($sheet, self::TABLE_START_ROW, $lastRow);
+        $this->writeFooterBlock($sheet, $lastRow + 2);
     }
 
     private function setupPage(Worksheet $sheet): void
@@ -234,7 +242,7 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
         $sheet->getRowDimension(self::TABLE_SUBHEADER_ROW)->setRowHeight(20);
     }
 
-    private function writeSection(Worksheet $sheet, string $type, string $label, int $startRow): int
+    private function writeSection(Worksheet $sheet, string $type, string $label, int $startRow, float $weightPercent = 0): int
     {
         $sheet->setCellValue("A{$startRow}", $label);
         $sheet->mergeCells("A{$startRow}:N{$startRow}");
@@ -256,7 +264,16 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
 
         $row = $startRow + 1;
 
-        return $this->writeIndicatorsFlat($sheet, $row, $this->groupedItems[$type] ?? []);
+        $nextRow = $this->writeIndicatorsFlat($sheet, $row, $this->groupedItems[$type] ?? []);
+
+        $this->sectionRanges[] = [
+            'label' => $label,
+            'start_row' => $row,
+            'end_row' => max($row, $nextRow - 1),
+            'weight_percent' => $weightPercent,
+        ];
+
+        return $nextRow;
     }
 
     private function writeIndicatorsFlat(Worksheet $sheet, int $row, array $groupedOutputs): int
@@ -539,7 +556,11 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
         foreach ($ordered as $index => $type) {
             $label = $this->buildSectionLabel($type, $index);
             $labels[] = $label;
-            $sections[] = ['type' => $type, 'label' => $label];
+            $sections[] = [
+                'type' => $type,
+                'label' => $label,
+                'weight_percent' => $this->resolveSectionWeightPercent($type),
+            ];
         }
 
         $this->sectionLabels = $labels;
@@ -558,6 +579,149 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
         };
 
         return "{$prefix}. {$label}";
+    }
+
+    private function writeFooterBlock(Worksheet $sheet, int $startRow): void
+    {
+        $row = $startRow;
+        $weightedValueCells = [];
+
+        foreach ($this->sectionRanges as $section) {
+            $sheet->mergeCells("A{$row}:L{$row}");
+            $sheet->mergeCells("M{$row}:N{$row}");
+            $sheet->setCellValue("A{$row}", $this->buildWeightedAverageLabel((string) ($section['label'] ?? '')));
+
+            $weightPercent = (float) ($section['weight_percent'] ?? 0);
+            $start = (int) ($section['start_row'] ?? 0);
+            $end = (int) ($section['end_row'] ?? 0);
+
+            if ($start > 0 && $end >= $start && $weightPercent > 0) {
+                $sheet->setCellValue(
+                    "M{$row}",
+                    sprintf('=IFERROR(AVERAGE(H%d:H%d)*%.4F,"")', $start, $end, $weightPercent / 100)
+                );
+            } else {
+                $sheet->setCellValue("M{$row}", '');
+            }
+
+            $weightedValueCells[] = "M{$row}";
+            $row++;
+        }
+
+        $overallRow = $row;
+        $sheet->mergeCells("A{$overallRow}:L{$overallRow}");
+        $sheet->mergeCells("M{$overallRow}:N{$overallRow}");
+        $sheet->setCellValue("A{$overallRow}", 'OVERALL RATING');
+        $sheet->setCellValue(
+            "M{$overallRow}",
+            empty($weightedValueCells) ? '' : '=' . implode('+', $weightedValueCells)
+        );
+
+        $row++;
+        $sheet->mergeCells("A{$row}:L{$row}");
+        $sheet->mergeCells("M{$row}:N{$row}");
+        $sheet->setCellValue("A{$row}", 'ADJECTIVAL RATING');
+        $sheet->setCellValue(
+            "M{$row}",
+            '=IF(M' . $overallRow . '="","",IF(M' . $overallRow . '>=4.5,"Outstanding",IF(M' . $overallRow . '>=3.5,"Very Satisfactory",IF(M' . $overallRow . '>=2.5,"Satisfactory",IF(M' . $overallRow . '>=1.5,"Unsatisfactory","Poor")))))'
+        );
+
+        $sheet->getStyle("A{$startRow}:N{$row}")->getFont()->setBold(true);
+        $sheet->getStyle("A{$startRow}:N{$row}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $sheet->getStyle("A{$startRow}:L{$row}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->getStyle("M{$startRow}:N{$row}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        $row += 2;
+        $sheet->mergeCells("A{$row}:N{$row}");
+        $sheet->setCellValue("A{$row}", 'Comments and Recommendations for Development Purposes');
+        $sheet->getStyle("A{$row}:N{$row}")->getFont()->setBold(true);
+        $sheet->getStyle("A{$row}:N{$row}")->getFill()
+            ->setFillType(Fill::FILL_SOLID)
+            ->getStartColor()
+            ->setRGB('F4B6FF');
+        $sheet->getStyle("A{$row}:N{$row}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $sheet->getStyle("A{$row}:N{$row}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+
+        $row++;
+        $sheet->mergeCells("A{$row}:N" . ($row + 1));
+        $sheet->setCellValue("A{$row}", '');
+        $sheet->getStyle("A{$row}:N" . ($row + 1))->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $sheet->getRowDimension($row)->setRowHeight(22);
+        $sheet->getRowDimension($row + 1)->setRowHeight(22);
+
+        $row += 3;
+        $signatureBlocks = $this->resolveSignatureBlocks();
+
+        foreach ($signatureBlocks as $block) {
+            [$fromCol, $toCol] = explode(':', $block['range']);
+
+            $sheet->mergeCells("{$fromCol}{$row}:{$toCol}{$row}");
+            $sheet->setCellValue("{$fromCol}{$row}", $block['label']);
+            $sheet->mergeCells("{$fromCol}" . ($row + 1) . ":{$toCol}" . ($row + 1));
+            $sheet->setCellValue("{$fromCol}" . ($row + 1), $block['name']);
+            $sheet->mergeCells("{$fromCol}" . ($row + 2) . ":{$toCol}" . ($row + 2));
+            $sheet->setCellValue("{$fromCol}" . ($row + 2), $block['title']);
+            $sheet->mergeCells("{$fromCol}" . ($row + 3) . ":{$toCol}" . ($row + 3));
+            $sheet->setCellValue("{$fromCol}" . ($row + 3), 'Date');
+
+            $sheet->getStyle("{$fromCol}{$row}:{$toCol}" . ($row + 3))
+                ->getBorders()
+                ->getAllBorders()
+                ->setBorderStyle(Border::BORDER_THIN);
+            $sheet->getStyle("{$fromCol}{$row}:{$toCol}" . ($row + 3))
+                ->getAlignment()
+                ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+                ->setVertical(Alignment::VERTICAL_CENTER);
+        }
+    }
+
+    private function buildWeightedAverageLabel(string $sectionLabel): string
+    {
+        $cleaned = preg_replace('/^[A-Z]\.\s*/', '', trim($sectionLabel)) ?? trim($sectionLabel);
+        $normalized = ucwords(strtolower($cleaned));
+
+        return "Weighted Average Rating for {$normalized}";
+    }
+
+    private function resolveSectionWeightPercent(string $type): float
+    {
+        foreach ($this->groupedItems[$type] ?? [] as $group) {
+            $firstItem = $group['items'][0] ?? null;
+            $weight = $firstItem?->uwpFunction?->weight_percent ?? null;
+            if (is_numeric($weight)) {
+                return (float) $weight;
+            }
+        }
+
+        return match ($type) {
+            'core' => 80.0,
+            'support' => 20.0,
+            default => 0.0,
+        };
+    }
+
+    private function resolveSignatureBlocks(): array
+    {
+        return [
+            [
+                'range' => 'A:D',
+                'label' => 'Discussed with and Agreed by:',
+                'name' => strtoupper((string) ($this->ipcr->employee?->name ?? '')),
+                'title' => strtoupper((string) ($this->ipcr->employee?->position ?? 'Employee')),
+            ],
+            [
+                'range' => 'E:I',
+                'label' => 'Assessed by:',
+                'name' => strtoupper((string) ($this->ipcr->opcr?->unitWorkPlan?->creator?->name ?? '')),
+                'title' => 'SUPERVISOR',
+            ],
+            [
+                'range' => 'J:N',
+                'label' => 'Approved by:',
+                'name' => strtoupper((string) ($this->ipcr->office?->head?->name ?? '')),
+                'title' => 'DEPARTMENT HEAD',
+            ],
+        ];
     }
 
     private function buildTargetQuantityByOutput(): array

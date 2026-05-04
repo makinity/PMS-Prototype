@@ -371,6 +371,16 @@ Route::prefix('pmt')->middleware('auth')->group(function () {
         Route::post('/{opcr}/release', [\App\Http\Controllers\Pmt\OfficeCalibrationController::class, 'release'])->name('release');
         Route::post('/{opcr}/return', [\App\Http\Controllers\Pmt\OfficeCalibrationController::class, 'returnOpcr'])->name('return');
     });
+
+    Route::get('/top-performers', [\App\Http\Controllers\Pmt\TopPerformersController::class, 'index'])
+        ->name('pmt.top-performers.index');
+
+    Route::prefix('development-planning')->name('pmt.development-planning.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Pmt\DevelopmentPlanningController::class, 'index'])->name('index');
+        Route::post('/', [\App\Http\Controllers\Pmt\DevelopmentPlanningController::class, 'store'])->name('store');
+        Route::get('/{developmentPlan}', [\App\Http\Controllers\Pmt\DevelopmentPlanningController::class, 'show'])->name('show');
+        Route::post('/{developmentPlan}/status', [\App\Http\Controllers\Pmt\DevelopmentPlanningController::class, 'updateStatus'])->name('status');
+    });
 });
 
 /*

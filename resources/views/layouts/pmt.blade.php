@@ -149,6 +149,8 @@
             $isDeptHeadAccReview = request()->routeIs('pmt.acc-review');
             $isEmployeeCalibration = request()->routeIs('pmt.employee-calibration.*');
             $isOfficeCalibration = request()->routeIs('pmt.office-calibration.*');
+            $isTopPerformers = request()->routeIs('pmt.top-performers.*');
+            $isDevelopmentPlanning = request()->routeIs('pmt.development-planning.*');
             $isPmtProfile = request()->routeIs('pmt.profile');
         @endphp
         <!-- Top Navigation -->
@@ -275,6 +277,24 @@
                                 <a href="{{ route('pmt.office-calibration.index') }}" class="sidebar-link" @if($isOfficeCalibration) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-building-circle-check"></i>
                                     <span>Office Calibration</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Stage IV</p>
+                        <ul class="mt-2 space-y-1 menu-stagger">
+                            <li>
+                                <a href="{{ route('pmt.top-performers.index') }}" class="sidebar-link" @if($isTopPerformers) aria-current="page" @endif>
+                                    <i class="sidebar-icon fa-solid fa-trophy"></i>
+                                    <span>Top Performers</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('pmt.development-planning.index') }}" class="sidebar-link" @if($isDevelopmentPlanning) aria-current="page" @endif>
+                                    <i class="sidebar-icon fa-solid fa-clipboard-list"></i>
+                                    <span>Development Planning</span>
                                 </a>
                             </li>
                         </ul>

@@ -1262,7 +1262,7 @@ class SmporIpcrAccomplishmentController extends Controller
         $meta = $this->buildMeta($request, $ipcrModel);
 
         return Excel::download(
-            new IpcrExcelExport($ipcr, $standards, $valuesByIndicator),
+            new IpcrExcelExport($ipcr, $standards, $valuesByIndicator, $meta),
             $this->buildFilename($meta, true)
         );
     }
@@ -1288,6 +1288,11 @@ class SmporIpcrAccomplishmentController extends Controller
             'employee' => (string) ($ipcr->employee?->name ?? $user?->name ?? 'Employee'),
             'office' => $office,
             'period' => $periodLabel,
+            'employee_title' => (string) ($ipcr->employee?->position ?? 'Employee'),
+            'reviewed_by' => (string) ($ipcr->opcr?->unitWorkPlan?->creator?->name ?? 'Supervisor'),
+            'reviewed_title' => 'Immediate Supervisor',
+            'approved_by' => (string) ($ipcr->office?->head?->name ?? 'Department Head'),
+            'approved_title' => 'PGDH',
         ];
     }
 

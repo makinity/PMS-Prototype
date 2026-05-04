@@ -40,12 +40,14 @@
                             value="{{ $searchTermSafe }}"
                             data-live-search
                             placeholder="Search employee, office, period, status..."
-                            class="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/30">
+                            style="background-color: #020617 !important; color: #f1f5f9 !important;"
+                            class="w-full rounded-xl border border-slate-700 px-4 py-3 text-sm placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/30">
                     </div>
                     <button
                         type="submit"
                         aria-label="Search records"
-                        class="inline-flex h-[50px] w-[50px] items-center justify-center rounded-xl border border-slate-700 bg-slate-950/70 text-slate-100 transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/40">
+                        style="background-color: #020617 !important; color: #f1f5f9 !important;"
+                        class="inline-flex h-[50px] w-[50px] items-center justify-center rounded-xl border border-slate-700 text-slate-100 transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/40">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5" aria-hidden="true">
                             <circle cx="11" cy="11" r="7"></circle>
                             <path stroke-linecap="round" d="M20 20l-3.5-3.5"></path>

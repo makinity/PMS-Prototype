@@ -4,9 +4,12 @@
 @php
     $currentOpcr = $opcr ?? null;
     $currentOpcrPayload = $payload ?? [];
+    $computedSummary = $currentOpcrPayload['computed_summary'] ?? null;
     $opcrStatus = strtolower((string) ($currentOpcr?->status ?? ''));
     $canCalibrate = in_array($opcrStatus, [\App\Models\Opcr::STATUS_PENDING_PMT_CALIBRATION, \App\Models\Opcr::STATUS_APPROVED_BY_PMT, \App\Models\Opcr::STATUS_ADJUSTED_BY_PMT], true);
     $canRelease = in_array($opcrStatus, [\App\Models\Opcr::STATUS_APPROVED_BY_PMT, \App\Models\Opcr::STATUS_ADJUSTED_BY_PMT], true);
+    $defaultAdjustedScore = old('adjusted_score', $currentOpcr->pmt_adjusted_score ?? ($computedSummary['overall_score'] ?? $currentOpcr->final_score));
+    $selectedAdjustedRating = old('adjusted_rating', $currentOpcr->pmt_adjusted_rating ?? ($computedSummary['adjectival_rating'] ?? 'Outstanding'));
 @endphp
 
 <section class="space-y-6">
@@ -20,7 +23,7 @@
         </div>
         <div class="rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3 text-right">
             <p class="text-[11px] uppercase tracking-[0.24em] text-slate-500">Active Period</p>
-            <p class="mt-1 text-sm font-semibold text-white">{{ $currentOpcr->performancePeriod?->name ?? '—' }}</p>
+            <p class="mt-1 text-sm font-semibold text-white">{{ $currentOpcr->performancePeriod?->name ?? '-' }}</p>
         </div>
     </div>
 
@@ -63,21 +66,46 @@
             <div class="grid gap-3 border-b border-slate-800 px-5 py-4 sm:grid-cols-4">
                 <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
                     <p class="text-[11px] uppercase tracking-wide text-slate-500">Office / Unit</p>
-                    <p class="mt-1 text-sm font-semibold text-white">{{ $currentOpcrPayload['opcr']['office']['name'] ?? '—' }}</p>
+                    <p class="mt-1 text-sm font-semibold text-white">{{ $currentOpcrPayload['opcr']['office']['name'] ?? '-' }}</p>
                 </div>
                 <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
                     <p class="text-[11px] uppercase tracking-wide text-slate-500">Period</p>
-                    <p class="mt-1 text-sm font-semibold text-white">{{ $currentOpcrPayload['opcr']['period']['name'] ?? '—' }}</p>
+                    <p class="mt-1 text-sm font-semibold text-white">{{ $currentOpcrPayload['opcr']['period']['name'] ?? '-' }}</p>
                 </div>
                 <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
                     <p class="text-[11px] uppercase tracking-wide text-slate-500">Computed Score</p>
-                    <p class="mt-1 text-sm font-semibold text-white">{{ $currentOpcr->final_score !== null ? number_format($currentOpcr->final_score, 2) : '—' }}</p>
+                    <p class="mt-1 text-sm font-semibold text-white">{{ $computedSummary && $computedSummary['is_ready'] ? number_format((float) $computedSummary['overall_score'], 2) : '-' }}</p>
                 </div>
                 <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
                     <p class="text-[11px] uppercase tracking-wide text-slate-500">Adjusted Score</p>
-                    <p class="mt-1 text-sm font-semibold text-blue-300">{{ $currentOpcr->pmt_adjusted_score !== null ? number_format($currentOpcr->pmt_adjusted_score, 2) : '—' }}</p>
+                    <p class="mt-1 text-sm font-semibold text-blue-300">{{ $currentOpcr->pmt_adjusted_score !== null ? number_format($currentOpcr->pmt_adjusted_score, 2) : '-' }}</p>
                 </div>
             </div>
+
+            @if ($computedSummary && $computedSummary['is_ready'])
+                <div class="grid gap-3 border-b border-slate-800 px-5 py-4 sm:grid-cols-4">
+                    <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                        <p class="text-[11px] uppercase tracking-wide text-slate-500">Core Weighted</p>
+                        <p class="mt-1 text-sm font-semibold text-white">{{ number_format((float) $computedSummary['core_weighted'], 2) }}</p>
+                    </div>
+                    <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                        <p class="text-[11px] uppercase tracking-wide text-slate-500">Support Weighted</p>
+                        <p class="mt-1 text-sm font-semibold text-white">{{ number_format((float) $computedSummary['support_weighted'], 2) }}</p>
+                    </div>
+                    <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                        <p class="text-[11px] uppercase tracking-wide text-slate-500">Computed Rating</p>
+                        <p class="mt-1 text-sm font-semibold text-white">{{ $computedSummary['adjectival_rating'] }}</p>
+                    </div>
+                    <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                        <p class="text-[11px] uppercase tracking-wide text-slate-500">Computation Status</p>
+                        @if ($computedSummary['is_provisional'])
+                            <p class="mt-1 text-sm font-semibold text-amber-300">Provisional</p>
+                        @else
+                            <p class="mt-1 text-sm font-semibold text-emerald-300">Complete</p>
+                        @endif
+                    </div>
+                </div>
+            @endif
 
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm text-slate-200">
@@ -95,10 +123,10 @@
                         @forelse (($currentOpcrPayload['outputs'] ?? []) as $output)
                             <tr class="hover:bg-slate-950/40">
                                 <td class="px-5 py-4 align-top">
-                                    <div class="font-medium text-white">{{ $output['source_supervisor'] ?? '—' }}</div>
-                                    <div class="mt-1 text-xs text-slate-500">UWP #{{ $output['source_uwp_id'] ?? '—' }}</div>
+                                    <div class="font-medium text-white">{{ $output['source_supervisor'] ?? '-' }}</div>
+                                    <div class="mt-1 text-xs text-slate-500">UWP #{{ $output['source_uwp_id'] ?? '-' }}</div>
                                 </td>
-                                <td class="px-5 py-4 align-top text-white">{{ $output['title'] ?? '—' }}</td>
+                                <td class="px-5 py-4 align-top text-white">{{ $output['title'] ?? '-' }}</td>
                                 <td class="px-5 py-4 align-top text-center text-slate-300">{{ count($output['success_indicators'] ?? []) }}</td>
                                 <td class="px-5 py-4 align-top text-slate-300">
                                     @php
@@ -110,10 +138,10 @@
                                     @elseif ($targetQuantity !== null)
                                         {{ $targetQuantity }}
                                     @else
-                                        —
+                                        -
                                     @endif
                                 </td>
-                                <td class="px-5 py-4 align-top text-slate-300">{{ ($output['weight_percent'] ?? '') !== '' ? $output['weight_percent'] . '%' : '—' }}</td>
+                                <td class="px-5 py-4 align-top text-slate-300">{{ ($output['weight_percent'] ?? '') !== '' ? $output['weight_percent'] . '%' : '-' }}</td>
                                 <td class="px-5 py-4 align-top">
                                     @php $functionType = strtolower((string) ($output['function_type'] ?? '')); @endphp
                                     @if ($functionType === 'core')
@@ -142,32 +170,31 @@
         @if ($canCalibrate)
             <div class="border-t border-slate-800 bg-slate-950/80 px-5 py-4">
                 <div class="grid gap-4 lg:grid-cols-2">
-                    <!-- Adjust Rating Form -->
                     <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
                         <h4 class="text-sm font-semibold text-white">Adjust Rating</h4>
                         <form method="POST" action="{{ route('pmt.office-calibration.adjust', $currentOpcr->id) }}" class="mt-3 space-y-3">
                             @csrf
                             <div>
                                 <label class="text-xs text-slate-400">Adjusted Score</label>
-                                <input type="number" step="0.01" min="1" max="5" name="adjusted_score" value="{{ $currentOpcr->final_score }}" 
+                                <input type="number" step="0.01" min="1" max="5" name="adjusted_score" value="{{ $defaultAdjustedScore }}"
                                     style="background-color: #020617 !important; color: #f1f5f9 !important; border-color: #334155 !important;"
                                     class="w-full rounded border px-3 py-2 text-sm" required>
                             </div>
                             <div>
                                 <label class="text-xs text-slate-400">Adjusted Rating</label>
-                                <select name="adjusted_rating" 
+                                <select name="adjusted_rating"
                                     style="background-color: #020617 !important; color: #f1f5f9 !important; border-color: #334155 !important;"
                                     class="w-full rounded border px-3 py-2 text-sm" required>
-                                    <option value="Outstanding">Outstanding</option>
-                                    <option value="Very Satisfactory">Very Satisfactory</option>
-                                    <option value="Satisfactory">Satisfactory</option>
-                                    <option value="Unsatisfactory">Unsatisfactory</option>
-                                    <option value="Poor">Poor</option>
+                                    <option value="Outstanding" @selected($selectedAdjustedRating === 'Outstanding')>Outstanding</option>
+                                    <option value="Very Satisfactory" @selected($selectedAdjustedRating === 'Very Satisfactory')>Very Satisfactory</option>
+                                    <option value="Satisfactory" @selected($selectedAdjustedRating === 'Satisfactory')>Satisfactory</option>
+                                    <option value="Unsatisfactory" @selected($selectedAdjustedRating === 'Unsatisfactory')>Unsatisfactory</option>
+                                    <option value="Poor" @selected($selectedAdjustedRating === 'Poor')>Poor</option>
                                 </select>
                             </div>
                             <div>
                                 <label class="text-xs text-slate-400">Adjustment Reason</label>
-                                <textarea name="adjustment_reason" rows="2" 
+                                <textarea name="adjustment_reason" rows="2"
                                     style="background-color: #020617 !important; color: #f1f5f9 !important; border-color: #334155 !important;"
                                     class="w-full rounded border px-3 py-2 text-sm" required></textarea>
                             </div>
@@ -177,18 +204,20 @@
                         </form>
                     </div>
 
-                    <!-- Approve or Return Form -->
                     <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
                         <h4 class="text-sm font-semibold text-white">Approve / Release / Return</h4>
+                        @if ($computedSummary && $computedSummary['is_provisional'])
+                            <p class="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-300">Computed office rating is provisional because one function bucket has no rated OPCR rows yet.</p>
+                        @endif
                         <form method="POST" action="{{ route('pmt.office-calibration.approve', $currentOpcr->id) }}" class="mt-3 space-y-3">
                             @csrf
                             <div>
                                 <label class="text-xs text-slate-400">PMT Remarks</label>
-                                <textarea name="remarks" id="pmtRemarksInput" rows="3" 
+                                <textarea name="remarks" id="pmtRemarksInput" rows="3"
                                     style="background-color: #020617 !important; color: #f1f5f9 !important; border-color: #334155 !important;"
                                     class="w-full rounded border px-3 py-2 text-sm"></textarea>
                             </div>
-                            <div class="flex items-center justify-end gap-3 mt-4">
+                            <div class="mt-4 flex items-center justify-end gap-3">
                                 <button type="button" id="pmtReturnBtn" class="rounded border border-rose-600 bg-rose-600/20 px-4 py-2 text-sm font-semibold text-rose-300 hover:bg-rose-600/30">Return to Office</button>
                                 @if ($canRelease)
                                     <button type="button" id="pmtReleaseBtn" class="rounded border border-cyan-600 bg-cyan-600/20 px-4 py-2 text-sm font-semibold text-cyan-300 hover:bg-cyan-600/30">Release Official Result</button>
