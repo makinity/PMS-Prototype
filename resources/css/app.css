@@ -28,6 +28,8 @@
             --text-gray: #94a3b8;
             --card-bg: #1e293b;
             --card-border: #334155;
+            --nav-height: 78px;
+            --nav-height-mobile: 72px;
         }
         
         * {
@@ -43,7 +45,7 @@
             background-color: var(--primary);
             color: var(--text-light);
             font-family: system-ui, -apple-system, sans-serif;
-            padding-top: 70px; /* Add padding to prevent content from hiding under fixed nav */
+            padding-top: var(--nav-height);
         }
         
         /* Sticky Navigation */
@@ -52,7 +54,7 @@
             top: 0;
             left: 0;
             right: 0;
-            z-index: 100;
+            z-index: 1000;
             backdrop-filter: blur(10px);
             background-color: rgba(15, 23, 42, 0.95);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -116,7 +118,7 @@
             color: var(--text-light);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             text-decoration: none;
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
         
         .mobile-menu a:last-child {
@@ -128,8 +130,8 @@
             background: linear-gradient(135deg, var(--primary-dark) 0%, #111827 50%, #1e1b4b 100%);
             position: relative;
             overflow: hidden;
-            margin-top: -70px; /* Keep the gradient tucked under the fixed nav */
-            padding-top: 90px; /* Add breathing room between the nav and hero content */
+            margin-top: calc(var(--nav-height) * -1);
+            padding-top: calc(var(--nav-height) + 20px);
         }
         
         .hero-gradient::before {
@@ -148,6 +150,11 @@
             border-left: 4px solid var(--pms-accent);
             display: inline-flex;
             align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            max-width: 100%;
+            text-align: center;
             padding: 8px 16px;
             border-radius: 8px;
             margin-bottom: 24px;
@@ -162,6 +169,7 @@
             position: relative;
             overflow: hidden;
             padding: 24px;
+            height: 100%;
         }
         
         .system-card:hover {
@@ -180,6 +188,11 @@
 
         .pms-card-badge {
             z-index: 2;
+        }
+
+        .nav-desktop a,
+        .nav-actions button {
+            white-space: nowrap;
         }
 
         .pms-badge-pill {
@@ -443,180 +456,125 @@
         }
         
         /* Responsive Design */
-        @media (max-width: 768px) {
+        @media (max-width: 1023px) {
             body {
-                padding-top: 64px; /* Adjust for smaller nav on mobile */
+                padding-top: var(--nav-height-mobile);
             }
-            
+
             .hero-gradient {
-                margin-top: -64px;
-                padding-top: 64px;
+                margin-top: calc(var(--nav-height-mobile) * -1);
+                padding-top: calc(var(--nav-height-mobile) + 18px);
             }
-            
-            /* Navigation */
+
             .mobile-menu-btn {
                 display: flex;
             }
-            
-            .sticky-nav .hidden.md\:flex {
+
+            .nav-desktop,
+            .nav-actions {
                 display: none !important;
             }
-            
-            .sticky-nav .hidden.md\:flex + div {
-                display: none !important;
-            }
-            
-            .sticky-nav {
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                z-index: 1000; /* Higher z-index to ensure nav stays on top */
-            }
-            
+
             .mobile-menu {
-                position: fixed; /* Change to fixed for mobile */
-                top: 64px; /* Height of the nav bar */
+                position: fixed;
+                top: var(--nav-height-mobile);
                 left: 0;
                 right: 0;
                 height: auto;
-                max-height: calc(100vh - 64px);
+                max-height: calc(100vh - var(--nav-height-mobile));
                 overflow-y: auto;
-                z-index: 999; /* Just below the nav bar */
+                padding: 16px 20px 20px;
+                z-index: 999;
             }
-            
-            /* Typography */
+
+            body.menu-open {
+                overflow: hidden;
+            }
+
+            body.menu-open::after {
+                content: '';
+                position: fixed;
+                top: var(--nav-height-mobile);
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 998;
+            }
+        }
+
+        @media (max-width: 767px) {
             h1 {
-                font-size: 2rem !important;
-                line-height: 1.2;
+                font-size: 2.1rem !important;
+                line-height: 1.15;
             }
-            
-            .text-4xl, .text-5xl, .text-6xl {
-                font-size: 2rem !important;
+
+            .text-4xl,
+            .text-5xl,
+            .text-6xl {
+                font-size: 2.1rem !important;
             }
-            
+
             .text-3xl {
                 font-size: 1.75rem !important;
             }
-            
+
             .text-xl {
                 font-size: 1.125rem !important;
             }
-            
+
             .text-2xl {
                 font-size: 1.5rem !important;
             }
-            
-            /* Spacing */
-            .px-4 {
-                padding-left: 16px !important;
-                padding-right: 16px !important;
-            }
-            
+
             .py-16 {
                 padding-top: 40px !important;
                 padding-bottom: 40px !important;
             }
-            
+
             .py-20 {
                 padding-top: 50px !important;
                 padding-bottom: 50px !important;
             }
-            
-            .pt-16, .pt-20 {
+
+            .pt-16,
+            .pt-20 {
                 padding-top: 40px !important;
             }
-            
-            .pb-12, .pb-16 {
+
+            .pb-12,
+            .pb-16 {
                 padding-bottom: 40px !important;
             }
-            
+
             .mb-12 {
                 margin-bottom: 32px !important;
             }
-            
+
             .mb-8 {
                 margin-bottom: 24px !important;
             }
-            
+
             .mb-6 {
                 margin-bottom: 20px !important;
             }
-            
-            /* Layout */
-            .grid-cols-1 {
-                grid-template-columns: 1fr !important;
-            }
-            
-            .md\:grid-cols-3, .lg\:grid-cols-3 {
-                grid-template-columns: 1fr !important;
-            }
-            
-            .lg\:col-span-2 {
-                grid-column: span 1 !important;
-            }
-            
-            .md\:grid-cols-2 {
-                grid-template-columns: 1fr !important;
-            }
-            
-            /* Gap adjustments */
-            .gap-8 {
-                gap: 24px !important;
-            }
-            
-            .gap-6 {
-                gap: 20px !important;
-            }
-            
-            /* Cards */
+
             .system-card {
                 padding: 20px !important;
             }
-            
+
             .p-6 {
                 padding: 20px !important;
             }
-            
-            /* Buttons */
-            .btn-gradient, .border-purple-500 {
+
+            .pms-badge {
                 width: 100%;
-                padding: 14px 20px !important;
+                padding: 12px 14px;
             }
-            
-            .px-8 {
-                padding-left: 20px !important;
-                padding-right: 20px !important;
-            }
-            
-            /* CTA Section */
-            .sm\:flex-row {
-                flex-direction: column !important;
-            }
-            
-            .sm\:space-x-6 {
-                gap: 16px !important;
-            }
-            
-            .space-y-4 > * + * {
-                margin-top: 16px !important;
-            }
-            
-            /* Footer */
-            .md\:flex-row {
-                flex-direction: column !important;
-                text-align: center;
-            }
-            
-            .md\:text-right {
-                text-align: center !important;
-                margin-top: 24px;
-            }
-            
-            /* Modals */
+
             .modal-dark {
-                margin: 16px;
-                max-width: calc(100% - 32px);
+                margin: 12px;
+                max-width: calc(100% - 24px);
             }
 
             .profile-upload {
@@ -632,73 +590,70 @@
                 justify-content: center;
             }
 
+            .activation-banner {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .activation-banner-icon {
+                margin: 0 auto;
+            }
+
             .activation-actions {
                 grid-template-columns: 1fr;
             }
-            
-            /* System flow diagram */
-            .system-flow-diagram {
-                padding: 16px !important;
-                margin: 0;
+
+            .btn-gradient,
+            .border-purple-500 {
+                width: 100%;
+                padding: 14px 20px !important;
             }
-            
-            /* Improve touch targets */
-            button, a {
+
+            .md\:flex-row {
+                flex-direction: column !important;
+                text-align: center;
+            }
+
+            .md\:text-right {
+                text-align: center !important;
+                margin-top: 24px;
+            }
+
+            button,
+            a {
                 min-height: 44px;
             }
-            
-            input, select, textarea {
+
+            input,
+            select,
+            textarea {
                 font-size: 16px !important;
             }
-            
-            /* Remove hover effects on touch devices */
-            @media (hover: none) {
-                .system-card:hover {
-                    transform: none;
-                }
-                
-                .btn-gradient:hover {
-                    transform: none;
-                }
-            }
-            
-            /* Body overlay when mobile menu is open */
-            body.menu-open {
-                overflow: hidden;
-            }
-            
-            body.menu-open::after {
-                content: '';
-                position: fixed;
-                top: 64px;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: rgba(0, 0, 0, 0.5);
-                z-index: 998;
-            }
         }
-        
-        @media (min-width: 769px) and (max-width: 1024px) {
-            /* Tablet styles */
-            .lg\:grid-cols-3 {
-                grid-template-columns: repeat(2, 1fr) !important;
-            }
-            
-            .system-card.lg\:col-span-2 {
-                grid-column: span 2 !important;
-            }
-            
+
+        @media (min-width: 768px) and (max-width: 1023px) {
             h1 {
-                font-size: 3rem !important;
+                font-size: 3.25rem !important;
             }
-            
-            .text-4xl, .text-5xl, .text-6xl {
-                font-size: 3rem !important;
+
+            .text-4xl,
+            .text-5xl,
+            .text-6xl {
+                font-size: 3.25rem !important;
             }
         }
         
         /* Touch feedback for mobile */
+        @media (hover: none) {
+            .system-card:hover {
+                transform: none;
+            }
+
+            .btn-gradient:hover {
+                transform: none;
+            }
+        }
+
         @media (hover: none) and (pointer: coarse) {
             .system-card:active {
                 transform: scale(0.98);
