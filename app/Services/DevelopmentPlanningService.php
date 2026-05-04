@@ -72,10 +72,11 @@ class DevelopmentPlanningService
             ->values();
     }
 
-    public function summaryCounts(Collection $candidates): array
+    public function summaryCounts(Collection $candidates, Collection $lowOffices): array
     {
         return [
-            'low_performers' => $candidates->count(),
+            'low_employees' => $candidates->count(),
+            'low_offices' => $lowOffices->count(),
             'drafts_created' => $candidates->filter(fn (array $row) => ($row['development_plan_status'] ?? '') === DevelopmentPlan::STATUS_DRAFT)->count(),
             'pending_details' => $candidates->filter(fn (array $row) => ($row['development_plan_status'] ?? '') === DevelopmentPlan::STATUS_PENDING_DETAILS)->count(),
         ];

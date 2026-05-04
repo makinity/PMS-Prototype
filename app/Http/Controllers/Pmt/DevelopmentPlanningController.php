@@ -22,18 +22,23 @@ class DevelopmentPlanningController extends Controller
             ->first();
 
         $candidates = $planningService->getLowPerformerCandidates($activePeriod);
-        $summaryCounts = $planningService->summaryCounts($candidates);
+        
+        $performerData = app(\App\Services\StageFourPerformerService::class)->getTopAndLowPerformers($activePeriod);
+        $lowOffices = $performerData['low_offices'] ?? collect();
+
+        $summaryCounts = $planningService->summaryCounts($candidates, $lowOffices);
 
         $infoMessage = null;
         if (!$activePeriod) {
             $infoMessage = 'No active performance period is configured.';
-        } elseif ($candidates->isEmpty()) {
-            $infoMessage = 'No officially released low-performing employee results found for the active period.';
+        } elseif ($candidates->isEmpty() && $lowOffices->isEmpty()) {
+            $infoMessage = 'No officially released low-performing results found for the active period.';
         }
 
         return view('pmt.development-planning.index', [
             'activePeriod' => $activePeriod,
             'candidates' => $candidates,
+            'lowOffices' => $lowOffices,
             'summaryCounts' => $summaryCounts,
             'infoMessage' => $infoMessage,
         ]);
