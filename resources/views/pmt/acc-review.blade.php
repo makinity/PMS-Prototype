@@ -73,11 +73,8 @@
                         <tr>
                             <th class="px-5 py-3 text-left">Employee</th>
                             <th class="px-5 py-3 text-left">Office</th>
-                            <th class="px-5 py-3 text-left">Period</th>
                             <th class="px-5 py-3 text-left">Status</th>
                             <th class="px-5 py-3 text-center tabular-nums">Score</th>
-                            <th class="px-5 py-3 text-left">Submitted At</th>
-                            <th class="px-5 py-3 text-left">Dept Head Action</th>
                             <th class="px-5 py-3 text-center">Actions</th>
                         </tr>
                     </thead>
@@ -100,15 +97,12 @@
                                 data-search-text="{{ \Illuminate\Support\Str::lower($rowSearchText) }}">
                                 <td class="px-5 py-3 font-semibold text-slate-100">{{ $row['employee_name'] ?? '--' }}</td>
                                 <td class="px-5 py-3">{{ $row['office_name'] ?? '--' }}</td>
-                                <td class="px-5 py-3">{{ $row['period_label'] ?? $periodLabelSafe }}</td>
                                 <td class="px-5 py-3">
                                     <span class="{{ $statusBadgeClasses }}">{{ $row['status_label'] ?? 'Draft' }}</span>
                                 </td>
                                 <td class="px-5 py-3 text-center tabular-nums font-bold text-emerald-400">
                                     {{ number_format($row['computed_score'] ?? 0, 2) }}
                                 </td>
-                                <td class="px-5 py-3">{{ $row['submitted_at_label'] ?? '--' }}</td>
-                                <td class="px-5 py-3">{{ $row['dept_head_action_at_label'] ?? '--' }}</td>
                                 <td class="px-5 py-3 text-center">
                                     <button type="button"
                                             data-open-submission
@@ -124,11 +118,11 @@
                             </tr>
                         @empty
                             <tr class="bg-slate-900/40">
-                                <td colspan="7" class="px-5 py-8 text-center text-sm text-slate-400">No dept-head-endorsed or PMT-approved submissions found for the active period.</td>
+                                <td colspan="5" class="px-5 py-8 text-center text-sm text-slate-400">No dept-head-endorsed or PMT-approved submissions found for the active period.</td>
                             </tr>
                         @endforelse
                         <tr id="pmt-submissions-no-match-row" class="hidden bg-slate-900/40">
-                            <td colspan="7" class="px-5 py-8 text-center text-sm text-slate-400">No matching accomplishment submissions found.</td>
+                            <td colspan="5" class="px-5 py-8 text-center text-sm text-slate-400">No matching accomplishment submissions found.</td>
                         </tr>
                     </tbody>
                 </table>

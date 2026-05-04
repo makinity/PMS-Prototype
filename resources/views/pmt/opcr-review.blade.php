@@ -226,13 +226,15 @@
                             <h2 id="dh-opcr-workspace-title" class="text-lg font-semibold text-white">PMT OPCR Review</h2>
                             <span class="rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-indigo-200">Stage I - Planning</span>
                         </div>
-                        <p id="dh-opcr-workspace-subtitle" class="mt-2 text-sm text-slate-400">Review Department Head-endorsed OPCRs and issue final approval.</p>
-                        <div class="mt-3 flex flex-wrap items-center gap-2 text-sm text-slate-400">
-                            <span id="dh-opcr-workspace-office-inline">-</span>
-                            <span class="text-slate-600">•</span>
-                            <span id="dh-opcr-workspace-period-inline">-</span>
-                            <span id="dh-opcr-workspace-status" class="ml-1 inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold">-</span>
-                            <span id="dh-opcr-workspace-source-count" class="inline-flex rounded-full bg-slate-800 px-2.5 py-1 text-xs font-semibold text-slate-200">0 source UWPs</span>
+                        <div class="hidden">
+                            <p id="dh-opcr-workspace-subtitle" class="mt-2 text-sm text-slate-400">Review Department Head-endorsed OPCRs and issue final approval.</p>
+                            <div class="mt-3 flex flex-wrap items-center gap-2 text-sm text-slate-400">
+                                <span id="dh-opcr-workspace-office-inline">-</span>
+                                <span class="text-slate-600">•</span>
+                                <span id="dh-opcr-workspace-period-inline">-</span>
+                                <span id="dh-opcr-workspace-status" class="ml-1 inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold">-</span>
+                                <span id="dh-opcr-workspace-source-count" class="inline-flex rounded-full bg-slate-800 px-2.5 py-1 text-xs font-semibold text-slate-200">0 source UWPs</span>
+                            </div>
                         </div>
                     </div>
                     <button type="button" data-close-workspace-modal class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-700 bg-slate-950/60 text-slate-400 transition hover:bg-slate-900 hover:text-white">
@@ -246,8 +248,13 @@
                             <p class="text-sm font-semibold uppercase tracking-[0.22em] text-slate-400">Consolidated Outputs</p>
                             <span id="dh-opcr-workspace-output-count" class="text-sm font-semibold text-blue-300">0</span>
                         </div>
+                        <div class="flex border-b border-slate-800 px-2 pt-2">
+                            <button type="button" data-workspace-function-tab="all" class="flex-1 border-b-2 border-blue-400 pb-2 text-xs font-semibold text-white transition">All</button>
+                            <button type="button" data-workspace-function-tab="core" class="flex-1 border-b-2 border-transparent pb-2 text-xs font-medium text-slate-400 transition hover:text-slate-300">Core</button>
+                            <button type="button" data-workspace-function-tab="support" class="flex-1 border-b-2 border-transparent pb-2 text-xs font-medium text-slate-400 transition hover:text-slate-300">Support</button>
+                        </div>
                         <div id="dh-opcr-workspace-output-list" class="min-h-0 space-y-2 overflow-y-auto px-2 py-2"></div>
-                        <div class="border-t border-slate-800 px-4 py-3">
+                        <div class="hidden border-t border-slate-800 px-4 py-3">
                             <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Source UWP List</p>
                             <div id="dh-opcr-workspace-source-list" class="mt-3 space-y-2 text-sm text-slate-300"></div>
                         </div>
@@ -258,7 +265,7 @@
                             <div class="flex flex-wrap items-center gap-3">
                                 <h3 id="dh-opcr-workspace-detail-title" class="text-lg font-semibold leading-tight text-white">No output selected</h3>
                                 <span id="dh-opcr-workspace-detail-function" class="hidden rounded-md border px-2 py-1 text-xs font-medium"></span>
-                                <span id="dh-opcr-workspace-detail-weight" class="text-sm font-semibold text-slate-300"></span>
+                                <span id="dh-opcr-workspace-detail-weight" class="hidden text-sm font-semibold text-slate-300"></span>
                             </div>
                         </div>
 
@@ -273,11 +280,11 @@
 
                         <div class="min-h-0 flex-1 overflow-y-auto px-6 py-4">
                             <div data-opcr-workspace-panel="overview" class="space-y-5">
-                                <div>
+                                <div class="hidden">
                                     <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Target Summary</p>
                                     <p id="dh-opcr-workspace-target-summary" class="mt-2 text-lg leading-snug text-white">-</p>
                                 </div>
-                                <div class="grid gap-5 sm:grid-cols-2">
+                                <div class="hidden grid gap-5 sm:grid-cols-2">
                                     <div><p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Function Type</p><div id="dh-opcr-workspace-function-copy" class="mt-2"></div></div>
                                     <div><p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Weight</p><p id="dh-opcr-workspace-weight-copy" class="mt-2 text-lg font-semibold text-white">-</p></div>
                                 </div>
@@ -304,7 +311,7 @@
                             </div>
 
                             <div data-opcr-workspace-panel="standards" class="hidden space-y-4">
-                                <div><p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Selected Indicator</p><p id="dh-opcr-workspace-standards-indicator" class="mt-1.5 text-base font-semibold text-white">-</p></div>
+                                <div class="hidden"><p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Selected Indicator</p><p id="dh-opcr-workspace-standards-indicator" class="mt-1.5 text-base font-semibold text-white">-</p></div>
                                 <div class="overflow-hidden rounded-xl border border-slate-800">
                                     <table class="min-w-full text-sm text-slate-100">
                                         <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.22em] text-slate-400">
@@ -316,7 +323,7 @@
                             </div>
 
                             <div data-opcr-workspace-panel="assignees" class="hidden space-y-4">
-                                <div><p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Selected Indicator</p><p id="dh-opcr-workspace-assignees-indicator" class="mt-1.5 text-base font-semibold text-white">-</p></div>
+                                <div class="hidden"><p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Selected Indicator</p><p id="dh-opcr-workspace-assignees-indicator" class="mt-1.5 text-base font-semibold text-white">-</p></div>
                                 <div class="overflow-hidden rounded-xl border border-slate-800">
                                     <table class="w-full text-sm text-slate-100">
                                         <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.2em] text-slate-400">
@@ -463,6 +470,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let selectedWorkspaceOutputIndex = 0;
     let selectedWorkspaceIndicatorIndex = 0;
     let activeWorkspaceTab = 'overview';
+    let activeWorkspaceFunctionTab = 'all';
     const liveSearchInput = document.querySelector('[data-live-opcr-search]');
     const opcrRows = Array.from(document.querySelectorAll('[data-opcr-row]'));
     const noMatchRow = document.getElementById('pmt-opcr-no-match-row');
@@ -671,6 +679,18 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     };
 
+    const setWorkspaceFunctionTab = (tabName) => {
+        activeWorkspaceFunctionTab = tabName || 'all';
+        document.querySelectorAll('[data-workspace-function-tab]').forEach((button) => {
+            const active = button.getAttribute('data-workspace-function-tab') === activeWorkspaceFunctionTab;
+            button.classList.toggle('border-blue-400', active);
+            button.classList.toggle('text-white', active);
+            button.classList.toggle('border-transparent', !active);
+            button.classList.toggle('text-slate-400', !active);
+        });
+        renderWorkspaceOutputList();
+    };
+
     const renderWorkspaceStandards = () => {
         const indicator = getSelectedWorkspaceIndicator();
         const tbody = document.getElementById('dh-opcr-workspace-standards-body');
@@ -764,7 +784,6 @@ document.addEventListener('DOMContentLoaded', function () {
             item.className = `flex w-full items-start justify-between rounded-xl border px-4 py-3 text-left transition ${index === selectedWorkspaceIndicatorIndex ? 'border-blue-500/30 bg-blue-500/10' : 'border-slate-800 bg-slate-950/50 hover:bg-slate-900/60'}`;
             item.innerHTML = `
                 <span class="pr-4 text-sm text-slate-100">${escapeHtml(indicator?.indicator_text || '-')}</span>
-                <span class="rounded-md bg-slate-900 px-3 py-1 text-xs text-slate-400">${escapeHtml(getIndicatorTargetSummary(indicator))}</span>
             `;
             item.addEventListener('click', () => {
                 selectedWorkspaceIndicatorIndex = index;
@@ -790,31 +809,43 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!container || !count || !sourceList) return;
 
         const outputs = getWorkspaceOutputs();
-        count.textContent = String(outputs.length);
+        
+        let filteredOutputs = outputs;
+        if (activeWorkspaceFunctionTab !== 'all') {
+            filteredOutputs = outputs.filter(o => {
+                const ft = String(o.function_type || '').toLowerCase();
+                return ft.includes(activeWorkspaceFunctionTab);
+            });
+        }
+
+        count.textContent = String(filteredOutputs.length);
         container.innerHTML = '';
 
-        outputs.forEach((output, index) => {
-            const indicators = Array.isArray(output?.success_indicators) ? output.success_indicators : [];
-            const button = document.createElement('button');
-            button.type = 'button';
-            button.className = `block w-full rounded-xl border px-3 py-3 text-left transition ${index === selectedWorkspaceOutputIndex ? 'border-blue-400/60 bg-blue-500/10 shadow-[inset_0_0_0_1px_rgba(96,165,250,0.18)]' : 'border-slate-800 bg-slate-950/30 hover:bg-slate-900/50'}`;
-            button.innerHTML = `
-                <div class="line-clamp-2 text-base font-semibold leading-snug text-white">${escapeHtml(output?.title || '-')}</div>
-                <div class="mt-2 flex flex-wrap items-center gap-2">
-                    ${functionBadge(output?.function_type)}
-                    <span class="text-sm font-semibold text-slate-200">${output?.weight_percent !== null && output?.weight_percent !== undefined && output?.weight_percent !== '' ? escapeHtml(String(output.weight_percent) + '%') : '-'}</span>
-                    <span class="text-xs text-slate-500">${indicators.length} indicator${indicators.length === 1 ? '' : 's'}</span>
-                </div>
-            `;
-            button.addEventListener('click', () => {
-                selectedWorkspaceOutputIndex = index;
-                selectedWorkspaceIndicatorIndex = 0;
-                renderWorkspaceModal();
+        if (filteredOutputs.length === 0) {
+            container.innerHTML = '<p class="p-4 text-center text-sm text-slate-500">No outputs found.</p>';
+        } else {
+            filteredOutputs.forEach((output) => {
+                const index = outputs.indexOf(output);
+                const indicators = Array.isArray(output?.success_indicators) ? output.success_indicators : [];
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = `block w-full rounded-xl border px-3 py-3 text-left transition ${index === selectedWorkspaceOutputIndex ? 'border-blue-400/60 bg-blue-500/10 shadow-[inset_0_0_0_1px_rgba(96,165,250,0.18)]' : 'border-slate-800 bg-slate-950/30 hover:bg-slate-900/50'}`;
+                button.innerHTML = `
+                    <div class="line-clamp-2 text-base font-semibold leading-snug text-white">${escapeHtml(output?.title || '-')}</div>
+                    <div class="mt-2 flex flex-wrap items-center gap-2">
+                        <span class="text-xs text-slate-500">${indicators.length} indicator${indicators.length === 1 ? '' : 's'}</span>
+                    </div>
+                `;
+                button.addEventListener('click', () => {
+                    selectedWorkspaceOutputIndex = index;
+                    selectedWorkspaceIndicatorIndex = 0;
+                    renderWorkspaceModal();
+                });
+                container.appendChild(button);
             });
-            container.appendChild(button);
-        });
+        }
 
-        const sourceIds = Array.from(new Set(outputs.map((output) => String(output?.source_uwp_id || '').trim()).filter(Boolean)));
+        const sourceIds = Array.from(new Set(filteredOutputs.map((output) => String(output?.source_uwp_id || '').trim()).filter(Boolean)));
         sourceList.innerHTML = sourceIds.length
             ? sourceIds.map((id) => `<div class="flex items-center justify-between gap-2"><span>UWP-${escapeHtml(id)}</span><span class="text-cyan-300">Consolidated</span></div>`).join('')
             : '<p class="text-slate-400">No source UWP reference.</p>';
@@ -1081,6 +1112,15 @@ document.addEventListener('DOMContentLoaded', function () {
         button.addEventListener('click', () => {
             setWorkspaceTab(button.getAttribute('data-opcr-workspace-tab') || 'overview');
             renderWorkspaceDetail();
+        });
+    });
+
+    document.querySelectorAll('[data-workspace-function-tab]').forEach((button) => {
+        button.addEventListener('click', () => {
+            selectedWorkspaceOutputIndex = 0;
+            selectedWorkspaceIndicatorIndex = 0;
+            setWorkspaceFunctionTab(button.getAttribute('data-workspace-function-tab') || 'all');
+            renderWorkspaceModal();
         });
     });
 
