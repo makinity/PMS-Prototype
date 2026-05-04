@@ -6,6 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class AccomplishmentSubmission extends Model
 {
+    public const STATUS_DRAFT = 'draft';
+    public const STATUS_SUBMITTED_TO_SUPERVISOR = 'submitted_to_supervisor';
+    public const STATUS_SUPERVISOR_ENDORSED = 'supervisor_endorsed';
+    public const STATUS_DEPT_HEAD_ENDORSED = 'dept_head_endorsed';
+    public const STATUS_RECOMMENDED_BY_PMT = 'recommended_by_pmt';
+    public const STATUS_RELEASED_BY_PMT = 'released_by_pmt';
+    public const STATUS_RETURNED_TO_EMPLOYEE = 'returned_to_employee';
+
     protected $fillable = [
         'employee_id',
         'office_id',

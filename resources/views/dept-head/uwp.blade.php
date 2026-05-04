@@ -477,15 +477,17 @@
                         <h2 class="text-lg font-semibold text-white">UWP Review</h2>
                         <span class="rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-indigo-200">Stage I - Planning</span>
                     </div>
-                    <p id="uwp-workspace-subtitle" class="mt-2 text-sm text-slate-400">Select a UWP to view details</p>
-                    <div class="mt-3 flex flex-wrap items-center gap-2 text-sm text-slate-400">
-                        <span id="uwp-workspace-office-inline">-</span>
-                        <span class="text-slate-600">•</span>
-                        <span id="uwp-workspace-period-inline">-</span>
-                        <span class="text-slate-600">•</span>
-                        <span id="uwp-workspace-supervisor-inline">-</span>
-                        <span id="uwp-workspace-status-inline" class="ml-1 inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold">-</span>
-                        <span id="uwp-workspace-output-count-inline" class="inline-flex rounded-full bg-slate-800 px-2.5 py-1 text-xs font-semibold text-slate-200">0 outputs</span>
+                    <div class="hidden">
+                        <p id="uwp-workspace-subtitle" class="mt-2 text-sm text-slate-400">Select a UWP to view details</p>
+                        <div class="mt-3 flex flex-wrap items-center gap-2 text-sm text-slate-400">
+                            <span id="uwp-workspace-office-inline">-</span>
+                            <span class="text-slate-600">•</span>
+                            <span id="uwp-workspace-period-inline">-</span>
+                            <span class="text-slate-600">•</span>
+                            <span id="uwp-workspace-supervisor-inline">-</span>
+                            <span id="uwp-workspace-status-inline" class="ml-1 inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold">-</span>
+                            <span id="uwp-workspace-output-count-inline" class="inline-flex rounded-full bg-slate-800 px-2.5 py-1 text-xs font-semibold text-slate-200">0 outputs</span>
+                        </div>
                     </div>
                 </div>
                 <button type="button" data-review-close
@@ -506,6 +508,11 @@
                         <p class="text-sm font-semibold uppercase tracking-[0.22em] text-slate-400">Planned Outputs</p>
                         <span id="uwp-workspace-output-count-badge" class="text-sm font-semibold text-blue-300">0</span>
                     </div>
+                    <div class="flex border-b border-slate-800 px-2 pt-2">
+                        <button type="button" data-workspace-function-tab="all" class="flex-1 border-b-2 border-blue-400 pb-2 text-xs font-semibold text-white transition">All</button>
+                        <button type="button" data-workspace-function-tab="core" class="flex-1 border-b-2 border-transparent pb-2 text-xs font-medium text-slate-400 transition hover:text-slate-300">Core</button>
+                        <button type="button" data-workspace-function-tab="support" class="flex-1 border-b-2 border-transparent pb-2 text-xs font-medium text-slate-400 transition hover:text-slate-300">Support</button>
+                    </div>
                     <div id="uwp-workspace-output-list" class="min-h-0 space-y-2 overflow-y-auto px-2 py-2"></div>
                 </aside>
 
@@ -514,7 +521,7 @@
                         <div class="flex flex-wrap items-center gap-3">
                             <h3 id="uwp-workspace-detail-title" class="text-lg font-semibold leading-tight text-white">No output selected</h3>
                             <span id="uwp-workspace-detail-function" class="hidden rounded-md border px-2 py-1 text-xs font-medium"></span>
-                            <span id="uwp-workspace-detail-weight" class="text-sm font-semibold text-slate-300"></span>
+                            <span id="uwp-workspace-detail-weight" class="hidden text-sm font-semibold text-slate-300"></span>
                         </div>
                     </div>
 
@@ -529,11 +536,11 @@
 
                     <div class="min-h-0 flex-1 overflow-y-auto px-5 py-4">
                         <div data-uwp-workspace-panel="overview" class="space-y-5">
-                            <div>
+                            <div class="hidden">
                                 <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Target Summary</p>
                                 <p id="uwp-workspace-target-summary" class="mt-2 text-lg leading-snug text-white">-</p>
                             </div>
-                            <div class="grid gap-5 sm:grid-cols-2">
+                            <div class="hidden grid gap-5 sm:grid-cols-2">
                                 <div><p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Function Type</p><div id="uwp-workspace-function-copy" class="mt-2"></div></div>
                                 <div><p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Weight</p><p id="uwp-workspace-weight-copy" class="mt-2 text-lg font-semibold text-white">-</p></div>
                             </div>
@@ -560,7 +567,7 @@
                         </div>
 
                         <div data-uwp-workspace-panel="standards" class="hidden space-y-4">
-                            <div><p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Selected Indicator</p><p id="uwp-workspace-standards-indicator" class="mt-1.5 text-base font-semibold text-white">-</p></div>
+                            <div class="hidden"><p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Selected Indicator</p><p id="uwp-workspace-standards-indicator" class="mt-1.5 text-base font-semibold text-white">-</p></div>
                             <div class="overflow-hidden rounded-xl border border-slate-800">
                                 <table class="min-w-full text-sm text-slate-100">
                                     <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.22em] text-slate-400">
@@ -572,7 +579,7 @@
                         </div>
 
                         <div data-uwp-workspace-panel="assignees" class="hidden space-y-4">
-                            <div><p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Selected Indicator</p><p id="uwp-workspace-assignees-indicator" class="mt-1.5 text-base font-semibold text-white">-</p></div>
+                            <div class="hidden"><p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Selected Indicator</p><p id="uwp-workspace-assignees-indicator" class="mt-1.5 text-base font-semibold text-white">-</p></div>
                             <div class="overflow-hidden rounded-xl border border-slate-800">
                                 <table class="min-w-full text-sm text-slate-100">
                                     <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.22em] text-slate-400">
@@ -623,6 +630,7 @@
     let selectedWorkspaceOutputIndex = 0;
     let selectedWorkspaceIndicatorIndex = 0;
     let activeWorkspaceTab = 'overview';
+    let activeWorkspaceFunctionTab = 'all';
 
     function createEmptyStandardsRow() {
         return { Q: [], E: [], T: [] };
@@ -822,6 +830,15 @@
                 renderWorkspaceDetail();
             });
         });
+
+        document.querySelectorAll('[data-workspace-function-tab]').forEach((button) => {
+            button.addEventListener('click', () => {
+                selectedWorkspaceOutputIndex = 0;
+                selectedWorkspaceIndicatorIndex = 0;
+                setWorkspaceFunctionTab(button.getAttribute('data-workspace-function-tab') || 'all');
+                renderWorkspaceModal();
+            });
+        });
     }
 
     function escapeHtml(str) {
@@ -891,6 +908,18 @@
         if (label && buttonEl.dataset.originalLabel) {
             label.textContent = buttonEl.dataset.originalLabel;
         }
+    }
+
+    function setWorkspaceFunctionTab(tabName) {
+        activeWorkspaceFunctionTab = tabName || 'all';
+        document.querySelectorAll('[data-workspace-function-tab]').forEach((button) => {
+            const active = button.getAttribute('data-workspace-function-tab') === activeWorkspaceFunctionTab;
+            button.classList.toggle('border-blue-400', active);
+            button.classList.toggle('text-white', active);
+            button.classList.toggle('border-transparent', !active);
+            button.classList.toggle('text-slate-400', !active);
+        });
+        renderWorkspaceOutputList();
     }
 
     function updateDeptHeadListRow(uwpId, newStatus, options = {}) {
@@ -1183,7 +1212,6 @@
             item.className = `flex w-full items-start justify-between rounded-xl border px-4 py-3 text-left transition ${isSelected ? 'border-blue-500/30 bg-blue-500/10' : 'border-slate-800 bg-slate-950/50 hover:bg-slate-900/60'}`;
             item.innerHTML = `
                 <span class="pr-4 text-sm text-slate-100">${escapeHtml(indicator?.indicator_text || '-')}</span>
-                <span class="rounded-md bg-slate-900 px-3 py-1 text-xs text-slate-400">${escapeHtml(getIndicatorTargetSummary(indicator))}</span>
             `;
             item.addEventListener('click', () => {
                 selectedWorkspaceIndicatorIndex = index;
@@ -1209,11 +1237,25 @@
         if (!container || !countEl || !countBadge) return;
 
         const outputs = getWorkspaceOutputs();
-        countEl.textContent = `${outputs.length} output${outputs.length === 1 ? '' : 's'}`;
-        countBadge.textContent = String(outputs.length);
+        let filteredOutputs = outputs;
+        if (activeWorkspaceFunctionTab !== 'all') {
+            filteredOutputs = outputs.filter(o => {
+                const ft = String(o.function_type || '').toLowerCase();
+                return ft.includes(activeWorkspaceFunctionTab);
+            });
+        }
+
+        countEl.textContent = `${filteredOutputs.length} output${filteredOutputs.length === 1 ? '' : 's'}`;
+        countBadge.textContent = String(filteredOutputs.length);
         container.innerHTML = '';
 
-        outputs.forEach((output, index) => {
+        if (filteredOutputs.length === 0) {
+            container.innerHTML = '<p class="p-4 text-center text-sm text-slate-500">No outputs found.</p>';
+            return;
+        }
+
+        filteredOutputs.forEach((output) => {
+            const index = outputs.indexOf(output);
             const active = index === selectedWorkspaceOutputIndex;
             const button = document.createElement('button');
             button.type = 'button';
@@ -1222,8 +1264,6 @@
             button.innerHTML = `
                 <div class="line-clamp-2 text-base font-semibold leading-snug text-white">${escapeHtml(output.title)}</div>
                 <div class="mt-2 flex flex-wrap items-center gap-2">
-                    ${buildFunctionBadge(output.function_type)}
-                    <span class="text-sm font-semibold text-slate-200">${output.weight_percent !== '' ? escapeHtml(String(output.weight_percent) + '%') : '-'}</span>
                     <span class="text-xs text-slate-500">${indicatorCount} indicator${indicatorCount === 1 ? '' : 's'}</span>
                 </div>
             `;

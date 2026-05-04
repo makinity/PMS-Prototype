@@ -481,10 +481,10 @@ class AccomplishmentController extends Controller
         return match ($status) {
             'submitted_to_supervisor' => 'Submitted to Supervisor',
             'supervisor_endorsed' => 'Supervisor Endorsed',
-            'dept_head_endorsed' => 'Dept Head Endorsed',
-            'pmt_approved' => 'Calibrated',
-            'approved_by_pmt' => 'Calibrated',
-            'adjusted_by_pmt' => 'Calibrated',
+            'dept_head_endorsed' => 'Awaiting PMT Recommendation',
+            'recommended_by_pmt', 'pmt_approved' => 'Recommended by PMT',
+            'approved_by_pmt', 'adjusted_by_pmt' => 'Calibrated by PMT',
+            'released_by_pmt' => 'Officially Released',
             'returned_to_employee' => 'Returned to Employee',
             default => 'Draft',
         };

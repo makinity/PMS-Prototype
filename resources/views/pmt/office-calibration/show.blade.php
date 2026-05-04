@@ -6,6 +6,7 @@
     $currentOpcrPayload = $payload ?? [];
     $opcrStatus = strtolower((string) ($currentOpcr?->status ?? ''));
     $canCalibrate = in_array($opcrStatus, [\App\Models\Opcr::STATUS_PENDING_PMT_CALIBRATION, \App\Models\Opcr::STATUS_APPROVED_BY_PMT, \App\Models\Opcr::STATUS_ADJUSTED_BY_PMT], true);
+    $canRelease = in_array($opcrStatus, [\App\Models\Opcr::STATUS_APPROVED_BY_PMT, \App\Models\Opcr::STATUS_ADJUSTED_BY_PMT], true);
 @endphp
 
 <section class="space-y-6">
@@ -15,7 +16,7 @@
                 &larr; Back to Calibration List
             </a>
             <h1 class="text-2xl font-bold text-white">Office OPCR Calibration</h1>
-            <p class="text-sm text-slate-400">Review and calibrate the final OPCR rating.</p>
+            <p class="text-sm text-slate-400">Review, calibrate, and release the final OPCR rating.</p>
         </div>
         <div class="rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3 text-right">
             <p class="text-[11px] uppercase tracking-[0.24em] text-slate-500">Active Period</p>
@@ -36,11 +37,21 @@
                             \App\Models\Opcr::STATUS_PENDING_PMT_CALIBRATION => 'border-sky-500/30 bg-sky-500/10 text-sky-300',
                             \App\Models\Opcr::STATUS_APPROVED_BY_PMT => 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300',
                             \App\Models\Opcr::STATUS_ADJUSTED_BY_PMT => 'border-violet-500/30 bg-violet-500/10 text-violet-300',
+                            \App\Models\Opcr::STATUS_RELEASED_BY_PMT => 'border-cyan-500/30 bg-cyan-500/10 text-cyan-300',
                             \App\Models\Opcr::STATUS_RETURNED_BY_PMT => 'border-rose-500/30 bg-rose-500/10 text-rose-300',
                             default => 'border-slate-500/30 bg-slate-500/10 text-slate-300',
                         };
                     @endphp
-                    <span class="rounded-full border px-3 py-1 {{ $opcrBadge }}">{{ ucwords(str_replace('_', ' ', $opcrStatus)) }}</span>
+                    <span class="rounded-full border px-3 py-1 {{ $opcrBadge }}">
+                        {{ match ($opcrStatus) {
+                            \App\Models\Opcr::STATUS_PENDING_PMT_CALIBRATION => 'Pending Calibration',
+                            \App\Models\Opcr::STATUS_APPROVED_BY_PMT => 'Calibrated (Approved)',
+                            \App\Models\Opcr::STATUS_ADJUSTED_BY_PMT => 'Calibrated (Adjusted)',
+                            \App\Models\Opcr::STATUS_RELEASED_BY_PMT => 'Officially Released',
+                            \App\Models\Opcr::STATUS_RETURNED_BY_PMT => 'Returned by PMT',
+                            default => ucwords(str_replace('_', ' ', $opcrStatus)),
+                        } }}
+                    </span>
                 @else
                     <span class="rounded-full border border-slate-700 bg-slate-950/70 px-3 py-1 text-slate-300">No OPCR yet</span>
                 @endif
@@ -168,7 +179,7 @@
 
                     <!-- Approve or Return Form -->
                     <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
-                        <h4 class="text-sm font-semibold text-white">Approve / Return</h4>
+                        <h4 class="text-sm font-semibold text-white">Approve / Release / Return</h4>
                         <form method="POST" action="{{ route('pmt.office-calibration.approve', $currentOpcr->id) }}" class="mt-3 space-y-3">
                             @csrf
                             <div>
@@ -179,6 +190,9 @@
                             </div>
                             <div class="flex items-center justify-end gap-3 mt-4">
                                 <button type="button" id="pmtReturnBtn" class="rounded border border-rose-600 bg-rose-600/20 px-4 py-2 text-sm font-semibold text-rose-300 hover:bg-rose-600/30">Return to Office</button>
+                                @if ($canRelease)
+                                    <button type="button" id="pmtReleaseBtn" class="rounded border border-cyan-600 bg-cyan-600/20 px-4 py-2 text-sm font-semibold text-cyan-300 hover:bg-cyan-600/30">Release Official Result</button>
+                                @endif
                                 <button type="submit" class="rounded border border-emerald-600 bg-emerald-600/20 px-4 py-2 text-sm font-semibold text-emerald-300 hover:bg-emerald-600/30">Approve Final Rating</button>
                             </div>
                         </form>
@@ -186,6 +200,10 @@
                         <form method="POST" id="pmtSubmissionReturnForm" action="{{ route('pmt.office-calibration.return', $currentOpcr->id) }}" class="hidden">
                             @csrf
                             <input type="hidden" name="remarks" id="pmtReturnRemarksInput">
+                        </form>
+                        <form method="POST" id="pmtSubmissionReleaseForm" action="{{ route('pmt.office-calibration.release', $currentOpcr->id) }}" class="hidden">
+                            @csrf
+                            <input type="hidden" name="remarks" id="pmtReleaseRemarksInput">
                         </form>
                     </div>
                 </div>
@@ -217,6 +235,11 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         document.getElementById('pmtReturnRemarksInput').value = remarks;
         document.getElementById('pmtSubmissionReturnForm').submit();
+    });
+    document.getElementById('pmtReleaseBtn')?.addEventListener('click', () => {
+        const remarks = document.getElementById('pmtRemarksInput')?.value || '';
+        document.getElementById('pmtReleaseRemarksInput').value = remarks;
+        document.getElementById('pmtSubmissionReleaseForm').submit();
     });
 });
 </script>

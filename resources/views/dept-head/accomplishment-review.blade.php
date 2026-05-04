@@ -10,9 +10,11 @@
             'submitted_to_supervisor' => 'inline-flex items-center rounded-full border border-sky-500/40 bg-sky-500/10 px-2.5 py-1 text-xs font-semibold text-sky-200',
             'supervisor_endorsed' => 'inline-flex items-center rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-200',
             'dept_head_endorsed' => 'inline-flex items-center rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-200',
+            'recommended_by_pmt' => 'inline-flex items-center rounded-full border border-violet-500/40 bg-violet-500/10 px-2.5 py-1 text-xs font-semibold text-violet-200',
             'pmt_approved' => 'inline-flex items-center rounded-full border border-violet-500/40 bg-violet-500/10 px-2.5 py-1 text-xs font-semibold text-violet-200',
-            'approved_by_pmt' => 'inline-flex items-center rounded-full border border-violet-500/40 bg-violet-500/10 px-2.5 py-1 text-xs font-semibold text-violet-200',
-            'adjusted_by_pmt' => 'inline-flex items-center rounded-full border border-violet-500/40 bg-violet-500/10 px-2.5 py-1 text-xs font-semibold text-violet-200',
+            'approved_by_pmt' => 'inline-flex items-center rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-200',
+            'adjusted_by_pmt' => 'inline-flex items-center rounded-full border border-blue-500/40 bg-blue-500/10 px-2.5 py-1 text-xs font-semibold text-blue-200',
+            'released_by_pmt' => 'inline-flex items-center rounded-full border border-cyan-500/40 bg-cyan-500/10 px-2.5 py-1 text-xs font-semibold text-cyan-200',
             'returned_to_employee' => 'inline-flex items-center rounded-full border border-rose-500/40 bg-rose-500/10 px-2.5 py-1 text-xs font-semibold text-rose-200',
             'draft' => 'inline-flex items-center rounded-full border border-slate-600 bg-slate-800/70 px-2.5 py-1 text-xs font-semibold text-slate-200',
         ];
@@ -503,8 +505,15 @@
                             return 'inline-flex items-center rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-200';
                         case 'dept_head_endorsed':
                             return 'inline-flex items-center rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-200';
+                        case 'recommended_by_pmt':
                         case 'pmt_approved':
                             return 'inline-flex items-center rounded-full border border-violet-500/40 bg-violet-500/10 px-2.5 py-1 text-xs font-semibold text-violet-200';
+                        case 'approved_by_pmt':
+                            return 'inline-flex items-center rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-200';
+                        case 'adjusted_by_pmt':
+                            return 'inline-flex items-center rounded-full border border-blue-500/40 bg-blue-500/10 px-2.5 py-1 text-xs font-semibold text-blue-200';
+                        case 'released_by_pmt':
+                            return 'inline-flex items-center rounded-full border border-cyan-500/40 bg-cyan-500/10 px-2.5 py-1 text-xs font-semibold text-cyan-200';
                         case 'returned_to_employee':
                             return 'inline-flex items-center rounded-full border border-rose-500/40 bg-rose-500/10 px-2.5 py-1 text-xs font-semibold text-rose-200';
                         default:
@@ -523,9 +532,16 @@
                         case 'supervisor_endorsed':
                             return 'Supervisor Endorsed';
                         case 'dept_head_endorsed':
-                            return 'Dept Head Endorsed';
+                            return 'Awaiting PMT Recommendation';
+                        case 'recommended_by_pmt':
                         case 'pmt_approved':
-                            return 'PMT Approved';
+                            return 'Recommended by PMT';
+                        case 'approved_by_pmt':
+                            return 'Calibrated by PMT';
+                        case 'adjusted_by_pmt':
+                            return 'Adjusted by PMT';
+                        case 'released_by_pmt':
+                            return 'Officially Released';
                         case 'returned_to_employee':
                             return 'Returned to Employee';
                         default:

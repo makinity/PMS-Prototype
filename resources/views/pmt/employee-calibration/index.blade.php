@@ -10,6 +10,7 @@
             'pending_pmt_calibration' => 'inline-flex items-center rounded-full border border-sky-500/40 bg-sky-500/10 px-2.5 py-1 text-xs font-semibold text-sky-200',
             'approved_by_pmt' => 'inline-flex items-center rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-200',
             'adjusted_by_pmt' => 'inline-flex items-center rounded-full border border-violet-500/40 bg-violet-500/10 px-2.5 py-1 text-xs font-semibold text-violet-200',
+            'released_by_pmt' => 'inline-flex items-center rounded-full border border-cyan-500/40 bg-cyan-500/10 px-2.5 py-1 text-xs font-semibold text-cyan-200',
             'returned_by_pmt' => 'inline-flex items-center rounded-full border border-rose-500/40 bg-rose-500/10 px-2.5 py-1 text-xs font-semibold text-rose-200',
         ];
     @endphp
@@ -17,8 +18,8 @@
     <section class="space-y-6">
         <div class="flex flex-wrap items-start justify-between gap-3">
             <div>
-                <h1 class="text-2xl font-bold text-white">Employee Calibration</h1>
-                <p class="text-sm text-slate-400">Final calibration of IPCR performance ratings for the active period.</p>
+                <h1 class="text-2xl font-bold text-white">IPCR Final Calibration</h1>
+                <p class="text-sm text-slate-400">Calibrate recommended IPCR ratings, then explicitly release official results to employees and offices.</p>
                 <p class="mt-1 text-xs text-slate-500">Active Performance Period: {{ $periodLabelSafe }}</p>
             </div>
             <div class="rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3 text-right">
@@ -103,7 +104,7 @@
                             </tr>
                         @empty
                             <tr class="bg-slate-900/40">
-                                <td colspan="6" class="px-5 py-8 text-center text-sm text-slate-400">No IPCRs pending calibration or calibrated found for the active period.</td>
+                                <td colspan="6" class="px-5 py-8 text-center text-sm text-slate-400">No IPCRs pending calibration, calibrated, or released found for the active period.</td>
                             </tr>
                         @endforelse
                         <tr id="pmt-submissions-no-match-row" class="hidden bg-slate-900/40">
@@ -123,7 +124,7 @@
                 <div>
                     <p class="text-xs uppercase tracking-[0.2em] text-sky-300">PMT Calibration</p>
                     <h3 class="text-lg font-semibold text-white">Employee Performance Calibration</h3>
-                    <p class="mt-1 text-sm text-slate-400">Review IPCR final rating and adjust if necessary.</p>
+                    <p class="mt-1 text-sm text-slate-400">Review PMT-recommended IPCR ratings, calibrate them, and release official results only after final PMT action.</p>
                 </div>
                 <button type="button" data-close-modal class="text-2xl leading-none text-slate-400 transition hover:text-white">&times;</button>
             </div>
@@ -243,7 +244,7 @@
                     </div>
 
                     <div class="rounded-xl border border-slate-700 bg-slate-900/80 p-4">
-                        <h4 class="text-sm font-semibold text-white">Approve / Return</h4>
+                        <h4 class="text-sm font-semibold text-white">Approve / Release / Return</h4>
                         <form method="POST"
                             id="pmtSubmissionApproveForm"
                             data-action-template="{{ route('pmt.employee-calibration.approve', ['ipcr' => '__SUBMISSION_ID__']) }}"
@@ -258,6 +259,7 @@
                             </div>
                             <div class="flex items-center justify-end gap-3">
                                 <button type="button" id="pmtReturnBtn" class="rounded border border-rose-600 bg-rose-600/20 px-4 py-2 text-sm font-semibold text-rose-300 hover:bg-rose-600/30">Return</button>
+                                <button type="button" id="pmtReleaseBtn" class="rounded border border-cyan-600 bg-cyan-600/20 px-4 py-2 text-sm font-semibold text-cyan-300 hover:bg-cyan-600/30">Release Official Result</button>
                                 <button type="submit" class="rounded border border-emerald-600 bg-emerald-600/20 px-4 py-2 text-sm font-semibold text-emerald-300 hover:bg-emerald-600/30">Approve As Is</button>
                             </div>
                         </form>
@@ -268,6 +270,14 @@
                             class="hidden">
                             @csrf
                             <input type="hidden" name="remarks" id="pmtReturnRemarksInput">
+                        </form>
+                        <form method="POST"
+                            id="pmtSubmissionReleaseForm"
+                            data-action-template="{{ route('pmt.employee-calibration.release', ['ipcr' => '__SUBMISSION_ID__']) }}"
+                            action="{{ route('pmt.employee-calibration.release', ['ipcr' => 0]) }}"
+                            class="hidden">
+                            @csrf
+                            <input type="hidden" name="remarks" id="pmtReleaseRemarksInput">
                         </form>
                     </div>
                 </div>
@@ -348,10 +358,12 @@
                 const submissionAdjustedScoreEl = document.getElementById('viewSubmissionAdjustedScore');
                 const submissionPmtRemarksEl = document.getElementById('viewSubmissionPmtRemarks');
                 const submissionAdjustmentReasonEl = document.getElementById('viewSubmissionAdjustmentReason');
+                const releaseButtonEl = document.getElementById('pmtReleaseBtn');
                 
                 const adjustFormEl = document.getElementById('pmtSubmissionAdjustForm');
                 const approveFormEl = document.getElementById('pmtSubmissionApproveForm');
                 const returnFormEl = document.getElementById('pmtSubmissionReturnForm');
+                const releaseFormEl = document.getElementById('pmtSubmissionReleaseForm');
                 const adjustScoreInput = document.getElementById('adjustScoreInput');
                 
                 const smporQuantityPanelEl = document.getElementById('smporQuantityPanel');
@@ -428,6 +440,7 @@
                         case 'pending_pmt_calibration': return 'inline-flex items-center rounded-full border border-sky-500/40 bg-sky-500/10 px-2.5 py-1 text-xs font-semibold text-sky-200';
                         case 'approved_by_pmt': return 'inline-flex items-center rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-200';
                         case 'adjusted_by_pmt': return 'inline-flex items-center rounded-full border border-violet-500/40 bg-violet-500/10 px-2.5 py-1 text-xs font-semibold text-violet-200';
+                        case 'released_by_pmt': return 'inline-flex items-center rounded-full border border-cyan-500/40 bg-cyan-500/10 px-2.5 py-1 text-xs font-semibold text-cyan-200';
                         case 'returned_by_pmt': return 'inline-flex items-center rounded-full border border-rose-500/40 bg-rose-500/10 px-2.5 py-1 text-xs font-semibold text-rose-200';
                         default: return 'inline-flex items-center rounded-full border border-slate-600 bg-slate-800/70 px-2.5 py-1 text-xs font-semibold text-slate-200';
                     }
@@ -455,7 +468,7 @@
                     }
 
                     const submissionId = String(payload.id ?? '').trim();
-                    [adjustFormEl, approveFormEl, returnFormEl].forEach(form => {
+                    [adjustFormEl, approveFormEl, returnFormEl, releaseFormEl].forEach(form => {
                         if (form) {
                             const actionTemplate = String(form.dataset.actionTemplate || '');
                             if (submissionId !== '' && actionTemplate.includes('__SUBMISSION_ID__')) {
@@ -463,6 +476,14 @@
                             }
                         }
                     });
+
+                    if (releaseButtonEl) {
+                        const status = String(payload.status || '').toLowerCase();
+                        const canRelease = status === 'approved_by_pmt' || status === 'adjusted_by_pmt';
+                        releaseButtonEl.disabled = !canRelease;
+                        releaseButtonEl.classList.toggle('opacity-50', !canRelease);
+                        releaseButtonEl.classList.toggle('cursor-not-allowed', !canRelease);
+                    }
 
                     openPreviewModal('pmt-submission-view-modal');
                 }
@@ -475,6 +496,12 @@
                     }
                     document.getElementById('pmtReturnRemarksInput').value = remarks;
                     returnFormEl.submit();
+                });
+
+                document.getElementById('pmtReleaseBtn')?.addEventListener('click', () => {
+                    const remarks = document.getElementById('pmtRemarksInput')?.value || '';
+                    document.getElementById('pmtReleaseRemarksInput').value = remarks;
+                    releaseFormEl.submit();
                 });
 
                 function setSmporTab(activeTab) {

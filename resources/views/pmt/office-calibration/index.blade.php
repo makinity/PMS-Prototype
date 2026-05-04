@@ -9,6 +9,7 @@
             'pending_pmt_calibration' => 'inline-flex items-center rounded-full border border-sky-500/40 bg-sky-500/10 px-2.5 py-1 text-xs font-semibold text-sky-200',
             'approved_by_pmt' => 'inline-flex items-center rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-200',
             'adjusted_by_pmt' => 'inline-flex items-center rounded-full border border-violet-500/40 bg-violet-500/10 px-2.5 py-1 text-xs font-semibold text-violet-200',
+            'released_by_pmt' => 'inline-flex items-center rounded-full border border-cyan-500/40 bg-cyan-500/10 px-2.5 py-1 text-xs font-semibold text-cyan-200',
             'returned_by_pmt' => 'inline-flex items-center rounded-full border border-rose-500/40 bg-rose-500/10 px-2.5 py-1 text-xs font-semibold text-rose-200',
         ];
     @endphp
@@ -16,8 +17,8 @@
     <section class="space-y-6">
         <div class="flex flex-wrap items-start justify-between gap-3">
             <div>
-                <h1 class="text-2xl font-bold text-white">Office Calibration</h1>
-                <p class="text-sm text-slate-400">Final calibration of OPCR performance ratings for the active period.</p>
+                <h1 class="text-2xl font-bold text-white">OPCR Final Calibration</h1>
+                <p class="text-sm text-slate-400">Calibrate office OPCR ratings, then explicitly release official office results.</p>
                 <p class="mt-1 text-xs text-slate-500">Active Performance Period: {{ $periodLabelSafe }}</p>
             </div>
             <div class="rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3 text-right">
@@ -73,12 +74,20 @@
                             @php
                                 $statusKey = strtolower((string) ($opcr->status ?? 'pending_pmt_calibration'));
                                 $statusBadgeClasses = $statusBadgeClassMap[$statusKey] ?? 'inline-flex items-center rounded-full border border-slate-600 bg-slate-800/70 px-2.5 py-1 text-xs font-semibold text-slate-200';
+                                $statusLabel = match ($statusKey) {
+                                    'pending_pmt_calibration' => 'Pending Calibration',
+                                    'approved_by_pmt' => 'Calibrated (Approved)',
+                                    'adjusted_by_pmt' => 'Calibrated (Adjusted)',
+                                    'released_by_pmt' => 'Officially Released',
+                                    'returned_by_pmt' => 'Returned by PMT',
+                                    default => ucwords(str_replace('_', ' ', $statusKey)),
+                                };
                             @endphp
                             <tr class="bg-slate-900/40 hover:bg-slate-900/60 transition">
                                 <td class="px-5 py-3 font-semibold text-slate-100">{{ $opcr->office->name ?? '--' }}</td>
                                 <td class="px-5 py-3">{{ $opcr->office->head->name ?? '--' }}</td>
                                 <td class="px-5 py-3">
-                                    <span class="{{ $statusBadgeClasses }}">{{ ucwords(str_replace('_', ' ', $opcr->status)) }}</span>
+                                    <span class="{{ $statusBadgeClasses }}">{{ $statusLabel }}</span>
                                 </td>
                                 <td class="px-5 py-3 font-medium text-slate-300">{{ $opcr->final_score !== null ? number_format($opcr->final_score, 2) : '--' }}</td>
                                 <td class="px-5 py-3 font-medium text-blue-300">{{ $opcr->pmt_adjusted_score !== null ? number_format($opcr->pmt_adjusted_score, 2) : '--' }}</td>

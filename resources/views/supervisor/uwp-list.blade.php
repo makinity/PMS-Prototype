@@ -234,15 +234,17 @@
                             <h2 class="text-lg font-semibold text-white">UWP Preview</h2>
                             <span class="rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-indigo-200">Stage I - Planning</span>
                         </div>
-                        <p id="workspaceModalUwpSubtitle" class="mt-2 text-sm text-slate-400">Select a UWP to view details</p>
-                        <div class="mt-3 flex flex-wrap items-center gap-2 text-sm text-slate-400">
-                            <span id="workspaceModalOfficeUnitInline">-</span>
-                            <span class="text-slate-600">•</span>
-                            <span id="workspaceModalPeriodInline">-</span>
-                            <span class="text-slate-600">•</span>
-                            <span id="workspaceModalSupervisorInline">-</span>
-                            <span id="workspaceModalStatus" class="ml-1 inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold">-</span>
-                            <span id="workspaceModalOutputCountInline" class="inline-flex rounded-full bg-slate-800 px-2.5 py-1 text-xs font-semibold text-slate-200">0 outputs</span>
+                        <div class="hidden">
+                            <p id="workspaceModalUwpSubtitle" class="mt-2 text-sm text-slate-400">Select a UWP to view details</p>
+                            <div class="mt-3 flex flex-wrap items-center gap-2 text-sm text-slate-400">
+                                <span id="workspaceModalOfficeUnitInline">-</span>
+                                <span class="text-slate-600">•</span>
+                                <span id="workspaceModalPeriodInline">-</span>
+                                <span class="text-slate-600">•</span>
+                                <span id="workspaceModalSupervisorInline">-</span>
+                                <span id="workspaceModalStatus" class="ml-1 inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold">-</span>
+                                <span id="workspaceModalOutputCountInline" class="inline-flex rounded-full bg-slate-800 px-2.5 py-1 text-xs font-semibold text-slate-200">0 outputs</span>
+                            </div>
                         </div>
                     </div>
                     <button type="button"

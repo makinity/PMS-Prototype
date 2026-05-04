@@ -27,7 +27,9 @@ class AccomplishmentReviewController extends Controller
             'submitted_to_supervisor',
             'supervisor_endorsed',
             'dept_head_endorsed',
+            'recommended_by_pmt',
             'pmt_approved',
+            'released_by_pmt',
             'returned_to_employee',
         ];
         $statusFilter = in_array($statusFilter, $allowedStatuses, true) ? $statusFilter : '';
@@ -510,10 +512,10 @@ class AccomplishmentReviewController extends Controller
         return match ($status) {
             'submitted_to_supervisor' => 'Submitted to Supervisor',
             'supervisor_endorsed' => 'Supervisor Endorsed',
-            'dept_head_endorsed' => 'Dept Head Endorsed',
-            'pmt_approved' => 'Calibrated',
-            'approved_by_pmt' => 'Calibrated',
-            'adjusted_by_pmt' => 'Calibrated',
+            'dept_head_endorsed' => 'Awaiting PMT Recommendation',
+            'recommended_by_pmt', 'pmt_approved' => 'Recommended by PMT',
+            'approved_by_pmt', 'adjusted_by_pmt' => 'Calibrated by PMT',
+            'released_by_pmt' => 'Officially Released',
             'returned_to_employee' => 'Returned to Employee',
             default => 'Draft',
         };

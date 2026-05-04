@@ -48,7 +48,12 @@ class AccomplishmentReviewController extends Controller
 
         $submissions = AccomplishmentSubmission::query()
             ->where('performance_period_id', $period->id)
-            ->whereIn('status', ['dept_head_endorsed', 'pmt_approved'])
+            ->whereIn('status', [
+                AccomplishmentSubmission::STATUS_DEPT_HEAD_ENDORSED,
+                AccomplishmentSubmission::STATUS_RECOMMENDED_BY_PMT,
+                'pmt_approved',
+                AccomplishmentSubmission::STATUS_RELEASED_BY_PMT,
+            ])
             ->with([
                 'employee:id,name,office_id',
                 'employee.office:id,name',
@@ -76,7 +81,7 @@ class AccomplishmentReviewController extends Controller
             ->get();
 
         if ($submissions->isEmpty()) {
-            $infoMessage = 'No dept-head-endorsed or PMT-approved submissions found for the active period.';
+            $infoMessage = 'No dept-head-endorsed, recommended, or released submissions found for the active period.';
         }
 
         foreach ($submissions as $submission) {
@@ -511,13 +516,13 @@ class AccomplishmentReviewController extends Controller
     private function formatStatusLabel(string $status): string
     {
         return match ($status) {
-            'submitted_to_supervisor' => 'Submitted to Supervisor',
-            'supervisor_endorsed' => 'Supervisor Endorsed',
-            'dept_head_endorsed' => 'Dept Head Endorsed',
-            'pmt_approved' => 'Calibrated',
-            'approved_by_pmt' => 'Calibrated',
-            'adjusted_by_pmt' => 'Calibrated',
-            'returned_to_employee' => 'Returned to Employee',
+            AccomplishmentSubmission::STATUS_SUBMITTED_TO_SUPERVISOR => 'Submitted to Supervisor',
+            AccomplishmentSubmission::STATUS_SUPERVISOR_ENDORSED => 'Supervisor Endorsed',
+            AccomplishmentSubmission::STATUS_DEPT_HEAD_ENDORSED => 'Awaiting PMT Recommendation',
+            AccomplishmentSubmission::STATUS_RECOMMENDED_BY_PMT, 'pmt_approved' => 'Recommended by PMT',
+            'approved_by_pmt', 'adjusted_by_pmt' => 'Calibrated by PMT',
+            AccomplishmentSubmission::STATUS_RELEASED_BY_PMT => 'Officially Released',
+            AccomplishmentSubmission::STATUS_RETURNED_TO_EMPLOYEE => 'Returned to Employee',
             default => 'Draft',
         };
     }
@@ -562,30 +567,27 @@ class AccomplishmentReviewController extends Controller
     public function approve($id)
     {
         $submission = AccomplishmentSubmission::findOrFail($id);
-        if ($submission->status !== 'dept_head_endorsed') {
-            return back()->with('error', 'Only submissions endorsed by Department Head can be Approved.');
+        if ($submission->status !== AccomplishmentSubmission::STATUS_DEPT_HEAD_ENDORSED) {
+            return back()->with('error', 'Only submissions endorsed by Department Head can be recommended by PMT.');
         }
 
         $submission->update([
-            'status' => 'pmt_approved',
+            'status' => AccomplishmentSubmission::STATUS_RECOMMENDED_BY_PMT,
             'pmt_id' => Auth::id(),
             'pmt_action_at' => now(),
         ]);
 
         if ($submission->ipcr) {
-            $ipcr = $submission->ipcr;
-            $finalStatus = ($ipcr->status === \App\Models\Ipcr::STATUS_ADJUSTED_BY_PMT)
-                ? \App\Models\Ipcr::STATUS_ADJUSTED_BY_PMT
-                : \App\Models\Ipcr::STATUS_APPROVED_BY_PMT;
-
-            $ipcr->update([
-                'status' => $finalStatus,
-                'finalized_at' => now(),
-                'locked_at' => now(),
+            $submission->ipcr->update([
+                'status' => \App\Models\Ipcr::STATUS_PENDING_PMT_CALIBRATION,
+                'finalized_at' => null,
+                'locked_at' => null,
+                'released_by' => null,
+                'released_at' => null,
             ]);
         }
 
-        return back()->with('success', 'Submission successfully validated and finalized.');
+        return back()->with('success', 'Submission successfully recommended by PMT and forwarded for calibration.');
     }
 
     public function returnSubmission(Request $request, $id)
@@ -596,13 +598,17 @@ class AccomplishmentReviewController extends Controller
 
         $submission = AccomplishmentSubmission::findOrFail($id);
         
-        if ($submission->status === 'pmt_approved') {
-            return back()->with('error', 'Approved submissions cannot be returned.');
+        if (in_array($submission->status, [
+            AccomplishmentSubmission::STATUS_RECOMMENDED_BY_PMT,
+            'pmt_approved',
+            AccomplishmentSubmission::STATUS_RELEASED_BY_PMT,
+        ], true)) {
+            return back()->with('error', 'Recommended or released submissions can no longer be returned from this screen.');
         }
 
         \Illuminate\Support\Facades\DB::transaction(function() use ($submission, $request) {
             $submission->update([
-                'status' => 'returned_to_employee',
+                'status' => AccomplishmentSubmission::STATUS_RETURNED_TO_EMPLOYEE,
                 'pmt_remarks' => $request->remarks,
                 'pmt_id' => Auth::id(),
                 'pmt_action_at' => now(),
@@ -612,8 +618,10 @@ class AccomplishmentReviewController extends Controller
                 $submission->ipcr->update([
                     'status' => \App\Models\Ipcr::STATUS_COMMITTED,
                     'pmt_remarks' => $request->remarks,
-                    'locked_at' => null, // Ensure it's not locked
+                    'locked_at' => null,
                     'finalized_at' => null,
+                    'released_by' => null,
+                    'released_at' => null,
                 ]);
             }
         });

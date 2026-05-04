@@ -54,6 +54,7 @@ class EmployeeCalibrationController extends Controller
                 Ipcr::STATUS_PENDING_PMT_CALIBRATION,
                 Ipcr::STATUS_APPROVED_BY_PMT,
                 Ipcr::STATUS_ADJUSTED_BY_PMT,
+                Ipcr::STATUS_RELEASED_BY_PMT,
             ])
             ->with([
                 'employee:id,name,office_id',
@@ -76,7 +77,7 @@ class EmployeeCalibrationController extends Controller
         $ipcrs = $ipcrsQuery->orderByDesc('updated_at')->get();
 
         if ($ipcrs->isEmpty()) {
-            $infoMessage = 'No IPCRs pending calibration or calibrated found for the active period.';
+            $infoMessage = 'No IPCRs pending calibration, calibrated, or released found for the active period.';
         }
 
         // Get associated Accomplishment Submissions for evidence (SMPORs)
@@ -135,6 +136,7 @@ class EmployeeCalibrationController extends Controller
                 'adjusted_rating' => $ipcr->pmt_adjusted_rating,
                 'adjustment_reason' => $ipcr->pmt_adjustment_reason,
                 'pmt_remarks' => $ipcr->pmt_remarks,
+                'released_at' => $ipcr->released_at?->format('M d, Y h:i A'),
                 'attachments' => $attachments,
                 'smporMonths' => $monthLabels,
                 'smporSections' => $smporSections,
@@ -194,6 +196,8 @@ class EmployeeCalibrationController extends Controller
             'pmt_remarks' => $request->remarks,
             'pmt_reviewed_by' => Auth::id(),
             'pmt_reviewed_at' => now(),
+            'released_by' => null,
+            'released_at' => null,
         ]);
 
         $ratingService = app(\App\Services\PerformanceRatingService::class);
@@ -224,12 +228,52 @@ class EmployeeCalibrationController extends Controller
             'pmt_remarks' => $request->remarks,
             'pmt_reviewed_by' => Auth::id(),
             'pmt_reviewed_at' => now(),
+            'released_by' => null,
+            'released_at' => null,
         ]);
 
         $ratingService = app(\App\Services\PerformanceRatingService::class);
         $ratingService->calculateAndSaveFinalScore($ipcr);
 
         return back()->with('success', 'IPCR rating approved and calibrated successfully.');
+    }
+
+    public function release(Request $request, $id)
+    {
+        $request->validate([
+            'remarks' => 'nullable|string|max:1000',
+        ]);
+
+        $ipcr = Ipcr::findOrFail($id);
+
+        if (!in_array($ipcr->status, [Ipcr::STATUS_APPROVED_BY_PMT, Ipcr::STATUS_ADJUSTED_BY_PMT], true)) {
+            return back()->with('error', 'Only calibrated IPCR ratings can be released.');
+        }
+
+        DB::transaction(function () use ($ipcr, $request) {
+            $ipcr->update([
+                'status' => Ipcr::STATUS_RELEASED_BY_PMT,
+                'pmt_remarks' => $request->remarks,
+                'pmt_reviewed_by' => Auth::id(),
+                'pmt_reviewed_at' => now(),
+                'released_by' => Auth::id(),
+                'released_at' => now(),
+                'finalized_at' => now(),
+                'locked_at' => now(),
+            ]);
+
+            $submission = AccomplishmentSubmission::where('ipcr_id', $ipcr->id)->first();
+            if ($submission) {
+                $submission->update([
+                    'status' => AccomplishmentSubmission::STATUS_RELEASED_BY_PMT,
+                    'pmt_remarks' => $request->remarks,
+                    'pmt_id' => Auth::id(),
+                    'pmt_action_at' => now(),
+                ]);
+            }
+        });
+
+        return back()->with('success', 'IPCR official rating released to the office and employee.');
     }
 
     public function returnIpcr(Request $request, $id)
@@ -250,14 +294,21 @@ class EmployeeCalibrationController extends Controller
                 'pmt_remarks' => $request->remarks,
                 'pmt_reviewed_by' => Auth::id(),
                 'pmt_reviewed_at' => now(),
+                'released_by' => null,
+                'released_at' => null,
+                'locked_at' => null,
+                'finalized_at' => null,
             ]);
 
             // We must also return the accomplishment submission so the flow goes back
             $submission = AccomplishmentSubmission::where('ipcr_id', $ipcr->id)->first();
             if ($submission) {
                 $submission->update([
-                    'status' => 'returned_to_employee',
-                    'dept_head_remarks' => $request->remarks, // Using dept_head_remarks or generic remarks
+                    'status' => AccomplishmentSubmission::STATUS_RETURNED_TO_EMPLOYEE,
+                    'dept_head_remarks' => $request->remarks,
+                    'pmt_remarks' => $request->remarks,
+                    'pmt_id' => Auth::id(),
+                    'pmt_action_at' => now(),
                 ]);
             }
         });
@@ -511,6 +562,8 @@ class EmployeeCalibrationController extends Controller
             Ipcr::STATUS_PENDING_PMT_CALIBRATION => 'Pending Calibration',
             Ipcr::STATUS_APPROVED_BY_PMT => 'Calibrated (Approved)',
             Ipcr::STATUS_ADJUSTED_BY_PMT => 'Calibrated (Adjusted)',
+            Ipcr::STATUS_RELEASED_BY_PMT => 'Officially Released',
+            Ipcr::STATUS_RETURNED_BY_PMT => 'Returned by PMT',
             default => str_replace('_', ' ', ucfirst($status)),
         };
     }

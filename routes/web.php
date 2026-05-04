@@ -359,6 +359,7 @@ Route::prefix('pmt')->middleware('auth')->group(function () {
         Route::get('/', [\App\Http\Controllers\Pmt\EmployeeCalibrationController::class, 'index'])->name('index');
         Route::post('/{ipcr}/adjust', [\App\Http\Controllers\Pmt\EmployeeCalibrationController::class, 'adjust'])->name('adjust');
         Route::post('/{ipcr}/approve', [\App\Http\Controllers\Pmt\EmployeeCalibrationController::class, 'approve'])->name('approve');
+        Route::post('/{ipcr}/release', [\App\Http\Controllers\Pmt\EmployeeCalibrationController::class, 'release'])->name('release');
         Route::post('/{ipcr}/return', [\App\Http\Controllers\Pmt\EmployeeCalibrationController::class, 'returnIpcr'])->name('return');
     });
 
@@ -367,6 +368,7 @@ Route::prefix('pmt')->middleware('auth')->group(function () {
         Route::get('/{opcr}', [\App\Http\Controllers\Pmt\OfficeCalibrationController::class, 'show'])->name('show');
         Route::post('/{opcr}/adjust', [\App\Http\Controllers\Pmt\OfficeCalibrationController::class, 'adjust'])->name('adjust');
         Route::post('/{opcr}/approve', [\App\Http\Controllers\Pmt\OfficeCalibrationController::class, 'approve'])->name('approve');
+        Route::post('/{opcr}/release', [\App\Http\Controllers\Pmt\OfficeCalibrationController::class, 'release'])->name('release');
         Route::post('/{opcr}/return', [\App\Http\Controllers\Pmt\OfficeCalibrationController::class, 'returnOpcr'])->name('return');
     });
 });

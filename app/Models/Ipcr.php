@@ -19,6 +19,7 @@ class Ipcr extends Model
     public const STATUS_RETURNED_BY_PMT = 'returned_by_pmt';
     public const STATUS_APPROVED_BY_PMT = 'approved_by_pmt';
     public const STATUS_ADJUSTED_BY_PMT = 'adjusted_by_pmt';
+    public const STATUS_RELEASED_BY_PMT = 'released_by_pmt';
 
     protected $fillable = [
         'opcr_id',
@@ -40,6 +41,8 @@ class Ipcr extends Model
         'pmt_remarks',
         'pmt_reviewed_by',
         'pmt_reviewed_at',
+        'released_by',
+        'released_at',
     ];
 
     protected $casts = [
@@ -48,6 +51,7 @@ class Ipcr extends Model
         'locked_at' => 'datetime',
         'finalized_at' => 'datetime',
         'pmt_reviewed_at' => 'datetime',
+        'released_at' => 'datetime',
         'final_score' => 'decimal:2',
         'pmt_adjusted_score' => 'decimal:2',
     ];
@@ -116,11 +120,16 @@ class Ipcr extends Model
 
     public function isPmtApproved(): bool
     {
-        return in_array($this->status, [self::STATUS_APPROVED_BY_PMT, self::STATUS_ADJUSTED_BY_PMT], true);
+        return in_array($this->status, [self::STATUS_APPROVED_BY_PMT, self::STATUS_ADJUSTED_BY_PMT, self::STATUS_RELEASED_BY_PMT], true);
     }
 
     public function isPmtAdjusted(): bool
     {
         return $this->status === self::STATUS_ADJUSTED_BY_PMT;
+    }
+
+    public function isReleasedByPmt(): bool
+    {
+        return $this->status === self::STATUS_RELEASED_BY_PMT;
     }
 }

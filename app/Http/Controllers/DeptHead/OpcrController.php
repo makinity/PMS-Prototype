@@ -216,7 +216,7 @@ class OpcrController extends Controller
         // Additional guard: Ensure we are not in the planning stage.
         // We consider it a rating stage only if at least one IPCR has been finalized or has a score.
         $hasAnyScores = \App\Models\Ipcr::where('opcr_id', $model->id)
-            ->whereIn('status', [\App\Models\Ipcr::STATUS_APPROVED_BY_PMT, \App\Models\Ipcr::STATUS_ADJUSTED_BY_PMT])
+            ->whereIn('status', [\App\Models\Ipcr::STATUS_APPROVED_BY_PMT, \App\Models\Ipcr::STATUS_ADJUSTED_BY_PMT, \App\Models\Ipcr::STATUS_RELEASED_BY_PMT])
             ->whereNotNull('final_score')
             ->exists();
         if (!$hasAnyScores) {
@@ -224,7 +224,7 @@ class OpcrController extends Controller
         }
 
         $ipcrs = \App\Models\Ipcr::where('opcr_id', $model->id)
-            ->whereIn('status', [\App\Models\Ipcr::STATUS_APPROVED_BY_PMT, \App\Models\Ipcr::STATUS_ADJUSTED_BY_PMT])
+            ->whereIn('status', [\App\Models\Ipcr::STATUS_APPROVED_BY_PMT, \App\Models\Ipcr::STATUS_ADJUSTED_BY_PMT, \App\Models\Ipcr::STATUS_RELEASED_BY_PMT])
             ->get();
 
         if ($ipcrs->isEmpty()) {
@@ -235,7 +235,7 @@ class OpcrController extends Controller
 
         if ($validScoresCount > 0) {
             $uncalibratedCount = $ipcrs->filter(function ($ipcr) {
-                return !in_array($ipcr->status, [\App\Models\Ipcr::STATUS_APPROVED_BY_PMT, \App\Models\Ipcr::STATUS_ADJUSTED_BY_PMT], true);
+                return !in_array($ipcr->status, [\App\Models\Ipcr::STATUS_APPROVED_BY_PMT, \App\Models\Ipcr::STATUS_ADJUSTED_BY_PMT, \App\Models\Ipcr::STATUS_RELEASED_BY_PMT], true);
             })->count();
 
             if ($uncalibratedCount > 0) {
@@ -339,7 +339,7 @@ class OpcrController extends Controller
         // Only aggregate IPCRs that are officially Calibrated (Approved or Adjusted)
         $ipcrAccomplishments = [];
         $officeIpcrs = \App\Models\Ipcr::where('opcr_id', $opcr->id)
-            ->whereIn('status', [\App\Models\Ipcr::STATUS_APPROVED_BY_PMT, \App\Models\Ipcr::STATUS_ADJUSTED_BY_PMT])
+            ->whereIn('status', [\App\Models\Ipcr::STATUS_APPROVED_BY_PMT, \App\Models\Ipcr::STATUS_ADJUSTED_BY_PMT, \App\Models\Ipcr::STATUS_RELEASED_BY_PMT])
             ->get();
         
         $ratingService = app(\App\Services\PerformanceRatingService::class);

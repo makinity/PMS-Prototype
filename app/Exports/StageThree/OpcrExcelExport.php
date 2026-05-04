@@ -96,7 +96,7 @@ class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
     {
         // 1. Only aggregate IPCRs that are officially Calibrated (Approved or Adjusted)
         $ipcrs = Ipcr::where('opcr_id', $this->opcrModel->id)
-            ->whereIn('status', [Ipcr::STATUS_APPROVED_BY_PMT, Ipcr::STATUS_ADJUSTED_BY_PMT])
+            ->whereIn('status', [Ipcr::STATUS_APPROVED_BY_PMT, Ipcr::STATUS_ADJUSTED_BY_PMT, Ipcr::STATUS_RELEASED_BY_PMT])
             ->get();
         $ipcrMaps = [];
         foreach ($ipcrs as $ipcr) {

@@ -149,7 +149,7 @@
                     <span class="text-slate-300">Total Staff Calibrated</span>
                     @php
                         $officeIpcrs = \App\Models\Ipcr::where('opcr_id', $currentOpcr->id)
-                            ->whereIn('status', [\App\Models\Ipcr::STATUS_APPROVED_BY_PMT, \App\Models\Ipcr::STATUS_ADJUSTED_BY_PMT])
+                            ->whereIn('status', [\App\Models\Ipcr::STATUS_APPROVED_BY_PMT, \App\Models\Ipcr::STATUS_ADJUSTED_BY_PMT, \App\Models\Ipcr::STATUS_RELEASED_BY_PMT])
                             ->get();
                         $calibratedCount = $officeIpcrs->filter(fn($i) => ($i->pmt_adjusted_score ?? $i->final_score) !== null)->count();
                         $totalStaff = \App\Models\Ipcr::where('opcr_id', $currentOpcr->id)->count();
@@ -161,7 +161,7 @@
                     <div class="text-right">
                         @php
                             $officeIpcrs = \App\Models\Ipcr::where('opcr_id', $currentOpcr->id)
-                                ->whereIn('status', [\App\Models\Ipcr::STATUS_APPROVED_BY_PMT, \App\Models\Ipcr::STATUS_ADJUSTED_BY_PMT])
+                                ->whereIn('status', [\App\Models\Ipcr::STATUS_APPROVED_BY_PMT, \App\Models\Ipcr::STATUS_ADJUSTED_BY_PMT, \App\Models\Ipcr::STATUS_RELEASED_BY_PMT])
                                 ->get();
                             $validScores = $officeIpcrs->map(fn($i) => (float)($i->pmt_adjusted_score ?? $i->final_score ?? 0))->filter(fn($s) => $s > 0);
                             $avg = $validScores->isNotEmpty() ? $validScores->average() : 0;

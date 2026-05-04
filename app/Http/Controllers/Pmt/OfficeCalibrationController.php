@@ -44,6 +44,7 @@ class OfficeCalibrationController extends Controller
                 Opcr::STATUS_PENDING_PMT_CALIBRATION,
                 Opcr::STATUS_APPROVED_BY_PMT,
                 Opcr::STATUS_ADJUSTED_BY_PMT,
+                Opcr::STATUS_RELEASED_BY_PMT,
             ]);
 
         if ($search !== '') {
@@ -60,7 +61,7 @@ class OfficeCalibrationController extends Controller
         $opcrs = $query->orderByDesc('updated_at')->get();
 
         if ($opcrs->isEmpty()) {
-            $infoMessage = 'No OPCRs pending calibration or calibrated found for the active period.';
+            $infoMessage = 'No OPCRs pending calibration, calibrated, or released found for the active period.';
         }
 
         return view('pmt.office-calibration.index', compact('activePeriod', 'opcrs', 'infoMessage', 'search'));
@@ -75,7 +76,7 @@ class OfficeCalibrationController extends Controller
             ->with($this->opcrRelations())
             ->findOrFail($id);
 
-        if (!in_array($opcr->status, [Opcr::STATUS_PENDING_PMT_CALIBRATION, Opcr::STATUS_APPROVED_BY_PMT, Opcr::STATUS_ADJUSTED_BY_PMT])) {
+        if (!in_array($opcr->status, [Opcr::STATUS_PENDING_PMT_CALIBRATION, Opcr::STATUS_APPROVED_BY_PMT, Opcr::STATUS_ADJUSTED_BY_PMT, Opcr::STATUS_RELEASED_BY_PMT])) {
             return redirect()->route('pmt.office-calibration.index')->with('error', 'Invalid OPCR status for calibration.');
         }
 
@@ -112,6 +113,8 @@ class OfficeCalibrationController extends Controller
             'pmt_remarks' => $request->remarks,
             'pmt_reviewed_by' => Auth::id(),
             'pmt_reviewed_at' => now(),
+            'released_by' => null,
+            'released_at' => null,
         ]);
 
         return back()->with('success', 'OPCR rating adjusted and calibrated successfully.');
@@ -139,9 +142,36 @@ class OfficeCalibrationController extends Controller
             'pmt_remarks' => $request->remarks,
             'pmt_reviewed_by' => Auth::id(),
             'pmt_reviewed_at' => now(),
+            'released_by' => null,
+            'released_at' => null,
         ]);
 
         return back()->with('success', 'OPCR rating approved and calibrated successfully.');
+    }
+
+    public function release(Request $request, $id)
+    {
+        $request->validate([
+            'remarks' => 'nullable|string|max:1000',
+        ]);
+
+        $opcr = Opcr::findOrFail($id);
+
+        if (!in_array($opcr->status, [Opcr::STATUS_APPROVED_BY_PMT, Opcr::STATUS_ADJUSTED_BY_PMT], true)) {
+            return back()->with('error', 'Only calibrated OPCR ratings can be released.');
+        }
+
+        $opcr->update([
+            'status' => Opcr::STATUS_RELEASED_BY_PMT,
+            'pmt_remarks' => $request->remarks,
+            'pmt_reviewed_by' => Auth::id(),
+            'pmt_reviewed_at' => now(),
+            'released_by' => Auth::id(),
+            'released_at' => now(),
+            'locked_at' => now(),
+        ]);
+
+        return back()->with('success', 'OPCR official rating released to the office.');
     }
 
     public function returnOpcr(Request $request, $id)
@@ -161,6 +191,9 @@ class OfficeCalibrationController extends Controller
             'pmt_remarks' => $request->remarks,
             'pmt_reviewed_by' => Auth::id(),
             'pmt_reviewed_at' => now(),
+            'released_by' => null,
+            'released_at' => null,
+            'locked_at' => null,
         ]);
 
         return back()->with('success', 'OPCR returned successfully.');
