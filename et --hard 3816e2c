@@ -1,0 +1,103 @@
+[33m1eb9056[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m HEAD@{0}: reset: moving to HEAD~1
+[33m3816e2c[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{1}: commit: implement dynamiz excel export
+[33m1eb9056[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m HEAD@{2}: commit: modified quantity formula, and implement email send functionality for EMP ID
+[33m98f2933[m HEAD@{3}: commit: modify opcr to include the new column target_quantity
+[33m2b76fdc[m HEAD@{4}: commit: added new column target_quanity
+[33mf6351c5[m HEAD@{5}: reset: moving to HEAD
+[33mf6351c5[m HEAD@{6}: reset: moving to f6351c50b4a9db416c3d2d83f7c809d1cc590fa6
+[33mf6351c5[m HEAD@{7}: commit: remove client request id and form type in ors
+[33me05560b[m HEAD@{8}: commit: modify ipcr ui in pmt and dept-head review
+[33m5c56c0b[m HEAD@{9}: commit: modify supervisor employee accomplishment review UI
+[33m6317533[m HEAD@{10}: commit: corrected ipcr average formula
+[33m1f1155f[m HEAD@{11}: commit: modify ipcr ui
+[33m89b4820[m HEAD@{12}: commit: organize controller files in stage one
+[33m0e150d1[m HEAD@{13}: commit: implemented Reactive UI and Ajax fetching for Pmt Uwp review screen
+[33mf1d1404[m HEAD@{14}: commit: implemented ajax fetch in Endorse To Pmt btn
+[33mfee3a3e[m HEAD@{15}: commit: implemented Reactive endorse functioon for its UI
+[33md16b12f[m HEAD@{16}: commit: implemented AJAX + optimistic UI / DOM patch for Reactive UI experience
+[33mf7e3132[m HEAD@{17}: commit: enhance pmt user experience on qar review blade
+[33m3af8785[m HEAD@{18}: commit: enhance qar UI experience
+[33m8b23e26[m HEAD@{19}: commit: remove reset dummy data function
+[33m7462f9b[m HEAD@{20}: commit: add status colors on supervisor mpor list
+[33m7847282[m HEAD@{21}: commit: modify submit btn on mpor to have realtime user experience
+[33mb895a81[m HEAD@{22}: commit: modify save btn logic to be disable after the status changed to rated
+[33me42c504[m HEAD@{23}: commit: modified ors log blade to have realtime user experience
+[33md682fc2[m HEAD@{24}: commit: ensure exported IPCR header displays evaluated employee name
+[33mae7bae1[m HEAD@{25}: commit: fix employee accomplishment index issue due to migration changes
+[33mac30d8e[m HEAD@{26}: commit: implemented Accomplishment final approva PMT Side
+[33ma5c0efd[m HEAD@{27}: commit: implement endorse function
+[33m51fb70e[m HEAD@{28}: commit: implemented Employee submission list screen for supervisor revbiew
+[33mfe53ef0[m HEAD@{29}: commit: modify submission function so its ready for supervisor,dept-head, and pmt review
+[33mb61032c[m HEAD@{30}: commit: prepares the migration accomplishment submission
+[33mc7c849d[m HEAD@{31}: commit: include QET rating in IPCR preview modal
+[33mdeb038a[m HEAD@{32}: commit: modified button
+[33m1a8ec7a[m HEAD@{33}: commit: add export function for smpor
+[33mb99fe59[m HEAD@{34}: commit: implement employee smpor/ipcr accomplishment a backend
+[33m3223fef[m HEAD@{35}: commit: implement preview pdf for qar
+[33me9e2cf8[m HEAD@{36}: commit: modify pmt qar modals
+[33m16b123c[m HEAD@{37}: commit: implemented qar final approval (PMT)
+[33m3b3a556[m HEAD@{38}: commit: implemented pmt qar approval
+[33m54e6277[m HEAD@{39}: commit: implemented qar approved backend
+[33mcb315ac[m HEAD@{40}: commit: implemented mpor backend for supervisor review
+[33meee9f3f[m HEAD@{41}: commit: modify minor UI errors
+[33m14fb8df[m HEAD@{42}: commit: implemented office management for admin
+[33ma12f4d0[m HEAD@{43}: commit: implemented user management for admin, including office assignment
+[33m97b3747[m HEAD@{44}: commit: implemented performance priod control for admin
+[33m82ed7c1[m HEAD@{45}: commit: implemented admin dashboard
+[33m72fdfe6[m HEAD@{46}: commit: implemented ors preview
+[33mde4471f[m HEAD@{47}: commit: implemented supervisor dashboard backend
+[33mb4d0ec3[m HEAD@{48}: commit: implemented employee dashboard
+[33mbef5110[m HEAD@{49}: commit: correct MPOR aggregation for multiple rated ORS tasks per MFO
+[33mb602f48[m HEAD@{50}: commit: fix mpor excel export issue
+[33mc2be8bd[m HEAD@{51}: commit: implemented mpor backend with computation logic
+[33m9e1e05e[m HEAD@{52}: commit: remove unecessary filters on team tasks
+[33m34b2c00[m HEAD@{53}: commit: fixed minor issue on ors moniotring rating to change its staus rated after ors rating
+[33mbb18767[m HEAD@{54}: commit: fixed ors issue to render data's from commited ipcr's
+[33mc2ad2bb[m HEAD@{55}: commit: implement backend for ipcr excel export to use actual data's from db
+[33m1085337[m HEAD@{56}: commit: fix employee list rendering issue
+[33m408963f[m HEAD@{57}: reset: moving to 408963fe4f0c1decaf5b5d9f1d0f87aadbf680ea
+[33m408963f[m HEAD@{58}: reset: moving to HEAD
+[33m408963f[m HEAD@{59}: checkout: moving from main to main
+[33m408963f[m HEAD@{60}: commit: remove performance rating from ors
+[33m426acb1[m HEAD@{61}: commit: enhance pill design in ors
+[33mdf1d3ee[m HEAD@{62}: commit: introduced new ors status. rated
+[33mcc2c69f[m HEAD@{63}: commit: fix standards per task issue
+[33m4b541c0[m HEAD@{64}: commit: fix minimal modal behaviour
+[33m971e35c[m HEAD@{65}: commit: enhance ors calendar design
+[33m09a4cd6[m HEAD@{66}: commit: implement backned function for ORS monioting
+[33mbabc74b[m HEAD@{67}: commit: added a evidence preview
+[33mf8b96be[m HEAD@{68}: commit: improved task tracking timer, and implement realtime tracking
+[33m9aea590[m HEAD@{69}: commit: implement ors partial backend functions
+[33m82cd046[m HEAD@{70}: commit: derived commited ipcr to ors
+[33md4a1f50[m HEAD@{71}: commit: removed save to draft functionality in IPCR target
+[33mdf02c53[m HEAD@{72}: commit: implement IPCR target excel export
+[33m8e1ac69[m HEAD@{73}: commit: modified ui and some backends
+[33m5c974ed[m HEAD@{74}: commit: modify uwp functions to allow edit and delete for uwp with status returned
+[33m092f89d[m HEAD@{75}: commit: implement delete functionality for uwp
+[33m466e290[m HEAD@{76}: commit: eparate create mode, prevent duplicate insert, support multiple functions
+[33md017e08[m HEAD@{77}: commit: implement ipcr stage 2 excel export
+[33m048adbb[m HEAD@{78}: commit: implement smpor excel export
+[33m63ba0ef[m HEAD@{79}: commit: modified stage 2 flow #3
+[33mb67d08a[m HEAD@{80}: commit: modified mpor view
+[33mc31a413[m HEAD@{81}: commit: align dummy data's in ors
+[33m76acc4f[m HEAD@{82}: commit: stage 2 flow refinement #2
+[33m2032d3c[m HEAD@{83}: commit: modified stage 2 prototype screens
+[33mfd92167[m HEAD@{84}: commit: modify uwp UI base on controller
+[33md990c8e[m HEAD@{85}: commit: populate modals with actuial data
+[33m553d9c1[m HEAD@{86}: commit: uwp planning is now partially connected in database
+[33m0255c9f[m HEAD@{87}: rebase (abort): returning to refs/heads/main
+[33mb223009[m HEAD@{88}: pull origin main --rebase (start): checkout b223009b1c69f9e770f83e9b8980ecd0177f9306
+[33m0255c9f[m HEAD@{89}: commit: prepared stage 1 backend resources
+[33ma975c30[m HEAD@{90}: commit: refactor(Stage II MPOR): compute quantity, quality, and timeliness from rated ORS entries
+[33mba268be[m HEAD@{91}: commit: Refine My Tasks to include supervisor rating
+[33m53f6f92[m HEAD@{92}: reset: moving to 53f6f92249e6044f42fa08e642a67a85f10589e9
+[33me53e461[m HEAD@{93}: pull origin main: Fast-forward
+[33m53f6f92[m HEAD@{94}: commit: enforce single standard per rating/dimension with edit and clear actions in uwp planning
+[33mbc75ec1[m HEAD@{95}: commit: refactor(opcr): update success indicators modal UI and add per-indicator assignee view
+[33mff21803[m HEAD@{96}: commit: refine uwp digital form
+[33m8793a80[m HEAD@{97}: commit: refine ors monitoring to allow supervisor rating
+[33m1572dcb[m HEAD@{98}: commit: feat(auth): finalize activation-first login with Fortify and role routing
+[33m153eba1[m HEAD@{99}: commit: modify generate opcr modal
+[33m86811b6[m HEAD@{100}: commit: change add standard btn color to blue
+[33m6102fc3[m HEAD@{101}: commit: modify standards modal designs
+[33m0a3a483[m HEAD@{102}: commit: modif

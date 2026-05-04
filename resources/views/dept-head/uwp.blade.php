@@ -4,7 +4,7 @@
 <div class="mb-6">
     <h1 class="text-2xl font-semibold text-slate-100">Unit Work Plan Review</h1>
     <p class="text-sm text-slate-400 mt-1">
-        Select an office/unit to review its submitted Unit Work Plan. Endorse to PMT or return with remarks.
+        Select submitted Unit Work Plans. Consolidate them into OPCR or return with remarks.
     </p>
 </div>
 
@@ -39,8 +39,7 @@
                 text-sm text-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 <option value="" {{ $statusFilter === '' ? 'selected' : '' }}>All Status</option>
                 <option value="submitted" {{ $statusFilter === 'submitted' ? 'selected' : '' }}>Submitted</option>
-                <option value="endorsed" {{ $statusFilter === 'endorsed' ? 'selected' : '' }}>Endorsed</option>
-                <option value="pmt_approved" {{ $statusFilter === 'pmt_approved' ? 'selected' : '' }}>PMT Approved</option>
+                <option value="consolidated" {{ $statusFilter === 'consolidated' ? 'selected' : '' }}>Consolidated</option>
                 <option value="returned" {{ $statusFilter === 'returned' ? 'selected' : '' }}>Returned</option>
             </select>
         </form>
@@ -99,6 +98,7 @@
                                     'name' => $fn->name,
                                     'function_type' => $fn->function_type,
                                     'weight_percent' => (string) ($fn->weight_percent ?? ''),
+                                    'weight' => (string) ($fn->weight_percent ?? ''),
                                     'mfos' => $fn->mfos->map(function ($mfo) {
                                         return [
                                             'id' => $mfo->id,
@@ -106,6 +106,7 @@
                                             'target_quantity' => $mfo->target_quantity,
                                             'target_timeline' => $mfo->target_timeline,
                                             'weight_percent' => (string) ($mfo->weight_percent ?? ''),
+                                            'weight' => (string) ($mfo->weight_percent ?? ''),
                                             'success_indicators' => $mfo->successIndicators->map(function ($si) {
                                                 $standardsByRating = [];
                                                 foreach ([5,4,3,2,1] as $r) {
@@ -147,6 +148,7 @@
                         $badge = match($statusKey) {
                             'returned' => ['bg'=>'bg-rose-500/10', 'text'=>'text-rose-300', 'border'=>'border-rose-500/20', 'label'=>'Returned'],
                             'submitted' => ['bg'=>'bg-blue-500/10', 'text'=>'text-blue-300', 'border'=>'border-blue-500/20', 'label'=>'Submitted'],
+                            'consolidated' => ['bg'=>'bg-cyan-500/10', 'text'=>'text-cyan-300', 'border'=>'border-cyan-500/20', 'label'=>'Consolidated'],
                             'endorsed' => ['bg'=>'bg-violet-500/10', 'text'=>'text-violet-300', 'border'=>'border-violet-500/20', 'label'=>'Endorsed'],
                             'approved', 'pmt_approved' => ['bg'=>'bg-emerald-500/10', 'text'=>'text-emerald-300', 'border'=>'border-emerald-500/20', 'label'=>'Approved'],
                             'draft' => ['bg'=>'bg-slate-500/10', 'text'=>'text-slate-200', 'border'=>'border-slate-500/20', 'label'=>'Draft'],
@@ -276,7 +278,7 @@
                         style="background:#0f172a;color:#e5e7eb;"
                         placeholder="Add clear instructions or justification for your decision..."></textarea>
                     <p class="text-[11px] text-slate-500 mt-2">
-                        Ensure targets, indicators, and weights are correct before endorsing to PMT.
+                        Consolidating will create or refresh the office OPCR using all submitted UWPs for this period.
                     </p>
                 </div>
 
@@ -300,7 +302,7 @@
                                 data-loading-text="Processing..."
                                 class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-emerald-900/40 transition hover:bg-emerald-500">
                             <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"></span>
-                            <span data-button-label>Endorse to PMT</span>
+                            <span data-button-label>Consolidate to OPCR</span>
                         </button>
                     </div>
                 </div>
@@ -465,6 +467,148 @@
     </div>
 </div>
 
+<div id="uwp-review-workspace-modal" data-modal-container tabindex="-1" aria-hidden="true"
+     class="fixed inset-0 z-[70] hidden items-start justify-center overflow-y-auto bg-black/70 px-4 py-4 backdrop-blur-sm sm:py-8">
+    <div class="w-full max-w-[1200px]">
+        <div class="flex h-[780px] max-h-[calc(100vh-2rem)] flex-col overflow-hidden rounded-[24px] border border-slate-800 bg-[#0f131d] text-slate-100 shadow-2xl sm:max-h-[calc(100vh-4rem)]">
+            <div class="flex items-start justify-between gap-4 border-b border-slate-800 px-5 py-4">
+                <div class="min-w-0">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <h2 class="text-lg font-semibold text-white">UWP Review</h2>
+                        <span class="rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-indigo-200">Stage I - Planning</span>
+                    </div>
+                    <p id="uwp-workspace-subtitle" class="mt-2 text-sm text-slate-400">Select a UWP to view details</p>
+                    <div class="mt-3 flex flex-wrap items-center gap-2 text-sm text-slate-400">
+                        <span id="uwp-workspace-office-inline">-</span>
+                        <span class="text-slate-600">•</span>
+                        <span id="uwp-workspace-period-inline">-</span>
+                        <span class="text-slate-600">•</span>
+                        <span id="uwp-workspace-supervisor-inline">-</span>
+                        <span id="uwp-workspace-status-inline" class="ml-1 inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold">-</span>
+                        <span id="uwp-workspace-output-count-inline" class="inline-flex rounded-full bg-slate-800 px-2.5 py-1 text-xs font-semibold text-slate-200">0 outputs</span>
+                    </div>
+                </div>
+                <button type="button" data-review-close
+                        class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-700 bg-slate-950/60 text-slate-400 transition hover:bg-slate-900 hover:text-white">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <div id="uwp-workspace-return-remarks-wrap" class="hidden border-b border-rose-500/20 bg-rose-500/5 px-5 py-3">
+                <p class="text-xs font-semibold uppercase tracking-[0.22em] text-rose-200">Returned Remarks</p>
+                <p id="uwp-workspace-return-remarks-meta" class="mt-1.5 text-[11px] text-rose-200/80"></p>
+                <div id="uwp-workspace-return-remarks-text" class="mt-1.5 whitespace-pre-line text-sm text-rose-100">-</div>
+            </div>
+
+            <div class="grid min-h-0 flex-1 lg:grid-cols-[300px_minmax(0,1fr)]">
+                <aside class="flex min-h-0 flex-col border-b border-slate-800 lg:border-b-0 lg:border-r">
+                    <div class="flex items-center justify-between border-b border-slate-800 px-4 py-3">
+                        <p class="text-sm font-semibold uppercase tracking-[0.22em] text-slate-400">Planned Outputs</p>
+                        <span id="uwp-workspace-output-count-badge" class="text-sm font-semibold text-blue-300">0</span>
+                    </div>
+                    <div id="uwp-workspace-output-list" class="min-h-0 space-y-2 overflow-y-auto px-2 py-2"></div>
+                </aside>
+
+                <section class="flex min-h-0 flex-col">
+                    <div class="border-b border-slate-800 px-5 py-3">
+                        <div class="flex flex-wrap items-center gap-3">
+                            <h3 id="uwp-workspace-detail-title" class="text-lg font-semibold leading-tight text-white">No output selected</h3>
+                            <span id="uwp-workspace-detail-function" class="hidden rounded-md border px-2 py-1 text-xs font-medium"></span>
+                            <span id="uwp-workspace-detail-weight" class="text-sm font-semibold text-slate-300"></span>
+                        </div>
+                    </div>
+
+                    <div class="border-b border-slate-800 px-4">
+                        <div class="flex flex-wrap gap-1.5">
+                            <button type="button" data-uwp-workspace-tab="overview" class="border-b-2 border-blue-400 px-2.5 py-2.5 text-sm font-semibold text-white">Overview</button>
+                            <button type="button" data-uwp-workspace-tab="indicators" class="border-b-2 border-transparent px-2.5 py-2.5 text-sm font-medium text-slate-400">Success Indicators</button>
+                            <button type="button" data-uwp-workspace-tab="standards" class="border-b-2 border-transparent px-2.5 py-2.5 text-sm font-medium text-slate-400">Standards (Q/E/T)</button>
+                            <button type="button" data-uwp-workspace-tab="assignees" class="border-b-2 border-transparent px-2.5 py-2.5 text-sm font-medium text-slate-400">Assigned Employees</button>
+                        </div>
+                    </div>
+
+                    <div class="min-h-0 flex-1 overflow-y-auto px-5 py-4">
+                        <div data-uwp-workspace-panel="overview" class="space-y-5">
+                            <div>
+                                <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Target Summary</p>
+                                <p id="uwp-workspace-target-summary" class="mt-2 text-lg leading-snug text-white">-</p>
+                            </div>
+                            <div class="grid gap-5 sm:grid-cols-2">
+                                <div><p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Function Type</p><div id="uwp-workspace-function-copy" class="mt-2"></div></div>
+                                <div><p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Weight</p><p id="uwp-workspace-weight-copy" class="mt-2 text-lg font-semibold text-white">-</p></div>
+                            </div>
+                            <div>
+                                <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Linked Success Indicators</p>
+                                <div id="uwp-workspace-overview-indicators" class="mt-3 space-y-2.5"></div>
+                            </div>
+                        </div>
+
+                        <div data-uwp-workspace-panel="indicators" class="hidden">
+                            <div class="overflow-hidden rounded-xl border border-slate-800">
+                                <table class="min-w-full text-sm text-slate-200">
+                                    <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.22em] text-slate-400">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left">Success Indicator</th>
+                                            <th class="px-4 py-3 text-left">Target Summary</th>
+                                            <th class="px-4 py-3 text-center">Standards</th>
+                                            <th class="px-4 py-3 text-center">Assigned</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="uwp-workspace-indicators-body" class="divide-y divide-slate-800"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div data-uwp-workspace-panel="standards" class="hidden space-y-4">
+                            <div><p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Selected Indicator</p><p id="uwp-workspace-standards-indicator" class="mt-1.5 text-base font-semibold text-white">-</p></div>
+                            <div class="overflow-hidden rounded-xl border border-slate-800">
+                                <table class="min-w-full text-sm text-slate-100">
+                                    <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.22em] text-slate-400">
+                                        <tr><th class="px-4 py-3 text-left">Rating</th><th class="px-4 py-3 text-left">Quality (Q)</th><th class="px-4 py-3 text-left">Efficiency (E)</th><th class="px-4 py-3 text-left">Timeliness (T)</th></tr>
+                                    </thead>
+                                    <tbody id="uwp-workspace-standards-body" class="divide-y divide-slate-800"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div data-uwp-workspace-panel="assignees" class="hidden space-y-4">
+                            <div><p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Selected Indicator</p><p id="uwp-workspace-assignees-indicator" class="mt-1.5 text-base font-semibold text-white">-</p></div>
+                            <div class="overflow-hidden rounded-xl border border-slate-800">
+                                <table class="min-w-full text-sm text-slate-100">
+                                    <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.22em] text-slate-400">
+                                        <tr><th class="px-4 py-3 text-left">Employee Name</th><th class="px-4 py-3 text-left">Office / Unit</th><th class="px-4 py-3 text-left">Assigned For</th><th class="px-4 py-3 text-left">Status</th></tr>
+                                    </thead>
+                                    <tbody id="uwp-workspace-assignees-body" class="divide-y divide-slate-800"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <form id="uwp-workspace-review-form" method="POST" action="{{ route('dept-head.uwp.review') }}" data-endorse-action="{{ route('dept-head.uwp.review') }}" data-return-action="{{ route('dept-head.uwp.return') }}">
+                @csrf
+                <input type="hidden" name="unit_work_plan_id" id="uwp-workspace-uwp-id" value="">
+                <input type="hidden" name="action" id="uwp-workspace-action" value="">
+                <div class="grid shrink-0 gap-3 border-t border-slate-800 px-5 py-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+                    <div>
+                        <label class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Return Remarks</label>
+                        <div class="mt-2 flex flex-col gap-2 lg:flex-row lg:items-center">
+                            <textarea name="remarks" id="uwp-workspace-remarks" rows="2" class="min-h-[42px] flex-1 rounded-xl border border-slate-700 bg-slate-950/80 px-3.5 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none" style="background:#0f172a;color:#e5e7eb;" placeholder="Required if returning to supervisor..."></textarea>
+                            <p class="text-[11px] leading-relaxed text-slate-500 lg:w-28">Required when returning</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap justify-end gap-2.5">
+                        <button type="button" data-review-close class="rounded-xl border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">Close</button>
+                        <button type="button" id="btn-return-uwp-workspace" data-admin-loading="true" data-loading-text="Returning..." class="inline-flex items-center gap-2 rounded-xl border border-rose-500/30 bg-rose-600/10 px-4 py-2 text-sm font-semibold text-rose-200 transition hover:bg-rose-600/20"><span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-rose-200/40 border-t-rose-200"></span><span data-button-label>Return to Supervisor</span></button>
+                        <button type="button" id="btn-endorse-uwp-workspace" data-admin-loading="true" data-loading-text="Processing..." class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-emerald-900/40 transition hover:bg-emerald-500"><span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"></span><span data-button-label>Consolidate to OPCR</span></button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
 <script>
     const standardRatings = [5, 4, 3, 2, 1];
@@ -476,6 +620,9 @@
 
     // runtime cache from selected UWP payload
     let selectedUwp = null;
+    let selectedWorkspaceOutputIndex = 0;
+    let selectedWorkspaceIndicatorIndex = 0;
+    let activeWorkspaceTab = 'overview';
 
     function createEmptyStandardsRow() {
         return { Q: [], E: [], T: [] };
@@ -566,17 +713,11 @@
     }
 
     function closeReviewModalSafely() {
-        const modal = document.getElementById('uwp-review-modal');
+        const modal = document.getElementById('uwp-review-workspace-modal');
         if (modal) {
             modal.classList.add('hidden');
+            modal.classList.remove('flex');
         }
-
-        const ids = ['uwp-indicators-modal', 'uwp-standards-viewer-modal', 'uwp-assignees-viewer-modal'];
-        ids.forEach((id) => {
-            const m = document.getElementById(id);
-            if (!m) return;
-            m.classList.add('hidden');
-        });
 
         clearFlowbiteBackdrops();
     }
@@ -653,15 +794,7 @@
     }
 
     function initModalHandlers() {
-        indicatorStandardsBody = document.getElementById('uwp-standards-table-body');
-        standardsModal = document.getElementById('uwp-standards-viewer-modal');
-        assigneesModal = document.getElementById('uwp-assignees-viewer-modal');
-        const indicatorsModal = document.getElementById('uwp-indicators-modal');
-        const reviewModal = document.getElementById('uwp-review-modal');
-
-        if (reviewModal && !reviewModal.classList.contains('flex')) {
-            reviewModal.classList.add('flex');
-        }
+        const reviewModal = document.getElementById('uwp-review-workspace-modal');
 
         document.querySelectorAll('[data-review-close]').forEach((btn) => {
             btn.addEventListener('click', () => closeReviewModalSafely());
@@ -676,31 +809,18 @@
         document.addEventListener('keydown', (event) => {
             if (event.key !== 'Escape') return;
             window.setTimeout(() => {
-                const modalEl = document.getElementById('uwp-review-modal');
+                const modalEl = document.getElementById('uwp-review-workspace-modal');
                 if (modalEl?.classList.contains('hidden')) {
                     cleanupFlowbiteBackdrop();
                 }
             }, 0);
         });
 
-        document.querySelectorAll('[data-modal-hide="uwp-indicators-modal"]').forEach((btn) => {
-            btn.addEventListener('click', () => closeModal(indicatorsModal));
-        });
-        document.querySelectorAll('[data-modal-hide="uwp-standards-viewer-modal"]').forEach((btn) => {
-            btn.addEventListener('click', () => closeModal(standardsModal));
-        });
-        document.querySelectorAll('[data-modal-hide="uwp-assignees-viewer-modal"]').forEach((btn) => {
-            btn.addEventListener('click', () => closeModal(assigneesModal));
-        });
-
-        indicatorsModal?.addEventListener('click', (event) => {
-            if (event.target === indicatorsModal) closeModal(indicatorsModal);
-        });
-        standardsModal?.addEventListener('click', (event) => {
-            if (event.target === standardsModal) closeModal(standardsModal);
-        });
-        assigneesModal?.addEventListener('click', (event) => {
-            if (event.target === assigneesModal) closeModal(assigneesModal);
+        document.querySelectorAll('[data-uwp-workspace-tab]').forEach((button) => {
+            button.addEventListener('click', () => {
+                setWorkspaceTab(button.getAttribute('data-uwp-workspace-tab') || 'overview');
+                renderWorkspaceDetail();
+            });
         });
     }
 
@@ -730,6 +850,9 @@
         }
         if (s === 'submitted') {
             return 'border-blue-500/30 bg-blue-500/10 text-blue-300';
+        }
+        if (s === 'consolidated') {
+            return 'border-cyan-500/30 bg-cyan-500/10 text-cyan-300';
         }
         if (s === 'endorsed') {
             return 'border-violet-500/30 bg-violet-500/10 text-violet-300';
@@ -886,6 +1009,324 @@
         return formatTargetTimelineDisplay(mfo?.target_quantity, mfo?.target_timeline);
     }
 
+    function normalizeWeightPercent(...values) {
+        for (const value of values) {
+            if (value === null || value === undefined || value === '') {
+                continue;
+            }
+
+            const numeric = Number(value);
+            if (Number.isFinite(numeric)) {
+                return Number.isInteger(numeric)
+                    ? String(numeric)
+                    : numeric.toFixed(2).replace(/\.00$/, '').replace(/(\.\d*[1-9])0+$/, '$1');
+            }
+
+            const text = String(value).trim();
+            if (text !== '') {
+                return text;
+            }
+        }
+
+        return '';
+    }
+
+    function getWorkspaceOutputs() {
+        const functions = Array.isArray(selectedUwp?.functions) ? selectedUwp.functions : [];
+        return functions.flatMap((fn) => {
+            const mfos = Array.isArray(fn?.mfos) ? fn.mfos : [];
+            return mfos.map((mfo) => ({
+                title: mfo?.title || '-',
+                function_type: fn?.function_type || '',
+                weight_percent: normalizeWeightPercent(
+                    mfo?.weight_percent,
+                    mfo?.weight,
+                    fn?.weight_percent,
+                    fn?.weight
+                ),
+                target_summary: getMfoTargetSummary(mfo),
+                success_indicators: Array.isArray(mfo?.success_indicators) ? mfo.success_indicators : [],
+            }));
+        });
+    }
+
+    function getSelectedWorkspaceOutput() {
+        const outputs = getWorkspaceOutputs();
+        if (!outputs.length) return null;
+        selectedWorkspaceOutputIndex = Math.min(Math.max(selectedWorkspaceOutputIndex, 0), outputs.length - 1);
+        return outputs[selectedWorkspaceOutputIndex] || null;
+    }
+
+    function getSelectedWorkspaceIndicator() {
+        const output = getSelectedWorkspaceOutput();
+        const indicators = Array.isArray(output?.success_indicators) ? output.success_indicators : [];
+        if (!indicators.length) return null;
+        selectedWorkspaceIndicatorIndex = Math.min(Math.max(selectedWorkspaceIndicatorIndex, 0), indicators.length - 1);
+        return indicators[selectedWorkspaceIndicatorIndex] || null;
+    }
+
+    function setWorkspaceTab(tabName) {
+        activeWorkspaceTab = tabName || 'overview';
+        document.querySelectorAll('[data-uwp-workspace-tab]').forEach((button) => {
+            const active = button.getAttribute('data-uwp-workspace-tab') === activeWorkspaceTab;
+            button.classList.toggle('border-blue-400', active);
+            button.classList.toggle('text-white', active);
+            button.classList.toggle('font-semibold', active);
+            button.classList.toggle('border-transparent', !active);
+            button.classList.toggle('text-slate-400', !active);
+            button.classList.toggle('font-medium', !active);
+        });
+
+        document.querySelectorAll('[data-uwp-workspace-panel]').forEach((panel) => {
+            panel.classList.toggle('hidden', panel.getAttribute('data-uwp-workspace-panel') !== activeWorkspaceTab);
+        });
+    }
+
+    function renderWorkspaceStandards() {
+        const indicator = getSelectedWorkspaceIndicator();
+        const label = document.getElementById('uwp-workspace-standards-indicator');
+        const tbody = document.getElementById('uwp-workspace-standards-body');
+        if (!label || !tbody) return;
+
+        label.textContent = indicator?.indicator_text || 'No success indicator selected';
+        tbody.innerHTML = '';
+
+        const standardsByRating = indicator?.standards_by_rating || {};
+        standardRatings.forEach((level) => {
+            const row = standardsByRating[String(level)] || createEmptyStandardsRow();
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-slate-900/40';
+            const makeListCell = (items) => {
+                const td = document.createElement('td');
+                td.className = 'px-4 py-3 align-top';
+                if (!items || !items.length) {
+                    td.textContent = '-';
+                    return td;
+                }
+                const ul = document.createElement('ul');
+                ul.className = 'list-disc space-y-1 pl-4 text-slate-200';
+                items.forEach((item) => {
+                    const li = document.createElement('li');
+                    li.textContent = item;
+                    ul.appendChild(li);
+                });
+                td.appendChild(ul);
+                return td;
+            };
+
+            const ratingTd = document.createElement('td');
+            ratingTd.className = 'px-4 py-3 font-semibold text-white';
+            ratingTd.textContent = level;
+            tr.append(ratingTd, makeListCell(row.Q || row.q || []), makeListCell(row.E || row.e || []), makeListCell(row.T || row.t || []));
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderWorkspaceAssignees() {
+        const indicator = getSelectedWorkspaceIndicator();
+        const tbody = document.getElementById('uwp-workspace-assignees-body');
+        const label = document.getElementById('uwp-workspace-assignees-indicator');
+        if (!tbody || !label) return;
+
+        label.textContent = indicator?.indicator_text || 'No success indicator selected';
+        tbody.innerHTML = '';
+
+        const assignees = Array.isArray(indicator?.assignees) ? indicator.assignees : [];
+        if (!assignees.length) {
+            tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-6 text-slate-400">No assigned employee for this indicator.</td></tr>';
+            return;
+        }
+
+        assignees.forEach((name) => {
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-slate-900/40';
+            tr.innerHTML = `
+                <td class="px-4 py-3 text-slate-100">${escapeHtml(name)}</td>
+                <td class="px-4 py-3 text-slate-300">${escapeHtml(selectedUwp?.office?.name || '-')}</td>
+                <td class="px-4 py-3 text-slate-300">${escapeHtml(indicator?.indicator_text || '-')}</td>
+                <td class="px-4 py-3"><span class="inline-flex rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300">Assigned</span></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderWorkspaceIndicators() {
+        const tbody = document.getElementById('uwp-workspace-indicators-body');
+        const overviewList = document.getElementById('uwp-workspace-overview-indicators');
+        const output = getSelectedWorkspaceOutput();
+        if (!tbody || !overviewList) return;
+
+        tbody.innerHTML = '';
+        overviewList.innerHTML = '';
+
+        const indicators = Array.isArray(output?.success_indicators) ? output.success_indicators : [];
+        if (!indicators.length) {
+            tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-6 text-slate-400">No success indicators found for this output.</td></tr>';
+            overviewList.innerHTML = '<p class="text-sm text-slate-400">No linked success indicators.</p>';
+            return;
+        }
+
+        indicators.forEach((indicator, index) => {
+            const isSelected = index === selectedWorkspaceIndicatorIndex;
+            const row = document.createElement('tr');
+            row.className = isSelected ? 'bg-slate-900/40' : 'hover:bg-slate-900/20';
+            row.innerHTML = `
+                <td class="px-4 py-3 align-top text-slate-100">${escapeHtml(indicator?.indicator_text || '-')}</td>
+                <td class="px-4 py-3 align-top text-slate-300">${escapeHtml(getIndicatorTargetSummary(indicator))}</td>
+                <td class="px-4 py-3 text-center"><button type="button" data-workspace-indicator-index="${index}" data-target-tab="standards" class="text-blue-300 hover:text-blue-200">View</button></td>
+                <td class="px-4 py-3 text-center"><button type="button" data-workspace-indicator-index="${index}" data-target-tab="assignees" class="text-blue-300 hover:text-blue-200">(${Array.isArray(indicator?.assignees) ? indicator.assignees.length : 0})</button></td>
+            `;
+            tbody.appendChild(row);
+
+            const item = document.createElement('button');
+            item.type = 'button';
+            item.className = `flex w-full items-start justify-between rounded-xl border px-4 py-3 text-left transition ${isSelected ? 'border-blue-500/30 bg-blue-500/10' : 'border-slate-800 bg-slate-950/50 hover:bg-slate-900/60'}`;
+            item.innerHTML = `
+                <span class="pr-4 text-sm text-slate-100">${escapeHtml(indicator?.indicator_text || '-')}</span>
+                <span class="rounded-md bg-slate-900 px-3 py-1 text-xs text-slate-400">${escapeHtml(getIndicatorTargetSummary(indicator))}</span>
+            `;
+            item.addEventListener('click', () => {
+                selectedWorkspaceIndicatorIndex = index;
+                setWorkspaceTab('indicators');
+                renderWorkspaceDetail();
+            });
+            overviewList.appendChild(item);
+        });
+
+        tbody.querySelectorAll('[data-workspace-indicator-index]').forEach((button) => {
+            button.addEventListener('click', () => {
+                selectedWorkspaceIndicatorIndex = Number(button.getAttribute('data-workspace-indicator-index') || 0);
+                setWorkspaceTab(button.getAttribute('data-target-tab') || 'indicators');
+                renderWorkspaceDetail();
+            });
+        });
+    }
+
+    function renderWorkspaceOutputList() {
+        const container = document.getElementById('uwp-workspace-output-list');
+        const countEl = document.getElementById('uwp-workspace-output-count-inline');
+        const countBadge = document.getElementById('uwp-workspace-output-count-badge');
+        if (!container || !countEl || !countBadge) return;
+
+        const outputs = getWorkspaceOutputs();
+        countEl.textContent = `${outputs.length} output${outputs.length === 1 ? '' : 's'}`;
+        countBadge.textContent = String(outputs.length);
+        container.innerHTML = '';
+
+        outputs.forEach((output, index) => {
+            const active = index === selectedWorkspaceOutputIndex;
+            const button = document.createElement('button');
+            button.type = 'button';
+            const indicatorCount = Array.isArray(output.success_indicators) ? output.success_indicators.length : 0;
+            button.className = `block w-full rounded-xl border px-3 py-3 text-left transition ${active ? 'border-blue-400/60 bg-blue-500/10 shadow-[inset_0_0_0_1px_rgba(96,165,250,0.18)]' : 'border-slate-800 bg-slate-950/30 hover:bg-slate-900/50'}`;
+            button.innerHTML = `
+                <div class="line-clamp-2 text-base font-semibold leading-snug text-white">${escapeHtml(output.title)}</div>
+                <div class="mt-2 flex flex-wrap items-center gap-2">
+                    ${buildFunctionBadge(output.function_type)}
+                    <span class="text-sm font-semibold text-slate-200">${output.weight_percent !== '' ? escapeHtml(String(output.weight_percent) + '%') : '-'}</span>
+                    <span class="text-xs text-slate-500">${indicatorCount} indicator${indicatorCount === 1 ? '' : 's'}</span>
+                </div>
+            `;
+            button.addEventListener('click', () => {
+                selectedWorkspaceOutputIndex = index;
+                selectedWorkspaceIndicatorIndex = 0;
+                renderWorkspaceModal();
+            });
+            container.appendChild(button);
+        });
+    }
+
+    function renderWorkspaceDetail() {
+        const output = getSelectedWorkspaceOutput();
+        const titleEl = document.getElementById('uwp-workspace-detail-title');
+        const functionEl = document.getElementById('uwp-workspace-detail-function');
+        const functionCopyEl = document.getElementById('uwp-workspace-function-copy');
+        const weightEl = document.getElementById('uwp-workspace-detail-weight');
+        const weightCopyEl = document.getElementById('uwp-workspace-weight-copy');
+        const targetSummaryEl = document.getElementById('uwp-workspace-target-summary');
+
+        if (!titleEl || !functionEl || !functionCopyEl || !weightEl || !weightCopyEl || !targetSummaryEl) return;
+
+        titleEl.textContent = output?.title || 'No output selected';
+        const type = String(output?.function_type || '').toLowerCase();
+        if (type) {
+            functionEl.classList.remove('hidden');
+            functionEl.className = `rounded-md border px-2 py-1 text-xs font-medium ${type === 'core' ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-400' : type === 'support' ? 'border-blue-400/30 bg-blue-500/10 text-blue-300' : 'border-slate-500/20 bg-slate-500/10 text-slate-200'}`;
+            functionEl.textContent = labelStatus(type);
+            functionCopyEl.innerHTML = buildFunctionBadge(type);
+        } else {
+            functionEl.classList.add('hidden');
+            functionCopyEl.textContent = '-';
+        }
+
+        const weightText = output && output.weight_percent !== '' ? `${output.weight_percent}%` : '-';
+        weightEl.textContent = weightText;
+        weightCopyEl.textContent = weightText;
+        targetSummaryEl.textContent = output?.target_summary || '-';
+
+        renderWorkspaceIndicators();
+        renderWorkspaceStandards();
+        renderWorkspaceAssignees();
+    }
+
+    function renderWorkspaceModal() {
+        renderWorkspaceOutputList();
+        renderWorkspaceDetail();
+        setWorkspaceTab(activeWorkspaceTab);
+    }
+
+    function hydrateWorkspaceReviewModal(uwp) {
+        selectedUwp = uwp || null;
+        document.getElementById('uwp-workspace-uwp-id').value = selectedUwp?.id || '';
+
+        const officeName = selectedUwp?.office?.name || '-';
+        const supervisorName = selectedUwp?.supervisor?.name || '-';
+        const periodName = selectedUwp?.period?.name || '-';
+        const statusKey = String(selectedUwp?.status || '').toLowerCase();
+
+        document.getElementById('uwp-workspace-office-inline').textContent = officeName;
+        document.getElementById('uwp-workspace-supervisor-inline').textContent = supervisorName;
+        document.getElementById('uwp-workspace-period-inline').textContent = periodName;
+        document.getElementById('uwp-workspace-subtitle').textContent = `${officeName} \u2022 ${periodName}`;
+
+        const statusEl = document.getElementById('uwp-workspace-status-inline');
+        statusEl.className = `ml-1 inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${statusBadgeClass(statusKey)}`;
+        statusEl.textContent = labelStatus(statusKey);
+
+        const returnWrap = document.getElementById('uwp-workspace-return-remarks-wrap');
+        const returnText = document.getElementById('uwp-workspace-return-remarks-text');
+        const returnMeta = document.getElementById('uwp-workspace-return-remarks-meta');
+        const returnRemarks = String(selectedUwp?.return_remarks || '').trim();
+        const returnedAt = String(selectedUwp?.returned_at || '').trim();
+        const returnedByRole = String(selectedUwp?.returned_by_role || '').trim().toLowerCase();
+
+        if (statusKey === 'returned' && returnRemarks !== '') {
+            const roleLabel = returnedByRole === 'pmt' ? 'Returned by PMT' : returnedByRole === 'dept-head' ? 'Returned by Department Head' : 'Returned for Revision';
+            returnWrap.classList.remove('hidden');
+            returnText.textContent = returnRemarks;
+            returnMeta.textContent = returnedAt ? `${roleLabel} \u2022 ${returnedAt}` : roleLabel;
+        } else {
+            returnWrap.classList.add('hidden');
+            returnText.textContent = '-';
+            returnMeta.textContent = '';
+        }
+
+        const canReview = statusKey === 'submitted';
+        const btnEndorse = document.getElementById('btn-endorse-uwp-workspace');
+        const btnReturn = document.getElementById('btn-return-uwp-workspace');
+        [btnEndorse, btnReturn].forEach((button) => {
+            if (!button) return;
+            button.disabled = !canReview;
+            button.classList.toggle('opacity-60', !canReview);
+            button.classList.toggle('pointer-events-none', !canReview);
+        });
+
+        selectedWorkspaceOutputIndex = 0;
+        selectedWorkspaceIndicatorIndex = 0;
+        activeWorkspaceTab = 'overview';
+        renderWorkspaceModal();
+    }
+
     function openIndicatorsModal(title, unit, mfoTitle, successIndicators) {
         const modal = document.getElementById('uwp-indicators-modal');
         const titleEl = document.getElementById('uwp-indicators-title');
@@ -1004,6 +1445,16 @@
             }
         }
 
+        const canReview = statusKey === 'submitted';
+        const btnEndorse = document.getElementById('btn-endorse-uwp');
+        const btnReturn = document.getElementById('btn-return-uwp');
+        [btnEndorse, btnReturn].forEach((button) => {
+            if (!button) return;
+            button.disabled = !canReview;
+            button.classList.toggle('opacity-60', !canReview);
+            button.classList.toggle('pointer-events-none', !canReview);
+        });
+
         const outputsTbody = document.getElementById('uwp-outputs-tbody');
         if (!outputsTbody) return;
 
@@ -1066,16 +1517,16 @@
                 } catch (_) {
                     uwp = null;
                 }
-                hydrateReviewModal(uwp);
-                showModal(document.getElementById('uwp-review-modal'));
+                hydrateWorkspaceReviewModal(uwp);
+                showModal(document.getElementById('uwp-review-workspace-modal'));
             });
             document.body.dataset.uwpReviewDelegated = 'true';
         }
 
-        const btnEndorse = document.getElementById('btn-endorse-uwp');
-        const btnReturn = document.getElementById('btn-return-uwp');
-        const remarks = document.getElementById('uwp-modal-remarks');
-        const form = document.getElementById('uwp-review-form');
+        const btnEndorse = document.getElementById('btn-endorse-uwp-workspace');
+        const btnReturn = document.getElementById('btn-return-uwp-workspace');
+        const remarks = document.getElementById('uwp-workspace-remarks');
+        const form = document.getElementById('uwp-workspace-review-form');
 
         btnEndorse?.addEventListener('click', async () => {
             if (!form) return;
@@ -1101,7 +1552,7 @@
                     document.querySelector('meta[name="csrf-token"]')?.content ||
                     form.querySelector('input[name="_token"]')?.value ||
                     '';
-                const uwpIdValue = String(selectedUwp?.id || document.getElementById('uwp-modal-uwp-id')?.value || '').trim();
+                const uwpIdValue = String(selectedUwp?.id || document.getElementById('uwp-workspace-uwp-id')?.value || '').trim();
 
                 const fd = new FormData();
                 fd.append('_token', csrfToken);
@@ -1130,7 +1581,7 @@
                 }
 
                 const endorsedAt = data?.endorsed_at || new Date().toISOString();
-                const endorsedStatus = data?.status || 'endorsed';
+                const endorsedStatus = data?.status || 'consolidated';
                 const uwpId = Number(selectedUwp?.id || data?.uwp_id || uwpIdValue || 0);
 
                 if (!selectedUwp) selectedUwp = {};
@@ -1172,7 +1623,7 @@
                 closeReviewModalSafely();
                 window.PMSnackbar?.show({
                     type: 'success',
-                    message: 'UWP endorsed.',
+                    message: 'UWP consolidated into OPCR.',
                 });
             } catch (error) {
                 window.PMSnackbar?.show({
@@ -1223,7 +1674,7 @@
                     document.querySelector('meta[name="csrf-token"]')?.content ||
                     form.querySelector('input[name="_token"]')?.value ||
                     '';
-                const uwpIdValue = String(selectedUwp?.id || document.getElementById('uwp-modal-uwp-id')?.value || '').trim();
+                const uwpIdValue = String(selectedUwp?.id || document.getElementById('uwp-workspace-uwp-id')?.value || '').trim();
 
                 const fd = new FormData();
                 fd.append('_token', csrfToken);

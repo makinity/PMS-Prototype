@@ -483,6 +483,13 @@ class MporController extends Controller
 
         $mpor->status = 'submitted';
         $mpor->submitted_at = now();
+        $mpor->approved_at = null;
+        $mpor->approved_by = null;
+        $mpor->endorsed_at = null;
+        $mpor->endorsed_by = null;
+        $mpor->returned_at = null;
+        $mpor->returned_by = null;
+        $mpor->return_remarks = null;
         $mpor->save();
 
         if ($request->expectsJson()) {

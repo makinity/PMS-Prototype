@@ -49,7 +49,9 @@
                     <td class="center">
                         {{ (int) round((float) $row->actual_performance) }}
                     </td>
-                    <td class="center">&mdash;</td>
+                    <td class="center">
+                        {{ $row->variance !== null ? (int) round((float) $row->variance) : '—' }}
+                    </td>
                     <td>{{ $row->remarks }}</td>
                 </tr>
             @empty

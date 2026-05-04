@@ -4,6 +4,8 @@
     @php
         $orsGate = $orsGate ?? ['blocked' => true, 'reason' => 'ORS unavailable.'];
         $orsOptions = $orsOptions ?? [];
+        $mporMonthLocks = $mporMonthLocks ?? [];
+        $currentMporLock = $currentMporLock ?? null;
     @endphp
 
     <style>
@@ -82,6 +84,13 @@
         <div class="space-y-1">
             <h1 class="text-2xl font-semibold text-white">Output Rating Sheet (ORS)</h1>
         </div>
+
+        @if($currentMporLock)
+            <div class="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+                <p class="font-semibold">Current month ORS locked</p>
+                <p class="mt-1">{{ $currentMporLock['reason'] ?? 'ORS is locked because the MPOR is already submitted.' }}</p>
+            </div>
+        @endif
 
         <!-- Stats Overview (DEMO LOCKED: 4 tasks total) -->
         <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
@@ -518,6 +527,7 @@
             };
 
             const orsGate = @json($orsGate);
+            const mporMonthLocks = @json($mporMonthLocks ?? []);
             const orsOptions = @json($orsOptions);
             const orsOptionsByKey = Array.isArray(orsOptions)
                 ? orsOptions.reduce((carry, option) => {
@@ -606,6 +616,8 @@
                         totalSeconds: Number.isFinite(totalSeconds) ? totalSeconds : 0,
                         startedAt: startedAt && !Number.isNaN(startedAt.getTime()) ? startedAt : null,
                         stoppedAt: stoppedAt && !Number.isNaN(stoppedAt.getTime()) ? stoppedAt : null,
+                        monthLocked: Boolean(entry?.monthLocked ?? entry?.month_locked ?? false),
+                        mporLockReason: String(entry?.mporLockReason ?? entry?.mpor_lock_reason ?? ''),
                     };
                 })
                 : [];
@@ -635,6 +647,8 @@
             const taskSelect = document.getElementById('orsTaskType');
             const ipcrItemHidden = document.getElementById('orsIpcrItemIdHidden');
             const gateNote = document.getElementById('orsModalGateNote');
+            const supervisorSelect = document.getElementById('orsSupervisorId');
+            const notesField = document.getElementById('orsNotes');
 
             function resetTaskOptions(placeholder = 'Select task / activity') {
                 if (!taskSelect) return;
@@ -645,6 +659,74 @@
                 taskSelect.appendChild(opt);
                 taskSelect.value = '';
                 if (ipcrItemHidden) ipcrItemHidden.value = '';
+            }
+
+            function monthKeyFromDate(dateValue) {
+                const raw = String(dateValue || '').trim();
+                const match = raw.match(/^(\d{4}-\d{2})/);
+                return match ? match[1] : '';
+            }
+
+            function getMporMonthLock(dateValue) {
+                const monthKey = monthKeyFromDate(dateValue);
+                if (!monthKey || typeof mporMonthLocks !== 'object' || mporMonthLocks === null) {
+                    return null;
+                }
+
+                return mporMonthLocks[monthKey] || null;
+            }
+
+            function setOrsModalDisabledState(disabled, reason = '') {
+                const logTaskSubmitButton = document.getElementById('orsLogTaskSubmitBtn');
+                [uwpSelect, taskSelect, supervisorSelect, notesField, logTaskSubmitButton].forEach((element) => {
+                    if (!element) return;
+                    element.disabled = Boolean(disabled);
+                    element.classList.toggle('opacity-70', Boolean(disabled));
+                });
+
+                if (gateNote) {
+                    if (disabled && reason) {
+                        gateNote.textContent = reason;
+                        gateNote.classList.remove('hidden');
+                    } else {
+                        gateNote.classList.add('hidden');
+                    }
+                }
+
+                if (disabled) {
+                    resetTaskOptions('Task selection unavailable');
+                }
+            }
+
+            function applyOrsModalStateForDate(dateValue) {
+                if (Boolean(orsGate?.blocked)) {
+                    const reason = `ORS locked: ${String(orsGate?.reason || 'No committed IPCR targets available.')}`;
+                    setOrsModalDisabledState(true, reason);
+                    return { allowed: false, reason };
+                }
+
+                if (!Array.isArray(orsOptions) || orsOptions.length === 0) {
+                    const reason = 'ORS locked: No committed IPCR targets available.';
+                    setOrsModalDisabledState(true, reason);
+                    return { allowed: false, reason };
+                }
+
+                const monthLock = getMporMonthLock(dateValue);
+                if (monthLock?.reason) {
+                    setOrsModalDisabledState(true, monthLock.reason);
+                    return { allowed: false, reason: monthLock.reason };
+                }
+
+                setOrsModalDisabledState(false);
+                return { allowed: true, reason: null };
+            }
+
+            function guardOrsDate(dateValue, announce = true) {
+                const result = applyOrsModalStateForDate(dateValue);
+                if (!result.allowed && announce && result.reason) {
+                    showFlash('error', result.reason);
+                }
+                return result.allowed;
             }
 
             function populateTaskOptions(outputKey) {
@@ -668,34 +750,20 @@
 
             if (uwpSelect && taskSelect) {
                 resetTaskOptions();
-
-                const shouldDisable = Boolean(orsGate?.blocked) || !Array.isArray(orsOptions) || orsOptions.length === 0;
-                if (shouldDisable) {
-                    const reason = String(orsGate?.reason || 'No committed IPCR targets available.');
-                    uwpSelect.disabled = true;
-                    taskSelect.disabled = true;
-                    if (gateNote) {
-                        gateNote.textContent = `ORS locked: ${reason}`;
-                        gateNote.classList.remove('hidden');
-                    }
-                    if (uwpSelect.options.length > 0) {
-                        uwpSelect.options[0].textContent = `ORS locked: ${reason}`;
-                    }
-                    resetTaskOptions('Task selection unavailable');
-                } else {
-                    if (gateNote) {
-                        gateNote.classList.add('hidden');
-                    }
-
-                    uwpSelect.addEventListener('change', () => {
-                        populateTaskOptions(uwpSelect.value);
-                    });
-                    taskSelect.addEventListener('change', () => {
-                        if (ipcrItemHidden) {
-                            ipcrItemHidden.value = taskSelect.value || '';
-                        }
-                    });
+                const initialDate = document.getElementById('orsSelectedDate')?.value || new Date().toISOString().slice(0, 10);
+                const initialResult = applyOrsModalStateForDate(initialDate);
+                if (!initialResult.allowed && uwpSelect.options.length > 0) {
+                    uwpSelect.options[0].textContent = initialResult.reason || 'ORS locked';
                 }
+
+                uwpSelect.addEventListener('change', () => {
+                    populateTaskOptions(uwpSelect.value);
+                });
+                taskSelect.addEventListener('change', () => {
+                    if (ipcrItemHidden) {
+                        ipcrItemHidden.value = taskSelect.value || '';
+                    }
+                });
             }
 
             // DEMO: exactly one active timer -> Jan 5 recording
@@ -798,6 +866,10 @@
                     const dateStr = info.dateStr;
                     if (Array.isArray(byDate[dateStr]) && byDate[dateStr].length > 0) {
                         openDaySummaryModal(dateStr, null);
+                        return;
+                    }
+
+                    if (!guardOrsDate(dateStr)) {
                         return;
                     }
 
@@ -1009,6 +1081,8 @@
                     totalSeconds: Number.isFinite(totalSecondsValue) ? totalSecondsValue : 0,
                     startedAt: startedAtValue ? new Date(startedAtValue) : null,
                     stoppedAt: stoppedAtValue ? new Date(stoppedAtValue) : null,
+                    monthLocked: Boolean(entry.monthLocked ?? entry.month_locked ?? fallback.monthLocked ?? false),
+                    mporLockReason: String(entry.mporLockReason ?? entry.mpor_lock_reason ?? fallback.mporLockReason ?? ''),
                 };
             }
 
@@ -1382,9 +1456,11 @@
                 document.getElementById('taskDetailSubmittedAt').textContent = formatDateTime(task.submittedAt);
 
                 const quantityInput = document.getElementById('taskDetailQuantity');
+                const monthLocked = Boolean(task.monthLocked);
+                const monthLockReason = String(task.mporLockReason || '');
                 if (quantityInput) {
                     quantityInput.value = task.quantity || '';
-                    const quantityDisabled = isLockedState(task.state);
+                    const quantityDisabled = isLockedState(task.state) || monthLocked;
                     quantityInput.disabled = quantityDisabled;
                     quantityInput.classList.toggle('opacity-70', quantityDisabled);
                 }
@@ -1392,7 +1468,7 @@
                 const isMissing = task.state === 'missing';
                 const uploadInput = document.getElementById('taskDetailUpload');
                 if (uploadInput) {
-                    const uploadDisabled = isLockedState(task.state);
+                    const uploadDisabled = isLockedState(task.state) || monthLocked;
                     uploadInput.disabled = uploadDisabled;
                     uploadInput.classList.toggle('opacity-70', uploadDisabled);
                     uploadInput.onchange = function () {
@@ -1433,7 +1509,7 @@
                 const lockMsg = document.getElementById('taskDetailLockMessage');
                 const draftMsg = document.getElementById('taskDetailDraftMessage');
 
-                const locked = !isMissing && isLockedState(task.state);
+                const locked = !isMissing && (isLockedState(task.state) || monthLocked);
 
                 if (isMissing) {
                     if (lockBadge) {
@@ -1449,12 +1525,17 @@
                     }
                 } else {
                     if (lockBadge) {
-                        lockBadge.textContent = 'Submitted (Locked)';
+                        lockBadge.textContent = monthLocked ? 'MPOR Locked' : 'Submitted (Locked)';
                         lockBadge.classList.toggle('hidden', !locked);
                         lockBadge.style.display = locked ? '' : 'none';
                         lockBadge.removeAttribute('aria-hidden');
                     }
                     if (lockMsg) {
+                        if (monthLocked && monthLockReason) {
+                            lockMsg.textContent = monthLockReason;
+                        } else {
+                            lockMsg.textContent = 'Submitted (Locked) — visible in MPOR monthly summary. SMPOR is system-generated after validation.';
+                        }
                         lockMsg.classList.toggle('hidden', !locked);
                         lockMsg.style.display = locked ? '' : 'none';
                         lockMsg.removeAttribute('aria-hidden');
@@ -1778,6 +1859,25 @@
                     pauseLabel.textContent = task.state === 'paused' ? 'Resume' : 'Pause';
                 }
 
+                if (task.monthLocked) {
+                    [pauseBtn, stopBtn, submitBtn].forEach((button) => {
+                        if (!button) return;
+                        button.disabled = true;
+                        button.classList.add('opacity-70', 'cursor-not-allowed');
+                    });
+
+                    pauseBtn.onclick = () => showFlash('error', task.mporLockReason || 'ORS is locked because the MPOR is already submitted.');
+                    stopBtn.onclick = () => showFlash('error', task.mporLockReason || 'ORS is locked because the MPOR is already submitted.');
+                    submitBtn.onclick = () => showFlash('error', task.mporLockReason || 'ORS is locked because the MPOR is already submitted.');
+                    return;
+                }
+
+                [pauseBtn, stopBtn, submitBtn].forEach((button) => {
+                    if (!button) return;
+                    button.disabled = false;
+                    button.classList.remove('opacity-70', 'cursor-not-allowed');
+                });
+
                 pauseBtn.onclick = () => runWithLoading(
                     pauseBtn,
                     task.state === 'paused' ? 'Resuming...' : 'Pausing...',
@@ -1825,6 +1925,9 @@
 
                 btn.addEventListener('click', () => {
                     const today = new Date().toISOString().split('T')[0];
+                    if (!guardOrsDate(today)) {
+                        return;
+                    }
 
                     const dateInput = document.getElementById('orsSelectedDate');
                     if (dateInput) dateInput.value = today;
@@ -1837,6 +1940,9 @@
                 if (!daySummaryLogBtn) return;
                 daySummaryLogBtn.addEventListener('click', () => {
                     if (!daySummaryDate) return;
+                    if (!guardOrsDate(daySummaryDate)) {
+                        return;
+                    }
                     const dateInput = document.getElementById('orsSelectedDate');
                     if (dateInput) dateInput.value = daySummaryDate;
                     openOrsModal('orsTaskModal');
@@ -1884,6 +1990,11 @@
                                 || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
                                 || document.querySelector('#ors-log-form input[name="_token"]')?.value
                                 || '';
+
+                            const selectedDate = String(document.getElementById('orsSelectedDate')?.value || '').trim();
+                            if (!guardOrsDate(selectedDate)) {
+                                return;
+                            }
 
                             const formData = new FormData(orsLogForm);
                             const response = await fetch(orsLogForm.action, {

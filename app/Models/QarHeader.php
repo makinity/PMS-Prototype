@@ -11,6 +11,7 @@ class QarHeader extends Model
 {
     public const STATUS_DRAFT = 'draft';
     public const STATUS_DEPT_HEAD_ENDORSED = 'dept_head_endorsed';
+    public const STATUS_RETURNED = 'returned';
     public const STATUS_PMT_APPROVED = 'pmt_approved';
 
     public const PMT_PENDING = 'pending';
@@ -92,6 +93,11 @@ class QarHeader extends Model
     public function isPmtApproved(): bool
     {
         return $this->status === self::STATUS_PMT_APPROVED;
+    }
+
+    public function isReturned(): bool
+    {
+        return $this->status === self::STATUS_RETURNED;
     }
 
     public function isPmtValidated(): bool

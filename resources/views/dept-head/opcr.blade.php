@@ -1,662 +1,331 @@
 @extends('layouts.dept-head')
 
 @section('main-content')
+@php
+    $opcrStatus = strtolower((string) ($currentOpcr?->status ?? ''));
+    $canRefreshPreview = !empty($submittedSeedUwpId) && in_array($opcrStatus, ['', \App\Models\Opcr::STATUS_DRAFT, \App\Models\Opcr::STATUS_RETURNED, \App\Models\Opcr::STATUS_SUBMITTED], true);
+    $canSubmitToPmt = $currentOpcr && in_array($opcrStatus, [\App\Models\Opcr::STATUS_DRAFT, \App\Models\Opcr::STATUS_RETURNED, \App\Models\Opcr::STATUS_SUBMITTED, \App\Models\Opcr::STATUS_APPROVED], true);
+    
+    // Stage-based logic: Only allow calibration submission if we are in the rating phase
+    $hasRatings = false;
+    if ($currentOpcr) {
+        $hasRatings = \App\Models\Ipcr::where('opcr_id', $currentOpcr->id)->whereNotNull('final_score')->exists();
+    }
+    
+    $sourceCount = $sourceUwps->count();
+@endphp
+
 <section class="space-y-6">
     <div class="flex flex-wrap items-start justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold text-white">Office Performance Commitment and Review (OPCR)</h1>
             <p class="text-sm text-slate-400">Stage I - Performance Planning and Commitment</p>
-            <p class="text-xs text-slate-500">Review OPCRs submitted by Supervisors based on PMT-approved Unit Work Plans.</p>
+            <p class="text-xs text-slate-500">Review Source UWPs, inspect each submission, then submit the consolidated OPCR to PMT.</p>
+        </div>
+        <div class="rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3 text-right">
+            <p class="text-[11px] uppercase tracking-[0.24em] text-slate-500">Active Period</p>
+            <p class="mt-1 text-sm font-semibold text-white">{{ $activePeriod?->name ?? '—' }}</p>
         </div>
     </div>
 
-    <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-        <div class="mb-4 flex flex-wrap items-end justify-between gap-4">
+    <section class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
+        <div class="flex flex-wrap items-start justify-between gap-4 border-b border-slate-800 px-5 py-4">
             <div>
-                <p class="text-xs uppercase tracking-wide text-slate-500">Active Period</p>
-                <p class="text-sm font-semibold text-white">{{ $activePeriod?->name ?? '' }}</p>
+                <h2 class="text-lg font-semibold text-white">Source UWPs</h2>
+                <p class="mt-1 text-sm text-slate-400">Submitted UWPs and already included source records for the current office-period OPCR.</p>
             </div>
-
-            <form method="GET" action="{{ route('dept-head.opcr.index') }}" class="flex items-center gap-2">
-                <label for="opcr-status" class="text-xs uppercase tracking-wide text-slate-500">Status</label>
-                <select id="opcr-status"
-                        name="status"
-                        onchange="this.form.submit()"
-                        style="background:#0f172a;color:#e5e7eb;"
-                        class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none">
-                    <option value="all" {{ $selectedStatus === 'all' ? 'selected' : '' }}>All Status</option>
-                    <option value="submitted" {{ $selectedStatus === 'submitted' ? 'selected' : '' }}>Submitted</option>
-                    <option value="endorsed" {{ $selectedStatus === 'endorsed' ? 'selected' : '' }}>Endorsed</option>
-                    <option value="approved" {{ $selectedStatus === 'approved' ? 'selected' : '' }}>Approved</option>
-                    <option value="returned" {{ $selectedStatus === 'returned' ? 'selected' : '' }}>Returned</option>
-                </select>
-            </form>
+            <div class="flex flex-wrap items-center gap-2 text-xs">
+                <span class="rounded-full border border-slate-700 bg-slate-950/70 px-3 py-1 text-slate-300">{{ $sourceCount }} source record{{ $sourceCount === 1 ? '' : 's' }}</span>
+                @if ($currentOpcr)
+                    <span class="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 text-cyan-200">OPCR #{{ $currentOpcr->id }}</span>
+                @endif
+            </div>
         </div>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-sm text-slate-300">
-                <thead class="text-xs uppercase text-slate-500">
+            <table class="min-w-full text-sm text-slate-200">
+                <thead class="bg-slate-950/60 text-xs uppercase tracking-[0.22em] text-slate-500">
                     <tr>
-                        <th class="px-4 py-2 text-left">Office / Unit</th>
-                        <th class="px-4 py-2 text-left">Period</th>
-                        <th class="px-4 py-2 text-left">Referenced UWP</th>
-                        <th class="px-4 py-2 text-left">Status</th>
-                        <th class="px-4 py-2 text-left">Action</th>
+                        <th class="px-5 py-4 text-left">Unit</th>
+                        <th class="px-5 py-4 text-left">Supervisor</th>
+                        <th class="px-5 py-4 text-center">Outputs</th>
+                        <th class="px-5 py-4 text-center">Status</th>
+                        <th class="px-5 py-4 text-right">Action</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-800">
-                    @forelse($opcrs as $opcr)
+                    @forelse ($sourceUwps as $uwp)
                         @php
-                            $payload = $opcrPayloads[$opcr->id] ?? null;
-                            $isSubmitted = strtolower((string) $opcr->status) === \App\Models\Opcr::STATUS_SUBMITTED;
-                            $statusMeta = match ($opcr->status) {
-                                \App\Models\Opcr::STATUS_SUBMITTED => ['label' => 'Submitted', 'class' => 'border-amber-500/30 bg-amber-500/20 text-amber-300'],
-                                \App\Models\Opcr::STATUS_ENDORSED => ['label' => 'Endorsed', 'class' => 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'],
-                                \App\Models\Opcr::STATUS_APPROVED => ['label' => 'Approved', 'class' => 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'],
-                                \App\Models\Opcr::STATUS_RETURNED => ['label' => 'Returned', 'class' => 'border-rose-500/30 bg-rose-500/10 text-rose-300'],
-                                default => ['label' => ucwords(str_replace('_', ' ', (string) $opcr->status)), 'class' => 'border-slate-500/30 bg-slate-500/10 text-slate-300'],
+                            $payload = $sourceUwpPayloads[$uwp->id] ?? null;
+                            $statusKey = strtolower(str_replace('-', '_', (string) ($uwp->status ?? '')));
+                            $outputCount = $uwp->uwpFunctions->sum(fn ($function) => $function->mfos->count());
+                            $statusMeta = match ($statusKey) {
+                                'submitted' => ['label' => 'Submitted', 'class' => 'border-blue-500/30 bg-blue-500/10 text-blue-300'],
+                                'consolidated' => ['label' => 'Included', 'class' => 'border-cyan-500/30 bg-cyan-500/10 text-cyan-300'],
+                                'returned' => ['label' => 'Returned', 'class' => 'border-rose-500/30 bg-rose-500/10 text-rose-300'],
+                                default => ['label' => ucwords(str_replace('_', ' ', $statusKey ?: 'unknown')), 'class' => 'border-slate-500/30 bg-slate-500/10 text-slate-300'],
                             };
                         @endphp
-                        <tr class="border-t border-slate-800">
-                            <td class="px-4 py-3 text-white">{{ $opcr->unitWorkPlan?->office?->name ?? '' }}</td>
-                            <td class="px-4 py-3">{{ $opcr->unitWorkPlan?->performancePeriod?->name ?? '' }}</td>
-                            <td class="px-4 py-3">UWP #{{ $opcr->unitWorkPlan?->id ?? '' }} ({{ ucwords(str_replace('_', ' ', (string) $opcr->unitWorkPlan?->status)) }})</td>
-                            <td class="px-4 py-3">
-                                <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold {{ $statusMeta['class'] }}">{{ $statusMeta['label'] }}</span>
+                        <tr class="hover:bg-slate-950/40">
+                            <td class="px-5 py-4">
+                                <div class="font-medium text-white">{{ $uwp->office?->name ?? '—' }}</div>
+                                <div class="mt-1 text-xs text-slate-500">UWP #{{ $uwp->id }}</div>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-5 py-4 text-slate-300">{{ $uwp->creator?->name ?? '—' }}</td>
+                            <td class="px-5 py-4 text-center text-slate-300">{{ $outputCount }}</td>
+                            <td class="px-5 py-4 text-center">
+                                <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold {{ $statusMeta['class'] }}">{{ $statusMeta['label'] }}</span>
+                            </td>
+                            <td class="px-5 py-4 text-right">
                                 <button type="button"
-                                        data-open-review-opcr
-                                        data-opcr='@json($payload)'
-                                        class="text-blue-400 hover:text-blue-300 {{ $payload ? '' : 'opacity-60 pointer-events-none' }}"
+                                        data-open-source-uwp
+                                        data-uwp='@json($payload)'
+                                        class="inline-flex items-center rounded-lg border border-blue-500/40 px-3 py-2 text-sm font-medium text-blue-300 transition hover:bg-blue-500/10 {{ $payload ? '' : 'opacity-60 pointer-events-none' }}"
                                         {{ $payload ? '' : 'disabled' }}>
-                                    {{ $isSubmitted ? 'Endorse / Return' : 'View' }}
+                                    View UWP
                                 </button>
-                                @unless ($isSubmitted)
-                                    <span class="ml-2 inline-flex items-center rounded-full border border-slate-500/30 bg-slate-500/10 px-2 py-0.5 text-[10px] font-semibold text-slate-300">Read-only</span>
-                                @endunless
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-4 py-8 text-center text-slate-400">No OPCR records found for review.</td>
+                            <td colspan="5" class="px-5 py-10 text-center text-sm text-slate-400">No submitted or linked Source UWPs found for this office and period.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-    </div>
+    </section>
 
-    <div id="review-opcr-modal" data-modal-container class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 px-4 py-6">
-        <div class="w-full max-w-6xl rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl">
-            <div class="flex items-start justify-between gap-4 border-b border-slate-800 pb-4">
-                <div class="min-w-0">
-                    <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Office Performance Commitment and Review</p>
-                    <h2 id="dh-opcr-modal-title" class="mt-1 truncate text-lg font-semibold text-white">Review OPCR</h2>
-                    <p class="text-sm text-slate-400">Derived from PMT-approved Unit Work Plan (Stage 1)</p>
-                    <div class="mt-2">
-                        <span id="dh-opcr-modal-status" class="inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold"></span>
-                    </div>
-                </div>
-                <button type="button" data-close-modal class="shrink-0 rounded-lg border border-slate-800 bg-slate-950/50 px-2.5 py-2 text-slate-400 hover:bg-slate-950 hover:text-white">&times;</button>
+    <section class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
+        <div class="flex flex-wrap items-start justify-between gap-4 border-b border-slate-800 px-5 py-4">
+            <div>
+                <h2 class="text-lg font-semibold text-white">OPCR Preview</h2>
+                <p class="mt-1 text-sm text-slate-400">Consolidated preview of all Source UWP contents that feed the current office-period OPCR.</p>
             </div>
+            <div class="flex flex-wrap items-center gap-2 text-xs">
+                @if ($currentOpcr)
+                    <a href="{{ route('stage1.opcr.export.excel', ['opcr' => $currentOpcr->id]) }}" class="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 font-semibold text-emerald-300 hover:bg-emerald-500/20 transition">
+                        <i class="fa-solid fa-file-excel"></i> Export Excel
+                    </a>
+                    @php
+                        $opcrBadge = match ($opcrStatus) {
+                            \App\Models\Opcr::STATUS_DRAFT => 'border-slate-500/30 bg-slate-500/10 text-slate-300',
+                            \App\Models\Opcr::STATUS_SUBMITTED => 'border-amber-500/30 bg-amber-500/10 text-amber-300',
+                            \App\Models\Opcr::STATUS_ENDORSED => 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300',
+                            \App\Models\Opcr::STATUS_APPROVED => 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300',
+                            \App\Models\Opcr::STATUS_RETURNED => 'border-rose-500/30 bg-rose-500/10 text-rose-300',
+                            default => 'border-slate-500/30 bg-slate-500/10 text-slate-300',
+                        };
+                    @endphp
+                    <span class="rounded-full border px-3 py-1 {{ $opcrBadge }}">{{ ucwords(str_replace('_', ' ', $opcrStatus)) }}</span>
+                @else
+                    <span class="rounded-full border border-slate-700 bg-slate-950/70 px-3 py-1 text-slate-300">No OPCR yet</span>
+                @endif
+                <span class="rounded-full border border-slate-700 bg-slate-950/70 px-3 py-1 text-slate-300">{{ count($currentOpcrPayload['outputs'] ?? []) }} output{{ count($currentOpcrPayload['outputs'] ?? []) === 1 ? '' : 's' }}</span>
+            </div>
+        </div>
 
-            <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        @if ($currentOpcr)
+            <div class="grid gap-3 border-b border-slate-800 px-5 py-4 sm:grid-cols-4">
                 <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
                     <p class="text-[11px] uppercase tracking-wide text-slate-500">Office / Unit</p>
-                    <p id="dh-opcr-modal-office" class="mt-1 text-sm font-semibold text-white"></p>
+                    <p class="mt-1 text-sm font-semibold text-white">{{ $currentOpcrPayload['opcr']['office']['name'] ?? '—' }}</p>
                 </div>
                 <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
                     <p class="text-[11px] uppercase tracking-wide text-slate-500">Period</p>
-                    <p id="dh-opcr-modal-period" class="mt-1 text-sm font-semibold text-white"></p>
+                    <p class="mt-1 text-sm font-semibold text-white">{{ $currentOpcrPayload['opcr']['period']['name'] ?? '—' }}</p>
                 </div>
                 <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
-                    <p class="text-[11px] uppercase tracking-wide text-slate-500">Referenced UWP</p>
-                    <p id="dh-opcr-modal-uwp" class="mt-1 text-sm font-semibold text-white"></p>
+                    <p class="text-[11px] uppercase tracking-wide text-slate-500">Source UWP IDs</p>
+                    <p class="mt-1 text-sm font-semibold text-white">{{ $currentOpcrPayload['opcr']['source_uwp']['id'] ?? '—' }}</p>
+                </div>
+                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                    <p class="text-[11px] uppercase tracking-wide text-slate-500">Source Status</p>
+                    <p class="mt-1 text-sm font-semibold text-white">{{ ucwords(str_replace('_', ' ', (string) ($currentOpcrPayload['opcr']['source_uwp']['status'] ?? '—'))) }}</p>
                 </div>
             </div>
 
-            <div class="mt-5 rounded-xl border border-slate-800 bg-slate-950/40 overflow-hidden">
-                <div class="max-h-[46vh] overflow-auto">
-                    <table class="w-full text-sm text-slate-200">
-                        <thead class="sticky top-0 z-10 bg-slate-950 text-xs uppercase text-slate-300">
-                            <tr class="border-b border-slate-800">
-                                <th class="w-[30%] px-4 py-3 text-left">Output</th>
-                                <th class="w-[12%] px-4 py-3 text-center">Success Indicators</th>
-                                <th class="w-[26%] px-4 py-3 text-left">Target Summary</th>
-                                <th class="w-[4%] px-4 py-3 text-left">Weight</th>
-                                <th class="w-[4%] px-4 py-3 text-left">Function</th>
-                            </tr>
-                        </thead>
-                        <tbody id="dh-opcr-outputs-tbody" class="divide-y divide-slate-800"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <form id="dh-opcr-review-form" method="POST" action="{{ route('dept-head.opcr.review') }}" class="mt-5">
-                @csrf
-                <input type="hidden" name="opcr_id" id="dh-opcr-id">
-                <input type="hidden" name="action" id="dh-opcr-action">
-
-                <div>
-                    <label for="dh-opcr-remarks" class="mb-1 block text-sm text-slate-300">Remarks (required if returning)</label>
-                    <textarea id="dh-opcr-remarks"
-                              name="remarks"
-                              rows="3"
-                              style="background:#0f172a;color:#e5e7eb;"
-                              class="w-full rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-2 text-sm text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40"></textarea>
-                    <p id="dh-opcr-remarks-error" class="mt-2 hidden text-[11px] text-rose-300">Remarks are required when returning the OPCR.</p>
-                    <p class="mt-2 text-[11px] text-slate-500">Ensure targets and weights match the PMT-approved Unit Work Plan before endorsing.</p>
-                </div>
-
-                <div class="mt-6 flex flex-col-reverse gap-3 border-t border-slate-800 pt-4 sm:flex-row sm:items-center sm:justify-between">
-                    <p class="text-[11px] text-slate-500">Endorse to forward OPCR to PMT; return sends it back to Supervisor for regeneration.</p>
-                    <div class="flex flex-wrap justify-end gap-3">
-                        <button type="button" data-close-modal class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">Close</button>
-
-                        <button type="button"
-                                data-review-action="return"
-                                data-loading-text="Returning..."
-                                class="inline-flex items-center gap-2 rounded-lg border border-amber-600 px-4 py-2 text-sm font-semibold text-amber-300 hover:bg-amber-600/10">
-                            <span data-button-label>Return to Supervisor</span>
-                            <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
-                        </button>
-
-                        <button type="button"
-                                data-review-action="endorse"
-                                data-loading-text="Endorsing..."
-                                class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500">
-                            <span data-button-label>Endorse OPCR</span>
-                            <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-    <div id="dh-indicators-modal" data-modal-container class="fixed inset-0 z-[90] hidden items-center justify-center bg-black/70 px-4 py-6">
-        <div class="w-full max-w-5xl rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl">
-            <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-4">
-                <div class="min-w-0">
-                    <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Success Indicators</p>
-                    <h3 id="dh-indicators-title" class="mt-1 truncate text-xl font-semibold text-white">--</h3>
-                </div>
-                <button type="button" data-close-modal class="text-slate-400 hover:text-white">&times;</button>
-            </div>
-
-            <div class="mt-5 rounded-xl border border-slate-800 bg-slate-950/50 overflow-hidden">
-                <div class="max-h-[55vh] overflow-auto">
-                    <table class="min-w-full text-sm text-slate-200">
-                        <thead class="bg-slate-900/70 text-xs uppercase text-slate-300">
-                            <tr class="border-b border-slate-800">
-                                <th class="w-[56%] px-4 py-3 text-left">Success Indicator</th>
-                                <th class="w-[24%] px-4 py-3 text-left">Target Summary</th>
-                                <th class="w-[20%] px-4 py-3 text-left">Standards</th>
-                                <th class="w-[24%] px-4 py-3 text-left">Assigned Employee</th>
-                            </tr>
-                        </thead>
-                        <tbody id="dh-indicators-table-body" class="divide-y divide-slate-800"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="mt-6 flex justify-end">
-                <button type="button" data-close-modal class="rounded-lg border border-slate-700 px-5 py-2 text-sm text-slate-200 hover:bg-slate-800">Close</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="dh-standards-modal" data-modal-container class="fixed inset-0 z-[91] hidden items-center justify-center bg-black/70 px-4 py-8">
-        <div class="w-full max-w-4xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
-            <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
-                <div>
-                    <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Standards (Q/E/T)</p>
-                    <h3 id="dh-standards-title" class="text-lg font-semibold text-white">Target Difficulty / Standards</h3>
-                    <p class="mt-1 text-[11px] text-slate-400">Indicator: <span id="dh-standards-indicator" class="font-semibold text-slate-200">--</span></p>
-                </div>
-                <button type="button" data-close-modal class="text-slate-400 hover:text-white">&times;</button>
-            </div>
-
-            <div class="mt-4 overflow-hidden rounded-xl border border-slate-800 bg-slate-950/70">
-                <table class="w-full text-sm text-slate-100">
-                    <thead class="bg-slate-900/70 text-xs uppercase text-slate-400">
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm text-slate-200">
+                    <thead class="bg-slate-950/60 text-xs uppercase tracking-[0.22em] text-slate-500">
                         <tr>
-                            <th class="px-3 py-2 text-left">Rating</th>
-                            <th class="px-3 py-2 text-left">Quality (Q)</th>
-                            <th class="px-3 py-2 text-left">Efficiency (E)</th>
-                            <th class="px-3 py-2 text-left">Timeliness (T)</th>
+                            <th class="px-5 py-4 text-left">Source</th>
+                            <th class="px-5 py-4 text-left">Output</th>
+                            <th class="px-5 py-4 text-center">Indicators</th>
+                            <th class="px-5 py-4 text-left">Target Summary</th>
+                            <th class="px-5 py-4 text-left">Weight</th>
+                            <th class="px-5 py-4 text-left">Function</th>
                         </tr>
                     </thead>
-                    <tbody id="dh-standards-table-body" class="divide-y divide-slate-800"></tbody>
+                    <tbody class="divide-y divide-slate-800">
+                        @forelse (($currentOpcrPayload['outputs'] ?? []) as $output)
+                            <tr class="hover:bg-slate-950/40">
+                                <td class="px-5 py-4 align-top">
+                                    <div class="font-medium text-white">{{ $output['source_supervisor'] ?? '—' }}</div>
+                                    <div class="mt-1 text-xs text-slate-500">UWP #{{ $output['source_uwp_id'] ?? '—' }}</div>
+                                </td>
+                                <td class="px-5 py-4 align-top text-white">{{ $output['title'] ?? '—' }}</td>
+                                <td class="px-5 py-4 align-top text-center text-slate-300">{{ count($output['success_indicators'] ?? []) }}</td>
+                                <td class="px-5 py-4 align-top text-slate-300">
+                                    @php
+                                        $targetQuantity = $output['target_quantity'] ?? null;
+                                        $targetSummary = trim((string) ($output['target_summary'] ?? ''));
+                                    @endphp
+                                    @if ($targetSummary !== '')
+                                        {{ trim(($targetQuantity !== null && $targetSummary !== 'Multiple indicator targets' ? $targetQuantity . ' ' : '') . $targetSummary) }}
+                                    @elseif ($targetQuantity !== null)
+                                        {{ $targetQuantity }}
+                                    @else
+                                        —
+                                    @endif
+                                </td>
+                                <td class="px-5 py-4 align-top text-slate-300">{{ ($output['weight_percent'] ?? '') !== '' ? $output['weight_percent'] . '%' : '—' }}</td>
+                                <td class="px-5 py-4 align-top">
+                                    @php $functionType = strtolower((string) ($output['function_type'] ?? '')); @endphp
+                                    @if ($functionType === 'core')
+                                        <span class="rounded-md border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-300">Core</span>
+                                    @elseif ($functionType === 'support')
+                                        <span class="rounded-md border border-blue-400/30 bg-blue-500/10 px-2 py-1 text-xs font-medium text-blue-300">Support</span>
+                                    @else
+                                        <span class="rounded-md border border-slate-500/20 bg-slate-500/10 px-2 py-1 text-xs font-medium text-slate-300">{{ $functionType !== '' ? ucfirst($functionType) : 'Custom' }}</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="px-5 py-10 text-center text-sm text-slate-400">This OPCR does not have consolidated outputs yet.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
                 </table>
             </div>
-
-            <div class="mt-5 flex justify-end border-t border-slate-800 pt-3">
-                <button type="button" data-close-modal class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800">Close</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="dh-indicator-assignee-modal" data-modal-container class="fixed inset-0 z-[92] hidden items-center justify-center bg-black/70 px-4 py-6">
-        <div class="w-full max-w-2xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
-            <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
-                <div>
-                    <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Assigned Employees</p>
-                    <h3 id="dh-assignee-title" class="text-lg font-semibold text-white">--</h3>
-                    <p class="mt-1 text-[11px] text-slate-400">Indicator: <span id="dh-assignee-indicator" class="font-semibold text-slate-200">--</span></p>
+            
+            <div class="border-t border-slate-800 p-6 flex flex-wrap items-center justify-between gap-4">
+                <p class="text-sm text-slate-400 max-w-lg">Verify the consolidated outputs above. You can endorse this OPCR to PMT for final approval, or return it to supervisors if adjustments are needed.</p>
+                <div class="flex gap-3">
+                    @if ($canSubmitToPmt && $opcrStatus !== \App\Models\Opcr::STATUS_ENDORSED)
+                        <form action="{{ route('dept-head.opcr.return', $currentOpcr->id) }}" method="POST" onsubmit="return confirm('Return this OPCR to supervisors for adjustment?')">
+                            @csrf
+                            <button type="submit" class="inline-flex items-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-6 py-2.5 text-sm font-bold text-rose-300 transition hover:bg-rose-500/20">
+                                <i class="fa-solid fa-rotate-left"></i> Return to Supervisors
+                            </button>
+                        </form>
+                        
+                        <form action="{{ route('dept-head.opcr.endorse', $currentOpcr->id) }}" method="POST" onsubmit="return confirm('Endorse this consolidated OPCR to PMT?')">
+                            @csrf
+                            <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-500 active:scale-95">
+                                <i class="fa-solid fa-check-double"></i> Endorse to PMT
+                            </button>
+                        </form>
+                    @elseif ($opcrStatus === \App\Models\Opcr::STATUS_ENDORSED)
+                        <div class="rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-6 py-2.5 text-sm font-bold text-emerald-300">
+                            <i class="fa-solid fa-clock mr-2"></i> Endorsed - Awaiting PMT Review
+                        </div>
+                    @endif
                 </div>
-                <button type="button" data-close-modal class="text-slate-400 hover:text-white">&times;</button>
             </div>
-
-            <div class="mt-4 overflow-hidden rounded-xl border border-slate-800 bg-slate-950/70">
-                <table class="w-full text-sm text-slate-100">
-                    <thead class="bg-slate-900/70 text-xs uppercase text-slate-400">
-                        <tr>
-                            <th class="px-4 py-3 text-left">Employee Name</th>
-                            <th class="px-4 py-3 text-left">Office / Unit</th>
-                            <th class="px-4 py-3 text-left">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="dh-assignee-body" class="divide-y divide-slate-800"></tbody>
-                </table>
+        @else
+            <div class="px-5 py-20 text-center">
+                <div class="inline-flex h-20 w-20 items-center justify-center rounded-full bg-slate-800 text-slate-500 mb-4">
+                    <i class="fa-solid fa-building-circle-exclamation text-3xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white">No Consolidated OPCR Found</h3>
+                <p class="text-sm text-slate-400 mt-2 max-w-sm mx-auto">Please ensure at least one Unit Work Plan is submitted and included in the consolidated record.</p>
             </div>
-
-            <div class="mt-5 flex justify-end">
-                <button type="button" data-close-modal class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800">Close</button>
-            </div>
-        </div>
-    </div>
+        @endif
+    </section>
 </section>
+
+<div id="uwp-preview-modal" data-modal-container class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 px-4 py-6">
+    <div class="w-full max-w-6xl rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl">
+        <div class="flex items-start justify-between gap-4 border-b border-slate-800 pb-4">
+            <div class="min-w-0">
+                <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Unit Work Plan Preview</p>
+                <h2 id="uwp-modal-title" class="mt-1 truncate text-lg font-semibold text-white">Review UWP</h2>
+            </div>
+            <button type="button" data-close-modal class="shrink-0 rounded-lg border border-slate-800 bg-slate-950/50 px-2.5 py-2 text-slate-400 hover:bg-slate-950 hover:text-white">&times;</button>
+        </div>
+        
+        <div id="uwp-modal-content" class="mt-5 max-h-[70vh] overflow-auto">
+            <!-- Dynamic UWP Content -->
+        </div>
+        
+        <div class="mt-6 flex justify-end border-t border-slate-800 pt-4">
+            <button type="button" data-close-modal class="rounded-lg border border-slate-700 bg-slate-900 px-6 py-2 text-sm font-semibold text-slate-300 hover:bg-slate-800">Close Preview</button>
+        </div>
+    </div>
+</div>
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const ratingLevels = [5, 4, 3, 2, 1];
-    let selectedOpcr = null;
-
-    const escapeHtml = (value) => String(value ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
-
-    const formatTargetSummaryDisplay = (targetQuantity, targetSummary) => {
-        const quantity = targetQuantity === null || targetQuantity === undefined || targetQuantity === ''
-            ? ''
-            : String(targetQuantity).trim();
-        const summary = targetSummary === null || targetSummary === undefined || targetSummary === ''
-            ? ''
-            : String(targetSummary).trim();
-
-        if (summary.toLowerCase() === 'multiple indicator targets') {
-            return summary;
-        }
-
-        if (quantity !== '' && summary !== '') {
-            return `${quantity} ${summary}`.trim();
-        }
-
-        if (quantity !== '') {
-            return quantity;
-        }
-
-        if (summary !== '') {
-            return summary;
-        }
-
-        return '—';
-    };
-
-    const getIndicatorTargetSummary = (indicator) => formatTargetSummaryDisplay(
-        indicator?.target_quantity,
-        indicator?.target_timeline
-    );
-
-    const parseJson = (raw) => {
-        try { return JSON.parse(raw); } catch (e) { return null; }
-    };
-
-    const openModal = (id) => {
-        const modal = document.getElementById(id);
-        if (!modal) return;
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        document.body.classList.add('overflow-hidden');
-    };
-
-    const closeModal = (modal) => {
-        if (!modal) return;
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-
-        const anyOpen = Array.from(document.querySelectorAll('[data-modal-container]'))
-            .some((node) => !node.classList.contains('hidden'));
-
-        if (!anyOpen) {
-            document.body.classList.remove('overflow-hidden');
-        }
-    };
-
-    const opcrStatusMeta = (status) => {
-        const key = String(status || '').toLowerCase();
-        if (key === 'submitted') return { label: 'Submitted', cls: 'border-amber-500/30 bg-amber-500/20 text-amber-300' };
-        if (key === 'endorsed') return { label: 'Endorsed', cls: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300' };
-        if (key === 'approved') return { label: 'Approved', cls: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300' };
-        if (key === 'returned') return { label: 'Returned', cls: 'border-rose-500/30 bg-rose-500/10 text-rose-300' };
-        if (key === 'draft') return { label: 'Draft', cls: 'border-slate-500/30 bg-slate-500/10 text-slate-300' };
-        return { label: key.replaceAll('_', ' ').replace(/\b\w/g, (char) => char.toUpperCase()), cls: 'border-slate-500/30 bg-slate-500/10 text-slate-300' };
-    };
-
-    const functionBadge = (functionType) => {
-        const type = String(functionType || '').toLowerCase();
-        if (type === 'core') return '<span class="rounded-md bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-300 border border-emerald-500/20">Core</span>';
-        if (type === 'support') return '<span class="rounded-md bg-blue-500/10 px-2 py-1 text-xs font-medium text-blue-300 border border-blue-400/30">Support</span>';
-        return '<span class="rounded-md bg-slate-500/10 px-2 py-1 text-xs font-medium text-slate-300 border border-slate-500/20">' + escapeHtml(type || 'Custom') + '</span>';
-    };
-
-    const setButtonLoading = (button, loading, loadingText) => {
-        if (!button) return;
-        const label = button.querySelector('[data-button-label]');
-        const spinner = button.querySelector('[data-button-spinner]');
-
-        if (loading) {
-            if (label) {
-                if (!button.dataset.originalLabel) {
-                    button.dataset.originalLabel = label.textContent || '';
-                }
-                label.textContent = loadingText || 'Processing...';
-            }
-            if (spinner) spinner.classList.remove('hidden');
-            button.disabled = true;
-            button.classList.add('opacity-70', 'cursor-wait');
-            return;
-        }
-
-        if (label && button.dataset.originalLabel) {
-            label.textContent = button.dataset.originalLabel;
-        }
-        if (spinner) spinner.classList.add('hidden');
-        button.disabled = false;
-        button.classList.remove('opacity-70', 'cursor-wait');
-    };
-    const renderOutputs = (outputs) => {
-        const tbody = document.getElementById('dh-opcr-outputs-tbody');
-        if (!tbody) return;
-        tbody.innerHTML = '';
-
-        (Array.isArray(outputs) ? outputs : []).forEach((output) => {
-            const indicators = Array.isArray(output.success_indicators) ? output.success_indicators : [];
-            const tr = document.createElement('tr');
-            tr.className = 'hover:bg-slate-900/40';
-            tr.innerHTML = `
-                <td class="px-4 py-3 align-top text-white">${escapeHtml(output.title || '')}</td>
-                <td class="px-4 py-3 align-top text-center">
-                    <button type="button" class="inline-flex items-center justify-center gap-2 text-blue-300 hover:text-blue-200" data-indicators-btn>
-                        <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12Z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                        </svg>
-                        <span class="text-xs">(${indicators.length})</span>
-                    </button>
-                </td>
-                <td class="px-4 py-3 align-top text-slate-200">${escapeHtml(formatTargetSummaryDisplay(output.target_quantity, output.target_summary))}</td>
-                <td class="px-4 py-3 align-top text-slate-200">${output.weight_percent !== null && output.weight_percent !== undefined && output.weight_percent !== '' ? escapeHtml(String(output.weight_percent) + '%') : ''}</td>
-                <td class="px-4 py-3 align-top">${functionBadge(output.function_type)}</td>
-            `;
-
-            tr.querySelector('[data-indicators-btn]')?.addEventListener('click', () => {
-                openIndicatorsModal(output.title || '--', indicators);
-            });
-
-            tbody.appendChild(tr);
-        });
-
-        if (!tbody.children.length) {
-            tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-6 text-center text-slate-400">No OPCR outputs found.</td></tr>';
-        }
-    };
-
-    const renderStandardsModal = (mfoTitle, indicatorText, standardsByRating) => {
-        document.getElementById('dh-standards-title').textContent = mfoTitle || '--';
-        document.getElementById('dh-standards-indicator').textContent = indicatorText || '--';
-
-        const tbody = document.getElementById('dh-standards-table-body');
-        if (!tbody) return;
-        tbody.innerHTML = '';
-
-        const renderCell = (items) => {
-            const values = Array.isArray(items) ? items : [];
-            if (!values.length) return '';
-            return '<ul class="list-disc space-y-1 pl-4">' + values.map((item) => '<li>' + escapeHtml(item) + '</li>').join('') + '</ul>';
-        };
-
-        ratingLevels.forEach((rating) => {
-            const row = standardsByRating?.[String(rating)] || standardsByRating?.[rating] || { Q: [], E: [], T: [] };
-            const q = row.Q ?? row.q ?? [];
-            const e = row.E ?? row.e ?? [];
-            const t = row.T ?? row.t ?? [];
-
-            const tr = document.createElement('tr');
-            tr.className = 'hover:bg-slate-900/40';
-            tr.innerHTML = `
-                <td class="px-3 py-2 text-left font-semibold text-white">${rating}</td>
-                <td class="px-3 py-2 align-top">${renderCell(q)}</td>
-                <td class="px-3 py-2 align-top">${renderCell(e)}</td>
-                <td class="px-3 py-2 align-top">${renderCell(t)}</td>
-            `;
-            tbody.appendChild(tr);
-        });
-
-        openModal('dh-standards-modal');
-    };
-
-    const renderAssigneeModal = (mfoTitle, indicatorText, assignees) => {
-        document.getElementById('dh-assignee-title').textContent = mfoTitle || '--';
-        document.getElementById('dh-assignee-indicator').textContent = indicatorText || '--';
-
-        const tbody = document.getElementById('dh-assignee-body');
-        if (!tbody) return;
-        tbody.innerHTML = '';
-
-        const unitName = selectedOpcr?.opcr?.office?.name || '';
-        const names = Array.isArray(assignees) ? assignees : [];
-
-        if (!names.length) {
-            tbody.innerHTML = '<tr><td colspan="3" class="px-4 py-6 text-center text-slate-400">No assigned employees.</td></tr>';
-            openModal('dh-indicator-assignee-modal');
-            return;
-        }
-
-        names.forEach((name) => {
-            const tr = document.createElement('tr');
-            tr.className = 'hover:bg-slate-900/40';
-            tr.innerHTML = `
-                <td class="px-4 py-2">${escapeHtml(name)}</td>
-                <td class="px-4 py-2">${escapeHtml(unitName)}</td>
-                <td class="px-4 py-2"><span class="inline-flex items-center rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2 py-1 text-[11px] font-semibold text-emerald-200">Assigned</span></td>
-            `;
-            tbody.appendChild(tr);
-        });
-
-        openModal('dh-indicator-assignee-modal');
-    };
-
-    const openIndicatorsModal = (mfoTitle, indicators) => {
-        document.getElementById('dh-indicators-title').textContent = mfoTitle || '--';
-
-        const tbody = document.getElementById('dh-indicators-table-body');
-        if (!tbody) return;
-        tbody.innerHTML = '';
-
-        (Array.isArray(indicators) ? indicators : []).forEach((indicator) => {
-            const indicatorText = indicator?.indicator_text || '';
-            const standards = indicator?.standards_by_rating || {};
-            const assignees = Array.isArray(indicator?.assignees) ? indicator.assignees : [];
-
-            const tr = document.createElement('tr');
-            tr.className = 'hover:bg-slate-900/40';
-            tr.innerHTML = `
-                <td class="px-4 py-3 align-top text-slate-100">${escapeHtml(indicatorText)}</td>
-                <td class="px-4 py-3 align-top text-slate-300">${escapeHtml(getIndicatorTargetSummary(indicator))}</td>
-                <td class="px-4 py-3 align-top">
-                    <button type="button" class="inline-flex items-center gap-2 text-blue-300 hover:text-blue-200" data-standards-btn>
-                        <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12Z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                        </svg>
-                        <span>View Standards</span>
-                    </button>
-                </td>
-                <td class="px-4 py-3 align-top">
-                    <button type="button" class="inline-flex items-center gap-2 text-blue-300 hover:text-blue-200" data-assignee-btn>
-                        <svg aria-hidden="true" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12Z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                        </svg>
-                        <span>View (${assignees.length})</span>
-                    </button>
-                </td>
-            `;
-
-            tr.querySelector('[data-standards-btn]')?.addEventListener('click', () => {
-                renderStandardsModal(mfoTitle, indicatorText, standards);
-            });
-
-            tr.querySelector('[data-assignee-btn]')?.addEventListener('click', () => {
-                renderAssigneeModal(mfoTitle, indicatorText, assignees);
-            });
-
-            tbody.appendChild(tr);
-        });
-
-        if (!tbody.children.length) {
-            tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-6 text-center text-slate-400">No indicators found.</td></tr>';
-        }
-
-        openModal('dh-indicators-modal');
-    };
-    const hydrateReviewModal = (payload) => {
-        selectedOpcr = payload;
-
-        const office = payload?.opcr?.office?.name || '';
-        const period = payload?.opcr?.period?.name || '';
-        const opcrStatus = String(payload?.opcr?.status || '').toLowerCase();
-        const sourceUwpId = payload?.opcr?.source_uwp?.id || '';
-        const sourceUwpStatus = payload?.opcr?.source_uwp?.status || '';
-
-        document.getElementById('dh-opcr-modal-title').textContent = `Review OPCR - ${office}`;
-        document.getElementById('dh-opcr-modal-office').textContent = office;
-        document.getElementById('dh-opcr-modal-period').textContent = period;
-        document.getElementById('dh-opcr-modal-uwp').textContent = `UWP #${sourceUwpId} (${String(sourceUwpStatus).replaceAll('_', ' ')})`;
-
-        const statusEl = document.getElementById('dh-opcr-modal-status');
-        const meta = opcrStatusMeta(opcrStatus);
-        statusEl.textContent = meta.label;
-        statusEl.className = `inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold ${meta.cls}`;
-
-        const remarks = document.getElementById('dh-opcr-remarks');
-        const remarksError = document.getElementById('dh-opcr-remarks-error');
-        const opcrId = document.getElementById('dh-opcr-id');
-        const actionInput = document.getElementById('dh-opcr-action');
-
-        if (remarks) remarks.value = '';
-        if (remarksError) remarksError.classList.add('hidden');
-        if (opcrId) opcrId.value = payload?.opcr?.id || '';
-        if (actionInput) actionInput.value = '';
-
-        const canReview = opcrStatus === 'submitted';
-
-        document.querySelectorAll('[data-review-action]').forEach((btn) => {
-            setButtonLoading(btn, false);
-            btn.classList.remove('opacity-70', 'cursor-wait');
-
-            btn.disabled = !canReview;
-            if (!canReview) {
-                btn.classList.add('opacity-60', 'pointer-events-none');
-            } else {
-                btn.classList.remove('opacity-60', 'pointer-events-none');
-            }
-        });
-
-        renderOutputs(payload?.outputs || []);
-    };
-
-    document.querySelectorAll('[data-open-review-opcr]').forEach((button) => {
-        button.addEventListener('click', () => {
-            const payload = parseJson(button.getAttribute('data-opcr') || 'null');
+document.addEventListener('DOMContentLoaded', function() {
+    const uwpModal = document.getElementById('uwp-preview-modal');
+    const uwpContent = document.getElementById('uwp-modal-content');
+    
+    document.querySelectorAll('[data-open-source-uwp]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const payload = JSON.parse(btn.getAttribute('data-uwp'));
             if (!payload) return;
-            hydrateReviewModal(payload);
-            openModal('review-opcr-modal');
-        });
-    });
-
-    document.querySelectorAll('[data-close-modal]').forEach((button) => {
-        button.addEventListener('click', () => {
-            closeModal(button.closest('[data-modal-container]'));
-        });
-    });
-
-    document.querySelectorAll('[data-modal-container]').forEach((modal) => {
-        modal.addEventListener('click', (event) => {
-            if (event.target === modal) {
-                closeModal(modal);
-            }
-        });
-    });
-
-    document.addEventListener('keydown', (event) => {
-        if (event.key !== 'Escape') return;
-        const openModals = Array.from(document.querySelectorAll('[data-modal-container]')).filter((modal) => !modal.classList.contains('hidden'));
-        if (!openModals.length) return;
-        closeModal(openModals[openModals.length - 1]);
-    });
-
-    const reviewForm = document.getElementById('dh-opcr-review-form');
-    const remarksEl = document.getElementById('dh-opcr-remarks');
-    const remarksErrorEl = document.getElementById('dh-opcr-remarks-error');
-    const actionInput = document.getElementById('dh-opcr-action');
-    const endorseUrlTemplate = @json(route('dept-head.opcr.endorse', ['opcr' => '__ID__']));
-    const returnUrlTemplate = @json(route('dept-head.opcr.return', ['opcr' => '__ID__']));
-
-    document.querySelectorAll('[data-review-action]').forEach((button) => {
-        button.addEventListener('click', () => {
-            if (!reviewForm || !actionInput) return;
-
-            const action = button.getAttribute('data-review-action');
-            actionInput.value = action || '';
-
-            const opcrId = document.getElementById('dh-opcr-id')?.value || '';
-            if (!opcrId) return;
-
-            if (action === 'endorse') {
-                reviewForm.action = endorseUrlTemplate.replace('__ID__', opcrId);
-            } else if (action === 'return') {
-                reviewForm.action = returnUrlTemplate.replace('__ID__', opcrId);
-            }
-
-            if (remarksErrorEl) remarksErrorEl.classList.add('hidden');
-
-            if (action === 'return') {
-                const remarks = (remarksEl?.value || '').trim();
-                if (!remarks) {
-                    if (remarksErrorEl) remarksErrorEl.classList.remove('hidden');
-                    remarksEl?.focus();
-                    return;
-                }
-            }
-
-            const loadingText = button.getAttribute('data-loading-text') || 'Processing...';
-            setButtonLoading(button, true, loadingText);
-
-            document.querySelectorAll('[data-review-action]').forEach((peer) => {
-                if (peer !== button) {
-                    peer.disabled = true;
-                    peer.classList.add('opacity-70', 'cursor-wait');
-                }
+            
+            document.getElementById('uwp-modal-title').textContent = `Unit Work Plan - ${payload.uwp.office.name}`;
+            
+            let html = `
+                <div class="grid gap-3 sm:grid-cols-2 mb-6">
+                    <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                        <p class="text-[11px] uppercase tracking-wide text-slate-500">Supervisor</p>
+                        <p class="mt-1 text-sm font-semibold text-white">${payload.uwp.creator.name}</p>
+                    </div>
+                    <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                        <p class="text-[11px] uppercase tracking-wide text-slate-500">Period</p>
+                        <p class="mt-1 text-sm font-semibold text-white">${payload.uwp.period.name}</p>
+                    </div>
+                </div>
+            `;
+            
+            payload.outputs.forEach(output => {
+                html += `
+                    <div class="mb-6 rounded-xl border border-slate-800 bg-slate-950/40 overflow-hidden">
+                        <div class="bg-slate-900/50 px-4 py-3 border-b border-slate-800 flex justify-between items-center">
+                            <h3 class="font-bold text-white text-sm">${output.title}</h3>
+                            <span class="text-xs font-semibold text-slate-400">${output.weight_percent}% Weight</span>
+                        </div>
+                        <div class="p-4">
+                            <table class="w-full text-xs text-slate-300">
+                                <thead>
+                                    <tr class="text-slate-500 uppercase tracking-wider">
+                                        <th class="text-left pb-2">Success Indicator</th>
+                                        <th class="text-left pb-2">Target</th>
+                                        <th class="text-left pb-2">Assignees</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-800/50">
+                                    ${output.success_indicators.map(si => `
+                                        <tr>
+                                            <td class="py-2 pr-4">${si.indicator_text}</td>
+                                            <td class="py-2 pr-4 text-slate-200">${si.target_quantity || ''} ${si.target_timeline || ''}</td>
+                                            <td class="py-2">${si.assignees.join(', ') || 'No assignees'}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
             });
-
-            reviewForm.submit();
+            
+            uwpContent.innerHTML = html;
+            uwpModal.classList.remove('hidden');
+            uwpModal.classList.add('flex');
+            document.body.classList.add('overflow-hidden');
+        });
+    });
+    
+    document.querySelectorAll('[data-close-modal]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const modal = btn.closest('[data-modal-container]');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.classList.remove('overflow-hidden');
         });
     });
 });

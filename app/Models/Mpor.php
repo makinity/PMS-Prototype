@@ -15,12 +15,23 @@ class Mpor extends Model
         'month',
         'status',
         'generated_at',
+        'submitted_at',
+        'approved_by',
+        'approved_at',
+        'endorsed_by',
+        'endorsed_at',
+        'returned_by',
+        'returned_at',
+        'return_remarks',
         'created_by',
     ];
 
     protected $casts = [
         'generated_at' => 'datetime',
         'submitted_at' => 'datetime',
+        'approved_at' => 'datetime',
+        'endorsed_at' => 'datetime',
+        'returned_at' => 'datetime',
     ];
 
     public function employee(): BelongsTo

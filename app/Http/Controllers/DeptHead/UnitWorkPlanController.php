@@ -4,6 +4,7 @@ namespace App\Http\Controllers\DeptHead;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Opcr;
 use App\Models\PerformancePeriod;
 use App\Models\UnitWorkPlan;
 use Illuminate\Support\Facades\Auth;
@@ -28,6 +29,7 @@ class UnitWorkPlanController extends Controller
         $status = strtolower(trim($request->string('status')->toString()));
         $allowedStatuses = [
             UnitWorkPlan::STATUS_SUBMITTED,
+            UnitWorkPlan::STATUS_CONSOLIDATED,
             UnitWorkPlan::STATUS_ENDORSED,
             UnitWorkPlan::STATUS_PMT_APPROVED,
             UnitWorkPlan::STATUS_RETURNED,
@@ -172,12 +174,7 @@ class UnitWorkPlanController extends Controller
         try {
             DB::transaction(function () use ($uwp, $validated, $user) {
                 if ($validated['action'] === 'endorse') {
-                    $uwp->status = UnitWorkPlan::STATUS_ENDORSED;
-                    $uwp->endorsed_at = now();
-                    $uwp->returned_at = null;
-                    $uwp->returned_by = null;
-                    $uwp->returned_by_role = null;
-                    $uwp->return_remarks = null;
+                    $this->consolidateSubmittedUwpsFor($uwp, $user);
                 }
 
                 if ($validated['action'] === 'return') {
@@ -192,8 +189,19 @@ class UnitWorkPlanController extends Controller
                     $uwp->submitted_at = null;
                 }
 
-                $uwp->save();
+                if ($validated['action'] !== 'endorse') {
+                    $uwp->save();
+                }
             });
+        } catch (ValidationException $e) {
+            if ($expectsJson) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->validator->errors()->first() ?: 'Unable to consolidate Unit Work Plans.',
+                ], 422);
+            }
+
+            throw $e;
         } catch (\Throwable $e) {
             if ($expectsJson) {
                 return response()->json([
@@ -209,7 +217,7 @@ class UnitWorkPlanController extends Controller
             return response()->json([
                 'success' => true,
                 'uwp_id' => (int) $uwp->id,
-                'status' => (string) $uwp->status,
+                'status' => $validated['action'] === 'endorse' ? UnitWorkPlan::STATUS_CONSOLIDATED : (string) $uwp->status,
                 'endorsed_at' => optional($uwp->endorsed_at)->toDateTimeString(),
                 'returned_at' => optional($uwp->returned_at)->toDateTimeString(),
                 'returned_by_role' => $uwp->returned_by_role,
@@ -218,8 +226,10 @@ class UnitWorkPlanController extends Controller
         }
 
         return redirect()
-            ->route('dept-head.uwp.index', $request->only('status'))
-            ->with('success', 'Unit Work Plan successfully reviewed.');
+            ->route($validated['action'] === 'endorse' ? 'dept-head.opcr.index' : 'dept-head.uwp.index', $request->only('status'))
+            ->with('success', $validated['action'] === 'endorse'
+                ? 'Submitted UWPs consolidated into an OPCR draft.'
+                : 'Unit Work Plan successfully reviewed.');
     }
 
     public function returnUwp(Request $request)
@@ -351,5 +361,92 @@ class UnitWorkPlanController extends Controller
         return redirect()
             ->route('dept-head.uwp.index', $request->only('status'))
             ->with('success', 'Unit Work Plan returned to Supervisor.');
+    }
+
+    private function consolidateSubmittedUwpsFor(UnitWorkPlan $seedUwp, $user): Opcr
+    {
+        $submittedUwps = UnitWorkPlan::query()
+            ->where('office_id', $seedUwp->office_id)
+            ->where('performance_period_id', $seedUwp->performance_period_id)
+            ->where('status', UnitWorkPlan::STATUS_SUBMITTED)
+            ->lockForUpdate()
+            ->get();
+
+        if ($submittedUwps->isEmpty()) {
+            throw ValidationException::withMessages([
+                'unit_work_plan_id' => 'No submitted Unit Work Plans are available for consolidation.',
+            ]);
+        }
+
+        /** @var Opcr $opcr */
+        $opcr = Opcr::query()
+            ->where('office_id', $seedUwp->office_id)
+            ->where('performance_period_id', $seedUwp->performance_period_id)
+            ->lockForUpdate()
+            ->first();
+
+        if (!$opcr) {
+            $opcr = Opcr::query()->create([
+                'unit_work_plan_id' => $submittedUwps->first()->id,
+                'office_id' => $seedUwp->office_id,
+                'performance_period_id' => $seedUwp->performance_period_id,
+                'generated_by' => $user->id,
+                'status' => Opcr::STATUS_DRAFT,
+                'submitted_at' => null,
+                'approved_by' => null,
+                'approved_at' => null,
+                'returned_at' => null,
+                'remarks' => null,
+                'locked_at' => null,
+            ]);
+        } elseif ($opcr->isApproved()) {
+            throw ValidationException::withMessages([
+                'unit_work_plan_id' => 'The OPCR for this office and period is already approved.',
+            ]);
+        } elseif (in_array(strtolower((string) $opcr->status), [Opcr::STATUS_ENDORSED, Opcr::STATUS_SUBMITTED], true)) {
+            throw ValidationException::withMessages([
+                'unit_work_plan_id' => 'The OPCR for this office and period is already submitted to PMT.',
+            ]);
+        } else {
+            $opcr->forceFill([
+                'unit_work_plan_id' => $opcr->unit_work_plan_id ?: $submittedUwps->first()->id,
+                'generated_by' => $user->id,
+                'status' => Opcr::STATUS_DRAFT,
+                'submitted_at' => null,
+                'approved_by' => null,
+                'approved_at' => null,
+                'returned_at' => null,
+                'remarks' => null,
+                'locked_at' => null,
+            ])->save();
+        }
+
+        $existingSourceIds = $opcr->unitWorkPlans()
+            ->where('unit_work_plans.status', UnitWorkPlan::STATUS_CONSOLIDATED)
+            ->pluck('unit_work_plans.id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        $sourceIds = $submittedUwps->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->merge($existingSourceIds)
+            ->unique()
+            ->values()
+            ->all();
+        $opcr->unitWorkPlans()->sync($sourceIds);
+
+        UnitWorkPlan::query()
+            ->whereIn('id', $sourceIds)
+            ->update([
+                'status' => UnitWorkPlan::STATUS_CONSOLIDATED,
+                'endorsed_at' => now(),
+                'locked_at' => now(),
+                'returned_at' => null,
+                'returned_by' => null,
+                'returned_by_role' => null,
+                'return_remarks' => null,
+            ]);
+
+        return $opcr;
     }
 }

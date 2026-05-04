@@ -134,12 +134,10 @@ class UnitWorkPlanController extends Controller
         $existing = UnitWorkPlan::query()
             ->where('office_id', $data['office_id'])
             ->where('performance_period_id', $data['performance_period_id'])
+            ->where('created_by', $user->id)
             ->first();
 
         if ($existing) {
-            if ((int) $existing->created_by !== (int) $user->id) {
-                return back()->with('error', 'A Unit Work Plan already exists for the selected Office/Unit and Performance Period.');
-            }
 
             if (!$existing->isEditableBySupervisor()) {
                 return back()->with('error', 'UWP is read-only at this stage.');
@@ -933,14 +931,10 @@ class UnitWorkPlanController extends Controller
                 $uwp = UnitWorkPlan::query()
                     ->where('office_id', $officeId)
                     ->where('performance_period_id', $periodId)
+                    ->where('created_by', $user->id)
                     ->first();
 
                 if ($uwp) {
-                    if ((int) $uwp->created_by !== (int) $user->id) {
-                        throw ValidationException::withMessages([
-                            'office_id' => 'A Unit Work Plan already exists for the selected Office/Unit and Performance Period.',
-                        ]);
-                    }
 
                     if (!$uwp->isEditableBySupervisor()) {
                         throw ValidationException::withMessages([
@@ -965,15 +959,14 @@ class UnitWorkPlanController extends Controller
             $conflict = UnitWorkPlan::query()
                 ->where('office_id', $officeId)
                 ->where('performance_period_id', $periodId)
+                ->where('created_by', $user->id)
                 ->where('id', '!=', $uwp->id)
                 ->first();
 
             if ($conflict) {
-                if ((int) $conflict->created_by !== (int) $user->id) {
-                    throw ValidationException::withMessages([
-                        'office_id' => 'A Unit Work Plan already exists for the selected Office/Unit and Performance Period.',
-                    ]);
-                }
+                throw ValidationException::withMessages([
+                    'office_id' => 'You already have a Unit Work Plan for the selected Office/Unit and Performance Period.',
+                ]);
             }
 
             $payloadUpdate = [
@@ -1122,6 +1115,11 @@ class UnitWorkPlanController extends Controller
                 $this->ensureDefaultUwpFunctions($uwp);
             }
 
+            // Child records can change without mutating the parent row directly.
+            // Touch the UWP so downstream preview logic can distinguish a freshly
+            // saved draft from untouched legacy seeded data.
+            $uwp->touch();
+
             return $uwp;
         });
     }
@@ -1155,6 +1153,134 @@ class UnitWorkPlanController extends Controller
                 'sort_order' => 2,
             ],
         ]);
+    }
+
+    private function legacySeedStandardsMap(): array
+    {
+        return [
+            'All e-bank transactions scanned and encoded daily' => [
+                5 => ['q' => ['No errors; accurate encoding'], 'e' => ['100% processed'], 't' => ['Same working day']],
+                4 => ['q' => ['Minor errors'], 'e' => ['100% processed'], 't' => ['Same working day']],
+                3 => ['q' => ['Few minor errors'], 'e' => ['95–99% processed'], 't' => ['End of working day']],
+                2 => ['q' => ['Multiple errors'], 'e' => ['<95% processed'], 't' => ['Beyond working day']],
+                1 => ['q' => ['Major errors/missing'], 'e' => ['Majority unprocessed'], 't' => ['Not within acceptable time']],
+            ],
+            'Indexing complete with no missing pages' => [
+                5 => ['q' => ['Indexing fully verified, zero gaps'], 'e' => ['100% pages indexed'], 't' => ['Same day']],
+                4 => ['q' => ['Indexing minor rechecks'], 'e' => ['100% pages indexed'], 't' => ['Same day']],
+                3 => ['q' => ['Occasional missing indexes fixed'], 'e' => ['95–99% indexed'], 't' => ['Within 24 hours']],
+                2 => ['q' => ['Frequent missing pages'], 'e' => ['<95% indexed'], 't' => ['Beyond 24 hours']],
+                1 => ['q' => ['Indexing largely incomplete'], 'e' => ['Major gaps'], 't' => ['Unacceptable']],
+            ],
+            'Audit trail maintained within 24 hours' => [
+                5 => ['q' => ['Complete trail, no errors'], 'e' => ['100% entries captured'], 't' => ['Within 24 hours']],
+                4 => ['q' => ['Minor corrections only'], 'e' => ['100% entries captured'], 't' => ['Within 24 hours']],
+                3 => ['q' => ['Some gaps corrected'], 'e' => ['95–99% entries captured'], 't' => ['Within 48 hours']],
+                2 => ['q' => ['Multiple missing logs'], 'e' => ['<95% captured'], 't' => ['Beyond 48 hours']],
+                1 => ['q' => ['Trail missing'], 'e' => ['Majority uncaptured'], 't' => ['Unacceptable']],
+            ],
+            'Same-day verification of OTC transactions' => [
+                5 => ['q' => ['Verified without discrepancies'], 'e' => ['100% OTC verified'], 't' => ['Same working day']],
+                4 => ['q' => ['Minor verifications pending'], 'e' => ['100% OTC verified'], 't' => ['Same working day']],
+                3 => ['q' => ['Few pending verifications'], 'e' => ['95–99% verified'], 't' => ['End of working day']],
+                2 => ['q' => ['Several unverified'], 'e' => ['<95% verified'], 't' => ['Beyond working day']],
+                1 => ['q' => ['Verification not done'], 'e' => ['Majority unverified'], 't' => ['Unacceptable']],
+            ],
+            '95% encoded within the business day' => [
+                5 => ['q' => ['Encodings error-free'], 'e' => ['100% encoded'], 't' => ['Same business day']],
+                4 => ['q' => ['Minor corrections'], 'e' => ['100% encoded'], 't' => ['Same business day']],
+                3 => ['q' => ['Few delays'], 'e' => ['95–99% encoded'], 't' => ['By end of day']],
+                2 => ['q' => ['Multiple delays'], 'e' => ['<95% encoded'], 't' => ['Next day']],
+                1 => ['q' => ['Encoding largely incomplete'], 'e' => ['Major backlog'], 't' => ['Unacceptable']],
+            ],
+            'OR validation completed daily' => [
+                5 => ['q' => ['All ORs validated error-free'], 'e' => ['100% validated'], 't' => ['Daily']],
+                4 => ['q' => ['Minor issues corrected same day'], 'e' => ['100% validated'], 't' => ['Daily']],
+                3 => ['q' => ['Some validations late'], 'e' => ['95–99% validated'], 't' => ['Within 48 hours']],
+                2 => ['q' => ['Frequent late validations'], 'e' => ['<95% validated'], 't' => ['Beyond 48 hours']],
+                1 => ['q' => ['Validations mostly missing'], 'e' => ['Majority unvalidated'], 't' => ['Unacceptable']],
+            ],
+            'Weekly filing updated and retrievable' => [
+                5 => ['q' => ['Zero retrieval issues'], 'e' => ['100% weekly updates'], 't' => ['Within week']],
+                4 => ['q' => ['Minor retrieval fixes'], 'e' => ['100% weekly updates'], 't' => ['Within week']],
+                3 => ['q' => ['Some items late'], 'e' => ['95–99% updates'], 't' => ['Within next week']],
+                2 => ['q' => ['Many late updates'], 'e' => ['<95% updates'], 't' => ['Beyond next week']],
+                1 => ['q' => ['Updates not done'], 'e' => ['Major gaps'], 't' => ['Unacceptable']],
+            ],
+            'Digital backups synced monthly' => [
+                5 => ['q' => ['Backups verified'], 'e' => ['100% synced'], 't' => ['Within month']],
+                4 => ['q' => ['Minor sync corrections'], 'e' => ['100% synced'], 't' => ['Within month']],
+                3 => ['q' => ['Some delays'], 'e' => ['95–99% synced'], 't' => ['Within following week']],
+                2 => ['q' => ['Frequent delays'], 'e' => ['<95% synced'], 't' => ['Beyond following week']],
+                1 => ['q' => ['Backups largely missing'], 'e' => ['Major gaps'], 't' => ['Unacceptable']],
+            ],
+            'Retrieval logs maintained for audits' => [
+                5 => ['q' => ['Logs complete and audit-ready'], 'e' => ['100% requests logged'], 't' => ['Same day']],
+                4 => ['q' => ['Minor log gaps corrected'], 'e' => ['100% requests logged'], 't' => ['Same day']],
+                3 => ['q' => ['Some gaps'], 'e' => ['95–99% logged'], 't' => ['Within 48 hours']],
+                2 => ['q' => ['Many gaps'], 'e' => ['<95% logged'], 't' => ['Beyond 48 hours']],
+                1 => ['q' => ['Logs largely missing'], 'e' => ['Majority unlogged'], 't' => ['Unacceptable']],
+            ],
+        ];
+    }
+
+    private function normalizeLegacySeedText(string $value): string
+    {
+        $normalized = str_replace(['–', '—', 'â€“', 'â€”'], '-', $value);
+        $normalized = preg_replace('/\s+/', ' ', trim($normalized)) ?? trim($normalized);
+
+        return mb_strtolower($normalized);
+    }
+
+    private function isLegacySeedDraft(UnitWorkPlan $uwp): bool
+    {
+        if (!in_array((string) $uwp->status, [UnitWorkPlan::STATUS_DRAFT, UnitWorkPlan::STATUS_RETURNED], true)) {
+            return false;
+        }
+
+        if (!$uwp->created_at || !$uwp->updated_at) {
+            return true;
+        }
+
+        return abs($uwp->updated_at->getTimestamp() - $uwp->created_at->getTimestamp()) < 1;
+    }
+
+    private function isLegacySeededIndicator(UnitWorkPlan $uwp, $indicator): bool
+    {
+        if (!$this->isLegacySeedDraft($uwp)) {
+            return false;
+        }
+
+        $seed = $this->legacySeedStandardsMap()[(string) ($indicator->indicator_text ?? '')] ?? null;
+        if (!$seed) {
+            return false;
+        }
+
+        $actual = [];
+        foreach ($indicator->qetStandards ?? [] as $standard) {
+            $rating = (int) ($standard->rating ?? 0);
+            $dimension = (string) ($standard->dimension ?? '');
+            $actual[$rating][$dimension][] = $this->normalizeLegacySeedText((string) ($standard->standard_text ?? ''));
+        }
+
+        foreach ([5, 4, 3, 2, 1] as $rating) {
+            foreach (['q', 'e', 't'] as $dimension) {
+                $actualValues = $actual[$rating][$dimension] ?? [];
+                $seedValues = array_map(
+                    fn ($value) => $this->normalizeLegacySeedText((string) $value),
+                    $seed[$rating][$dimension] ?? []
+                );
+
+                sort($actualValues);
+                sort($seedValues);
+
+                if ($actualValues !== $seedValues) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     private function mapUwpToEditorFunctions(UnitWorkPlan $uwp): array
@@ -1196,7 +1322,7 @@ class UnitWorkPlanController extends Controller
                                                 })
                                                 ->all(),
                                             'assignees' => $indicator->assignments
-                                                ->map(fn ($assignment) => $assignment->employee?->name)
+                                                ->map(fn ($assignment) => $assignment->employee?->id)
                                                 ->filter()
                                                 ->values()
                                                 ->all(),
@@ -1366,8 +1492,10 @@ class UnitWorkPlanController extends Controller
             $payload = [
                 'id' => $uwp->id,
                 'status' => $uwp->status,
+                'created_at' => optional($uwp->created_at)->toDateTimeString(),
                 'submitted_at' => optional($uwp->submitted_at)->toDateTimeString(),
                 'locked_at' => optional($uwp->locked_at)->toDateTimeString(),
+                'updated_at' => optional($uwp->updated_at)->toDateTimeString(),
                 'office' => [
                     'id' => $uwp->office?->id,
                     'name' => $uwp->office?->name,

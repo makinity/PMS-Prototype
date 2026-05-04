@@ -5,6 +5,7 @@ namespace App\Http\Controllers\StageTwo\Commitement;
 use App\Http\Controllers\Controller;
 use App\Models\Ipcr;
 use App\Models\IpcrItem;
+use App\Models\Mpor;
 use App\Models\OrsEntry;
 use App\Models\OrsEntryEvidence;
 use App\Models\PerformancePeriod;
@@ -96,6 +97,12 @@ class OrsController extends Controller
             'ipcr_status' => $ipcr?->status,
             'ipcr_id' => $ipcr?->id,
         ];
+
+        $mporMonthLocks = $this->resolveLockedMporMonthsForEmployee(
+            (int) $user->id,
+            $activePeriod
+        );
+        $currentMporLock = $this->resolveMporMonthLock($mporMonthLocks, now());
 
         if (!$activePeriod) {
             $orsGate['blocked'] = true;
@@ -294,7 +301,8 @@ class OrsController extends Controller
                 $hasSubmittedAt,
                 $hasTotalSeconds,
                 $hasSupervisorId,
-                $evidenceCounts
+                $evidenceCounts,
+                $mporMonthLocks
             ) {
                 $workDateRaw = $hasWorkDate ? data_get($entry, 'work_date') : null;
                 $workDate = null;
@@ -343,6 +351,8 @@ class OrsController extends Controller
                     'evidenceAttached' => (int) ($evidenceCounts[$entryId] ?? 0) > 0,
                     'supervisorId' => is_numeric($supervisorIdRaw) ? (int) $supervisorIdRaw : null,
                     'supervisorName' => $supervisorName !== '' ? $supervisorName : null,
+                    'monthLocked' => !is_null($workDate) && !is_null($this->resolveMporMonthLock($mporMonthLocks, $workDate)),
+                    'mporLockReason' => $workDate ? ($this->resolveMporMonthLock($mporMonthLocks, $workDate)['reason'] ?? null) : null,
                 ];
             })->values()->all();
         }
@@ -361,6 +371,8 @@ class OrsController extends Controller
             'employeeName' => $user->name ?? '',
             'officeName' => $officeName,
             'periodName' => $periodName,
+            'mporMonthLocks' => $mporMonthLocks,
+            'currentMporLock' => $currentMporLock,
         ]);
     }
 
@@ -456,6 +468,8 @@ class OrsController extends Controller
         }
 
         $workDate = Carbon::parse($validated['work_date'])->startOfDay();
+        $this->assertMporMonthUnlocked($user, $workDate);
+
         $period = $ipcr->performancePeriod;
         if ($period) {
             $periodStart = !empty($period->start_date) ? Carbon::parse($period->start_date)->startOfDay() : null;
@@ -548,6 +562,11 @@ class OrsController extends Controller
             return $this->jsonError('This ORS entry is already submitted/locked.', 422);
         }
 
+        $lockedMonthMessage = $this->mporMonthLockMessageForEntry($user, $orsEntry);
+        if ($lockedMonthMessage) {
+            return $this->jsonError($lockedMonthMessage, 422);
+        }
+
         try {
             $updated = DB::transaction(function () use ($orsEntry, $user) {
                 $entry = OrsEntry::query()->lockForUpdate()->findOrFail($orsEntry->id);
@@ -555,6 +574,8 @@ class OrsController extends Controller
                 if ($this->isEntryLocked($entry)) {
                     throw new \RuntimeException('This ORS entry is already submitted/locked.');
                 }
+
+                $this->assertAuthenticatedEmployeeMporMonthUnlocked($entry);
 
                 $status = strtolower((string) $entry->status);
                 if ($status === 'recording') {
@@ -605,6 +626,11 @@ class OrsController extends Controller
             return $this->jsonError('This ORS entry is already submitted/locked.', 422);
         }
 
+        $lockedMonthMessage = $this->mporMonthLockMessageForEntry($user, $orsEntry);
+        if ($lockedMonthMessage) {
+            return $this->jsonError($lockedMonthMessage, 422);
+        }
+
         try {
             $updated = DB::transaction(function () use ($orsEntry) {
                 $entry = OrsEntry::query()->lockForUpdate()->findOrFail($orsEntry->id);
@@ -612,6 +638,8 @@ class OrsController extends Controller
                 if ($this->isEntryLocked($entry)) {
                     throw new \RuntimeException('This ORS entry is already submitted/locked.');
                 }
+
+                $this->assertAuthenticatedEmployeeMporMonthUnlocked($entry);
 
                 if (strtolower((string) $entry->status) !== 'recording' || !$entry->started_at) {
                     throw new \RuntimeException('Only recording entries can be paused.');
@@ -663,6 +691,11 @@ class OrsController extends Controller
             return $this->jsonError('This ORS entry is already submitted/locked.', 422);
         }
 
+        $lockedMonthMessage = $this->mporMonthLockMessageForEntry($user, $orsEntry);
+        if ($lockedMonthMessage) {
+            return $this->jsonError($lockedMonthMessage, 422);
+        }
+
         try {
             $updated = DB::transaction(function () use ($orsEntry, $user) {
                 $entry = OrsEntry::query()->lockForUpdate()->findOrFail($orsEntry->id);
@@ -670,6 +703,8 @@ class OrsController extends Controller
                 if ($this->isEntryLocked($entry)) {
                     throw new \RuntimeException('This ORS entry is already submitted/locked.');
                 }
+
+                $this->assertAuthenticatedEmployeeMporMonthUnlocked($entry);
 
                 $status = strtolower((string) $entry->status);
                 if ($status === 'recording') {
@@ -720,6 +755,11 @@ class OrsController extends Controller
             return $this->jsonError('This ORS entry is already submitted/locked.', 422);
         }
 
+        $lockedMonthMessage = $this->mporMonthLockMessageForEntry($user, $orsEntry);
+        if ($lockedMonthMessage) {
+            return $this->jsonError($lockedMonthMessage, 422);
+        }
+
         try {
             $updated = DB::transaction(function () use ($orsEntry) {
                 $entry = OrsEntry::query()->lockForUpdate()->findOrFail($orsEntry->id);
@@ -727,6 +767,8 @@ class OrsController extends Controller
                 if ($this->isEntryLocked($entry)) {
                     throw new \RuntimeException('This ORS entry is already submitted/locked.');
                 }
+
+                $this->assertAuthenticatedEmployeeMporMonthUnlocked($entry);
 
                 $status = strtolower((string) $entry->status);
                 if (!in_array($status, ['recording', 'paused'], true)) {
@@ -785,6 +827,13 @@ class OrsController extends Controller
                 : back()->withErrors(['entry' => 'This ORS entry is already submitted/locked.']);
         }
 
+        $lockedMonthMessage = $this->mporMonthLockMessageForEntry($user, $orsEntry);
+        if ($lockedMonthMessage) {
+            return $request->expectsJson()
+                ? $this->jsonError($lockedMonthMessage, 422)
+                : back()->withErrors(['entry' => $lockedMonthMessage]);
+        }
+
         if (strtolower((string) $orsEntry->status) !== 'draft') {
             return $request->expectsJson()
                 ? $this->jsonError('Only draft entries can be submitted for review.', 422)
@@ -792,7 +841,7 @@ class OrsController extends Controller
         }
 
         $validated = $request->validate([
-            'quantity' => ['required', 'string', 'max:255'],
+            'quantity' => ['required', 'numeric', 'min:0'],
             'evidence' => ['nullable', 'array'],
             'evidence.*' => ['file', 'max:10240', 'mimes:pdf,jpg,jpeg,png,doc,docx,xlsx'],
             'notes' => ['nullable', 'string', 'max:1000'],
@@ -805,6 +854,7 @@ class OrsController extends Controller
                 if ($this->isEntryLocked($entry)) {
                     throw new \RuntimeException('This ORS entry is already submitted/locked.');
                 }
+                $this->assertAuthenticatedEmployeeMporMonthUnlocked($entry);
                 if (strtolower((string) $entry->status) !== 'draft') {
                     throw new \RuntimeException('Only draft entries can be submitted for review.');
                 }
@@ -911,6 +961,13 @@ class OrsController extends Controller
                 : abort(403, 'Unauthorized.');
         }
 
+        $lockedMonthMessage = $this->mporMonthLockMessageForEntry($user, $orsEntry);
+        if ($lockedMonthMessage) {
+            return $request->expectsJson()
+                ? $this->jsonError($lockedMonthMessage, 422)
+                : back()->withErrors(['evidence' => $lockedMonthMessage]);
+        }
+
         $validated = $request->validate([
             'evidence' => ['required', 'array', 'min:1'],
             'evidence.*' => ['file', 'max:10240', 'mimes:pdf,jpg,jpeg,png,doc,docx,xlsx'],
@@ -923,6 +980,8 @@ class OrsController extends Controller
                 if ($this->isEntryLocked($entry)) {
                     throw new \RuntimeException('Cannot upload evidence to a submitted/locked ORS entry.');
                 }
+
+                $this->assertAuthenticatedEmployeeMporMonthUnlocked($entry);
 
                 $now = now();
                 $files = $validated['evidence'] ?? [];
@@ -983,6 +1042,13 @@ class OrsController extends Controller
                 : abort(403, 'Unauthorized.');
         }
 
+        $lockedMonthMessage = $this->mporMonthLockMessageForEntry($user, $orsEntry);
+        if ($lockedMonthMessage) {
+            return $request->expectsJson()
+                ? $this->jsonError($lockedMonthMessage, 422)
+                : back()->withErrors(['evidence' => $lockedMonthMessage]);
+        }
+
         if ((int) $evidence->ors_entry_id !== (int) $orsEntry->id) {
             return $request->expectsJson()
                 ? $this->jsonError('Evidence does not belong to this ORS entry.', 422)
@@ -995,6 +1061,8 @@ class OrsController extends Controller
                 if ($this->isEntryLocked($entry)) {
                     throw new \RuntimeException('Cannot remove evidence from a submitted/locked ORS entry.');
                 }
+
+                $this->assertAuthenticatedEmployeeMporMonthUnlocked($entry);
 
                 $evidenceRow = OrsEntryEvidence::query()->lockForUpdate()->findOrFail($evidence->id);
                 if ((int) $evidenceRow->ors_entry_id !== (int) $entry->id) {
@@ -1063,6 +1131,102 @@ class OrsController extends Controller
     {
         return in_array(strtolower((string) $orsEntry->status), ['submitted', 'rated'], true)
             || !is_null($orsEntry->locked_at);
+    }
+
+    private function resolveLockedMporMonthsForEmployee(int $employeeId, ?PerformancePeriod $activePeriod = null): array
+    {
+        $query = Mpor::query()
+            ->select(['month', 'status'])
+            ->where('employee_id', $employeeId)
+            ->whereIn('status', ['submitted', 'approved', 'endorsed']);
+
+        if ($activePeriod && !empty($activePeriod->start_date) && !empty($activePeriod->end_date)) {
+            $startMonth = Carbon::parse($activePeriod->start_date)->format('Y-m');
+            $endMonth = Carbon::parse($activePeriod->end_date)->format('Y-m');
+            $query->whereBetween('month', [$startMonth, $endMonth]);
+        }
+
+        return $query
+            ->get()
+            ->mapWithKeys(function (Mpor $mpor): array {
+                $monthKey = trim((string) $mpor->month);
+                if ($monthKey === '') {
+                    return [];
+                }
+
+                $status = strtolower(trim((string) $mpor->status));
+                $monthLabel = Carbon::createFromFormat('Y-m', substr($monthKey, 0, 7))->format('F Y');
+
+                return [
+                    $monthKey => [
+                        'month' => $monthKey,
+                        'status' => $status,
+                        'label' => $monthLabel,
+                        'reason' => sprintf(
+                            'ORS is locked for %s because the MPOR is already %s.',
+                            $monthLabel,
+                            $status
+                        ),
+                    ],
+                ];
+            })
+            ->all();
+    }
+
+    private function resolveMporMonthLock(array $monthLocks, $date): ?array
+    {
+        if (empty($monthLocks) || empty($date)) {
+            return null;
+        }
+
+        try {
+            $monthKey = Carbon::parse($date)->format('Y-m');
+        } catch (\Throwable $e) {
+            return null;
+        }
+
+        return $monthLocks[$monthKey] ?? null;
+    }
+
+    private function assertMporMonthUnlocked(User $user, $date): void
+    {
+        $monthLock = $this->resolveMporMonthLock(
+            $this->resolveLockedMporMonthsForEmployee((int) $user->id),
+            $date
+        );
+
+        if ($monthLock) {
+            throw ValidationException::withMessages([
+                'work_date' => [$monthLock['reason'] ?? 'ORS is locked because the MPOR is already submitted.'],
+            ]);
+        }
+    }
+
+    private function assertAuthenticatedEmployeeMporMonthUnlocked(OrsEntry $orsEntry): void
+    {
+        $user = Auth::user();
+        if (!$user || $user->role !== 'employee') {
+            throw new \RuntimeException('Unauthorized.');
+        }
+
+        $monthLock = $this->resolveMporMonthLock(
+            $this->resolveLockedMporMonthsForEmployee((int) $user->id),
+            $orsEntry->work_date
+        );
+
+        if ($monthLock) {
+            throw new \RuntimeException($monthLock['reason'] ?? 'ORS is locked because the MPOR is already submitted.');
+        }
+    }
+
+    private function mporMonthLockMessageForEntry(User $user, OrsEntry $orsEntry): ?string
+    {
+        $monthLock = $this->resolveMporMonthLock(
+            $this->resolveLockedMporMonthsForEmployee((int) $user->id),
+            $orsEntry->work_date
+        );
+
+        return $monthLock['reason'] ?? null;
     }
 
     private function jsonError(string $message, int $status = 422)
@@ -1137,6 +1301,14 @@ class OrsController extends Controller
             'durationSeconds' => $totalSeconds,
             'evidenceCount' => $evidenceCount,
             'evidenceAttached' => $evidenceCount > 0,
+            'monthLocked' => !is_null($this->resolveMporMonthLock(
+                $this->resolveLockedMporMonthsForEmployee((int) ($entry->employee_id ?? 0)),
+                $workDate
+            )),
+            'mporLockReason' => $this->resolveMporMonthLock(
+                $this->resolveLockedMporMonthsForEmployee((int) ($entry->employee_id ?? 0)),
+                $workDate
+            )['reason'] ?? null,
         ];
     }
 

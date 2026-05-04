@@ -13,6 +13,22 @@ class IpcrGeneratorService
     public function generateFromOpcr(Opcr $opcr): void
     {
         $opcr->load([
+            'unitWorkPlans.office',
+            'unitWorkPlans.performancePeriod',
+            'unitWorkPlans.uwpFunctions' => function ($query) {
+                $query->orderBy('sort_order')->with([
+                    'mfos' => function ($mfoQuery) {
+                        $mfoQuery->orderBy('sort_order')->with([
+                            'successIndicators' => function ($indicatorQuery) {
+                                $indicatorQuery->orderBy('sort_order')->with([
+                                    'qetStandards',
+                                    'assignments.employee',
+                                ]);
+                            },
+                        ]);
+                    },
+                ]);
+            },
             'unitWorkPlan.office',
             'unitWorkPlan.performancePeriod',
             'unitWorkPlan.uwpFunctions' => function ($query) {
@@ -31,8 +47,8 @@ class IpcrGeneratorService
             },
         ]);
 
-        $uwp = $opcr->unitWorkPlan;
-        if (!$uwp) {
+        $sourceUwps = $opcr->sourceUnitWorkPlans();
+        if ($sourceUwps->isEmpty()) {
             return;
         }
 
@@ -43,50 +59,62 @@ class IpcrGeneratorService
 
         $byEmployee = [];
 
-        foreach ($uwp->uwpFunctions as $function) {
-            foreach ($function->mfos as $mfo) {
-                foreach ($mfo->successIndicators as $indicator) {
-                    $standardsByRating = [];
-                    foreach ([5, 4, 3, 2, 1] as $rating) {
-                        $standardsByRating[(string) $rating] = ['Q' => [], 'E' => [], 'T' => []];
-                    }
+        foreach ($sourceUwps as $uwp) {
+            $uwp->loadMissing([
+                'office',
+                'performancePeriod',
+                'uwpFunctions.mfos.successIndicators.qetStandards',
+                'uwpFunctions.mfos.successIndicators.assignments.employee',
+            ]);
 
-                    foreach ($indicator->qetStandards as $standard) {
-                        $rating = (string) $standard->rating;
-                        if (!isset($standardsByRating[$rating])) {
-                            continue;
+            foreach ($uwp->uwpFunctions as $function) {
+                foreach ($function->mfos as $mfo) {
+                    foreach ($mfo->successIndicators as $indicator) {
+                        $standardsByRating = [];
+                        foreach ([5, 4, 3, 2, 1] as $rating) {
+                            $standardsByRating[(string) $rating] = ['Q' => [], 'E' => [], 'T' => []];
                         }
 
-                        $dimension = strtolower((string) $standard->dimension);
-                        if (in_array($dimension, ['q', 'quality'], true)) {
-                            $standardsByRating[$rating]['Q'][] = (string) $standard->standard_text;
-                        } elseif (in_array($dimension, ['e', 'efficiency'], true)) {
-                            $standardsByRating[$rating]['E'][] = (string) $standard->standard_text;
-                        } elseif (in_array($dimension, ['t', 'timeliness'], true)) {
-                            $standardsByRating[$rating]['T'][] = (string) $standard->standard_text;
-                        }
-                    }
+                        foreach ($indicator->qetStandards as $standard) {
+                            $rating = (string) $standard->rating;
+                            if (!isset($standardsByRating[$rating])) {
+                                continue;
+                            }
 
-                    foreach ($indicator->assignments as $assignment) {
-                        $employeeId = (int) ($assignment->employee?->id ?? 0);
-                        if ($employeeId <= 0) {
-                            continue;
+                            $dimension = strtolower((string) $standard->dimension);
+                            if (in_array($dimension, ['q', 'quality'], true)) {
+                                $standardsByRating[$rating]['Q'][] = (string) $standard->standard_text;
+                            } elseif (in_array($dimension, ['e', 'efficiency'], true)) {
+                                $standardsByRating[$rating]['E'][] = (string) $standard->standard_text;
+                            } elseif (in_array($dimension, ['t', 'timeliness'], true)) {
+                                $standardsByRating[$rating]['T'][] = (string) $standard->standard_text;
+                            }
                         }
 
-                        $byEmployee[$employeeId][] = [
-                            'uwp_function_id' => (int) $function->id,
-                            'uwp_success_indicator_id' => (int) ($indicator->id ?? 0),
-                            'output_title' => (string) ($mfo->title ?? ''),
-                            'function_type' => strtolower((string) ($function->function_type ?? '')),
-                            'indicator_text' => (string) ($indicator->indicator_text ?? ''),
-                            'target_quantity' => $indicator->target_quantity ?? $mfo->target_quantity,
-                            'target_timeline' => $indicator->target_timeline ?? $mfo->target_timeline,
-                            'target_summary' => $this->buildTargetSummary(
-                                $indicator->target_quantity ?? $mfo->target_quantity,
-                                $indicator->target_timeline ?? $mfo->target_timeline
-                            ),
-                            'standards_payload' => $standardsByRating,
-                        ];
+                        foreach ($indicator->assignments as $assignment) {
+                            $employeeId = (int) ($assignment->employee?->id ?? 0);
+                            if ($employeeId <= 0) {
+                                continue;
+                            }
+
+                            $byEmployee[$employeeId][] = [
+                                'unit_work_plan_id' => (int) $uwp->id,
+                                'performance_period_id' => (int) $uwp->performance_period_id,
+                                'office_id' => (int) $uwp->office_id,
+                                'uwp_function_id' => (int) $function->id,
+                                'uwp_success_indicator_id' => (int) ($indicator->id ?? 0),
+                                'output_title' => (string) ($mfo->title ?? ''),
+                                'function_type' => strtolower((string) ($function->function_type ?? '')),
+                                'indicator_text' => (string) ($indicator->indicator_text ?? ''),
+                                'target_quantity' => $indicator->target_quantity ?? $mfo->target_quantity,
+                                'target_timeline' => $indicator->target_timeline ?? $mfo->target_timeline,
+                                'target_summary' => $this->buildTargetSummary(
+                                    $indicator->target_quantity ?? $mfo->target_quantity,
+                                    $indicator->target_timeline ?? $mfo->target_timeline
+                                ),
+                                'standards_payload' => $standardsByRating,
+                            ];
+                        }
                     }
                 }
             }
@@ -102,26 +130,31 @@ class IpcrGeneratorService
                 ->where('employee_id', $employeeId)
                 ->first();
 
-            if ($existingIpcr && !empty($existingIpcr->committed_at)) {
-                continue;
-            }
+            // We remove the hard block on committed IPCrs here because 
+            // if a plan is re-approved, the employee needs to re-commit to the new targets.
 
             $updateData = [
                 'status' => Ipcr::STATUS_FOR_COMMITMENT,
             ];
 
             if ($hasUnitWorkPlanId) {
-                $updateData['unit_work_plan_id'] = $uwp->id;
+                $updateData['unit_work_plan_id'] = $items[0]['unit_work_plan_id'] ?? $sourceUwps->first()?->id;
             }
             if ($hasPerformancePeriodId) {
-                $updateData['performance_period_id'] = $uwp->performance_period_id;
+                $updateData['performance_period_id'] = $opcr->performance_period_id
+                    ?? ($items[0]['performance_period_id'] ?? $sourceUwps->first()?->performance_period_id);
             }
             if ($hasOfficeId) {
-                $updateData['office_id'] = $uwp->office_id;
+                $updateData['office_id'] = $opcr->office_id
+                    ?? ($items[0]['office_id'] ?? $sourceUwps->first()?->office_id);
             }
             if ($hasGeneratedAt) {
                 $updateData['generated_at'] = now();
             }
+
+            // Reset commitment status to allow the employee to review and click 'Commit'
+            $updateData['committed_at'] = null;
+            $updateData['locked_at'] = null;
 
             $ipcr = Ipcr::query()->updateOrCreate(
                 [

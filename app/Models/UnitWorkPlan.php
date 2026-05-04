@@ -7,12 +7,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class UnitWorkPlan extends Model
 {
     // Status constants
     public const STATUS_DRAFT = 'draft';
     public const STATUS_SUBMITTED = 'submitted';
+    public const STATUS_CONSOLIDATED = 'consolidated';
     public const STATUS_ENDORSED = 'endorsed';
     public const STATUS_PMT_APPROVED = 'pmt_approved';
     public const STATUS_RETURNED = 'returned';
@@ -93,6 +95,12 @@ class UnitWorkPlan extends Model
     public function opcr(): HasOne
     {
         return $this->hasOne(Opcr::class, 'unit_work_plan_id');
+    }
+
+    public function opcrs(): BelongsToMany
+    {
+        return $this->belongsToMany(Opcr::class, 'opcr_unit_work_plan', 'unit_work_plan_id', 'opcr_id')
+            ->withTimestamps();
     }
 
     public function isLocked(): bool

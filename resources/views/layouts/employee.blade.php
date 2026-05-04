@@ -24,18 +24,11 @@
     <div class="min-h-screen">
         @php
             $isDashboard = request()->routeIs('employee.dashboard');
-            $isUnitWorkPlan = request()->routeIs('employee.uwp');
             $isMyTasks = request()->routeIs('employee.my-task');
             $isAccomplishmentSubmission = request()->routeIs('employee.accomplishment-submission');
-            $isSubmitOutput = request()->routeIs('employee.submit-output');
             $isOutputRating = request()->routeIs('employee.ors');
-            $isOpcr = request()->routeIs('employee.opcr');
             $isMpor = request()->routeIs('employee.mpor');
-            $isSmpor = request()->routeIs('employee.smpor');
-            $isIPCR = request()->routeIs('employee.ipcr');
-            $isFinal = request()->routeIs('employee.final-ratings');
             $isIPCRTARGET = request()->routeIs('employee.ipcr-target');
-            $isIdp = request()->routeIs('employee.idp');
             $isProfile = request()->routeIs('employee.profile');
         @endphp
         <!-- Top Navigation -->
@@ -163,27 +156,9 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('employee.smpor') }}" class="sidebar-link" @if($isSmpor) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-layer-group"></i>
-                                    <span>SMPOR</span>
-                                </a>
-                            </li>
-                            <li>
                                 <a href="{{ route('employee.ipcr-target') }}" class="sidebar-link" @if($isIPCRTARGET) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-bullseye"></i>
                                     <span>IPCR Target</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('employee.ipcr') }}" class="sidebar-link" @if($isIPCR) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-file-circle-check"></i>
-                                    <span>IPCR Final</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('employee.final-ratings') }}" class="sidebar-link" @if($isFinal) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-award"></i>
-                                    <span>My Final Ratings</span>
                                 </a>
                             </li>
                         </ul>

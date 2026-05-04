@@ -11,6 +11,10 @@
                 'label' => 'Dept Head Endorsed',
                 'badge' => 'border-emerald-500/40 bg-emerald-500/10 text-emerald-200',
             ],
+            'returned' => [
+                'label' => 'Returned',
+                'badge' => 'border-rose-500/40 bg-rose-500/10 text-rose-200',
+            ],
             'pmt_approved' => [
                 'label' => 'PMT Approved',
                 'badge' => 'border-sky-500/40 bg-sky-500/10 text-sky-200',
@@ -29,7 +33,7 @@
         $hasIncoming = !empty($incomingMporsSafe);
         $hasConsolidated = !empty($consolidatedMporsSafe);
 
-        $canEndorse = ($status === 'draft') && $hasConsolidated;
+        $canEndorse = in_array($status, ['draft', 'returned'], true) && $hasConsolidated;
 
         $approvedDateLabel = $isEndorsed && !empty($approvedAt)
             ? \Illuminate\Support\Carbon::parse($approvedAt)->format('M d, Y g:i A')
@@ -241,6 +245,7 @@
                                 <th class="px-4 py-3">Performance Indicator</th>
                                 <th class="px-4 py-3 text-center">Target / Timeline</th>
                                 <th class="px-4 py-3 text-center">Actual Performance</th>
+                                <th class="px-4 py-3 text-center">Variance</th>
                                 <th class="px-4 py-3">Remarks</th>
                             </tr>
                         </thead>
@@ -258,11 +263,12 @@
                                         <p class="text-sm text-slate-200">{{ $targetTimeline }}</p>
                                     </td>
                                     <td class="px-4 py-3 text-center font-semibold">{{ $row['actual_performance'] ?? '-' }}</td>
+                                    <td class="px-4 py-3 text-center font-semibold">{{ isset($row['variance']) && $row['variance'] !== null ? $row['variance'] : '-' }}</td>
                                     <td class="px-4 py-3">{{ $row['remarks'] ?? '-' }}</td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="px-4 py-6 text-center text-sm text-slate-400">
+                                    <td colspan="7" class="px-4 py-6 text-center text-sm text-slate-400">
                                         QAR rows are empty. No approved MPOR data found.
                                     </td>
                                 </tr>

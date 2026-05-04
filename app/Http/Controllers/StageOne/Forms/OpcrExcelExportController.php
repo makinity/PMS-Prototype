@@ -35,12 +35,30 @@ class OpcrExcelExportController extends Controller
     {
         $opcrId = (int) $request->query('opcr');
         $query = Opcr::query()
-            ->where('status', Opcr::STATUS_APPROVED)
             ->with([
+                'office.head',
+                'performancePeriod',
                 'unitWorkPlan.office.head',
                 'unitWorkPlan.performancePeriod',
                 'unitWorkPlan.creator',
                 'unitWorkPlan.uwpFunctions' => function ($query) {
+                    $query->orderBy('sort_order')->with([
+                        'mfos' => function ($mfoQuery) {
+                            $mfoQuery->orderBy('sort_order')->with([
+                                'successIndicators' => function ($indicatorQuery) {
+                                    $indicatorQuery->orderBy('sort_order')->with([
+                                        'qetStandards',
+                                        'assignments.employee',
+                                    ]);
+                                },
+                            ]);
+                        },
+                    ]);
+                },
+                'unitWorkPlans.office.head',
+                'unitWorkPlans.performancePeriod',
+                'unitWorkPlans.creator',
+                'unitWorkPlans.uwpFunctions' => function ($query) {
                     $query->orderBy('sort_order')->with([
                         'mfos' => function ($mfoQuery) {
                             $mfoQuery->orderBy('sort_order')->with([
@@ -65,8 +83,9 @@ class OpcrExcelExportController extends Controller
 
     protected function buildFilename(Opcr $opcr, bool $preview): string
     {
-        $office = Str::slug((string) ($opcr->unitWorkPlan?->office?->name ?? 'Office'), '_');
-        $period = Str::slug((string) ($opcr->unitWorkPlan?->performancePeriod?->name ?? 'Period'), '_');
+        $source = $opcr->sourceUnitWorkPlans()->first();
+        $office = Str::slug((string) ($opcr->office?->name ?? $source?->office?->name ?? 'Office'), '_');
+        $period = Str::slug((string) ($opcr->performancePeriod?->name ?? $source?->performancePeriod?->name ?? 'Period'), '_');
         $suffix = $preview ? '_Preview' : '';
 
         return "OPCR_{$office}_{$period}{$suffix}.xlsx";

@@ -95,6 +95,20 @@ class DatabaseSeeder extends Seeder
                 ]
             );
 
+            $supervisorRCU2 = User::query()->updateOrCreate(
+                ['email' => 'juan.delacruz@example.com'],
+                [
+                    'employee_id' => 'SUP-RCU-0002',
+                    'name' => 'Juan Dela Cruz',
+                    'password' => $password,
+                    'role' => 'supervisor',
+                    'office_id' => $officeRCU->id,
+                    'position' => 'Supervisor',
+                    'is_active' => true,
+                    'activated_at' => $now,
+                ]
+            );
+
             $empRamon = User::query()->updateOrCreate(
                 ['email' => 'ramon.reyes@example.com'],
                 [
@@ -211,9 +225,22 @@ class DatabaseSeeder extends Seeder
                 [
                     'office_id' => $officeRCU->id,
                     'performance_period_id' => $period->id,
+                    'created_by' => $supervisorRCU->id,
                 ],
                 [
-                    'created_by' => $supervisorRCU->id,
+                    'status' => UnitWorkPlan::STATUS_DRAFT,
+                    'submitted_at' => null,
+                    'locked_at' => null,
+                ]
+            );
+
+            $uwpRCU2 = UnitWorkPlan::query()->updateOrCreate(
+                [
+                    'office_id' => $officeRCU->id,
+                    'performance_period_id' => $period->id,
+                    'created_by' => $supervisorRCU2->id,
+                ],
+                [
                     'status' => UnitWorkPlan::STATUS_DRAFT,
                     'submitted_at' => null,
                     'locked_at' => null,
@@ -236,7 +263,8 @@ class DatabaseSeeder extends Seeder
             $seedUwpTemplate = function (
                 UnitWorkPlan $uwp,
                 array $functionSeed,
-                array $standardsMap
+                array $standardsMap,
+                array $employeeIds = []
             ): void {
                 $functionIds = UwpFunction::query()
                     ->where('unit_work_plan_id', $uwp->id)
@@ -331,6 +359,16 @@ class DatabaseSeeder extends Seeder
                                         'standard_text' => $standardText,
                                     ]);
                                 }
+                            }
+
+                            // Automatically assign employees to this indicator
+                            foreach ($employeeIds as $eid) {
+                                UwpIndicatorAssignment::query()->create([
+                                    'uwp_success_indicator_id' => $indicator->id,
+                                    'employee_id' => $eid,
+                                    'assigned_by' => $uwp->created_by,
+                                    'assigned_at' => now(),
+                                ]);
                             }
                         }
                     }
@@ -573,16 +611,28 @@ class DatabaseSeeder extends Seeder
                 ],
             ];
 
+            $rcuEmployeeIds = [$empRamon->id, $empMark->id, $empDenji->id];
+            $rmuEmployeeIds = [$empMilo->id, $empXuiie->id];
+
             $seedUwpTemplate(
                 $uwpRCU,
                 $functionSeedRCU,
-                $standardsMapRCU
+                $standardsMapRCU,
+                $rcuEmployeeIds
+            );
+
+            $seedUwpTemplate(
+                $uwpRCU2,
+                $functionSeedRMU,
+                $standardsMapRMU,
+                $rcuEmployeeIds
             );
 
             $seedUwpTemplate(
                 $uwpRMU,
                 $functionSeedRMU,
-                $standardsMapRMU
+                $standardsMapRMU,
+                $rmuEmployeeIds
             );
         });
     }

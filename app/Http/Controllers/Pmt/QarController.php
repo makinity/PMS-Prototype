@@ -105,6 +105,39 @@ class QarController extends Controller
             $qarHeader->pmt_validated_at = now();
             $qarHeader->pmt_validated_by = $request->user()?->id;
             $qarHeader->save();
+
+            // Finalize Office OPCR
+            \App\Models\Opcr::query()
+                ->where('office_id', $qarHeader->office_id)
+                ->where('performance_period_id', $qarHeader->performance_period_id)
+                ->whereIn('status', [
+                    \App\Models\Opcr::STATUS_PENDING_PMT_CALIBRATION,
+                    \App\Models\Opcr::STATUS_ADJUSTED_BY_PMT
+                ])
+                ->get()
+                ->each(function ($opcr) {
+                    $finalStatus = ($opcr->status === \App\Models\Opcr::STATUS_ADJUSTED_BY_PMT)
+                        ? \App\Models\Opcr::STATUS_ADJUSTED_BY_PMT
+                        : \App\Models\Opcr::STATUS_APPROVED_BY_PMT;
+
+                    $opcr->update([
+                        'status' => $finalStatus,
+                        'locked_at' => now(),
+                    ]);
+                });
+
+            // AUTOMATIC IPCR CALCULATION FOR ALL EMPLOYEES
+            $ipcrs = \App\Models\Ipcr::query()
+                ->where('office_id', $qarHeader->office_id)
+                ->where('performance_period_id', $qarHeader->performance_period_id)
+                ->where('status', \App\Models\Ipcr::STATUS_PENDING_PMT_CALIBRATION)
+                ->get();
+
+            $ratingService = app(\App\Services\PerformanceRatingService::class);
+            foreach ($ipcrs as $ipcr) {
+                $ratingService->calculateAndSaveFinalScore($ipcr);
+            }
+
             app(SmporGeneratorService::class)->generateFromApprovedQar($qarHeader, $request->user()?->id);
         });
 
@@ -130,15 +163,31 @@ class QarController extends Controller
         }
 
         DB::transaction(function () use ($request, $qarHeader): void {
+            $qarHeader->status = QarHeader::STATUS_RETURNED;
             $qarHeader->pmt_status = QarHeader::PMT_RETURNED;
             $qarHeader->pmt_validated_at = now();
             $qarHeader->pmt_validated_by = $request->user()?->id;
             $qarHeader->save();
+
+            $mporIds = $qarHeader->mporLinks()
+                ->pluck('mpor_id')
+                ->filter()
+                ->unique()
+                ->values();
+
+            if ($mporIds->isNotEmpty()) {
+                DB::table('mpors')
+                    ->whereIn('id', $mporIds->all())
+                    ->update([
+                        'status' => 'returned',
+                        'updated_at' => now(),
+                    ]);
+            }
         });
 
         return redirect()
             ->route('pmt.qar', $redirectParams)
-            ->with('success', 'QAR returned to Dept Head.');
+            ->with('success', 'QAR returned to Dept Head. Linked MPORs were also returned to employees.');
     }
 
     private function resolveQuarterContext(Request $request): array
@@ -186,7 +235,7 @@ class QarController extends Controller
         $qarHeader->load([
             'office:id,name',
             'performancePeriod:id,name,start_date,end_date',
-            'rows:id,qar_header_id,ppa_code,mfo_title,indicator_text,target_timeline,actual_performance,remarks,sort_order',
+            'rows:id,qar_header_id,ppa_code,mfo_title,indicator_text,target_quantity,target_timeline,actual_performance,variance,remarks,sort_order',
         ]);
 
         $officeName = $qarHeader->office?->name ?? 'Office';

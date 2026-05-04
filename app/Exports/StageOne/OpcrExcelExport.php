@@ -102,76 +102,84 @@ class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
 
     private function hydrateFromModel(): void
     {
-        $uwp = $this->opcrModel->unitWorkPlan;
-        if (!$uwp) {
+        $sources = $this->opcrModel->sourceUnitWorkPlans();
+        if ($sources->isEmpty()) {
             return;
         }
 
-        foreach ($uwp->uwpFunctions as $function) {
-            $bucket = $this->normalizeFunctionType((string) ($function->function_type ?? ''));
+        foreach ($sources as $uwp) {
+            $uwp->loadMissing([
+                'creator',
+                'uwpFunctions.mfos.successIndicators.qetStandards',
+                'uwpFunctions.mfos.successIndicators.assignments.employee',
+            ]);
 
-            if (!isset($this->sectionMeta[$bucket])) {
-                $this->sectionMeta[$bucket] = [
-                    'weight_percent' => 0.0,
-                    'sort_order' => is_null($function->sort_order) ? (1000 + count($this->sectionMeta)) : (int) $function->sort_order,
-                ];
-            }
+            foreach ($uwp->uwpFunctions as $function) {
+                $bucket = $this->normalizeFunctionType((string) ($function->function_type ?? ''));
 
-            $this->sectionMeta[$bucket]['weight_percent'] += (float) ($function->weight_percent ?? 0);
-
-            if (!isset($this->opcrData[$bucket])) {
-                $this->opcrData[$bucket] = [];
-            }
-
-            foreach ($function->mfos as $mfo) {
-                $indicatorRows = [];
-
-                foreach ($mfo->successIndicators as $indicator) {
-                    $indicatorText = (string) ($indicator->indicator_text ?? '');
-                    $assigneeNames = $indicator->assignments
-                        ->map(fn ($assignment) => $assignment->employee?->name)
-                        ->filter()
-                        ->values()
-                        ->all();
-
-                    $indicatorRows[] = [
-                        'text' => $indicatorText,
-                        'employee' => implode(', ', $assigneeNames),
+                if (!isset($this->sectionMeta[$bucket])) {
+                    $this->sectionMeta[$bucket] = [
+                        'weight_percent' => 0.0,
+                        'sort_order' => is_null($function->sort_order) ? (1000 + count($this->sectionMeta)) : (int) $function->sort_order,
                     ];
-
-                    foreach (self::RATINGS as $rating) {
-                        $this->standards[$indicatorText][$rating] = ['q' => [], 'e' => [], 't' => []];
-                    }
-
-                    foreach ($indicator->qetStandards as $standard) {
-                        $rating = (int) $standard->rating;
-                        if (!in_array($rating, self::RATINGS, true)) {
-                            continue;
-                        }
-
-                        $dimension = strtolower((string) $standard->dimension);
-                        $dimension = match ($dimension) {
-                            'q', 'quality' => 'q',
-                            'e', 'efficiency' => 'e',
-                            't', 'timeliness' => 't',
-                            default => null,
-                        };
-
-                        if ($dimension === null) {
-                            continue;
-                        }
-
-                        $text = trim((string) ($standard->standard_text ?? ''));
-                        if ($text !== '') {
-                            $this->standards[$indicatorText][$rating][$dimension][] = $text;
-                        }
-                    }
                 }
 
-                $this->opcrData[$bucket][] = [
-                    'mfo' => (string) ($mfo->title ?? ''),
-                    'indicators' => $indicatorRows,
-                ];
+                $this->sectionMeta[$bucket]['weight_percent'] += (float) ($function->weight_percent ?? 0);
+
+                if (!isset($this->opcrData[$bucket])) {
+                    $this->opcrData[$bucket] = [];
+                }
+
+                foreach ($function->mfos as $mfo) {
+                    $indicatorRows = [];
+
+                    foreach ($mfo->successIndicators as $indicator) {
+                        $indicatorText = (string) ($indicator->indicator_text ?? '');
+                        $assigneeNames = $indicator->assignments
+                            ->map(fn ($assignment) => $assignment->employee?->name)
+                            ->filter()
+                            ->values()
+                            ->all();
+
+                        $indicatorRows[] = [
+                            'text' => $indicatorText,
+                            'employee' => implode(', ', $assigneeNames),
+                        ];
+
+                        foreach (self::RATINGS as $rating) {
+                            $this->standards[$indicatorText][$rating] = ['q' => [], 'e' => [], 't' => []];
+                        }
+
+                        foreach ($indicator->qetStandards as $standard) {
+                            $rating = (int) $standard->rating;
+                            if (!in_array($rating, self::RATINGS, true)) {
+                                continue;
+                            }
+
+                            $dimension = strtolower((string) $standard->dimension);
+                            $dimension = match ($dimension) {
+                                'q', 'quality' => 'q',
+                                'e', 'efficiency' => 'e',
+                                't', 'timeliness' => 't',
+                                default => null,
+                            };
+
+                            if ($dimension === null) {
+                                continue;
+                            }
+
+                            $text = trim((string) ($standard->standard_text ?? ''));
+                            if ($text !== '') {
+                                $this->standards[$indicatorText][$rating][$dimension][] = $text;
+                            }
+                        }
+                    }
+
+                    $this->opcrData[$bucket][] = [
+                        'mfo' => (string) ($mfo->title ?? ''),
+                        'indicators' => $indicatorRows,
+                    ];
+                }
             }
         }
     }
@@ -218,11 +226,11 @@ class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
 
     private function writeManualHeader(Worksheet $sheet): void
     {
-        $uwp = $this->opcrModel->unitWorkPlan;
-        $periodName = $uwp?->performancePeriod?->name ?? '';
-        $officeName = $uwp?->office?->name ?? '';
-        $officeHead = $uwp?->creator?->name ?? '';
-        $departmentHead = $uwp?->office?->head?->name ?? '';
+        $source = $this->opcrModel->sourceUnitWorkPlans()->first();
+        $periodName = $this->opcrModel->performancePeriod?->name ?? $source?->performancePeriod?->name ?? '';
+        $officeName = $this->opcrModel->office?->name ?? $source?->office?->name ?? '';
+        $officeHead = $source?->creator?->name ?? '';
+        $departmentHead = $this->opcrModel->office?->head?->name ?? $source?->office?->head?->name ?? '';
 
         $sheet->mergeCells('A1:O1');
         $sheet->setCellValue('A1', 'OFFICE PERFORMANCE COMMITMENT AND REVIEW (OPCR)');
@@ -590,7 +598,8 @@ class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
         $boxEndRow = $row + 3;
         $titleRow = $row + 4;
 
-        $discussedName = (string) ($this->opcrModel->unitWorkPlan?->office?->head?->name ?? '');
+        $source = $this->opcrModel->sourceUnitWorkPlans()->first();
+        $discussedName = (string) ($this->opcrModel->office?->head?->name ?? $source?->office?->head?->name ?? '');
         $assessedName = (string) ($this->opcrModel->approver?->name ?? '');
         $approvedName = '';
 

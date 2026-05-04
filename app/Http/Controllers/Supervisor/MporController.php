@@ -61,7 +61,6 @@ class MporController extends Controller
                 $q->where('office_id', $supervisor->office_id)
                   ->where('role', 'employee');
             })
-            // show only meaningful statuses (adjust if you want draft visible)
             ->whereIn('status', ['submitted', 'approved', 'endorsed'])
             ->orderByRaw("FIELD(status,'submitted','approved','endorsed')")
             ->orderByDesc('generated_at')
@@ -293,6 +292,7 @@ class MporController extends Controller
                 'employeeName' => $employeeName,
                 'officeName' => $officeName,
                 'supervisorName' => $supervisor->name ?? '--',
+                'returnRemarks' => (string) ($mpor->return_remarks ?? ''),
             ],
             'sectionLabels' => $sectionLabels,
             'sectionRows' => $sectionRows,
@@ -412,10 +412,47 @@ class MporController extends Controller
 
         $mpor->update([
             'status' => 'approved',
+            'submitted_at' => $mpor->submitted_at ?? now(),
             'approved_at' => now(),
             'approved_by' => auth()->id(),
+            'endorsed_at' => null,
+            'endorsed_by' => null,
+            'returned_at' => null,
+            'returned_by' => null,
+            'return_remarks' => null,
         ]);
 
-        return back();
+        return back()->with('success', 'MPOR approved.');
+    }
+
+    public function return(Request $request, Mpor $mpor)
+    {
+        $supervisor = $request->user();
+        abort_unless($supervisor && $supervisor->role === 'supervisor', 403);
+
+        $mpor->load('employee:id,office_id');
+        abort_unless((int) ($mpor->employee?->office_id ?? 0) === (int) $supervisor->office_id, 403);
+
+        if ($mpor->status !== 'submitted') {
+            return back()->with('info', 'Only submitted MPOR can be returned to employee.');
+        }
+
+        $validated = $request->validate([
+            'return_remarks' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        $mpor->update([
+            'status' => 'returned',
+            'submitted_at' => null,
+            'approved_at' => null,
+            'approved_by' => null,
+            'endorsed_at' => null,
+            'endorsed_by' => null,
+            'returned_at' => now(),
+            'returned_by' => $supervisor->id,
+            'return_remarks' => trim((string) ($validated['return_remarks'] ?? '')) ?: null,
+        ]);
+
+        return back()->with('success', 'MPOR returned to employee.');
     }
 }

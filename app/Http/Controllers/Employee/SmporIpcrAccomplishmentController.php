@@ -90,7 +90,8 @@ class SmporIpcrAccomplishmentController extends Controller
                 ->first();
 
             if ($submission) {
-                $submissionStatus = (string) ($submission->status ?? 'draft');
+                $status = (string) ($submission->status ?? 'draft');
+                $submissionStatus = $this->formatStatusLabel($status);
                 $submittedAtLabel = $submission->submitted_at
                     ? $submission->submitted_at->format('M d, Y h:i A')
                     : '-';
@@ -593,6 +594,13 @@ class SmporIpcrAccomplishmentController extends Controller
             }
         }
 
+        $computedScore = 0.00;
+        $computedRating = '--';
+        if ($ipcr) {
+            $ratingService = app(\App\Services\PerformanceRatingService::class);
+            [$computedScore, $computedRating] = $ratingService->getResolvedScoreAndRating($ipcr);
+        }
+
         return view('employee.accomplishment-submission', compact(
             'employeeName',
             'officeName',
@@ -609,6 +617,8 @@ class SmporIpcrAccomplishmentController extends Controller
             'smporSections',
             'smporSourceLabel',
             'smporModeLabel',
+            'computedScore',
+            'computedRating',
         ));
     }
 
@@ -1792,6 +1802,18 @@ class SmporIpcrAccomplishmentController extends Controller
         }
 
         return back()->with('success', 'Accomplishments submitted successfully. Uploads and remarks are now read-only.');
+    }
+
+    private function formatStatusLabel(string $status): string
+    {
+        return match ($status) {
+            'submitted_to_supervisor' => 'Submitted to Supervisor',
+            'supervisor_endorsed' => 'Supervisor Endorsed',
+            'dept_head_endorsed' => 'Dept Head Endorsed',
+            'pmt_approved', 'approved_by_pmt', 'adjusted_by_pmt' => 'Calibrated',
+            'returned_to_employee' => 'Returned to Employee',
+            default => ucfirst(str_replace('_', ' ', $status)),
+        };
     }
 }
 

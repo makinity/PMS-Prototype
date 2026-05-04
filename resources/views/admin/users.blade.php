@@ -13,9 +13,11 @@
         $canUpdateRoute = \Illuminate\Support\Facades\Route::has('admin.users.update');
         $canToggleRoute = \Illuminate\Support\Facades\Route::has('admin.users.toggle-active');
         $canResetRoute = \Illuminate\Support\Facades\Route::has('admin.users.reset-password');
+        $canSendCodeRoute = \Illuminate\Support\Facades\Route::has('admin.users.send-code');
         $updateRouteTemplate = $canUpdateRoute ? route('admin.users.update', ['user' => '__ID__']) : '';
         $toggleRouteTemplate = $canToggleRoute ? route('admin.users.toggle-active', ['user' => '__ID__']) : '';
         $resetRouteTemplate = $canResetRoute ? route('admin.users.reset-password', ['user' => '__ID__']) : '';
+        $sendCodeRouteTemplate = $canSendCodeRoute ? route('admin.users.send-code', ['user' => '__ID__']) : '';
     @endphp
 
     <section class="space-y-4 px-3 md:px-6">
@@ -232,6 +234,13 @@
                     </button>
                 </form>
 
+                <form id="modalSendCodeForm" action="#" method="POST">
+                    @csrf
+                    <button type="submit" id="modalSendCodeBtn" class="rounded-lg border border-sky-500/60 bg-sky-500/10 px-4 py-2 text-sm font-medium text-sky-300 hover:bg-sky-500/20">
+                        Send Employee Code
+                    </button>
+                </form>
+
                 <button type="button" id="openEditUserFromDetails" class="rounded-lg border border-gray-500 px-4 py-2 text-sm font-medium text-gray-100 hover:bg-gray-700/60">
                     Edit
                 </button>
@@ -321,8 +330,10 @@
 
                 const toggleForm = document.getElementById('modalToggleForm');
                 const resetForm = document.getElementById('modalResetForm');
+                const sendCodeForm = document.getElementById('modalSendCodeForm');
                 const toggleBtn = document.getElementById('modalToggleBtn');
                 const resetBtn = document.getElementById('modalResetBtn');
+                const sendCodeBtn = document.getElementById('modalSendCodeBtn');
                 const openEditFromDetailsBtn = document.getElementById('openEditUserFromDetails');
 
                 const editForm = document.getElementById('userEditForm');
@@ -352,6 +363,7 @@
                 const updateUrlTemplate = @json($updateRouteTemplate);
                 const toggleUrlTemplate = @json($toggleRouteTemplate);
                 const resetUrlTemplate = @json($resetRouteTemplate);
+                const sendCodeRouteTemplate = @json($sendCodeRouteTemplate);
 
                 function buildUrl(template, id) {
                     const encodedToken = encodeURIComponent('__ID__');
@@ -491,6 +503,22 @@
                         resetBtn.disabled = true;
                         resetBtn.className = 'cursor-not-allowed rounded-lg border border-gray-600 px-4 py-2 text-sm font-medium text-gray-500 opacity-70';
                         resetBtn.title = 'Route admin.users.reset-password not available.';
+                    }
+
+                    const canSendCode = !!activatedAt === false && !!employeeId && !!email;
+                    if (sendCodeRouteTemplate && userId && sendCodeForm && sendCodeBtn) {
+                        sendCodeForm.action = buildUrl(sendCodeRouteTemplate, userId);
+                        sendCodeBtn.disabled = !canSendCode;
+                        sendCodeBtn.className = canSendCode
+                            ? 'rounded-lg border border-sky-500/60 bg-sky-500/10 px-4 py-2 text-sm font-medium text-sky-300 hover:bg-sky-500/20'
+                            : 'cursor-not-allowed rounded-lg border border-gray-600 px-4 py-2 text-sm font-medium text-gray-500 opacity-70';
+                        sendCodeBtn.title = canSendCode
+                            ? ''
+                            : 'Only pending accounts with a valid employee code and email can receive the activation email.';
+                    } else if (sendCodeBtn) {
+                        sendCodeBtn.disabled = true;
+                        sendCodeBtn.className = 'cursor-not-allowed rounded-lg border border-gray-600 px-4 py-2 text-sm font-medium text-gray-500 opacity-70';
+                        sendCodeBtn.title = 'Route admin.users.send-code not available.';
                     }
 
                     detailsModal.classList.remove('hidden');

@@ -146,20 +146,9 @@
             $isSupervisorDashboard = request()->routeIs('supervisor.dashboard');
             $isSupervisorTeamTasks = request()->routeIs('supervisor.team-tasks');
             $isSupervisorUWP = request()->routeIs('supervisor.uwp-page');
-            $isSupervisorIPCR = request()->routeIs('supervisor.ipcr');
-            $isSupervisorIPCRSMPORReview = request()->routeIs('supervisor.smpor-ipcr-review');
-            $isSupervisorIPCRTARGET = request()->routeIs('supervisor.ipcr-target');
-            $isSupervisorOPCR = request()->routeIs('supervisor.opcr');
             $isSupervisorMPOR = request()->routeIs('supervisor.mpor');
             $isSupervisorEmpAcc = request()->routeIs('supervisor.employee-submissions');
-            $isSupervisorMPORValidation = request()->routeIs('supervisor.mpor-validation');
             $isSupervisorORS = request()->routeIs('supervisor.ors-monitoring');
-            $isSupervisorOverdueAlerts = request()->routeIs('supervisor.overdue-alerts');
-            $isSupervisorTaskValidation = request()->routeIs('supervisor.task-validation');
-            $isSupervisorTeamProductivity = request()->routeIs('supervisor.team-productivity');
-            $isSupervisorBottleneckReports = request()->routeIs('supervisor.bottleneck-reports');
-            $isSupervisorRecommendations = request()->routeIs('supervisor.recommendations');
-            $isSupervisorReports = request()->routeIs('supervisor.reports');
             $isSupervisorProfile = request()->routeIs('supervisor.profile');
         @endphp
         <!-- Top Navigation -->
@@ -264,27 +253,9 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('supervisor.ipcr-target') }}" class="sidebar-link" @if($isSupervisorIPCRTARGET) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-bullseye"></i>
-                                    <span>IPCR Target Review</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('supervisor.ipcr') }}" class="sidebar-link" @if($isSupervisorIPCR) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-star-half-stroke"></i>
-                                    <span>IPCR Review & Rating</span>
-                                </a>
-                            </li>
-                            <li>
                                 <a href="{{ route('supervisor.employee-submissions') }}" class="sidebar-link" @if($isSupervisorEmpAcc) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-file-lines"></i>
                                     <span>Accomplishment Review</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('supervisor.opcr') }}" class="sidebar-link" @if($isSupervisorOPCR) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-building-circle-check"></i>
-                                    <span>OPCR</span>
                                 </a>
                             </li>
                             <li>
@@ -294,69 +265,9 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('supervisor.mpor-validation') }}" class="sidebar-link" @if($isSupervisorMPORValidation) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-check-double"></i>
-                                    <span>MPOR Validation</span>
-                                </a>
-                            </li>
-                            <li>
                                 <a href="{{ route('supervisor.ors-monitoring') }}" class="sidebar-link" @if($isSupervisorORS) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-eye"></i>
                                     <span>ORS Monitoring</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('supervisor.overdue-alerts') }}" class="sidebar-link" @if($isSupervisorOverdueAlerts) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-bell-exclamation"></i>
-                                    <span>Overdue &amp; alerts</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="" class="sidebar-link">
-                                    <i class="sidebar-icon fa-solid fa-road"></i>
-                                    <span>IDP</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div>
-                        <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Performance</p>
-                        <ul class="mt-2 space-y-1 menu-stagger">
-                            <li>
-                                <a href="{{ route('supervisor.task-validation') }}" class="sidebar-link" @if($isSupervisorTaskValidation) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-circle-check"></i>
-                                    <span>Task Validation</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('supervisor.team-productivity') }}" class="sidebar-link" @if($isSupervisorTeamProductivity) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-chart-line"></i>
-                                    <span>Team Productivity</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('supervisor.bottleneck-reports') }}" class="sidebar-link" @if($isSupervisorBottleneckReports) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-hourglass-half"></i>
-                                    <span>Bottleneck Reports</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('supervisor.recommendations') }}" class="sidebar-link" @if($isSupervisorRecommendations) aria-current="page" @endif>
-                                     <i class="sidebar-icon fa-solid fa-lightbulb"></i>
-                                    <span>Recommendations</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div>
-                        <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Reports</p>
-                        <ul class="mt-2 space-y-1 menu-stagger">
-                            <li>
-                                <a href="{{ route('supervisor.reports') }}" class="sidebar-link" @if($isSupervisorReports) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-file-lines"></i>
-                                    <span>Reports</span>
                                 </a>
                             </li>
                         </ul>

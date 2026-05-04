@@ -52,13 +52,19 @@ class FortifyServiceProvider extends ServiceProvider
 
         Fortify::authenticateUsing(function (Request $request) {
             $loginField = Fortify::username();
-            $value = $request->input($loginField);
+            $value = trim((string) $request->input($loginField));
 
             if (! $value || ! $request->password) {
                 return null;
             }
 
-            $user = User::where($loginField, $value)->first();
+            $normalizedValue = Str::lower($value);
+            $user = User::query()
+                ->whereRaw('LOWER(name) = ?', [$normalizedValue])
+                ->orWhereRaw('LOWER(email) = ?', [$normalizedValue])
+                ->orWhereRaw('LOWER(employee_id) = ?', [$normalizedValue])
+                ->first();
+
             if (! $user || ! Hash::check($request->password, $user->password)) {
                 return null;
             }

@@ -1,8 +1,12 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\AuditLogsController;
+use App\Http\Controllers\Admin\DatabaseController;
+use App\Http\Controllers\Admin\HrisIntegrationController;
 use App\Http\Controllers\Admin\OfficeController;
 use App\Http\Controllers\Admin\PerformancePeriodsController;
+use App\Http\Controllers\Admin\ReportsController;
 use App\Http\Controllers\Admin\UsersController;
 use App\Http\Controllers\Auth\ActivationController;
 use App\Http\Controllers\Supervisor\UnitWorkPlanController;
@@ -52,8 +56,7 @@ use App\Http\Controllers\Supervisor\OpcrController;
 | Public / Auth
 |--------------------------------------------------------------------------
 */
-
-Route::get('/', fn () => view('landing'));
+Route::get('/', fn () => view('main-page'))->name('main-page');
 
 Route::get('/login', fn () => redirect('/'))->name('login');
 
@@ -69,6 +72,16 @@ Route::get('/whoami', function (Request $request) {
 })->middleware('auth');
 
 Route::get('/logout', function (Request $request) {
+    $actor = $request->user();
+    if ($actor) {
+        $request->attributes->set('audit_force', true);
+        $request->attributes->set('audit_actor_snapshot', [
+            'id' => $actor->id,
+            'name' => $actor->name,
+            'role' => $actor->role,
+        ]);
+    }
+
     Auth::logout();
     $request->session()->invalidate();
     $request->session()->regenerateToken();
@@ -98,7 +111,6 @@ Route::get('/dashboard', function () {
         'dept-head'  => redirect()->route('dept-head.dashboard'),
         'pmt'        => redirect()->route('pmt.dashboard'),
         'admin'      => redirect()->route('admin.dashboard'),
-        'manager'    => redirect()->route('manager.dashboard'),
         default      => abort(403, 'Unauthorized role'),
     };
 })->middleware('auth');
@@ -120,7 +132,6 @@ Route::prefix('employee')->middleware('auth')->group(function () {
         ->name('stage2.my_tasks.evidences.view');
     Route::get('/stage2/my-tasks/{orsEntry}/evidences/{evidence}/download', [MyTasksController::class, 'downloadEvidence'])
         ->name('stage2.my_tasks.evidences.download');
-    Route::get('/submit-output', fn () => view('employee.submit-output'))->name('employee.submit-output');
     Route::get('/ors', [OrsController::class, 'index'])->name('employee.ors');
     Route::post('/ors', [OrsController::class, 'store'])->name('stage2.ors.store');
     Route::post('/ors/{orsEntry}/start', [OrsController::class, 'start'])->name('stage2.ors.start');
@@ -135,15 +146,10 @@ Route::prefix('employee')->middleware('auth')->group(function () {
     Route::post('/mpor/{mpor}/attach', [MporController::class, 'employeeAttachRatedOrs'])->name('employee.mpor.attach');
     Route::post('/mpor/{mpor}/detach', [MporController::class, 'employeeDetachRatedOrs'])->name('employee.mpor.detach');
     Route::get('/MPOR', fn () => redirect()->route('employee.mpor'));
-    Route::get('/SMPOR', fn () => view('employee.smpor'))->name('employee.smpor');
     Route::get('/IPCR-Target', [IpcrTargetController::class, 'index'])
         ->name('employee.ipcr-target');
     Route::post('/stage1/ipcr/commit', [IpcrTargetController::class, 'commit'])
     ->name('stage1.ipcr.commit');
-
-    Route::get('/IPCR', fn () => view('employee.ipcr'))->name('employee.ipcr');
-    Route::get('/final-ratings', fn () => view('employee.final-ratings'))->name('employee.final-ratings');
-    Route::get('/IDP', fn () => view('employee.idp'))->name('employee.idp');
     Route::get('/Profile', fn () => view('employee.profile'))->name('employee.profile');
 
     // Stage II - Accomplishment Submission
@@ -191,11 +197,6 @@ Route::prefix('employee')->middleware('auth')->group(function () {
 Route::prefix('dept-head')->middleware('auth')->group(function () {
     // Views
     Route::get('/dashboard', fn () => view('dept-head.dashboard'))->name('dept-head.dashboard');
-    Route::get('/smpor', fn () => view('dept-head.smpor'))->name('dept-head.smpor');
-    Route::get('/smpor-ipcr-review', fn () => view('dept-head.smpor-ipcr-review'))->name('dept-head.smpor-ipcr-review');
-    Route::get('/IPCR', fn () => view('dept-head.ipcr'))->name('dept-head.ipcr');
-    Route::get('/IPCRTARGET', fn () => view('dept-head.ipcr-target'))->name('dept-head.ipcr-target');
-    Route::get('/idp', fn () => view('dept-head.idp'))->name('dept-head.idp');
     Route::get('/profile', fn () => view('dept-head.profile'))->name('dept-head.profile');
 
     // Stage I - UWP Review
@@ -207,7 +208,9 @@ Route::prefix('dept-head')->middleware('auth')->group(function () {
     // Stage I - OPCR Review
     Route::get('/opcr', [DeptHeadOpcrController::class, 'index'])->name('dept-head.opcr');
     Route::get('/opcr/index', [DeptHeadOpcrController::class, 'index'])->name('dept-head.opcr.index');
+    Route::get('/opcr/accomplishment', [DeptHeadOpcrController::class, 'accomplishment'])->name('dept-head.opcr.accomplishment');
     Route::post('/opcr/{opcr}/endorse', [DeptHeadOpcrController::class, 'endorse'])->name('dept-head.opcr.endorse');
+    Route::post('/opcr/{opcr}/submit-calibration', [DeptHeadOpcrController::class, 'submitCalibration'])->name('dept-head.opcr.submit-calibration');
     Route::post('/opcr/{opcr}/return', [DeptHeadOpcrController::class, 'returnOpcr'])->name('dept-head.opcr.return');
     Route::post('/opcr/review', [DeptHeadOpcrController::class, 'review'])->name('dept-head.opcr.review');
 
@@ -226,6 +229,10 @@ Route::prefix('dept-head')->middleware('auth')->group(function () {
 
     Route::get('/accomplishment-review', [AccomplishmentReviewController::class, 'index'])->name('dept-head.acc-review');
     Route::post('/accomplishment-review/{id}', [AccomplishmentReviewController::class, 'endorseToPmt'])->name('dept-head.acc-review.endorse');
+    
+    // Stage III - Export
+    Route::get('/opcr/export-stage3', [\App\Http\Controllers\StageThree\Forms\OpcrExcelExportController::class, 'exportExcel'])
+        ->name('dept-head.opcr.export-stage3');
 });
 
 /*
@@ -240,9 +247,6 @@ Route::prefix('supervisor')->middleware('auth')->group(function () {
     Route::get('/team-tasks', [TeamTasksController::class, 'index'])->name('supervisor.team-tasks');
     Route::get('/team-tasks/{orsEntry}/monitor', [OrsMonitoringController::class, 'show'])->name('supervisor.team-tasks.monitor');
     Route::post('/team-tasks/{orsEntry}/monitor', [OrsMonitoringController::class, 'store'])->name('supervisor.team-tasks.monitor.store');
-    Route::get('/ipcr', fn () => view('supervisor.ipcr'))->name('supervisor.ipcr');
-    Route::get('/smpor-ipcr-review', fn () => view('supervisor.smpor-ipcr-review'))->name('supervisor.smpor-ipcr-review');
-    Route::get('/ipcr-target', fn () => view('supervisor.ipcr-target'))->name('supervisor.ipcr-target');
 
     Route::get('/submissions', [SupervisorAccomplishmentController::class, 'index'])
         ->name('supervisor.employee-submissions');
@@ -250,15 +254,8 @@ Route::prefix('supervisor')->middleware('auth')->group(function () {
         ->name('supervisor.submissions.endorse');
 
 
-    Route::get('/mpor-validation', fn () => view('supervisor.mpor-validation'))->name('supervisor.mpor-validation');
     Route::get('/ors-monitoring', [OrsMonitoringController::class, 'index'])->name('supervisor.ors-monitoring');
     Route::post('/ors-monitoring/{orsEntry}/monitor', [OrsMonitoringController::class, 'store'])->name('supervisor.ors-monitoring.store');
-    Route::get('/overdue-alerts', fn () => view('supervisor.overdue-alerts'))->name('supervisor.overdue-alerts');
-    Route::get('/task-validation', fn () => view('supervisor.task-validation'))->name('supervisor.task-validation');
-    Route::get('/team-productivity', fn () => view('supervisor.team-productivity'))->name('supervisor.team-productivity');
-    Route::get('/bottleneck-reports', fn () => view('supervisor.bottleneck-reports'))->name('supervisor.bottleneck-reports');
-    Route::get('/recommendations', fn () => view('supervisor.recommendations'))->name('supervisor.recommendations');
-    Route::get('/reports', fn () => view('supervisor.reports'))->name('supervisor.reports');
     Route::get('/profile', fn () => view('supervisor.profile'))->name('supervisor.profile');
 
     // Stage I - UWP
@@ -289,15 +286,11 @@ Route::prefix('supervisor')->middleware('auth')->group(function () {
         ->name('supervisor.uwp.preview');
 
     // Stage I - OPCR
-    Route::get('/opcr', [OpcrController::class, 'index'])->name('supervisor.opcr');
-    Route::get('/stage-one/planning/opcr', [OpcrController::class, 'index'])->name('stage1.opcr.index');
-    Route::post('/stage-one/planning/opcr/generate', [OpcrController::class, 'generate'])->name('stage1.opcr.generate');
-    Route::post('/stage-one/planning/opcr/{opcr}/submit', [OpcrController::class, 'submit'])->name('stage1.opcr.submit');
-
     // Stage II - MPOR Review
     Route::get('/mpor', [SupervisorMporController::class, 'index'])->name('supervisor.mpor');
     Route::get('/mpor/{mpor}', [SupervisorMporController::class, 'show'])->name('supervisor.mpor.show');
     Route::post('/mpor/{mpor}/approve', [SupervisorMporController::class, 'approve'])->name('supervisor.mpor.approve');
+    Route::post('/mpor/{mpor}/return', [SupervisorMporController::class, 'return'])->name('supervisor.mpor.return');
     Route::post('/mpor/{mpor}/endorse', [SupervisorMporController::class, 'endorse'])->name('supervisor.mpor.endorse');
 
     // Exports - OPCR
@@ -316,22 +309,12 @@ Route::prefix('supervisor')->middleware('auth')->group(function () {
 Route::prefix('pmt')->middleware('auth')->group(function () {
     // Views
     Route::get('/dashboard', fn () => view('pmt.dashboard'))->name('pmt.dashboard');
-    Route::get('/OPCR', fn () => view('pmt.opcr'))->name('pmt.opcr');
-    Route::get('/OPCR/approval', fn () => view('pmt.opcr-app-view'))->name('pmt.opcr-app-view');
-    Route::get('/ipcr', fn () => view('pmt.ipcr'))->name('pmt.ipcr');
-    Route::get('/ipcr-overview', fn () => view('pmt.ipcr-calib-overview'))->name('pmt.ipcr-calib-overview');
-    Route::get('/ipcr-calibration', fn () => view('pmt.ipcr-calib'))->name('pmt.ipcr-calib');
-    Route::get('/final-calibration', fn () => view('pmt.final-calibration'))->name('pmt.final-calib');
-    Route::get('/final-calibration/office', fn () => view('pmt.final-calibration-office'))->name('pmt.final-calibration-office');
-    Route::get('/rewards-development', fn () => view('pmt.rewards'))->name('pmt.rewards');
-    Route::get('/smpor', fn () => view('pmt.smpor'))->name('pmt.smpor');
-    Route::get('/performance-reports', fn () => view('pmt.pr'))->name('pmt.pr');
     Route::get('/profile', fn () => view('pmt.profile'))->name('pmt.profile');
 
-    // Stage I - UWP / OPCR
-    Route::get('/UWP', [PmtUnitWorkPlanController::class, 'index'])->name('pmt.uwp');
-    Route::post('/uwp/review', [PmtUnitWorkPlanController::class, 'review'])->name('pmt.uwp.review');
-    Route::post('/uwp/return', [PmtUnitWorkPlanController::class, 'returnUwp'])->name('pmt.uwp.return');
+    // Stage I - OPCR only
+    Route::get('/UWP', fn () => redirect()->route('pmt.opcr.review.index'))->name('pmt.uwp');
+    Route::post('/uwp/review', fn () => redirect()->route('pmt.opcr.review.index'))->name('pmt.uwp.review');
+    Route::post('/uwp/return', fn () => redirect()->route('pmt.opcr.review.index'))->name('pmt.uwp.return');
 
     Route::get('/opcr-review', [PmtOpcrController::class, 'index'])->name('pmt.opcr.review.index');
     Route::post('/opcr-review/action', [PmtOpcrController::class, 'review'])->name('pmt.opcr.review.action');
@@ -369,6 +352,23 @@ Route::prefix('pmt')->middleware('auth')->group(function () {
 
     Route::get('/acc-review', [PmtAccomplishmentReviewController::class, 'index'])->name('pmt.acc-review');
     Route::post('/acc-review/{id}/approve', [PmtAccomplishmentReviewController::class, 'approve'])->name('pmt.acc-review.approve');
+    Route::post('/acc-review/{id}/return', [PmtAccomplishmentReviewController::class, 'returnSubmission'])->name('pmt.acc-review.return');
+
+    // Stage III - Final Calibration
+    Route::prefix('employee-calibration')->name('pmt.employee-calibration.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Pmt\EmployeeCalibrationController::class, 'index'])->name('index');
+        Route::post('/{ipcr}/adjust', [\App\Http\Controllers\Pmt\EmployeeCalibrationController::class, 'adjust'])->name('adjust');
+        Route::post('/{ipcr}/approve', [\App\Http\Controllers\Pmt\EmployeeCalibrationController::class, 'approve'])->name('approve');
+        Route::post('/{ipcr}/return', [\App\Http\Controllers\Pmt\EmployeeCalibrationController::class, 'returnIpcr'])->name('return');
+    });
+
+    Route::prefix('office-calibration')->name('pmt.office-calibration.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Pmt\OfficeCalibrationController::class, 'index'])->name('index');
+        Route::get('/{opcr}', [\App\Http\Controllers\Pmt\OfficeCalibrationController::class, 'show'])->name('show');
+        Route::post('/{opcr}/adjust', [\App\Http\Controllers\Pmt\OfficeCalibrationController::class, 'adjust'])->name('adjust');
+        Route::post('/{opcr}/approve', [\App\Http\Controllers\Pmt\OfficeCalibrationController::class, 'approve'])->name('approve');
+        Route::post('/{opcr}/return', [\App\Http\Controllers\Pmt\OfficeCalibrationController::class, 'returnOpcr'])->name('return');
+    });
 });
 
 /*
@@ -378,8 +378,8 @@ Route::prefix('pmt')->middleware('auth')->group(function () {
 */
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/stage-one/pmt/uwp', [PmtUnitWorkPlanController::class, 'index'])->name('pmt.uwp.index');
-    Route::post('/stage-one/pmt/uwp/approve', [PmtUnitWorkPlanController::class, 'approve'])->name('pmt.uwp.approve');
+    Route::get('/stage-one/pmt/uwp', fn () => redirect()->route('pmt.opcr.review.index'))->name('pmt.uwp.index');
+    Route::post('/stage-one/pmt/uwp/approve', fn () => redirect()->route('pmt.opcr.review.index'))->name('pmt.uwp.approve');
     Route::get('/stage-one/uwp/{uwp}/export', [PmtUnitWorkPlanController::class, 'exportExcel'])->name('uwp.export');
 });
 
@@ -392,6 +392,15 @@ Route::middleware(['auth'])->group(function () {
 Route::prefix('administrator')->middleware('auth')->group(function () {
     // Views
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('/audit-logs', [AuditLogsController::class, 'index'])->name('admin.audit-logs');
+    Route::get('/database', [DatabaseController::class, 'index'])->name('admin.database');
+    Route::post('/database/backups', [DatabaseController::class, 'store'])->name('admin.database.backups.store');
+    Route::get('/database/backups/{backup}/download', [DatabaseController::class, 'download'])->name('admin.database.backups.download');
+    Route::post('/database/backups/{backup}/restore', [DatabaseController::class, 'restore'])->name('admin.database.backups.restore');
+    Route::delete('/database/backups/{backup}', [DatabaseController::class, 'destroy'])->name('admin.database.backups.destroy');
+    Route::get('/reports', [ReportsController::class, 'index'])->name('admin.reports');
+    Route::get('/reports/{report}/preview', [ReportsController::class, 'preview'])->name('admin.reports.preview');
+    Route::get('/reports/{report}/download', [ReportsController::class, 'download'])->name('admin.reports.download');
     Route::get('/performance-period', [PerformancePeriodsController::class, 'index'])->name('admin.performance-period');
     Route::post('/performance-period', [PerformancePeriodsController::class, 'store'])->name('admin.performance-periods.store');
     Route::put('/performance-period/{period}', [PerformancePeriodsController::class, 'update'])->name('admin.performance-periods.update');
@@ -405,44 +414,17 @@ Route::prefix('administrator')->middleware('auth')->group(function () {
     Route::patch('/users/{user}', [UsersController::class, 'update']);
     Route::post('/users/{user}/toggle-active', [UsersController::class, 'toggleActive'])->name('admin.users.toggle');
     Route::post('/users/{user}/reset-password', [UsersController::class, 'resetPassword'])->name('admin.users.reset-password');
+    Route::post('/users/{user}/send-code', [UsersController::class, 'sendEmployeeCode'])->name('admin.users.send-code');
 
     Route::get('/offices', [OfficeController::class, 'index'])->name('admin.office');
     Route::post('/offices/create', [OfficeController::class, 'store'])->name('admin.office.create');
     Route::post('/offices/{id}', [OfficeController::class, 'update'])->name('admin.office.update');
     Route::post('/offices/{id}/delete', [OfficeController::class, 'destroy'])->name('admin.office.delete');
 
-    Route::get('/roles', fn () => view('admin.roles'))->name('admin.roles');
-    Route::get('/opcr', fn () => view('admin.opcr'))->name('admin.opcr');
-    Route::get('/opcr-accomplishment', fn () => view('admin.opcr-acc'))->name('admin.opcr-acc');
-    Route::get('/opcr-accomplishment/show', fn () => view('admin.opcr-acc-view'))->name('admin.opcr-acc-view');
-    Route::get('/task-configuration', fn () => view('admin.task-config'))->name('admin.task-config');
-    Route::get('/uwp-monitoring', fn () => view('admin.uwp-monitoring'))->name('admin.uwp-monitoring');
-    Route::get('/performance-metrics', fn () => view('admin.performance-metrics'))->name('admin.performance-metrics');
-    Route::get('/system-settings', fn () => view('admin.system'))->name('admin.system');
-    Route::get('/HRIS-integration', fn () => view('admin.hris'))->name('admin.hris');
-    Route::get('/data-export', fn () => view('admin.data'))->name('admin.data');
-    Route::get('/semestral-pr', fn () => view('admin.semestral-pr'))->name('admin.semestral-pr');
-    Route::get('/audit-trails', fn () => view('admin.audit-trail'))->name('admin.audit-trail');
-    Route::get('/system-logs', fn () => view('admin.system-logs'))->name('admin.system-logs');
-    Route::get('/profile', fn () => view('admin.profile'))->name('admin.profile');
-});
-
-/*
-|--------------------------------------------------------------------------
-| Manager Routes
-|--------------------------------------------------------------------------
-*/
-
-Route::prefix('manager')->middleware('auth')->group(function () {
-    Route::get('/dashboard', fn () => view('manager.dashboard'))->name('manager.dashboard');
-    Route::get('/team', fn () => view('manager.my-team'))->name('manager.my-team');
-    Route::get('/task-monitoring', fn () => view('manager.task-monitoring'))->name('manager.task-monitoring');
-    Route::get('/productivity-analysis', fn () => view('manager.productivity'))->name('manager.productivity');
-    Route::get('/bottleneck-analysis', fn () => view('manager.bottleneck'))->name('manager.bottleneck');
-    Route::get('/predictive-analytics', fn () => view('manager.predictive-analytics'))->name('manager.predictive-analytics');
-    Route::get('/performance-rating', fn () => view('manager.performance-rate'))->name('manager.performance-rate');
-    Route::get('/ipcr-reports', fn () => view('manager.ipcr-reports'))->name('manager.ipcr-reports');
-    Route::get('/profile', fn () => view('manager.profile'))->name('manager.profile');
+    Route::get('/HRIS-integration', [HrisIntegrationController::class, 'index'])->name('admin.hris');
+    Route::post('/HRIS-integration', [HrisIntegrationController::class, 'update'])->name('admin.hris.update');
+    Route::post('/HRIS-integration/test', [HrisIntegrationController::class, 'testConnection'])->name('admin.hris.test');
+    Route::post('/HRIS-integration/sync', [HrisIntegrationController::class, 'syncEmployees'])->name('admin.hris.sync');
 });
 
 /*

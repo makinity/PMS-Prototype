@@ -11,6 +11,8 @@
             'supervisor_endorsed' => 'inline-flex items-center rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-200',
             'dept_head_endorsed' => 'inline-flex items-center rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-200',
             'pmt_approved' => 'inline-flex items-center rounded-full border border-violet-500/40 bg-violet-500/10 px-2.5 py-1 text-xs font-semibold text-violet-200',
+            'approved_by_pmt' => 'inline-flex items-center rounded-full border border-violet-500/40 bg-violet-500/10 px-2.5 py-1 text-xs font-semibold text-violet-200',
+            'adjusted_by_pmt' => 'inline-flex items-center rounded-full border border-violet-500/40 bg-violet-500/10 px-2.5 py-1 text-xs font-semibold text-violet-200',
             'returned_to_employee' => 'inline-flex items-center rounded-full border border-rose-500/40 bg-rose-500/10 px-2.5 py-1 text-xs font-semibold text-rose-200',
             'draft' => 'inline-flex items-center rounded-full border border-slate-600 bg-slate-800/70 px-2.5 py-1 text-xs font-semibold text-slate-200',
         ];
@@ -38,6 +40,7 @@
                             <th class="px-5 py-3 text-left">Office</th>
                             <th class="px-5 py-3 text-left">Period</th>
                             <th class="px-5 py-3 text-left">Status</th>
+                            <th class="px-5 py-3 text-center tabular-nums">Score</th>
                             <th class="px-5 py-3 text-left">Submitted At</th>
                             <th class="px-5 py-3 text-left">Supervisor Action</th>
                             <th class="px-5 py-3 text-center">Actions</th>
@@ -55,6 +58,9 @@
                                 <td class="px-5 py-3">{{ $row['period_label'] ?? $periodLabelSafe }}</td>
                                 <td class="px-5 py-3">
                                     <span class="{{ $statusBadgeClasses }}">{{ $row['status_label'] ?? 'Draft' }}</span>
+                                </td>
+                                <td class="px-5 py-3 text-center tabular-nums font-bold text-emerald-400">
+                                    {{ number_format($row['computed_score'] ?? 0, 2) }}
                                 </td>
                                 <td class="px-5 py-3">{{ $row['submitted_at_label'] ?? '--' }}</td>
                                 <td class="px-5 py-3">{{ $row['supervisor_action_at_label'] ?? '--' }}</td>
@@ -110,6 +116,16 @@
                     <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
                         <p class="text-[11px] uppercase tracking-[0.18em] text-slate-500">Submitted At</p>
                         <p id="viewSubmissionSubmittedAt" class="mt-2 text-base font-semibold text-white">--</p>
+                    </div>
+
+                    <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4">
+                        <p class="text-[11px] uppercase tracking-[0.18em] text-emerald-500/70">Performance Score</p>
+                        <p id="viewSubmissionScore" class="mt-2 text-xl font-bold text-emerald-400">—</p>
+                    </div>
+
+                    <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4">
+                        <p class="text-[11px] uppercase tracking-[0.18em] text-emerald-500/70">Performance Rating</p>
+                        <p id="viewSubmissionRating" class="mt-2 text-base font-bold text-emerald-400 uppercase tracking-wider">—</p>
                     </div>
 
                     {{-- Row 2 (3 equal cards under the 2-card row) --}}
@@ -343,6 +359,8 @@
                 const submissionPeriodEl = document.getElementById('viewSubmissionPeriod');
                 const submissionStatusEl = document.getElementById('viewSubmissionStatus');
                 const submissionSubmittedAtEl = document.getElementById('viewSubmissionSubmittedAt');
+                const submissionScoreEl = document.getElementById('viewSubmissionScore');
+                const submissionRatingEl = document.getElementById('viewSubmissionRating');
                 const submissionRemarksEl = document.getElementById('viewSubmissionRemarks');
                 const submissionSupervisorActionAtEl = document.getElementById('viewSubmissionSupervisorActionAt');
                 const submissionSupervisorRemarksEl = document.getElementById('viewSubmissionSupervisorRemarks');
@@ -600,6 +618,8 @@
                     if (submissionOfficeEl) submissionOfficeEl.textContent = payload.office_name || '--';
                     if (submissionPeriodEl) submissionPeriodEl.textContent = payload.period_label || '--';
                     if (submissionSubmittedAtEl) submissionSubmittedAtEl.textContent = payload.submitted_at_label || '--';
+                    if (submissionScoreEl) submissionScoreEl.textContent = formatNumber(payload.computed_score || 0, 2);
+                    if (submissionRatingEl) submissionRatingEl.textContent = payload.computed_rating || '--';
                     if (submissionRemarksEl) submissionRemarksEl.textContent = (payload.remarks || '').trim() !== '' ? payload.remarks : '--';
                     if (submissionSupervisorActionAtEl) {
                         submissionSupervisorActionAtEl.textContent = payload.supervisor_action_at_label || '--';

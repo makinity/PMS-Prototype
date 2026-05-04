@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Pmt;
 
-use App\Http\Controllers\Controller;
 use App\Exports\StageOne\OpcrExcelExport;
+use App\Http\Controllers\Controller;
 use App\Models\Opcr;
 use App\Models\PerformancePeriod;
+use App\Models\UnitWorkPlan;
 use App\Services\IpcrGeneratorService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -29,6 +30,7 @@ class OpcrController extends Controller
             ->first();
 
         $status = strtolower(trim($request->string('status')->toString()));
+        $search = trim($request->string('search')->toString());
         $allowedStatuses = [
             Opcr::STATUS_ENDORSED,
             'for_pmt_review',
@@ -37,33 +39,31 @@ class OpcrController extends Controller
             Opcr::STATUS_SUBMITTED,
         ];
         $selectedStatus = $status;
-        $forPmtReviewStatuses = [
-            Opcr::STATUS_ENDORSED,
-            'for_pmt_review',
-        ];
+        $forPmtReviewStatuses = [Opcr::STATUS_ENDORSED, 'for_pmt_review'];
 
         $opcrsQuery = Opcr::query()
-            ->with([
-                'unitWorkPlan.office',
-                'unitWorkPlan.performancePeriod',
-                'unitWorkPlan.uwpFunctions' => function ($query) {
-                    $query->orderBy('sort_order')->with([
-                        'mfos' => function ($mfoQuery) {
-                            $mfoQuery->orderBy('sort_order')->with([
-                                'successIndicators' => function ($indicatorQuery) {
-                                    $indicatorQuery->orderBy('sort_order')->with([
-                                        'qetStandards',
-                                        'assignments.employee',
-                                    ]);
-                                },
-                            ]);
-                        },
-                    ]);
-                },
-            ])
+            ->with($this->opcrRelations())
             ->when($activePeriod, function ($query) use ($activePeriod) {
-                $query->whereHas('unitWorkPlan', fn ($uwpQuery) => $uwpQuery->where('performance_period_id', $activePeriod->id));
+                $query->where(function ($q) use ($activePeriod) {
+                    $q->where('performance_period_id', $activePeriod->id)
+                        ->orWhereHas('unitWorkPlan', fn ($uwpQuery) => $uwpQuery->where('performance_period_id', $activePeriod->id))
+                        ->orWhereHas('unitWorkPlans', fn ($uwpQuery) => $uwpQuery->where('performance_period_id', $activePeriod->id));
+                });
             });
+
+        if ($search !== '') {
+            $like = '%' . str_replace(['%', '_'], ['\\%', '\\_'], $search) . '%';
+            $opcrsQuery->where(function ($query) use ($like) {
+                $query->whereHas('office', fn ($officeQuery) => $officeQuery->where('name', 'like', $like))
+                    ->orWhereHas('performancePeriod', fn ($periodQuery) => $periodQuery->where('name', 'like', $like))
+                    ->orWhereHas('unitWorkPlan.office', fn ($officeQuery) => $officeQuery->where('name', 'like', $like))
+                    ->orWhereHas('unitWorkPlan.performancePeriod', fn ($periodQuery) => $periodQuery->where('name', 'like', $like))
+                    ->orWhereHas('unitWorkPlans.office', fn ($officeQuery) => $officeQuery->where('name', 'like', $like))
+                    ->orWhereHas('unitWorkPlans.performancePeriod', fn ($periodQuery) => $periodQuery->where('name', 'like', $like))
+                    ->orWhere('id', 'like', $like)
+                    ->orWhereRaw('LOWER(status) like ?', [strtolower($like)]);
+            });
+        }
 
         if ($status !== '' && in_array($status, $allowedStatuses, true)) {
             if ($status === Opcr::STATUS_ENDORSED || $status === 'for_pmt_review') {
@@ -84,15 +84,16 @@ class OpcrController extends Controller
             ->orderByDesc('id')
             ->get();
 
-        $opcrPayloads = $opcrs->mapWithKeys(function (Opcr $opcr) {
-            return [$opcr->id => $this->buildPayload($opcr)];
-        });
+        $opcrPayloads = $opcrs->mapWithKeys(fn (Opcr $opcr) => [
+            $opcr->id => $this->buildPayload($opcr),
+        ]);
 
         return view('pmt.opcr-review', [
             'activePeriod' => $activePeriod,
             'opcrs' => $opcrs,
             'opcrPayloads' => $opcrPayloads,
             'selectedStatus' => $selectedStatus,
+            'searchTerm' => $search,
         ]);
     }
 
@@ -109,7 +110,7 @@ class OpcrController extends Controller
             'remarks' => ['required_if:action,return', 'nullable', 'string', 'min:3'],
         ]);
 
-        return DB::transaction(function () use ($validated) {
+        return DB::transaction(function () use ($validated, $user) {
             /** @var Opcr $opcr */
             $opcr = Opcr::query()
                 ->lockForUpdate()
@@ -125,32 +126,50 @@ class OpcrController extends Controller
             }
 
             if ($validated['action'] === 'approve') {
-                $wasApproved = ($opcr->status === Opcr::STATUS_APPROVED);
+                $opcr->forceFill([
+                    'status' => Opcr::STATUS_APPROVED,
+                    'approved_by' => $user->id,
+                    'approved_at' => now(),
+                    'returned_at' => null,
+                    'remarks' => null,
+                    'locked_at' => now(),
+                ])->save();
 
-                $opcr->status = Opcr::STATUS_APPROVED;
-
-                if (array_key_exists('remarks', $opcr->getAttributes())) {
-                    $opcr->remarks = null;
-                }
-
-                $opcr->save();
-
-                if (!$wasApproved) {
-                    app(IpcrGeneratorService::class)->generateFromOpcr($opcr);
-                }
+                app(IpcrGeneratorService::class)->generateFromOpcr($opcr);
 
                 return back()->with('success', 'OPCR final approved.');
             }
 
-            $opcr->status = Opcr::STATUS_RETURNED;
+            $remarks = trim((string) ($validated['remarks'] ?? ''));
+            $opcr->forceFill([
+                'status' => Opcr::STATUS_RETURNED,
+                'approved_by' => null,
+                'approved_at' => null,
+                'returned_at' => now(),
+                'remarks' => $remarks,
+                'locked_at' => null,
+            ])->save();
 
-            if (array_key_exists('remarks', $opcr->getAttributes())) {
-                $opcr->remarks = trim((string) ($validated['remarks'] ?? ''));
+            $sourceIds = $opcr->unitWorkPlans()->pluck('unit_work_plans.id');
+            if ($sourceIds->isEmpty() && $opcr->unit_work_plan_id) {
+                $sourceIds = collect([(int) $opcr->unit_work_plan_id]);
             }
 
-            $opcr->save();
+            UnitWorkPlan::query()
+                ->whereIn('id', $sourceIds->all())
+                ->update([
+                    'status' => UnitWorkPlan::STATUS_RETURNED,
+                    'submitted_at' => null,
+                    'endorsed_at' => null,
+                    'approved_at' => null,
+                    'locked_at' => null,
+                    'returned_at' => now(),
+                    'returned_by' => $user->id,
+                    'returned_by_role' => 'pmt',
+                    'return_remarks' => $remarks,
+                ]);
 
-            return back()->with('success', 'OPCR returned for correction.');
+            return back()->with('success', 'OPCR returned to Supervisors for UWP correction.');
         });
     }
 
@@ -161,28 +180,11 @@ class OpcrController extends Controller
             abort(403, 'Unauthorized.');
         }
 
-        $opcr->load([
-            'unitWorkPlan.office.head',
-            'unitWorkPlan.performancePeriod',
-            'unitWorkPlan.creator',
-            'unitWorkPlan.uwpFunctions' => function ($query) {
-                $query->orderBy('sort_order')->with([
-                    'mfos' => function ($mfoQuery) {
-                        $mfoQuery->orderBy('sort_order')->with([
-                            'successIndicators' => function ($indicatorQuery) {
-                                $indicatorQuery->orderBy('sort_order')->with([
-                                    'qetStandards',
-                                    'assignments.employee',
-                                ]);
-                            },
-                        ]);
-                    },
-                ]);
-            },
-        ]);
+        $opcr->load($this->opcrRelations());
 
-        $office = Str::slug((string) ($opcr->unitWorkPlan?->office?->name ?? 'Office'), '_');
-        $period = Str::slug((string) ($opcr->unitWorkPlan?->performancePeriod?->name ?? 'Period'), '_');
+        $source = $opcr->sourceUnitWorkPlans()->first();
+        $office = Str::slug((string) ($opcr->office?->name ?? $source?->office?->name ?? 'Office'), '_');
+        $period = Str::slug((string) ($opcr->performancePeriod?->name ?? $source?->performancePeriod?->name ?? 'Period'), '_');
         $filename = "OPCR_{$office}_{$period}.xlsx";
 
         return Excel::download(new OpcrExcelExport($opcr), $filename);
@@ -190,10 +192,18 @@ class OpcrController extends Controller
 
     private function buildPayload(Opcr $opcr): array
     {
-        $uwp = $opcr->unitWorkPlan;
+        $sources = $opcr->sourceUnitWorkPlans();
+        $fallbackUwp = $sources->first() ?: $opcr->unitWorkPlan;
         $outputs = [];
 
-        if ($uwp) {
+        foreach ($sources as $uwp) {
+            $uwp->loadMissing([
+                'office',
+                'performancePeriod',
+                'uwpFunctions.mfos.successIndicators.qetStandards',
+                'uwpFunctions.mfos.successIndicators.assignments.employee',
+            ]);
+
             foreach ($uwp->uwpFunctions as $function) {
                 foreach ($function->mfos as $mfo) {
                     $successIndicators = [];
@@ -228,9 +238,7 @@ class OpcrController extends Controller
                             ->values()
                             ->all();
 
-                        $targetQuantity = is_numeric($indicator->target_quantity ?? null)
-                            ? (int) $indicator->target_quantity
-                            : null;
+                        $targetQuantity = is_numeric($indicator->target_quantity ?? null) ? (int) $indicator->target_quantity : null;
                         $targetTimeline = trim((string) ($indicator->target_timeline ?? ''));
 
                         if ($targetQuantity !== null && $targetQuantity > 0) {
@@ -258,6 +266,7 @@ class OpcrController extends Controller
 
                     $outputs[] = [
                         'title' => (string) ($mfo->title ?? ''),
+                        'source_uwp_id' => $uwp->id,
                         'target_quantity' => $outputTargetQuantity > 0
                             ? $outputTargetQuantity
                             : (is_numeric($mfo->target_quantity ?? null) ? (int) $mfo->target_quantity : null),
@@ -275,17 +284,46 @@ class OpcrController extends Controller
                 'id' => $opcr->id,
                 'status' => (string) $opcr->status,
                 'office' => [
-                    'name' => $uwp?->office?->name ?? '',
+                    'name' => $opcr->office?->name ?? $fallbackUwp?->office?->name ?? '',
                 ],
                 'period' => [
-                    'name' => $uwp?->performancePeriod?->name ?? '',
+                    'name' => $opcr->performancePeriod?->name ?? $fallbackUwp?->performancePeriod?->name ?? '',
                 ],
                 'source_uwp' => [
-                    'id' => $uwp?->id ?? '',
-                    'status' => (string) ($uwp?->status ?? ''),
+                    'id' => $sources->pluck('id')->implode(', '),
+                    'status' => $sources->pluck('status')->unique()->implode(', '),
                 ],
             ],
             'outputs' => $outputs,
+        ];
+    }
+
+    private function opcrRelations(): array
+    {
+        $uwpTree = function ($query) {
+            $query->orderBy('sort_order')->with([
+                'mfos' => function ($mfoQuery) {
+                    $mfoQuery->orderBy('sort_order')->with([
+                        'successIndicators' => function ($indicatorQuery) {
+                            $indicatorQuery->orderBy('sort_order')->with([
+                                'qetStandards',
+                                'assignments.employee',
+                            ]);
+                        },
+                    ]);
+                },
+            ]);
+        };
+
+        return [
+            'office',
+            'performancePeriod',
+            'unitWorkPlan.office',
+            'unitWorkPlan.performancePeriod',
+            'unitWorkPlan.uwpFunctions' => $uwpTree,
+            'unitWorkPlans.office',
+            'unitWorkPlans.performancePeriod',
+            'unitWorkPlans.uwpFunctions' => $uwpTree,
         ];
     }
 }

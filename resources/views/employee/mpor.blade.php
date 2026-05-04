@@ -30,9 +30,25 @@
 
         $orsTasks = $orsTasks ?? [];
         $includedRatedTasks = $includedRatedTasks ?? [];
+        $isReturned = strtolower((string) $mporStatus) === 'returned';
+        $returnRemarks = trim((string) ($mpor?->return_remarks ?? ''));
     @endphp
 
     <section class="space-y-6">
+        @if ($isReturned)
+            <div id="mporReturnedBanner" class="rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-100">
+                <p class="font-semibold">MPOR returned by Supervisor</p>
+                <p class="mt-1 text-rose-100/90">
+                    You may continue logging ORS tasks for {{ $mporMonthYear }} and then resubmit the MPOR.
+                </p>
+                @if ($returnRemarks !== '')
+                    <p class="mt-2 text-rose-100/90">
+                        Remarks: {{ $returnRemarks }}
+                    </p>
+                @endif
+            </div>
+        @endif
+
         <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div class="min-w-0">
                 <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Monthly Performance Output Report</p>
@@ -61,7 +77,7 @@
                 @if (! $isMporLocked)
                     <button type="button" data-modal-target="mporSubmitConfirmModal" data-modal-toggle="mporSubmitConfirmModal"
                         class="flex-1 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-center text-xs font-semibold text-white transition hover:bg-slate-700 md:flex-none">
-                        Submit MPOR
+                        {{ $isReturned ? 'Resubmit MPOR' : 'Submit MPOR' }}
                     </button>
                 @else
                     <button type="button" disabled
@@ -247,7 +263,7 @@
                         <p class="font-medium text-white">Proceed?</p>
                     </div>
 
-                    <form id="mporSubmitForm" method="POST" action="{{ route('employee.mpor.submit') }}"
+                    <form id="mporSubmitForm" method="POST" action="{{ route('employee.mpor.submit') }}" data-snackbar-ignore="true"
                         class="flex items-center justify-end gap-2 border-t border-slate-800 p-5">
                         @csrf
                         <input type="hidden" name="month" value="{{ $month }}">
@@ -276,6 +292,7 @@
             const submitForm = document.getElementById('mporSubmitForm');
             const proceedButton = document.getElementById('mporProceedSubmissionBtn');
             const actionButtons = document.getElementById('mporActionButtons');
+            const returnedBanner = document.getElementById('mporReturnedBanner');
             const label = proceedButton?.querySelector('[data-button-label]');
             const spinner = proceedButton?.querySelector('[data-button-spinner]');
             const originalLabel = label?.textContent?.trim() || 'Proceed Submission';
@@ -292,15 +309,13 @@
                     return;
                 }
 
-                if (window.PMSnackbar && !window.PMSnackbar.hasActive()) {
+                if (window.PMSnackbar) {
+                    window.PMSnackbar.clear();
                     window.PMSnackbar.show({
                         type: String(type || 'info').toLowerCase(),
                         message: String(message),
                     });
-                    return;
                 }
-
-                alert(String(message));
             };
 
             const setLoading = (isLoading) => {
@@ -354,6 +369,14 @@
                 submitMporButton.replaceWith(submittedButton);
             };
 
+            const clearReturnedBanner = () => {
+                if (!returnedBanner) {
+                    return;
+                }
+
+                returnedBanner.remove();
+            };
+
             submitForm.addEventListener('submit', async function(event) {
                 event.preventDefault();
 
@@ -386,6 +409,7 @@
                         renderAlert('success', payload?.message || 'MPOR successfully submitted.');
                         closeSubmitModal();
                         markSubmittedActionButton();
+                        clearReturnedBanner();
                         return;
                     }
 

@@ -21,6 +21,7 @@ class AccomplishmentReviewController extends Controller
     {
         $user = $request->user();
         abort_unless($user, 403);
+        $search = trim($request->string('search')->toString());
 
         $period = PerformancePeriod::query()
             ->where('is_active', 1)
@@ -55,7 +56,21 @@ class AccomplishmentReviewController extends Controller
                 'ipcr:id,unit_work_plan_id,performance_period_id,office_id,employee_id',
                 'ipcr.unitWorkPlan.uwpFunctions.mfos:id,uwp_function_id,title,target_quantity,target_timeline',
                 'ipcr.items:id,ipcr_id,uwp_function_id,uwp_success_indicator_id,output_title,function_type,indicator_text,target_quantity,target_timeline,target_summary,standards_payload',
-            ])
+            ]);
+
+        if ($search !== '') {
+            $normalizedSearch = mb_strtolower($search);
+
+            $submissions->where(function ($query) use ($search, $normalizedSearch) {
+                $query->whereHas('employee', function ($employeeQuery) use ($search) {
+                    $employeeQuery->where('name', 'like', '%' . $search . '%');
+                })->orWhereHas('employee.office', function ($officeQuery) use ($search) {
+                    $officeQuery->where('name', 'like', '%' . $search . '%');
+                })->orWhereRaw('LOWER(status) like ?', ['%' . $normalizedSearch . '%']);
+            });
+        }
+
+        $submissions = $submissions
             ->orderByDesc('dept_head_action_at')
             ->orderByDesc('id')
             ->get();
@@ -125,6 +140,18 @@ class AccomplishmentReviewController extends Controller
                 'dept_head_remarks' => (string) ($submission->dept_head_remarks ?? ''),
             ];
 
+            $ratingService = app(\App\Services\PerformanceRatingService::class);
+            if ($submission->ipcr) {
+                $submission->ipcr->refresh();
+                [$computedScore, $computedRating] = $ratingService->getResolvedScoreAndRating($submission->ipcr);
+            } else {
+                $computedScore = 0.00;
+                $computedRating = '--';
+            }
+
+            $payload['computed_score'] = $computedScore;
+            $payload['computed_rating'] = $computedRating;
+
             $rows[] = [
                 'id' => (int) $submission->id,
                 'employee_name' => $employeeName,
@@ -134,6 +161,7 @@ class AccomplishmentReviewController extends Controller
                 'status_label' => $this->formatStatusLabel($status),
                 'submitted_at_label' => $submittedAtLabel,
                 'dept_head_action_at_label' => $deptHeadActionLabel,
+                'computed_score' => $computedScore,
             ];
 
             $submissionPayloads[(string) $submission->id] = $payload;
@@ -143,7 +171,8 @@ class AccomplishmentReviewController extends Controller
             'periodLabel',
             'rows',
             'submissionPayloads',
-            'infoMessage'
+            'infoMessage',
+            'search'
         ));
     }
 
@@ -485,7 +514,9 @@ class AccomplishmentReviewController extends Controller
             'submitted_to_supervisor' => 'Submitted to Supervisor',
             'supervisor_endorsed' => 'Supervisor Endorsed',
             'dept_head_endorsed' => 'Dept Head Endorsed',
-            'pmt_approved' => 'PMT Approved',
+            'pmt_approved' => 'Calibrated',
+            'approved_by_pmt' => 'Calibrated',
+            'adjusted_by_pmt' => 'Calibrated',
             'returned_to_employee' => 'Returned to Employee',
             default => 'Draft',
         };
@@ -541,6 +572,52 @@ class AccomplishmentReviewController extends Controller
             'pmt_action_at' => now(),
         ]);
 
-        return back()->with('success', 'Submission successfully Approved.');
+        if ($submission->ipcr) {
+            $ipcr = $submission->ipcr;
+            $finalStatus = ($ipcr->status === \App\Models\Ipcr::STATUS_ADJUSTED_BY_PMT)
+                ? \App\Models\Ipcr::STATUS_ADJUSTED_BY_PMT
+                : \App\Models\Ipcr::STATUS_APPROVED_BY_PMT;
+
+            $ipcr->update([
+                'status' => $finalStatus,
+                'finalized_at' => now(),
+                'locked_at' => now(),
+            ]);
+        }
+
+        return back()->with('success', 'Submission successfully validated and finalized.');
+    }
+
+    public function returnSubmission(Request $request, $id)
+    {
+        $request->validate([
+            'remarks' => 'required|string|max:1000',
+        ]);
+
+        $submission = AccomplishmentSubmission::findOrFail($id);
+        
+        if ($submission->status === 'pmt_approved') {
+            return back()->with('error', 'Approved submissions cannot be returned.');
+        }
+
+        \Illuminate\Support\Facades\DB::transaction(function() use ($submission, $request) {
+            $submission->update([
+                'status' => 'returned_to_employee',
+                'pmt_remarks' => $request->remarks,
+                'pmt_id' => Auth::id(),
+                'pmt_action_at' => now(),
+            ]);
+
+            if ($submission->ipcr) {
+                $submission->ipcr->update([
+                    'status' => \App\Models\Ipcr::STATUS_COMMITTED,
+                    'pmt_remarks' => $request->remarks,
+                    'locked_at' => null, // Ensure it's not locked
+                    'finalized_at' => null,
+                ]);
+            }
+        });
+
+        return back()->with('success', 'Submission returned to employee for correction.');
     }
 }

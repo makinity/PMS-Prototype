@@ -14,14 +14,18 @@ class QarRow extends Model
         'ppa_code',
         'mfo_title',
         'indicator_text',
+        'target_quantity',
         'target_timeline',
         'actual_performance',
+        'variance',
         'remarks',
         'sort_order',
     ];
 
     protected $casts = [
+        'target_quantity' => 'decimal:2',
         'actual_performance' => 'decimal:2',
+        'variance' => 'decimal:2',
         'sort_order' => 'integer',
     ];
 
@@ -30,4 +34,3 @@ class QarRow extends Model
         return $this->belongsTo(QarHeader::class);
     }
 }
-

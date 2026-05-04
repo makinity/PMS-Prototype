@@ -26,13 +26,9 @@
             $isDashboard = request()->routeIs('dept-head.dashboard');
             $isUnitWorkPlan = request()->routeIs('dept-head.uwp');
             $isOpcr = request()->routeIs('dept-head.opcr');
+            $isOpcrAcc = request()->routeIs('dept-head.opcr.accomplishment');
             $isQar = request()->routeIs('dept-head.qar');
             $isDeptHeadAccReview = request()->routeIs('dept-head.acc-review');
-            $isSMPOR = request()->routeIs('dept-head.smpor');
-            $isDeptHeadIPCRSMPORReview = request()->routeIs('dept-head.smpor-ipcr-review');
-            $isIPCR = request()->routeIs('pmt.ipcr');
-            $isIPCRTARGET = request()->routeIs('pmt.ipcr-target');
-            $isIdp = request()->routeIs('dept-head.idp');
             $isProfile = request()->routeIs('dept-head.profile');
         @endphp
         <!-- Top Navigation -->
@@ -131,8 +127,15 @@
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
                                 <a href="{{ route('dept-head.opcr') }}" class="sidebar-link" @if($isOpcr) aria-current="page" @endif>
+                                    <i class="sidebar-icon fa-solid fa-building-circle-arrow-right"></i>
+                                    <span>OPCR Planning (Stage I)</span>
+                                </a>
+                            </li>
+
+                            <li>
+                                <a href="{{ route('dept-head.opcr.accomplishment') }}" class="sidebar-link" @if($isOpcrAcc) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-building-circle-check"></i>
-                                    <span>OPCR Review</span>
+                                    <span>OPCR Evaluation (Stage III)</span>
                                 </a>
                             </li>
 
@@ -147,39 +150,6 @@
                                 <a href="{{ route('dept-head.acc-review') }}" class="sidebar-link" @if($isDeptHeadAccReview) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-star-half-stroke"></i>
                                     <span>Accomplishment Review</span>
-                                </a>
-                            </li>
-
-                            <li>
-                                <a href="{{ route('dept-head.smpor-ipcr-review') }}" class="sidebar-link" @if($isDeptHeadIPCRSMPORReview) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-star-half-stroke"></i>
-                                    <span>SMPOR & IPCR Review</span>
-                                </a>
-                            </li>
-
-                            <li>
-                                <a href="{{ route('dept-head.ipcr') }}" class="sidebar-link" @if($isIPCR) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-user-check"></i>
-                                    <span>IPCR Approval</span>
-                                </a>
-                            </li>
-
-                            <li>
-                                <a href="{{ route('dept-head.ipcr-target') }}" class="sidebar-link" @if($isIPCRTARGET) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-bullseye-arrow"></i>
-                                    <span> Target Approval</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div>
-                        <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Development</p>
-                        <ul class="mt-2 space-y-1 menu-stagger">
-                            <li>
-                                <a href="{{ route('dept-head.idp') }}" class="sidebar-link" @if($isIdp) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-road"></i>
-                                    <span>Individual Development Plan</span>
                                 </a>
                             </li>
                         </ul>

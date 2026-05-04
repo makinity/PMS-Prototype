@@ -144,17 +144,11 @@
     <div class="min-h-screen">
         @php
             $isPmtDashboard = request()->routeIs('pmt.dashboard');
-            $isPmtUwp = request()->routeIs('pmt.uwp');
             $isOpcr = request()->routeIs('pmt.opcr.review.index');
-            $isPmtOpcrApproval = request()->routeIs('pmt.opcr');
-            $isSMPOR = request()->routeIs('pmt.smpor');
-            $isIPCR = request()->routeIs('pmt.ipcr');
             $isQAR = request()->routeIs('pmt.qar');
             $isDeptHeadAccReview = request()->routeIs('pmt.acc-review');
-            $isRD = request()->routeIs('pmt.rewards');
-            $isIPCRCalibOVR = request()->routeIs('pmt.ipcr-calib-overview');
-            $isFinalCalib = request()->routeIs('pmt.final-calib');
-            $isPmtReports = request()->routeIs('pmt.pr');
+            $isEmployeeCalibration = request()->routeIs('pmt.employee-calibration.*');
+            $isOfficeCalibration = request()->routeIs('pmt.office-calibration.*');
             $isPmtProfile = request()->routeIs('pmt.profile');
         @endphp
         <!-- Top Navigation -->
@@ -247,27 +241,9 @@
                         <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Approvals</p>
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
-                                <a href="{{ route('pmt.uwp') }}" class="sidebar-link" @if($isPmtUwp) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-diagram-project"></i>
-                                    <span>Unit Work Plan Approval</span>
-                                </a>
-                            </li>
-                            <li>
                                 <a href="{{ route('pmt.opcr.review.index') }}" class="sidebar-link" @if($isOpcr) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-user-check"></i>
                                     <span>OPCR Review</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('pmt.opcr') }}" class="sidebar-link" @if($isPmtOpcrApproval) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-building-circle-check"></i>
-                                    <span>OPCR Validation</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('pmt.ipcr') }}" class="sidebar-link" @if($isIPCR) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-user-check"></i>
-                                    <span>IPCR Review</span>
                                 </a>
                             </li>
                             <li>
@@ -283,40 +259,22 @@
                                     <span>Accomplishment Review</span>
                                 </a>
                             </li>
-                            <li>
-                                <a href="{{ route('pmt.ipcr-calib-overview') }}" class="sidebar-link" @if($isIPCRCalibOVR) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-scale-balanced"></i>
-                                    <span>IPCR Calibration</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('pmt.final-calib') }}" class="sidebar-link" @if($isFinalCalib) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-gavel"></i>
-                                    <span>Final Calibration</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('pmt.rewards') }}" class="sidebar-link" @if($isRD) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-award"></i>
-                                    <span>Rewards & Development</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('pmt.smpor') }}" class="sidebar-link" @if($isSMPOR) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-layer-group"></i>
-                                    <span>SMPOR</span>
-                                </a>
-                            </li>
                         </ul>
                     </div>
 
                     <div>
-                        <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Reports</p>
+                        <p class="px-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Calibration</p>
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
-                                <a href="{{ route('pmt.pr') }}" class="sidebar-link" @if($isPmtReports) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-chart-column"></i>
-                                    <span>Performance Reports</span>
+                                <a href="{{ route('pmt.employee-calibration.index') }}" class="sidebar-link" @if($isEmployeeCalibration) aria-current="page" @endif>
+                                    <i class="sidebar-icon fa-solid fa-users-gear"></i>
+                                    <span>Employee Calibration</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('pmt.office-calibration.index') }}" class="sidebar-link" @if($isOfficeCalibration) aria-current="page" @endif>
+                                    <i class="sidebar-icon fa-solid fa-building-circle-check"></i>
+                                    <span>Office Calibration</span>
                                 </a>
                             </li>
                         </ul>

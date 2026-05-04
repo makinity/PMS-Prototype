@@ -15,6 +15,11 @@ class Ipcr extends Model
     // Legacy alias for compatibility.
     public const STATUS_GENERATED = self::STATUS_FOR_COMMITMENT;
 
+    public const STATUS_PENDING_PMT_CALIBRATION = 'pending_pmt_calibration';
+    public const STATUS_RETURNED_BY_PMT = 'returned_by_pmt';
+    public const STATUS_APPROVED_BY_PMT = 'approved_by_pmt';
+    public const STATUS_ADJUSTED_BY_PMT = 'adjusted_by_pmt';
+
     protected $fillable = [
         'opcr_id',
         'unit_work_plan_id',
@@ -29,6 +34,12 @@ class Ipcr extends Model
         'finalized_at',
         'final_score',
         'adjectival_rating',
+        'pmt_adjusted_score',
+        'pmt_adjusted_rating',
+        'pmt_adjustment_reason',
+        'pmt_remarks',
+        'pmt_reviewed_by',
+        'pmt_reviewed_at',
     ];
 
     protected $casts = [
@@ -36,7 +47,9 @@ class Ipcr extends Model
         'committed_at' => 'datetime',
         'locked_at' => 'datetime',
         'finalized_at' => 'datetime',
+        'pmt_reviewed_at' => 'datetime',
         'final_score' => 'decimal:2',
+        'pmt_adjusted_score' => 'decimal:2',
     ];
 
     public function opcr(): BelongsTo
@@ -94,5 +107,20 @@ class Ipcr extends Model
         return $this->hasMany(Mpor::class, 'employee_id', 'employee_id')
             ->where('office_id', $this->office_id)
             ->whereBetween('month', [$this->performancePeriod->start_month, $this->performancePeriod->end_month]);
+    }
+
+    public function pmtReviewer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'pmt_reviewed_by');
+    }
+
+    public function isPmtApproved(): bool
+    {
+        return in_array($this->status, [self::STATUS_APPROVED_BY_PMT, self::STATUS_ADJUSTED_BY_PMT], true);
+    }
+
+    public function isPmtAdjusted(): bool
+    {
+        return $this->status === self::STATUS_ADJUSTED_BY_PMT;
     }
 }

@@ -11,6 +11,10 @@
                 'label' => 'Dept Head Endorsed',
                 'badge' => 'border-emerald-500/40 bg-emerald-500/10 text-emerald-200',
             ],
+            'returned' => [
+                'label' => 'Returned',
+                'badge' => 'border-rose-500/40 bg-rose-500/10 text-rose-200',
+            ],
             'pmt_approved' => [
                 'label' => 'PMT Approved',
                 'badge' => 'border-cyan-500/40 bg-cyan-500/10 text-cyan-200',
@@ -268,6 +272,7 @@
                                                 <th class="px-3 py-2 text-left">Indicator</th>
                                                 <th class="px-3 py-2 text-left">Target/Timeline</th>
                                                 <th class="px-3 py-2 text-right">Actual Performance</th>
+                                                <th class="px-3 py-2 text-right">Variance</th>
                                                 <th class="px-3 py-2 text-left">Remarks</th>
                                             </tr>
                                         </thead>
@@ -279,11 +284,12 @@
                                                     <td class="px-3 py-2">{{ $row->indicator_text ?: '-' }}</td>
                                                     <td class="px-3 py-2">{{ $row->target_timeline ?: '-' }}</td>
                                                     <td class="px-3 py-2 text-right">{{ (int) round((float) ($row->actual_performance ?? 0)) }}</td>
+                                                    <td class="px-3 py-2 text-right">{{ $row->variance !== null ? (int) round((float) $row->variance) : '-' }}</td>
                                                     <td class="px-3 py-2">{{ $row->remarks ?: '-' }}</td>
                                                 </tr>
                                             @empty
                                                 <tr>
-                                                    <td colspan="6" class="px-3 py-6 text-center text-xs text-slate-400">
+                                                    <td colspan="7" class="px-3 py-6 text-center text-xs text-slate-400">
                                                         No Annex I rows saved for this QAR.
                                                     </td>
                                                 </tr>

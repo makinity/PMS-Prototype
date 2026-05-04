@@ -139,6 +139,18 @@ class AccomplishmentReviewController extends Controller
                 'supervisor_remarks' => (string) ($submission->supervisor_remarks ?? ''),
             ];
 
+            $ratingService = app(\App\Services\PerformanceRatingService::class);
+            if ($submission->ipcr) {
+                $submission->ipcr->refresh();
+                [$computedScore, $computedRating] = $ratingService->getResolvedScoreAndRating($submission->ipcr);
+            } else {
+                $computedScore = 0.00;
+                $computedRating = '--';
+            }
+
+            $payload['computed_score'] = $computedScore;
+            $payload['computed_rating'] = $computedRating;
+
             $rows[] = [
                 'id' => (int) $submission->id,
                 'employee_name' => $employeeName,
@@ -148,6 +160,7 @@ class AccomplishmentReviewController extends Controller
                 'status_label' => $this->formatStatusLabel($status),
                 'submitted_at_label' => $submittedAtLabel,
                 'supervisor_action_at_label' => $supervisorActionLabel,
+                'computed_score' => $computedScore,
             ];
 
             $submissionPayloads[(string) $submission->id] = $payload;
@@ -498,7 +511,9 @@ class AccomplishmentReviewController extends Controller
             'submitted_to_supervisor' => 'Submitted to Supervisor',
             'supervisor_endorsed' => 'Supervisor Endorsed',
             'dept_head_endorsed' => 'Dept Head Endorsed',
-            'pmt_approved' => 'PMT Approved',
+            'pmt_approved' => 'Calibrated',
+            'approved_by_pmt' => 'Calibrated',
+            'adjusted_by_pmt' => 'Calibrated',
             'returned_to_employee' => 'Returned to Employee',
             default => 'Draft',
         };
@@ -553,6 +568,12 @@ class AccomplishmentReviewController extends Controller
             'dept_head_id' => Auth::id(),
             'dept_head_action_at' => now(),
         ]);
+
+        if ($submission->ipcr) {
+            $submission->ipcr->update([
+                'status' => \App\Models\Ipcr::STATUS_PENDING_PMT_CALIBRATION,
+            ]);
+        }
 
         return back()->with('success', 'Submission successfully endorsed to PMT.');
     }

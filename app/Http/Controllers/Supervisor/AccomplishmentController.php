@@ -90,6 +90,15 @@ class AccomplishmentController extends Controller
                 $ratingsByIndicator
             );
 
+            $ratingService = app(\App\Services\PerformanceRatingService::class);
+            if ($submission->ipcr) {
+                $submission->ipcr->refresh();
+                [$computedScore, $computedRating] = $ratingService->getResolvedScoreAndRating($submission->ipcr);
+            } else {
+                $computedScore = 0.00;
+                $computedRating = '--';
+            }
+
             $payload = [
                 'id' => (int) $submission->id,
                 'employee_name' => $employeeName,
@@ -105,6 +114,8 @@ class AccomplishmentController extends Controller
                 'smporSourceLabel' => $smporSourceLabel,
                 'smporModeLabel' => $smporModeLabel,
                 'ipcrSections' => $ipcrSections,
+                'computed_score' => $computedScore,
+                'computed_rating' => $computedRating,
             ];
 
             $rows[] = [
@@ -115,6 +126,7 @@ class AccomplishmentController extends Controller
                 'status' => $status,
                 'status_label' => $this->formatStatusLabel($status),
                 'submitted_at_label' => $submittedAtLabel,
+                'computed_score' => $computedScore,
             ];
 
             $submissionPayloads[(string) $submission->id] = $payload;
@@ -470,7 +482,9 @@ class AccomplishmentController extends Controller
             'submitted_to_supervisor' => 'Submitted to Supervisor',
             'supervisor_endorsed' => 'Supervisor Endorsed',
             'dept_head_endorsed' => 'Dept Head Endorsed',
-            'pmt_approved' => 'PMT Approved',
+            'pmt_approved' => 'Calibrated',
+            'approved_by_pmt' => 'Calibrated',
+            'adjusted_by_pmt' => 'Calibrated',
             'returned_to_employee' => 'Returned to Employee',
             default => 'Draft',
         };

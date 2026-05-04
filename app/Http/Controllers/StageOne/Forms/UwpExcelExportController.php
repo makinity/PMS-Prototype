@@ -22,8 +22,8 @@ class UwpExcelExportController extends Controller
             ->where('id', $uwpId)
             ->firstOrFail();
 
-        if ($uwp->status !== UnitWorkPlan::STATUS_PMT_APPROVED) {
-            abort(403, 'Only PMT approved UWP can be exported.');
+        if ($uwp->uwpFunctions->isEmpty()) {
+            return back()->with('error', 'Cannot export an empty UWP. Please add some functions and outputs first.');
         }
 
         $uwpData = [

@@ -87,26 +87,39 @@ class QarController extends Controller
             $state = [];
         }
 
-        $status = (string) ($state['status'] ?? QarHeader::STATUS_DRAFT);
+        $existingHeader = null;
+        if ($officeId > 0 && $period?->id) {
+            $existingHeader = QarHeader::query()
+                ->where('office_id', $officeId)
+                ->where('performance_period_id', $period->id)
+                ->where('quarter_key', $quarterKey)
+                ->first();
+        }
+
+        $status = (string) ($existingHeader?->status ?? $state['status'] ?? QarHeader::STATUS_DRAFT);
         $status = str_replace('-', '_', $status);
         if ($status === 'endorsed') {
             $status = QarHeader::STATUS_DEPT_HEAD_ENDORSED;
         }
-        if (!in_array($status, [QarHeader::STATUS_DRAFT, QarHeader::STATUS_DEPT_HEAD_ENDORSED, QarHeader::STATUS_PMT_APPROVED], true)) {
+        if (!in_array($status, [QarHeader::STATUS_DRAFT, QarHeader::STATUS_DEPT_HEAD_ENDORSED, QarHeader::STATUS_RETURNED, QarHeader::STATUS_PMT_APPROVED], true)) {
             $status = QarHeader::STATUS_DRAFT;
         }
-        $approvedAt = $state['approved_at'] ?? null;
+        $approvedAt = $existingHeader?->approved_at?->toDateTimeString() ?? ($state['approved_at'] ?? null);
 
         $state['seeded'] = true;
         $state['incoming_mpors'] = [];
         $state['consolidated_mpors'] = $consolidatedMpors;
         $state['qar_rows'] = [];
-        $state['generated_at'] = $generatedAt
+        $state['generated_at'] = $existingHeader?->generated_at?->toDateTimeString() ?? ($generatedAt
             ? Carbon::parse($generatedAt)->toDateTimeString()
-            : ($state['generated_at'] ?? null);
+            : ($state['generated_at'] ?? null));
         $state['status'] = $status;
         $state['approved_at'] = $approvedAt;
-        $pmtStatusLabel = 'Pending validation';
+        $pmtStatusLabel = match ((string) ($existingHeader?->pmt_status ?? 'pending')) {
+            QarHeader::PMT_VALIDATED => 'Validated by PMT',
+            QarHeader::PMT_RETURNED => 'Returned by PMT',
+            default => 'Pending validation',
+        };
 
         $annexRowsMap = [];
         foreach ($incomingMporModels as $mpor) {
@@ -125,25 +138,40 @@ class QarController extends Controller
                     continue;
                 }
 
-                if (!isset($annexRowsMap[$ipcrItemId])) {
-                    $annexRowsMap[$ipcrItemId] = [
-                        'ppa_code' => (string) $ipcrItemId,
+                $norm = fn ($s) => mb_strtolower(trim(preg_replace('/\s+/', ' ', (string) $s)));
+                $groupKey = $norm($item->output_title ?? '') . '||' . $norm($item->indicator_text ?? '');
+
+                if (!isset($annexRowsMap[$groupKey])) {
+                    $annexRowsMap[$groupKey] = [
+                        'ppa_code' => (string) ($item->id ?? ''),
                         'mfo' => (string) ($item->output_title ?? '-'),
                         'indicator' => (string) ($item->indicator_text ?? '-'),
+                        'target_quantity' => 0.0,
                         'target_timeline' => (string) ($item->target_summary ?? '-'),
                         'actual_performance' => 0.0,
-                        'remarks' => 'Derived from rated ORS entries',
+                        'variance' => null,
+                        'remarks' => 'Consolidated from multiple employee MPORs',
                     ];
                 }
 
-                $annexRowsMap[$ipcrItemId]['actual_performance'] += (float) ($entry->quantity ?? 0);
+                $annexRowsMap[$groupKey]['target_quantity'] += is_numeric($item->target_quantity ?? null) ? (float) $item->target_quantity : 0;
+                $annexRowsMap[$groupKey]['actual_performance'] += (float) ($entry->quantity ?? 0);
             }
         }
 
         $annexRows = collect($annexRowsMap)
             ->sortKeys()
             ->map(function (array $row): array {
-                $row['actual_performance'] = round((float) $row['actual_performance'], 2);
+                $targetQuantity = is_numeric($row['target_quantity'] ?? null)
+                    ? round((float) $row['target_quantity'], 2)
+                    : null;
+                $actualPerformance = round((float) $row['actual_performance'], 2);
+
+                $row['target_quantity'] = $targetQuantity;
+                $row['actual_performance'] = $actualPerformance;
+                $row['variance'] = $targetQuantity !== null
+                    ? round($targetQuantity - $actualPerformance, 2)
+                    : null;
 
                 return $row;
             })
@@ -583,25 +611,40 @@ class QarController extends Controller
                     continue;
                 }
 
-                if (!isset($annexRowsMap[$ipcrItemId])) {
-                    $annexRowsMap[$ipcrItemId] = [
-                        'ppa_code' => (string) $ipcrItemId,
+                $norm = fn ($s) => mb_strtolower(trim(preg_replace('/\s+/', ' ', (string) $s)));
+                $groupKey = $norm($item->output_title ?? '') . '||' . $norm($item->indicator_text ?? '');
+
+                if (!isset($annexRowsMap[$groupKey])) {
+                    $annexRowsMap[$groupKey] = [
+                        'ppa_code' => (string) ($item->id ?? ''),
                         'mfo' => (string) ($item->output_title ?? '-'),
                         'indicator' => (string) ($item->indicator_text ?? '-'),
+                        'target_quantity' => 0.0,
                         'target_timeline' => (string) ($item->target_summary ?? '-'),
                         'actual_performance' => 0.0,
-                        'remarks' => 'Derived from rated ORS entries',
+                        'variance' => null,
+                        'remarks' => 'Consolidated from multiple employee MPORs',
                     ];
                 }
 
-                $annexRowsMap[$ipcrItemId]['actual_performance'] += (float) ($entry->quantity ?? 0);
+                $annexRowsMap[$groupKey]['target_quantity'] += is_numeric($item->target_quantity ?? null) ? (float) $item->target_quantity : 0;
+                $annexRowsMap[$groupKey]['actual_performance'] += (float) ($entry->quantity ?? 0);
             }
         }
 
         $rows = collect($annexRowsMap)
             ->sortKeys()
             ->map(function (array $row): array {
-                $row['actual_performance'] = round((float) $row['actual_performance'], 2);
+                $targetQuantity = is_numeric($row['target_quantity'] ?? null)
+                    ? round((float) $row['target_quantity'], 2)
+                    : null;
+                $actualPerformance = round((float) $row['actual_performance'], 2);
+
+                $row['target_quantity'] = $targetQuantity;
+                $row['actual_performance'] = $actualPerformance;
+                $row['variance'] = $targetQuantity !== null
+                    ? round($targetQuantity - $actualPerformance, 2)
+                    : null;
 
                 return $row;
             })
@@ -668,8 +711,10 @@ class QarController extends Controller
                     'ppa_code' => (string) ($row['ppa_code'] ?? ''),
                     'mfo_title' => (string) ($row['mfo'] ?? ''),
                     'indicator_text' => (string) ($row['indicator'] ?? ''),
+                    'target_quantity' => is_numeric($row['target_quantity'] ?? null) ? (float) $row['target_quantity'] : null,
                     'target_timeline' => (string) ($row['target_timeline'] ?? '-'),
                     'actual_performance' => (float) ($row['actual_performance'] ?? 0),
+                    'variance' => is_numeric($row['variance'] ?? null) ? (float) $row['variance'] : null,
                     'remarks' => (string) ($row['remarks'] ?? ''),
                     'sort_order' => $index + 1,
                 ]);
@@ -697,6 +742,25 @@ class QarController extends Controller
                     'status_label' => (string) ($mpor->status ?? '-'),
                 ]);
             }
+
+            // Move Office OPCR to pending calibration
+            \App\Models\Opcr::query()
+                ->where('office_id', $officeId)
+                ->where('performance_period_id', $period->id)
+                ->whereIn('status', [
+                    \App\Models\Opcr::STATUS_DRAFT,
+                    \App\Models\Opcr::STATUS_SUBMITTED,
+                    \App\Models\Opcr::STATUS_ENDORSED,
+                    \App\Models\Opcr::STATUS_APPROVED
+                ])
+                ->update(['status' => \App\Models\Opcr::STATUS_PENDING_PMT_CALIBRATION]);
+
+            // Move individual IPCRs to pending calibration
+            \App\Models\Ipcr::query()
+                ->where('office_id', $officeId)
+                ->where('performance_period_id', $period->id)
+                ->where('status', \App\Models\Ipcr::STATUS_COMMITTED)
+                ->update(['status' => \App\Models\Ipcr::STATUS_PENDING_PMT_CALIBRATION]);
         });
 
         $sessionKey = self::QAR_SESSION_KEY . ':' . $quarterKey;

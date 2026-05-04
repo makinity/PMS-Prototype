@@ -5,12 +5,15 @@
     @php
         $submissionRows = is_array($rows ?? null) ? $rows : [];
         $periodLabelSafe = (string) ($periodLabel ?? '--');
+        $searchTermSafe = trim((string) ($search ?? ''));
 
         $statusBadgeClassMap = [
             'submitted_to_supervisor' => 'inline-flex items-center rounded-full border border-sky-500/40 bg-sky-500/10 px-2.5 py-1 text-xs font-semibold text-sky-200',
             'supervisor_endorsed' => 'inline-flex items-center rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-200',
             'dept_head_endorsed' => 'inline-flex items-center rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-200',
             'pmt_approved' => 'inline-flex items-center rounded-full border border-violet-500/40 bg-violet-500/10 px-2.5 py-1 text-xs font-semibold text-violet-200',
+            'approved_by_pmt' => 'inline-flex items-center rounded-full border border-violet-500/40 bg-violet-500/10 px-2.5 py-1 text-xs font-semibold text-violet-200',
+            'adjusted_by_pmt' => 'inline-flex items-center rounded-full border border-violet-500/40 bg-violet-500/10 px-2.5 py-1 text-xs font-semibold text-violet-200',
             'returned_to_employee' => 'inline-flex items-center rounded-full border border-rose-500/40 bg-rose-500/10 px-2.5 py-1 text-xs font-semibold text-rose-200',
             'draft' => 'inline-flex items-center rounded-full border border-slate-600 bg-slate-800/70 px-2.5 py-1 text-xs font-semibold text-slate-200',
         ];
@@ -30,6 +33,38 @@
         </div>
 
         <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
+            <div class="border-b border-slate-800 px-5 py-4">
+                <form method="GET" class="flex w-full max-w-xl items-end gap-2">
+                    <div class="flex-1">
+                        <label for="pmt-accomplishment-search" class="mb-2 block text-xs uppercase tracking-[0.14em] text-slate-400">Search</label>
+                        <input
+                            id="pmt-accomplishment-search"
+                            name="search"
+                            type="text"
+                            value="{{ $searchTermSafe }}"
+                            data-live-submission-search
+                            placeholder="Search employee, office, period, status..."
+                            style="background-color: #020617 !important; color: #f8fafc !important; border-color: #1e293b !important;"
+                            class="w-full rounded-xl border px-4 py-3 text-sm placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/30">
+                    </div>
+                    <button
+                        type="submit"
+                        aria-label="Search accomplishment submissions"
+                        style="background-color: #020617 !important; color: #f8fafc !important; border-color: #1e293b !important;"
+                        class="inline-flex h-[50px] w-[50px] items-center justify-center rounded-xl border text-slate-100 transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/40">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5" aria-hidden="true">
+                            <circle cx="11" cy="11" r="7"></circle>
+                            <path stroke-linecap="round" d="M20 20l-3.5-3.5"></path>
+                        </svg>
+                    </button>
+                    @if ($searchTermSafe !== '')
+                        <a href="{{ route('pmt.acc-review.index') }}"
+                            class="inline-flex h-[50px] items-center rounded-xl border border-slate-700 px-4 text-sm font-medium text-slate-300 transition hover:bg-slate-800">
+                            Clear
+                        </a>
+                    @endif
+                </form>
+            </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm text-slate-200">
                     <thead class="bg-slate-950/70 text-xs uppercase tracking-[0.14em] text-slate-400">
@@ -38,6 +73,7 @@
                             <th class="px-5 py-3 text-left">Office</th>
                             <th class="px-5 py-3 text-left">Period</th>
                             <th class="px-5 py-3 text-left">Status</th>
+                            <th class="px-5 py-3 text-center tabular-nums">Score</th>
                             <th class="px-5 py-3 text-left">Submitted At</th>
                             <th class="px-5 py-3 text-left">Dept Head Action</th>
                             <th class="px-5 py-3 text-center">Actions</th>
@@ -48,13 +84,26 @@
                             @php
                                 $statusKey = strtolower((string) ($row['status'] ?? 'draft'));
                                 $statusBadgeClasses = $statusBadgeClassMap[$statusKey] ?? $statusBadgeClassMap['draft'];
+                                $rowSearchText = collect([
+                                    $row['employee_name'] ?? '',
+                                    $row['office_name'] ?? '',
+                                    $row['period_label'] ?? $periodLabelSafe,
+                                    $row['status_label'] ?? 'Draft',
+                                    $row['submitted_at_label'] ?? '',
+                                    $row['dept_head_action_at_label'] ?? '',
+                                ])->filter()->implode(' ');
                             @endphp
-                            <tr class="bg-slate-900/40">
+                            <tr class="bg-slate-900/40"
+                                data-review-row
+                                data-search-text="{{ \Illuminate\Support\Str::lower($rowSearchText) }}">
                                 <td class="px-5 py-3 font-semibold text-slate-100">{{ $row['employee_name'] ?? '--' }}</td>
                                 <td class="px-5 py-3">{{ $row['office_name'] ?? '--' }}</td>
                                 <td class="px-5 py-3">{{ $row['period_label'] ?? $periodLabelSafe }}</td>
                                 <td class="px-5 py-3">
                                     <span class="{{ $statusBadgeClasses }}">{{ $row['status_label'] ?? 'Draft' }}</span>
+                                </td>
+                                <td class="px-5 py-3 text-center tabular-nums font-bold text-emerald-400">
+                                    {{ number_format($row['computed_score'] ?? 0, 2) }}
                                 </td>
                                 <td class="px-5 py-3">{{ $row['submitted_at_label'] ?? '--' }}</td>
                                 <td class="px-5 py-3">{{ $row['dept_head_action_at_label'] ?? '--' }}</td>
@@ -76,6 +125,9 @@
                                 <td colspan="7" class="px-5 py-8 text-center text-sm text-slate-400">No dept-head-endorsed or PMT-approved submissions found for the active period.</td>
                             </tr>
                         @endforelse
+                        <tr id="pmt-submissions-no-match-row" class="hidden bg-slate-900/40">
+                            <td colspan="7" class="px-5 py-8 text-center text-sm text-slate-400">No matching accomplishment submissions found.</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -110,6 +162,16 @@
                     <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
                         <p class="text-[11px] uppercase tracking-[0.18em] text-slate-500">Submitted At</p>
                         <p id="viewSubmissionSubmittedAt" class="mt-2 text-base font-semibold text-white">--</p>
+                    </div>
+
+                    <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4">
+                        <p class="text-[11px] uppercase tracking-[0.18em] text-emerald-500/70">Performance Score</p>
+                        <p id="viewSubmissionScore" class="mt-2 text-xl font-bold text-emerald-400">—</p>
+                    </div>
+
+                    <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4">
+                        <p class="text-[11px] uppercase tracking-[0.18em] text-emerald-500/70">Performance Rating</p>
+                        <p id="viewSubmissionRating" class="mt-2 text-base font-bold text-emerald-400 uppercase tracking-wider">—</p>
                     </div>
 
                     {{-- Row 2 (3 equal cards under the 2-card row) --}}
@@ -189,6 +251,12 @@
             </div>
 
             <div class="mt-5 flex items-center justify-end gap-4 border-t border-slate-800 pt-4">
+                <button type="button" 
+                    id="pmtSubmissionReturnTrigger"
+                    class="rounded-lg border border-red-600/40 bg-red-600/10 px-3 py-2 text-xs font-semibold text-red-300 transition hover:bg-red-600/20">
+                    Return
+                </button>
+
                 <form method="POST"
                     id="pmtSubmissionApproveForm"
                     data-action-template="{{ route('pmt.acc-review.approve', ['id' => '__SUBMISSION_ID__']) }}"
@@ -329,6 +397,38 @@
         </div>
     </div>
 
+    {{-- Return Submission Modal --}}
+    <div id="pmt-submission-return-modal" data-preview-modal data-parent-modal-id="pmt-submission-view-modal" class="fixed inset-0 z-[130] hidden items-center justify-center bg-black/60 px-4">
+        <div class="w-full max-w-lg rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 class="text-lg font-semibold text-white">Return Submission</h3>
+                <button type="button" data-close-modal class="text-2xl leading-none text-slate-400 transition hover:text-white">&times;</button>
+            </div>
+            
+            <p class="mt-3 text-sm text-slate-400">Provide feedback to the employee on why this submission is being returned.</p>
+            
+            <form id="pmtSubmissionReturnForm" method="POST" action="" class="mt-4">
+                @csrf
+                <div class="space-y-2">
+                    <label for="pmt_return_remarks" class="text-[11px] uppercase tracking-wider text-slate-500">Remarks / Feedback</label>
+                    <textarea 
+                        id="pmt_return_remarks" 
+                        name="remarks" 
+                        required
+                        rows="4"
+                        placeholder="e.g., Please provide supporting documents for task X. The current evidence is insufficient."
+                        style="background-color: #020617 !important; color: #f1f5f9 !important; border-color: #334155 !important;"
+                        class="w-full rounded-xl border p-3 text-sm placeholder:text-slate-600 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"></textarea>
+                </div>
+                
+                <div class="mt-6 flex justify-end gap-3">
+                    <button type="button" data-close-modal class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-300 transition hover:bg-slate-800">Cancel</button>
+                    <button type="submit" class="rounded-lg bg-red-600 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-red-900/20 transition hover:bg-red-700">Confirm Return</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', () => {
@@ -342,6 +442,9 @@
                 @endif
 
                 const payloadScript = document.getElementById('pmt-submissions-json');
+                const liveSearchInput = document.querySelector('[data-live-submission-search]');
+                const submissionRows = Array.from(document.querySelectorAll('[data-review-row]'));
+                const noMatchRow = document.getElementById('pmt-submissions-no-match-row');
                 const previewModals = Array.from(document.querySelectorAll('[data-preview-modal]'));
                 const openPreviewStack = [];
 
@@ -350,6 +453,8 @@
                 const submissionPeriodEl = document.getElementById('viewSubmissionPeriod');
                 const submissionStatusEl = document.getElementById('viewSubmissionStatus');
                 const submissionSubmittedAtEl = document.getElementById('viewSubmissionSubmittedAt');
+                const submissionScoreEl = document.getElementById('viewSubmissionScore');
+                const submissionRatingEl = document.getElementById('viewSubmissionRating');
                 const submissionRemarksEl = document.getElementById('viewSubmissionRemarks');
                 const submissionSupervisorActionAtEl = document.getElementById('viewSubmissionSupervisorActionAt');
                 const submissionSupervisorRemarksEl = document.getElementById('viewSubmissionSupervisorRemarks');
@@ -360,6 +465,9 @@
                 const smporSourceSummaryEl = document.getElementById('viewSmporSource');
                 const submissionApproveFormEl = document.getElementById('pmtSubmissionApproveForm');
                 const submissionApproveBtnEl = document.getElementById('pmtSubmissionApproveBtn');
+                const pmtReturnTrigger = document.getElementById('pmtSubmissionReturnTrigger');
+                const pmtReturnForm = document.getElementById('pmtSubmissionReturnForm');
+                const pmtReturnRemarksInput = document.getElementById('pmt_return_remarks');
 
                 const smporEmployeeEl = document.getElementById('smporEmployeeName');
                 const smporOfficeEl = document.getElementById('smporOfficeName');
@@ -387,6 +495,28 @@
                 let currentPayload = null;
                 let currentIpcrSections = [];
                 let selectedIndicators = [];
+
+                function applySubmissionLiveSearch() {
+                    if (!liveSearchInput) {
+                        return;
+                    }
+
+                    const term = String(liveSearchInput.value || '').trim().toLowerCase();
+                    let visibleCount = 0;
+
+                    submissionRows.forEach((row) => {
+                        const haystack = String(row.dataset.searchText || '').toLowerCase();
+                        const isVisible = term === '' || haystack.includes(term);
+                        row.classList.toggle('hidden', !isVisible);
+                        if (isVisible) {
+                            visibleCount += 1;
+                        }
+                    });
+
+                    if (noMatchRow) {
+                        noMatchRow.classList.toggle('hidden', visibleCount > 0 || submissionRows.length === 0);
+                    }
+                }
 
                 try {
                     const parsed = JSON.parse(payloadScript?.textContent || '{}');
@@ -609,6 +739,8 @@
                     if (submissionOfficeEl) submissionOfficeEl.textContent = payload.office_name || '--';
                     if (submissionPeriodEl) submissionPeriodEl.textContent = payload.period_label || '--';
                     if (submissionSubmittedAtEl) submissionSubmittedAtEl.textContent = payload.submitted_at_label || '--';
+                    if (submissionScoreEl) submissionScoreEl.textContent = formatNumber(payload.computed_score || 0, 2);
+                    if (submissionRatingEl) submissionRatingEl.textContent = payload.computed_rating || '--';
                     if (submissionRemarksEl) submissionRemarksEl.textContent = (payload.remarks || '').trim() !== '' ? payload.remarks : '--';
                     if (submissionSupervisorActionAtEl) {
                         submissionSupervisorActionAtEl.textContent = payload.supervisor_action_at_label || '--';
@@ -856,6 +988,18 @@
                     renderIpcrPreview(currentPayload);
                 });
 
+                pmtReturnTrigger?.addEventListener('click', () => {
+                    if (!currentPayload) return;
+
+                    if (pmtReturnForm) {
+                        const actionTemplate = "{{ route('pmt.acc-review.return', ['id' => '__SUBMISSION_ID__']) }}";
+                        pmtReturnForm.action = actionTemplate.replace('__SUBMISSION_ID__', currentPayload.id);
+                    }
+                    
+                    if (pmtReturnRemarksInput) pmtReturnRemarksInput.value = '';
+                    openPreviewModal('pmt-submission-return-modal');
+                });
+
                 smporTabButtons.forEach((button) => {
                     button.addEventListener('click', () => {
                         const tab = button.dataset.smporTab;
@@ -908,6 +1052,9 @@
                         closePreviewModal(openPreviewStack[openPreviewStack.length - 1]);
                     }
                 });
+
+                liveSearchInput?.addEventListener('input', applySubmissionLiveSearch);
+                applySubmissionLiveSearch();
 
                 refreshPreviewModalZIndices();
                 syncBodyScroll();

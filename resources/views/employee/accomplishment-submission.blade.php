@@ -2,10 +2,17 @@
 
 @section('main-content')
     @php
+        $isCalibrated = strtolower((string) ($submissionStatus ?? '')) === 'calibrated';
         $isSubmitted = !in_array(strtolower((string) ($submissionStatus ?? 'draft')), ['draft', 'returned_to_employee'], true);
-        $statusBadgeClasses = $isSubmitted
-            ? 'inline-flex items-center rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-200 border border-emerald-500/40'
-            : 'inline-flex items-center rounded-full bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-200 border border-amber-500/40';
+        
+        $statusBadgeClasses = 'inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold border ';
+        if ($isCalibrated) {
+            $statusBadgeClasses .= 'bg-violet-500/10 text-violet-200 border-violet-500/40';
+        } elseif ($isSubmitted) {
+            $statusBadgeClasses .= 'bg-emerald-500/10 text-emerald-200 border-emerald-500/40';
+        } else {
+            $statusBadgeClasses .= 'bg-amber-500/10 text-amber-200 border-amber-500/40';
+        }
         $periodLabelValue = $periodLabel ?? '—';
         $periodHeaderLabel = $periodLabelValue === '—' ? 'No active period' : $periodLabelValue;
 
@@ -104,7 +111,7 @@
                     </a>
                 </div>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-slate-200">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-sm text-slate-200">
                 <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Rating Period</p>
                     <p class="mt-1 font-semibold">{{ $periodLabelValue }}</p>
@@ -113,9 +120,17 @@
                     <p class="text-[11px] uppercase text-slate-500">Status</p>
                     <p class="mt-1 font-semibold">System-generated, read-only</p>
                 </div>
-                <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-                    <p class="text-[11px] uppercase text-slate-500">Data Source</p>
-                    <p class="mt-1 font-semibold">SMPOR totals (derived from submitted MPORs)</p>
+                <div class="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3">
+                    <p class="text-[11px] uppercase text-emerald-500/70">Performance Score</p>
+                    <p class="mt-1 text-lg font-bold text-emerald-400">
+                        {{ number_format($computedScore, 2) }}
+                    </p>
+                </div>
+                <div class="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3">
+                    <p class="text-[11px] uppercase text-emerald-500/70">Performance Rating</p>
+                    <p class="mt-1 font-bold text-emerald-400 uppercase tracking-wider">
+                        {{ $computedRating }}
+                    </p>
                 </div>
             </div>
         </div>

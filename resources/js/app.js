@@ -1,5 +1,19 @@
 import './bootstrap';
 
+const showAuthSnackbar = (type, message) => {
+    if (window.PMSnackbar) {
+        window.PMSnackbar.clear();
+        window.PMSnackbar.show({
+            type,
+            message,
+            duration: type === 'error' ? 4500 : 3200,
+        });
+        return;
+    }
+
+    console[type === 'error' ? 'error' : 'log'](message);
+};
+
 // Landing Page
 document.addEventListener('DOMContentLoaded', function() {
 if (!document.getElementById('mainNav')) {
@@ -997,3 +1011,4 @@ adminLoadingButtons.forEach((button) => {
     });
 });
 });
+

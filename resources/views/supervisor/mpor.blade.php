@@ -14,7 +14,7 @@
                 <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Stage II</p>
                 <h1 class="mt-1 text-2xl font-bold text-white md:text-3xl">MPOR List (Supervisor)</h1>
                 <p class="mt-1 text-sm text-slate-400">
-                    Showing submitted/approved/endorsed MPORs for {{ $monthLabel }}.
+                    Showing submitted, approved, and endorsed MPORs for {{ $monthLabel }}.
                 </p>
             </div>
         </div>
@@ -257,6 +257,56 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div id="mporReturnPanel" class="hidden rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4">
+                            <div class="flex items-start justify-between gap-4">
+                                <div>
+                                    <h4 class="text-sm font-semibold text-white">Return MPOR to Employee</h4>
+                                    <p class="mt-1 text-xs text-slate-300">
+                                        Remarks are optional. Once returned, the employee may continue logging ORS tasks and resubmit the MPOR.
+                                    </p>
+                                </div>
+                                <button
+                                    type="button"
+                                    id="mporReturnPanelClose"
+                                    class="rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:bg-slate-800"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+
+                            <form id="mporReturnForm" method="POST" action="" data-action-form class="mt-4 space-y-3">
+                                @csrf
+                                <label class="block text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-slate-400">
+                                    Return Remarks
+                                </label>
+                                <textarea
+                                    id="mporReturnRemarks"
+                                    name="return_remarks"
+                                    rows="3"
+                                    style="background:#0f172a;color:#e5e7eb;"
+                                    class="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-rose-400 focus:ring-0"
+                                    placeholder="Optional reason for returning this MPOR..."
+                                ></textarea>
+
+                                <div class="flex items-center justify-end gap-2">
+                                    <button
+                                        type="button"
+                                        id="mporReturnPanelCancel"
+                                        class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 transition hover:bg-slate-800"
+                                    >
+                                        Keep MPOR
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        class="inline-flex items-center gap-2 rounded-lg border border-rose-500/40 bg-rose-500/10 px-4 py-2 text-sm font-semibold text-rose-200 transition hover:bg-rose-500/20"
+                                    >
+                                        <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-rose-200/40 border-t-rose-100"></span>
+                                        <span data-button-label>Return to Employee</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
 
                     <div class="flex shrink-0 items-center justify-end gap-2 border-t border-slate-800 p-5">
@@ -282,6 +332,16 @@
                                 <span data-button-label>Approve</span>
                             </button>
                         </form>
+                    </template>
+
+                    <template id="tplMporReturnButton">
+                        <button
+                            type="button"
+                            data-open-return-panel
+                            class="inline-flex items-center gap-2 rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs font-semibold text-rose-200 transition hover:bg-rose-500/20"
+                        >
+                            Return
+                        </button>
                     </template>
                 </div>
             </div>
@@ -332,7 +392,14 @@
             const bottomCards = document.getElementById('mporBottomCards');
             const modalActionSlot = document.getElementById('mporModalActionSlot');
             const approveTemplate = document.getElementById('tplMporApproveForm');
+            const returnButtonTemplate = document.getElementById('tplMporReturnButton');
             const approveUrlTpl = @json(route('supervisor.mpor.approve', ['mpor' => '__ID__']));
+            const returnUrlTpl = @json(route('supervisor.mpor.return', ['mpor' => '__ID__']));
+            const returnPanel = document.getElementById('mporReturnPanel');
+            const returnForm = document.getElementById('mporReturnForm');
+            const returnRemarks = document.getElementById('mporReturnRemarks');
+            const returnPanelClose = document.getElementById('mporReturnPanelClose');
+            const returnPanelCancel = document.getElementById('mporReturnPanelCancel');
 
             const elEmployeeName = document.getElementById('mporEmployeeName');
             const elOfficeName = document.getElementById('mporOfficeName');
@@ -470,6 +537,8 @@
                     badgeClass = ['border-emerald-500/30', 'bg-emerald-500/10', 'text-emerald-200'];
                 } else if (statusKey === 'endorsed') {
                     badgeClass = ['border-violet-400/30', 'bg-violet-400/10', 'text-violet-200'];
+                } else if (statusKey === 'returned') {
+                    badgeClass = ['border-rose-500/30', 'bg-rose-500/10', 'text-rose-200'];
                 }
 
                 mporStatusBadge.classList.add(...badgeClass);
@@ -488,22 +557,59 @@
                 }
 
                 modalActionSlot.innerHTML = '';
+                hideReturnPanel();
 
                 const normalizedStatus = String(status || '').toLowerCase();
                 const safeId = String(resolvedId || '').trim();
-                if (!safeId || normalizedStatus !== 'submitted' || !approveTemplate) {
+                if (!safeId || normalizedStatus !== 'submitted') {
                     return;
                 }
 
-                const fragment = approveTemplate.content.cloneNode(true);
-                const form = fragment.querySelector('form[data-action-form]');
-                if (!form) {
-                    return;
+                if (returnButtonTemplate) {
+                    const returnFragment = returnButtonTemplate.content.cloneNode(true);
+                    const returnBtn = returnFragment.querySelector('[data-open-return-panel]');
+                    if (returnBtn) {
+                        returnBtn.addEventListener('click', function () {
+                            showReturnPanel(safeId);
+                        });
+                    }
+                    modalActionSlot.appendChild(returnFragment);
                 }
 
-                form.setAttribute('action', approveUrlTpl.replace('__ID__', encodeURIComponent(safeId)));
-                modalActionSlot.appendChild(fragment);
+                if (approveTemplate) {
+                    const approveFragment = approveTemplate.content.cloneNode(true);
+                    const form = approveFragment.querySelector('form[data-action-form]');
+                    if (form) {
+                        form.setAttribute('action', approveUrlTpl.replace('__ID__', encodeURIComponent(safeId)));
+                        modalActionSlot.appendChild(approveFragment);
+                    }
+                }
+
                 bindActionForms(modalActionSlot);
+            }
+
+            function hideReturnPanel() {
+                if (!returnPanel || !returnForm) {
+                    return;
+                }
+
+                returnPanel.classList.add('hidden');
+                returnForm.setAttribute('action', '');
+                if (returnRemarks) {
+                    returnRemarks.value = '';
+                }
+            }
+
+            function showReturnPanel(mporId) {
+                if (!returnPanel || !returnForm) {
+                    return;
+                }
+
+                returnForm.setAttribute('action', returnUrlTpl.replace('__ID__', encodeURIComponent(String(mporId))));
+                returnPanel.classList.remove('hidden');
+                if (returnRemarks) {
+                    returnRemarks.focus();
+                }
             }
 
             async function loadMporPreview(mporId) {
@@ -551,6 +657,7 @@
                     applyTotals(grandTotals, kpis, meta);
                     renderModalActions(status, resolvedId);
                     setModalStatusBadge(status);
+                    hideReturnPanel();
 
                     loadingBox.classList.add('hidden');
                     headerCards.classList.remove('hidden');
@@ -569,6 +676,14 @@
                     const mporId = button.getAttribute('data-mpor-id');
                     loadMporPreview(mporId);
                 });
+            });
+
+            [returnPanelClose, returnPanelCancel].forEach((button) => {
+                if (!button) {
+                    return;
+                }
+
+                button.addEventListener('click', hideReturnPanel);
             });
         });
     </script>

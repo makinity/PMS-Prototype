@@ -13,6 +13,7 @@ class User extends Authenticatable
 
     protected $fillable = [
         'employee_id',
+        'hms_employee_id',
         'name',
         'email',
         'password',
@@ -36,6 +37,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'is_active' => 'bool',
             'activated_at' => 'datetime',
+            'hms_employee_id' => 'integer',
         ];
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Mail\PmsEmployeeIdIssuedMail;
 use App\Http\Controllers\Controller;
 use App\Models\Office;
 use App\Models\User;
@@ -9,6 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -176,6 +178,31 @@ class UsersController extends Controller
             ->with('success', 'Password reset successfully.')
             ->with('temporary_password', $temporaryPassword)
             ->with('temporary_password_user', $user->email);
+    }
+
+    public function sendEmployeeCode(Request $request, User $user): RedirectResponse
+    {
+        self::ensureAdmin($request);
+
+        if ($this->isAdminAccount($user)) {
+            return back()->with('error', 'Admin accounts cannot be modified in this module.');
+        }
+
+        if (!filter_var($user->email, FILTER_VALIDATE_EMAIL)) {
+            return back()->with('error', 'This user does not have a valid email address.');
+        }
+
+        if (blank($user->employee_id)) {
+            return back()->with('error', 'This user does not have a PMS employee code yet.');
+        }
+
+        Mail::to($user->email)->send(new PmsEmployeeIdIssuedMail(
+            (string) $user->name,
+            (string) $user->employee_id,
+            (string) $user->email,
+        ));
+
+        return back()->with('success', 'Employee code sent to ' . $user->email . '.');
     }
 
     private static function ensureAdmin(Request $request): void
