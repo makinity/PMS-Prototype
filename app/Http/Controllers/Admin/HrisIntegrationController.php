@@ -8,6 +8,7 @@ use App\Services\HmsEmployeeSyncService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class HrisIntegrationController extends Controller
 {
@@ -18,6 +19,10 @@ class HrisIntegrationController extends Controller
     private const SETTING_LAST_TEST_STATUS = 'hms.last_test_status';
     private const SETTING_LAST_TEST_MESSAGE = 'hms.last_test_message';
     private const SETTING_LAST_TEST_COUNT = 'hms.last_test_count';
+    private const SETTING_PMS_API_ENABLED = 'pms_api.enabled';
+    private const SETTING_PMS_API_TOKEN = 'pms_api.token';
+    private const SETTING_PMS_API_TOKEN_GENERATED_AT = 'pms_api.token_generated_at';
+    private const SETTING_PMS_API_TOKEN_REGENERATED_BY = 'pms_api.token_regenerated_by';
 
     public function __construct(
         private readonly HmsEmployeeSyncService $employeeSyncService,
@@ -27,6 +32,8 @@ class HrisIntegrationController extends Controller
     public function index(Request $request)
     {
         $this->ensureAdminAccess($request);
+
+        $this->ensurePmsApiToken($request->user()?->name);
 
         $settings = [
             'base_url' => IntegrationSetting::getValue(self::SETTING_BASE_URL, ''),
@@ -38,9 +45,9 @@ class HrisIntegrationController extends Controller
             'last_test_count' => IntegrationSetting::getValue(self::SETTING_LAST_TEST_COUNT),
         ];
 
-        $sampleEndpoints = $this->buildSampleEndpoints($settings['base_url']);
+        $pmsApi = $this->buildPmsApiDetails();
 
-        return view('admin.hris', compact('settings', 'sampleEndpoints'));
+        return view('admin.hris', compact('settings', 'pmsApi'));
     }
 
     public function update(Request $request): RedirectResponse
@@ -155,18 +162,64 @@ class HrisIntegrationController extends Controller
             ->with('hms_sync_summary', $summary);
     }
 
-    private function buildSampleEndpoints(string $baseUrl): array
+    public function regeneratePmsApiToken(Request $request): RedirectResponse
     {
-        $normalized = rtrim(trim($baseUrl), '/');
-        if ($normalized === '') {
-            return [];
-        }
+        $this->ensureAdminAccess($request);
+
+        $this->generateAndPersistPmsApiToken($request->user()?->name);
+
+        return back()
+            ->with('success', 'PMS API token regenerated. Previously shared credentials are now invalid.')
+            ->with('open_pms_api_modal', true);
+    }
+
+    private function buildPmsApiDetails(): array
+    {
+        $baseUrl = rtrim((string) config('app.url'), '/');
+        $apiBaseUrl = $baseUrl !== '' ? $baseUrl . '/api/pms/v1' : '/api/pms/v1';
 
         return [
-            $normalized . '/offices',
-            $normalized . '/employees?per_page=15&updated_since=' . now()->subDay()->toIso8601String(),
-            $normalized . '/employees/1',
+            'enabled' => IntegrationSetting::getValue(self::SETTING_PMS_API_ENABLED, '1') === '1',
+            'base_url' => $apiBaseUrl,
+            'token' => (string) IntegrationSetting::getValue(self::SETTING_PMS_API_TOKEN, ''),
+            'generated_at' => IntegrationSetting::getValue(self::SETTING_PMS_API_TOKEN_GENERATED_AT),
+            'regenerated_by' => IntegrationSetting::getValue(self::SETTING_PMS_API_TOKEN_REGENERATED_BY),
+            'available_data' => [
+                'Employees',
+                'Offices',
+                'Performance Periods',
+            ],
+            'sample_endpoints' => [
+                $apiBaseUrl . '/employees',
+                $apiBaseUrl . '/offices',
+                $apiBaseUrl . '/performance-periods',
+            ],
         ];
+    }
+
+    private function ensurePmsApiToken(?string $actorName = null): void
+    {
+        $existingToken = trim((string) IntegrationSetting::getValue(self::SETTING_PMS_API_TOKEN, ''));
+        if ($existingToken !== '') {
+            return;
+        }
+
+        $this->generateAndPersistPmsApiToken($actorName);
+    }
+
+    private function generateAndPersistPmsApiToken(?string $actorName = null): string
+    {
+        $token = 'pms_' . Str::lower(bin2hex(random_bytes(32)));
+
+        IntegrationSetting::setValue(self::SETTING_PMS_API_ENABLED, '1');
+        IntegrationSetting::setValue(self::SETTING_PMS_API_TOKEN, $token);
+        IntegrationSetting::setValue(self::SETTING_PMS_API_TOKEN_GENERATED_AT, now()->toDateTimeString());
+        IntegrationSetting::setValue(
+            self::SETTING_PMS_API_TOKEN_REGENERATED_BY,
+            trim((string) ($actorName ?? 'System'))
+        );
+
+        return $token;
     }
 
     private function ensureAdminAccess(Request $request): void

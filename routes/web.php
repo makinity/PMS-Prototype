@@ -437,6 +437,7 @@ Route::prefix('administrator')->middleware('auth')->group(function () {
     Route::post('/HRIS-integration', [HrisIntegrationController::class, 'update'])->name('admin.hris.update');
     Route::post('/HRIS-integration/test', [HrisIntegrationController::class, 'testConnection'])->name('admin.hris.test');
     Route::post('/HRIS-integration/sync', [HrisIntegrationController::class, 'syncEmployees'])->name('admin.hris.sync');
+    Route::post('/HRIS-integration/pms-api/regenerate', [HrisIntegrationController::class, 'regeneratePmsApiToken'])->name('admin.hris.pms-api.regenerate');
 });
 
 /*

@@ -189,7 +189,7 @@
                     @endif
                     <div class="relative">
                         <button type="button" id="manager-user-menu-button" data-dropdown-toggle="manager-user-menu" class="flex items-center gap-3 rounded-full border border-slate-800 bg-slate-900/70 px-2 py-1.5 text-left text-slate-100 shadow-sm transition hover:bg-slate-800">
-                            <span class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 via-blue-600 to-emerald-500 text-xs font-semibold text-white shadow-sm">MG</span>
+                            @include('partials.user-avatar', ['user' => Auth::user()])
                             <span class="hidden sm:block">
                                 <span class="block text-sm font-semibold text-white">Performance Management Team</span>
                                 <span class="block text-xs text-slate-400">PMT</span>

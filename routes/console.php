@@ -19,8 +19,13 @@ Artisan::command('pms:refresh-dev {--keep-evidence : Skip ORS evidence cleanup}'
             $this->components->task('Deleting ORS evidence files', function () use ($evidenceDisk, $evidenceDirectory) {
                 return $evidenceDisk->deleteDirectory($evidenceDirectory);
             });
-        } else {
-            $this->line('ORS evidence folder is already clean.');
+        }
+
+        $photoDirectory = 'profile_photos';
+        if ($evidenceDisk->exists($photoDirectory)) {
+            $this->components->task('Deleting profile photos', function () use ($evidenceDisk, $photoDirectory) {
+                return $evidenceDisk->deleteDirectory($photoDirectory);
+            });
         }
 
         File::ensureDirectoryExists($evidenceRoot);

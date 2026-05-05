@@ -39,11 +39,8 @@
                     <thead class="bg-slate-950/70 text-xs uppercase tracking-[0.14em] text-slate-400">
                         <tr>
                             <th class="px-5 py-3 text-left">Employee</th>
-                            <th class="px-5 py-3 text-left">Office</th>
-                            <th class="px-5 py-3 text-left">Period</th>
                             <th class="px-5 py-3 text-left">Status</th>
                             <th class="px-5 py-3 text-center tabular-nums">Score</th>
-                            <th class="px-5 py-3 text-left">Submitted At</th>
                             <th class="px-5 py-3 text-center">Actions</th>
                         </tr>
                     </thead>
@@ -53,33 +50,38 @@
                                 $statusKey = strtolower((string) ($row['status'] ?? 'draft'));
                                 $statusBadgeClasses = $statusBadgeClassMap[$statusKey] ?? $statusBadgeClassMap['draft'];
                             @endphp
-                            <tr class="bg-slate-900/40">
-                                <td class="px-5 py-3 font-semibold text-slate-100">{{ $row['employee_name'] ?? '--' }}</td>
-                                <td class="px-5 py-3">{{ $row['office_name'] ?? '--' }}</td>
-                                <td class="px-5 py-3">{{ $row['period_label'] ?? $periodLabelSafe }}</td>
-                                <td class="px-5 py-3">
+                            <tr class="bg-slate-900/40 hover:bg-slate-800/30 transition-colors">
+                                <td class="px-5 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <span class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 text-[10px] font-bold text-slate-300">
+                                            {{ collect(explode(' ', $row['employee_name']))->map(fn($n) => mb_substr($n, 0, 1))->join('') }}
+                                        </span>
+                                        <span class="font-semibold text-slate-100">{{ $row['employee_name'] ?? '--' }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-5 py-4">
                                     <span class="{{ $statusBadgeClasses }}">{{ $row['status_label'] ?? 'Draft' }}</span>
                                 </td>
-                                <td class="px-5 py-3 text-center tabular-nums font-bold text-emerald-400">
+                                <td class="px-5 py-4 text-center tabular-nums font-bold text-emerald-400 text-lg">
                                     {{ number_format($row['computed_score'] ?? 0, 2) }}
                                 </td>
-                                <td class="px-5 py-3">{{ $row['submitted_at_label'] ?? '--' }}</td>
-                                <td class="px-5 py-3 text-center">
+                                <td class="px-5 py-4 text-center">
                                     <button type="button"
                                             data-open-submission
                                             data-submission-id="{{ $row['id'] }}"
                                             aria-label="View submission"
-                                            class="inline-flex items-center justify-center rounded-lg border border-slate-700 px-2.5 py-2 text-slate-200 transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/40">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-4 w-4" aria-hidden="true">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1 1 0 010-.644C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178a1 1 0 010 .644C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        </svg>
+                                            class="inline-flex items-center justify-center rounded-lg border border-slate-700 px-3 py-2 text-slate-200 transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/40">
+                                        <i class="fa-regular fa-eye text-sm mr-2"></i>
+                                        <span>View Details</span>
                                     </button>
                                 </td>
                             </tr>
                         @empty
                             <tr class="bg-slate-900/40">
-                                <td colspan="6" class="px-5 py-8 text-center text-sm text-slate-400">No employee submissions found for the active period.</td>
+                                <td colspan="4" class="px-5 py-12 text-center text-sm text-slate-400">
+                                    <i class="fa-solid fa-inbox block text-3xl mb-3 text-slate-600"></i>
+                                    No employee submissions found for the active period.
+                                </td>
                             </tr>
                         @endforelse
                     </tbody>

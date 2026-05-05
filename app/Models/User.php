@@ -57,6 +57,23 @@ class User extends Authenticatable
         return $this->hasMany(OrsEntry::class, 'supervisor_id');
     }
 
+    public function getProfilePhotoUrlAttribute()
+    {
+        return $this->profile_photo_path
+            ? asset('storage/' . $this->profile_photo_path)
+            : null;
+    }
+
+    public function getInitialsAttribute()
+    {
+        $words = explode(' ', $this->name);
+        $initials = '';
+        foreach ($words as $w) {
+            $initials .= mb_substr($w, 0, 1);
+        }
+        return mb_strtoupper(mb_substr($initials, 0, 2));
+    }
+
     public function isSupervisor()
     {
         return $this->role === 'supervisor';

@@ -61,9 +61,9 @@
                     @endif
                     <div class="relative">
                         <button type="button" id="admin-user-menu-button" data-dropdown-toggle="admin-user-menu" class="flex items-center gap-3 rounded-full border border-slate-800 bg-slate-900/70 px-2 py-1.5 text-left text-slate-100 shadow-sm transition hover:bg-slate-800">
-                            <span class="flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold text-white shadow-sm" style="background: linear-gradient(135deg, #7c3aed, #4f46e5, #06b6d4);">SA</span>
+                            @include('partials.user-avatar', ['user' => Auth::user()])
                             <span class="hidden sm:block">
-                                <span class="block text-sm font-semibold text-white">PMS Administrator</span>
+                                <span class="block text-sm font-semibold text-white">{{ Auth::user()->name }}</span>
                                 <span class="block text-xs text-slate-400">System Admin</span>
                             </span>
                             <i class="fa-solid fa-chevron-down hidden text-xs text-slate-500 sm:block"></i>
