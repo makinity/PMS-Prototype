@@ -146,6 +146,8 @@
 
         </div>
     </section>
+    
+    @include('partials.signature-pad-modal')
 
     {{-- ====================================
         DYNAMIC MODALS - ONLY THESE SHOULD EXIST
@@ -212,13 +214,10 @@
                         class="rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800 opacity-50 cursor-not-allowed pointer-events-none">
                         Export Excel
                     </a>
-                    <button type="submit"
-                            data-employee-loading="true"
-                            data-loading-text="Submitting..."
-                            data-submit-uwp-btn
+                    <button type="button"
+                            data-submit-uwp-trigger
                             class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-900/40 transition hover:bg-blue-500">
-                        <span data-button-label>Submit for Approval</span>
-                        <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                        <span>Submit for Approval</span>
                     </button>
                 </div>
             </div>
@@ -370,14 +369,10 @@
                                 class="rounded-xl border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">
                             Close
                         </button>
-                        <button type="submit"
-                                id="workspaceSubmitUwpBtn"
-                                data-employee-loading="true"
-                                data-loading-text="Submitting..."
-                                data-submit-uwp-btn
+                        <button type="button"
+                                id="workspaceSubmitUwpTrigger"
                                 class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-900/40 transition hover:bg-blue-500">
-                            <span data-button-label>Submit for Approval</span>
-                            <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                            <span>Submit for Approval</span>
                         </button>
                     </div>
                 </div>
@@ -567,6 +562,111 @@
     </script>
     @push('scripts')
         <script>
+            // Global triggers
+            document.querySelectorAll('[data-submit-uwp-trigger], #workspaceSubmitUwpTrigger').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const targetId = currentUwpId || (currentPreviewUwp ? currentPreviewUwp.id : null);
+                    if (!targetId) {
+                        showNotification('No UWP selected for submission.', 'error');
+                        return;
+                    }
+                    
+                    // Set the current ID for the signature handler
+                    window.uwpToSubmitId = targetId;
+                    
+                    // Show signature modal
+                    const sigModal = document.getElementById('signature-pad-modal');
+                    if (sigModal) {
+                        sigModal.classList.remove('hidden');
+                        sigModal.classList.add('flex');
+                    }
+                });
+            });
+
+            // Signature Modal Buttons
+            const confirmSigBtn = document.getElementById('signature-pad-confirm');
+            if (confirmSigBtn) {
+                confirmSigBtn.addEventListener('click', async () => {
+                    const signatureData = window.getSignatureData_signature_pad_modal ? window.getSignatureData_signature_pad_modal() : null;
+                    
+                    if (!signatureData) {
+                        showNotification('Please provide your signature before submitting.', 'error');
+                        return;
+                    }
+
+                    const uwpId = window.uwpToSubmitId;
+                    if (!uwpId) return;
+
+                    const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+                    const csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : '';
+
+                    if (!csrfToken) {
+                        showNotification('Security token missing. Please refresh the page.', 'error');
+                        return;
+                    }
+
+                    // Start loading state
+                    confirmSigBtn.disabled = true;
+                    confirmSigBtn.textContent = 'Submitting...';
+
+                    try {
+                        const response = await fetch(window.uwpSubmitBaseUrl.replace('__ID__', uwpId), {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': csrfToken,
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                signature: signatureData
+                            })
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            showNotification(result.message || 'UWP submitted successfully.', 'success');
+                            // Close modals and refresh
+                            document.getElementById('signature-pad-modal').classList.add('hidden');
+                            document.getElementById('uwpPreviewModal').classList.add('hidden');
+                            document.getElementById('uwpWorkspacePreviewModal').classList.add('hidden');
+                            setTimeout(() => window.location.reload(), 1500);
+                        } else {
+                            showNotification(result.error || 'Failed to submit UWP.', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Submission error:', error);
+                        showNotification('An unexpected error occurred during submission.', 'error');
+                    } finally {
+                        confirmSigBtn.disabled = false;
+                        confirmSigBtn.textContent = 'Confirm';
+                    }
+                });
+            }
+
+            // Close handlers for signature modal
+            document.querySelectorAll('[data-signature-close]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const sigModal = document.getElementById('signature-pad-modal');
+                    if (sigModal) sigModal.classList.add('hidden');
+                    if (window.clearSignaturePad_signature_pad_modal) {
+                        window.clearSignaturePad_signature_pad_modal();
+                    }
+                });
+            });
+
+            // Notification helper using PMSnackbar
+            function showNotification(message, type = 'success') {
+                if (window.PMSnackbar) {
+                    window.PMSnackbar.show({
+                        type: type,
+                        message: message
+                    });
+                } else {
+                    alert(message);
+                }
+            }
+
             let currentUwpId = null;
             let selectedUwp = null;
             let currentPreviewUwp = null;
@@ -1224,12 +1324,13 @@
                 statusBadge.textContent = labelStatus(status);
                 statusBadge.className = `ml-1 inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${previewStatusClass(normalizedStatus)}`;
 
-                const submitButton = document.getElementById('workspaceSubmitUwpBtn') || document.querySelector('[data-submit-uwp-btn]');
+                const submitButton = document.getElementById('workspaceSubmitUwpTrigger');
                 if (submitButton) {
                     if ((normalizedStatus === 'draft' || normalizedStatus === 'returned') && !isLocked) {
                         submitButton.classList.remove('hidden');
                         submitButton.disabled = false;
-                        submitButton.querySelector('[data-button-label]').textContent = 'Submit for Approval';
+                        const label = submitButton.querySelector('span');
+                        if (label) label.textContent = 'Submit for Approval';
                     } else {
                         submitButton.classList.add('hidden');
                     }
@@ -1259,88 +1360,12 @@
                 renderPreviewModal();
             }
 
-            // ====================================
-            // SUBMIT FOR APPROVAL - FIXED VERSION
-            // ====================================
-            function submitUwpForApproval() {
-                if (!currentUwpId) {
-                    alert('No UWP selected to submit.');
-                    return;
-                }
-
-                const submitButton = document.getElementById('workspaceSubmitUwpBtn') || document.querySelector('[data-submit-uwp-btn]');
-                const buttonLabel = submitButton.querySelector('[data-button-label]');
-                const buttonSpinner = submitButton.querySelector('[data-button-spinner]');
-
-                submitButton.disabled = true;
-                buttonLabel.textContent = 'Submitting...';
-                buttonSpinner.classList.remove('hidden');
-
-                const formData = new FormData();
-                formData.append('_token', document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}');
-
-                const submitUrl = `{{ route('supervisor.uwp.submit', ['id' => '__ID__']) }}`.replace('__ID__', currentUwpId);
-
-                console.log('Submitting to:', submitUrl);
-                console.log('UWP ID:', currentUwpId);
-
-                fetch(submitUrl, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}',
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: formData
-                })
-                .then(response => {
-                    console.log('Response status:', response.status);
-
-                    return response.json().then(data => {
-                        if (!response.ok) {
-                            throw new Error(data.error || data.message || `Server error: ${response.status}`);
-                        }
-                        return data;
-                    });
-                })
-                .then(data => {
-                    console.log('Success response:', data);
-
-                    if (data.success) {
-                        const submittedId = currentUwpId;
-
-                        const statusBadge = document.getElementById('workspaceModalStatus');
-                        if (statusBadge) {
-                            statusBadge.textContent = 'Submitted';
-                            statusBadge.className = 'ml-1 inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold border-blue-500/30 bg-blue-500/10 text-blue-300';
-                        }
-
-                        submitButton.classList.add('hidden');
-
-                        setTimeout(() => {
-                            updateListRowAfterSubmit(submittedId);
-                            closeModal('uwpWorkspacePreviewModal');
-                        }, 600);
-                    } else {
-                        throw new Error(data.error || 'Failed to submit UWP');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error submitting UWP:', error);
-                    alert(error.message || 'Error submitting UWP. Please try again.');
-
-                    resetSubmitButton();
-                });
-            }
-
             function resetSubmitButton() {
-                const submitButton = document.getElementById('workspaceSubmitUwpBtn') || document.querySelector('[data-submit-uwp-btn]');
+                const submitButton = document.getElementById('workspaceSubmitUwpTrigger');
                 if (submitButton) {
                     submitButton.disabled = false;
-                    const buttonLabel = submitButton.querySelector('[data-button-label]');
-                    const buttonSpinner = submitButton.querySelector('[data-button-spinner]');
-                    if (buttonLabel) buttonLabel.textContent = 'Submit for Approval';
-                    if (buttonSpinner) buttonSpinner.classList.add('hidden');
+                    const label = submitButton.querySelector('span');
+                    if (label) label.textContent = 'Submit for Approval';
                 }
             }
 
@@ -1687,15 +1712,6 @@
             // INITIALIZATION
             // ====================================
             document.addEventListener('DOMContentLoaded', function() {
-                const submitButton = document.getElementById('workspaceSubmitUwpBtn') || document.querySelector('[data-submit-uwp-btn]');
-                if (submitButton) {
-                    submitButton.replaceWith(submitButton.cloneNode(true));
-                    const newSubmitButton = document.getElementById('workspaceSubmitUwpBtn') || document.querySelector('[data-submit-uwp-btn]');
-                    newSubmitButton.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        submitUwpForApproval();
-                    });
-                }
 
                 const deleteForm = document.getElementById('delete-uwp-form');
                 if (deleteForm) {

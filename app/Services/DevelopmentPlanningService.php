@@ -41,6 +41,27 @@ class DevelopmentPlanningService
         return $this->buildCandidateRows($ipcrs, $plans);
     }
 
+    public function getPersistedDevelopmentPlans(?PerformancePeriod $period): Collection
+    {
+        $query = DevelopmentPlan::query()
+            ->with([
+                'employee.office:id,name',
+                'office.head:id,name',
+                'performancePeriod:id,name',
+                'creator:id,name',
+                'updater:id,name',
+            ])
+            ->orderByDesc('performance_period_id')
+            ->orderBy('status')
+            ->orderBy('employee_id');
+
+        if ($period) {
+            $query->where('performance_period_id', $period->id);
+        }
+
+        return $this->mapPersistedDevelopmentPlans($query->get());
+    }
+
     public function buildCandidateRows(Collection $ipcrs, Collection $plans): Collection
     {
         return $ipcrs
@@ -90,5 +111,35 @@ class DevelopmentPlanningService
             DevelopmentPlan::STATUS_SUBMITTED_TO_LD => 'Submitted to L&D',
             default => 'No Draft Yet',
         };
+    }
+
+    public function mapPersistedDevelopmentPlans(Collection $plans): Collection
+    {
+        return $plans
+            ->map(function (DevelopmentPlan $plan) {
+                return [
+                    'id' => (int) $plan->id,
+                    'ipcr_id' => (int) $plan->ipcr_id,
+                    'employee_id' => (int) $plan->employee_id,
+                    'office_id' => (int) $plan->office_id,
+                    'performance_period_id' => (int) $plan->performance_period_id,
+                    'performance_period_name' => (string) ($plan->performancePeriod?->name ?? '--'),
+                    'employee_name' => (string) ($plan->employee?->name ?? '--'),
+                    'office_name' => (string) ($plan->employee?->office?->name ?? $plan->office?->name ?? '--'),
+                    'department_head_name' => (string) ($plan->office?->head?->name ?? '--'),
+                    'designation' => (string) ($plan->employee?->position ?? '--'),
+                    'source_score' => round((float) $plan->source_score, 2),
+                    'source_rating' => (string) $plan->source_rating,
+                    'status' => (string) $plan->status,
+                    'status_label' => $this->formatStatusLabel((string) $plan->status),
+                    'pmt_remarks' => (string) ($plan->pmt_remarks ?? ''),
+                    'created_by_name' => (string) ($plan->creator?->name ?? '--'),
+                    'updated_by_name' => (string) ($plan->updater?->name ?? '--'),
+                    'submitted_to_ld_at' => optional($plan->submitted_to_ld_at)?->toISOString(),
+                    'created_at' => optional($plan->created_at)?->toISOString(),
+                    'updated_at' => optional($plan->updated_at)?->toISOString(),
+                ];
+            })
+            ->values();
     }
 }

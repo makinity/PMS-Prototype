@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\DeptHead;
 
 use App\Http\Controllers\Controller;
+use App\Models\UwpConsolidationSignature;
 use Illuminate\Http\Request;
 use App\Models\Opcr;
 use App\Models\PerformancePeriod;
 use App\Models\UnitWorkPlan;
+use App\Services\UwpConsolidationSignatureService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -14,6 +16,11 @@ use Illuminate\Validation\ValidationException;
 
 class UnitWorkPlanController extends Controller
 {
+    public function __construct(
+        private readonly UwpConsolidationSignatureService $signatureService,
+    ) {
+    }
+
     public function index(Request $request)
     {
         $user = Auth::user();
@@ -107,6 +114,22 @@ class UnitWorkPlanController extends Controller
                 'unit_work_plan_id' => ['required', 'exists:unit_work_plans,id'],
                 'action' => ['required', Rule::in(['endorse', 'return'])],
                 'remarks' => ['nullable', 'string'],
+                'signature' => [
+                    Rule::requiredIf(fn () => $request->input('action') === 'endorse'),
+                    'nullable',
+                    'string',
+                    function (string $attribute, mixed $value, \Closure $fail) use ($request) {
+                        if ($request->input('action') !== 'endorse') {
+                            return;
+                        }
+
+                        try {
+                            $this->signatureService->decodeSignatureDataUrl((string) $value);
+                        } catch (\InvalidArgumentException $e) {
+                            $fail($e->getMessage());
+                        }
+                    },
+                ],
             ])->validate();
         } catch (ValidationException $e) {
             if ($expectsJson) {
@@ -171,10 +194,60 @@ class UnitWorkPlanController extends Controller
             return back()->with('error', 'Remarks are required when returning a Unit Work Plan.');
         }
 
+        $signedArtifact = [];
+        $reviewedUwp = $uwp;
+
         try {
-            DB::transaction(function () use ($uwp, $validated, $user) {
+            DB::transaction(function () use ($request, $uwp, $validated, $user, &$signedArtifact, &$reviewedUwp) {
                 if ($validated['action'] === 'endorse') {
-                    $this->consolidateSubmittedUwpsFor($uwp, $user);
+                    $lockedUwp = UnitWorkPlan::query()
+                        ->with($this->signatureRelations())
+                        ->whereKey($uwp->id)
+                        ->lockForUpdate()
+                        ->firstOrFail();
+
+                    if (!$lockedUwp->office || !$lockedUwp->office->head || (int) $lockedUwp->office->head->id !== (int) $user->id) {
+                        throw ValidationException::withMessages([
+                            'unit_work_plan_id' => 'You are not authorized to review this Unit Work Plan.',
+                        ]);
+                    }
+
+                    if ($lockedUwp->status !== UnitWorkPlan::STATUS_SUBMITTED) {
+                        throw ValidationException::withMessages([
+                            'unit_work_plan_id' => 'Only submitted Unit Work Plans can be endorsed.',
+                        ]);
+                    }
+
+                    $signedArtifact = $this->signatureService->createSignedArtifact(
+                        $lockedUwp,
+                        (string) ($validated['signature'] ?? '')
+                    );
+
+                    $signatureRecord = UwpConsolidationSignature::query()->create([
+                        'unit_work_plan_id' => $lockedUwp->id,
+                        'opcr_id' => null,
+                        'signed_by' => $user->id,
+                        'signature_image_path' => $signedArtifact['signature_image_path'],
+                        'signed_excel_path' => $signedArtifact['signed_excel_path'],
+                        'signature_hash' => $signedArtifact['signature_hash'],
+                        'signed_at' => now(),
+                        'metadata' => [
+                            'office_id' => $lockedUwp->office_id,
+                            'performance_period_id' => $lockedUwp->performance_period_id,
+                            'ip_address' => $request->ip(),
+                            'user_agent' => $request->userAgent(),
+                        ],
+                    ]);
+ 
+                    $opcr = $this->consolidateSubmittedUwpsFor($lockedUwp, $user);
+
+                    $signatureRecord->forceFill([
+                        'opcr_id' => $opcr->id,
+                    ])->save();
+
+                    $lockedUwp->refresh();
+                    $reviewedUwp = $lockedUwp;
+                    return;
                 }
 
                 if ($validated['action'] === 'return') {
@@ -194,6 +267,9 @@ class UnitWorkPlanController extends Controller
                 }
             });
         } catch (ValidationException $e) {
+            if (!empty($signedArtifact)) {
+                $this->signatureService->cleanupArtifact($signedArtifact);
+            }
             if ($expectsJson) {
                 return response()->json([
                     'success' => false,
@@ -203,6 +279,9 @@ class UnitWorkPlanController extends Controller
 
             throw $e;
         } catch (\Throwable $e) {
+            if (!empty($signedArtifact)) {
+                $this->signatureService->cleanupArtifact($signedArtifact);
+            }
             if ($expectsJson) {
                 return response()->json([
                     'success' => false,
@@ -216,12 +295,12 @@ class UnitWorkPlanController extends Controller
         if ($expectsJson) {
             return response()->json([
                 'success' => true,
-                'uwp_id' => (int) $uwp->id,
-                'status' => $validated['action'] === 'endorse' ? UnitWorkPlan::STATUS_CONSOLIDATED : (string) $uwp->status,
-                'endorsed_at' => optional($uwp->endorsed_at)->toDateTimeString(),
-                'returned_at' => optional($uwp->returned_at)->toDateTimeString(),
-                'returned_by_role' => $uwp->returned_by_role,
-                'return_remarks' => $uwp->return_remarks,
+                'uwp_id' => (int) $reviewedUwp->id,
+                'status' => $validated['action'] === 'endorse' ? UnitWorkPlan::STATUS_CONSOLIDATED : (string) $reviewedUwp->status,
+                'endorsed_at' => optional($reviewedUwp->endorsed_at)->toDateTimeString(),
+                'returned_at' => optional($reviewedUwp->returned_at)->toDateTimeString(),
+                'returned_by_role' => $reviewedUwp->returned_by_role,
+                'return_remarks' => $reviewedUwp->return_remarks,
             ]);
         }
 
@@ -329,7 +408,7 @@ class UnitWorkPlanController extends Controller
             if ($expectsJson) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Unable to return Unit Work Plan.',
+                    'message' => 'Unable to review Unit Work Plan.',
                 ], 500);
             }
 
@@ -448,5 +527,28 @@ class UnitWorkPlanController extends Controller
             ]);
 
         return $opcr;
+    }
+
+    private function signatureRelations(): array
+    {
+        return [
+            'office.head',
+            'performancePeriod',
+            'creator',
+            'uwpFunctions' => function ($q) {
+                $q->orderBy('sort_order')
+                    ->with([
+                        'mfos' => function ($mq) {
+                            $mq->orderBy('sort_order')
+                                ->with([
+                                    'successIndicators' => function ($iq) {
+                                        $iq->orderBy('sort_order')
+                                            ->with(['qetStandards']);
+                                    },
+                                ]);
+                        },
+                    ]);
+            },
+        ];
     }
 }

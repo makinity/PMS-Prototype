@@ -10,4 +10,6 @@ Route::prefix('pms/v1')
         Route::get('/employees', [PmsProviderController::class, 'employees']);
         Route::get('/offices', [PmsProviderController::class, 'offices']);
         Route::get('/performance-periods', [PmsProviderController::class, 'performancePeriods']);
+        Route::get('/top-performers', [PmsProviderController::class, 'topPerformers']);
+        Route::get('/idp-list', [PmsProviderController::class, 'idpList']);
     });

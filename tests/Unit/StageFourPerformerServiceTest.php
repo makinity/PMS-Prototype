@@ -27,7 +27,7 @@ class StageFourPerformerServiceTest extends TestCase
     {
         $period = new PerformancePeriod(['name' => 'Jan - Jun 2026']);
         $office = new Office(['name' => 'HRMO']);
-        $employee = new User(['name' => 'Alice Employee']);
+        $employee = new User(['name' => 'Alice Marie Employee Jr', 'position' => 'Administrative Aide']);
         $employee->setRelation('office', $office);
 
         $ipcr = new Ipcr([
@@ -43,11 +43,17 @@ class StageFourPerformerServiceTest extends TestCase
         $row = $this->service->resolveEmployeeRow($ipcr);
 
         $this->assertSame(10, $row['id']);
-        $this->assertSame('Alice Employee', $row['employee_name']);
+        $this->assertSame('Alice Marie Employee Jr', $row['employee_name']);
+        $this->assertSame('Employee', $row['surname']);
+        $this->assertSame('Alice', $row['given_name']);
+        $this->assertSame('Marie', $row['middle_name']);
+        $this->assertSame('Jr', $row['name_extension']);
+        $this->assertSame('Administrative Aide', $row['designation']);
         $this->assertSame('HRMO', $row['office_name']);
         $this->assertSame('Jan - Jun 2026', $row['period_name']);
         $this->assertSame(4.70, $row['official_score']);
         $this->assertSame('Outstanding', $row['official_rating']);
+        $this->assertSame('Released Stage III result', $row['remarks']);
     }
 
     public function test_it_prefers_adjusted_employee_values_when_present(): void

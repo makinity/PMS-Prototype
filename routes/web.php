@@ -374,6 +374,8 @@ Route::prefix('pmt')->middleware('auth')->group(function () {
 
     Route::get('/top-performers', [\App\Http\Controllers\Pmt\TopPerformersController::class, 'index'])
         ->name('pmt.top-performers.index');
+    Route::get('/top-performers/preview-pdf', [\App\Http\Controllers\Pmt\TopPerformersController::class, 'previewPdf'])
+        ->name('pmt.top-performers.preview-pdf');
 
     Route::prefix('development-planning')->name('pmt.development-planning.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Pmt\DevelopmentPlanningController::class, 'index'])->name('index');

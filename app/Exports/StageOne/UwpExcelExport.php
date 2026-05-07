@@ -14,6 +14,7 @@ use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class UwpExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTitle, WithEvents
@@ -92,6 +93,7 @@ class UwpExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTit
 
     private function populateTemplate(Worksheet $sheet): void
     {
+        $this->setupPage($sheet);
         $this->writeManualHeader($sheet);
         $this->writeTableHeader($sheet);
 
@@ -117,6 +119,15 @@ class UwpExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTit
 
         // - Section label rows: keep bottom separator line
         $this->applySectionRowBorders($sheet, self::TABLE_START_ROW, $lastRow);
+        $this->writeFooterBlock($sheet, $lastRow + 2);
+    }
+
+    private function setupPage(Worksheet $sheet): void
+    {
+        $sheet->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_LEGAL);
+        $sheet->getPageSetup()->setOrientation(PageSetup::ORIENTATION_LANDSCAPE);
+        $sheet->getPageSetup()->setFitToWidth(1);
+        $sheet->getPageSetup()->setFitToHeight(0);
     }
 
     private function writeManualHeader(Worksheet $sheet): void
@@ -397,6 +408,72 @@ class UwpExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTit
         return $sections;
     }
 
+    private function writeFooterBlock(Worksheet $sheet, int $startRow): void
+    {
+        $row = $startRow;
+
+        foreach ($this->buildSectionDefinitions() as $section) {
+            $label = trim((string) ($section['label'] ?? ''));
+            $label = preg_replace('/^[A-Z]\.\s*/', '', $label ?? '') ?: 'FUNCTIONS';
+
+            $sheet->mergeCells("A{$row}:F{$row}");
+            $sheet->mergeCells("G{$row}:H{$row}");
+            $sheet->setCellValue("A{$row}", "Weighted Average Rating for {$label}");
+            $sheet->getStyle("A{$row}:H{$row}")->getAlignment()
+                ->setHorizontal(Alignment::HORIZONTAL_RIGHT)
+                ->setVertical(Alignment::VERTICAL_CENTER);
+            $sheet->getStyle("A{$row}:H{$row}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+            $row++;
+        }
+
+        foreach (['OVERALL RATING', 'ADJECTIVAL RATING'] as $label) {
+            $sheet->mergeCells("A{$row}:F{$row}");
+            $sheet->mergeCells("G{$row}:H{$row}");
+            $sheet->setCellValue("A{$row}", $label);
+            $sheet->getStyle("A{$row}:H{$row}")->getFont()->setBold(true);
+            $sheet->getStyle("A{$row}:H{$row}")->getAlignment()
+                ->setHorizontal(Alignment::HORIZONTAL_RIGHT)
+                ->setVertical(Alignment::VERTICAL_CENTER);
+            $sheet->getStyle("A{$row}:H{$row}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+            $row++;
+        }
+
+        $labelRow = $row;
+        $boxStartRow = $row + 1;
+        $boxEndRow = $row + 3;
+        $titleRow = $row + 4;
+
+        foreach ($this->resolveSignatureBlocks() as $block) {
+            [$from, $to] = $block['range'];
+
+            $sheet->mergeCells("{$from}{$labelRow}:{$to}{$labelRow}");
+            $sheet->setCellValue("{$from}{$labelRow}", $block['label']);
+            $sheet->getStyle("{$from}{$labelRow}:{$to}{$labelRow}")->getAlignment()
+                ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+                ->setVertical(Alignment::VERTICAL_CENTER);
+            $sheet->getStyle("{$from}{$labelRow}:{$to}{$labelRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+
+            $sheet->mergeCells("{$from}{$boxStartRow}:{$to}{$boxEndRow}");
+            $sheet->setCellValue("{$from}{$boxStartRow}", $block['name']);
+            $sheet->getStyle("{$from}{$boxStartRow}:{$to}{$boxEndRow}")->getAlignment()
+                ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+                ->setVertical(Alignment::VERTICAL_CENTER)
+                ->setWrapText(true);
+            $sheet->getStyle("{$from}{$boxStartRow}:{$to}{$boxEndRow}")->getFill()
+                ->setFillType(Fill::FILL_SOLID)
+                ->getStartColor()
+                ->setRGB('D9D9D9');
+            $sheet->getStyle("{$from}{$boxStartRow}:{$to}{$boxEndRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+
+            $sheet->mergeCells("{$from}{$titleRow}:{$to}{$titleRow}");
+            $sheet->setCellValue("{$from}{$titleRow}", $block['title']);
+            $sheet->getStyle("{$from}{$titleRow}:{$to}{$titleRow}")->getAlignment()
+                ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+                ->setVertical(Alignment::VERTICAL_CENTER);
+            $sheet->getStyle("{$from}{$titleRow}:{$to}{$titleRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        }
+    }
+
     private function buildSectionLabel(string $type, int $index): string
     {
         $prefix = chr(65 + $index);
@@ -428,5 +505,41 @@ class UwpExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTit
         }
 
         return 'custom';
+    }
+
+    private function resolveSignatureBlocks(): array
+    {
+        return [
+            [
+                'label' => 'Prepared by:',
+                'range' => ['A', 'B'],
+                'name' => (string) ($this->uwp['supervisor'] ?? ''),
+                'title' => 'Supervisor',
+            ],
+            [
+                'label' => 'Discussed with and Agreed by:',
+                'range' => ['C', 'D'],
+                'name' => (string) ($this->uwp['dept_head'] ?? ''),
+                'title' => 'PGDH',
+            ],
+            [
+                'label' => 'Date',
+                'range' => ['E', 'E'],
+                'name' => '',
+                'title' => '',
+            ],
+            [
+                'label' => 'Assessed by:',
+                'range' => ['F', 'G'],
+                'name' => (string) ($this->uwp['pmt_chairperson'] ?? ''),
+                'title' => 'PMT Chairperson',
+            ],
+            [
+                'label' => 'Final Rating Approved by:',
+                'range' => ['H', 'H'],
+                'name' => (string) ($this->uwp['governor'] ?? ''),
+                'title' => 'Governor',
+            ],
+        ];
     }
 }

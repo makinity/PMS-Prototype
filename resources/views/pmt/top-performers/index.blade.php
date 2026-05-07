@@ -6,11 +6,19 @@
             <div>
                 <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">Stage IV</p>
                 <h1 class="mt-1 text-2xl font-bold text-white">Top Performers</h1>
-                <p class="text-sm text-slate-400">Identification-only view for released top performers from Stage III results.</p>
+                <p class="text-sm text-slate-400">Released top-performing employees and offices from Stage III results.</p>
             </div>
-            <div class="rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3 text-right">
-                <p class="text-[11px] uppercase tracking-[0.24em] text-slate-500">Active Period</p>
-                <p class="mt-1 text-sm font-semibold text-white">{{ $activePeriod?->name ?? '--' }}</p>
+            <div class="flex items-center gap-3">
+                <a href="{{ route('pmt.top-performers.preview-pdf') }}"
+                   target="_blank"
+                   class="inline-flex items-center gap-2 rounded-xl border border-rose-500/25 bg-rose-500/10 px-4 py-3 text-sm font-semibold text-rose-200 transition hover:bg-rose-500/20">
+                    <i class="fa-solid fa-file-pdf text-xs"></i>
+                    <span>Preview PDF</span>
+                </a>
+                <div class="rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3 text-right">
+                    <p class="text-[11px] uppercase tracking-[0.24em] text-slate-500">Active Period</p>
+                    <p class="mt-1 text-sm font-semibold text-white">{{ $activePeriod?->name ?? '--' }}</p>
+                </div>
             </div>
         </div>
 
@@ -52,29 +60,43 @@
                 <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
                     <div class="border-b border-slate-800 px-5 py-4">
                         <h3 class="text-lg font-semibold text-white">Employees</h3>
-                        <p class="mt-1 text-sm text-slate-400">Released employee IPCR results classified as Outstanding or Very Satisfactory.</p>
+                        <p class="mt-1 text-sm text-slate-400">Released employee IPCR results classified as Outstanding or Very Satisfactory, arranged for Stage IV reporting.</p>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="min-w-full text-sm text-slate-200">
                             <thead class="bg-slate-950/60 text-xs uppercase tracking-[0.22em] text-slate-500">
                                 <tr>
-                                    <th class="px-5 py-4 text-left">Employee</th>
-                                    <th class="px-5 py-4 text-left">Office</th>
-                                    <th class="px-5 py-4 text-center">Official Score</th>
-                                    <th class="px-5 py-4 text-right">Action</th>
+                                    <th class="px-4 py-4 text-center">Rank</th>
+                                    <th class="px-4 py-4 text-left">Surname</th>
+                                    <th class="px-4 py-4 text-left">Given Name</th>
+                                    <th class="px-4 py-4 text-left">Middle Name</th>
+                                    <th class="px-4 py-4 text-center">Ext.</th>
+                                    <th class="px-4 py-4 text-left">Designation</th>
+                                    <th class="px-4 py-4 text-left">Office</th>
+                                    <th class="px-4 py-4 text-center">Numerical</th>
+                                    <th class="px-4 py-4 text-center">Adjective</th>
+                                    <th class="px-4 py-4 text-left">Remarks</th>
+                                    <th class="px-4 py-4 text-right">Action</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-800">
                                 @forelse ($topEmployees as $row)
                                     <tr class="hover:bg-slate-950/40">
-                                        <td class="px-5 py-4 font-medium text-white">{{ $row['employee_name'] }}</td>
-                                        <td class="px-5 py-4 text-slate-300">{{ $row['office_name'] }}</td>
-                                        <td class="px-5 py-4 text-center">
+                                        <td class="px-4 py-4 text-center text-slate-300">{{ $loop->iteration }}</td>
+                                        <td class="px-4 py-4 font-medium text-white">{{ $row['surname'] }}</td>
+                                        <td class="px-4 py-4 text-slate-300">{{ $row['given_name'] }}</td>
+                                        <td class="px-4 py-4 text-slate-300">{{ $row['middle_name'] }}</td>
+                                        <td class="px-4 py-4 text-center text-slate-300">{{ $row['name_extension'] }}</td>
+                                        <td class="px-4 py-4 text-slate-300">{{ $row['designation'] }}</td>
+                                        <td class="px-4 py-4 text-slate-300">{{ $row['office_name'] }}</td>
+                                        <td class="px-4 py-4 text-center">
                                             <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-300 border border-emerald-500/20">
                                                 {{ number_format((float) $row['official_score'], 2) }}
                                             </span>
                                         </td>
-                                        <td class="px-5 py-4 text-right">
+                                        <td class="px-4 py-4 text-center text-slate-200">{{ $row['official_rating'] }}</td>
+                                        <td class="px-4 py-4 text-slate-400">{{ $row['remarks'] }}</td>
+                                        <td class="px-4 py-4 text-right">
                                             <button type="button" 
                                                 data-open-details
                                                 data-details='@json($row)'
@@ -85,7 +107,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="px-5 py-10 text-center text-sm text-slate-400">No top employee performers identified for the active period.</td>
+                                        <td colspan="11" class="px-5 py-10 text-center text-sm text-slate-400">No top employee performers identified for the active period.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -104,7 +126,8 @@
                                 <tr>
                                     <th class="px-5 py-4 text-left">Office</th>
                                     <th class="px-5 py-4 text-left">Department Head</th>
-                                    <th class="px-5 py-4 text-center">Official Score</th>
+                                    <th class="px-5 py-4 text-center">Numerical</th>
+                                    <th class="px-5 py-4 text-center">Adjective</th>
                                     <th class="px-5 py-4 text-right">Action</th>
                                 </tr>
                             </thead>
@@ -118,6 +141,7 @@
                                                 {{ number_format((float) $row['official_score'], 2) }}
                                             </span>
                                         </td>
+                                        <td class="px-5 py-4 text-center text-slate-200">{{ $row['official_rating'] }}</td>
                                         <td class="px-5 py-4 text-right">
                                             <button type="button" 
                                                 data-open-details
@@ -129,7 +153,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="px-5 py-10 text-center text-sm text-slate-400">No top office performers identified for the active period.</td>
+                                        <td colspan="5" class="px-5 py-10 text-center text-sm text-slate-400">No top office performers identified for the active period.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -172,6 +196,10 @@
                         <p id="modal-extra-label" class="text-[10px] uppercase tracking-[0.2em] text-slate-500">--</p>
                         <p id="modal-extra-value" class="mt-0.5 text-sm font-medium text-slate-200">--</p>
                     </div>
+                    <div id="modal-remarks-row">
+                        <p class="text-[10px] uppercase tracking-[0.2em] text-slate-500">Remarks</p>
+                        <p id="modal-remarks" class="mt-0.5 text-sm font-medium text-slate-200">--</p>
+                    </div>
                     <div>
                         <p class="text-[10px] uppercase tracking-[0.2em] text-slate-500">Performance Period</p>
                         <p id="modal-period" class="mt-0.5 text-sm font-medium text-slate-200">--</p>
@@ -201,6 +229,7 @@
             const officeEl = document.getElementById('modal-office');
             const extraLabelEl = document.getElementById('modal-extra-label');
             const extraValueEl = document.getElementById('modal-extra-value');
+            const remarksEl = document.getElementById('modal-remarks');
             const periodEl = document.getElementById('modal-period');
             const releasedEl = document.getElementById('modal-released');
 
@@ -213,10 +242,9 @@
                 officeEl.textContent = data.office_name;
                 
                 if (isEmployee) {
-                    extraLabelEl.textContent = 'Office';
-                    extraValueEl.textContent = data.office_name;
-                    // Since office is already shown, maybe show something else or hide
-                    document.getElementById('modal-office-row').classList.add('hidden');
+                    extraLabelEl.textContent = 'Designation';
+                    extraValueEl.textContent = data.designation || '--';
+                    document.getElementById('modal-office-row').classList.remove('hidden');
                 } else {
                     extraLabelEl.textContent = 'Department Head';
                     extraValueEl.textContent = data.department_head_name;
@@ -224,6 +252,7 @@
                 }
 
                 periodEl.textContent = data.period_name;
+                remarksEl.textContent = data.remarks || '--';
                 releasedEl.textContent = data.released_at ? new Date(data.released_at).toLocaleString('en-US', {
                     month: 'short',
                     day: 'numeric',

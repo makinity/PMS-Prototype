@@ -188,11 +188,15 @@ class HrisIntegrationController extends Controller
                 'Employees',
                 'Offices',
                 'Performance Periods',
+                'Top Performers',
+                'IDP List',
             ],
             'sample_endpoints' => [
                 $apiBaseUrl . '/employees',
                 $apiBaseUrl . '/offices',
                 $apiBaseUrl . '/performance-periods',
+                $apiBaseUrl . '/top-performers',
+                $apiBaseUrl . '/idp-list',
             ],
         ];
     }

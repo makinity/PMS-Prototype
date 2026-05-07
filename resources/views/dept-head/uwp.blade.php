@@ -597,6 +597,7 @@
                 @csrf
                 <input type="hidden" name="unit_work_plan_id" id="uwp-workspace-uwp-id" value="">
                 <input type="hidden" name="action" id="uwp-workspace-action" value="">
+                <input type="hidden" name="signature" id="uwp-workspace-signature" value="">
                 <div class="grid shrink-0 gap-3 border-t border-slate-800 px-5 py-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
                     <div>
                         <label class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Return Remarks</label>
@@ -616,6 +617,17 @@
     </div>
 </div>
 
+@include('partials.signature-pad-modal', [
+    'modalId' => 'uwp-signature-modal',
+    'canvasId' => 'uwp-signature-canvas',
+    'clearButtonId' => 'uwp-signature-clear',
+    'confirmButtonId' => 'uwp-signature-confirm',
+    'cancelSelector' => 'data-signature-close',
+    'title' => 'Department Head Signature Required',
+    'message' => 'Please sign before consolidating this UWP into OPCR.',
+    'confirmText' => 'Confirm and Consolidate',
+])
+
 @push('scripts')
 <script>
     const standardRatings = [5, 4, 3, 2, 1];
@@ -631,6 +643,9 @@
     let selectedWorkspaceIndicatorIndex = 0;
     let activeWorkspaceTab = 'overview';
     let activeWorkspaceFunctionTab = 'all';
+    let signaturePadContext = null;
+    let signaturePadHasInk = false;
+    let signaturePadPointerActive = false;
 
     function createEmptyStandardsRow() {
         return { Q: [], E: [], T: [] };
@@ -720,6 +735,26 @@
         cleanupFlowbiteBackdrop();
     }
 
+    function openSignatureModal() {
+        const modal = document.getElementById('uwp-signature-modal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+    }
+
+    function closeSignatureModal() {
+        const modal = document.getElementById('uwp-signature-modal');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+        if (window.clearSignaturePad_uwp_signature_modal) {
+            window.clearSignaturePad_uwp_signature_modal();
+        }
+        clearFlowbiteBackdrops();
+    }
+
     function closeReviewModalSafely() {
         const modal = document.getElementById('uwp-review-workspace-modal');
         if (modal) {
@@ -728,6 +763,136 @@
         }
 
         clearFlowbiteBackdrops();
+    }
+
+    function initSignatureModal() {
+        const modal = document.getElementById('uwp-signature-modal');
+        const confirmButton = document.getElementById('uwp-signature-confirm');
+        if (!modal || !confirmButton) return;
+
+        modal.querySelectorAll('[data-signature-close]').forEach((button) => {
+            button.addEventListener('click', closeSignatureModal);
+        });
+
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                closeSignatureModal();
+            }
+        });
+
+        confirmButton.addEventListener('click', async () => {
+            const signatureDataUrl = window.getSignatureData_uwp_signature_modal ? window.getSignatureData_uwp_signature_modal() : null;
+            if (!signatureDataUrl) {
+                window.PMSnackbar?.show({
+                    type: 'error',
+                    message: 'Please provide a signature first.',
+                });
+                return;
+            }
+            const form = document.getElementById('uwp-workspace-review-form');
+            const btnEndorse = document.getElementById('btn-endorse-uwp-workspace');
+            const btnReturn = document.getElementById('btn-return-uwp-workspace');
+
+            if (!form || !btnEndorse) return;
+
+            const url = String(form.dataset.endorseAction || '').trim();
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ||
+                              form.querySelector('input[name="_token"]')?.value || '';
+            const uwpIdValue = String(selectedUwp?.id || document.getElementById('uwp-workspace-uwp-id')?.value || '').trim();
+
+            setButtonLoading(btnEndorse, true);
+            confirmButton.disabled = true;
+            confirmButton.classList.add('opacity-80', 'cursor-not-allowed');
+
+            try {
+                const fd = new FormData();
+                fd.append('_token', csrfToken);
+                fd.append('unit_work_plan_id', uwpIdValue);
+                fd.append('action', 'endorse');
+                fd.append('signature', signatureDataUrl);
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: fd,
+                });
+
+                let data = {};
+                try {
+                    data = await response.json();
+                } catch (_) {
+                    data = {};
+                }
+
+                if (!response.ok || !data?.success) {
+                    throw new Error(data?.message || data?.error || 'Unable to endorse UWP');
+                }
+
+                const endorsedAt = data?.endorsed_at || new Date().toISOString();
+                const endorsedStatus = data?.status || 'consolidated';
+                const uwpId = Number(selectedUwp?.id || data?.uwp_id || uwpIdValue || 0);
+
+                if (!selectedUwp) selectedUwp = {};
+                selectedUwp.id = selectedUwp.id || uwpId;
+                selectedUwp.status = endorsedStatus;
+                selectedUwp.endorsed_at = endorsedAt;
+                selectedUwp.return_remarks = '';
+                selectedUwp.returned_at = null;
+                selectedUwp.returned_by_role = null;
+
+                hydrateReviewModal(selectedUwp);
+                updateDeptHeadListRow(selectedUwp.id || uwpId, endorsedStatus, {
+                    return_remarks: '',
+                    returned_at: null,
+                    returned_by_role: null,
+                });
+
+                const row = document.querySelector(`[data-uwp-row-id="${uwpId}"]`) || document.querySelector(`[data-uwp-row="${uwpId}"]`);
+                const reviewBtn = row?.querySelector(`[data-uwp-id="${uwpId}"][data-uwp]`) || row?.querySelector('[data-review-btn][data-uwp]');
+                if (reviewBtn) {
+                    let nextPayload = {};
+                    try {
+                        nextPayload = JSON.parse(reviewBtn.getAttribute('data-uwp') || '{}');
+                    } catch (_) {
+                        nextPayload = {};
+                    }
+                    nextPayload.status = normalizeStatusKey(endorsedStatus);
+                    nextPayload.endorsed_at = endorsedAt;
+                    nextPayload.return_remarks = '';
+                    nextPayload.returned_at = null;
+                    nextPayload.returned_by_role = null;
+                    reviewBtn.setAttribute('data-uwp', JSON.stringify(nextPayload));
+                }
+
+                closeSignatureModal();
+                closeReviewModalSafely();
+
+                window.PMSnackbar?.show({
+                    type: 'success',
+                    message: 'UWP consolidated into OPCR.',
+                });
+            } catch (error) {
+                window.PMSnackbar?.show({
+                    type: 'error',
+                    message: error?.message || 'Unable to endorse UWP right now. Please try again.',
+                });
+            } finally {
+                setButtonLoading(btnEndorse, false);
+                confirmButton.disabled = false;
+                confirmButton.classList.remove('opacity-80', 'cursor-not-allowed');
+                clearFlowbiteBackdrops();
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            if (!modal.classList.contains('hidden')) {
+                resizeSignatureCanvas();
+            }
+        });
     }
 
     function openStandardsViewer(mfoTitle, indicatorText) {
@@ -1568,8 +1733,7 @@
         const remarks = document.getElementById('uwp-workspace-remarks');
         const form = document.getElementById('uwp-workspace-review-form');
 
-        btnEndorse?.addEventListener('click', async () => {
-            if (!form) return;
+        btnEndorse?.addEventListener('click', () => {
             if (btnEndorse.disabled) return;
 
             const url = String(form.dataset.endorseAction || '').trim();
@@ -1581,104 +1745,9 @@
                 return;
             }
 
-            setButtonLoading(btnEndorse, true);
-            if (btnReturn) {
-                btnReturn.disabled = true;
-                btnReturn.classList.add('opacity-80', 'cursor-not-allowed');
-            }
-
-            try {
-                const csrfToken =
-                    document.querySelector('meta[name="csrf-token"]')?.content ||
-                    form.querySelector('input[name="_token"]')?.value ||
-                    '';
-                const uwpIdValue = String(selectedUwp?.id || document.getElementById('uwp-workspace-uwp-id')?.value || '').trim();
-
-                const fd = new FormData();
-                fd.append('_token', csrfToken);
-                fd.append('unit_work_plan_id', uwpIdValue);
-                fd.append('action', 'endorse');
-
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': csrfToken,
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest',
-                    },
-                    body: fd,
-                });
-
-                let data = {};
-                try {
-                    data = await response.json();
-                } catch (_) {
-                    data = {};
-                }
-
-                if (!response.ok || !data?.success) {
-                    throw new Error(data?.message || data?.error || 'Unable to endorse UWP');
-                }
-
-                const endorsedAt = data?.endorsed_at || new Date().toISOString();
-                const endorsedStatus = data?.status || 'consolidated';
-                const uwpId = Number(selectedUwp?.id || data?.uwp_id || uwpIdValue || 0);
-
-                if (!selectedUwp) selectedUwp = {};
-                selectedUwp.id = selectedUwp.id || uwpId;
-                selectedUwp.status = endorsedStatus;
-                selectedUwp.endorsed_at = endorsedAt;
-                selectedUwp.return_remarks = '';
-                selectedUwp.returned_at = null;
-                selectedUwp.returned_by_role = null;
-
-                hydrateReviewModal(selectedUwp);
-                updateDeptHeadListRow(selectedUwp.id || uwpId, endorsedStatus, {
-                    return_remarks: '',
-                    returned_at: null,
-                    returned_by_role: null,
-                });
-
-                const row = document.querySelector(`[data-uwp-row-id="${uwpId}"]`) || document.querySelector(`[data-uwp-row="${uwpId}"]`);
-                const reviewBtn = row?.querySelector(`[data-uwp-id="${uwpId}"][data-uwp]`) || row?.querySelector('[data-review-btn][data-uwp]');
-                if (reviewBtn) {
-                    let nextPayload = {};
-                    try {
-                        nextPayload = JSON.parse(reviewBtn.getAttribute('data-uwp') || '{}');
-                    } catch (_) {
-                        nextPayload = {};
-                    }
-                    nextPayload.status = normalizeStatusKey(endorsedStatus);
-                    nextPayload.endorsed_at = endorsedAt;
-                    nextPayload.return_remarks = '';
-                    nextPayload.returned_at = null;
-                    nextPayload.returned_by_role = null;
-                    reviewBtn.setAttribute('data-uwp', JSON.stringify(nextPayload));
-                }
-
-                if (remarks) {
-                    remarks.value = '';
-                }
-
-                closeReviewModalSafely();
-                window.PMSnackbar?.show({
-                    type: 'success',
-                    message: 'UWP consolidated into OPCR.',
-                });
-            } catch (error) {
-                window.PMSnackbar?.show({
-                    type: 'error',
-                    message: error?.message || 'Unable to endorse UWP right now. Please try again.',
-                });
-            } finally {
-                setButtonLoading(btnEndorse, false);
-                if (btnReturn) {
-                    btnReturn.disabled = false;
-                    btnReturn.classList.remove('opacity-80', 'cursor-not-allowed');
-                }
-                clearFlowbiteBackdrops();
-            }
+            openSignatureModal();
         });
+
 
         btnReturn?.addEventListener('click', async () => {
             if (!form) return;
@@ -1805,6 +1874,7 @@
     function boot() {
         initModalHandlers();
         initReviewModalTriggers();
+        initSignatureModal();
     }
 
     if (document.readyState === 'loading') {

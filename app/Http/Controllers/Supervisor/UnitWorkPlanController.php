@@ -10,6 +10,8 @@ use App\Models\PerformancePeriod;
 use App\Models\UwpFunction;
 use App\Models\UwpIndicatorAssignment;
 use App\Models\UwpQetStandard;
+use App\Models\UwpConsolidationSignature;
+use App\Services\UwpConsolidationSignatureService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -18,6 +20,10 @@ use Illuminate\Validation\ValidationException;
 
 class UnitWorkPlanController extends Controller
 {
+    public function __construct(
+        private readonly UwpConsolidationSignatureService $signatureService
+    ) {
+    }
     public function uwpList(Request $request)
     {
         $user = $request->user();
@@ -389,12 +395,35 @@ class UnitWorkPlanController extends Controller
             ], 422);
         }
 
-        DB::transaction(function () use ($uwp) {
+        DB::transaction(function () use ($uwp, $request) {
             $uwp->update([
                 'status' => UnitWorkPlan::STATUS_SUBMITTED,
                 'submitted_at' => now(),
                 'locked_at' => now(),
             ]);
+
+            // If a signature is provided, create the signed artifact and record
+            if ($request->filled('signature')) {
+                $signedArtifact = $this->signatureService->createSignedArtifact(
+                    $uwp,
+                    $request->input('signature')
+                );
+
+                UwpConsolidationSignature::query()->create([
+                    'unit_work_plan_id' => $uwp->id,
+                    'opcr_id' => null, // Not yet consolidated into an OPCR
+                    'signed_by' => auth()->id(),
+                    'signature_image_path' => $signedArtifact['signature_image_path'],
+                    'signed_excel_path' => $signedArtifact['signed_excel_path'],
+                    'signature_hash' => $signedArtifact['signature_hash'],
+                    'signed_at' => now(),
+                    'metadata' => [
+                        'action' => 'supervisor_submit',
+                        'ip_address' => $request->ip(),
+                        'user_agent' => $request->userAgent(),
+                    ],
+                ]);
+            }
         });
 
         if (!($request->expectsJson() || $request->ajax())) {
@@ -411,6 +440,17 @@ class UnitWorkPlanController extends Controller
 
     public function submitForApproval(Request $request, $id)
     {
+        // Read signature directly from JSON or form input — do NOT rely on validate()
+        // to cache JSON body since large base64 payloads can be silently dropped.
+        $signatureInput = $request->input('signature');
+
+        Log::info('UWP submitForApproval called', [
+            'uwp_id'           => $id,
+            'has_signature'    => !empty($signatureInput),
+            'content_type'     => $request->header('Content-Type'),
+            'is_json'          => $request->isJson(),
+        ]);
+
         try {
             $user = $this->resolveSupervisorUser($request);
 
@@ -461,15 +501,44 @@ class UnitWorkPlanController extends Controller
                 );
             }
 
-            DB::transaction(function () use ($uwp) {
+            DB::transaction(function () use ($uwp, $request, $signatureInput) {
                 $uwp->update([
-                    'status' => UnitWorkPlan::STATUS_SUBMITTED,
+                    'status'       => UnitWorkPlan::STATUS_SUBMITTED,
                     'submitted_at' => now(),
-                    'locked_at' => now(),
+                    'locked_at'    => now(),
                 ]);
 
+                // Process signature if provided
+                if (!empty($signatureInput)) {
+                    Log::info('UWP submitForApproval: processing signature', ['uwp_id' => $uwp->id]);
+
+                    $signedArtifact = $this->signatureService->createSignedArtifact(
+                        $uwp,
+                        $signatureInput
+                    );
+
+                    UwpConsolidationSignature::query()->create([
+                        'unit_work_plan_id'    => $uwp->id,
+                        'opcr_id'              => null,
+                        'signed_by'            => auth()->id(),
+                        'signature_image_path' => $signedArtifact['signature_image_path'],
+                        'signed_excel_path'    => $signedArtifact['signed_excel_path'],
+                        'signature_hash'       => $signedArtifact['signature_hash'],
+                        'signed_at'            => now(),
+                        'metadata'             => [
+                            'action'     => 'supervisor_submit',
+                            'ip_address' => $request->ip(),
+                            'user_agent' => $request->userAgent(),
+                        ],
+                    ]);
+
+                    Log::info('UWP submitForApproval: signature record saved', ['uwp_id' => $uwp->id]);
+                } else {
+                    Log::warning('UWP submitForApproval: no signature provided, skipping artifact creation', ['uwp_id' => $uwp->id]);
+                }
+
                 Log::info('UWP submitted for department head review', [
-                    'uwp_id' => $uwp->id,
+                    'uwp_id'       => $uwp->id,
                     'submitted_by' => auth()->id(),
                     'submitted_at' => now()
                 ]);
@@ -535,6 +604,7 @@ class UnitWorkPlanController extends Controller
             'functions_payload' => ['nullable', 'string'],
             'mfos_payload' => ['nullable', 'string'],
             'assignments_payload' => ['nullable', 'string'],
+            'signature' => ['nullable', 'string'],
         ]);
 
         $functionsPayload = [];

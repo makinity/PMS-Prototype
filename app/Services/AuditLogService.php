@@ -20,6 +20,7 @@ class AuditLogService
         'token',
         'remember_token',
         'bearer_token',
+        'signature',
         'current_password',
         'new_password',
         'new_password_confirmation',
@@ -315,6 +316,7 @@ class AuditLogService
         }
 
         return str_contains($key, 'password')
-            || str_contains($key, 'token');
+            || str_contains($key, 'token')
+            || str_contains($key, 'signature');
     }
 }
