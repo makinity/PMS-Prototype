@@ -204,19 +204,25 @@
                 <p class="text-sm text-slate-400 max-w-lg">Verify the consolidated outputs above. You can endorse this OPCR to PMT for final approval, or return it to supervisors if adjustments are needed.</p>
                 <div class="flex gap-3">
                     @if ($canSubmitToPmt && $opcrStatus !== \App\Models\Opcr::STATUS_ENDORSED)
-                        <form action="{{ route('dept-head.opcr.return', $currentOpcr->id) }}" method="POST" onsubmit="return confirm('Return this OPCR to supervisors for adjustment?')">
+                        {{-- Hidden forms submitted by the confirmation modal --}}
+                        <form id="form-opcr-return" action="{{ route('dept-head.opcr.return', $currentOpcr->id) }}" method="POST">
                             @csrf
-                            <button type="submit" class="inline-flex items-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-6 py-2.5 text-sm font-bold text-rose-300 transition hover:bg-rose-500/20">
-                                <i class="fa-solid fa-rotate-left"></i> Return to Supervisors
-                            </button>
                         </form>
-                        
-                        <form action="{{ route('dept-head.opcr.endorse', $currentOpcr->id) }}" method="POST" onsubmit="return confirm('Endorse this consolidated OPCR to PMT?')">
+                        <form id="form-opcr-endorse" action="{{ route('dept-head.opcr.endorse', $currentOpcr->id) }}" method="POST">
                             @csrf
-                            <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-500 active:scale-95">
-                                <i class="fa-solid fa-check-double"></i> Endorse to PMT
-                            </button>
                         </form>
+
+                        <button type="button"
+                                data-confirm-action="return"
+                                class="inline-flex items-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-6 py-2.5 text-sm font-bold text-rose-300 transition hover:bg-rose-500/20">
+                            <i class="fa-solid fa-rotate-left"></i> Return to Supervisors
+                        </button>
+
+                        <button type="button"
+                                data-confirm-action="endorse"
+                                class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-500 active:scale-95">
+                            <i class="fa-solid fa-check-double"></i> Endorse to PMT
+                        </button>
                     @elseif ($opcrStatus === \App\Models\Opcr::STATUS_ENDORSED)
                         <div class="rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-6 py-2.5 text-sm font-bold text-emerald-300">
                             <i class="fa-solid fa-clock mr-2"></i> Endorsed - Awaiting PMT Review
@@ -256,9 +262,99 @@
     </div>
 </div>
 
+{{-- Confirmation Modal --}}
+<div id="opcr-confirm-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/70 px-4 backdrop-blur-sm">
+    <div class="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-950 shadow-2xl">
+        <div class="px-6 pt-6 pb-2">
+            <p id="opcr-confirm-eyebrow" class="text-xs font-semibold uppercase tracking-[0.22em]"></p>
+            <h3 id="opcr-confirm-title" class="mt-2 text-xl font-semibold text-white"></h3>
+            <p id="opcr-confirm-message" class="mt-2 text-sm text-slate-400"></p>
+        </div>
+        <div class="flex items-center justify-end gap-3 px-6 py-5">
+            <button type="button" id="opcr-confirm-cancel"
+                    class="rounded-xl border border-slate-700 px-5 py-2 text-sm font-medium text-slate-300 transition hover:bg-slate-800">
+                Cancel
+            </button>
+            <button type="button" id="opcr-confirm-proceed"
+                    class="rounded-xl px-5 py-2 text-sm font-bold text-white transition">
+                Confirm
+            </button>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // ── Confirmation Modal ────────────────────────────────────────────────
+    const confirmModal   = document.getElementById('opcr-confirm-modal');
+    const confirmTitle   = document.getElementById('opcr-confirm-title');
+    const confirmEyebrow = document.getElementById('opcr-confirm-eyebrow');
+    const confirmMsg     = document.getElementById('opcr-confirm-message');
+    const confirmProceed = document.getElementById('opcr-confirm-proceed');
+    const confirmCancel  = document.getElementById('opcr-confirm-cancel');
+
+    const ACTIONS = {
+        return: {
+            eyebrow:  'Return OPCR',
+            eyebrowClass: 'text-rose-400',
+            title:    'Return to Supervisors?',
+            message:  'This OPCR will be sent back to the supervisors for adjustment. You can re-endorse it once the changes are made.',
+            btnClass: 'bg-rose-600 hover:bg-rose-500',
+            formId:   'form-opcr-return',
+        },
+        endorse: {
+            eyebrow:  'Endorse OPCR',
+            eyebrowClass: 'text-emerald-400',
+            title:    'Endorse to PMT?',
+            message:  'This consolidated OPCR will be submitted to the PMT for final review and approval. This action cannot be undone.',
+            btnClass: 'bg-emerald-600 hover:bg-emerald-500',
+            formId:   'form-opcr-endorse',
+        },
+    };
+
+    let pendingFormId = null;
+
+    document.querySelectorAll('[data-confirm-action]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const action = btn.getAttribute('data-confirm-action');
+            const meta   = ACTIONS[action];
+            if (!meta) return;
+
+            pendingFormId = meta.formId;
+
+            confirmEyebrow.textContent  = meta.eyebrow;
+            confirmEyebrow.className    = `text-xs font-semibold uppercase tracking-[0.22em] ${meta.eyebrowClass}`;
+            confirmTitle.textContent    = meta.title;
+            confirmMsg.textContent      = meta.message;
+            confirmProceed.className    = `rounded-xl px-5 py-2 text-sm font-bold text-white transition shadow-lg ${meta.btnClass}`;
+
+            confirmModal.classList.remove('hidden');
+            confirmModal.classList.add('flex');
+        });
+    });
+
+    confirmCancel.addEventListener('click', () => {
+        confirmModal.classList.add('hidden');
+        confirmModal.classList.remove('flex');
+        pendingFormId = null;
+    });
+
+    confirmModal.addEventListener('click', e => {
+        if (e.target === confirmModal) {
+            confirmModal.classList.add('hidden');
+            confirmModal.classList.remove('flex');
+            pendingFormId = null;
+        }
+    });
+
+    confirmProceed.addEventListener('click', () => {
+        if (pendingFormId) {
+            document.getElementById(pendingFormId)?.submit();
+        }
+    });
+
+    // ── UWP Preview Modal ─────────────────────────────────────────────────
     const uwpModal = document.getElementById('uwp-preview-modal');
     const uwpContent = document.getElementById('uwp-modal-content');
     
