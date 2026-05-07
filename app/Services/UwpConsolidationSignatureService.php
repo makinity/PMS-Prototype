@@ -119,14 +119,22 @@ class UwpConsolidationSignatureService
         $drawing->setName($name);
         $drawing->setDescription($name);
         $drawing->setPath($absPath);
-        
-        // Supervisor is block 1 (A:B), Dept Head is block 2 (C:D)
-        $column = $role === 'dept-head' ? 'C' : 'A';
-        
-        $drawing->setCoordinates("{$column}{$row}");
-        $drawing->setOffsetX(15); 
-        $drawing->setOffsetY(5);
-        $drawing->setHeight(75);
+        $drawing->setResizeProportional(false);
+
+        // Supervisor block spans A:B (col widths: A=32, B=40 → ~504px total)
+        // Dept-head block spans C:D (col widths: C=18, D=30 → ~336px total)
+        // Anchor at the START of the merged block so the image overlays the name text.
+        if ($role === 'dept-head') {
+            $drawing->setCoordinates("C{$row}");
+            $drawing->setWidth(290);   // covers C:D merged width
+        } else {
+            $drawing->setCoordinates("A{$row}");
+            $drawing->setWidth(390);   // covers A:B merged width
+        }
+
+        $drawing->setHeight(68);
+        $drawing->setOffsetX(8);
+        $drawing->setOffsetY(4);
         $drawing->setWorksheet($worksheet);
     }
 

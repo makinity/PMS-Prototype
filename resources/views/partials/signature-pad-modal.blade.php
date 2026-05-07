@@ -30,7 +30,7 @@
         <div class="px-6 py-5">
             <div class="rounded-2xl border border-slate-700 bg-slate-900/70 p-3">
                 <canvas id="{{ $canvasId }}"
-                        class="h-56 w-full rounded-xl border border-dashed border-slate-600 bg-slate-950 touch-none"></canvas>
+                        class="h-56 w-full rounded-xl border border-dashed border-slate-300 bg-white touch-none"></canvas>
             </div>
             <p class="mt-3 text-xs text-slate-500">Use your mouse, touch, or pen to provide the Department Head signature.</p>
         </div>
@@ -94,9 +94,10 @@
         signaturePadContext.lineCap = 'round';
         signaturePadContext.lineJoin = 'round';
         signaturePadContext.lineWidth = 2.2;
-        signaturePadContext.strokeStyle = '#f8fafc';
-        signaturePadContext.fillStyle = '#020617';
-        signaturePadContext.fillRect(0, 0, rect.width, rect.height);
+        signaturePadContext.strokeStyle = '#1e293b'; // near-black ink
+        // Do NOT fill with any background — keep transparent so the PNG overlay
+        // doesn't hide the name text underneath in Excel.
+        // The white appearance in the modal comes from the CSS bg-white class.
 
         if (hadInk) {
             const restored = new Image();
@@ -166,6 +167,8 @@
         window.clearSignaturePad_{{ str_replace('-', '_', $modalId) }} = clearPad;
         window.getSignatureData_{{ str_replace('-', '_', $modalId) }} = () => {
             if (!signaturePadHasInk) return null;
+            // Export with transparency — ink strokes on transparent background.
+            // This lets the signature float over the name in Excel without hiding it.
             return canvas.toDataURL('image/png');
         };
         
