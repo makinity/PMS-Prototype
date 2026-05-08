@@ -274,8 +274,6 @@
                             <div class="flex flex-wrap gap-1.5">
                                 <button type="button" data-opcr-workspace-tab="overview" class="border-b-2 border-blue-400 px-2.5 py-2.5 text-sm font-semibold text-white">Overview</button>
                                 <button type="button" data-opcr-workspace-tab="indicators" class="border-b-2 border-transparent px-2.5 py-2.5 text-sm font-medium text-slate-400">Success Indicators</button>
-                                <button type="button" data-opcr-workspace-tab="standards" class="border-b-2 border-transparent px-2.5 py-2.5 text-sm font-medium text-slate-400">Standards (Q/E/T)</button>
-                                <button type="button" data-opcr-workspace-tab="assignees" class="border-b-2 border-transparent px-2.5 py-2.5 text-sm font-medium text-slate-400">Assigned Employees</button>
                             </div>
                         </div>
 

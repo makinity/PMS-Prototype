@@ -24,111 +24,104 @@ class UwpConsolidationSignatureService
 
     public function createSignedOpcrArtifact(Opcr $opcr, string $signatureDataUrl, bool $isPmt = false): array
     {
-        $currentSignatureBinary = $this->decodeSignatureDataUrl($signatureDataUrl);
-        
-        $xlsxBinary = Excel::raw(
-            new OpcrExcelExport($opcr),
-            \Maatwebsite\Excel\Excel::XLSX
-        );
-
         $disk = Storage::disk('public');
-        $timestamp = now()->format('Ymd_His');
-        $suffix = Str::lower(Str::random(8));
+        $signaturePath = 'signatures/opcr/' . $opcr->id . '_' . time() . '.png';
 
-        $signaturePath = "signatures/opcr/opcr_{$opcr->id}_{$timestamp}_{$suffix}.png";
-        $signedExcelPath = "opcr/signed/opcr_{$opcr->id}_{$timestamp}_{$suffix}.xlsx";
-
-        $signatureAbsolutePath = $disk->path($signaturePath);
-        $signedExcelAbsolutePath = $disk->path($signedExcelPath);
-
-        File::ensureDirectoryExists(dirname($signatureAbsolutePath));
-        File::ensureDirectoryExists(dirname($signedExcelAbsolutePath));
-
+        // Save current signature image
+        $signatureData = str_replace('data:image/png;base64,', '', $signatureDataUrl);
+        $signatureData = str_replace(' ', '+', $signatureData);
+        $currentSignatureBinary = base64_decode($signatureData);
         $disk->put($signaturePath, $currentSignatureBinary);
 
-        // Find existing signatures for this OPCR
+        // Find existing signatures for this OPCR to ensure we don't lose them
         $existingSignatures = UwpConsolidationSignature::query()
             ->where('opcr_id', $opcr->id)
             ->with('signer')
             ->get();
 
-        $tempWorkbookPath = tempnam(sys_get_temp_dir(), 'opcr-sign-');
-        if ($tempWorkbookPath === false) {
-            throw new \RuntimeException('Unable to allocate temporary workbook path.');
-        }
+        $latestSignature = $existingSignatures->sortByDesc('signed_at')->first();
 
         try {
-            file_put_contents($tempWorkbookPath, $xlsxBinary);
+            // Prepare the XLSX to sign
+            // Priority: 1. Latest signed version, 2. Base consolidated file, 3. Generate new
+            $sourcePath = null;
+            if ($latestSignature && $latestSignature->signed_excel_path && $disk->exists($latestSignature->signed_excel_path)) {
+                $sourcePath = $disk->path($latestSignature->signed_excel_path);
+            } elseif ($disk->exists('opcr_consolidated_' . $opcr->id . '.xlsx')) {
+                $sourcePath = $disk->path('opcr_consolidated_' . $opcr->id . '.xlsx');
+            }
 
-            $spreadsheet = IOFactory::load($tempWorkbookPath);
+            if ($sourcePath) {
+                $spreadsheet = IOFactory::load($sourcePath);
+            } else {
+                // Generate base file on the fly if missing
+                $export = new OpcrExcelExport($opcr);
+                $tempFilename = 'temp_opcr_' . $opcr->id . '_' . time() . '.xlsx';
+                Excel::store($export, $tempFilename, 'public');
+                $tempPath = $disk->path($tempFilename);
+                $spreadsheet = IOFactory::load($tempPath);
+                @unlink($tempPath);
+            }
+
             $worksheet = $spreadsheet->getActiveSheet();
-            
-            $signatureBaseRow = null;
-            $searchLimit = min(2000, (int)$worksheet->getHighestRow());
-            $searchLabel = $isPmt ? 'Assessed by:' : 'Discussed with and Agreed by:';
-            
-            for ($r = $searchLimit; $r >= 1; $r--) {
-                $cellVal = trim((string)$worksheet->getCell("A{$r}")->getValue());
-                // For PMT, it might be in Column G? Wait, let's check Column G too
-                if ($isPmt) {
-                    $cellValG = trim((string)$worksheet->getCell("G{$r}")->getValue());
-                    if ($cellValG === $searchLabel) {
-                        $signatureBaseRow = $r;
-                        break;
-                    }
-                }
+            $targetSignatureRow = 0;
+            $highestRow = $worksheet->getHighestRow();
 
-                if ($cellVal === $searchLabel) {
-                    $signatureBaseRow = $r;
+            // Dynamic footer row detection - look for label rows
+            for ($r = $highestRow; $r >= max(1, $highestRow - 100); $r--) {
+                $val = (string) $worksheet->getCell("A{$r}")->getValue();
+                if (str_contains($val, 'Discussed with') || str_contains($val, 'Assessed by')) {
+                    $targetSignatureRow = $r + 1;
                     break;
                 }
             }
 
-            $targetSignatureRow = $signatureBaseRow ? ($signatureBaseRow + 1) : max(1, (int)$worksheet->getHighestRow() - 2);
+            if ($targetSignatureRow === 0) {
+                throw new \Exception("Could not find signature row in OPCR template.");
+            }
 
-            // Inject current signature
-            $this->injectSignatureToWorksheet(
-                $worksheet, 
-                $signatureAbsolutePath, 
-                $isPmt ? 'pmt-chairperson' : 'opcr-dept-head',
-                $targetSignatureRow
-            );
+            $signatureAbsolutePath = $disk->path($signaturePath);
 
-            // Inject existing signatures
-            // Group by role and take only the latest one per role
-            $latestSignaturesByRole = $existingSignatures
+            // 1. Inject current signature
+            $currentRole = $isPmt ? 'pmt-chairperson' : 'opcr-dept-head';
+            $this->injectSignatureToWorksheet($worksheet, $signatureAbsolutePath, $currentRole, $targetSignatureRow);
+
+            // 2. Re-inject historical signatures for OTHER roles
+            $latestByRole = $existingSignatures
                 ->sortByDesc('signed_at')
                 ->unique(function ($s) {
-                    return ($s->metadata['action'] ?? '') === 'dept_head_endorse_opcr' ? 'opcr-dept-head' : 'pmt-chairperson';
+                    $action = $s->metadata['action'] ?? '';
+                    if ($action === 'dept_head_endorse_opcr') return 'opcr-dept-head';
+                    if ($action === 'pmt_approve_opcr') return 'pmt-chairperson';
+                    return 'unknown';
                 });
 
-            foreach ($latestSignaturesByRole as $existing) {
-                $existingAction = $existing->metadata['action'] ?? '';
-                $existingRole = $existingAction === 'dept_head_endorse_opcr' ? 'opcr-dept-head' : 'pmt-chairperson';
-                $currentRole = $isPmt ? 'pmt-chairperson' : 'opcr-dept-head';
+            foreach ($latestByRole as $existing) {
+                $action = $existing->metadata['action'] ?? '';
+                $existingRole = ($action === 'dept_head_endorse_opcr') ? 'opcr-dept-head' : 
+                               (($action === 'pmt_approve_opcr') ? 'pmt-chairperson' : null);
 
-                // Avoid duplicating the role we just injected above
-                if ($existingRole !== $currentRole) {
-                    $absPath = $disk->path($existing->signature_image_path);
-                    if (File::exists($absPath)) {
-                        $this->injectSignatureToWorksheet($worksheet, $absPath, $existingRole, $targetSignatureRow);
+                if ($existingRole && $existingRole !== $currentRole) {
+                    $oldPath = $disk->path($existing->signature_image_path);
+                    if (File::exists($oldPath)) {
+                        $this->injectSignatureToWorksheet($worksheet, $oldPath, $existingRole, $targetSignatureRow);
                     }
                 }
             }
 
             $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
-            $writer->save($signedExcelAbsolutePath);
-            $spreadsheet->disconnectWorksheets();
-            unset($spreadsheet, $writer);
-        } finally {
-            @unlink($tempWorkbookPath);
-        }
+            $signedExcelPath = 'signatures/opcr/signed_' . $opcr->id . '_' . time() . '.xlsx';
+            $writer->save($disk->path($signedExcelPath));
 
-        return [
-            'signature_image_path' => $signaturePath,
-            'signed_excel_path' => $signedExcelPath,
-            'signature_hash' => hash('sha256', $currentSignatureBinary),
-        ];
+            return [
+                'signature_image_path' => $signaturePath,
+                'signed_excel_path' => $signedExcelPath,
+                'signature_hash' => hash_file('sha256', $signatureAbsolutePath),
+            ];
+        } catch (\Exception $e) {
+            \Log::error("OPCR Signature Error: " . $e->getMessage());
+            throw $e;
+        }
     }
 
     public function createSignedArtifact(UnitWorkPlan $uwp, string $signatureDataUrl): array
@@ -236,38 +229,47 @@ class UwpConsolidationSignatureService
         $name = str_contains($role, 'dept-head') || str_contains($role, 'pmt') ? 'Head Signature' : 'Supervisor Signature';
         $drawing->setName($name);
         $drawing->setPath($absPath);
+        $isOpcr = str_contains(strtolower($worksheet->getTitle()), 'opcr');
 
-        // Define target widths in pixels based on actual Excel column widths (chars * ~7.5)
-        // Supervisor (UWP A+B): 32+40=72 chars -> ~540px
-        // Dept-head (UWP C+D): 18+30=48 chars -> ~360px
-        // OPCR Dept-head (A+B+C+D): 35+40+12+18=105 chars -> ~780px
-        // PMT Chairperson (OPCR G+H+I): 6+6+6=18 chars -> ~135px
-        $targetWidth = 540;
+        // Define target widths in pixels based on actual Excel column widths (chars * ~7.6)
+        // Multiplier 7.6 is used for standard Excel character-to-pixel conversion
+        $targetWidth = 540; // Default for UWP Supervisor (A+B: 72 chars)
         $anchor = "A{$row}";
 
         if ($role === 'dept-head') {
-            $targetWidth = 360;
+            // UWP Dept Head (C+D: 48 chars)
+            $targetWidth = 365;
             $anchor = "C{$row}";
         } elseif ($role === 'opcr-dept-head') {
-            $targetWidth = 780;
+            // OPCR Dept Head (A+B+C+D: 105 chars)
+            $targetWidth = 840;
             $anchor = "A{$row}";
         } elseif ($role === 'pmt-chairperson') {
-            $targetWidth = 135;
-            $anchor = "G{$row}";
+            if ($isOpcr) {
+                // OPCR PMT (G+H+I: 18 chars)
+                $targetWidth = 150;
+                $anchor = "G{$row}";
+            } else {
+                // UWP PMT (F+G: 60 chars)
+                $targetWidth = 455;
+                $anchor = "F{$row}";
+            }
         }
 
         // Calculate centering using actual image dimensions
         $size = getimagesize($absPath);
         $origW = (float) ($size[0] ?? 1);
         $origH = (float) ($size[1] ?? 1);
-        $maxH = 52.0;
+        
+        // Slightly larger max height for OPCR to fill the box better
+        $maxH = $isOpcr ? 50.0 : 45.0;
 
         // Scale proportionally to fit max height
         $scaledW = ($origW / $origH) * $maxH;
 
         // Ensure it doesn't overflow the target width
-        if ($scaledW > ($targetWidth - 20)) {
-            $scaledW = (float) ($targetWidth - 20);
+        if ($scaledW > ($targetWidth - 10)) {
+            $scaledW = (float) ($targetWidth - 10);
             $scaledH = ($origH / $origW) * $scaledW;
         } else {
             $scaledH = $maxH;
@@ -281,7 +283,9 @@ class UwpConsolidationSignatureService
         // Center horizontally within the block
         $offsetX = (int) max(0, ($targetWidth - $scaledW) / 2);
         $drawing->setOffsetX($offsetX);
-        $drawing->setOffsetY(-4);
+        
+        // Adjust vertical offset: OPCR needs a bit more room than UWP
+        $drawing->setOffsetY($isOpcr ? -6 : -12);
         
         $drawing->setWorksheet($worksheet);
     }
