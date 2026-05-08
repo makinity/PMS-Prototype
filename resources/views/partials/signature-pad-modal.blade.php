@@ -164,12 +164,50 @@
         clearButton?.addEventListener('click', clearPad);
 
         // Export global helpers if needed
+        function trimCanvas(originalCanvas) {
+            const ctx = originalCanvas.getContext('2d');
+            const width = originalCanvas.width;
+            const height = originalCanvas.height;
+            const imageData = ctx.getImageData(0, 0, width, height);
+            const data = imageData.data;
+
+            let minX = width, minY = height, maxX = 0, maxY = 0;
+            let found = false;
+
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const alpha = data[(y * width + x) * 4 + 3];
+                    if (alpha > 0) {
+                        if (x < minX) minX = x;
+                        if (y < minY) minY = y;
+                        if (x > maxX) maxX = x;
+                        if (y > maxY) maxY = y;
+                        found = true;
+                    }
+                }
+            }
+
+            if (!found) return null;
+
+            // Add a small padding
+            const padding = 20;
+            const cropWidth = (maxX - minX) + 1;
+            const cropHeight = (maxY - minY) + 1;
+            
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = cropWidth + (padding * 2);
+            tempCanvas.height = cropHeight + (padding * 2);
+            const tempCtx = tempCanvas.getContext('2d');
+
+            tempCtx.drawImage(originalCanvas, minX, minY, cropWidth, cropHeight, padding, padding, cropWidth, cropHeight);
+            return tempCanvas.toDataURL('image/png');
+        }
+
         window.clearSignaturePad_{{ str_replace('-', '_', $modalId) }} = clearPad;
         window.getSignatureData_{{ str_replace('-', '_', $modalId) }} = () => {
             if (!signaturePadHasInk) return null;
-            // Export with transparency — ink strokes on transparent background.
-            // This lets the signature float over the name in Excel without hiding it.
-            return canvas.toDataURL('image/png');
+            const { canvas } = getElements();
+            return trimCanvas(canvas);
         };
         
         // Listen for modal show

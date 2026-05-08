@@ -179,6 +179,7 @@
                 @csrf
                 <input type="hidden" name="opcr_id" id="dh-opcr-id">
                 <input type="hidden" name="action" id="dh-opcr-action">
+                <input type="hidden" name="signature" id="dh-opcr-signature">
 
                 <div>
                     <label for="dh-opcr-remarks" class="mb-1 block text-sm text-slate-300">Remarks (required when returning)</label>
@@ -345,6 +346,7 @@
                     @csrf
                     <input type="hidden" name="opcr_id" id="dh-opcr-workspace-id">
                     <input type="hidden" name="action" id="dh-opcr-workspace-action">
+                    <input type="hidden" name="signature" id="dh-opcr-workspace-signature">
                     <div>
                         <label for="dh-opcr-workspace-remarks" class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Return Remarks</label>
                         <div class="mt-2 flex flex-col gap-2 lg:flex-row lg:items-center">
@@ -461,6 +463,13 @@
         </div>
     </div>
 </section>
+
+@include('partials.signature-pad-modal', [
+    'modalId' => 'pmt-signature-modal',
+    'title' => 'Approve OPCR (Final)',
+    'message' => 'Your e-signature will be applied to the "Assessed by" block of the final OPCR Excel document.',
+    'confirmText' => 'Sign & Approve'
+])
 
 @push('scripts')
 <script>
@@ -1151,20 +1160,22 @@ document.addEventListener('DOMContentLoaded', function () {
         closeModal(openModals[openModals.length - 1]);
     });
 
-    const reviewForm = document.getElementById('dh-opcr-workspace-review-form') || document.getElementById('dh-opcr-review-form');
-    const remarksEl = document.getElementById('dh-opcr-workspace-remarks') || document.getElementById('dh-opcr-remarks');
-    const remarksErrorEl = document.getElementById('dh-opcr-workspace-remarks-error') || document.getElementById('dh-opcr-remarks-error');
-    const actionInput = document.getElementById('dh-opcr-workspace-action') || document.getElementById('dh-opcr-action');
+    let activeReviewForm = null;
 
     document.querySelectorAll('[data-review-action], [data-workspace-review-action]').forEach((button) => {
         button.addEventListener('click', () => {
-            if (!reviewForm || !actionInput) return;
+            const form = button.closest('form');
+            if (!form) return;
 
             const action = button.getAttribute('data-review-action') || button.getAttribute('data-workspace-review-action');
-            actionInput.value = action || '';
+            const actionInput = form.querySelector('[name="action"]');
+            if (actionInput) actionInput.value = action || '';
 
-            const opcrId = document.getElementById('dh-opcr-workspace-id')?.value || document.getElementById('dh-opcr-id')?.value || '';
-            if (!opcrId) return;
+            const opcrIdInput = form.querySelector('[name="opcr_id"]');
+            if (!opcrIdInput || !opcrIdInput.value) return;
+
+            const remarksEl = form.querySelector('[name="remarks"]');
+            const remarksErrorEl = form.querySelector('[id$="-remarks-error"]');
 
             if (remarksErrorEl) remarksErrorEl.classList.add('hidden');
 
@@ -1177,17 +1188,71 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
 
-            const loadingText = button.getAttribute('data-loading-text') || 'Processing...';
-            setButtonLoading(button, true, loadingText);
-
-            document.querySelectorAll('[data-review-action], [data-workspace-review-action]').forEach((peer) => {
-                if (peer !== button) {
-                    peer.disabled = true;
-                    peer.classList.add('opacity-70', 'cursor-wait');
+            if (action === 'approve') {
+                activeReviewForm = form;
+                const sigModal = document.getElementById('pmt-signature-modal');
+                if (sigModal) {
+                    sigModal.classList.remove('hidden');
+                    sigModal.classList.add('flex');
                 }
-            });
+                return; // Stop here, wait for signature
+            }
 
-            reviewForm.submit();
+            // For return, submit immediately
+            submitReviewForm(form, button);
+        });
+    });
+
+    const submitReviewForm = (form, triggeringButton) => {
+        const loadingText = triggeringButton ? (triggeringButton.getAttribute('data-loading-text') || 'Processing...') : 'Processing...';
+        if (triggeringButton) setButtonLoading(triggeringButton, true, loadingText);
+
+        document.querySelectorAll('[data-review-action], [data-workspace-review-action]').forEach((peer) => {
+            if (peer !== triggeringButton) {
+                peer.disabled = true;
+                peer.classList.add('opacity-70', 'cursor-wait');
+            }
+        });
+
+        form.submit();
+    };
+
+    const pmtSigConfirm = document.getElementById('signature-pad-confirm');
+    if (pmtSigConfirm) {
+        pmtSigConfirm.addEventListener('click', function() {
+            const signature = window.getSignatureData_pmt_signature_modal();
+            if (!signature) {
+                alert('Please provide your signature before approving.');
+                return;
+            }
+
+            if (activeReviewForm) {
+                const sigInput = activeReviewForm.querySelector('[name="signature"]');
+                if (sigInput) {
+                    sigInput.value = signature;
+                }
+                // Find the approve button inside the form to show loading state
+                const approveBtn = activeReviewForm.querySelector('[data-review-action="approve"], [data-workspace-review-action="approve"]');
+                
+                // Hide signature modal
+                const sigModal = document.getElementById('pmt-signature-modal');
+                if (sigModal) {
+                    sigModal.classList.add('hidden');
+                    sigModal.classList.remove('flex');
+                }
+                
+                submitReviewForm(activeReviewForm, approveBtn);
+            }
+        });
+    }
+
+    document.querySelectorAll('[data-signature-close]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const modal = document.getElementById('pmt-signature-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
         });
     });
 });

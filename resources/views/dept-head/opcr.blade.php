@@ -210,6 +210,7 @@
                         </form>
                         <form id="form-opcr-endorse" action="{{ route('dept-head.opcr.endorse', $currentOpcr->id) }}" method="POST">
                             @csrf
+                            <input type="hidden" name="signature" id="opcr-endorse-signature">
                         </form>
 
                         <button type="button"
@@ -283,6 +284,13 @@
     </div>
 </div>
 
+@include('partials.signature-pad-modal', [
+    'modalId' => 'opcr-signature-modal',
+    'title' => 'Endorse Consolidated OPCR',
+    'message' => 'Your e-signature will be applied to the consolidated OPCR Excel document for the PMT review.',
+    'confirmText' => 'Sign & Endorse'
+])
+
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -349,9 +357,45 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     confirmProceed.addEventListener('click', () => {
-        if (pendingFormId) {
+        if (pendingFormId === 'form-opcr-endorse') {
+            // Close confirmation modal and open signature pad
+            confirmModal.classList.add('hidden');
+            confirmModal.classList.remove('flex');
+            
+            const sigModal = document.getElementById('opcr-signature-modal');
+            if (sigModal) {
+                sigModal.classList.remove('hidden');
+                sigModal.classList.add('flex');
+            }
+        } else if (pendingFormId) {
             document.getElementById(pendingFormId)?.submit();
         }
+    });
+
+    // ── Signature Pad logic for OPCR ──────────────────────────────────────
+    const opcrSigConfirm = document.getElementById('signature-pad-confirm');
+    if (opcrSigConfirm) {
+        opcrSigConfirm.addEventListener('click', function() {
+            const signature = window.getSignatureData_opcr_signature_modal();
+            if (!signature) {
+                alert('Please provide your signature before endorsing.');
+                return;
+            }
+
+            const sigInput = document.getElementById('opcr-endorse-signature');
+            if (sigInput) {
+                sigInput.value = signature;
+                document.getElementById('form-opcr-endorse').submit();
+            }
+        });
+    }
+
+    document.querySelectorAll('[data-signature-close]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const modal = document.getElementById('opcr-signature-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        });
     });
 
     // ── UWP Preview Modal ─────────────────────────────────────────────────

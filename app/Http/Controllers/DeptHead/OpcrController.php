@@ -150,8 +150,13 @@ class OpcrController extends Controller
         return $this->returnOpcr($request, (int) $validated['opcr_id']);
     }
 
-    public function endorse(Request $request, int $opcr)
+    public function endorse(Request $request, int $opcr, \App\Services\UwpConsolidationSignatureService $signatureService)
     {
+        $signatureInput = $request->input('signature');
+
+        $validated = $request->validate([
+            'signature' => ['nullable', 'string'],
+        ]);
         $user = Auth::user();
         if (!$user || $user->role !== 'dept-head') {
             abort(403, 'Unauthorized.');
@@ -173,7 +178,7 @@ class OpcrController extends Controller
             return $this->invalidResponse($request, 'Only draft, returned, submitted, or already approved OPCR can be submitted to PMT.');
         }
 
-        DB::transaction(function () use ($model, $user) {
+        DB::transaction(function () use ($model, $user, $signatureInput, $signatureService, $request) {
             $model->forceFill([
                 'status' => Opcr::STATUS_ENDORSED,
                 'submitted_at' => now(),
@@ -183,6 +188,28 @@ class OpcrController extends Controller
                 'remarks' => null,
                 'locked_at' => now(),
             ])->save();
+
+            if (!empty($signatureInput)) {
+                $signedArtifact = $signatureService->createSignedOpcrArtifact(
+                    $model,
+                    $signatureInput
+                );
+
+                \App\Models\UwpConsolidationSignature::query()->create([
+                    'unit_work_plan_id' => $model->unit_work_plan_id ?: $model->unitWorkPlans()->first()?->id,
+                    'opcr_id' => $model->id,
+                    'signed_by' => $user->id,
+                    'signature_image_path' => $signedArtifact['signature_image_path'],
+                    'signed_excel_path' => $signedArtifact['signed_excel_path'],
+                    'signature_hash' => $signedArtifact['signature_hash'],
+                    'signed_at' => now(),
+                    'metadata' => [
+                        'action' => 'dept_head_endorse_opcr',
+                        'ip_address' => $request->ip(),
+                        'user_agent' => $request->userAgent(),
+                    ],
+                ]);
+            }
         });
 
         if ($request->expectsJson()) {

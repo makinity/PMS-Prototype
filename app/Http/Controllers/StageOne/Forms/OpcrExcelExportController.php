@@ -15,6 +15,19 @@ class OpcrExcelExportController extends Controller
     {
         $opcr = $this->resolveOpcrForExport($request);
 
+        // Check if there's a signed artifact for this OPCR
+        $latestSignature = \App\Models\UwpConsolidationSignature::query()
+            ->where('opcr_id', $opcr->id)
+            ->orderByDesc('signed_at')
+            ->first();
+
+        if ($latestSignature && $latestSignature->signed_excel_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($latestSignature->signed_excel_path)) {
+            return \Illuminate\Support\Facades\Storage::disk('public')->download(
+                $latestSignature->signed_excel_path,
+                $this->buildFilename($opcr, false, true)
+            );
+        }
+
         return Excel::download(
             new OpcrExcelExport($opcr),
             $this->buildFilename($opcr, false)
@@ -81,12 +94,15 @@ class OpcrExcelExportController extends Controller
         return $query->latest('id')->firstOrFail();
     }
 
-    protected function buildFilename(Opcr $opcr, bool $preview): string
+    protected function buildFilename(Opcr $opcr, bool $preview, bool $signed = false): string
     {
         $source = $opcr->sourceUnitWorkPlans()->first();
         $office = Str::slug((string) ($opcr->office?->name ?? $source?->office?->name ?? 'Office'), '_');
         $period = Str::slug((string) ($opcr->performancePeriod?->name ?? $source?->performancePeriod?->name ?? 'Period'), '_');
         $suffix = $preview ? '_Preview' : '';
+        if ($signed) {
+            $suffix .= '_SIGNED';
+        }
 
         return "OPCR_{$office}_{$period}{$suffix}.xlsx";
     }

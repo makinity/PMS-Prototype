@@ -97,7 +97,7 @@ class OpcrController extends Controller
         ]);
     }
 
-    public function review(Request $request)
+    public function review(Request $request, \App\Services\UwpConsolidationSignatureService $signatureService)
     {
         $user = Auth::user();
         if (!$user || $user->role !== 'pmt') {
@@ -108,7 +108,10 @@ class OpcrController extends Controller
             'opcr_id' => ['required', 'integer', 'exists:opcrs,id'],
             'action' => ['required', Rule::in(['approve', 'return'])],
             'remarks' => ['required_if:action,return', 'nullable', 'string', 'min:3'],
+            'signature' => ['nullable', 'string'],
         ]);
+
+        $signatureInput = $request->input('signature');
 
         return DB::transaction(function () use ($validated, $user) {
             /** @var Opcr $opcr */
@@ -134,6 +137,29 @@ class OpcrController extends Controller
                     'remarks' => null,
                     'locked_at' => now(),
                 ])->save();
+
+                if (!empty($signatureInput)) {
+                    $signedArtifact = $signatureService->createSignedOpcrArtifact(
+                        $opcr,
+                        $signatureInput,
+                        true // isPmt
+                    );
+
+                    \App\Models\UwpConsolidationSignature::query()->create([
+                        'unit_work_plan_id' => $opcr->unit_work_plan_id ?: $opcr->unitWorkPlans()->first()?->id,
+                        'opcr_id' => $opcr->id,
+                        'signed_by' => $user->id,
+                        'signature_image_path' => $signedArtifact['signature_image_path'],
+                        'signed_excel_path' => $signedArtifact['signed_excel_path'],
+                        'signature_hash' => $signedArtifact['signature_hash'],
+                        'signed_at' => now(),
+                        'metadata' => [
+                            'action' => 'pmt_approve_opcr',
+                            'ip_address' => $request->ip(),
+                            'user_agent' => $request->userAgent(),
+                        ],
+                    ]);
+                }
 
                 app(IpcrGeneratorService::class)->generateFromOpcr($opcr);
 
@@ -185,8 +211,21 @@ class OpcrController extends Controller
         $source = $opcr->sourceUnitWorkPlans()->first();
         $office = Str::slug((string) ($opcr->office?->name ?? $source?->office?->name ?? 'Office'), '_');
         $period = Str::slug((string) ($opcr->performancePeriod?->name ?? $source?->performancePeriod?->name ?? 'Period'), '_');
-        $filename = "OPCR_{$office}_{$period}.xlsx";
+        
+        $latestSignature = \App\Models\UwpConsolidationSignature::query()
+            ->where('opcr_id', $opcr->id)
+            ->orderByDesc('signed_at')
+            ->first();
 
+        if ($latestSignature && $latestSignature->signed_excel_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($latestSignature->signed_excel_path)) {
+            $filename = "OPCR_{$office}_{$period}_SIGNED.xlsx";
+            return \Illuminate\Support\Facades\Storage::disk('public')->download(
+                $latestSignature->signed_excel_path,
+                $filename
+            );
+        }
+
+        $filename = "OPCR_{$office}_{$period}.xlsx";
         return Excel::download(new OpcrExcelExport($opcr), $filename);
     }
 
