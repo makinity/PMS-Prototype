@@ -23,7 +23,7 @@
                 class="rounded-lg border border-gray-600 bg-gray-700 px-3 py-2.5 text-sm text-white focus:border-blue-500 focus:ring-blue-500">
         </div>
 
-        <div class="overflow-hidden rounded-lg border border-gray-700 bg-gray-800">
+        <div class="overflow-hidden rounded-lg border border-gray-700 bg-transparent">
             <div class="border-b border-gray-700 px-4 py-3 text-xs text-gray-400">
                 Status reflects ORS state only; no submissions, uploads, or task creation here.
             </div>
@@ -44,7 +44,7 @@
             </div>
         </div>
 
-        <div class="flex items-center rounded-lg border border-gray-700 bg-gray-800 p-4 text-sm text-gray-400">
+        <div class="flex items-center rounded-lg border border-gray-700 bg-transparent p-4 text-sm text-gray-400">
             <svg class="mr-3 inline h-4 w-4 flex-shrink-0 text-blue-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
                 fill="currentColor" viewBox="0 0 20 20">
                 <path

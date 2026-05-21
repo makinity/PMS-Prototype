@@ -455,7 +455,7 @@ const parseJsonSafe = async response => {
     }
 };
 
-const employeeIdPattern = /^EMP-\d{4}-\d{5}$/;
+const employeeIdPattern = /^EMP-[A-Z]{3}-\d{4}$/i;
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const activateLoadingState = (button, text) => {
@@ -478,7 +478,7 @@ let verifiedData = null;
 
 // Step 1: Verify Account
 verifyBtn.addEventListener('click', async function() {
-    const employeeId = employeeIdInput.value.trim();
+    const employeeId = employeeIdInput.value.trim().toUpperCase();
     const email = emailInput.value.trim();
 
     if (!employeeId) {
@@ -492,7 +492,7 @@ verifyBtn.addEventListener('click', async function() {
     }
 
     if (!employeeIdPattern.test(employeeId)) {
-        showError(employeeIdInput, 'Invalid format. Use EMP-YYYY-XXXXX');
+        showError(employeeIdInput, 'Invalid format. Use EMP-ABC-0000');
         return;
     }
 
@@ -1018,4 +1018,3 @@ adminLoadingButtons.forEach((button) => {
     });
 });
 });
-

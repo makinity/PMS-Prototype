@@ -25,7 +25,7 @@
         </div>
 
         <!-- STATUS / CONTEXT -->
-        <div class="bg-gray-800 border border-gray-700 rounded-lg p-5">
+        <div class="bg-transparent border border-gray-700 rounded-lg p-5">
             <div class="flex items-start justify-between gap-4">
                 <div>
                     <h2 class="text-lg font-semibold text-white">Status & Context</h2>
@@ -61,7 +61,7 @@
         @endif
 
         <!-- EMPLOYEE INFORMATION -->
-        <div class="bg-gray-800 border border-gray-700 rounded-lg p-5">
+        <div class="bg-transparent border border-gray-700 rounded-lg p-5">
             <h2 class="font-semibold text-lg text-white mb-4">Employee Information</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
@@ -101,7 +101,7 @@
         <div id="ipcr-function-sections" class="space-y-6"></div>
 
         <!-- COMMITMENT SECTION -->
-        <div class="bg-gray-800 border border-gray-700 rounded-lg p-5">
+        <div class="bg-transparent border border-gray-700 rounded-lg p-5">
             <h2 class="font-semibold text-lg text-white mb-4">Employee Commitment</h2>
             <div class="bg-gray-700/50 rounded-lg p-4 mb-6">
                 <p class="text-sm text-gray-300 italic">
@@ -549,7 +549,7 @@
                 const percent = buildSectionPercent(type);
                 const percentLabel = Number.isFinite(percent) ? `(${percent}%)` : '';
                 const section = document.createElement('div');
-                section.className = 'bg-gray-800 border border-gray-700 rounded-lg p-5 space-y-4';
+                section.className = 'bg-transparent border border-gray-700 rounded-lg p-5 space-y-4';
                 section.innerHTML = `
                     <div class="flex justify-between items-start">
                         <div>

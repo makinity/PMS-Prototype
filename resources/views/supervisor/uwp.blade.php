@@ -227,6 +227,8 @@
                             <div class="flex flex-wrap gap-1.5">
                                 <button type="button" data-editor-workspace-tab="overview" class="border-b-2 border-cyan-400 px-2.5 py-2.5 text-sm font-semibold text-white">Overview</button>
                                 <button type="button" data-editor-workspace-tab="targets" class="border-b-2 border-transparent px-2.5 py-2.5 text-sm font-medium text-slate-400">Targets</button>
+                                <button type="button" data-editor-workspace-tab="standards" class="border-b-2 border-transparent px-2.5 py-2.5 text-sm font-medium text-slate-400">Standards</button>
+                                <button type="button" data-editor-workspace-tab="assignees" class="border-b-2 border-transparent px-2.5 py-2.5 text-sm font-medium text-slate-400">Assignees</button>
                             </div>
                         </div>
 
@@ -1705,7 +1707,7 @@
 
                         if (isDraft) {
                             const actionWrap = document.createElement('div');
-                            actionWrap.className = 'flex items-center gap-2';
+                            actionWrap.className = 'flex flex-wrap items-center justify-end gap-2';
 
                             const editBtn = document.createElement('button');
                             editBtn.type = 'button';

@@ -108,7 +108,7 @@
         }
 
         .hero-copy {
-            max-width: 18rem;
+            max-width: 32rem;
             padding-top: 2.6rem;
         }
 
@@ -155,9 +155,9 @@
         .hero-text {
             margin: 0;
             color: rgba(236, 241, 255, 0.92);
-            font-size: 0.82rem;
+            font-size: 0.95rem;
             line-height: 1.58;
-            max-width: 15rem;
+            max-width: 26rem;
         }
 
         .hero-features {
@@ -383,7 +383,9 @@
             width: 0.95rem;
             height: 0.95rem;
             border-radius: 0.3rem;
-            accent-color: #7969ff;
+            accent-color: #223454;
+            background-color: #16233c;
+            box-shadow: inset 0 0 0 1px rgba(126, 145, 184, 0.42);
         }
 
         .text-link {
@@ -644,99 +646,173 @@
             }
         }
 
-        @media (max-width: 1260px) {
-            body {
-                overflow: auto;
-            }
-
+        @media (max-width: 1024px) {
             .auth-page {
-                height: auto;
-                grid-template-columns: 1fr;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                background: var(--page-bg);
+                padding: 1.5rem 1rem;
             }
 
             .auth-hero {
-                min-height: 42rem;
-                padding: 2rem 1.5rem 0;
+                width: 100%;
+                max-width: 30rem;
+                min-height: unset;
+                padding: 1rem 0 0.75rem;
+                background: transparent;
             }
 
             .auth-hero::before,
             .hero-overlay {
-                inset: 0;
-                border-radius: 0;
+                display: none !important;
+            }
+
+            .hero-content {
+                display: block;
             }
 
             .hero-copy {
-                padding-top: 3rem;
+                padding-top: 0;
+                text-align: center;
+                max-width: none;
             }
 
-            .auth-panel {
-                padding: 1.5rem;
-                margin-top: -1rem;
-                min-height: auto;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .auth-hero {
-                min-height: auto;
-            }
-
-            .hero-copy {
-                max-width: 100%;
-                padding-top: 2rem;
+            .hero-badge {
+                display: none !important;
             }
 
             .hero-title {
-                font-size: 3.2rem;
+                margin: 0;
+                font-size: 1.65rem;
+                line-height: 1.1;
+                letter-spacing: -0.03em;
+                text-align: center;
             }
 
+            .hero-title span {
+                display: inline;
+            }
+
+            .hero-rule,
             .hero-text {
-                font-size: 1.1rem;
+                display: none !important;
             }
 
             .hero-features {
-                grid-template-columns: 1fr;
-                padding: 1.3rem;
-            }
-
-            .feature-title {
-                font-size: 1.15rem;
-            }
-
-            .feature-text {
-                font-size: 0.98rem;
+                display: none !important;
             }
 
             .auth-panel {
-                padding: 1rem;
+                width: 100%;
+                max-width: 30rem;
+                min-height: unset;
+                padding: 0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
             }
 
-            .auth-card-header,
+            .auth-panel::before {
+                display: none;
+            }
+
+            .auth-card {
+                width: 100%;
+                margin: 0 auto;
+                border-radius: 1.35rem;
+                border-color: rgba(122, 149, 197, 0.18);
+                background: linear-gradient(180deg, rgba(10, 18, 35, 0.96), rgba(7, 14, 28, 0.98));
+            }
+
+            .auth-card-header {
+                padding: 1.25rem 1.15rem 0.9rem;
+            }
+
             .auth-card-body {
-                padding-left: 1.3rem;
-                padding-right: 1.3rem;
+                padding: 1rem 1.15rem 1.15rem;
             }
 
             .auth-title {
-                font-size: 2rem;
+                font-size: 1.05rem;
+                line-height: 1.2;
             }
 
             .auth-subtitle {
-                font-size: 1rem;
+                margin-top: 0.35rem;
+                font-size: 0.72rem;
+                line-height: 1.45;
+                max-width: 16rem;
+            }
+
+            .auth-form {
+                gap: 0.95rem;
+            }
+
+            .field-group {
+                gap: 0.46rem;
             }
 
             .field-label {
-                font-size: 1.05rem;
+                font-size: 0.78rem;
             }
 
-            .action-grid,
-            .profile-upload {
-                grid-template-columns: 1fr;
+            .field-input {
+                min-height: 3.15rem;
+                font-size: 0.82rem;
+                padding-left: 2.45rem;
+                border-radius: 1rem;
+            }
+
+            .field-input::placeholder {
+                color: rgba(161, 178, 214, 0.9);
+            }
+
+            .field-shell i.leading-icon {
+                font-size: 0.8rem;
+                left: 0.8rem;
             }
 
             .form-row {
-                align-items: flex-start;
-                flex-direction: column;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 0.75rem;
+                flex-wrap: wrap;
+                margin-top: 0.15rem;
+            }
+
+            .remember-wrap,
+            .text-link[data-open-view="reset"] {
+                min-height: 2rem;
+                display: inline-flex;
+                align-items: center;
+            }
+
+            .remember-wrap {
+                font-size: 0.78rem;
+            }
+
+            .text-link[data-open-view="reset"] {
+                margin-left: auto;
+                text-align: right;
+            }
+
+            .submit-button {
+                font-size: 0.88rem;
+                min-height: 3.2rem;
+                padding: 0.78rem;
+                border-radius: 1rem;
+            }
+
+            .footer-link {
+                margin-top: 0.2rem;
+                padding-top: 0.9rem;
+                font-size: 0.74rem;
+                text-align: center;
             }
         }
     </style>
@@ -813,10 +889,10 @@
                     <section class="auth-view is-active" id="loginView" data-auth-view="login">
                         <form id="loginForm" class="auth-form" novalidate>
                             <div class="field-group">
-                                <label class="field-label" for="login_name">Name, Email, or Employee ID</label>
+                                <label class="field-label" for="login_name">Username</label>
                                 <div class="field-shell">
                                     <i class="fa-regular fa-user leading-icon"></i>
-                                    <input type="text" id="login_name" name="name" class="field-input" placeholder="Enter your email, name, or employee ID" autocomplete="username">
+                                    <input type="text" id="login_name" name="name" class="field-input" placeholder="Enter your username" autocomplete="username">
                                 </div>
                                 <div class="field-error" data-error-for="login_name"></div>
                             </div>
@@ -861,9 +937,9 @@
                                     <label class="field-label" for="employee_id">Employee ID</label>
                                     <div class="field-shell">
                                         <i class="fa-regular fa-id-badge leading-icon"></i>
-                                        <input type="text" id="employee_id" name="employee_id" class="field-input" placeholder="EMP-2026-10433">
+                                        <input type="text" id="employee_id" name="employee_id" class="field-input" placeholder="EMP-RCU-0003">
                                     </div>
-                                    <div class="field-hint">Format: EMP-YYYY-XXXXX</div>
+                                    <div class="field-hint">Format: EMP-ABC-0000</div>
                                     <div class="field-error" data-error-for="employee_id"></div>
                                 </div>
 
@@ -1029,6 +1105,7 @@
             const authTitle = document.getElementById('authTitle');
             const authSubtitle = document.getElementById('authSubtitle');
             const activationStepSummary = document.getElementById('activationStepSummary');
+            const authPage = document.querySelector('.auth-page');
             const authViews = Array.from(document.querySelectorAll('[data-auth-view]'));
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
 
@@ -1130,6 +1207,10 @@
                 authViews.forEach(view => {
                     view.classList.toggle('is-active', view.dataset.authView === viewName);
                 });
+
+                if (authPage) {
+                    authPage.dataset.mobileGap = ['login', 'reset'].includes(viewName) ? 'extended' : 'compact';
+                }
 
                 const meta = titleMap[viewName];
                 authTitle.textContent = meta.title;
@@ -1330,9 +1411,9 @@
             verifyBtn.addEventListener('click', async () => {
                 clearErrorsInView(activationView);
 
-                const employeeId = employeeIdInput.value.trim();
+                const employeeId = employeeIdInput.value.trim().toUpperCase();
                 const email = activationEmailInput.value.trim();
-                const employeeIdPattern = /^EMP-\d{4}-\d{5}$/;
+                const employeeIdPattern = /^EMP-[A-Z]{3}-\d{4}$/i;
                 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
                 if (!employeeId) {
@@ -1346,7 +1427,7 @@
                 }
 
                 if (!employeeIdPattern.test(employeeId)) {
-                    showFieldError(employeeIdInput, 'Invalid format. Use EMP-YYYY-XXXXX.');
+                    showFieldError(employeeIdInput, 'Invalid format. Use EMP-ABC-0000.');
                     return;
                 }
 

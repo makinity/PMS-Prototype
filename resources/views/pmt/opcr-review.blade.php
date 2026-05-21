@@ -1187,13 +1187,8 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             if (action === 'approve') {
-                activeReviewForm = form;
-                const sigModal = document.getElementById('pmt-signature-modal');
-                if (sigModal) {
-                    sigModal.classList.remove('hidden');
-                    sigModal.classList.add('flex');
-                }
-                return; // Stop here, wait for signature
+                submitReviewForm(form, button);
+                return;
             }
 
             // For return, submit immediately

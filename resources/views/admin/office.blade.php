@@ -15,7 +15,7 @@
     @endphp
 
     <section class="space-y-4 px-3 md:px-6">
-        <div class="min-w-0 rounded-xl border border-white/10 bg-gray-800/90 p-4 shadow-sm">
+        <div class="min-w-0 rounded-xl border border-white/10 bg-transparent p-4 shadow-sm">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                     <h1 class="text-lg font-semibold text-gray-100 sm:text-xl">Office Management</h1>
@@ -47,7 +47,7 @@
                         ->values();
                     $hasBlockingData = (int) ($office->employees_count ?? 0) > 0 || (int) ($office->unit_work_plans_count ?? 0) > 0;
                 @endphp
-                <article class="rounded-xl border border-white/10 bg-gray-800/90 p-4 shadow-sm">
+                <article class="rounded-xl border border-white/10 bg-transparent p-4 shadow-sm">
                     <div class="flex items-start justify-between gap-2">
                         <h2 class="break-words text-sm font-semibold text-gray-100">{{ $office->name }}</h2>
                         <span class="shrink-0 rounded-full border border-white/10 bg-gray-700/70 px-2.5 py-1 text-[11px] font-semibold text-gray-200">
@@ -114,13 +114,13 @@
                     </div>
                 </article>
             @empty
-                <div class="rounded-xl border border-white/10 bg-gray-800/90 px-4 py-10 text-center text-sm text-gray-400 shadow-sm">
+                <div class="rounded-xl border border-white/10 bg-transparent px-4 py-10 text-center text-sm text-gray-400 shadow-sm">
                     No offices found.
                 </div>
             @endforelse
         </div>
 
-        <div class="hidden min-w-0 rounded-xl border border-white/10 bg-gray-800/90 shadow-sm sm:block">
+        <div class="hidden min-w-0 rounded-xl border border-white/10 bg-transparent shadow-sm sm:block">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-white/10 text-xs sm:text-sm">
                     <thead class="bg-gray-900/70 text-[11px] uppercase tracking-wide text-gray-400 sm:text-xs">

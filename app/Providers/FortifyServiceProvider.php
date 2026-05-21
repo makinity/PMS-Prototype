@@ -69,10 +69,17 @@ class FortifyServiceProvider extends ServiceProvider
                 return null;
             }
 
-            if (! $user->is_active) {
+            if (! $user->activated_at) {
                 $key = $loginField ?: 'name';
                 throw ValidationException::withMessages([
                     $key => 'Activate account first.',
+                ]);
+            }
+
+            if (! $user->is_active) {
+                $key = $loginField ?: 'name';
+                throw ValidationException::withMessages([
+                    $key => 'This account is currently disabled.',
                 ]);
             }
 

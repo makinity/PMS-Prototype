@@ -32,7 +32,7 @@ class ActivationController extends Controller
         }
 
         $data = $request->validate([
-            'employee_id' => ['required', 'string', 'regex:/^EMP-\d{4}-\d{5}$/'],
+            'employee_id' => ['required', 'string', 'regex:/^EMP-[A-Z]{3}-\d{4}$/i'],
             'email' => ['required', 'email'],
         ]);
 
@@ -46,7 +46,7 @@ class ActivationController extends Controller
             return response()->json(['message' => 'Invalid Employee ID or Email.'], 422);
         }
 
-        if ($user->is_active || $user->activated_at) {
+        if ($user->activated_at) {
             return response()->json(['message' => 'Account already activated. Please login.'], 409);
         }
 
@@ -98,7 +98,7 @@ class ActivationController extends Controller
             return response()->json(['message' => 'Invalid or expired token.'], 422);
         }
 
-        if ($user->is_active || $user->activated_at) {
+        if ($user->activated_at) {
             return response()->json(['message' => 'Account already activated. Please login.'], 409);
         }
 

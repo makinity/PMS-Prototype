@@ -6,7 +6,7 @@
     @endphp
 
     <section class="space-y-5 px-3 md:px-6">
-        <div class="rounded-2xl border border-white/10 bg-slate-900/85 p-5 shadow-sm">
+        <div class="rounded-2xl border border-white/10 bg-transparent p-5 shadow-sm">
             <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                 <div>
                     <h1 class="text-xl font-semibold text-white sm:text-2xl">Database</h1>
@@ -19,24 +19,24 @@
         </div>
 
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <div class="rounded-2xl border border-white/10 bg-slate-900/85 p-4">
+            <div class="rounded-2xl border border-white/10 bg-transparent p-4">
                 <p class="text-xs uppercase tracking-[0.28em] text-slate-400">Connection</p>
                 <p class="mt-2 text-lg font-semibold text-white">{{ strtoupper($status['driver'] ?? 'unknown') }}</p>
                 <p class="mt-1 text-sm text-slate-400">{{ $status['connection'] ?? 'unknown' }}</p>
             </div>
-            <div class="rounded-2xl border border-white/10 bg-slate-900/85 p-4">
+            <div class="rounded-2xl border border-white/10 bg-transparent p-4">
                 <p class="text-xs uppercase tracking-[0.28em] text-slate-400">Database</p>
                 <p class="mt-2 text-lg font-semibold text-white">{{ $status['database'] ?? 'unknown' }}</p>
                 <p class="mt-1 text-sm text-slate-400">{{ $status['host'] ?? 'localhost' }}:{{ $status['port'] ?? '3306' }}</p>
             </div>
-            <div class="rounded-2xl border border-white/10 bg-slate-900/85 p-4">
+            <div class="rounded-2xl border border-white/10 bg-transparent p-4">
                 <p class="text-xs uppercase tracking-[0.28em] text-slate-400">mysqldump</p>
                 <p class="mt-2 text-lg font-semibold {{ !empty($status['mysqldump_available']) ? 'text-emerald-300' : 'text-rose-300' }}">
                     {{ !empty($status['mysqldump_available']) ? 'Available' : 'Unavailable' }}
                 </p>
                 <p class="mt-1 text-xs text-slate-400">{{ $status['mysqldump_message'] ?? 'Unknown' }}</p>
             </div>
-            <div class="rounded-2xl border border-white/10 bg-slate-900/85 p-4">
+            <div class="rounded-2xl border border-white/10 bg-transparent p-4">
                 <p class="text-xs uppercase tracking-[0.28em] text-slate-400">mysql client</p>
                 <p class="mt-2 text-lg font-semibold {{ !empty($status['mysql_available']) ? 'text-emerald-300' : 'text-rose-300' }}">
                     {{ !empty($status['mysql_available']) ? 'Available' : 'Unavailable' }}
@@ -46,7 +46,7 @@
         </div>
 
         <div class="grid grid-cols-1 gap-5 xl:grid-cols-[1.15fr_0.85fr]">
-            <div class="rounded-2xl border border-white/10 bg-slate-900/85 p-5 shadow-sm">
+            <div class="rounded-2xl border border-white/10 bg-transparent p-5 shadow-sm">
                 <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                     <div>
                         <h2 class="text-lg font-semibold text-white">Create Backup</h2>
@@ -87,7 +87,7 @@
             </div>
         </div>
 
-        <div class="rounded-2xl border border-white/10 bg-slate-900/85 shadow-sm">
+        <div class="rounded-2xl border border-white/10 bg-transparent shadow-sm">
             <div class="border-b border-white/10 px-5 py-4">
                 <h2 class="text-lg font-semibold text-white">Stored Backups</h2>
                 <p class="mt-1 text-sm text-slate-300">Private backup inventory derived from files under the local storage disk.</p>

@@ -11,7 +11,7 @@
     @endphp
 
     <section class="space-y-5 px-3 md:px-6">
-        <div class="rounded-2xl border border-white/10 bg-slate-900/85 p-5 shadow-sm">
+        <div class="rounded-2xl border border-white/10 bg-transparent p-5 shadow-sm">
             <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                 <div>
                     <h1 class="text-xl font-semibold text-white sm:text-2xl">Reports</h1>
@@ -24,21 +24,21 @@
         </div>
 
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <div class="rounded-2xl border border-white/10 bg-slate-900/85 p-4">
+            <div class="rounded-2xl border border-white/10 bg-transparent p-4">
                 <p class="text-xs uppercase tracking-[0.28em] text-slate-400">Available Reports</p>
                 <p class="mt-2 text-3xl font-semibold text-white">{{ count($reportOptions) }}</p>
             </div>
-            <div class="rounded-2xl border border-white/10 bg-slate-900/85 p-4">
+            <div class="rounded-2xl border border-white/10 bg-transparent p-4">
                 <p class="text-xs uppercase tracking-[0.28em] text-slate-400">Selected Report</p>
                 <p class="mt-2 text-lg font-semibold text-white">{{ $selectedDefinition['label'] ?? 'None selected' }}</p>
             </div>
-            <div class="rounded-2xl border border-white/10 bg-slate-900/85 p-4">
+            <div class="rounded-2xl border border-white/10 bg-transparent p-4">
                 <p class="text-xs uppercase tracking-[0.28em] text-slate-400">Performance Period</p>
                 <p class="mt-2 text-lg font-semibold text-white">
                     {{ optional(collect($periods)->firstWhere('id', (int) $selectedPeriod))->name ?? 'Not selected' }}
                 </p>
             </div>
-            <div class="rounded-2xl border border-white/10 bg-slate-900/85 p-4">
+            <div class="rounded-2xl border border-white/10 bg-transparent p-4">
                 <p class="text-xs uppercase tracking-[0.28em] text-slate-400">Office</p>
                 <p class="mt-2 text-lg font-semibold text-white">
                     {{ optional(collect($offices)->firstWhere('id', (int) $selectedOffice))->name ?? 'Not selected' }}
@@ -46,7 +46,7 @@
             </div>
         </div>
 
-        <div class="rounded-2xl border border-white/10 bg-slate-900/85 p-5 shadow-sm">
+        <div class="rounded-2xl border border-white/10 bg-transparent p-5 shadow-sm">
             <form method="GET" action="{{ route('admin.reports') }}" class="grid grid-cols-1 gap-4 lg:grid-cols-4">
                 <div>
                     <label for="report" class="mb-1 block text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">Report Type</label>
@@ -104,7 +104,7 @@
                         'office_id' => $selectedOffice,
                     ];
                 @endphp
-                <article class="rounded-2xl border {{ $isSelected ? 'border-blue-400/40 bg-blue-500/10' : 'border-white/10 bg-slate-900/85' }} p-5 shadow-sm">
+                <article class="rounded-2xl border {{ $isSelected ? 'border-blue-400/40 bg-blue-500/10' : 'border-white/10 bg-transparent' }} p-5 shadow-sm">
                     <div class="flex items-start justify-between gap-4">
                         <div>
                             <p class="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">{{ strtoupper($option['slug']) }}</p>

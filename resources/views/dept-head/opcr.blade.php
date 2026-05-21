@@ -357,17 +357,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     confirmProceed.addEventListener('click', () => {
-        if (pendingFormId === 'form-opcr-endorse') {
-            // Close confirmation modal and open signature pad
-            confirmModal.classList.add('hidden');
-            confirmModal.classList.remove('flex');
-            
-            const sigModal = document.getElementById('opcr-signature-modal');
-            if (sigModal) {
-                sigModal.classList.remove('hidden');
-                sigModal.classList.add('flex');
-            }
-        } else if (pendingFormId) {
+        if (pendingFormId) {
             document.getElementById(pendingFormId)?.submit();
         }
     });

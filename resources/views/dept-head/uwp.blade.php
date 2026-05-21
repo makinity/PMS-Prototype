@@ -1731,7 +1731,7 @@
         const remarks = document.getElementById('uwp-workspace-remarks');
         const form = document.getElementById('uwp-workspace-review-form');
 
-        btnEndorse?.addEventListener('click', () => {
+        btnEndorse?.addEventListener('click', async () => {
             if (btnEndorse.disabled) return;
 
             const url = String(form.dataset.endorseAction || '').trim();
@@ -1742,8 +1742,96 @@
                 });
                 return;
             }
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ||
+                              form.querySelector('input[name="_token"]')?.value || '';
+            const uwpIdValue = String(selectedUwp?.id || document.getElementById('uwp-workspace-uwp-id')?.value || '').trim();
 
-            openSignatureModal();
+            setButtonLoading(btnEndorse, true);
+            if (btnReturn) {
+                btnReturn.disabled = true;
+                btnReturn.classList.add('opacity-80', 'cursor-not-allowed');
+            }
+
+            try {
+                const fd = new FormData();
+                fd.append('_token', csrfToken);
+                fd.append('unit_work_plan_id', uwpIdValue);
+                fd.append('action', 'endorse');
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: fd,
+                });
+
+                let data = {};
+                try {
+                    data = await response.json();
+                } catch (_) {
+                    data = {};
+                }
+
+                if (!response.ok || !data?.success) {
+                    throw new Error(data?.message || data?.error || 'Unable to endorse UWP');
+                }
+
+                const endorsedAt = data?.endorsed_at || new Date().toISOString();
+                const endorsedStatus = data?.status || 'consolidated';
+                const uwpId = Number(selectedUwp?.id || data?.uwp_id || uwpIdValue || 0);
+
+                if (!selectedUwp) selectedUwp = {};
+                selectedUwp.id = selectedUwp.id || uwpId;
+                selectedUwp.status = endorsedStatus;
+                selectedUwp.endorsed_at = endorsedAt;
+                selectedUwp.return_remarks = '';
+                selectedUwp.returned_at = null;
+                selectedUwp.returned_by_role = null;
+
+                hydrateWorkspaceReviewModal(selectedUwp);
+                updateDeptHeadListRow(selectedUwp.id || uwpId, endorsedStatus, {
+                    return_remarks: '',
+                    returned_at: null,
+                    returned_by_role: null,
+                });
+
+                const row = document.querySelector(`[data-uwp-row-id="${uwpId}"]`) || document.querySelector(`[data-uwp-row="${uwpId}"]`);
+                const reviewBtn = row?.querySelector(`[data-uwp-id="${uwpId}"][data-uwp]`) || row?.querySelector('[data-review-btn][data-uwp]');
+                if (reviewBtn) {
+                    let nextPayload = {};
+                    try {
+                        nextPayload = JSON.parse(reviewBtn.getAttribute('data-uwp') || '{}');
+                    } catch (_) {
+                        nextPayload = {};
+                    }
+                    nextPayload.status = normalizeStatusKey(endorsedStatus);
+                    nextPayload.return_remarks = '';
+                    nextPayload.returned_at = null;
+                    nextPayload.returned_by_role = null;
+                    reviewBtn.setAttribute('data-uwp', JSON.stringify(nextPayload));
+                }
+
+                closeReviewModalSafely();
+                window.PMSnackbar?.show({
+                    type: 'success',
+                    message: 'UWP consolidated to OPCR successfully.',
+                });
+            } catch (error) {
+                window.PMSnackbar?.show({
+                    type: 'error',
+                    message: error?.message || 'Unable to consolidate UWP right now. Please try again.',
+                });
+            } finally {
+                setButtonLoading(btnEndorse, false);
+                if (btnReturn) {
+                    btnReturn.disabled = false;
+                    btnReturn.classList.remove('opacity-80', 'cursor-not-allowed');
+                }
+                clearFlowbiteBackdrops();
+            }
         });
 
 

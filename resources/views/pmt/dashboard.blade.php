@@ -1,108 +1,161 @@
 @extends('layouts.pmt')
 
 @section('main-content')
+    @php
+        $periodLabel = $period?->name ?? 'No Active Performance Period';
+        $kpis = $kpis ?? [];
+        $queueCounts = $queueCounts ?? [];
+        $trend = $trend ?? ['labels' => [], 'series' => ['approved' => [], 'returned' => []]];
+        $approvalQueue = $approvalQueue ?? [];
+        $recentActions = $recentActions ?? [];
+    @endphp
+
     <section class="space-y-6">
-        <div class="flex flex-wrap items-center justify-between gap-4">
-            <div>
-                <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">Performance Management Team</p>
-                <h1 class="mt-1 text-2xl font-bold text-white">Dashboard</h1>
-                <p class="text-sm text-slate-400">Quick view of approvals, escalations, and performance signals.</p>
-            </div>
-            <div class="flex items-center gap-2 text-xs text-slate-300">
-                <span class="rounded-full border border-emerald-600/50 bg-emerald-500/10 px-3 py-1 font-semibold text-emerald-200">Live</span>
-                <span class="rounded-full border border-blue-600/50 bg-blue-500/10 px-3 py-1 font-semibold text-blue-200">Prototype</span>
-            </div>
+        <div class="rounded-2xl border border-white/10 bg-transparent p-5">
+            <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">Performance Management Team</p>
+            <h1 class="mt-1 text-2xl font-bold text-white">Dashboard</h1>
+            <p class="mt-1 text-sm text-slate-400">Operational queue and approval workflow overview.</p>
+            <p class="mt-2 text-xs text-slate-500">{{ $periodLabel }}</p>
         </div>
 
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-                <p class="text-xs text-slate-400">UWP approvals pending</p>
-                <p class="mt-1 text-3xl font-semibold text-white">6</p>
-                <p class="text-xs text-amber-300">3 due today</p>
+            <div class="rounded-xl border border-white/10 bg-transparent p-4">
+                <p class="text-xs text-slate-400">Pending Actions</p>
+                <p class="mt-1 text-3xl font-semibold text-amber-300">{{ (int) ($kpis['pendingActions'] ?? 0) }}</p>
             </div>
-            <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-                <p class="text-xs text-slate-400">OPCR approvals</p>
-                <p class="mt-1 text-3xl font-semibold text-white">4</p>
-                <p class="text-xs text-emerald-300">2 auto-validated from UWP</p>
+            <div class="rounded-xl border border-white/10 bg-transparent p-4">
+                <p class="text-xs text-slate-400">Returned / Escalated</p>
+                <p class="mt-1 text-3xl font-semibold text-rose-300">{{ (int) ($kpis['returnedEscalated'] ?? 0) }}</p>
             </div>
-            <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-                <p class="text-xs text-slate-400">Performance reports queued</p>
-                <p class="mt-1 text-3xl font-semibold text-white">12</p>
-                <p class="text-xs text-slate-400">Awaiting export</p>
+            <div class="rounded-xl border border-white/10 bg-transparent p-4">
+                <p class="text-xs text-slate-400">Finalized Approvals</p>
+                <p class="mt-1 text-3xl font-semibold text-emerald-300">{{ (int) ($kpis['finalizedApprovals'] ?? 0) }}</p>
             </div>
-            <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-                <p class="text-xs text-slate-400">Alerts</p>
-                <p class="mt-1 text-3xl font-semibold text-rose-300">2</p>
-                <p class="text-xs text-rose-300">Missing linkage to ORS</p>
+            <div class="rounded-xl border border-white/10 bg-transparent p-4">
+                <p class="text-xs text-slate-400">Queue Items</p>
+                <p class="mt-1 text-3xl font-semibold text-white">{{ (int) ($kpis['queueItems'] ?? 0) }}</p>
             </div>
         </div>
 
         <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-lg font-semibold text-white">UWP Approvals</h2>
-                    <a href="" class="text-xs font-semibold text-emerald-300 hover:text-emerald-200">View all</a>
+            <div class="rounded-xl border border-white/10 bg-transparent p-4">
+                <h2 class="text-sm font-semibold text-white">PMT Action Trend (Last 14 Days)</h2>
+                <div class="relative mt-3 h-64 w-full overflow-hidden sm:h-72">
+                    <canvas id="pmtTrendChart" class="block h-full w-full"></canvas>
                 </div>
-                <div class="mt-3 space-y-3 text-sm text-slate-200">
-                    <div class="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2">
-                        <div>
-                            <p class="font-semibold text-white">Provincial HRMO</p>
-                            <p class="text-xs text-slate-400">Jan–Jun 2025</p>
+            </div>
+            <div class="rounded-xl border border-white/10 bg-transparent p-4">
+                <h2 class="text-sm font-semibold text-white">Current Queue Composition</h2>
+                <div class="relative mt-3 h-64 w-full overflow-hidden sm:h-72">
+                    <canvas id="pmtQueueChart" class="block h-full w-full"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <div class="rounded-xl border border-white/10 bg-transparent p-4">
+                <h2 class="text-sm font-semibold text-white">Approval Queue</h2>
+                <div class="mt-3 space-y-2 text-sm text-slate-200">
+                    @forelse ($approvalQueue as $item)
+                        <div class="rounded-lg border border-white/10 bg-transparent px-3 py-2">
+                            <p class="font-semibold text-white">{{ $item['office'] ?? 'Unknown Office' }}</p>
+                            <p class="text-xs text-slate-400">
+                                Status: {{ strtoupper((string) ($item['status'] ?? '--')) }} |
+                                Updated: {{ $item['updated_at'] ?? '--' }}
+                            </p>
                         </div>
-                        <span class="rounded-full border border-amber-600/50 bg-amber-500/10 px-2.5 py-1 text-[11px] font-semibold text-amber-200">For review</span>
-                    </div>
-                    <div class="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2">
-                        <div>
-                            <p class="font-semibold text-white">IT Services</p>
-                            <p class="text-xs text-slate-400">Jul–Dec 2024</p>
-                        </div>
-                        <span class="rounded-full border border-emerald-600/50 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-200">Approved</span>
-                    </div>
-                    <div class="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2">
-                        <div>
-                            <p class="font-semibold text-white">Budget Office</p>
-                            <p class="text-xs text-slate-400">Jan–Jun 2025</p>
-                        </div>
-                        <span class="rounded-full border border-blue-600/50 bg-blue-500/10 px-2.5 py-1 text-[11px] font-semibold text-blue-200">In routing</span>
-                    </div>
+                    @empty
+                        <p class="text-slate-400">No approval items in queue.</p>
+                    @endforelse
                 </div>
             </div>
 
-            <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-lg font-semibold text-white">Recent Actions</h2>
-                    <a href="" class="text-xs font-semibold text-emerald-300 hover:text-emerald-200">Open reports</a>
-                </div>
-                <div class="mt-3 space-y-3 text-sm text-slate-200">
-                    <div class="flex items-start gap-3 rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2">
-                        <span class="mt-1 inline-flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/50">
-                            <i class="fa-solid fa-check"></i>
-                        </span>
-                        <div>
-                            <p class="font-semibold text-white">OPCR approved</p>
-                            <p class="text-xs text-slate-400">PMT validated OPCR for Provincial HRMO</p>
+            <div class="rounded-xl border border-white/10 bg-transparent p-4">
+                <h2 class="text-sm font-semibold text-white">Recent Actions</h2>
+                <div class="mt-3 space-y-2 text-sm text-slate-200">
+                    @forelse ($recentActions as $item)
+                        <div class="rounded-lg border border-white/10 bg-transparent px-3 py-2">
+                            <p class="font-semibold text-white">{{ $item['office'] ?? 'Unknown Office' }}</p>
+                            <p class="text-xs text-slate-400">
+                                Status: {{ strtoupper((string) ($item['status'] ?? '--')) }} |
+                                Updated: {{ $item['updated_at'] ?? '--' }}
+                            </p>
                         </div>
-                    </div>
-                    <div class="flex items-start gap-3 rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2">
-                        <span class="mt-1 inline-flex h-8 w-8 items-center justify-center rounded-full bg-amber-500/10 text-amber-200 border border-amber-500/50">
-                            <i class="fa-solid fa-exclamation"></i>
-                        </span>
-                        <div>
-                            <p class="font-semibold text-white">UWP needs revision</p>
-                            <p class="text-xs text-slate-400">Budget Office flagged missing linkage to ORS</p>
-                        </div>
-                    </div>
-                    <div class="flex items-start gap-3 rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2">
-                        <span class="mt-1 inline-flex h-8 w-8 items-center justify-center rounded-full bg-blue-500/10 text-blue-200 border border-blue-500/50">
-                            <i class="fa-solid fa-chart-line"></i>
-                        </span>
-                        <div>
-                            <p class="font-semibold text-white">Report exported</p>
-                            <p class="text-xs text-slate-400">Performance report queued for Q4 rollup</p>
-                        </div>
-                    </div>
+                    @empty
+                        <p class="text-slate-400">No recent PMT actions found.</p>
+                    @endforelse
                 </div>
             </div>
         </div>
     </section>
+
+    @push('scripts')
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            (function () {
+                const trendLabels = @json($trend['labels'] ?? []);
+                const approvedSeries = @json($trend['series']['approved'] ?? []);
+                const returnedSeries = @json($trend['series']['returned'] ?? []);
+
+                const queueCounts = @json($queueCounts ?? []);
+                const queueLabels = ['UWP', 'OPCR', 'Accomplishment', 'Returned'];
+                const queueData = [
+                    Number(queueCounts.uwp ?? 0),
+                    Number(queueCounts.opcr ?? 0),
+                    Number(queueCounts.accomplishment ?? 0),
+                    Number(queueCounts.returned ?? 0)
+                ];
+
+                const textColor = '#d1d5db';
+                const gridColor = 'rgba(148, 163, 184, 0.18)';
+
+                const trendEl = document.getElementById('pmtTrendChart');
+                if (trendEl) {
+                    new Chart(trendEl, {
+                        type: 'line',
+                        data: {
+                            labels: trendLabels,
+                            datasets: [{
+                                label: 'Approved',
+                                data: approvedSeries,
+                                borderWidth: 2,
+                                tension: 0.25
+                            }, {
+                                label: 'Returned',
+                                data: returnedSeries,
+                                borderWidth: 2,
+                                tension: 0.25
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { labels: { color: textColor } } },
+                            scales: {
+                                x: { ticks: { color: textColor }, grid: { color: gridColor } },
+                                y: { beginAtZero: true, ticks: { color: textColor, precision: 0 }, grid: { color: gridColor } }
+                            }
+                        }
+                    });
+                }
+
+                const queueEl = document.getElementById('pmtQueueChart');
+                if (queueEl) {
+                    new Chart(queueEl, {
+                        type: 'doughnut',
+                        data: {
+                            labels: queueLabels,
+                            datasets: [{ data: queueData }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { position: 'bottom', labels: { color: textColor } } }
+                        }
+                    });
+                }
+            })();
+        </script>
+    @endpush
 @endsection
+

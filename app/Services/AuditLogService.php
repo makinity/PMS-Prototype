@@ -230,7 +230,7 @@ class AuditLogService
             $routeName === 'activate.complete' => 'activate_account',
             $routeName === 'admin.users.reset-password' => 'reset_password',
             $routeName === 'admin.users.send-code' => 'send_employee_code',
-            str_ends_with($routeName, '.toggle-active') => 'toggle_active',
+            str_ends_with($routeName, '.toggle') || str_ends_with($routeName, '.toggle-active') => 'toggle_active',
             str_ends_with($routeName, '.activate') => 'activate',
             str_ends_with($routeName, '.deactivate') => 'deactivate',
             str_ends_with($routeName, '.store') => 'create',

@@ -562,21 +562,55 @@
         <script>
             // Global triggers
             document.querySelectorAll('[data-submit-uwp-trigger], #workspaceSubmitUwpTrigger').forEach(btn => {
-                btn.addEventListener('click', (e) => {
+                btn.addEventListener('click', async (e) => {
                     const targetId = currentUwpId || (currentPreviewUwp ? currentPreviewUwp.id : null);
                     if (!targetId) {
                         showNotification('No UWP selected for submission.', 'error');
                         return;
                     }
-                    
-                    // Set the current ID for the signature handler
-                    window.uwpToSubmitId = targetId;
-                    
-                    // Show signature modal
-                    const sigModal = document.getElementById('signature-pad-modal');
-                    if (sigModal) {
-                        sigModal.classList.remove('hidden');
-                        sigModal.classList.add('flex');
+
+                    const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+                    const csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : '';
+
+                    if (!csrfToken) {
+                        showNotification('Security token missing. Please refresh the page.', 'error');
+                        return;
+                    }
+
+                    // Start loading state
+                    btn.disabled = true;
+                    const originalText = btn.innerHTML;
+                    btn.textContent = 'Submitting...';
+
+                    try {
+                        const response = await fetch(window.uwpSubmitBaseUrl.replace('__ID__', targetId), {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': csrfToken,
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                signature: null
+                            })
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            showNotification(result.message || 'UWP submitted successfully.', 'success');
+                            document.getElementById('uwpPreviewModal')?.classList.add('hidden');
+                            document.getElementById('uwpWorkspacePreviewModal')?.classList.add('hidden');
+                            setTimeout(() => window.location.reload(), 1500);
+                        } else {
+                            showNotification(result.error || 'Failed to submit UWP.', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Submission error:', error);
+                        showNotification('An unexpected error occurred during submission.', 'error');
+                    } finally {
+                        btn.disabled = false;
+                        btn.innerHTML = originalText;
                     }
                 });
             });
@@ -2155,7 +2189,6 @@
             }
 
             function creationSubmit() {
-                if (!confirm('Submit this UWP for approval? You cannot edit it after submission.')) return;
                 creationSetLoading('creationSubmitBtn', true);
                 const payload = creationBuildPayload(false);
                 creationPost(creationSaveDraftUrl, payload)

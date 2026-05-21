@@ -18,7 +18,7 @@
     @endphp
 
     <section class="space-y-4 px-3 md:px-6">
-        <div class="rounded-xl border border-white/10 bg-gray-800/90 p-4 shadow-sm">
+        <div class="rounded-xl border border-white/10 bg-transparent p-4 shadow-sm">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                     <h1 class="text-lg font-semibold text-gray-100 sm:text-xl">HMS Integration</h1>
@@ -52,24 +52,24 @@
         </div>
 
         <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
-            <div class="rounded-xl border border-white/10 bg-gray-800/90 p-4 shadow-sm">
+            <div class="rounded-xl border border-white/10 bg-transparent p-4 shadow-sm">
                 <p class="text-xs text-gray-400">Connection Status</p>
                 <p class="mt-2 text-2xl font-semibold {{ $statusClass }}">{{ $statusLabel }}</p>
                 <p class="text-xs text-gray-500">Fake HMS API</p>
             </div>
-            <div class="rounded-xl border border-white/10 bg-gray-800/90 p-4 shadow-sm">
+            <div class="rounded-xl border border-white/10 bg-transparent p-4 shadow-sm">
                 <p class="text-xs text-gray-400">Last Checked</p>
                 <p class="mt-2 text-lg font-semibold text-white">
                     {{ !empty($settings['last_tested_at']) ? \Carbon\Carbon::parse($settings['last_tested_at'])->format('M d, Y h:i A') : 'Never' }}
                 </p>
                 <p class="text-xs text-gray-500">Connectivity verification</p>
             </div>
-            <div class="rounded-xl border border-white/10 bg-gray-800/90 p-4 shadow-sm">
+            <div class="rounded-xl border border-white/10 bg-transparent p-4 shadow-sm">
                 <p class="text-xs text-gray-400">Remote Employees</p>
                 <p class="mt-2 text-2xl font-semibold text-white">{{ $settings['last_test_count'] !== null && $settings['last_test_count'] !== '' ? $settings['last_test_count'] : '--' }}</p>
                 <p class="text-xs text-gray-500">From last successful test</p>
             </div>
-            <div class="rounded-xl border border-white/10 bg-gray-800/90 p-4 shadow-sm">
+            <div class="rounded-xl border border-white/10 bg-transparent p-4 shadow-sm">
                 <p class="text-xs text-gray-400">Sync Mode</p>
                 <p class="mt-2 text-2xl font-semibold text-white">Manual</p>
                 <p class="text-xs text-gray-500">Run sync manually from this screen</p>
@@ -78,7 +78,7 @@
 
         @php($syncSummary = session('hms_sync_summary'))
         @if (is_array($syncSummary))
-            <div class="rounded-xl border border-white/10 bg-gray-800/90 p-5 shadow-sm">
+            <div class="rounded-xl border border-white/10 bg-transparent p-5 shadow-sm">
                 <div class="flex items-center justify-between gap-3">
                     <div>
                         <h2 class="text-sm font-semibold uppercase tracking-[0.3em] text-slate-400">Last Sync Summary</h2>
@@ -126,7 +126,7 @@
         @endif
 
         <div>
-            <form method="POST" action="{{ route('admin.hris.update') }}" class="rounded-xl border border-white/10 bg-gray-800/90 p-5 shadow-sm">
+            <form method="POST" action="{{ route('admin.hris.update') }}" class="rounded-xl border border-white/10 bg-transparent p-5 shadow-sm">
                 @csrf
 
                 <div class="flex items-start justify-between gap-3">

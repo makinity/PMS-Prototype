@@ -115,11 +115,10 @@ class UnitWorkPlanController extends Controller
                 'action' => ['required', Rule::in(['endorse', 'return'])],
                 'remarks' => ['nullable', 'string'],
                 'signature' => [
-                    Rule::requiredIf(fn () => $request->input('action') === 'endorse'),
                     'nullable',
                     'string',
                     function (string $attribute, mixed $value, \Closure $fail) use ($request) {
-                        if ($request->input('action') !== 'endorse') {
+                        if (empty($value)) {
                             return;
                         }
 
@@ -218,32 +217,36 @@ class UnitWorkPlanController extends Controller
                         ]);
                     }
 
-                    $signedArtifact = $this->signatureService->createSignedArtifact(
-                        $lockedUwp,
-                        (string) ($validated['signature'] ?? '')
-                    );
+                    if (!empty($validated['signature'])) {
+                        $signedArtifact = $this->signatureService->createSignedArtifact(
+                            $lockedUwp,
+                            (string) ($validated['signature'] ?? '')
+                        );
 
-                    $signatureRecord = UwpConsolidationSignature::query()->create([
-                        'unit_work_plan_id' => $lockedUwp->id,
-                        'opcr_id' => null,
-                        'signed_by' => $user->id,
-                        'signature_image_path' => $signedArtifact['signature_image_path'],
-                        'signed_excel_path' => $signedArtifact['signed_excel_path'],
-                        'signature_hash' => $signedArtifact['signature_hash'],
-                        'signed_at' => now(),
-                        'metadata' => [
-                            'office_id' => $lockedUwp->office_id,
-                            'performance_period_id' => $lockedUwp->performance_period_id,
-                            'ip_address' => $request->ip(),
-                            'user_agent' => $request->userAgent(),
-                        ],
-                    ]);
- 
-                    $opcr = $this->consolidateSubmittedUwpsFor($lockedUwp, $user);
+                        $signatureRecord = UwpConsolidationSignature::query()->create([
+                            'unit_work_plan_id' => $lockedUwp->id,
+                            'opcr_id' => null,
+                            'signed_by' => $user->id,
+                            'signature_image_path' => $signedArtifact['signature_image_path'],
+                            'signed_excel_path' => $signedArtifact['signed_excel_path'],
+                            'signature_hash' => $signedArtifact['signature_hash'],
+                            'signed_at' => now(),
+                            'metadata' => [
+                                'office_id' => $lockedUwp->office_id,
+                                'performance_period_id' => $lockedUwp->performance_period_id,
+                                'ip_address' => $request->ip(),
+                                'user_agent' => $request->userAgent(),
+                            ],
+                        ]);
 
-                    $signatureRecord->forceFill([
-                        'opcr_id' => $opcr->id,
-                    ])->save();
+                        $opcr = $this->consolidateSubmittedUwpsFor($lockedUwp, $user);
+
+                        $signatureRecord->forceFill([
+                            'opcr_id' => $opcr->id,
+                        ])->save();
+                    } else {
+                        $this->consolidateSubmittedUwpsFor($lockedUwp, $user);
+                    }
 
                     $lockedUwp->refresh();
                     $reviewedUwp = $lockedUwp;

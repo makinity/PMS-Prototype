@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\UsersController;
 use App\Http\Controllers\Auth\ActivationController;
 use App\Http\Controllers\Supervisor\UnitWorkPlanController;
 use App\Http\Controllers\DeptHead\AccomplishmentReviewController;
+use App\Http\Controllers\DeptHead\DashboardController as DeptHeadDashboardController;
 use App\Http\Controllers\DeptHead\OpcrController as DeptHeadOpcrController;
 use App\Http\Controllers\DeptHead\QarController;
 use App\Http\Controllers\StageOne\Forms\IpcrExportController;
@@ -45,6 +46,7 @@ use App\Http\Controllers\Employee\DashboardController as EmployeeDashboardContro
 use App\Http\Controllers\Employee\IpcrTargetController;
 use App\Http\Controllers\Employee\SmporIpcrAccomplishmentController;
 use App\Http\Controllers\Pmt\AccomplishmentReviewController as PmtAccomplishmentReviewController;
+use App\Http\Controllers\Pmt\DashboardController as PmtDashboardController;
 use App\Http\Controllers\Pmt\OpcrController as PmtOpcrController;
 use App\Http\Controllers\Supervisor\AccomplishmentController as SupervisorAccomplishmentController;
 use App\Http\Controllers\Supervisor\DashboardController as SupervisorDashboardController;
@@ -196,7 +198,7 @@ Route::prefix('employee')->middleware('auth')->group(function () {
 
 Route::prefix('dept-head')->middleware('auth')->group(function () {
     // Views
-    Route::get('/dashboard', fn () => view('dept-head.dashboard'))->name('dept-head.dashboard');
+    Route::get('/dashboard', [DeptHeadDashboardController::class, 'index'])->name('dept-head.dashboard');
     Route::get('/profile', fn () => view('dept-head.profile'))->name('dept-head.profile');
 
     // Stage I - UWP Review
@@ -308,7 +310,7 @@ Route::prefix('supervisor')->middleware('auth')->group(function () {
 
 Route::prefix('pmt')->middleware('auth')->group(function () {
     // Views
-    Route::get('/dashboard', fn () => view('pmt.dashboard'))->name('pmt.dashboard');
+    Route::get('/dashboard', [PmtDashboardController::class, 'index'])->name('pmt.dashboard');
     Route::get('/profile', fn () => view('pmt.profile'))->name('pmt.profile');
 
     // Stage I - OPCR only
@@ -406,6 +408,7 @@ Route::middleware(['auth'])->group(function () {
 Route::prefix('administrator')->middleware('auth')->group(function () {
     // Views
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('/profile', fn () => view('admin.profile'))->name('admin.profile');
     Route::get('/audit-logs', [AuditLogsController::class, 'index'])->name('admin.audit-logs');
     Route::get('/database', [DatabaseController::class, 'index'])->name('admin.database');
     Route::post('/database/backups', [DatabaseController::class, 'store'])->name('admin.database.backups.store');

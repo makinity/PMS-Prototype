@@ -23,31 +23,31 @@
     @endphp
 
     <section class="space-y-4 px-3 md:px-6">
-        <div class="rounded-xl border border-white/10 bg-gray-800/90 p-4 shadow-sm">
+        <div class="rounded-xl border border-white/10 bg-transparent p-4 shadow-sm">
             <h1 class="text-lg font-semibold text-gray-100 sm:text-xl">Audit Logs</h1>
             <p class="mt-1 text-sm text-gray-300">Monitor state-changing activity across authentication, admin, and workflow modules.</p>
         </div>
 
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <div class="rounded-xl border border-white/10 bg-gray-800/90 p-4 shadow-sm">
+            <div class="rounded-xl border border-white/10 bg-transparent p-4 shadow-sm">
                 <p class="text-xs uppercase tracking-wide text-gray-400">Total Events</p>
                 <p id="audit-summary-total" class="mt-2 text-2xl font-semibold text-white">{{ number_format((int) ($summary['total'] ?? 0)) }}</p>
             </div>
-            <div class="rounded-xl border border-white/10 bg-gray-800/90 p-4 shadow-sm">
+            <div class="rounded-xl border border-white/10 bg-transparent p-4 shadow-sm">
                 <p class="text-xs uppercase tracking-wide text-gray-400">Successful</p>
                 <p id="audit-summary-success" class="mt-2 text-2xl font-semibold text-emerald-300">{{ number_format((int) ($summary['success'] ?? 0)) }}</p>
             </div>
-            <div class="rounded-xl border border-white/10 bg-gray-800/90 p-4 shadow-sm">
+            <div class="rounded-xl border border-white/10 bg-transparent p-4 shadow-sm">
                 <p class="text-xs uppercase tracking-wide text-gray-400">Failed</p>
                 <p id="audit-summary-failed" class="mt-2 text-2xl font-semibold text-rose-300">{{ number_format((int) ($summary['failed'] ?? 0)) }}</p>
             </div>
-            <div class="rounded-xl border border-white/10 bg-gray-800/90 p-4 shadow-sm">
+            <div class="rounded-xl border border-white/10 bg-transparent p-4 shadow-sm">
                 <p class="text-xs uppercase tracking-wide text-gray-400">Unique Actors</p>
                 <p id="audit-summary-actors" class="mt-2 text-2xl font-semibold text-white">{{ number_format((int) ($summary['unique_actors'] ?? 0)) }}</p>
             </div>
         </div>
 
-        <div class="rounded-xl border border-white/10 bg-gray-800/90 p-4 shadow-sm">
+        <div class="rounded-xl border border-white/10 bg-transparent p-4 shadow-sm">
             <form id="audit-filter-form" method="GET" action="{{ $indexUrl }}" class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
                 <div class="xl:col-span-2">
                     <label for="auditSearch" class="mb-1 block text-xs uppercase tracking-wide text-gray-400">Search</label>
@@ -115,7 +115,7 @@
             </form>
         </div>
 
-        <div class="rounded-xl border border-white/10 bg-gray-800/90 shadow-sm">
+        <div class="rounded-xl border border-white/10 bg-transparent shadow-sm">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-white/10 text-xs sm:text-sm">
                     <thead class="bg-gray-900/70 text-[11px] uppercase tracking-wide text-gray-400 sm:text-xs">

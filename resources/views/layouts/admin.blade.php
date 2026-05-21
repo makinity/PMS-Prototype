@@ -76,7 +76,7 @@
                                 <p class="text-xs text-slate-400">System Admin</p>
                             </div>
                             <ul class="py-2 text-sm text-slate-200" aria-labelledby="admin-user-menu-button">
-                                <li><a href="#" class="block px-4 py-2 transition hover:bg-slate-800">Profile</a></li>
+                                <li><a href="{{ route('admin.profile') }}" class="block px-4 py-2 transition hover:bg-slate-800">Profile</a></li>
                                 <li><a href="#" class="block px-4 py-2 transition hover:bg-slate-800">Settings</a></li>
                                 <li><a href="#" class="block px-4 py-2 transition hover:bg-slate-800">Support</a></li>
                             </ul>

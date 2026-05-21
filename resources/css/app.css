@@ -641,6 +641,49 @@
             .text-6xl {
                 font-size: 3.25rem !important;
             }
+
+            /* Hero section spacing */
+            .hero-gradient {
+                padding-top: calc(var(--nav-height-mobile) + 32px);
+                padding-bottom: 48px;
+            }
+
+            /* System cards: 2 columns on tablet */
+            #systems .grid.grid-cols-1.lg\:grid-cols-3 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            /* PMS card spans full width on tablet for emphasis */
+            #systems .grid.grid-cols-1.lg\:grid-cols-3 > .pms-card {
+                grid-column: 1 / -1;
+            }
+
+            /* Feature cards: 2 columns on tablet */
+            #features .grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            /* Modal sizing */
+            .modal-overlay > div {
+                max-width: 440px;
+                margin: 0 auto;
+            }
+
+            /* CTA buttons side-by-side on tablet */
+            .flex.flex-col.md\:flex-row {
+                flex-direction: row;
+                justify-content: center;
+            }
+
+            /* Footer layout stays row on tablet */
+            footer .flex.flex-col.md\:flex-row {
+                flex-direction: row;
+            }
+
+            /* Activation actions keep 2-col grid on tablet */
+            .activation-actions {
+                grid-template-columns: 1fr 1fr;
+            }
         }
         
         /* Touch feedback for mobile */
@@ -942,3 +985,12 @@
 
 /* End Admin Layout */
 
+/* Chrome Autofill Fix for Dark Mode */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px #0f172a inset !important;
+    -webkit-text-fill-color: white !important;
+    transition: background-color 5000s ease-in-out 0s;
+}

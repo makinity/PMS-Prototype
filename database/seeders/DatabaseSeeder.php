@@ -124,7 +124,7 @@ class DatabaseSeeder extends Seeder
             );
 
             $empMark = User::query()->updateOrCreate(
-                ['email' => 'marklionesios@gmail.com.com'],
+                ['email' => 'marklionesios@gmail.com'],
                 [
                     'employee_id' => 'EMP-RCU-0002',
                     'name' => 'Mark Juntilla',
@@ -138,7 +138,7 @@ class DatabaseSeeder extends Seeder
             );
 
             $empDenji = User::query()->updateOrCreate(
-                ['email' => 'denjikun1030.com'],
+                ['email' => 'denjikun1030@gmail.com'],
                 [
                     'employee_id' => 'EMP-RCU-0003',
                     'name' => 'Denji Kun',

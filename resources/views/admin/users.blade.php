@@ -11,17 +11,17 @@
 
         $indexUrl = \Illuminate\Support\Facades\Route::has('admin.users') ? route('admin.users') : url()->current();
         $canUpdateRoute = \Illuminate\Support\Facades\Route::has('admin.users.update');
-        $canToggleRoute = \Illuminate\Support\Facades\Route::has('admin.users.toggle-active');
+        $canToggleRoute = \Illuminate\Support\Facades\Route::has('admin.users.toggle');
         $canResetRoute = \Illuminate\Support\Facades\Route::has('admin.users.reset-password');
         $canSendCodeRoute = \Illuminate\Support\Facades\Route::has('admin.users.send-code');
         $updateRouteTemplate = $canUpdateRoute ? route('admin.users.update', ['user' => '__ID__']) : '';
-        $toggleRouteTemplate = $canToggleRoute ? route('admin.users.toggle-active', ['user' => '__ID__']) : '';
+        $toggleRouteTemplate = $canToggleRoute ? route('admin.users.toggle', ['user' => '__ID__']) : '';
         $resetRouteTemplate = $canResetRoute ? route('admin.users.reset-password', ['user' => '__ID__']) : '';
         $sendCodeRouteTemplate = $canSendCodeRoute ? route('admin.users.send-code', ['user' => '__ID__']) : '';
     @endphp
 
     <section class="space-y-4 px-3 md:px-6">
-        <div class="min-w-0 rounded-xl border border-white/10 bg-gray-800/90 p-4 shadow-sm">
+        <div class="min-w-0 rounded-xl border border-white/10 bg-transparent p-4 shadow-sm">
             <h1 class="text-lg font-semibold text-gray-100 sm:text-xl">Users Management</h1>
             <p class="mt-1 text-sm text-gray-300">Manage roles, offices, and activation status.</p>
         </div>
@@ -33,7 +33,7 @@
             </div>
         @endif
 
-        <div class="min-w-0 rounded-xl border border-white/10 bg-gray-800/90 p-4 shadow-sm">
+        <div class="min-w-0 rounded-xl border border-white/10 bg-transparent p-4 shadow-sm">
             <form method="GET" action="{{ $indexUrl }}" class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
                 <div class="min-w-0 xl:col-span-2">
                     <label for="filterSearch" class="mb-1 block text-xs uppercase tracking-wide text-gray-400">Search</label>
@@ -100,7 +100,7 @@
             </form>
         </div>
 
-        <div class="min-w-0 rounded-xl border border-white/10 bg-gray-800/90 shadow-sm">
+        <div class="min-w-0 rounded-xl border border-white/10 bg-transparent shadow-sm">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-white/10 text-xs sm:text-sm">
                     <thead class="bg-gray-900/70 text-[11px] uppercase tracking-wide text-gray-400 sm:text-xs">
@@ -115,14 +115,16 @@
                     <tbody class="divide-y divide-white/10 text-gray-200">
                         @forelse ($users as $user)
                             @php
-                                $statusLabel = $user->is_active
-                                    ? 'Active'
-                                    : (is_null($user->activated_at) ? 'Pending Activation' : 'Disabled');
-                                $statusClasses = $user->is_active
-                                    ? 'border border-emerald-600/50 bg-emerald-500/10 text-emerald-300'
-                                    : (is_null($user->activated_at)
-                                        ? 'border border-amber-600/50 bg-amber-500/10 text-amber-300'
-                                        : 'border border-rose-600/50 bg-rose-500/10 text-rose-300');
+                                if (is_null($user->activated_at)) {
+                                    $statusLabel = 'Pending Activation';
+                                    $statusClasses = 'border border-amber-600/50 bg-amber-500/10 text-amber-300';
+                                } elseif (!$user->is_active) {
+                                    $statusLabel = 'Disabled';
+                                    $statusClasses = 'border border-rose-600/50 bg-rose-500/10 text-rose-300';
+                                } else {
+                                    $statusLabel = 'Active';
+                                    $statusClasses = 'border border-emerald-600/50 bg-emerald-500/10 text-emerald-300';
+                                }
                             @endphp
                             <tr>
                                 <td class="px-4 py-3 text-gray-300">{{ $user->employee_id ?: '--' }}</td>
@@ -206,10 +208,7 @@
                         <p class="text-xs uppercase tracking-wide text-gray-400">Position</p>
                         <p id="vmPosition" class="mt-1 text-sm font-medium text-gray-100">--</p>
                     </div>
-                    <div>
-                        <p class="text-xs uppercase tracking-wide text-gray-400">Account Status</p>
-                        <span id="vmAccountStatus" class="mt-1 inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold">--</span>
-                    </div>
+
                     <div>
                         <p class="text-xs uppercase tracking-wide text-gray-400">Activation Status</p>
                         <span id="vmActivationStatus" class="mt-1 inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold">--</span>
@@ -222,10 +221,7 @@
             </div>
 
             <div class="flex flex-wrap items-center justify-end gap-2 border-t border-white/10 px-5 py-4">
-                <form id="modalToggleForm" action="#" method="POST">
-                    @csrf
-                    <button type="submit" id="modalToggleBtn" class="rounded-lg px-4 py-2 text-sm font-medium">Toggle</button>
-                </form>
+
 
                 <form id="modalResetForm" action="#" method="POST" onsubmit="return confirm('Reset password for this user?');">
                     @csrf
@@ -328,11 +324,9 @@
                 const detailsModal = document.getElementById('userDetailsModal');
                 const editModal = document.getElementById('userEditModal');
 
-                const toggleForm = document.getElementById('modalToggleForm');
                 const resetForm = document.getElementById('modalResetForm');
-                const sendCodeForm = document.getElementById('modalSendCodeForm');
-                const toggleBtn = document.getElementById('modalToggleBtn');
                 const resetBtn = document.getElementById('modalResetBtn');
+                const sendCodeForm = document.getElementById('modalSendCodeForm');
                 const sendCodeBtn = document.getElementById('modalSendCodeBtn');
                 const openEditFromDetailsBtn = document.getElementById('openEditUserFromDetails');
 
@@ -353,7 +347,6 @@
                     role: document.getElementById('vmRole'),
                     office: document.getElementById('vmOffice'),
                     position: document.getElementById('vmPosition'),
-                    accountStatus: document.getElementById('vmAccountStatus'),
                     activationStatus: document.getElementById('vmActivationStatus'),
                     activatedAt: document.getElementById('vmActivatedAt'),
                 };
@@ -361,7 +354,6 @@
                 let currentUserData = null;
 
                 const updateUrlTemplate = @json($updateRouteTemplate);
-                const toggleUrlTemplate = @json($toggleRouteTemplate);
                 const resetUrlTemplate = @json($resetRouteTemplate);
                 const sendCodeRouteTemplate = @json($sendCodeRouteTemplate);
 
@@ -371,6 +363,15 @@
                     actionUrl = actionUrl.replace(encodedToken, encodeURIComponent(id));
 
                     return actionUrl;
+                }
+
+                function showSnackbar(type, message) {
+                    if (window.PMSnackbar?.show) {
+                        window.PMSnackbar.show({ type, message });
+                        return;
+                    }
+
+                    console[type === 'error' ? 'error' : 'log'](message);
                 }
 
                 function refreshBodyLock() {
@@ -400,9 +401,11 @@
                     }
 
                     if (type === 'activation') {
-                        classes = key === 'activated'
-                            ? 'border border-emerald-600/50 bg-emerald-500/10 text-emerald-300'
-                            : 'border border-amber-600/50 bg-amber-500/10 text-amber-300';
+                        classes = {
+                            activated: 'border border-emerald-600/50 bg-emerald-500/10 text-emerald-300',
+                            disabled: 'border border-rose-600/50 bg-rose-500/10 text-rose-300',
+                            pending: 'border border-amber-600/50 bg-amber-500/10 text-amber-300',
+                        }[key] || classes;
                     }
 
                     element.className = `mt-1 inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold ${classes}`;
@@ -472,27 +475,17 @@
                     fields.role.textContent = role ? role.toUpperCase() : '--';
                     setBadgeClasses(fields.role, 'role', role);
 
-                    fields.accountStatus.textContent = isActive ? 'Active' : 'Inactive';
-                    setBadgeClasses(fields.accountStatus, 'account', isActive ? 'active' : 'inactive');
-
-                    const activationState = activatedAt ? 'activated' : 'pending';
-                    fields.activationStatus.textContent = activationState === 'activated' ? 'Activated' : 'Pending';
+                    const activationState = activatedAt
+                        ? (isActive ? 'activated' : 'disabled')
+                        : 'pending';
+                    fields.activationStatus.textContent = activationState === 'activated'
+                        ? 'Activated'
+                        : activationState === 'disabled'
+                            ? 'Disabled'
+                            : 'Pending Activation';
                     setBadgeClasses(fields.activationStatus, 'activation', activationState);
 
-                    if (toggleUrlTemplate && userId && toggleForm && toggleBtn) {
-                        toggleForm.action = buildUrl(toggleUrlTemplate, userId);
-                        toggleBtn.disabled = false;
-                        toggleBtn.textContent = isActive ? 'Deactivate' : 'Activate';
-                        toggleBtn.className = isActive
-                            ? 'rounded-lg border border-rose-500/60 bg-rose-500/10 px-4 py-2 text-sm font-medium text-rose-300 hover:bg-rose-500/20'
-                            : 'rounded-lg border border-emerald-500/60 bg-emerald-500/10 px-4 py-2 text-sm font-medium text-emerald-300 hover:bg-emerald-500/20';
-                        toggleBtn.title = '';
-                    } else if (toggleBtn) {
-                        toggleBtn.disabled = true;
-                        toggleBtn.textContent = 'Toggle Status';
-                        toggleBtn.className = 'cursor-not-allowed rounded-lg border border-gray-600 px-4 py-2 text-sm font-medium text-gray-500 opacity-70';
-                        toggleBtn.title = 'Route admin.users.toggle-active not available.';
-                    }
+
 
                     if (resetUrlTemplate && userId && resetForm && resetBtn) {
                         resetForm.action = buildUrl(resetUrlTemplate, userId);
@@ -612,6 +605,41 @@
                             return;
                         }
                         closeUserDetailsModal();
+                    }
+                });
+
+                sendCodeForm?.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    if (!currentUserData || !currentUserData.id) return;
+                    
+                    const originalHTML = sendCodeBtn.innerHTML;
+                    sendCodeBtn.disabled = true;
+                    sendCodeBtn.innerHTML = '<svg class="inline mr-2 h-4 w-4 animate-spin text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Sending...';
+
+                    try {
+                        const token = document.querySelector('input[name="_token"]')?.value;
+                        const response = await fetch(sendCodeForm.action, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': token,
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json'
+                            }
+                        });
+                        const data = await response.json();
+                        
+                        if (response.ok) {
+                            showSnackbar('success', data.message || 'Code sent successfully!');
+                            closeUserDetailsModal();
+                        } else {
+                            showSnackbar('error', data.message || 'Error sending code.');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        showSnackbar('error', 'An unexpected error occurred while sending the code.');
+                    } finally {
+                        sendCodeBtn.disabled = false;
+                        sendCodeBtn.innerHTML = originalHTML;
                     }
                 });
             })();

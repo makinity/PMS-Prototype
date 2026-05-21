@@ -59,7 +59,7 @@ class UsersController extends Controller
         }
 
         if ($filters['status'] === 'active') {
-            $query->where('is_active', true);
+            $query->where('is_active', true)->whereNotNull('activated_at');
         } elseif ($filters['status'] === 'pending') {
             $query->whereNull('activated_at');
         } elseif ($filters['status'] === 'disabled') {
@@ -180,20 +180,23 @@ class UsersController extends Controller
             ->with('temporary_password_user', $user->email);
     }
 
-    public function sendEmployeeCode(Request $request, User $user): RedirectResponse
+    public function sendEmployeeCode(Request $request, User $user): RedirectResponse|\Illuminate\Http\JsonResponse
     {
         self::ensureAdmin($request);
 
         if ($this->isAdminAccount($user)) {
-            return back()->with('error', 'Admin accounts cannot be modified in this module.');
+            $msg = 'Admin accounts cannot be modified in this module.';
+            return $request->wantsJson() ? response()->json(['message' => $msg], 403) : back()->with('error', $msg);
         }
 
         if (!filter_var($user->email, FILTER_VALIDATE_EMAIL)) {
-            return back()->with('error', 'This user does not have a valid email address.');
+            $msg = 'This user does not have a valid email address.';
+            return $request->wantsJson() ? response()->json(['message' => $msg], 422) : back()->with('error', $msg);
         }
 
         if (blank($user->employee_id)) {
-            return back()->with('error', 'This user does not have a PMS employee code yet.');
+            $msg = 'This user does not have a PMS employee code yet.';
+            return $request->wantsJson() ? response()->json(['message' => $msg], 422) : back()->with('error', $msg);
         }
 
         Mail::to($user->email)->send(new PmsEmployeeIdIssuedMail(
@@ -202,7 +205,8 @@ class UsersController extends Controller
             (string) $user->email,
         ));
 
-        return back()->with('success', 'Employee code sent to ' . $user->email . '.');
+        $msg = 'Employee code sent to ' . $user->email . '.';
+        return $request->wantsJson() ? response()->json(['message' => $msg]) : back()->with('success', $msg);
     }
 
     private static function ensureAdmin(Request $request): void
