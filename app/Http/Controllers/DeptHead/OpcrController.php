@@ -355,6 +355,66 @@ class OpcrController extends Controller
         return back()->with('success', 'OPCR returned to Supervisors.');
     }
 
+    public function showSuccessIndicators(Request $request, int $opcrId, int $mfoId)
+    {
+        $user = Auth::user();
+        if (!$user || $user->role !== 'dept-head') {
+            abort(403, 'Unauthorized.');
+        }
+
+        $opcr = Opcr::with(['office.head', 'unitWorkPlans'])->findOrFail($opcrId);
+
+        if (!$this->canManageOpcr($opcr, $user)) {
+            return $this->notFoundResponse($request);
+        }
+
+        $mfo = \App\Models\UwpMfo::with([
+            'successIndicators.qetStandards',
+            'successIndicators.assignments.employee.office',
+        ])->findOrFail($mfoId);
+
+        $initialIndicators = $mfo->successIndicators->map(function ($indicator) {
+            $standardsList = [];
+            foreach ($indicator->qetStandards as $std) {
+                $standardsList[] = [
+                    'rating' => (int) $std->rating,
+                    'dimension' => strtolower((string) $std->dimension),
+                    'text' => $std->standard_text,
+                ];
+            }
+
+            $assigneesData = $indicator->assignments->map(function ($assignment) {
+                return [
+                    'id' => $assignment->employee?->id,
+                    'employee' => [
+                        'name' => $assignment->employee?->name,
+                        'profile_photo_url' => $assignment->employee?->profile_photo_url,
+                        'office' => [
+                            'name' => $assignment->employee?->office?->name,
+                        ],
+                    ],
+                ];
+            })->filter(fn($a) => !empty($a['id']))->values()->all();
+
+            return [
+                'id' => $indicator->id,
+                'indicator_text' => $indicator->indicator_text,
+                'target_quantity' => $indicator->target_quantity,
+                'target_timeline' => $indicator->target_timeline,
+                'standards' => $standardsList,
+                'assignees' => $assigneesData,
+            ];
+        })->values()->all();
+
+        return view('dept-head.opcr-success-indicators', [
+            'opcr' => $opcr,
+            'mfo' => $mfo,
+            'initialIndicators' => $initialIndicators,
+            'canEdit' => false,
+            'status' => $opcr->status,
+        ]);
+    }
+
     private function buildPayload(Opcr $opcr): array
     {
         $sources = $opcr->sourceUnitWorkPlans();
@@ -475,6 +535,7 @@ class OpcrController extends Controller
                         : 0.0;
 
                     $outputs[] = [
+                        'mfo_id' => $mfo->id,
                         'title' => $mfo->title,
                         'source_uwp_id' => $uwp->id,
                         'source_supervisor' => $uwp->creator?->name,

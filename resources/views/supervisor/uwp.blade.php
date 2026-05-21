@@ -19,6 +19,22 @@
             ])
             ->values()
             ->all();
+
+        // Map persisted MFO ids to the dedicated Success Indicators page.
+        $mfoSuccessIndicatorUrls = [];
+        if (!empty($selectedUwpId) && !empty($initialFunctions) && is_array($initialFunctions)) {
+            foreach ($initialFunctions as $func) {
+                foreach (($func['mfos'] ?? []) as $mfo) {
+                    $mfoId = (int) ($mfo['id'] ?? 0);
+                    if ($mfoId > 0) {
+                        $mfoSuccessIndicatorUrls[$mfoId] = route('supervisor.uwp.success-indicators', [
+                            'uwpId' => (int) $selectedUwpId,
+                            'mfoId' => $mfoId,
+                        ]);
+                    }
+                }
+            }
+        }
     @endphp
 @section('main-content')
     <section class="space-y-6">
@@ -165,377 +181,7 @@
         </form>
     </section>
 
-    {{-- SUCCESS INDICATORS MODAL (now includes Assigned Employees per indicator) --}}
-    <div id="uwp-indicators-modal" class="fixed inset-0 z-[80] hidden items-start justify-center overflow-y-auto bg-black/70 px-4 py-4 backdrop-blur-sm sm:py-8">
-        <div class="w-full max-w-[1200px]">
-            <div class="flex h-[780px] max-h-[calc(100vh-2rem)] flex-col overflow-hidden rounded-[24px] border border-slate-800 bg-slate-950 text-slate-100 shadow-2xl sm:max-h-[calc(100vh-4rem)]">
-                <div class="flex items-start justify-between gap-4 border-b border-slate-800 px-6 py-5">
-                    <div class="min-w-0">
-                        <div class="flex flex-wrap items-center gap-3">
-                            <h2 class="text-lg font-semibold text-white">Success Indicator Workspace</h2>
-                            <span class="rounded-full border border-cyan-500/20 bg-cyan-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-cyan-200">Stage I - Editor</span>
-                        </div>
-                        <h3 id="uwp-indicators-title" class="mt-3 text-2xl font-semibold tracking-tight text-white">--</h3>
-                        <div class="hidden mt-3 flex flex-wrap items-center gap-2 text-sm text-slate-400">
-                            <span id="uwp-workspace-function-type" class="inline-flex rounded-full border border-slate-700 px-2.5 py-1 text-xs font-semibold text-slate-200">--</span>
-                            <span id="uwp-workspace-function-weight" class="inline-flex rounded-full bg-slate-800 px-2.5 py-1 text-xs font-semibold text-slate-200">--</span>
-                            <span class="text-slate-600">•</span>
-                            <span id="uwp-workspace-target-summary">--</span>
-                        </div>
-                        <p class="hidden mt-2 text-sm text-slate-400">
-                            {{ $canEdit
-                                ? 'Manage indicators, standards, and employee assignments in one workspace.'
-                                : 'Read-only indicator workspace for this output.' }}
-                        </p>
-                    </div>
-                    <button type="button"
-                            onclick="closeUwpIndicatorsModal()"
-                            class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-700 bg-slate-950/60 text-slate-400 transition hover:bg-slate-900 hover:text-white">
-                        <span class="sr-only">Close</span>
-                        <i class="fa-solid fa-xmark text-sm"></i>
-                    </button>
-                </div>
-
-                <div class="grid min-h-0 flex-1 lg:grid-cols-[300px_minmax(0,1fr)]">
-                    <aside class="flex min-h-0 flex-col border-b border-slate-800 lg:border-b-0 lg:border-r">
-                        <div class="flex items-center justify-between border-b border-slate-800 px-4 py-3">
-                            <p class="text-sm font-semibold uppercase tracking-[0.22em] text-slate-400">Indicators</p>
-                            <span id="uwp-workspace-indicator-count-badge" class="text-sm font-semibold text-cyan-300">0</span>
-                        </div>
-                        <div id="uwp-workspace-indicator-nav" class="min-h-0 space-y-2 overflow-y-auto px-2 py-2"></div>
-                        @if ($canEdit)
-                            <div class="border-t border-slate-800 px-3 py-3">
-                                <button type="button"
-                                        data-indicator-add-secondary
-                                        class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-slate-800/90 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-700">
-                                    <span class="fa-solid fa-plus text-[11px]"></span>
-                                    <span>Add Indicator</span>
-                                </button>
-                            </div>
-                        @endif
-                    </aside>
-
-                    <section class="flex min-h-0 flex-col">
-                        <div class="hidden border-b border-slate-800 px-6 py-3">
-                            <div class="flex flex-wrap items-center gap-3">
-                                <h3 id="uwp-workspace-selected-indicator-title" class="text-lg font-semibold leading-tight text-white">No success indicator selected</h3>
-                                <span id="uwp-workspace-selected-indicator-target" class="text-sm font-semibold text-slate-300"></span>
-                            </div>
-                        </div>
-
-                        <div class="border-b border-slate-800 px-5">
-                            <div class="flex flex-wrap gap-1.5">
-                                <button type="button" data-editor-workspace-tab="overview" class="border-b-2 border-cyan-400 px-2.5 py-2.5 text-sm font-semibold text-white">Overview</button>
-                                <button type="button" data-editor-workspace-tab="targets" class="border-b-2 border-transparent px-2.5 py-2.5 text-sm font-medium text-slate-400">Targets</button>
-                                <button type="button" data-editor-workspace-tab="standards" class="border-b-2 border-transparent px-2.5 py-2.5 text-sm font-medium text-slate-400">Standards</button>
-                                <button type="button" data-editor-workspace-tab="assignees" class="border-b-2 border-transparent px-2.5 py-2.5 text-sm font-medium text-slate-400">Assignees</button>
-                            </div>
-                        </div>
-
-                        <div class="min-h-0 flex-1 overflow-y-auto px-6 py-4">
-                            <div data-editor-workspace-panel="overview" class="space-y-5">
-                                <div>
-                                    <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Output Target Summary</p>
-                                    <p id="uwp-workspace-overview-summary" class="mt-2 text-lg leading-snug text-white">-</p>
-                                </div>
-                                <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                                    <div class="rounded-2xl border border-slate-800 bg-slate-900/50 p-4">
-                                        <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Function Type</p>
-                                        <p id="uwp-workspace-overview-function" class="mt-2 text-lg font-semibold text-white">-</p>
-                                    </div>
-                                    <div class="rounded-2xl border border-slate-800 bg-slate-900/50 p-4">
-                                        <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Weight</p>
-                                        <p id="uwp-workspace-overview-weight" class="mt-2 text-lg font-semibold text-white">-</p>
-                                    </div>
-                                    <div class="rounded-2xl border border-slate-800 bg-slate-900/50 p-4">
-                                        <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Indicators</p>
-                                        <p id="uwp-workspace-overview-indicator-count" class="mt-2 text-lg font-semibold text-white">0</p>
-                                    </div>
-                                    <div class="rounded-2xl border border-slate-800 bg-slate-900/50 p-4">
-                                        <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Selected Q/E/T Cells</p>
-                                        <p id="uwp-workspace-overview-standards-count" class="mt-2 text-lg font-semibold text-white">0</p>
-                                    </div>
-                                </div>
-                                <div class="rounded-2xl border border-slate-800 bg-slate-900/50 p-4">
-                                    <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Selected Assigned Employees</p>
-                                    <p id="uwp-workspace-overview-assignee-count" class="mt-2 text-lg font-semibold text-white">0</p>
-                                </div>
-                                <div>
-                                    <div class="flex flex-wrap items-center justify-between gap-3">
-                                        <div>
-                                            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Linked Success Indicators</p>
-                                            <p class="mt-1 text-sm text-slate-400">Pick an indicator here to jump directly to its editor tabs.</p>
-                                        </div>
-                                        @if ($canEdit)
-                                            <button type="button" id="uwp-add-indicator"
-                                                    class="inline-flex items-center gap-2 rounded-full bg-slate-800/90 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-700">
-                                                <span class="fa-solid fa-plus text-[11px]"></span>
-                                                <span>Add Indicator</span>
-                                            </button>
-                                        @endif
-                                    </div>
-                                    <div id="uwp-workspace-overview-indicators" class="mt-3 space-y-2.5"></div>
-                                </div>
-                            </div>
-
-                            <div data-editor-workspace-panel="targets" class="hidden space-y-5">
-                                <div class="grid gap-4 xl:grid-cols-[180px_minmax(0,1fr)]">
-                                    <label class="space-y-2 text-sm text-slate-300">
-                                        <span class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Quantity</span>
-                                        <input id="uwp-targets-quantity"
-                                               type="number"
-                                               min="0"
-                                               placeholder="Enter quantity"
-                                               style="background:#0f172a;color:#e5e7eb;"
-                                               class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none">
-                                    </label>
-                                    <label class="space-y-2 text-sm text-slate-300">
-                                        <span class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Target / Timeline</span>
-                                        <input id="uwp-targets-timeline"
-                                               type="text"
-                                               placeholder="Describe the target or timeline"
-                                               style="background:#0f172a;color:#e5e7eb;"
-                                               class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none">
-                                    </label>
-                                </div>
-                                @unless ($canEdit)
-                                    <p class="text-[11px] text-slate-500">Targets are read-only in this stage.</p>
-                                @endunless
-                            </div>
-
-                            <div data-editor-workspace-panel="standards" class="hidden space-y-4">
-                                <div class="hidden">
-                                    <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Selected Indicator</p>
-                                    <p id="uwp-standards-indicator" class="mt-1.5 text-base font-semibold text-white">-</p>
-                                </div>
-                                <div id="uwp-standards-list" class="overflow-hidden rounded-xl border border-slate-800"></div>
-
-                                @if ($canEdit)
-                                    <div class="space-y-3 rounded-xl border border-slate-800 bg-slate-950/60 p-4">
-                                        <p class="text-xs text-slate-400">Add a standard to a specific Rating x Dimension cell.</p>
-                                        <div class="grid grid-cols-1 gap-3 lg:grid-cols-[220px_220px_minmax(0,1fr)]">
-                                            <select id="uwp-standard-rating"
-                                                    style="background:#0f172a;color:#e5e7eb;"
-                                                    class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none">
-                                                <option value="5" selected>Rating: 5</option>
-                                                <option value="4">Rating: 4</option>
-                                                <option value="3">Rating: 3</option>
-                                                <option value="2">Rating: 2</option>
-                                                <option value="1">Rating: 1</option>
-                                            </select>
-
-                                            <select id="uwp-standard-dimension"
-                                                    style="background:#0f172a;color:#e5e7eb;"
-                                                    class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none">
-                                                <option value="q" selected>Dimension: Q (Quality)</option>
-                                                <option value="e">Dimension: E (Efficiency)</option>
-                                                <option value="t">Dimension: T (Timeliness)</option>
-                                            </select>
-
-                                            <textarea id="uwp-standards-input"
-                                                      style="background:#0f172a;color:#e5e7eb;"
-                                                      rows="2"
-                                                      placeholder="Enter standard text"
-                                                      class="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none"></textarea>
-                                        </div>
-
-                                        <div class="flex flex-wrap gap-2">
-                                            <button type="button"
-                                                    id="uwp-add-standard"
-                                                    class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-500">
-                                                Save to Table
-                                            </button>
-                                            <button type="button"
-                                                    id="uwp-reset-standard"
-                                                    class="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800/60 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-800">
-                                                Reset to Seeded Dummy
-                                            </button>
-                                        </div>
-                                    </div>
-                                @else
-                                    <p class="text-[11px] text-slate-500">Standards are read-only in this stage.</p>
-                                @endif
-                            </div>
-
-                            <div data-editor-workspace-panel="assignees" class="hidden space-y-4">
-                                <div class="hidden">
-                                    <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Selected Indicator</p>
-                                    <p id="uwp-assigned-indicator" class="mt-1.5 text-base font-semibold text-white">-</p>
-                                    <p class="mt-1 text-[11px] text-slate-400">Office / Unit: <span id="uwp-assigned-unit">--</span></p>
-                                </div>
-
-                                <div class="overflow-hidden rounded-xl border border-slate-800 bg-slate-950/60">
-                                    <table class="min-w-full text-sm">
-                                        <thead class="bg-slate-900/70 text-slate-200">
-                                            <tr>
-                                                <th class="px-4 py-3 text-left text-[11px] uppercase tracking-[0.2em] text-slate-400">Employee Name</th>
-                                                <th class="px-4 py-3 text-left text-[11px] uppercase tracking-[0.2em] text-slate-400">Office / Unit</th>
-                                                <th class="px-4 py-3 text-left text-[11px] uppercase tracking-[0.2em] text-slate-400">Status</th>
-                                                <th class="px-4 py-3 text-left text-[11px] uppercase tracking-[0.2em] text-slate-400">Success Indicator</th>
-                                                @if ($canEdit)
-                                                    <th class="px-4 py-3 text-center text-[11px] uppercase tracking-[0.2em] text-slate-400">Action</th>
-                                                @endif
-                                            </tr>
-                                        </thead>
-                                        <tbody id="uwp-assigned-list" class="divide-y divide-slate-800"></tbody>
-                                    </table>
-                                </div>
-
-                                <p id="uwp-assigned-empty" class="text-[12px] text-slate-500 hidden">No employees available...</p>
-                            </div>
-                        </div>
-                    </section>
-                </div>
-
-                <div class="grid shrink-0 gap-3 border-t border-slate-800 px-6 py-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
-                    <div class="hidden text-xs text-slate-500">
-                        {{ $canEdit ? 'One workspace for indicator editing, Q/E/T standards, and employee assignment.' : 'Read-only indicator workspace.' }}
-                    </div>
-                    <div class="flex flex-wrap justify-end gap-2.5">
-                        <button type="button"
-                                onclick="closeUwpIndicatorsModal()"
-                                class="rounded-xl border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">
-                            Close
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- STANDARDS SUB-MODAL --}}
-    <div id="uwp-standards-modal-legacy" class="fixed inset-0 z-[86] hidden items-center justify-center bg-black/60 px-4 py-8">
-        <div class="w-full max-w-4xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
-            <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
-                <div>
-                    <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Standards</p>
-                    <h3 class="text-lg font-semibold text-white">Target Difficulty / Standards</h3>
-                    <p id="uwp-standards-indicator-legacy" class="text-[11px] text-slate-400 mt-1"></p>
-                </div>
-                <button type="button" onclick="closeStandardsModal()" class="text-slate-400 hover:text-white">
-                    <span class="sr-only">Close</span>
-                    &times;
-                </button>
-            </div>
-
-            <div class="mt-4 space-y-4 text-sm text-slate-200 max-h-[70vh] overflow-y-auto">
-                <div id="uwp-standards-list-legacy" class="w-full"></div>
-
-                @if ($canEdit)
-                    <div class="space-y-3 rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-                        <p class="text-xs text-slate-400">Add a standard to a specific Rating × Dimension cell.</p>
-                        <div class="grid grid-cols-1 gap-2 sm:grid-cols-4">
-                            <select id="uwp-standard-rating-legacy"
-                                    style="background:#0f172a;color:#e5e7eb;"
-                                    class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none">
-                                <option value="5" selected>Rating: 5</option>
-                                <option value="4">Rating: 4</option>
-                                <option value="3">Rating: 3</option>
-                                <option value="2">Rating: 2</option>
-                                <option value="1">Rating: 1</option>
-                            </select>
-
-                            <select id="uwp-standard-dimension-legacy"
-                                    style="background:#0f172a;color:#e5e7eb;"
-                                    class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none">
-                                <option value="q" selected>Dimension: Q (Quality)</option>
-                                <option value="e">Dimension: E (Efficiency)</option>
-                                <option value="t">Dimension: T (Timeliness)</option>
-                            </select>
-
-                            <div class="sm:col-span-2">
-                                <textarea id="uwp-standards-input-legacy"
-                                          style="background:#0f172a;color:#e5e7eb;"
-                                          rows="2"
-                                          placeholder="Enter standard text"
-                                          class="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none"></textarea>
-                            </div>
-                        </div>
-
-                        <div class="flex flex-wrap gap-2">
-                            <button type="button"
-                                    id="uwp-add-standard-legacy"
-                                    class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-500">
-                                Save to Table
-                            </button>
-                            <button type="button"
-                                    id="uwp-reset-standard-legacy"
-                                    class="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800/60 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-800">
-                                Reset to Seeded Dummy
-                            </button>
-                        </div>
-                    </div>
-                @else
-                    <p class="text-[11px] text-slate-500">Standards are read-only in this stage.</p>
-                @endif
-            </div>
-
-            <div class="mt-5 flex justify-end border-t border-slate-800 pt-3">
-                <button type="button"
-                        class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800"
-                        onclick="closeStandardsModal()">
-                    Close
-                </button>
-            </div>
-        </div>
-    </div>
-
-    {{-- ASSIGN EMPLOYEE SUB-MODAL (scoped to a specific success indicator) --}}
-    <div id="uwp-assigned-employees-modal-legacy" class="fixed inset-0 z-[85] hidden items-center justify-center bg-black/60 px-4 py-8">
-        <div class="w-full max-w-3xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
-            <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
-                <div>
-                    <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Assign Employee</p>
-                    <h3 class="text-lg font-semibold text-white">Employees under the selected Office/Unit</h3>
-                    <p class="text-[11px] text-slate-400 mt-1">Office / Unit: <span id="uwp-assigned-unit-legacy">--</span></p>
-                    <p class="text-[11px] text-slate-400 mt-1">Success Indicator: <span id="uwp-assigned-indicator-legacy" class="font-semibold text-slate-200">--</span></p>
-                </div>
-                <button type="button" onclick="closeAssignedModal()" class="text-slate-400 hover:text-white">
-                    <span class="sr-only">Close</span>
-                    &times;
-                </button>
-            </div>
-
-            <div class="mt-4 space-y-3 text-sm text-slate-200 max-h-[60vh] overflow-y-auto">
-                <div>
-                    <div class="relative">
-                        <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-500 text-xs">🔍</span>
-                        <input type="text"
-                               style="background:#0f172a;color:#e5e7eb;"
-                               placeholder="Search employee name…"
-                               class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 pl-8 text-sm text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none">
-                    </div>
-                </div>
-
-                <div class="rounded-lg border border-slate-800 bg-slate-950/60 overflow-hidden">
-                    <table class="min-w-full text-sm">
-                        <thead class="bg-slate-900/70 text-slate-200">
-                            <tr>
-                                <th class="px-4 py-2 text-left">Employee Name</th>
-                                <th class="px-4 py-2 text-left">Office / Unit</th>
-                                <th class="px-4 py-2 text-left">Status</th>
-                                <th class="px-4 py-2 text-left">Success Indicator</th>
-                                @if ($canEdit)
-                                    <th class="px-4 py-2 text-center">Action</th>
-                                @endif
-                            </tr>
-                        </thead>
-                        <tbody id="uwp-assigned-list-legacy" class="divide-y divide-slate-800"></tbody>
-                    </table>
-                </div>
-
-                <p id="uwp-assigned-empty-legacy" class="text-[12px] text-slate-500 hidden">No employees available...</p>
-            </div>
-
-            <div class="mt-4 flex items-center justify-end gap-3 border-t border-slate-800 pt-3">
-                <button type="button"
-                        class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800"
-                        onclick="closeAssignedModal()">
-                    Close
-                </button>
-            </div>
-        </div>
-    </div>
+    {{-- Success Indicator workspace migrated to a dedicated page. --}}
 
     {{-- GENERIC ACTION MODAL (unchanged) --}}
     <div id="employee-action-modal" role="dialog" aria-modal="true" class="fixed inset-0 z-[70] hidden flex items-center justify-center bg-black/60 px-4 py-6">
@@ -647,41 +293,7 @@
                     button.addEventListener('click', closeModal);
                 });
 
-                // ===== UWP Modals =====
-                const indicatorsModal = document.getElementById('uwp-indicators-modal');
-                const indicatorsTitle = document.getElementById('uwp-indicators-title');
-                const addIndicatorBtn = document.getElementById('uwp-add-indicator');
-                const addIndicatorSecondaryBtn = document.querySelector('[data-indicator-add-secondary]');
-                const workspaceIndicatorNav = document.getElementById('uwp-workspace-indicator-nav');
-                const workspaceIndicatorCountBadge = document.getElementById('uwp-workspace-indicator-count-badge');
-                const workspaceSelectedIndicatorTitle = document.getElementById('uwp-workspace-selected-indicator-title');
-                const workspaceSelectedIndicatorTarget = document.getElementById('uwp-workspace-selected-indicator-target');
-                const workspaceFunctionType = document.getElementById('uwp-workspace-function-type');
-                const workspaceFunctionWeight = document.getElementById('uwp-workspace-function-weight');
-                const workspaceTargetSummary = document.getElementById('uwp-workspace-target-summary');
-                const workspaceOverviewSummary = document.getElementById('uwp-workspace-overview-summary');
-                const workspaceOverviewFunction = document.getElementById('uwp-workspace-overview-function');
-                const workspaceOverviewWeight = document.getElementById('uwp-workspace-overview-weight');
-                const workspaceOverviewIndicatorCount = document.getElementById('uwp-workspace-overview-indicator-count');
-                const workspaceOverviewStandardsCount = document.getElementById('uwp-workspace-overview-standards-count');
-                const workspaceOverviewAssigneeCount = document.getElementById('uwp-workspace-overview-assignee-count');
-                const workspaceOverviewIndicators = document.getElementById('uwp-workspace-overview-indicators');
-                const targetsQuantityInput = document.getElementById('uwp-targets-quantity');
-                const targetsTimelineInput = document.getElementById('uwp-targets-timeline');
-                const workspaceTabButtons = Array.from(document.querySelectorAll('[data-editor-workspace-tab]'));
-                const workspacePanels = Array.from(document.querySelectorAll('[data-editor-workspace-panel]'));
-                const standardsList = document.getElementById('uwp-standards-list');
-                const standardsIndicatorLabel = document.getElementById('uwp-standards-indicator');
-                const standardsInput = document.getElementById('uwp-standards-input');
-                const addStandardBtn = document.getElementById('uwp-add-standard');
-                const ratingSelectEl = document.getElementById('uwp-standard-rating');
-                const dimSelectEl = document.getElementById('uwp-standard-dimension');
-                let standardsEditTarget = null; // { rating: '5', dim: 'q' }
-
-                const assignedList = document.getElementById('uwp-assigned-list');
-                const assignedEmpty = document.getElementById('uwp-assigned-empty');
-                const assignedUnit = document.getElementById('uwp-assigned-unit');
-                const assignedIndicator = document.getElementById('uwp-assigned-indicator');
+                // Success Indicator workspace UI moved to a dedicated page.
 
                 const unitSelect = document.getElementById('uwp-office-unit');
                 const uwpForm = document.getElementById('uwp-form');
@@ -701,12 +313,8 @@
                     ? @json(route('supervisor.uwp.submitData.byId', ['id' => '__ID__'])).replace('__ID__', String(selectedUwpId))
                     : @json(route('supervisor.uwp.submitData'));
 
-                let activeFunctionIndex = null;
-                let activeMfoIndex = null;
-                let activeIndicators = [];
-                let activeIndicatorIndex = 0;
-                let activeWorkspaceTab = 'overview';
-                let activeEditingIndicatorIndex = null;
+                const mfoSuccessIndicatorUrls = @json($mfoSuccessIndicatorUrls ?? []);
+
                 let activeRowConfirmId = null;
                 let activeFunctionConfirmId = null;
 
@@ -1170,71 +778,6 @@
                     return Array.isArray(indicator.assignees) ? [...indicator.assignees] : [];
                 }
 
-                function getActiveFunction() {
-                    return activeFunctionIndex === null ? null : uwpState.functions[activeFunctionIndex] || null;
-                }
-
-                function getActiveMfo() {
-                    const func = getActiveFunction();
-                    return func?.mfos?.[activeMfoIndex] || null;
-                }
-
-                function getSelectedIndicator() {
-                    if (!Array.isArray(activeIndicators) || !activeIndicators.length) {
-                        activeIndicatorIndex = 0;
-                        return null;
-                    }
-
-                    activeIndicatorIndex = Math.min(Math.max(activeIndicatorIndex, 0), activeIndicators.length - 1);
-                    return activeIndicators[activeIndicatorIndex] || null;
-                }
-
-                function setSelectedIndicatorIndex(index) {
-                    if (!Array.isArray(activeIndicators) || !activeIndicators.length) {
-                        activeIndicatorIndex = 0;
-                        return;
-                    }
-
-                    activeIndicatorIndex = Math.min(Math.max(Number(index) || 0, 0), activeIndicators.length - 1);
-                }
-
-                function setEditorWorkspaceTab(tabName) {
-                    activeWorkspaceTab = ['overview', 'targets', 'standards', 'assignees'].includes(tabName) ? tabName : 'overview';
-
-                    workspaceTabButtons.forEach((button) => {
-                        const active = button.getAttribute('data-editor-workspace-tab') === activeWorkspaceTab;
-                        button.classList.toggle('border-cyan-400', active);
-                        button.classList.toggle('text-white', active);
-                        button.classList.toggle('font-semibold', active);
-                        button.classList.toggle('border-transparent', !active);
-                        button.classList.toggle('text-slate-400', !active);
-                        button.classList.toggle('font-medium', !active);
-                    });
-
-                    workspacePanels.forEach((panel) => {
-                        panel.classList.toggle('hidden', panel.getAttribute('data-editor-workspace-panel') !== activeWorkspaceTab);
-                    });
-                }
-
-                function isEmployeeAssigned(indicator, employeeId) {
-                    return getAssignedEmployees(indicator).includes(Number(employeeId));
-                }
-
-                function assignEmployee(indicator, employeeId) {
-                    employeeId = Number(employeeId);
-                    if (!employeeId) return;
-                    indicator.assignees = Array.isArray(indicator.assignees) ? indicator.assignees : [];
-                    if (!indicator.assignees.includes(employeeId)) indicator.assignees.push(employeeId);
-                }
-
-                function unassignEmployee(indicator, employeeId) {
-                    employeeId = Number(employeeId);
-                    if (!employeeId) return;
-                    indicator.assignees = Array.isArray(indicator.assignees) ? indicator.assignees : [];
-                    const idx = indicator.assignees.indexOf(employeeId);
-                    if (idx !== -1) indicator.assignees.splice(idx, 1);
-                }
-
                 function renderFunctions() {
                     if (!functionsWrapper) return;
 
@@ -1269,14 +812,27 @@
                                     </td>
 
                                     <td class="px-4 py-4 text-center">
-                                        <button
-                                            type="button"
-                                            data-action="view-indicators"
-                                            data-function-index="${funcIndex}"
-                                            data-mfo-index="${mfoIndex}"
-                                            class="inline-flex items-center rounded-full border border-slate-700 bg-slate-900 px-3 py-1 text-xs font-semibold text-slate-300 transition hover:bg-slate-700/40 hover:border-slate-400/60 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 cursor-pointer">
-                                            ${indicatorCount} indicator${indicatorCount === 1 ? '' : 's'}
-                                        </button>
+                                        ${(() => {
+                                            const persistedId = Number(mfo?.id || mfo?.mfo_id || mfo?.uwp_mfo_id || 0);
+                                            const url = persistedId ? (mfoSuccessIndicatorUrls[String(persistedId)] || mfoSuccessIndicatorUrls[persistedId]) : '';
+                                            const label = `${indicatorCount} indicator${indicatorCount === 1 ? '' : 's'}`;
+                                            if (url) {
+                                                return `
+                                                    <a
+                                                        href="${url}"
+                                                        class="inline-flex items-center rounded-full border border-slate-700 bg-slate-900 px-3 py-1 text-xs font-semibold text-slate-300 transition hover:bg-slate-700/40 hover:border-slate-400/60 focus:outline-none focus:ring-2 focus:ring-cyan-500/60">
+                                                        ${label}
+                                                    </a>
+                                                `;
+                                            }
+                                            return `
+                                                <span
+                                                    title="Save the UWP first to manage indicators"
+                                                    class="inline-flex items-center rounded-full border border-slate-800 bg-slate-950 px-3 py-1 text-xs font-semibold text-slate-500 opacity-70 cursor-not-allowed">
+                                                    ${label}
+                                                </span>
+                                            `;
+                                        })()}
                                     </td>
 
                                     <td class="px-4 py-4 text-right">
@@ -1435,500 +991,6 @@
 
                     functionsWrapper.innerHTML = html;
                 }
-
-                function renderTargetsPanel() {
-                    const indicator = getSelectedIndicator();
-                    const hasSelection = Boolean(indicator);
-
-                    if (targetsQuantityInput) {
-                        targetsQuantityInput.disabled = !isDraft || !hasSelection;
-                        targetsQuantityInput.value = hasSelection && indicator?.targetQuantity !== null && indicator?.targetQuantity !== undefined
-                            ? String(indicator.targetQuantity)
-                            : '';
-                    }
-
-                    if (targetsTimelineInput) {
-                        targetsTimelineInput.disabled = !isDraft || !hasSelection;
-                        targetsTimelineInput.value = hasSelection ? String(indicator?.targetTimeline || '') : '';
-                    }
-                }
-
-                function renderAssigned(unit) {
-                    if (!assignedList || !assignedEmpty || !assignedUnit || !assignedIndicator) return;
-
-                    const indicator = getSelectedIndicator();
-                    const indicatorText = indicator ? indicator.text : '';
-                    assignedUnit.textContent = unit || '---';
-                    assignedIndicator.textContent = indicatorText || '---';
-
-                    assignedList.innerHTML = '';
-                    if (!indicator) {
-                        assignedEmpty.classList.remove('hidden');
-                        assignedEmpty.textContent = 'No success indicator selected.';
-                        return;
-                    }
-
-                    const officeId = getSelectedOfficeId();
-                    const rows = (assignedData || []).filter((employee) => Number(employee.office_id) === Number(officeId));
-                    if (!rows.length) {
-                        assignedEmpty.classList.remove('hidden');
-                        assignedEmpty.textContent = 'No employees available...';
-                        return;
-                    }
-                    assignedEmpty.classList.add('hidden');
-
-                    rows.forEach((emp) => {
-                        const tr = document.createElement('tr');
-                        tr.className = 'hover:bg-slate-900/40';
-
-                        const nameTd = document.createElement('td');
-                        nameTd.className = 'px-4 py-3';
-                        nameTd.textContent = emp.name;
-
-                        const unitTd = document.createElement('td');
-                        unitTd.className = 'px-4 py-3';
-                        unitTd.textContent = emp.unit;
-
-                        const statusTd = document.createElement('td');
-                        statusTd.className = 'px-4 py-3';
-
-                        const isAssigned = isEmployeeAssigned(indicator, emp.id);
-
-                        const badge = document.createElement('span');
-                        badge.className = `inline-flex items-center px-2 py-1 text-[11px] font-semibold rounded-full border ${
-                            isAssigned ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-200' : 'border-slate-600 bg-slate-800 text-slate-300'
-                        }`;
-                        badge.textContent = isAssigned ? 'Assigned' : 'Available';
-                        statusTd.appendChild(badge);
-
-                        const indicatorTd = document.createElement('td');
-                        indicatorTd.className = 'px-4 py-3 text-slate-300';
-                        indicatorTd.textContent = indicatorText || '---';
-
-                        tr.appendChild(nameTd);
-                        tr.appendChild(unitTd);
-                        tr.appendChild(statusTd);
-                        tr.appendChild(indicatorTd);
-
-                        if (isDraft) {
-                            const actionTd = document.createElement('td');
-                            actionTd.className = 'px-4 py-3 text-center';
-
-                            const toggle = document.createElement('button');
-                            toggle.type = 'button';
-                            toggle.className = 'text-blue-300 hover:text-blue-200 text-xs underline';
-                            toggle.textContent = isAssigned ? 'Unassign' : 'Assign';
-                            toggle.addEventListener('click', () => {
-                                if (isEmployeeAssigned(indicator, emp.id)) {
-                                    unassignEmployee(indicator, emp.id);
-                                } else {
-                                    assignEmployee(indicator, emp.id);
-                                }
-                                renderEditorWorkspaceDetail();
-                            });
-
-                            actionTd.appendChild(toggle);
-                            tr.appendChild(actionTd);
-                        }
-
-                        assignedList.appendChild(tr);
-                    });
-                }
-
-                function renderStandardsPanel() {
-                    if (!standardsList || !standardsIndicatorLabel) return;
-
-                    const indicator = getSelectedIndicator();
-                    standardsList.innerHTML = '';
-                    standardsIndicatorLabel.textContent = indicator?.text || 'No success indicator selected';
-
-                    if (!indicator) {
-                        standardsList.innerHTML = '<div class="px-4 py-6 text-sm text-slate-400">No success indicator selected.</div>';
-                        return;
-                    }
-
-                    const data = ensureIndicatorMatrix(indicator);
-                    const table = document.createElement('table');
-                    table.className = 'min-w-full text-sm text-slate-100';
-                    table.innerHTML = `
-                        <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.22em] text-slate-400">
-                            <tr>
-                                <th class="px-4 py-3 text-left">Rating</th>
-                                <th class="px-4 py-3 text-left">Quality (Q)</th>
-                                <th class="px-4 py-3 text-left">Efficiency (E)</th>
-                                <th class="px-4 py-3 text-left">Timeliness (T)</th>
-                            </tr>
-                        </thead>
-                    `;
-
-                    const tbody = document.createElement('tbody');
-                    tbody.className = 'divide-y divide-slate-800 text-slate-100';
-
-                    const makeCell = (value, lvl, dim) => {
-                        const td = document.createElement('td');
-                        td.className = 'px-4 py-3 align-top';
-
-                        const txt = (value || '').trim();
-                        const textEl = document.createElement('div');
-                        textEl.className = 'text-slate-100';
-                        textEl.textContent = txt || '---';
-                        td.appendChild(textEl);
-
-                        if (isDraft) {
-                            const actionBtn = document.createElement('button');
-                            actionBtn.type = 'button';
-                            actionBtn.className = 'mt-1 text-[11px] text-blue-300 hover:text-blue-200';
-                            actionBtn.textContent = txt ? 'Edit' : 'Add +';
-                            actionBtn.addEventListener('click', () => {
-                                ratingSelectEl.value = String(lvl);
-                                dimSelectEl.value = dim;
-                                standardsEditTarget = { rating: String(lvl), dim };
-                                standardsInput.value = txt || '';
-                                standardsInput.focus();
-                            });
-                            td.appendChild(actionBtn);
-                        }
-
-                        if (isDraft && txt) {
-                            const clearBtn = document.createElement('button');
-                            clearBtn.type = 'button';
-                            clearBtn.className = 'mt-1 ml-3 text-[11px] text-rose-300 hover:text-rose-200';
-                            clearBtn.textContent = 'Clear';
-                            clearBtn.addEventListener('click', () => {
-                                const matrix = ensureIndicatorMatrix(indicator);
-                                if (!matrix[String(lvl)]) {
-                                    matrix[String(lvl)] = { q: '', e: '', t: '' };
-                                }
-
-                                matrix[String(lvl)][dim] = '';
-                                indicator._matrix = matrix;
-                                indicator.standards = standardsMatrixToArray(matrix);
-
-                                if (
-                                    standardsEditTarget
-                                    && standardsEditTarget.rating === String(lvl)
-                                    && standardsEditTarget.dim === dim
-                                ) {
-                                    standardsEditTarget = null;
-                                    if (standardsInput) standardsInput.value = '';
-                                }
-
-                                renderEditorWorkspaceDetail();
-                            });
-                            td.appendChild(clearBtn);
-                        }
-
-                        return td;
-                    };
-
-                    [5, 4, 3, 2, 1].forEach((lvl) => {
-                        const row = data[lvl] || { q: '', e: '', t: '' };
-                        const tr = document.createElement('tr');
-                        tr.className = 'hover:bg-slate-900/40';
-
-                        const ratingTd = document.createElement('td');
-                        ratingTd.className = 'px-4 py-3 font-semibold text-white';
-                        ratingTd.textContent = lvl;
-
-                        tr.append(
-                            ratingTd,
-                            makeCell(row.q, lvl, 'q'),
-                            makeCell(row.e, lvl, 'e'),
-                            makeCell(row.t, lvl, 't')
-                        );
-                        tbody.appendChild(tr);
-                    });
-
-                    table.appendChild(tbody);
-                    standardsList.appendChild(table);
-                }
-
-                function renderIndicatorWorkspaceNav() {
-                    if (!workspaceIndicatorNav || !workspaceIndicatorCountBadge) return;
-
-                    workspaceIndicatorNav.innerHTML = '';
-                    workspaceIndicatorCountBadge.textContent = String(activeIndicators.length || 0);
-
-                    if (!activeIndicators.length) {
-                        workspaceIndicatorNav.innerHTML = '<p class="px-3 py-4 text-sm text-slate-500">No success indicators yet.</p>';
-                        return;
-                    }
-
-                    activeIndicators.forEach((indicator, idx) => {
-                        const isSelected = idx === activeIndicatorIndex;
-                        const isEditingIndicator = isDraft && activeEditingIndicatorIndex === idx;
-                        const card = document.createElement('div');
-                        card.className = `rounded-xl border px-4 py-3 transition ${
-                            isSelected ? 'border-cyan-500/30 bg-cyan-500/10' : 'border-slate-800 bg-slate-950/50 hover:bg-slate-900/60'
-                        }`;
-
-                        const topRow = document.createElement('div');
-                        topRow.className = 'flex items-start justify-between gap-3';
-
-                        const textWrap = document.createElement('div');
-                        textWrap.className = 'min-w-0 flex-1';
-
-                        if (isEditingIndicator) {
-                            const input = document.createElement('input');
-                            input.type = 'text';
-                            input.value = indicator?.text || '';
-                            input.placeholder = 'Enter success indicator';
-                            input.dataset.indicatorNavInput = String(idx);
-                            input.className = 'w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/40 focus:outline-none';
-                            input.style.background = '#0f172a';
-                            input.style.color = '#e5e7eb';
-                            input.addEventListener('input', (event) => {
-                                const value = String(event.target.value || '');
-                                indicator.text = value;
-                                if (workspaceSelectedIndicatorTitle && idx === activeIndicatorIndex) {
-                                    workspaceSelectedIndicatorTitle.textContent = value.trim() || 'New success indicator';
-                                }
-                            });
-                            input.addEventListener('keydown', (event) => {
-                                if (event.key === 'Enter') {
-                                    event.preventDefault();
-                                    finishEditIndicator(idx);
-                                }
-                            });
-                            textWrap.appendChild(input);
-                        } else {
-                            const selectBtn = document.createElement('button');
-                            selectBtn.type = 'button';
-                            selectBtn.className = 'w-full text-left';
-                            selectBtn.innerHTML = `<span class="block text-sm font-medium leading-6 text-slate-100">${escapeHtml(indicator?.text || 'Untitled indicator')}</span>`;
-                            selectBtn.addEventListener('click', () => {
-                                setSelectedIndicatorIndex(idx);
-                                renderEditorWorkspaceDetail();
-                            });
-                            textWrap.appendChild(selectBtn);
-                        }
-
-                        topRow.appendChild(textWrap);
-
-                        if (isDraft) {
-                            const actionWrap = document.createElement('div');
-                            actionWrap.className = 'flex flex-wrap items-center justify-end gap-2';
-
-                            const editBtn = document.createElement('button');
-                            editBtn.type = 'button';
-                            editBtn.className = 'rounded-full border border-slate-700 bg-slate-900 px-2.5 py-1 text-[11px] font-semibold text-slate-300 transition hover:text-white';
-                            editBtn.textContent = isEditingIndicator ? 'Done' : 'Edit';
-                            editBtn.addEventListener('click', () => {
-                                if (isEditingIndicator) {
-                                    finishEditIndicator(idx);
-                                } else {
-                                    startEditIndicator(idx);
-                                }
-                            });
-
-                            const delBtn = document.createElement('button');
-                            delBtn.type = 'button';
-                            delBtn.className = 'rounded-full border border-rose-500/40 bg-rose-500/10 px-2.5 py-1 text-[11px] font-semibold text-rose-200 transition hover:bg-rose-500/20';
-                            delBtn.textContent = 'Delete';
-                            delBtn.addEventListener('click', () => deleteIndicator(idx));
-
-                            actionWrap.appendChild(editBtn);
-                            actionWrap.appendChild(delBtn);
-                            topRow.appendChild(actionWrap);
-                        }
-
-                        card.appendChild(topRow);
-                        card.addEventListener('click', (event) => {
-                            if (event.target.closest('button, input, textarea, select')) return;
-                            setSelectedIndicatorIndex(idx);
-                            renderEditorWorkspaceDetail();
-                        });
-                        workspaceIndicatorNav.appendChild(card);
-                    });
-                }
-
-                function renderWorkspaceOverview() {
-                    const func = getActiveFunction();
-                    const mfo = getActiveMfo();
-                    const indicator = getSelectedIndicator();
-                    const functionType = normalizeFunctionType(func?.type || 'custom');
-                    const indicatorCount = activeIndicators.length;
-                    const selectedStandardsCount = indicator ? getIndicatorStandardsArray(indicator).length : 0;
-                    const selectedAssigneeCount = indicator ? getAssignedEmployees(indicator).length : 0;
-                    const targetSummary = deriveMfoTargetMeta(mfo || {}).summary || String(mfo?.target || '').trim() || '--';
-
-                    if (workspaceFunctionType) workspaceFunctionType.textContent = `${functionType.charAt(0).toUpperCase()}${functionType.slice(1)} Function`;
-                    if (workspaceFunctionWeight) workspaceFunctionWeight.textContent = `${Number(func?.weight || 0)}% Weight`;
-                    if (workspaceTargetSummary) workspaceTargetSummary.textContent = targetSummary;
-                    if (workspaceSelectedIndicatorTitle) workspaceSelectedIndicatorTitle.textContent = indicator?.text || 'No success indicator selected';
-                    if (workspaceSelectedIndicatorTarget) workspaceSelectedIndicatorTarget.textContent = indicator ? getIndicatorTargetSummary(indicator) || '--' : '';
-                    if (workspaceOverviewSummary) workspaceOverviewSummary.textContent = targetSummary;
-                    if (workspaceOverviewFunction) workspaceOverviewFunction.textContent = `${functionType.charAt(0).toUpperCase()}${functionType.slice(1)}`;
-                    if (workspaceOverviewWeight) workspaceOverviewWeight.textContent = `${Number(func?.weight || 0)}%`;
-                    if (workspaceOverviewIndicatorCount) workspaceOverviewIndicatorCount.textContent = String(indicatorCount);
-                    if (workspaceOverviewStandardsCount) workspaceOverviewStandardsCount.textContent = String(selectedStandardsCount);
-                    if (workspaceOverviewAssigneeCount) workspaceOverviewAssigneeCount.textContent = String(selectedAssigneeCount);
-
-                    if (workspaceOverviewIndicators) {
-                        workspaceOverviewIndicators.innerHTML = '';
-
-                        if (!activeIndicators.length) {
-                            workspaceOverviewIndicators.innerHTML = '<p class="text-sm text-slate-500">No linked success indicators.</p>';
-                        } else {
-                            activeIndicators.forEach((entry, idx) => {
-                                const item = document.createElement('button');
-                                item.type = 'button';
-                                item.className = `flex w-full items-start justify-between rounded-xl border px-4 py-3 text-left transition ${
-                                    idx === activeIndicatorIndex ? 'border-cyan-500/30 bg-cyan-500/10' : 'border-slate-800 bg-slate-950/50 hover:bg-slate-900/60'
-                                }`;
-                                item.innerHTML = `
-                                    <span class="pr-4 text-sm text-slate-100">${escapeHtml(entry?.text || 'Untitled indicator')}</span>
-                                    <span class="rounded-md bg-slate-900 px-3 py-1 text-xs text-slate-400">${getIndicatorTargetSummary(entry) || '--'}</span>
-                                `;
-                                item.addEventListener('click', () => {
-                                    setSelectedIndicatorIndex(idx);
-                                    setEditorWorkspaceTab('targets');
-                                    renderEditorWorkspaceDetail();
-                                });
-                                workspaceOverviewIndicators.appendChild(item);
-                            });
-                        }
-                    }
-                }
-
-                function renderEditorWorkspaceDetail() {
-                    renderIndicatorWorkspaceNav();
-                    renderWorkspaceOverview();
-                    renderTargetsPanel();
-                    renderStandardsPanel();
-                    renderAssigned(getSelectedUnitLabel());
-                }
-
-                function openAssignedModalForIndicator(indicatorIdx) {
-                    setSelectedIndicatorIndex(indicatorIdx);
-                    setEditorWorkspaceTab('assignees');
-                    renderEditorWorkspaceDetail();
-                }
-
-                function openStandardsModal(idx) {
-                    setSelectedIndicatorIndex(idx);
-                    setEditorWorkspaceTab('standards');
-                    renderEditorWorkspaceDetail();
-                }
-
-                function handleAddStandard() {
-                    if (!standardsInput || !ratingSelectEl || !dimSelectEl) return;
-
-                    const indicator = getSelectedIndicator();
-                    if (!indicator) return;
-
-                    const raw = standardsInput.value.trim();
-                    if (!raw) return;
-
-                    const rating = standardsEditTarget?.rating || ratingSelectEl.value;
-                    const dim = standardsEditTarget?.dim || dimSelectEl.value;
-
-                    const matrix = ensureIndicatorMatrix(indicator);
-                    if (!matrix[rating]) matrix[rating] = { q: '', e: '', t: '' };
-                    matrix[rating][dim] = raw;
-                    indicator._matrix = matrix;
-                    indicator.standards = standardsMatrixToArray(matrix);
-
-                    standardsInput.value = '';
-                    standardsEditTarget = null;
-                    renderEditorWorkspaceDetail();
-                }
-
-                // ===== Indicator CRUD =====
-                function startEditIndicator(idx) {
-                    const indicator = activeIndicators[idx];
-                    if (!indicator) return;
-                    setSelectedIndicatorIndex(idx);
-                    if (activeEditingIndicatorIndex !== null && activeEditingIndicatorIndex !== idx) {
-                        finalizeIndicatorValues(activeIndicators[activeEditingIndicatorIndex]);
-                    }
-
-                    activeEditingIndicatorIndex = idx;
-                    setEditorWorkspaceTab('targets');
-                    renderEditorWorkspaceDetail();
-
-                    requestAnimationFrame(() => {
-                        const input = workspaceIndicatorNav?.querySelector(`[data-indicator-nav-input="${idx}"]`);
-                        if (!input) return;
-                        input.focus();
-                        input.select();
-                    });
-                }
-
-                function finishEditIndicator(idx) {
-                    const indicator = activeIndicators[idx];
-                    if (!indicator) return;
-
-                    finalizeIndicatorValues(indicator);
-                    setSelectedIndicatorIndex(idx);
-                    activeEditingIndicatorIndex = null;
-                    renderEditorWorkspaceDetail();
-                }
-
-                function deleteIndicator(idx) {
-                    if (activeEditingIndicatorIndex === idx) {
-                        activeEditingIndicatorIndex = null;
-                    } else if (activeEditingIndicatorIndex !== null && idx < activeEditingIndicatorIndex) {
-                        activeEditingIndicatorIndex -= 1;
-                    }
-                    activeIndicators.splice(idx, 1);
-                    if (!activeIndicators.length) {
-                        activeIndicatorIndex = 0;
-                    } else if (idx <= activeIndicatorIndex) {
-                        activeIndicatorIndex = Math.max(0, Math.min(activeIndicatorIndex, activeIndicators.length - 1));
-                    }
-                    renderEditorWorkspaceDetail();
-                }
-
-                function addIndicator() {
-                    activeIndicators.push(createIndicator('New success indicator'));
-                    setSelectedIndicatorIndex(activeIndicators.length - 1);
-                    setEditorWorkspaceTab('targets');
-                    renderEditorWorkspaceDetail();
-                    startEditIndicator(activeIndicators.length - 1);
-                }
-
-                function openUwpIndicatorsModal(functionIndex, mfoIndex) {
-                    const func = uwpState.functions[functionIndex];
-                    const mfo = func?.mfos?.[mfoIndex];
-                    if (!mfo || !indicatorsModal) return;
-
-                    activeFunctionIndex = functionIndex;
-                    activeMfoIndex = mfoIndex;
-                    activeEditingIndicatorIndex = null;
-                    if (!Array.isArray(mfo.indicators)) mfo.indicators = [];
-                    activeIndicators = mfo.indicators;
-                    activeIndicatorIndex = activeIndicators.length ? 0 : 0;
-                    activeWorkspaceTab = 'overview';
-
-                    if (indicatorsTitle) indicatorsTitle.textContent = mfo.title || '--';
-                    setEditorWorkspaceTab('overview');
-                    renderEditorWorkspaceDetail();
-
-                    indicatorsModal.classList.remove('hidden');
-                    indicatorsModal.classList.add('flex');
-                    document.body.classList.add('overflow-hidden');
-                }
-
-                window.closeUwpIndicatorsModal = function () {
-                    if (activeEditingIndicatorIndex !== null) {
-                        finalizeIndicatorValues(activeIndicators[activeEditingIndicatorIndex]);
-                    }
-                    if (indicatorsModal) {
-                        indicatorsModal.classList.add('hidden');
-                        indicatorsModal.classList.remove('flex');
-                    }
-                    activeFunctionIndex = null;
-                    activeMfoIndex = null;
-                    activeIndicators = [];
-                    activeIndicatorIndex = 0;
-                    activeWorkspaceTab = 'overview';
-                    activeEditingIndicatorIndex = null;
-                    standardsEditTarget = null;
-                    if (standardsInput) standardsInput.value = '';
-                    renderFunctions();
-                    document.body.classList.remove('overflow-hidden');
-                };
 
                 // ===== Function Container Actions =====
                 function addFunction() {
@@ -2169,14 +1231,6 @@
                     });
 
                     functionsWrapper.addEventListener('click', (event) => {
-                        const viewBtn = event.target.closest('[data-action="view-indicators"]');
-                        if (viewBtn) {
-                            const funcIdx = Number(viewBtn.dataset.functionIndex);
-                            const mfoIdx = Number(viewBtn.dataset.mfoIndex);
-                            openUwpIndicatorsModal(funcIdx, mfoIdx);
-                            return;
-                        }
-
                         const addMfoBtn = event.target.closest('[data-action="add-mfo"]');
                         if (addMfoBtn) {
                             const funcIdx = Number(addMfoBtn.dataset.functionIndex);
@@ -2233,49 +1287,6 @@
                 }
 
                 if (addFunctionBtn && isDraft) addFunctionBtn.addEventListener('click', addFunction);
-                if (addIndicatorBtn && isDraft) addIndicatorBtn.addEventListener('click', addIndicator);
-                if (addIndicatorSecondaryBtn && isDraft) addIndicatorSecondaryBtn.addEventListener('click', addIndicator);
-                if (addStandardBtn && isDraft) addStandardBtn.addEventListener('click', handleAddStandard);
-                if (targetsQuantityInput) {
-                    targetsQuantityInput.addEventListener('input', (event) => {
-                        const indicator = getSelectedIndicator();
-                        if (!indicator || !isDraft) return;
-                        indicator.targetQuantity = normalizeTargetQuantity(event.target.value);
-                        if (workspaceSelectedIndicatorTarget) {
-                            workspaceSelectedIndicatorTarget.textContent = getIndicatorTargetSummary(indicator) || '--';
-                        }
-                    });
-                    targetsQuantityInput.addEventListener('blur', () => {
-                        if (!isDraft) return;
-                        renderEditorWorkspaceDetail();
-                    });
-                }
-                if (targetsTimelineInput) {
-                    targetsTimelineInput.addEventListener('input', (event) => {
-                        const indicator = getSelectedIndicator();
-                        if (!indicator || !isDraft) return;
-                        indicator.targetTimeline = String(event.target.value || '');
-                        if (workspaceSelectedIndicatorTarget) {
-                            workspaceSelectedIndicatorTarget.textContent = getIndicatorTargetSummary(indicator) || '--';
-                        }
-                    });
-                    targetsTimelineInput.addEventListener('blur', () => {
-                        if (!isDraft) return;
-                        renderEditorWorkspaceDetail();
-                    });
-                }
-                const resetStandardBtn = document.getElementById('uwp-reset-standard');
-                if (resetStandardBtn && isDraft) {
-                    resetStandardBtn.addEventListener('click', () => {
-                        const indicator = getSelectedIndicator();
-                        if (!indicator) return;
-                        indicator._matrix = seedStandardsForIndicator(indicator.text || '');
-                        indicator.standards = standardsMatrixToArray(indicator._matrix);
-                        standardsEditTarget = null;
-                        if (standardsInput) standardsInput.value = '';
-                        renderEditorWorkspaceDetail();
-                    });
-                }
 
                 if (submitUwpBtn && isDraft) {
                     submitUwpBtn.addEventListener('click', () => {
@@ -2313,32 +1324,17 @@
                     }
                 });
 
-                workspaceTabButtons.forEach((button) => {
-                    button.addEventListener('click', () => {
-                        setEditorWorkspaceTab(button.getAttribute('data-editor-workspace-tab') || 'overview');
-                    });
-                });
-
-                indicatorsModal?.addEventListener('click', (e) => {
-                    if (e.target === indicatorsModal) closeUwpIndicatorsModal();
-                });
-
                 document.addEventListener('keydown', (e) => {
                     if (e.key === 'Escape') {
                         if (isDraft && (activeRowConfirmId !== null || activeFunctionConfirmId !== null)) {
                             activeRowConfirmId = null;
                             activeFunctionConfirmId = null;
                             renderFunctions();
-                        } else if (indicatorsModal && !indicatorsModal.classList.contains('hidden')) {
-                            closeUwpIndicatorsModal();
                         } else {
                             closeModal();
                         }
                     }
                 });
-
-                window.closeStandardsModal = closeUwpIndicatorsModal;
-                window.closeAssignedModal = closeUwpIndicatorsModal;
             });
         </script>
     @endpush

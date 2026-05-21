@@ -135,6 +135,7 @@
                                     <tr>
                                         <th class="px-4 py-3 text-left">Indicator</th>
                                         <th class="px-4 py-3 text-left">Target</th>
+                                        <th class="px-4 py-3 text-left">Standards</th>
                                         <th class="px-4 py-3 text-left">Assignees</th>
                                     </tr>
                                 </thead>
@@ -164,6 +165,80 @@
         </div>
     </section>
 
+    {{-- Assignees Modal --}}
+    <div id="assignees-modal" role="dialog" aria-modal="true" class="fixed inset-0 z-[70] hidden flex items-center justify-center bg-slate-950/80 px-4 py-6 backdrop-blur-sm transition-opacity">
+        <div class="w-full max-w-md rounded-2xl border border-slate-700/40 bg-slate-900 shadow-2xl shadow-black/40" style="animation:fadeInScale .2s ease-out">
+            {{-- Header --}}
+            <div class="flex items-center justify-between rounded-t-2xl px-5 py-4" style="background:linear-gradient(135deg,rgba(6,182,212,.08),rgba(99,102,241,.06))">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-400">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-semibold text-white">Assigned Employees</h2>
+                        <p class="text-xs text-slate-400">Task Assignees</p>
+                    </div>
+                </div>
+                <button type="button" data-assignees-modal-close class="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-800/60 hover:text-white">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            {{-- List --}}
+            <div id="assignees-modal-list" class="max-h-[60vh] overflow-y-auto px-3 py-3">
+                <!-- Assignee items injected here -->
+            </div>
+            {{-- Footer --}}
+            <div class="border-t border-slate-800/40 px-5 py-3">
+                <button type="button" data-assignees-modal-close class="w-full rounded-xl bg-slate-800/80 py-2.5 text-sm font-semibold text-slate-200 transition hover:bg-slate-700">Close</button>
+            </div>
+        </div>
+    </div>
+    <style>
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+
+    {{-- Standards Modal --}}
+    <div id="standards-modal" role="dialog" aria-modal="true" class="fixed inset-0 z-[75] hidden flex items-center justify-center bg-slate-950/80 px-4 py-6 backdrop-blur-sm transition-opacity">
+        <div class="w-full max-w-4xl rounded-2xl border border-slate-700/40 bg-slate-900 shadow-2xl shadow-black/40" style="animation:fadeInScale .2s ease-out">
+            <div class="flex items-center justify-between rounded-t-2xl px-5 py-4" style="background:linear-gradient(135deg,rgba(59,130,246,.08),rgba(99,102,241,.06))">
+                <div>
+                    <h2 class="text-base font-semibold text-white">Success Indicator Standards</h2>
+                    <p class="text-xs text-slate-400">
+                        Indicator: <span id="standards-modal-indicator" class="font-semibold text-slate-200">--</span>
+                    </p>
+                </div>
+                <button type="button" data-standards-modal-close class="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-800/60 hover:text-white">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <div class="max-h-[65vh] overflow-y-auto px-5 py-4">
+                <div class="overflow-hidden rounded-xl border border-slate-800">
+                    <table class="min-w-full text-sm text-slate-200">
+                        <thead class="bg-slate-950/70 text-xs uppercase tracking-wide text-slate-400">
+                            <tr>
+                                <th class="px-4 py-3 text-left">Rating</th>
+                                <th class="px-4 py-3 text-left">Q</th>
+                                <th class="px-4 py-3 text-left">E</th>
+                                <th class="px-4 py-3 text-left">T</th>
+                            </tr>
+                        </thead>
+                        <tbody id="standards-modal-body" class="divide-y divide-slate-800"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="border-t border-slate-800/40 px-5 py-3">
+                <button type="button" data-standards-modal-close class="w-full rounded-xl bg-slate-800/80 py-2.5 text-sm font-semibold text-slate-200 transition hover:bg-slate-700">Close</button>
+            </div>
+        </div>
+    </div>
+
     @push('scripts')
         <script>
             (function () {
@@ -180,6 +255,12 @@
                 const targetEl = document.getElementById('uwpTargetSummary');
                 const indicatorsSummaryEl = document.getElementById('uwpIndicatorsSummary');
                 const indicatorsTableBodyEl = document.getElementById('uwpIndicatorsTableBody');
+
+                const assigneesModal = document.getElementById('assignees-modal');
+                const assigneesList = document.getElementById('assignees-modal-list');
+                const standardsModal = document.getElementById('standards-modal');
+                const standardsModalBody = document.getElementById('standards-modal-body');
+                const standardsModalIndicator = document.getElementById('standards-modal-indicator');
 
                 function escapeHtml(str) {
                     return String(str ?? '')
@@ -215,6 +296,42 @@
                     document.querySelectorAll('[data-uwp-panel]').forEach((panel) => {
                         panel.classList.toggle('hidden', panel.getAttribute('data-uwp-panel') !== tab);
                     });
+                }
+
+                function normalizeStandardsPayload(indicator) {
+                    const empty = {
+                        5: { q: '', e: '', t: '' },
+                        4: { q: '', e: '', t: '' },
+                        3: { q: '', e: '', t: '' },
+                        2: { q: '', e: '', t: '' },
+                        1: { q: '', e: '', t: '' },
+                    };
+
+                    if (indicator?.standards_by_rating && typeof indicator.standards_by_rating === 'object') {
+                        [5, 4, 3, 2, 1].forEach((rating) => {
+                            const row = indicator.standards_by_rating[rating] || indicator.standards_by_rating[String(rating)] || {};
+                            empty[rating] = {
+                                q: String(row.q || '').trim(),
+                                e: String(row.e || '').trim(),
+                                t: String(row.t || '').trim(),
+                            };
+                        });
+                        return empty;
+                    }
+
+                    const standards = Array.isArray(indicator?.qet_standards)
+                        ? indicator.qet_standards
+                        : (Array.isArray(indicator?.standards) ? indicator.standards : []);
+                    standards.forEach((item) => {
+                        const rating = Number(item?.rating ?? item?.rating_level ?? 0);
+                        const dimension = String(item?.dimension || '').toLowerCase();
+                        const text = String(item?.standard_text ?? item?.text ?? item?.standard ?? '').trim();
+                        if (![1, 2, 3, 4, 5].includes(rating)) return;
+                        if (!['q', 'e', 't'].includes(dimension)) return;
+                        empty[rating][dimension] = text;
+                    });
+
+                    return empty;
                 }
 
                 function filteredOutputs() {
@@ -279,7 +396,7 @@
                         weightEl.classList.add('hidden');
                         targetEl.textContent = '--';
                         indicatorsSummaryEl.innerHTML = '<p class="text-sm text-slate-500">No output selected.</p>';
-                        indicatorsTableBodyEl.innerHTML = '<tr><td colspan="3" class="px-4 py-8 text-center text-slate-500">No output selected.</td></tr>';
+                        indicatorsTableBodyEl.innerHTML = '<tr><td colspan="4" class="px-4 py-8 text-center text-slate-500">No output selected.</td></tr>';
                         return;
                     }
 
@@ -317,17 +434,119 @@
 
                     indicatorsTableBodyEl.innerHTML = indicators.length
                         ? indicators.map((ind) => {
-                            const assignees = (ind.assignments || []).map(a => a.employee?.name).filter(Boolean);
-                            const assigneeLabel = assignees.length ? assignees.join(', ') : '--';
+                            const assignees = (ind.assignments || []).map(a => {
+                                if (!a.employee) return null;
+                                return {
+                                    name: a.employee.name,
+                                    photo: a.employee.profile_photo_url || null,
+                                    office: (a.employee.office && a.employee.office.name) ? a.employee.office.name : null
+                                };
+                            }).filter(Boolean);
                             const targetSummary = [ind.target_quantity, ind.target_timeline].filter(Boolean).join(' ') || '--';
+                            
+                            let assigneeCell = `<span class="text-slate-500">--</span>`;
+                            if (assignees.length > 0) {
+                                const assigneesData = escapeHtml(JSON.stringify(assignees));
+                                assigneeCell = `
+                                    <button type="button" class="btn-view-assignees group inline-flex items-center gap-1 text-slate-400 transition hover:text-cyan-400" title="View Assignees" data-assignees="${assigneesData}">
+                                        <svg class="h-4 w-4 transition group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
+                                        <span class="text-xs font-medium">${assignees.length}</span>
+                                    </button>
+                                `;
+                            }
+
+                            const standardsData = escapeHtml(JSON.stringify(normalizeStandardsPayload(ind)));
+                            const standardsCell = `
+                                <button type="button" class="btn-view-standards inline-flex items-center gap-1 text-blue-300 transition hover:text-blue-200" title="View Standards" data-indicator="${escapeHtml(ind.indicator_text || '--')}" data-standards="${standardsData}">
+                                    <span class="text-xs font-medium">View</span>
+                                </button>
+                            `;
+
                             return `
                                 <tr class="hover:bg-slate-900/30">
                                     <td class="px-4 py-3 text-slate-100">${escapeHtml(ind.indicator_text || '--')}</td>
                                     <td class="px-4 py-3 text-slate-300 text-xs">${escapeHtml(targetSummary)}</td>
-                                    <td class="px-4 py-3 text-slate-300 text-xs">${escapeHtml(assigneeLabel)}</td>
+                                    <td class="px-4 py-3 text-slate-300 text-xs">${standardsCell}</td>
+                                    <td class="px-4 py-3 text-slate-300 text-xs">${assigneeCell}</td>
                                 </tr>`;
                         }).join('')
-                        : '<tr><td colspan="3" class="px-4 py-8 text-center text-slate-500">No success indicators.</td></tr>';
+                        : '<tr><td colspan="4" class="px-4 py-8 text-center text-slate-500">No success indicators.</td></tr>';
+                }
+
+                function openStandardsModal(indicatorName, standardsByRating) {
+                    if (!standardsModal || !standardsModalBody || !standardsModalIndicator) return;
+
+                    standardsModalIndicator.textContent = indicatorName || '--';
+
+                    standardsModalBody.innerHTML = [5, 4, 3, 2, 1].map((rating) => {
+                        const row = standardsByRating?.[rating] || standardsByRating?.[String(rating)] || {};
+                        const qRaw = String(row.q || '').trim();
+                        const eRaw = String(row.e || '').trim();
+                        const tRaw = String(row.t || '').trim();
+                        const q = qRaw ? escapeHtml(qRaw) : '<span class="text-slate-500">--</span>';
+                        const e = eRaw ? escapeHtml(eRaw) : '<span class="text-slate-500">--</span>';
+                        const t = tRaw ? escapeHtml(tRaw) : '<span class="text-slate-500">--</span>';
+
+                        return `
+                            <tr class="align-top">
+                                <td class="px-4 py-3 font-semibold text-slate-100">${rating}</td>
+                                <td class="px-4 py-3 text-slate-300 text-xs leading-6">${q}</td>
+                                <td class="px-4 py-3 text-slate-300 text-xs leading-6">${e}</td>
+                                <td class="px-4 py-3 text-slate-300 text-xs leading-6">${t}</td>
+                            </tr>
+                        `;
+                    }).join('');
+
+                    standardsModal.classList.remove('hidden');
+                    document.body.classList.add('overflow-hidden');
+                }
+
+                function openAssigneesModal(assigneesData) {
+                    if (!assigneesModal || !assigneesList) return;
+                    assigneesList.innerHTML = '';
+                    if (!assigneesData || assigneesData.length === 0) {
+                        assigneesList.innerHTML = '<div class="px-4 py-8 text-center text-sm text-slate-500">No assignees found.</div>';
+                    } else {
+                        assigneesData.forEach(emp => {
+                            const name = typeof emp === 'string' ? emp : (emp.name || 'Unknown');
+                            const photo = typeof emp === 'string' ? null : (emp.photo || null);
+                            const office = typeof emp === 'string' ? '' : (emp.office || '');
+                            let avatarHtml = '';
+                            if (photo) {
+                                avatarHtml = `<img src="${escapeHtml(photo)}" alt="${escapeHtml(name)}" class="h-10 w-10 shrink-0 rounded-full object-cover ring-2 ring-slate-700/60">`;
+                            } else {
+                                const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                                avatarHtml = `<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-slate-700 to-slate-800 text-xs font-bold text-slate-300 ring-2 ring-slate-700/60">${escapeHtml(initials)}</div>`;
+                            }
+
+                            assigneesList.innerHTML += `
+                                <div class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition hover:bg-slate-800/40">
+                                    ${avatarHtml}
+                                    <div class="min-w-0">
+                                        <p class="truncate text-sm font-medium text-slate-100">${escapeHtml(name)}</p>
+                                        ${office ? `<p class="truncate text-xs text-slate-500">${escapeHtml(office)}</p>` : ''}
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    }
+                    assigneesModal.classList.remove('hidden');
+                    document.body.classList.add('overflow-hidden');
+                }
+
+                function closeAssigneesModal() {
+                    if (!assigneesModal) return;
+                    assigneesModal.classList.add('hidden');
+                    document.body.classList.remove('overflow-hidden');
+                }
+
+                function closeStandardsModal() {
+                    if (!standardsModal) return;
+                    standardsModal.classList.add('hidden');
+                    document.body.classList.remove('overflow-hidden');
                 }
 
                 document.querySelectorAll('[data-uwp-filter]').forEach((btn) => {
@@ -346,6 +565,57 @@
                         setTab(activeTab);
                     });
                 });
+
+                if (indicatorsTableBodyEl) {
+                    indicatorsTableBodyEl.addEventListener('click', (e) => {
+                        const standardsBtn = e.target.closest('.btn-view-standards');
+                        if (standardsBtn) {
+                            try {
+                                let dataStr = standardsBtn.getAttribute('data-standards') || '{}';
+                                dataStr = dataStr.replace(/&quot;/g, '"');
+                                const standards = JSON.parse(dataStr);
+                                openStandardsModal(standardsBtn.getAttribute('data-indicator') || '--', standards);
+                            } catch (err) {
+                                console.error('Failed to parse standards data', err);
+                            }
+                            return;
+                        }
+
+                        const btn = e.target.closest('.btn-view-assignees');
+                        if (!btn) return;
+                        try {
+                            // Using standard JSON parsing but handling escaped HTML quotes if necessary
+                            // Using unescapeHtml logic conceptually if we had one, but we escaped quotes as &quot;
+                            let dataStr = btn.getAttribute('data-assignees') || '[]';
+                            // Convert &quot; back to " for JSON parsing
+                            dataStr = dataStr.replace(/&quot;/g, '"');
+                            const data = JSON.parse(dataStr);
+                            openAssigneesModal(data);
+                        } catch(err) {
+                            console.error('Failed to parse assignees data', err);
+                        }
+                    });
+                }
+
+                document.querySelectorAll('[data-assignees-modal-close]').forEach(btn => {
+                    btn.addEventListener('click', closeAssigneesModal);
+                });
+
+                document.querySelectorAll('[data-standards-modal-close]').forEach(btn => {
+                    btn.addEventListener('click', closeStandardsModal);
+                });
+                
+                if (assigneesModal) {
+                    assigneesModal.addEventListener('click', (e) => {
+                        if (e.target === assigneesModal) closeAssigneesModal();
+                    });
+                }
+
+                if (standardsModal) {
+                    standardsModal.addEventListener('click', (e) => {
+                        if (e.target === standardsModal) closeStandardsModal();
+                    });
+                }
 
                 // init
                 const defaultFilterBtn = document.querySelector('[data-uwp-filter="all"]');

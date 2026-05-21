@@ -165,7 +165,12 @@
                                     <div class="mt-1 text-xs text-slate-500">UWP #{{ $output['source_uwp_id'] ?? '—' }}</div>
                                 </td>
                                 <td class="px-5 py-4 align-top text-white">{{ $output['title'] ?? '—' }}</td>
-                                <td class="px-5 py-4 align-top text-center text-slate-300">{{ count($output['success_indicators'] ?? []) }}</td>
+                                <td class="px-5 py-4 align-top text-center text-slate-300">
+                                    <a href="{{ route('dept-head.opcr.success-indicators', ['opcr' => $currentOpcr->id, 'mfoId' => $output['mfo_id']]) }}" class="group inline-flex items-center justify-center gap-1.5 text-cyan-400 hover:text-cyan-300 transition" title="View Success Indicators">
+                                        <i class="fa-regular fa-eye transition group-hover:scale-110"></i>
+                                        <span class="text-xs font-semibold">{{ count($output['success_indicators'] ?? []) }}</span>
+                                    </a>
+                                </td>
                                 <td class="px-5 py-4 align-top text-slate-300">
                                     @php
                                         $targetQuantity = $output['target_quantity'] ?? null;

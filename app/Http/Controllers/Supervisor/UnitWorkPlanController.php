@@ -8,8 +8,10 @@ use App\Models\User;
 use App\Models\Office;
 use App\Models\PerformancePeriod;
 use App\Models\UwpFunction;
+use App\Models\UwpMfo;
 use App\Models\UwpIndicatorAssignment;
 use App\Models\UwpQetStandard;
+use App\Models\UwpSuccessIndicator;
 use App\Models\UwpConsolidationSignature;
 use App\Services\UwpConsolidationSignatureService;
 use Illuminate\Http\Request;
@@ -1409,6 +1411,7 @@ class UnitWorkPlanController extends Controller
                         ->values()
                         ->map(function ($mfo) {
                             return [
+                                'id' => $mfo->id,
                                 'title' => (string) $mfo->title,
                                 'targetQuantity' => $this->normalizeTargetQuantity($mfo->target_quantity),
                                 'target' => (string) ($mfo->target_timeline ?? ''),
@@ -1676,6 +1679,7 @@ class UnitWorkPlanController extends Controller
                                             'employee' => [
                                                 'id' => $assignment->employee?->id,
                                                 'name' => $assignment->employee?->name,
+                                                'profile_photo_url' => $assignment->employee?->profile_photo_url,
                                                 'office' => [
                                                     'id' => $assignment->employee?->office?->id,
                                                     'name' => $assignment->employee?->office?->name,
@@ -1690,5 +1694,174 @@ class UnitWorkPlanController extends Controller
                 ];
             })->values()->all(),
         ];
+    }
+
+    public function showSuccessIndicators(Request $request, int $uwpId, int $mfoId): \Illuminate\View\View
+    {
+        $user = $this->resolveSupervisorUser($request);
+
+        $uwp = UnitWorkPlan::with(['returnedByUser'])->find($uwpId);
+        if (!$uwp) {
+            abort(404);
+        }
+
+        if ((int) $uwp->created_by !== (int) $user->id) {
+            abort(403);
+        }
+
+        $mfo = UwpMfo::with([
+            'successIndicators' => fn ($q) => $q->orderBy('sort_order'),
+            'successIndicators.qetStandards',
+            'successIndicators.assignments.employee',
+            'uwpFunction',
+        ])->find($mfoId);
+
+        if (!$mfo || (int) ($mfo->uwpFunction->unit_work_plan_id ?? 0) !== $uwpId) {
+            abort(404);
+        }
+
+        $statusKey  = strtolower((string) $uwp->status);
+        $isDraft    = $statusKey === UnitWorkPlan::STATUS_DRAFT;
+        $isReturned = $statusKey === UnitWorkPlan::STATUS_RETURNED;
+        $isLocked   = !is_null($uwp->locked_at);
+        $canEdit    = ($isDraft || $isReturned) && !$isLocked;
+        $status     = $uwp->status;
+        $locked_at  = $uwp->locked_at;
+
+        $officeEmployees = User::query()
+            ->where('office_id', $uwp->office_id)
+            ->where('role', 'employee')
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get(['id', 'name', 'office_id']);
+
+        $initialIndicators = $mfo->successIndicators
+            ->map(fn ($indicator) => [
+                'id'             => $indicator->id,
+                'text'           => (string) $indicator->indicator_text,
+                'targetQuantity' => $indicator->target_quantity,
+                'targetTimeline' => (string) ($indicator->target_timeline ?? ''),
+                'sort_order'     => (int) $indicator->sort_order,
+                'standards'      => $indicator->qetStandards
+                    ->sortByDesc('rating')
+                    ->values()
+                    ->map(fn ($s) => [
+                        'rating'    => (int) $s->rating,
+                        'dimension' => (string) $s->dimension,
+                        'text'      => (string) $s->standard_text,
+                    ])
+                    ->all(),
+                'assignees' => $indicator->assignments
+                    ->map(fn ($a) => $a->employee?->id)
+                    ->filter()
+                    ->values()
+                    ->all(),
+            ])
+            ->values()
+            ->all();
+
+        return view('supervisor.uwp-success-indicators', compact(
+            'uwp', 'mfo', 'status', 'locked_at', 'canEdit',
+            'officeEmployees', 'initialIndicators'
+        ));
+    }
+
+    public function saveSuccessIndicators(Request $request, int $uwpId, int $mfoId): \Illuminate\Http\RedirectResponse
+    {
+        $user = $this->resolveSupervisorUser($request);
+
+        $uwp = UnitWorkPlan::find($uwpId);
+        if (!$uwp) {
+            abort(404);
+        }
+
+        if ((int) $uwp->created_by !== (int) $user->id) {
+            abort(403);
+        }
+
+        $statusKey  = strtolower((string) $uwp->status);
+        $isDraft    = $statusKey === UnitWorkPlan::STATUS_DRAFT;
+        $isReturned = $statusKey === UnitWorkPlan::STATUS_RETURNED;
+        $isLocked   = !is_null($uwp->locked_at);
+        $canEdit    = ($isDraft || $isReturned) && !$isLocked;
+
+        if (!$canEdit) {
+            return back()
+                ->withInput()
+                ->with('error', 'This UWP is read-only and cannot be edited.');
+        }
+
+        $mfo = UwpMfo::with(['uwpFunction'])->find($mfoId);
+        if (!$mfo || (int) ($mfo->uwpFunction->unit_work_plan_id ?? 0) !== $uwpId) {
+            abort(404);
+        }
+
+        $rawPayload = $request->input('indicators_payload', '[]');
+        $indicators = json_decode($rawPayload, true);
+        if (!is_array($indicators)) {
+            return back()->withInput()->with('error', 'Invalid indicators payload.');
+        }
+
+        try {
+            DB::transaction(function () use ($mfo, $indicators, $user) {
+                foreach ($mfo->successIndicators()->with(['qetStandards', 'assignments'])->get() as $old) {
+                    $old->assignments()->delete();
+                    $old->qetStandards()->delete();
+                }
+                $mfo->successIndicators()->delete();
+
+                foreach ($indicators as $sortOrder => $item) {
+                    $indicatorText = trim((string) ($item['text'] ?? ''));
+                    if ($indicatorText === '') {
+                        continue;
+                    }
+
+                    $indicator = UwpSuccessIndicator::create([
+                        'uwp_mfo_id'      => $mfo->id,
+                        'indicator_text'  => $indicatorText,
+                        'target_quantity' => isset($item['targetQuantity']) ? (int) $item['targetQuantity'] : null,
+                        'target_timeline' => trim((string) ($item['targetTimeline'] ?? '')),
+                        'sort_order'      => (int) $sortOrder + 1,
+                    ]);
+
+                    foreach ($item['standards'] ?? [] as $standard) {
+                        $text = trim((string) ($standard['text'] ?? ''));
+                        if ($text === '') {
+                            continue;
+                        }
+                        UwpQetStandard::create([
+                            'uwp_success_indicator_id' => $indicator->id,
+                            'dimension'                => (string) ($standard['dimension'] ?? 'q'),
+                            'rating'                   => (int) ($standard['rating'] ?? 3),
+                            'standard_text'            => $text,
+                        ]);
+                    }
+
+                    $assignedIds = array_unique(array_filter(
+                        array_map('intval', $item['assignees'] ?? [])
+                    ));
+                    foreach ($assignedIds as $employeeId) {
+                        UwpIndicatorAssignment::create([
+                            'uwp_success_indicator_id' => $indicator->id,
+                            'employee_id'              => $employeeId,
+                            'assigned_by'              => $user->id,
+                            'assigned_at'              => now(),
+                        ]);
+                    }
+                }
+            });
+        } catch (\Throwable $e) {
+            Log::error('saveSuccessIndicators failed', [
+                'uwp_id' => $uwpId,
+                'mfo_id' => $mfoId,
+                'error'  => $e->getMessage(),
+            ]);
+
+            return back()->withInput()->with('error', 'Failed to save indicators. Please try again.');
+        }
+
+        return redirect()
+            ->route('supervisor.uwp', ['uwp_id' => $uwpId])
+            ->with('success', 'Success indicators saved successfully.');
     }
 }

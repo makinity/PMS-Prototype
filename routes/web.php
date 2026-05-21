@@ -204,12 +204,14 @@ Route::prefix('dept-head')->middleware('auth')->group(function () {
     // Stage I - UWP Review
     Route::get('/uwp', [DeptHeadUnitWorkPlanController::class, 'index'])->name('dept-head.uwp');
     Route::get('/uwp/index', [DeptHeadUnitWorkPlanController::class, 'index'])->name('dept-head.uwp.index');
+    Route::get('/uwp/{id}/show', [DeptHeadUnitWorkPlanController::class, 'show'])->name('dept-head.uwp.show');
     Route::post('/uwp/review', [DeptHeadUnitWorkPlanController::class, 'review'])->name('dept-head.uwp.review');
     Route::post('/uwp/return', [DeptHeadUnitWorkPlanController::class, 'returnUwp'])->name('dept-head.uwp.return');
 
     // Stage I - OPCR Review
     Route::get('/opcr', [DeptHeadOpcrController::class, 'index'])->name('dept-head.opcr');
     Route::get('/opcr/index', [DeptHeadOpcrController::class, 'index'])->name('dept-head.opcr.index');
+    Route::get('/opcr/{opcr}/mfo/{mfoId}/success-indicators', [DeptHeadOpcrController::class, 'showSuccessIndicators'])->name('dept-head.opcr.success-indicators');
     Route::get('/opcr/accomplishment', [DeptHeadOpcrController::class, 'accomplishment'])->name('dept-head.opcr.accomplishment');
     Route::post('/opcr/{opcr}/endorse', [DeptHeadOpcrController::class, 'endorse'])->name('dept-head.opcr.endorse');
     Route::post('/opcr/{opcr}/submit-calibration', [DeptHeadOpcrController::class, 'submitCalibration'])->name('dept-head.opcr.submit-calibration');
@@ -285,6 +287,12 @@ Route::prefix('supervisor')->middleware('auth')->group(function () {
         ->name('supervisor.uwp.submit');
     Route::post('/stage1/uwp/{id}/submit-legacy', [UnitWorkPlanController::class, 'submitForApproval'])
         ->name('supervisor.uwp.submit.legacy');
+
+    // Stage I - UWP Success Indicators (dedicated page)
+    Route::get('/uwp/{uwpId}/mfo/{mfoId}/success-indicators', [UnitWorkPlanController::class, 'showSuccessIndicators'])
+        ->name('supervisor.uwp.success-indicators');
+    Route::post('/uwp/{uwpId}/mfo/{mfoId}/success-indicators', [UnitWorkPlanController::class, 'saveSuccessIndicators'])
+        ->name('supervisor.uwp.success-indicators.save');
 
     Route::get('/supervisor/uwp/{id}/preview', [UnitWorkPlanController::class, 'previewJson'])
         ->name('supervisor.uwp.preview.legacy');

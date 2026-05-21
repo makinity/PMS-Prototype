@@ -90,6 +90,135 @@ class UnitWorkPlanController extends Controller
         ]);
     }
 
+    public function show(Request $request, int $id)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            abort(403, 'Unauthorized.');
+        }
+
+        $uwp = UnitWorkPlan::query()
+            ->with([
+                'office.head',
+                'performancePeriod',
+                'creator',
+                'uwpFunctions' => function ($q) {
+                    $q->orderBy('sort_order')
+                        ->with([
+                            'mfos' => function ($mq) {
+                                $mq->orderBy('sort_order')
+                                    ->with([
+                                        'successIndicators' => function ($iq) {
+                                            $iq->orderBy('sort_order')
+                                                ->with([
+                                                    'qetStandards',
+                                                    'assignments.employee',
+                                                ]);
+                                        },
+                                    ]);
+                            },
+                        ]);
+                },
+            ])
+            ->findOrFail($id);
+
+        if (!$uwp->office || !$uwp->office->head || (int) $uwp->office->head->id !== (int) $user->id) {
+            abort(403, 'You are not authorized to review this Unit Work Plan.');
+        }
+
+        if ($uwp->status === UnitWorkPlan::STATUS_DRAFT) {
+            abort(404);
+        }
+
+        $payload = [
+            'id' => $uwp->id,
+            'status' => (string) $uwp->status,
+            'return_remarks' => (string) ($uwp->return_remarks ?? ''),
+            'returned_at' => optional($uwp->returned_at)->toDateTimeString(),
+            'returned_by_role' => (string) ($uwp->returned_by_role ?? ''),
+            'office' => [
+                'id' => $uwp->office?->id,
+                'name' => $uwp->office?->name,
+            ],
+            'period' => [
+                'id' => $uwp->performancePeriod?->id,
+                'name' => $uwp->performancePeriod?->name,
+            ],
+            'supervisor' => [
+                'id' => $uwp->creator?->id,
+                'name' => $uwp->creator?->name,
+            ],
+            'department_head' => [
+                'id' => $uwp->office?->head?->id,
+                'name' => $uwp->office?->head?->name,
+            ],
+            'functions' => $uwp->uwpFunctions->map(function ($fn) {
+                return [
+                    'id' => $fn->id,
+                    'name' => $fn->name,
+                    'function_type' => $fn->function_type,
+                    'weight_percent' => (string) ($fn->weight_percent ?? ''),
+                    'weight' => (string) ($fn->weight_percent ?? ''),
+                    'mfos' => $fn->mfos->map(function ($mfo) {
+                        return [
+                            'id' => $mfo->id,
+                            'title' => $mfo->title,
+                            'target_quantity' => $mfo->target_quantity,
+                            'target_timeline' => $mfo->target_timeline,
+                            'weight_percent' => (string) ($mfo->weight_percent ?? ''),
+                            'weight' => (string) ($mfo->weight_percent ?? ''),
+                            'success_indicators' => $mfo->successIndicators->map(function ($si) {
+                                $standardsByRating = [];
+                                foreach ([5, 4, 3, 2, 1] as $r) {
+                                    $standardsByRating[(string) $r] = ['Q' => [], 'E' => [], 'T' => []];
+                                }
+
+                                foreach ($si->qetStandards as $st) {
+                                    $dim = strtolower((string) $st->dimension);
+                                    $rating = (string) $st->rating;
+                                    if (!isset($standardsByRating[$rating])) {
+                                        continue;
+                                    }
+
+                                    if ($dim === 'q') {
+                                        $standardsByRating[$rating]['Q'][] = $st->standard_text;
+                                    }
+                                    if ($dim === 'e') {
+                                        $standardsByRating[$rating]['E'][] = $st->standard_text;
+                                    }
+                                    if ($dim === 't') {
+                                        $standardsByRating[$rating]['T'][] = $st->standard_text;
+                                    }
+                                }
+
+                                $assignees = $si->assignments
+                                    ->map(fn ($a) => $a->employee?->name)
+                                    ->filter()
+                                    ->values()
+                                    ->all();
+
+                                return [
+                                    'id' => $si->id,
+                                    'indicator_text' => $si->indicator_text,
+                                    'target_quantity' => $si->target_quantity,
+                                    'target_timeline' => $si->target_timeline,
+                                    'assignees' => $assignees,
+                                    'standards_by_rating' => $standardsByRating,
+                                ];
+                            })->values()->all(),
+                        ];
+                    })->values()->all(),
+                ];
+            })->values()->all(),
+        ];
+
+        return view('dept-head.uwp-show', [
+            'uwp' => $uwp,
+            'uwpPayload' => $payload,
+            'statusFilter' => (string) $request->query('status', ''),
+        ]);
+    }
+
     /**
      * POST action from modal: endorse to PMT OR return to supervisor
      */
