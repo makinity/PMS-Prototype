@@ -49,94 +49,172 @@
             </div>
         @endif
 
-        <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <div class="flex flex-col gap-3 md:gap-4 md:flex-row md:items-start md:justify-between">
             <div class="min-w-0">
                 <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Monthly Performance Output Report</p>
-                <h1 class="mt-1 text-2xl font-bold text-white md:text-3xl">MONTHLY PERFORMANCE OUTPUT REPORT</h1>
-                <p class="mt-1 text-sm text-slate-400">
+                <h1 class="mt-1 text-xl font-bold leading-tight text-white sm:text-2xl md:text-3xl">MONTHLY PERFORMANCE OUTPUT REPORT</h1>
+                <p class="mt-1 text-sm text-slate-400 md:text-base">
                     Read-only mirror of locked ORS entries with supervisor ratings.
                 </p>
 
-                <div class="mt-4 grid gap-3 text-xs uppercase tracking-[0.3em] text-white sm:grid-cols-3">
-                    <div class="rounded-xl border border-slate-800 bg-slate-900/40 p-3">
-                        <p class="text-slate-400">NAME</p>
-                        <p class="mt-1 font-semibold normal-case tracking-normal">{{ $employeeName }}</p>
+                <div class="mt-3 grid grid-cols-2 gap-2 text-xs uppercase tracking-[0.2em] text-white sm:grid-cols-3">
+                    <div class="rounded-lg border border-slate-800 bg-slate-900/50 px-3 py-2">
+                        <p class="text-[0.6rem] text-slate-500">NAME</p>
+                        <p class="mt-0.5 truncate text-sm font-semibold normal-case tracking-normal">{{ $employeeName }}</p>
                     </div>
-                    <div class="rounded-xl border border-slate-800 bg-slate-900/40 p-3">
-                        <p class="text-slate-400">OFFICE / DIVISION</p>
-                        <p class="mt-1 font-semibold normal-case tracking-normal">{{ $officeName }}</p>
+                    <div class="rounded-lg border border-slate-800 bg-slate-900/50 px-3 py-2">
+                        <p class="text-[0.6rem] text-slate-500">OFFICE / DIVISION</p>
+                        <p class="mt-0.5 truncate text-sm font-semibold normal-case tracking-normal">{{ $officeName }}</p>
                     </div>
-                    <div class="rounded-xl border border-slate-800 bg-slate-900/40 p-3">
-                        <p class="text-slate-400">MONTH</p>
-                        <p class="mt-1 font-semibold normal-case tracking-normal">{{ $mporMonthYear }}</p>
+                    <div class="col-span-2 rounded-lg border border-slate-800 bg-slate-900/50 px-3 py-2 sm:col-span-1">
+                        <p class="text-[0.6rem] text-slate-500">MONTH</p>
+                        <p class="mt-0.5 truncate text-sm font-semibold normal-case tracking-normal">{{ $mporMonthYear }}</p>
                     </div>
                 </div>
             </div>
 
-            <div id="mporActionButtons" class="flex w-full flex-row gap-2 md:w-auto md:items-center">
+            <div id="mporActionButtons" class="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-row md:items-center">
                 @if (! $isMporLocked)
                     <button type="button" data-modal-target="mporSubmitConfirmModal" data-modal-toggle="mporSubmitConfirmModal"
-                        class="flex-1 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-center text-xs font-semibold text-white transition hover:bg-slate-700 md:flex-none">
+                        class="group inline-flex items-center justify-center gap-2 rounded-lg border border-blue-500/50 bg-gradient-to-b from-blue-500 to-blue-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-[0_8px_20px_-12px_rgba(59,130,246,0.9)] transition hover:from-blue-400 hover:to-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400/60 focus:ring-offset-2 focus:ring-offset-slate-950 sm:min-w-[10.5rem] sm:flex-none">
+                        <i class="fa-solid fa-paper-plane text-xs text-blue-100 transition group-hover:translate-x-0.5"></i>
                         {{ $isReturned ? 'Resubmit MPOR' : 'Submit MPOR' }}
                     </button>
                 @else
                     <button type="button" disabled
-                        class="flex-1 cursor-not-allowed rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-center text-xs font-semibold text-emerald-200 opacity-80 md:flex-none">
+                        class="inline-flex cursor-not-allowed items-center justify-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-center text-sm font-semibold text-emerald-200 opacity-80 sm:min-w-[10.5rem] sm:flex-none">
+                        <i class="fa-solid fa-circle-check text-xs"></i>
                         Submitted
                     </button>
                 @endif
 
                 <a href="{{ route('employee.mpor.export.excel') }}"
-                    class="flex-1 rounded-lg border border-slate-700 px-4 py-2 text-center text-xs text-slate-300 hover:bg-slate-800 md:flex-none">
+                    class="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-600 bg-slate-900/70 px-3 py-2 text-center text-sm font-medium text-slate-200 transition hover:border-slate-500 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400/40 focus:ring-offset-2 focus:ring-offset-slate-950 sm:min-w-[8.75rem] sm:flex-none">
+                    <i class="fa-solid fa-file-arrow-down text-xs text-slate-300"></i>
                     Export PDF
                 </a>
             </div>
         </div>
 
-        {{-- Mobile cards --}}
-        <div class="space-y-4 md:hidden">
-            @foreach ($sectionLabels as $sectionKey => $sectionLabel)
-                <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-                    <p class="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-slate-400">{{ $sectionLabel }}</p>
-
-                    @forelse ($sectionRows[$sectionKey] ?? [] as $row)
-                        <div class="mt-3 rounded-xl border border-slate-800 bg-slate-900/50 p-3">
-                            <p class="text-sm font-semibold text-white">{{ $row['label'] }}</p>
-                            <div class="mt-3 grid gap-3">
-                                @foreach (['qty' => 'Efficiency / Quantity', 'qual' => 'Quality / Effectiveness', 'time' => 'Timeliness'] as $metricKey => $metricLabel)
-                                    <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-3">
-                                        <p class="text-[0.6rem] uppercase tracking-[0.3em] text-slate-500">{{ $metricLabel }}</p>
-                                        <div class="mt-2 grid grid-cols-5 gap-2 text-right">
-                                            @for ($week = 1; $week <= 4; $week++)
-                                                <div>
-                                                    <p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">W{{ $week }}</p>
-                                                    <p class="text-sm font-semibold text-white">{{ number_format(data_get($row, "{$metricKey}.{$week}", 0), 0) }}</p>
-                                                </div>
-                                            @endfor
-                                            <div>
-                                                <p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">Total</p>
-                                                <p class="text-sm font-semibold text-white">{{ number_format(data_get($row, "{$metricKey}Total", 0), 0) }}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
-                    @empty
-                        <p class="mt-3 text-sm text-slate-500">No entries available.</p>
-                    @endforelse
+        {{-- Mobile: Hybrid tabs + output drawer --}}
+        <div class="space-y-4 lg:hidden" id="mporMobileWorkspace">
+            <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <p class="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-slate-400">Output Metrics</p>
                 </div>
-            @endforeach
+
+                <div class="mt-3 grid grid-cols-3 gap-2" role="tablist" aria-label="MPOR metrics">
+                    @php
+                        $mobileMetricTabs = [
+                            'qty' => 'Quantity',
+                            'qual' => 'Quality',
+                            'time' => 'Timeliness',
+                        ];
+                    @endphp
+                    @foreach ($mobileMetricTabs as $metricKey => $metricLabel)
+                        <button type="button" data-mpor-metric-tab="{{ $metricKey }}" role="tab"
+                            aria-selected="{{ $metricKey === 'qty' ? 'true' : 'false' }}"
+                            class="{{ $metricKey === 'qty' ? 'bg-blue-600 text-white border-blue-500' : 'border-slate-700 text-slate-300' }} rounded-lg border px-2 py-2 text-xs font-semibold transition">
+                            {{ $metricLabel }}
+                        </button>
+                    @endforeach
+                </div>
+
+                <div class="mt-3">
+                    <p class="mb-1 block text-[0.6rem] font-semibold uppercase tracking-[0.25em] text-slate-500">Function</p>
+                    <div class="relative" id="mporSectionDropdown" data-mpor-section-dropdown>
+                        <button type="button" id="mporSectionDropdownButton" data-mpor-section-trigger aria-haspopup="listbox" aria-expanded="false"
+                            class="flex w-full items-center justify-between rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-200 transition hover:border-slate-600 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                            <span data-mpor-section-label>All Functions</span>
+                            <i class="fa-solid fa-chevron-down text-xs text-slate-400"></i>
+                        </button>
+                        <div id="mporSectionDropdownList" data-mpor-section-list
+                            class="absolute z-30 mt-1 hidden w-full overflow-hidden rounded-lg border border-slate-700 bg-slate-900 shadow-xl">
+                            <button type="button" data-mpor-section-option="all" role="option" aria-selected="true"
+                                class="block w-full px-3 py-2 text-left text-sm text-slate-100 transition hover:bg-slate-800">All Functions</button>
+                            <button type="button" data-mpor-section-option="core" role="option" aria-selected="false"
+                                class="block w-full px-3 py-2 text-left text-sm text-slate-100 transition hover:bg-slate-800">Core Functions (80%)</button>
+                            <button type="button" data-mpor-section-option="support" role="option" aria-selected="false"
+                                class="block w-full px-3 py-2 text-left text-sm text-slate-100 transition hover:bg-slate-800">Support Functions (20%)</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-3" id="mporMobileOutputList">
+                @forelse ($sectionRows as $sectionKey => $rows)
+                    @foreach ($rows as $row)
+                        @php
+                            $rowLabel = (string) data_get($row, 'label', 'Untitled output');
+                            $rowId = $sectionKey . '-' . md5($rowLabel . '|' . $loop->index);
+                        @endphp
+                        <article data-mpor-mobile-row data-section="{{ $sectionKey }}"
+                            class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
+                            <button type="button"
+                                class="flex w-full items-start justify-between gap-3 px-4 py-3 text-left"
+                                data-mpor-row-toggle="{{ $rowId }}" aria-expanded="false" aria-controls="mpor-row-panel-{{ $rowId }}">
+                                <div class="min-w-0">
+                                    <p class="truncate text-sm font-semibold text-white" title="{{ $rowLabel }}">{{ $rowLabel }}</p>
+                                    <span class="mt-1 inline-flex rounded-full border border-slate-700 px-2 py-0.5 text-[0.6rem] uppercase tracking-[0.2em] text-slate-400">
+                                        {{ $sectionKey === 'core' ? 'Core' : 'Support' }}
+                                    </span>
+                                </div>
+                                <div class="shrink-0 text-right">
+                                    <p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">Total</p>
+                                    <p data-mpor-row-total
+                                        data-qty="{{ number_format((float) data_get($row, 'qtyTotal', 0), 0, '.', '') }}"
+                                        data-qual="{{ number_format((float) data_get($row, 'qualTotal', 0), 0, '.', '') }}"
+                                        data-time="{{ number_format((float) data_get($row, 'timeTotal', 0), 0, '.', '') }}"
+                                        class="mt-1 text-base font-bold text-cyan-200 tabular-nums">
+                                        {{ number_format(data_get($row, 'qtyTotal', 0), 0) }}
+                                    </p>
+                                </div>
+                            </button>
+
+                            <div id="mpor-row-panel-{{ $rowId }}" class="hidden border-t border-slate-800 px-4 pb-4 pt-3"
+                                data-mpor-row-panel>
+                                <p class="mb-2 text-[0.6rem] uppercase tracking-[0.25em] text-slate-500">Weekly breakdown</p>
+                                <div class="grid grid-cols-5 gap-2">
+                                    @for ($week = 1; $week <= 4; $week++)
+                                        <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-2 text-center">
+                                            <p class="text-[0.55rem] uppercase tracking-[0.25em] text-slate-500">W{{ $week }}</p>
+                                            <p data-mpor-week-value data-qty="{{ number_format((float) data_get($row, "qty.{$week}", 0), 0, '.', '') }}"
+                                                data-qual="{{ number_format((float) data_get($row, "qual.{$week}", 0), 0, '.', '') }}"
+                                                data-time="{{ number_format((float) data_get($row, "time.{$week}", 0), 0, '.', '') }}"
+                                                class="mt-1 text-sm font-semibold text-white tabular-nums">
+                                                {{ number_format(data_get($row, "qty.{$week}", 0), 0) }}
+                                            </p>
+                                        </div>
+                                    @endfor
+                                    <div class="rounded-lg border border-cyan-500/30 bg-cyan-500/10 p-2 text-center">
+                                        <p class="text-[0.55rem] uppercase tracking-[0.25em] text-cyan-200">Total</p>
+                                        <p data-mpor-total-value data-qty="{{ number_format((float) data_get($row, 'qtyTotal', 0), 0, '.', '') }}"
+                                            data-qual="{{ number_format((float) data_get($row, 'qualTotal', 0), 0, '.', '') }}"
+                                            data-time="{{ number_format((float) data_get($row, 'timeTotal', 0), 0, '.', '') }}"
+                                            class="mt-1 text-sm font-bold text-cyan-100 tabular-nums">
+                                            {{ number_format(data_get($row, 'qtyTotal', 0), 0) }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    @endforeach
+                @empty
+                    <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 text-sm text-slate-500">
+                        No entries available.
+                    </div>
+                @endforelse
+            </div>
         </div>
 
         {{-- Desktop table --}}
-        <div class="hidden md:block">
+        <div class="hidden lg:block">
             <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
-                <div class="overflow-x-auto">
+                <div class="overflow-x-auto max-h-[38rem]">
                     <table class="min-w-full text-[0.75rem] text-slate-200">
-                        <thead>
+                        <thead class="sticky top-0 z-20 bg-slate-900/95 backdrop-blur-sm">
                             <tr class="text-left text-[0.65rem] uppercase tracking-[0.3em] text-slate-500">
-                                <th class="whitespace-nowrap px-3 py-3 align-bottom" rowspan="2">Output / Task</th>
+                                <th class="sticky left-0 z-30 whitespace-nowrap px-3 py-3 align-bottom bg-slate-900/95" rowspan="2">Output / Task</th>
                                 <th class="border-l border-slate-800 px-3 py-3 text-center" colspan="5">Efficiency / Quantity</th>
                                 <th class="border-l border-slate-800 px-3 py-3 text-center" colspan="5">Quality / Effectiveness</th>
                                 <th class="border-l border-slate-800 px-3 py-3 text-center" colspan="5">Timeliness</th>
@@ -155,12 +233,16 @@
                         <tbody class="divide-y divide-slate-800 text-[0.75rem]">
                             @foreach ($sectionLabels as $sectionKey => $sectionLabel)
                                 <tr class="bg-slate-800/40 text-[0.65rem] uppercase tracking-[0.3em] text-slate-400">
-                                    <td class="px-3 py-2 font-semibold text-slate-200" colspan="16">{{ $sectionLabel }}</td>
+                                    <td class="sticky left-0 z-10 border-r border-slate-800 bg-slate-800/80 px-3 py-2 font-semibold text-slate-100" colspan="16">
+                                        {{ $sectionLabel }}
+                                    </td>
                                 </tr>
 
                                 @forelse ($sectionRows[$sectionKey] ?? [] as $row)
                                     <tr>
-                                        <td class="px-3 py-3 font-semibold text-white">{{ $row['label'] }}</td>
+                                        <td class="sticky left-0 z-10 max-w-[20rem] border-r border-slate-800 bg-slate-900/95 px-3 py-3 font-semibold text-white">
+                                            <span class="block truncate" title="{{ $row['label'] }}">{{ $row['label'] }}</span>
+                                        </td>
 
                                         {{-- qty --}}
                                         <td class="border-l border-slate-800 px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qty.1', 0), 0) }}</td>
@@ -181,7 +263,7 @@
                                         <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'time.2', 0), 0) }}</td>
                                         <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'time.3', 0), 0) }}</td>
                                         <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'time.4', 0), 0) }}</td>
-                                        <td class="px-2 py-3 text-right font-semibold tabular-nums">{{ number_format(data_get($row, 'timeTotal', 0), 0) }}</td>
+                                        <td class="px-2 py-3 text-right font-semibold tabular-nums text-cyan-100">{{ number_format(data_get($row, 'timeTotal', 0), 0) }}</td>
                                     </tr>
                                 @empty
                                     <tr>
@@ -289,6 +371,159 @@
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const mobileWorkspace = document.getElementById('mporMobileWorkspace');
+            if (mobileWorkspace) {
+                let activeMetric = 'qty';
+                let activeSection = 'all';
+
+                const metricTabs = Array.from(mobileWorkspace.querySelectorAll('[data-mpor-metric-tab]'));
+                const sectionDropdown = mobileWorkspace.querySelector('[data-mpor-section-dropdown]');
+                const sectionTrigger = mobileWorkspace.querySelector('[data-mpor-section-trigger]');
+                const sectionLabel = mobileWorkspace.querySelector('[data-mpor-section-label]');
+                const sectionList = mobileWorkspace.querySelector('[data-mpor-section-list]');
+                const sectionOptions = Array.from(mobileWorkspace.querySelectorAll('[data-mpor-section-option]'));
+                const rows = Array.from(mobileWorkspace.querySelectorAll('[data-mpor-mobile-row]'));
+                const sectionLabelMap = {
+                    all: 'All Functions',
+                    core: 'Core Functions (80%)',
+                    support: 'Support Functions (20%)',
+                };
+
+                const formatValue = (value) => Number(value || 0).toLocaleString();
+
+                const paintMetricValues = () => {
+                    rows.forEach((row) => {
+                        row.querySelectorAll('[data-mpor-week-value], [data-mpor-total-value], [data-mpor-row-total]').forEach((el) => {
+                            el.textContent = formatValue(el.dataset[activeMetric]);
+                        });
+                    });
+                };
+
+                const paintMetricTabs = () => {
+                    metricTabs.forEach((tab) => {
+                        const selected = tab.dataset.mporMetricTab === activeMetric;
+                        tab.setAttribute('aria-selected', selected ? 'true' : 'false');
+                        tab.classList.toggle('bg-blue-600', selected);
+                        tab.classList.toggle('text-white', selected);
+                        tab.classList.toggle('border-blue-500', selected);
+                        tab.classList.toggle('border-slate-700', !selected);
+                        tab.classList.toggle('text-slate-300', !selected);
+                    });
+                };
+
+                const paintRowsBySection = () => {
+                    rows.forEach((row) => {
+                        const visible = activeSection === 'all' || row.dataset.section === activeSection;
+                        row.classList.toggle('hidden', !visible);
+                    });
+                };
+
+                const setRowExpanded = (row, expand) => {
+                    const toggle = row.querySelector('[data-mpor-row-toggle]');
+                    const panel = row.querySelector('[data-mpor-row-panel]');
+                    if (!toggle || !panel) {
+                        return;
+                    }
+                    toggle.setAttribute('aria-expanded', expand ? 'true' : 'false');
+                    panel.classList.toggle('hidden', !expand);
+                    row.classList.toggle('ring-1', expand);
+                    row.classList.toggle('ring-cyan-500/20', expand);
+                };
+
+                const getVisibleRows = () => rows.filter((row) => !row.classList.contains('hidden'));
+
+                const collapseAllRows = () => {
+                    rows.forEach((row) => setRowExpanded(row, false));
+                };
+
+                const ensureAtLeastOneExpanded = () => {
+                    const visibleRows = getVisibleRows();
+                    if (!visibleRows.length) {
+                        return;
+                    }
+                    const hasExpanded = visibleRows.some((row) => row.querySelector('[data-mpor-row-toggle]')?.getAttribute('aria-expanded') === 'true');
+                    if (!hasExpanded) {
+                        setRowExpanded(visibleRows[0], true);
+                    }
+                };
+
+                metricTabs.forEach((tab) => {
+                    tab.addEventListener('click', () => {
+                        activeMetric = tab.dataset.mporMetricTab || 'qty';
+                        paintMetricTabs();
+                        paintMetricValues();
+                    });
+                });
+
+                const setSection = (value) => {
+                    activeSection = ['all', 'core', 'support'].includes(value) ? value : 'all';
+                    if (sectionLabel) {
+                        sectionLabel.textContent = sectionLabelMap[activeSection] || sectionLabelMap.all;
+                    }
+                    sectionOptions.forEach((option) => {
+                        const selected = option.dataset.mporSectionOption === activeSection;
+                        option.setAttribute('aria-selected', selected ? 'true' : 'false');
+                        option.classList.toggle('bg-slate-800', selected);
+                        option.classList.toggle('text-cyan-200', selected);
+                    });
+                };
+
+                if (sectionTrigger && sectionList) {
+                    sectionTrigger.addEventListener('click', () => {
+                        const expanded = sectionTrigger.getAttribute('aria-expanded') === 'true';
+                        sectionTrigger.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+                        sectionList.classList.toggle('hidden', expanded);
+                    });
+
+                    document.addEventListener('click', (event) => {
+                        if (!sectionDropdown || sectionDropdown.contains(event.target)) {
+                            return;
+                        }
+                        sectionTrigger.setAttribute('aria-expanded', 'false');
+                        sectionList.classList.add('hidden');
+                    });
+                }
+
+                if (sectionOptions.length) {
+                    sectionOptions.forEach((option) => {
+                        option.addEventListener('click', () => {
+                            setSection(option.dataset.mporSectionOption || 'all');
+                            paintRowsBySection();
+                            collapseAllRows();
+                            ensureAtLeastOneExpanded();
+                            if (sectionTrigger && sectionList) {
+                                sectionTrigger.setAttribute('aria-expanded', 'false');
+                                sectionList.classList.add('hidden');
+                            }
+                        });
+                    });
+                } else {
+                    // Fallback in case options are not rendered
+                    activeSection = 'all';
+                }
+
+                if (sectionOptions.length) {
+                    setSection('all');
+                }
+
+                rows.forEach((row) => {
+                    const toggle = row.querySelector('[data-mpor-row-toggle]');
+                    if (!toggle) {
+                        return;
+                    }
+                    toggle.addEventListener('click', () => {
+                        const expanded = toggle.getAttribute('aria-expanded') === 'true';
+                        setRowExpanded(row, !expanded);
+                    });
+                });
+
+                paintMetricTabs();
+                paintRowsBySection();
+                paintMetricValues();
+                collapseAllRows();
+                ensureAtLeastOneExpanded();
+            }
+
             const submitForm = document.getElementById('mporSubmitForm');
             const proceedButton = document.getElementById('mporProceedSubmissionBtn');
             const actionButtons = document.getElementById('mporActionButtons');
@@ -427,4 +662,13 @@
             });
         });
     </script>
+@endpush
+
+@push('styles')
+    <style>
+        #mporSectionFilter option {
+            background-color: #020617;
+            color: #e2e8f0;
+        }
+    </style>
 @endpush

@@ -2001,6 +2001,21 @@
                         delete saveBtn.dataset.loadingActive;
                     }
                 });
+
+                @if(isset($orsEntry) && $orsEntry)
+                    setTimeout(() => {
+                        const autoLoadEntryId = '{{ $orsEntry->id }}';
+                        const autoLoadEntry = taskById[autoLoadEntryId];
+                        if (autoLoadEntry) {
+                            const autoStatus = String(autoLoadEntry.status || '').toLowerCase();
+                            if (autoStatus === 'rated') {
+                                openRatedMonitoringModal(autoLoadEntry);
+                            } else {
+                                openMonitoringModal(autoLoadEntry);
+                            }
+                        }
+                    }, 100);
+                @endif
             });
         </script>
     @endpush

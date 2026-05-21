@@ -362,14 +362,11 @@
                         <p class="text-slate-200" id="taskDetailMfo">--</p>
                     </div>
                     <div class="md:col-span-2">
-                        <p class="text-xs text-slate-400">Quantity (employee-declared)</p>
+                        <p class="text-xs text-slate-400">Quantity</p>
                         <input id="taskDetailQuantity"
                                type="text"
                                class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200"
                                placeholder="e.g., 12 transactions">
-                        <p class="mt-1 text-[11px] text-slate-400">
-                            Quantity is declared by the employee. Supervisor rates Quality & Timeliness during ORS Monitoring.
-                        </p>
                     </div>
                     <div>
                         <p class="text-xs text-slate-400">Status</p>
@@ -411,14 +408,11 @@
                     </div>
 
                     <div class="mt-3 space-y-2">
-                        <label class="text-xs text-slate-300">Output Upload (multiple files allowed)</label>
+                        <label class="text-xs text-slate-300">Output Upload</label>
                         <input id="taskDetailUpload"
                             type="file"
                             multiple
                             class="block w-full rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-xs text-slate-200 file:mr-3 file:rounded-md file:border-0 file:bg-slate-800 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-slate-200">
-                        <p class="text-[11px] text-slate-400">
-                            You can upload multiple evidence files. After submit, the entry is locked and visible in My Tasks (read-only) and MPOR/SMPOR.
-                        </p>
                     </div>
 
                     <div class="mt-3 flex flex-wrap gap-2" id="taskDetailActions">
@@ -457,9 +451,7 @@
                     <p id="taskDetailLockMessage" class="mt-2 hidden text-[11px] text-emerald-300">
                         Submitted (Locked) — visible in MPOR monthly summary. SMPOR is system-generated after validation.
                     </p>
-                    <p id="taskDetailDraftMessage" class="mt-2 text-[11px] text-slate-400">
-                        Stop ends timing and keeps Draft editable. Submit for Review locks the entry and prevents duplicate submissions.
-                    </p>
+                    <p id="taskDetailDraftMessage" class="mt-2 text-[11px] text-slate-400"></p>
                 </div>
             </div>
 
@@ -1299,7 +1291,7 @@
                         const entries = statusMap[stateKey];
 
                         const section = document.createElement('div');
-                        section.className = 'rounded-xl border border-slate-800 bg-slate-950/40 p-3';
+                        section.className = 'rounded-xl border border-slate-700/80 bg-slate-950/50 p-3';
 
                         if (!filterKey) {
                             const header = document.createElement('div');
@@ -1312,25 +1304,30 @@
                         }
 
                         const list = document.createElement('div');
-                        list.className = 'space-y-2';
+                        list.className = 'space-y-2.5';
 
                         entries.forEach((entry) => {
                             const itemBtn = document.createElement('button');
                             itemBtn.type = 'button';
-                            itemBtn.className = 'w-full rounded-lg border border-slate-800 bg-slate-900/50 px-3 py-2 text-left hover:bg-slate-800';
+                            itemBtn.className = 'group relative w-full overflow-hidden rounded-xl border border-slate-700/90 bg-gradient-to-r from-slate-900/80 to-slate-900/45 px-4 py-3 text-left transition hover:border-slate-500/90 hover:from-slate-800/85 hover:to-slate-800/55';
                             itemBtn.innerHTML = `
-                                <div class="flex items-start justify-between gap-2">
-                                    <div class="min-w-0">
-                                        <p class="truncate text-sm font-semibold text-white">${entry.title || '--'}</p>
-                                        <p class="mt-1 text-[11px] text-slate-400">
-                                            Duration: <span class="ors-day-duration" data-task-id="${entry.id}">
-                                                ${formatDuration(computeElapsed(entry))}
+                                <span class="pointer-events-none absolute inset-y-0 left-0 w-1 rounded-l-xl" style="background:${meta.color};"></span>
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="min-w-0 pl-2">
+                                        <p class="truncate text-base font-semibold leading-snug text-white">${entry.title || '--'}</p>
+                                        <div class="mt-1.5 flex flex-wrap items-center gap-3 text-[11px] text-slate-400">
+                                            <span class="inline-flex items-center gap-1">
+                                                <span class="h-1.5 w-1.5 rounded-full bg-slate-500/80"></span>
+                                                Duration:
+                                                <span class="ors-day-duration font-semibold text-slate-300" data-task-id="${entry.id}">
+                                                    ${formatDuration(computeElapsed(entry))}
+                                                </span>
                                             </span>
-                                        </p>
+                                        </div>
                                     </div>
                                     <div class="shrink-0 text-right">
-                                        <span class="rounded-full border px-2 py-[2px] text-[11px]" style="color:${meta.color}; border-color:${meta.color};">${summaryStateLabel(stateKey)}</span>
-                                        <p class="mt-1 text-[11px] ${entry.evidenceAttached ? 'text-emerald-300' : 'text-slate-400'}">${entry.evidenceAttached ? 'Evidence' : 'No evidence'}</p>
+                                        <span class="inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold" style="color:${meta.color}; border-color:${meta.color};">${summaryStateLabel(stateKey)}</span>
+                                        <p class="mt-1.5 text-[11px] font-medium ${entry.evidenceAttached ? 'text-emerald-300' : 'text-slate-400'}">${entry.evidenceAttached ? 'Evidence attached' : 'No evidence'}</p>
                                     </div>
                                 </div>
                             `;
@@ -1712,7 +1709,7 @@
 
                 const qtyValue = syncQuantityFromInput(task);
                 if (!qtyValue) {
-                    alert('Quantity is required before submitting an ORS entry.');
+                    showFlash('warning', 'Quantity is required before submitting an ORS entry.');
                     return false;
                 }
 
@@ -1721,7 +1718,7 @@
                 const hasSelectedFiles = selectedFiles.length > 0;
                 const hasExistingEvidence = Boolean(task.evidenceAttached) || Number(task.evidenceCount || 0) > 0;
                 if (!hasSelectedFiles && !hasExistingEvidence) {
-                    alert('Evidence attachment is required before submitting an ORS entry.');
+                    showFlash('warning', 'Evidence attachment is required before submitting an ORS entry.');
                     return false;
                 }
 

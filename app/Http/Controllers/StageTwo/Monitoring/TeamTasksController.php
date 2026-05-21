@@ -24,7 +24,8 @@ class TeamTasksController extends Controller
             ->with([
                 'employee:id,name,office_id',
                 'ipcrItem',
-                'monitoring',
+                'monitoring.supervisor.office',
+                'supervisor.office',
             ])
             ->withCount('evidences')
             ->whereHas('employee', function ($query) use ($supervisor) {
@@ -45,7 +46,7 @@ class TeamTasksController extends Controller
 
         $entries = $entriesQuery->paginate(15)->withQueryString();
 
-        return view('supervisor.team-tasks', compact('entries', 'teamEmployees'));
+        return view('supervisor.team-tasks', compact('entries', 'teamEmployees', 'supervisor'));
     }
 
     private function authorizedSupervisor(): User

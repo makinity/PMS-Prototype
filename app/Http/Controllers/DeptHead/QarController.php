@@ -778,6 +778,193 @@ class QarController extends Controller
             ->with('success', 'QAR endorsed and saved');
     }
 
+    public function showMpor(Request $request, Mpor $mpor)
+    {
+        $deptHead = $request->user();
+        $role = strtolower(str_replace('-', '_', (string) ($deptHead?->role ?? '')));
+        abort_unless($deptHead && $role === 'dept_head', 403);
+
+        $mpor->load(['employee:id,name,office_id', 'employee.office:id,name']);
+        abort_unless($mpor->employee, 404);
+        $deptOfficeId = (int) ($deptHead->office_id ?? 0);
+        $employeeOfficeId = (int) ($mpor->employee?->office_id ?? 0);
+        $mporOfficeId = (int) ($mpor->office_id ?? 0);
+        $isSameOffice = $deptOfficeId > 0 && (
+            ($employeeOfficeId > 0 && $employeeOfficeId === $deptOfficeId) ||
+            ($mporOfficeId > 0 && $mporOfficeId === $deptOfficeId)
+        );
+        abort_unless($isSameOffice, 403);
+
+        $month = (string) $mpor->month;
+        try {
+            $start = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+        } catch (\Throwable $e) {
+            abort(422, 'Invalid MPOR month.');
+        }
+        $end = $start->copy()->endOfMonth();
+
+        $mporMonthYear = $start->format('F Y');
+        $employeeName = $mpor->employee?->name ?? '--';
+        $officeName = $mpor->employee?->office?->name ?? '--';
+
+        $ratedEntries = OrsEntry::query()
+            ->with([
+                'ipcrItem:id,output_title,function_type,indicator_text,uwp_function_id',
+                'ipcrItem.uwpFunction:id,function_type,weight_percent',
+                'monitoring:ors_entry_id,quality_rating,timeliness_rating',
+            ])
+            ->where('employee_id', $mpor->employee_id)
+            ->where('status', 'rated')
+            ->where('quantity', '>', 0)
+            ->whereBetween('work_date', [$start->toDateString(), $end->toDateString()])
+            ->whereHas('ipcrItem', function ($q) {
+                $q->whereNotNull('output_title');
+            })
+            ->whereHas('monitoring', function ($q) {
+                $q->whereNotNull('quality_rating')->whereNotNull('timeliness_rating');
+            })
+            ->orderBy('work_date')
+            ->get();
+
+        $allMonthEntriesCount = OrsEntry::query()
+            ->where('employee_id', $mpor->employee_id)
+            ->where('quantity', '>', 0)
+            ->whereBetween('work_date', [$start->toDateString(), $end->toDateString()])
+            ->count();
+
+        $includedCount = $ratedEntries->count();
+        $excludedCount = max($allMonthEntriesCount - $includedCount, 0);
+
+        $normalizeOutputKey = static function (string $outputTitle): string {
+            return mb_strtolower(trim((string) preg_replace('/\s+/', ' ', $outputTitle)));
+        };
+
+        $functionWeights = ['core' => 80.0, 'support' => 20.0];
+        foreach ($ratedEntries->pluck('ipcrItem')->filter()->unique('uwp_function_id') as $item) {
+            $rawType = (string) ($item->uwpFunction?->function_type ?? $item->function_type ?? '');
+            $type = $this->normalizeFunctionType($rawType);
+            if ($type === '') {
+                continue;
+            }
+            $functionWeights[$type] = ($functionWeights[$type] ?? 0) + (float) ($item->uwpFunction?->weight_percent ?? 0);
+        }
+
+        $sectionLabels = [];
+        $detectedTypes = $ratedEntries
+            ->map(fn ($entry) => $this->normalizeFunctionType((string) data_get($entry, 'ipcrItem.function_type', '')))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+        $orderedTypes = [];
+        foreach (['core', 'support'] as $preferred) {
+            if (in_array($preferred, $detectedTypes, true)) {
+                $orderedTypes[] = $preferred;
+            }
+        }
+        foreach ($detectedTypes as $type) {
+            if (!in_array($type, $orderedTypes, true)) {
+                $orderedTypes[] = $type;
+            }
+        }
+        foreach ($orderedTypes as $type) {
+            $sectionLabels[$type] = $this->buildSectionMeta($type, $functionWeights[$type] ?? null)['label']
+                . (($functionWeights[$type] ?? null) !== null ? ' (' . $this->formatWeightPercent((float) $functionWeights[$type]) . '%)' : '');
+        }
+        if (empty($sectionLabels)) {
+            $sectionLabels = ['core' => 'Core Functions (80%)', 'support' => 'Support Functions (20%)'];
+        }
+
+        $mporRows = [];
+        foreach ($ratedEntries as $entry) {
+            $outputTitle = trim((string) data_get($entry, 'ipcrItem.output_title', ''));
+            if ($outputTitle === '') continue;
+            $outputKey = $normalizeOutputKey($outputTitle);
+            if ($outputKey === '') continue;
+            $section = $this->normalizeFunctionType((string) data_get($entry, 'ipcrItem.function_type', ''));
+
+            if (!isset($mporRows[$outputKey])) {
+                $mporRows[$outputKey] = [
+                    'id' => $outputKey,
+                    'label' => $outputTitle,
+                    'section' => $section,
+                    'qty' => [1 => 0, 2 => 0, 3 => 0, 4 => 0],
+                    'qual' => [1 => 0, 2 => 0, 3 => 0, 4 => 0],
+                    'time' => [1 => 0, 2 => 0, 3 => 0, 4 => 0],
+                    'qtyTotal' => 0,
+                    'qualTotal' => 0,
+                    'timeTotal' => 0,
+                ];
+            }
+
+            $day = (int) Carbon::parse((string) $entry->work_date)->format('j');
+            $week = $day <= 7 ? 1 : ($day <= 14 ? 2 : ($day <= 21 ? 3 : 4));
+            $qty = is_numeric($entry->quantity) ? (float) $entry->quantity : 0;
+            if ($qty <= 0) continue;
+            $qRating = (float) data_get($entry, 'monitoring.quality_rating', 0);
+            $tRating = (float) data_get($entry, 'monitoring.timeliness_rating', 0);
+            $mporRows[$outputKey]['qty'][$week] += $qty;
+            $mporRows[$outputKey]['qual'][$week] += ($qty * $qRating);
+            $mporRows[$outputKey]['time'][$week] += ($qty * $tRating);
+        }
+
+        $sectionRows = [];
+        foreach (array_keys($sectionLabels) as $sectionKey) {
+            $sectionRows[$sectionKey] = [];
+        }
+        foreach (array_values($mporRows) as $row) {
+            $row['qtyTotal'] = array_sum($row['qty']);
+            $row['qualTotal'] = array_sum($row['qual']);
+            $row['timeTotal'] = array_sum($row['time']);
+            if ($row['qtyTotal'] <= 0) continue;
+            $sectionKey = (string) ($row['section'] ?? 'core');
+            if (!isset($sectionRows[$sectionKey])) {
+                $sectionRows[$sectionKey] = [];
+                $sectionLabels[$sectionKey] = ucwords($sectionKey) . ' Functions';
+            }
+            $sectionRows[$sectionKey][] = $row;
+        }
+
+        $grandTotals = [
+            'qty' => [1 => 0, 2 => 0, 3 => 0, 4 => 0],
+            'qual' => [1 => 0, 2 => 0, 3 => 0, 4 => 0],
+            'time' => [1 => 0, 2 => 0, 3 => 0, 4 => 0],
+            'qtyTotal' => 0,
+            'qualTotal' => 0,
+            'timeTotal' => 0,
+        ];
+        foreach ($sectionRows as $rows) {
+            foreach ($rows as $row) {
+                foreach ([1, 2, 3, 4] as $week) {
+                    $grandTotals['qty'][$week] += (float) $row['qty'][$week];
+                    $grandTotals['qual'][$week] += (float) $row['qual'][$week];
+                    $grandTotals['time'][$week] += (float) $row['time'][$week];
+                }
+            }
+        }
+        $grandTotals['qtyTotal'] = array_sum($grandTotals['qty']);
+        $grandTotals['qualTotal'] = array_sum($grandTotals['qual']);
+        $grandTotals['timeTotal'] = array_sum($grandTotals['time']);
+
+        return view('dept-head.qar-mpor-show', [
+            'mpor' => $mpor,
+            'meta' => [
+                'status' => $mpor->status,
+                'monthLabel' => $mporMonthYear,
+                'employeeName' => $employeeName,
+                'officeName' => $officeName,
+            ],
+            'sectionLabels' => $sectionLabels,
+            'sectionRows' => $sectionRows,
+            'grandTotals' => $grandTotals,
+            'kpis' => [
+                'includedRated' => $includedCount,
+                'excluded' => $excludedCount,
+            ],
+            'backQuarter' => (int) $request->query('q', 0),
+        ]);
+    }
+
     private function normalizeFunctionType(?string $type): string
     {
         $normalized = strtolower(trim((string) $type));

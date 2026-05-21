@@ -116,14 +116,9 @@ class OrsController extends Controller
         $supervisors = [];
         if (Schema::hasTable('users')) {
             $supervisorsQuery = User::query()
-                ->select(['id', 'name'])
+                ->select(['id', 'name', 'office_id'])
+                ->with('office:id,name')
                 ->where('role', 'supervisor');
-
-            if (!is_null($supervisorOfficeId)) {
-                $supervisorsQuery->where('office_id', $supervisorOfficeId);
-            } else {
-                $supervisorsQuery->whereRaw('1 = 0');
-            }
 
             if (Schema::hasColumn('users', 'is_active')) {
                 $supervisorsQuery->where('is_active', true);
@@ -134,7 +129,7 @@ class OrsController extends Controller
                 ->get()
                 ->map(static fn (User $supervisor): array => [
                     'id' => (int) $supervisor->id,
-                    'name' => (string) $supervisor->name,
+                    'name' => (string) $supervisor->name . ($supervisor->office ? ' - ' . $supervisor->office->name : ''),
                 ])
                 ->values()
                 ->all();
@@ -444,15 +439,6 @@ class OrsController extends Controller
                 throw ValidationException::withMessages([
                     'supervisor_id' => ['Selected supervisor is invalid.'],
                 ]);
-            }
-
-            if (!is_null($resolvedOfficeId)) {
-                $supervisorOfficeId = $supervisor->office_id;
-                if (is_null($supervisorOfficeId) || (int) $supervisorOfficeId !== (int) $resolvedOfficeId) {
-                    throw ValidationException::withMessages([
-                        'supervisor_id' => ['Selected supervisor must belong to your office.'],
-                    ]);
-                }
             }
         }
 

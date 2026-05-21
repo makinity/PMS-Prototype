@@ -31,7 +31,7 @@ class OrsMonitoringController extends Controller
         ]);
 
         abort_unless(
-            $orsEntry->employee && (int) $orsEntry->employee->office_id === (int) $supervisor->office_id,
+            (int) $orsEntry->supervisor_id === (int) $supervisor->id,
             403
         );
 
@@ -50,7 +50,7 @@ class OrsMonitoringController extends Controller
 
         $orsEntry->load('employee');
         abort_unless(
-            $orsEntry->employee && (int) $orsEntry->employee->office_id === (int) $supervisor->office_id,
+            (int) $orsEntry->supervisor_id === (int) $supervisor->id,
             403
         );
 
@@ -135,9 +135,7 @@ class OrsMonitoringController extends Controller
             ])
             ->withCount('evidences')
             ->whereIn('status', ['submitted', 'rated'])
-            ->whereHas('employee', function ($query) use ($supervisor) {
-                $query->where('office_id', $supervisor->office_id);
-            })
+            ->where('supervisor_id', $supervisor->id)
             ->orderByDesc('work_date')
             ->orderByDesc('id')
             ->get();

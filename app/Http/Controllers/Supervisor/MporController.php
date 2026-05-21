@@ -80,10 +80,26 @@ class MporController extends Controller
         ));
     }
 
-    /**
-     * JSON endpoint: modal preview loads rated entries + summary.
-     */
     public function show(Request $request, Mpor $mpor)
+    {
+        $payload = $this->buildMporPayload($request, $mpor);
+
+        return view('supervisor.mpor-show', [
+            'mpor' => $mpor,
+            'meta' => $payload['meta'],
+            'sectionLabels' => $payload['sectionLabels'],
+            'sectionRows' => $payload['sectionRows'],
+            'grandTotals' => $payload['grandTotals'],
+            'kpis' => $payload['kpis'],
+        ]);
+    }
+
+    public function previewJson(Request $request, Mpor $mpor)
+    {
+        return response()->json($this->buildMporPayload($request, $mpor));
+    }
+
+    private function buildMporPayload(Request $request, Mpor $mpor): array
     {
         $supervisor = $request->user();
         abort_unless($supervisor && $supervisor->role === 'supervisor', 403);
@@ -99,7 +115,7 @@ class MporController extends Controller
         try {
             $start = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
         } catch (\Throwable $e) {
-            return response()->json(['message' => 'Invalid MPOR month.'], 422);
+            abort(422, 'Invalid MPOR month.');
         }
         $end = $start->copy()->endOfMonth();
 
@@ -283,7 +299,7 @@ class MporController extends Controller
         $grandTotals['qualTotal'] = array_sum($grandTotals['qual']);
         $grandTotals['timeTotal'] = array_sum($grandTotals['time']);
 
-        return response()->json([
+        return [
             'meta' => [
                 'mpor_id' => $mpor->id,
                 'status' => $mpor->status,
@@ -301,7 +317,7 @@ class MporController extends Controller
                 'includedRated' => $includedCount,
                 'excluded' => $excludedCount,
             ],
-        ]);
+        ];
     }
 
     private function normalizeFunctionType(?string $type): string

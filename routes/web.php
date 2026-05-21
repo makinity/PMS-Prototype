@@ -220,6 +220,7 @@ Route::prefix('dept-head')->middleware('auth')->group(function () {
 
     // Stage II - QAR
     Route::get('/qar', [QarController::class, 'index'])->name('dept-head.qar');
+    Route::get('/qar/mpor/{mpor}/show', [QarController::class, 'showMpor'])->name('dept-head.qar.mpor.show');
     Route::post('/qar/generate', [QarController::class, 'generate'])->name('dept-head.qar.generate');
     Route::post('/qar/endorse', [QarController::class, 'endorse'])->name('dept-head.qar.endorse');
     Route::post('/qar/reset', [QarController::class, 'reset'])->name('dept-head.qar.reset');
@@ -301,6 +302,7 @@ Route::prefix('supervisor')->middleware('auth')->group(function () {
     // Stage II - MPOR Review
     Route::get('/mpor', [SupervisorMporController::class, 'index'])->name('supervisor.mpor');
     Route::get('/mpor/{mpor}', [SupervisorMporController::class, 'show'])->name('supervisor.mpor.show');
+    Route::get('/mpor/{mpor}/preview-json', [SupervisorMporController::class, 'previewJson'])->name('supervisor.mpor.preview.json');
     Route::post('/mpor/{mpor}/approve', [SupervisorMporController::class, 'approve'])->name('supervisor.mpor.approve');
     Route::post('/mpor/{mpor}/return', [SupervisorMporController::class, 'return'])->name('supervisor.mpor.return');
     Route::post('/mpor/{mpor}/endorse', [SupervisorMporController::class, 'endorse'])->name('supervisor.mpor.endorse');
@@ -329,6 +331,7 @@ Route::prefix('pmt')->middleware('auth')->group(function () {
     Route::post('/uwp/return', fn () => redirect()->route('pmt.opcr.review.index'))->name('pmt.uwp.return');
 
     Route::get('/opcr-review', [PmtOpcrController::class, 'index'])->name('pmt.opcr.review.index');
+    Route::get('/opcr/{opcr}/review', [PmtOpcrController::class, 'show'])->name('pmt.opcr.review.show');
     Route::post('/opcr-review/action', [PmtOpcrController::class, 'review'])->name('pmt.opcr.review.action');
     Route::get('/opcr-review/{opcr}/export', [PmtOpcrController::class, 'export'])->name('pmt.opcr.review.export');
 

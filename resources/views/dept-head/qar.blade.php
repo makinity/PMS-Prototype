@@ -148,16 +148,12 @@
                                     <td class="px-4 py-3 text-slate-300">Auto-populated to QAR</td>
                                     <td class="px-4 py-3">
                                         <div class="flex items-center justify-center gap-2">
-                                        <button
-                                            type="button"
-                                            data-view-mpor
-                                            data-mpor-id="{{ (int) ($mpor['id'] ?? 0) }}"
-                                            data-modal-target="qarViewMporModal"
-                                            data-modal-toggle="qarViewMporModal"
+                                        <a
+                                            href="{{ route('dept-head.qar.mpor.show', ['mpor' => (int) ($mpor['id'] ?? 0), 'q' => $selectedQuarterNumberSafe]) }}"
                                             class="rounded-lg border border-slate-700 bg-slate-900/50 px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:bg-slate-800"
                                         >
                                             View
-                                        </button>
+                                        </a>
                                     </div>
                                 </td>
                             </tr>

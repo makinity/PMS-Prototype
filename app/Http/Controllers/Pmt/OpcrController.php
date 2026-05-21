@@ -97,7 +97,7 @@ class OpcrController extends Controller
         ]);
     }
 
-    public function review(Request $request, \App\Services\UwpConsolidationSignatureService $signatureService)
+    public function review(Request $request)
     {
         $user = Auth::user();
         if (!$user || $user->role !== 'pmt') {
@@ -108,24 +108,29 @@ class OpcrController extends Controller
             'opcr_id' => ['required', 'integer', 'exists:opcrs,id'],
             'action' => ['required', Rule::in(['approve', 'return'])],
             'remarks' => ['required_if:action,return', 'nullable', 'string', 'min:3'],
-            'signature' => ['nullable', 'string'],
         ]);
 
-        $signatureInput = $request->input('signature');
+        $redirectToList = (bool) $request->boolean('redirect_to_list');
+        $redirect = function (string $type, string $message) use ($redirectToList) {
+            if ($redirectToList) {
+                return redirect()->route('pmt.opcr.review.index')->with($type, $message);
+            }
+            return back()->with($type, $message);
+        };
 
-        return DB::transaction(function () use ($validated, $user) {
+        return DB::transaction(function () use ($validated, $user, $redirect) {
             /** @var Opcr $opcr */
             $opcr = Opcr::query()
                 ->lockForUpdate()
                 ->findOrFail($validated['opcr_id']);
 
             if ($opcr->status === Opcr::STATUS_APPROVED) {
-                return back()->with('error', 'OPCR already final approved.');
+                return $redirect('error', 'OPCR already final approved.');
             }
 
             $reviewableStatuses = [Opcr::STATUS_ENDORSED, 'for_pmt_review'];
             if (!in_array($opcr->status, $reviewableStatuses, true)) {
-                return back()->with('error', 'OPCR is not ready for PMT final review.');
+                return $redirect('error', 'OPCR is not ready for PMT final review.');
             }
 
             if ($validated['action'] === 'approve') {
@@ -138,32 +143,9 @@ class OpcrController extends Controller
                     'locked_at' => now(),
                 ])->save();
 
-                if (!empty($signatureInput)) {
-                    $signedArtifact = $signatureService->createSignedOpcrArtifact(
-                        $opcr,
-                        $signatureInput,
-                        true // isPmt
-                    );
-
-                    \App\Models\UwpConsolidationSignature::query()->create([
-                        'unit_work_plan_id' => $opcr->unit_work_plan_id ?: $opcr->unitWorkPlans()->first()?->id,
-                        'opcr_id' => $opcr->id,
-                        'signed_by' => $user->id,
-                        'signature_image_path' => $signedArtifact['signature_image_path'],
-                        'signed_excel_path' => $signedArtifact['signed_excel_path'],
-                        'signature_hash' => $signedArtifact['signature_hash'],
-                        'signed_at' => now(),
-                        'metadata' => [
-                            'action' => 'pmt_approve_opcr',
-                            'ip_address' => $request->ip(),
-                            'user_agent' => $request->userAgent(),
-                        ],
-                    ]);
-                }
-
                 app(IpcrGeneratorService::class)->generateFromOpcr($opcr);
 
-                return back()->with('success', 'OPCR final approved.');
+                return $redirect('success', 'OPCR final approved.');
             }
 
             $remarks = trim((string) ($validated['remarks'] ?? ''));
@@ -195,8 +177,28 @@ class OpcrController extends Controller
                     'return_remarks' => $remarks,
                 ]);
 
-            return back()->with('success', 'OPCR returned to Supervisors for UWP correction.');
+            return $redirect('success', 'OPCR returned to Supervisors for UWP correction.');
         });
+    }
+
+    public function show(Opcr $opcr)
+    {
+        $user = Auth::user();
+        if (!$user || $user->role !== 'pmt') {
+            abort(403, 'Unauthorized.');
+        }
+
+        $opcr->load($this->opcrRelations());
+
+        $payload = $this->buildPayload($opcr);
+        $statusKey = strtolower((string) $opcr->status);
+        $isReviewable = in_array($statusKey, [Opcr::STATUS_ENDORSED, 'for_pmt_review'], true);
+
+        return view('pmt.opcr-review-show', [
+            'opcr' => $opcr,
+            'payload' => $payload,
+            'isReviewable' => $isReviewable,
+        ]);
     }
 
     public function export(Opcr $opcr)

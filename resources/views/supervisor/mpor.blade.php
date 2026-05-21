@@ -3,47 +3,35 @@
 @section('main-content')
     @php
         $mpors = $mpors ?? collect();
-        $selectedEmployeeId = $selectedEmployeeId ?? 0;
         $month = $month ?? now()->format('Y-m');
         $monthLabel = $monthLabel ?? now()->format('F Y');
     @endphp
 
-    <section class="space-y-6">
-        <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+    <section class="space-y-4">
+        <div class="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
             <div class="min-w-0">
                 <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Stage II</p>
-                <h1 class="mt-1 text-2xl font-bold text-white md:text-3xl">MPOR List (Supervisor)</h1>
-                <p class="mt-1 text-sm text-slate-400">
-                    Showing submitted, approved, and endorsed MPORs for {{ $monthLabel }}.
-                </p>
+                <h1 class="mt-1 text-xl font-bold text-white md:text-2xl">MPOR List (Supervisor)</h1>
+                <p class="mt-1 text-sm text-slate-400">Showing submitted, approved, and endorsed MPORs for {{ $monthLabel }}.</p>
             </div>
         </div>
 
         <form method="GET" action="{{ route('supervisor.mpor') }}"
-            class="grid gap-3 rounded-2xl border border-slate-800 bg-slate-900/70 p-4 md:grid-cols-3">
-            <div>
-                <label class="mb-2 block text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-slate-500">
-                    Employee
-                </label>
-                <input type="text" name="employee_id"
-                    style="background:#0f172a;color:#e5e7eb;"
+            class="grid grid-cols-2 gap-2 rounded-2xl border border-slate-800 bg-slate-900/70 p-3 md:grid-cols-12 md:items-end">
+            <div class="col-span-2 md:col-span-5">
+                <label class="mb-2 block text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-slate-500">Employee</label>
+                <input type="text" name="employee_id" style="background:#0f172a;color:#e5e7eb;"
                     class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white focus:border-emerald-500 focus:ring-0"
                     placeholder="Search...">
             </div>
-
-            <div>
-                <label class="mb-2 block text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-slate-500">
-                    Month
-                </label>
-                <input type="month" name="month" value="{{ $month }}"
-                    style="background:#0f172a;color:#e5e7eb;"
+            <div class="col-span-1 md:col-span-5">
+                <label class="mb-2 block text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-slate-500">Month</label>
+                <input type="month" name="month" value="{{ $month }}" style="background:#0f172a;color:#e5e7eb;"
                     class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white focus:border-emerald-500 focus:ring-0">
             </div>
-
-            <div class="flex items-end gap-2">
-                <button type="submit"
-                    class="w-full rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500">
-                    Apply Filters
+            <div class="col-span-1 flex items-end gap-2 md:col-span-2">
+                <button type="submit" class="w-full rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm font-semibold text-emerald-200 transition hover:bg-emerald-500/20">
+                    Apply
                 </button>
             </div>
         </form>
@@ -54,9 +42,6 @@
                     <thead class="text-[0.65rem] uppercase tracking-[0.3em] text-slate-500">
                         <tr class="border-b border-slate-800">
                             <th class="px-4 py-3">Employee</th>
-                            <th class="px-4 py-3">Office</th>
-                            <th class="px-4 py-3">Month</th>
-                            <th class="px-4 py-3 text-center">Rated ORS</th>
                             <th class="px-4 py-3 text-center">Status</th>
                             <th class="px-4 py-3 text-right">Actions</th>
                         </tr>
@@ -64,18 +49,7 @@
                     <tbody class="divide-y divide-slate-800">
                         @forelse ($mpors as $mpor)
                             <tr>
-                                <td class="px-4 py-3 font-semibold text-white">
-                                    {{ $mpor->employee?->name ?? '—' }}
-                                </td>
-                                <td class="px-4 py-3 text-slate-300">
-                                    {{ $mpor->employee?->office?->name ?? '—' }}
-                                </td>
-                                <td class="px-4 py-3 text-slate-300">
-                                    {{ $mpor->month ?? '—' }}
-                                </td>
-                                <td class="px-4 py-3 text-center tabular-nums">
-                                    {{ (int) ($mpor->rated_ors_entries_count ?? 0) }}
-                                </td>
+                                <td class="px-4 py-3 font-semibold text-white">{{ $mpor->employee?->name ?? '—' }}</td>
                                 <td class="px-4 py-3 text-center">
                                     @php
                                         $statusKey = strtolower((string) ($mpor->status ?? ''));
@@ -86,605 +60,25 @@
                                             default => 'border-slate-700 bg-slate-800 text-slate-200',
                                         };
                                     @endphp
-                                    <span class="rounded-full border px-3 py-1 text-xs font-semibold {{ $badgeClass }}">
-                                        {{ strtoupper($statusKey ?: '—') }}
-                                    </span>
+                                    <span class="rounded-full border px-3 py-1 text-xs font-semibold {{ $badgeClass }}">{{ strtoupper($statusKey ?: '—') }}</span>
                                 </td>
-                                <td class="px-4 py-3">
-                                    @if (empty($mpor->id) || empty($mpor->month))
-                                        <span class="text-xs font-semibold text-amber-300">Invalid MPOR row</span>
-                                    @else
-                                        <div class="flex flex-wrap items-center justify-end gap-2">
-                                            <button
-                                                type="button"
-                                                data-preview-mpor
-                                                data-mpor-id="{{ $mpor->id }}"
-                                                data-modal-target="mporPreviewModal"
-                                                data-modal-toggle="mporPreviewModal"
-                                                class="rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-700"
-                                            >
-                                                Preview
-                                            </button>
-                                        </div>
-                                    @endif
+                                <td class="px-4 py-3 text-right">
+                                    <a href="{{ route('supervisor.mpor.show', ['mpor' => $mpor->id]) }}"
+                                        class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-700 bg-slate-800 text-slate-200 transition hover:bg-slate-700 hover:text-white"
+                                        title="Preview MPOR"
+                                        aria-label="Preview MPOR">
+                                        <i class="fa-regular fa-eye text-sm"></i>
+                                    </a>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-4 py-10 text-center text-slate-500">
-                                    No MPOR records found for this month.
-                                </td>
+                                <td colspan="3" class="px-4 py-10 text-center text-slate-500">No MPOR records found for this month.</td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
-
-        <div
-            id="mporPreviewModal"
-            tabindex="-1"
-            aria-hidden="true"
-            class="fixed left-0 right-0 top-0 z-50 hidden h-[calc(100%-1rem)] max-h-full w-full items-center justify-center overflow-y-auto overflow-x-hidden md:inset-0"
-        >
-            <div class="relative w-full max-w-7xl p-4">
-                <div class="relative flex max-h-[85vh] w-full flex-col overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-lg">
-                    <div class="flex shrink-0 items-start justify-between border-b border-slate-800 p-5">
-                        <div class="min-w-0">
-                            <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Monthly Performance Output Report</p>
-                            <h3 class="mt-1 text-xl font-bold text-white md:text-2xl">MONTHLY PERFORMANCE OUTPUT REPORT</h3>
-                            <p class="mt-1 text-sm text-slate-400">
-                                Read-only mirror of locked ORS entries with supervisor ratings.
-                            </p>
-                            <span id="mporStatusBadge"
-                                class="hidden mt-2 inline-flex rounded-full border px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.3em]">
-                                --
-                            </span>
-                        </div>
-
-                        <button
-                            type="button"
-                            data-modal-hide="mporPreviewModal"
-                            class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-800 hover:text-white"
-                        >
-                            <span class="sr-only">Close modal</span>
-                            <i class="fa-solid fa-xmark text-sm"></i>
-                        </button>
-                    </div>
-
-                    <div class="max-h-[calc(85vh-140px)] flex-1 overflow-y-auto p-5 space-y-6">
-                        <div
-                            id="mporModalLoading"
-                            class="rounded-2xl border border-slate-800 bg-slate-900/50 p-4 text-sm text-slate-300"
-                        >
-                            Loading MPOR preview...
-                        </div>
-
-                        <div
-                            id="mporHeaderCards"
-                            class="hidden mt-2 grid gap-3 text-xs uppercase tracking-[0.3em] text-white sm:grid-cols-3"
-                        >
-                            <div class="rounded-xl border border-slate-800 bg-slate-900/40 p-3">
-                                <p class="text-slate-400">NAME</p>
-                                <p class="mt-1 font-semibold normal-case tracking-normal" id="mporEmployeeName">--</p>
-                            </div>
-                            <div class="rounded-xl border border-slate-800 bg-slate-900/40 p-3">
-                                <p class="text-slate-400">OFFICE / DIVISION</p>
-                                <p class="mt-1 font-semibold normal-case tracking-normal" id="mporOfficeName">--</p>
-                            </div>
-                            <div class="rounded-xl border border-slate-800 bg-slate-900/40 p-3">
-                                <p class="text-slate-400">MONTH</p>
-                                <p class="mt-1 font-semibold normal-case tracking-normal" id="mporMonthLabel">--</p>
-                            </div>
-                        </div>
-
-                        <div id="mporTableWrap" class="hidden">
-                            <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
-                                <div class="overflow-x-auto">
-                                    <table class="min-w-full text-[0.75rem] text-slate-200">
-                                        <thead>
-                                            <tr class="text-left text-[0.65rem] uppercase tracking-[0.3em] text-slate-500">
-                                                <th class="whitespace-nowrap px-3 py-3 align-bottom" rowspan="2">Output / Task</th>
-                                                <th class="border-l border-slate-800 px-3 py-3 text-center" colspan="5">Efficiency / Quantity</th>
-                                                <th class="border-l border-slate-800 px-3 py-3 text-center" colspan="5">Quality / Effectiveness</th>
-                                                <th class="border-l border-slate-800 px-3 py-3 text-center" colspan="5">Timeliness</th>
-                                            </tr>
-                                            <tr class="text-[0.6rem] uppercase tracking-[0.3em] text-slate-500">
-                                                @for ($i = 0; $i < 3; $i++)
-                                                    <th class="{{ $i === 0 ? 'border-l border-slate-800' : '' }} px-2 py-2 text-right">W1</th>
-                                                    <th class="px-2 py-2 text-right">W2</th>
-                                                    <th class="px-2 py-2 text-right">W3</th>
-                                                    <th class="px-2 py-2 text-right">W4</th>
-                                                    <th class="px-2 py-2 text-right font-semibold">Total</th>
-                                                @endfor
-                                            </tr>
-                                        </thead>
-
-                                        <tbody id="mporModalTbody" class="divide-y divide-slate-800 text-[0.75rem]"></tbody>
-                                    </table>
-                                </div>
-                            </div>
-
-                            <p class="mt-3 text-xs text-slate-400">
-                                MPOR points = Quantity x Supervisor Rating (Q/T). Only rated ORS entries with supervisor ratings are included.
-                            </p>
-                        </div>
-
-                        <div id="mporBottomCards" class="hidden grid gap-4 lg:grid-cols-2">
-                            <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 text-xs uppercase tracking-[0.3em] text-slate-400">
-                                <div class="flex items-center justify-between text-[0.6rem] tracking-[0.3em] text-slate-500">
-                                    <span>Week 1</span><span>Week 2</span><span>Week 3</span><span>Week 4</span><span>Total</span>
-                                </div>
-                                <div class="mt-2 grid grid-cols-5 text-center text-sm font-semibold text-white">
-                                    <span id="kpiW1">0</span>
-                                    <span id="kpiW2">0</span>
-                                    <span id="kpiW3">0</span>
-                                    <span id="kpiW4">0</span>
-                                    <span id="kpiTotal">0</span>
-                                </div>
-
-                                <div class="my-5 border-t border-slate-700/70"></div>
-
-                                <div class="mt-3 space-y-2 text-[0.65rem] tracking-[0.2em] text-slate-500">
-                                    <div class="flex items-center justify-between gap-3">
-                                        <span class="min-w-0">Included ORS entries (rated)</span>
-                                        <span class="shrink-0 font-semibold text-white" id="kpiIncluded">0</span>
-                                    </div>
-                                    <div class="flex items-center justify-between gap-3">
-                                        <span class="min-w-0">Excluded entries (unrated/draft/missing)</span>
-                                        <span class="shrink-0 font-semibold text-white" id="kpiExcluded">0</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 text-[0.65rem] uppercase tracking-[0.3em] text-slate-400">
-                                <div class="flex items-center justify-between text-sm font-semibold text-white">
-                                    <span>Confirmed:</span>
-                                    <span class="text-slate-500">Stage II</span>
-                                </div>
-
-                                <div class="mt-4 grid gap-3 sm:grid-cols-2">
-                                    <div class="space-y-1 rounded-xl border border-slate-800 bg-slate-900/40 p-3 text-center">
-                                        <p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">Supervisor</p>
-                                        <p class="text-sm font-semibold text-white normal-case tracking-normal" id="confirmSupervisor">--</p>
-                                        <p class="text-[0.6rem] text-slate-500 normal-case tracking-normal">Signature over printed name</p>
-                                    </div>
-                                    <div class="space-y-1 rounded-xl border border-slate-800 bg-slate-900/40 p-3 text-center">
-                                        <p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">Employee</p>
-                                        <p class="text-sm font-semibold text-white normal-case tracking-normal" id="confirmEmployee">--</p>
-                                        <p class="text-[0.6rem] text-slate-500 normal-case tracking-normal">Signature over printed name</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div id="mporReturnPanel" class="hidden rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4">
-                            <div class="flex items-start justify-between gap-4">
-                                <div>
-                                    <h4 class="text-sm font-semibold text-white">Return MPOR to Employee</h4>
-                                    <p class="mt-1 text-xs text-slate-300">
-                                        Remarks are optional. Once returned, the employee may continue logging ORS tasks and resubmit the MPOR.
-                                    </p>
-                                </div>
-                                <button
-                                    type="button"
-                                    id="mporReturnPanelClose"
-                                    class="rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:bg-slate-800"
-                                >
-                                    Cancel
-                                </button>
-                            </div>
-
-                            <form id="mporReturnForm" method="POST" action="" data-action-form class="mt-4 space-y-3">
-                                @csrf
-                                <label class="block text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-slate-400">
-                                    Return Remarks
-                                </label>
-                                <textarea
-                                    id="mporReturnRemarks"
-                                    name="return_remarks"
-                                    rows="3"
-                                    style="background:#0f172a;color:#e5e7eb;"
-                                    class="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-rose-400 focus:ring-0"
-                                    placeholder="Optional reason for returning this MPOR..."
-                                ></textarea>
-
-                                <div class="flex items-center justify-end gap-2">
-                                    <button
-                                        type="button"
-                                        id="mporReturnPanelCancel"
-                                        class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 transition hover:bg-slate-800"
-                                    >
-                                        Keep MPOR
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        class="inline-flex items-center gap-2 rounded-lg border border-rose-500/40 bg-rose-500/10 px-4 py-2 text-sm font-semibold text-rose-200 transition hover:bg-rose-500/20"
-                                    >
-                                        <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-rose-200/40 border-t-rose-100"></span>
-                                        <span data-button-label>Return to Employee</span>
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-
-                    <div class="flex shrink-0 items-center justify-end gap-2 border-t border-slate-800 p-5">
-                        <div id="mporModalActionSlot" class="flex items-center justify-end gap-2"></div>
-
-                        <button
-                            type="button"
-                            data-modal-hide="mporPreviewModal"
-                            class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 transition hover:bg-slate-800"
-                        >
-                            Close
-                        </button>
-                    </div>
-
-                    <template id="tplMporApproveForm">
-                        <form method="POST" action="__ACTION__" data-action-form>
-                            @csrf
-                            <button
-                                type="submit"
-                                class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-emerald-500"
-                            >
-                                <span data-button-spinner class="hidden h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
-                                <span data-button-label>Approve</span>
-                            </button>
-                        </form>
-                    </template>
-
-                    <template id="tplMporReturnButton">
-                        <button
-                            type="button"
-                            data-open-return-panel
-                            class="inline-flex items-center gap-2 rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs font-semibold text-rose-200 transition hover:bg-rose-500/20"
-                        >
-                            Return
-                        </button>
-                    </template>
-                </div>
-            </div>
-        </div>
     </section>
 @endsection
-
-@push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            function bindActionForm(form) {
-                if (!form || form.dataset.actionBound === 'true') {
-                    return;
-                }
-
-                form.dataset.actionBound = 'true';
-                form.addEventListener('submit', function () {
-                    const btn = form.querySelector('button[type="submit"]');
-                    if (!btn) {
-                        return;
-                    }
-
-                    const label = btn.querySelector('[data-button-label]');
-                    const spinner = btn.querySelector('[data-button-spinner]');
-
-                    btn.disabled = true;
-                    btn.classList.add('cursor-not-allowed', 'opacity-80');
-
-                    if (label) {
-                        label.textContent = 'Processing...';
-                    }
-
-                    if (spinner) {
-                        spinner.classList.remove('hidden');
-                    }
-                });
-            }
-
-            function bindActionForms(root = document) {
-                root.querySelectorAll('form[data-action-form]').forEach(bindActionForm);
-            }
-
-            bindActionForms();
-
-            const loadingBox = document.getElementById('mporModalLoading');
-            const headerCards = document.getElementById('mporHeaderCards');
-            const tableWrap = document.getElementById('mporTableWrap');
-            const bottomCards = document.getElementById('mporBottomCards');
-            const modalActionSlot = document.getElementById('mporModalActionSlot');
-            const approveTemplate = document.getElementById('tplMporApproveForm');
-            const returnButtonTemplate = document.getElementById('tplMporReturnButton');
-            const approveUrlTpl = @json(route('supervisor.mpor.approve', ['mpor' => '__ID__']));
-            const returnUrlTpl = @json(route('supervisor.mpor.return', ['mpor' => '__ID__']));
-            const returnPanel = document.getElementById('mporReturnPanel');
-            const returnForm = document.getElementById('mporReturnForm');
-            const returnRemarks = document.getElementById('mporReturnRemarks');
-            const returnPanelClose = document.getElementById('mporReturnPanelClose');
-            const returnPanelCancel = document.getElementById('mporReturnPanelCancel');
-
-            const elEmployeeName = document.getElementById('mporEmployeeName');
-            const elOfficeName = document.getElementById('mporOfficeName');
-            const elMonthLabel = document.getElementById('mporMonthLabel');
-            const mporStatusBadge = document.getElementById('mporStatusBadge');
-
-            const tbody = document.getElementById('mporModalTbody');
-
-            const kpiW1 = document.getElementById('kpiW1');
-            const kpiW2 = document.getElementById('kpiW2');
-            const kpiW3 = document.getElementById('kpiW3');
-            const kpiW4 = document.getElementById('kpiW4');
-            const kpiTotal = document.getElementById('kpiTotal');
-            const kpiIncluded = document.getElementById('kpiIncluded');
-            const kpiExcluded = document.getElementById('kpiExcluded');
-
-            const confirmSupervisor = document.getElementById('confirmSupervisor');
-            const confirmEmployee = document.getElementById('confirmEmployee');
-
-            function escapeHtml(str) {
-                return String(str ?? '')
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;')
-                    .replace(/"/g, '&quot;')
-                    .replace(/'/g, '&#039;');
-            }
-
-            function num(value) {
-                const n = Number(value);
-                return Number.isFinite(n) ? n : 0;
-            }
-
-            function fmt0(value) {
-                return Math.round(num(value)).toLocaleString();
-            }
-
-            function metricGroup(row, key, withBorder) {
-                const borderClass = withBorder ? ' border-l border-slate-800' : '';
-                const w1 = fmt0(row?.[key]?.[1] ?? 0);
-                const w2 = fmt0(row?.[key]?.[2] ?? 0);
-                const w3 = fmt0(row?.[key]?.[3] ?? 0);
-                const w4 = fmt0(row?.[key]?.[4] ?? 0);
-                const total = fmt0(row?.[`${key}Total`] ?? 0);
-
-                return `
-                    <td class="${borderClass} px-2 py-3 text-right tabular-nums">${w1}</td>
-                    <td class="px-2 py-3 text-right tabular-nums">${w2}</td>
-                    <td class="px-2 py-3 text-right tabular-nums">${w3}</td>
-                    <td class="px-2 py-3 text-right tabular-nums">${w4}</td>
-                    <td class="px-2 py-3 text-right font-semibold tabular-nums">${total}</td>
-                `;
-            }
-
-            function buildSectionRow(label) {
-                return `
-                    <tr class="bg-slate-800/40 text-[0.65rem] uppercase tracking-[0.3em] text-slate-400">
-                        <td class="px-3 py-2 font-semibold text-slate-200" colspan="16">${escapeHtml(label)}</td>
-                    </tr>
-                `;
-            }
-
-            function buildRow(row) {
-                return `
-                    <tr>
-                        <td class="px-3 py-3 font-semibold text-white">${escapeHtml(row?.label ?? '--')}</td>
-                        ${metricGroup(row, 'qty', true)}
-                        ${metricGroup(row, 'qual', true)}
-                        ${metricGroup(row, 'time', true)}
-                    </tr>
-                `;
-            }
-
-            function renderTable(sectionLabels, sectionRows) {
-                const labels = sectionLabels && typeof sectionLabels === 'object'
-                    ? Object.entries(sectionLabels)
-                    : [];
-
-                const sections = labels.length > 0
-                    ? labels
-                    : Object.keys(sectionRows || {}).map((key) => [key, `${String(key || 'Functions').toUpperCase()} FUNCTIONS`]);
-
-                let html = '';
-
-                if (sections.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="16" class="px-3 py-6 text-center text-sm text-slate-500">No entries available.</td></tr>';
-                    return;
-                }
-
-                sections.forEach(([key, label]) => {
-                    const rows = Array.isArray(sectionRows?.[key]) ? sectionRows[key] : [];
-                    html += buildSectionRow(label || 'Functions');
-                    if (rows.length > 0) {
-                        html += rows.map((row) => buildRow(row)).join('');
-                    } else {
-                        html += '<tr><td colspan="16" class="px-3 py-6 text-center text-sm text-slate-500">No entries available.</td></tr>';
-                    }
-                });
-
-                tbody.innerHTML = html;
-            }
-
-            function applyTotals(grandTotals, kpis, meta) {
-                kpiW1.textContent = fmt0(grandTotals?.qty?.[1] ?? 0);
-                kpiW2.textContent = fmt0(grandTotals?.qty?.[2] ?? 0);
-                kpiW3.textContent = fmt0(grandTotals?.qty?.[3] ?? 0);
-                kpiW4.textContent = fmt0(grandTotals?.qty?.[4] ?? 0);
-                kpiTotal.textContent = fmt0(grandTotals?.qtyTotal ?? 0);
-
-                kpiIncluded.textContent = fmt0(kpis?.includedRated ?? 0);
-                kpiExcluded.textContent = fmt0(kpis?.excluded ?? 0);
-
-                confirmSupervisor.textContent = meta?.supervisorName ?? '--';
-                confirmEmployee.textContent = meta?.employeeName ?? '--';
-            }
-
-            function setModalStatusBadge(status) {
-                if (!mporStatusBadge) {
-                    return;
-                }
-
-                mporStatusBadge.classList.remove(
-                    'border-blue-500/30', 'bg-blue-500/10', 'text-blue-200',
-                    'border-emerald-500/30', 'bg-emerald-500/10', 'text-emerald-200',
-                    'border-violet-400/30', 'bg-violet-400/10', 'text-violet-200',
-                    'border-slate-700', 'bg-slate-800', 'text-slate-200'
-                );
-
-                const statusKey = String(status || '').toLowerCase();
-                let badgeClass = ['border-slate-700', 'bg-slate-800', 'text-slate-200'];
-
-                if (statusKey === 'submitted') {
-                    badgeClass = ['border-blue-500/30', 'bg-blue-500/10', 'text-blue-200'];
-                } else if (statusKey === 'approved') {
-                    badgeClass = ['border-emerald-500/30', 'bg-emerald-500/10', 'text-emerald-200'];
-                } else if (statusKey === 'endorsed') {
-                    badgeClass = ['border-violet-400/30', 'bg-violet-400/10', 'text-violet-200'];
-                } else if (statusKey === 'returned') {
-                    badgeClass = ['border-rose-500/30', 'bg-rose-500/10', 'text-rose-200'];
-                }
-
-                mporStatusBadge.classList.add(...badgeClass);
-                mporStatusBadge.textContent = statusKey ? statusKey.toUpperCase() : '--';
-
-                if (statusKey) {
-                    mporStatusBadge.classList.remove('hidden');
-                } else {
-                    mporStatusBadge.classList.add('hidden');
-                }
-            }
-
-            function renderModalActions(status, resolvedId) {
-                if (!modalActionSlot) {
-                    return;
-                }
-
-                modalActionSlot.innerHTML = '';
-                hideReturnPanel();
-
-                const normalizedStatus = String(status || '').toLowerCase();
-                const safeId = String(resolvedId || '').trim();
-                if (!safeId || normalizedStatus !== 'submitted') {
-                    return;
-                }
-
-                if (returnButtonTemplate) {
-                    const returnFragment = returnButtonTemplate.content.cloneNode(true);
-                    const returnBtn = returnFragment.querySelector('[data-open-return-panel]');
-                    if (returnBtn) {
-                        returnBtn.addEventListener('click', function () {
-                            showReturnPanel(safeId);
-                        });
-                    }
-                    modalActionSlot.appendChild(returnFragment);
-                }
-
-                if (approveTemplate) {
-                    const approveFragment = approveTemplate.content.cloneNode(true);
-                    const form = approveFragment.querySelector('form[data-action-form]');
-                    if (form) {
-                        form.setAttribute('action', approveUrlTpl.replace('__ID__', encodeURIComponent(safeId)));
-                        modalActionSlot.appendChild(approveFragment);
-                    }
-                }
-
-                bindActionForms(modalActionSlot);
-            }
-
-            function hideReturnPanel() {
-                if (!returnPanel || !returnForm) {
-                    return;
-                }
-
-                returnPanel.classList.add('hidden');
-                returnForm.setAttribute('action', '');
-                if (returnRemarks) {
-                    returnRemarks.value = '';
-                }
-            }
-
-            function showReturnPanel(mporId) {
-                if (!returnPanel || !returnForm) {
-                    return;
-                }
-
-                returnForm.setAttribute('action', returnUrlTpl.replace('__ID__', encodeURIComponent(String(mporId))));
-                returnPanel.classList.remove('hidden');
-                if (returnRemarks) {
-                    returnRemarks.focus();
-                }
-            }
-
-            async function loadMporPreview(mporId) {
-                if (!mporId) {
-                    return;
-                }
-
-                loadingBox.textContent = 'Loading MPOR preview...';
-                loadingBox.classList.remove('hidden');
-
-                headerCards.classList.add('hidden');
-                tableWrap.classList.add('hidden');
-                bottomCards.classList.add('hidden');
-                tbody.innerHTML = '';
-                renderModalActions('', '');
-                setModalStatusBadge('');
-
-                try {
-                    const url = @json(route('supervisor.mpor.show', ['mpor' => '__ID__'])).replace('__ID__', String(mporId));
-                    const response = await fetch(url, {
-                        headers: {
-                            Accept: 'application/json'
-                        }
-                    });
-
-                    if (!response.ok) {
-                        throw new Error('Failed to load MPOR preview.');
-                    }
-
-                    const data = await response.json();
-
-                    const meta = data?.meta ?? {};
-                    const sectionLabels = data?.sectionLabels ?? {};
-                    const sectionRows = data?.sectionRows ?? {};
-                    const grandTotals = data?.grandTotals ?? {};
-                    const kpis = data?.kpis ?? {};
-                    const status = String(meta?.status ?? data?.status ?? '').toLowerCase();
-                    const resolvedId = String(meta?.mporId ?? data?.mporId ?? mporId);
-
-                    elEmployeeName.textContent = meta?.employeeName ?? '--';
-                    elOfficeName.textContent = meta?.officeName ?? '--';
-                    elMonthLabel.textContent = meta?.monthLabel ?? meta?.month ?? '--';
-
-                    renderTable(sectionLabels, sectionRows);
-                    applyTotals(grandTotals, kpis, meta);
-                    renderModalActions(status, resolvedId);
-                    setModalStatusBadge(status);
-                    hideReturnPanel();
-
-                    loadingBox.classList.add('hidden');
-                    headerCards.classList.remove('hidden');
-                    tableWrap.classList.remove('hidden');
-                    bottomCards.classList.remove('hidden');
-                } catch (error) {
-                    loadingBox.textContent = error?.message ?? 'Unable to load MPOR preview.';
-                    loadingBox.classList.remove('hidden');
-                    renderModalActions('', '');
-                    setModalStatusBadge('');
-                }
-            }
-
-            document.querySelectorAll('[data-preview-mpor]').forEach((button) => {
-                button.addEventListener('click', function () {
-                    const mporId = button.getAttribute('data-mpor-id');
-                    loadMporPreview(mporId);
-                });
-            });
-
-            [returnPanelClose, returnPanelCancel].forEach((button) => {
-                if (!button) {
-                    return;
-                }
-
-                button.addEventListener('click', hideReturnPanel);
-            });
-        });
-    </script>
-@endpush
