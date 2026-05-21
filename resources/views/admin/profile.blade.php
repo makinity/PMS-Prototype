@@ -25,7 +25,7 @@
                 @if(auth()->user()->email_verified_at)
                     <span class="px-3 py-1 text-xs rounded-full border border-emerald-600/50 bg-emerald-500/10 text-emerald-300">VERIFIED</span>
                 @else
-                    <span class="px-3 py-1 text-xs rounded-full border border-yellow-600/50 bg-yellow-500/10 text-yellow-300">UNVERIFIED</span>
+
                 @endif
             </div>
 
@@ -171,36 +171,7 @@
                 </form>
             </div>
 
-            {{-- 2FA & Sessions --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div class="rounded-xl border border-slate-800 bg-transparent p-5">
-                    <div class="flex justify-between items-start mb-3">
-                        <h3 class="font-semibold text-white">Two-Factor Authentication</h3>
-                        @if(auth()->user()->two_factor_secret)
-                            <span class="px-2.5 py-1 text-[11px] rounded-full border border-emerald-600/50 bg-emerald-500/10 font-semibold text-emerald-300">Enabled</span>
-                        @else
-                            <span class="px-2.5 py-1 text-[11px] rounded-full border border-slate-600 bg-slate-800 font-semibold text-slate-400">Disabled</span>
-                        @endif
-                    </div>
-                    <p class="text-sm text-slate-400 mb-4">Mandatory for System Administrators. Adds a second layer of verification on login.</p>
-                    <a href="#" class="inline-flex w-full items-center justify-center gap-2 px-4 py-2 border border-slate-700 text-slate-300 rounded-lg hover:bg-slate-800 transition-colors duration-200 text-sm font-medium">
-                        Manage 2FA
-                    </a>
-                </div>
 
-                <div class="rounded-xl border border-slate-800 bg-transparent p-5">
-                    <h3 class="font-semibold text-white mb-3">Active Sessions</h3>
-                    <p class="text-sm text-slate-400 mb-4">Sign out from all other browsers and devices to protect your account.</p>
-                    <form method="POST" action="#">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit"
-                                class="w-full px-4 py-2 border border-rose-700/60 bg-rose-500/10 text-rose-300 rounded-lg hover:bg-rose-500/20 transition-colors duration-200 text-sm font-semibold">
-                            Sign Out Other Sessions (Coming Soon)
-                        </button>
-                    </form>
-                </div>
-            </div>
         </div>
 
     </section>

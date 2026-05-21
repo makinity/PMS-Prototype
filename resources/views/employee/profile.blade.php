@@ -23,7 +23,7 @@
                 @if(auth()->user()->email_verified_at)
                     <span class="px-3 py-1 text-xs rounded bg-emerald-900 text-emerald-300 border border-emerald-800">VERIFIED</span>
                 @else
-                    <span class="px-3 py-1 text-xs rounded bg-yellow-900 text-yellow-300 border border-yellow-800">UNVERIFIED</span>
+
                 @endif
             </div>
 

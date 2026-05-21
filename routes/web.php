@@ -263,7 +263,9 @@ Route::prefix('supervisor')->middleware('auth')->group(function () {
     // Stage I - UWP
     Route::get('/uwp-page', [UnitWorkPlanController::class, 'uwpList'])->name('supervisor.uwp-page');
     Route::get('/stage-one/planning/uwp', [UnitWorkPlanController::class, 'uwpList'])->name('supervisor.uwp.index');
-    Route::get('/stage-one/planning/uwp/{id}', [UnitWorkPlanController::class, 'show'])->name('supervisor.uwp.show');
+    Route::get('/stage-one/planning/uwp/{id}', [UnitWorkPlanController::class, 'showJson'])->name('supervisor.uwp.show');
+    Route::get('/uwp/{id}/preview', [UnitWorkPlanController::class, 'previewJson'])->name('supervisor.uwp.preview');
+    Route::get('/uwp/{id}/show', [UnitWorkPlanController::class, 'showPage'])->name('supervisor.uwp.show.page');
     Route::get('/uwp', [UnitWorkPlanController::class, 'index'])->name('supervisor.uwp');
 
     Route::get('/uwp/{uwp}/excel', [UwpExcelExportController::class, 'excelExport'])->name('uwp.excel.export');
@@ -284,8 +286,8 @@ Route::prefix('supervisor')->middleware('auth')->group(function () {
     Route::post('/stage1/uwp/{id}/submit-legacy', [UnitWorkPlanController::class, 'submitForApproval'])
         ->name('supervisor.uwp.submit.legacy');
 
-    Route::get('/supervisor/uwp/{id}/preview', [UnitWorkPlanController::class, 'preview'])
-        ->name('supervisor.uwp.preview');
+    Route::get('/supervisor/uwp/{id}/preview', [UnitWorkPlanController::class, 'previewJson'])
+        ->name('supervisor.uwp.preview.legacy');
 
     // Stage I - OPCR
     // Stage II - MPOR Review

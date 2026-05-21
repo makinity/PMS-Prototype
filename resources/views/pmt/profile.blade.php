@@ -21,7 +21,7 @@
                 @if(auth()->user()->email_verified_at)
                     <span class="px-3 py-1 text-xs rounded bg-emerald-900 text-emerald-300 border border-emerald-800">VERIFIED</span>
                 @else
-                    <span class="px-3 py-1 text-xs rounded bg-yellow-900 text-yellow-300 border border-yellow-800">UNVERIFIED</span>
+
                 @endif
             </div>
 
@@ -179,36 +179,7 @@
                 </form>
             </div>
 
-            {{-- 2FA & Sessions --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-transparent border border-gray-600 rounded-lg p-5">
-                    <div class="flex justify-between items-start mb-4">
-                        <h3 class="font-medium text-white">Two-Factor Authentication</h3>
-                        @if(auth()->user()->two_factor_secret)
-                            <span class="px-2 py-1 text-xs rounded bg-emerald-900 text-emerald-300">Enabled</span>
-                        @else
-                            <span class="px-2 py-1 text-xs rounded bg-gray-700 text-gray-400">Disabled</span>
-                        @endif
-                    </div>
-                    <p class="text-sm text-gray-400 mb-4">Add an extra layer of security to your account.</p>
-                    <a href="#" class="inline-flex w-full items-center justify-center gap-2 px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors duration-200 text-sm">
-                        Manage 2FA
-                    </a>
-                </div>
 
-                <div class="bg-transparent border border-gray-600 rounded-lg p-5">
-                    <h3 class="font-medium text-white mb-4">Active Sessions</h3>
-                    <p class="text-sm text-gray-400 mb-4">Sign out of all other browser sessions.</p>
-                    <form method="POST" action="#">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit"
-                                class="w-full px-4 py-2 border border-red-600/50 text-red-300 rounded-lg hover:bg-red-900/20 transition-colors duration-200 text-sm">
-                            Sign Out Other Sessions (Coming Soon)
-                        </button>
-                    </form>
-                </div>
-            </div>
         </div>
 
     </section>

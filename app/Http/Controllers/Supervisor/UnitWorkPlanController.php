@@ -167,7 +167,7 @@ class UnitWorkPlanController extends Controller
     }
 
 
-    public function show(Request $request, int $id)
+    public function showJson(Request $request, int $id)
     {
         $uwp = UnitWorkPlan::find($id);
         if (!$uwp) {
@@ -179,7 +179,7 @@ class UnitWorkPlanController extends Controller
         return $this->buildUwpShowResponse($request, $uwp);
     }
 
-    public function preview(Request $request, $id)
+    public function previewJson(Request $request, int $id)
     {
         $uwp = UnitWorkPlan::find($id);
         if (!$uwp) {
@@ -189,6 +189,42 @@ class UnitWorkPlanController extends Controller
         }
 
         return $this->buildUwpShowResponse($request, $uwp);
+    }
+
+    // Backward-compatible aliases during rollout
+    public function show(Request $request, int $id)
+    {
+        return $this->showJson($request, $id);
+    }
+
+    public function preview(Request $request, int $id)
+    {
+        return $this->previewJson($request, $id);
+    }
+
+    public function showPage(Request $request, int $id)
+    {
+        $uwp = UnitWorkPlan::find($id);
+        if (!$uwp) {
+            return redirect()->route('supervisor.uwp-page')->with('error', 'UWP not found.');
+        }
+
+        try {
+            $payload = $this->buildUwpShowPayload($request, $uwp);
+
+            $status = strtolower((string) ($payload['status'] ?? ''));
+            $isEditable = in_array($status, [UnitWorkPlan::STATUS_DRAFT, UnitWorkPlan::STATUS_RETURNED], true)
+                && empty($payload['locked_at']);
+            $canSubmit = $isEditable;
+
+            return view('supervisor.uwp-show', [
+                'uwp' => $payload,
+                'canSubmit' => $canSubmit,
+                'isEditable' => $isEditable,
+            ]);
+        } catch (\Throwable $e) {
+            return redirect()->route('supervisor.uwp-page')->with('error', $e->getMessage() ?: 'Unable to open UWP preview.');
+        }
     }
 
     public function edit(Request $request, int $id)
@@ -585,6 +621,10 @@ class UnitWorkPlanController extends Controller
                 'success' => false,
                 'error' => $message,
             ], $statusCode);
+        }
+
+        if ($request->boolean('redirect_to_list') && $success) {
+            return redirect()->route('supervisor.uwp-page')->with('success', $message);
         }
 
         if ($success) {
@@ -1522,115 +1562,7 @@ class UnitWorkPlanController extends Controller
     private function buildUwpShowResponse(Request $request, UnitWorkPlan $uwp)
     {
         try {
-            $user = $request->user();
-            if (!$user) {
-                return response()->json([
-                    'message' => 'Unauthorized.',
-                ], 403);
-            }
-
-            $isPrivileged = in_array($user->role, ['admin', 'pmt', 'dept-head'], true);
-            $isOwner = (int) $uwp->created_by === (int) $user->id;
-            $isSupervisorSameOffice = $user->role === 'supervisor' && (int) $user->office_id === (int) $uwp->office_id;
-
-            if (!$isPrivileged && !$isOwner && !$isSupervisorSameOffice) {
-                return response()->json([
-                    'message' => 'You are not allowed to view this UWP.',
-                ], 403);
-            }
-
-            $uwp->load([
-                'office.head',
-                'performancePeriod',
-                'creator',
-                'uwpFunctions' => function ($query) {
-                    $query->orderBy('sort_order')->with([
-                        'mfos' => function ($mfoQuery) {
-                            $mfoQuery->orderBy('sort_order')->with([
-                                'successIndicators' => function ($siQuery) {
-                                    $siQuery->orderBy('sort_order')->with([
-                                        'qetStandards',
-                                        'assignments.employee.office',
-                                    ]);
-                                },
-                            ]);
-                        },
-                    ]);
-                },
-            ]);
-
-            $payload = [
-                'id' => $uwp->id,
-                'status' => $uwp->status,
-                'created_at' => optional($uwp->created_at)->toDateTimeString(),
-                'submitted_at' => optional($uwp->submitted_at)->toDateTimeString(),
-                'locked_at' => optional($uwp->locked_at)->toDateTimeString(),
-                'updated_at' => optional($uwp->updated_at)->toDateTimeString(),
-                'office' => [
-                    'id' => $uwp->office?->id,
-                    'name' => $uwp->office?->name,
-                ],
-                'performance_period' => [
-                    'id' => $uwp->performancePeriod?->id,
-                    'name' => $uwp->performancePeriod?->name,
-                ],
-                'creator' => [
-                    'id' => $uwp->creator?->id,
-                    'name' => $uwp->creator?->name,
-                ],
-                'department_head' => [
-                    'id' => $uwp->office?->head?->id,
-                    'name' => $uwp->office?->head?->name,
-                ],
-                'uwp_functions' => $uwp->uwpFunctions->map(function ($function) {
-                    return [
-                        'id' => $function->id,
-                        'name' => $function->name,
-                        'function_type' => $function->function_type,
-                        'weight_percent' => $function->weight_percent,
-                        'mfos' => $function->mfos->map(function ($mfo) {
-                            return [
-                                'id' => $mfo->id,
-                                'title' => $mfo->title,
-                                'target_quantity' => $this->normalizeTargetQuantity($mfo->target_quantity),
-                                'target_timeline' => $mfo->target_timeline,
-                                'weight_percent' => $mfo->weight_percent,
-                                'success_indicators' => $mfo->successIndicators->map(function ($indicator) {
-                                    return [
-                                        'id' => $indicator->id,
-                                        'indicator_text' => $indicator->indicator_text,
-                                        'target_quantity' => $this->normalizeTargetQuantity($indicator->target_quantity),
-                                        'target_timeline' => $indicator->target_timeline,
-                                        'qet_standards' => $indicator->qetStandards->map(function ($standard) {
-                                            return [
-                                                'id' => $standard->id,
-                                                'dimension' => $standard->dimension,
-                                                'rating' => $standard->rating,
-                                                'standard_text' => $standard->standard_text,
-                                            ];
-                                        })->values()->all(),
-                                        'assignments' => $indicator->assignments->map(function ($assignment) {
-                                            return [
-                                                'id' => $assignment->id,
-                                                'assigned_at' => optional($assignment->assigned_at)->toDateTimeString(),
-                                                'employee' => [
-                                                    'id' => $assignment->employee?->id,
-                                                    'name' => $assignment->employee?->name,
-                                                    'office' => [
-                                                        'id' => $assignment->employee?->office?->id,
-                                                        'name' => $assignment->employee?->office?->name,
-                                                    ],
-                                                ],
-                                            ];
-                                        })->values()->all(),
-                                    ];
-                                })->values()->all(),
-                            ];
-                        })->values()->all(),
-                    ];
-                })->values()->all(),
-            ];
-
+            $payload = $this->buildUwpShowPayload($request, $uwp);
             return response()->json($payload);
         } catch (\Throwable $e) {
             Log::error('Failed to load UWP preview data.', [
@@ -1643,5 +1575,120 @@ class UnitWorkPlanController extends Controller
                 'message' => 'Unable to load UWP details right now.',
             ], 500);
         }
+    }
+
+    private function buildUwpShowPayload(Request $request, UnitWorkPlan $uwp): array
+    {
+        $user = $request->user();
+        if (!$user) {
+            throw new \RuntimeException('Unauthorized.');
+        }
+
+        $isPrivileged = in_array($user->role, ['admin', 'pmt', 'dept-head'], true);
+        $isOwner = (int) $uwp->created_by === (int) $user->id;
+        $isSupervisorSameOffice = $user->role === 'supervisor' && (int) $user->office_id === (int) $uwp->office_id;
+
+        if (!$isPrivileged && !$isOwner && !$isSupervisorSameOffice) {
+            throw new \RuntimeException('You are not allowed to view this UWP.');
+        }
+
+        $uwp->load([
+            'office.head',
+            'performancePeriod',
+            'creator',
+            'returnedByUser',
+            'uwpFunctions' => function ($query) {
+                $query->orderBy('sort_order')->with([
+                    'mfos' => function ($mfoQuery) {
+                        $mfoQuery->orderBy('sort_order')->with([
+                            'successIndicators' => function ($siQuery) {
+                                $siQuery->orderBy('sort_order')->with([
+                                    'qetStandards',
+                                    'assignments.employee.office',
+                                ]);
+                            },
+                        ]);
+                    },
+                ]);
+            },
+        ]);
+
+        return [
+            'id' => $uwp->id,
+            'status' => $uwp->status,
+            'created_at' => optional($uwp->created_at)->toDateTimeString(),
+            'submitted_at' => optional($uwp->submitted_at)->toDateTimeString(),
+            'locked_at' => optional($uwp->locked_at)->toDateTimeString(),
+            'updated_at' => optional($uwp->updated_at)->toDateTimeString(),
+            'returned_at' => optional($uwp->returned_at)->toDateTimeString(),
+            'return_remarks' => (string) ($uwp->return_remarks ?? ''),
+            'returned_by_user' => [
+                'id' => $uwp->returnedByUser?->id,
+                'name' => $uwp->returnedByUser?->name,
+            ],
+            'office' => [
+                'id' => $uwp->office?->id,
+                'name' => $uwp->office?->name,
+            ],
+            'performance_period' => [
+                'id' => $uwp->performancePeriod?->id,
+                'name' => $uwp->performancePeriod?->name,
+            ],
+            'creator' => [
+                'id' => $uwp->creator?->id,
+                'name' => $uwp->creator?->name,
+            ],
+            'department_head' => [
+                'id' => $uwp->office?->head?->id,
+                'name' => $uwp->office?->head?->name,
+            ],
+            'uwp_functions' => $uwp->uwpFunctions->map(function ($function) {
+                return [
+                    'id' => $function->id,
+                    'name' => $function->name,
+                    'function_type' => $function->function_type,
+                    'weight_percent' => $function->weight_percent,
+                    'mfos' => $function->mfos->map(function ($mfo) {
+                        return [
+                            'id' => $mfo->id,
+                            'title' => $mfo->title,
+                            'target_quantity' => $this->normalizeTargetQuantity($mfo->target_quantity),
+                            'target_timeline' => $mfo->target_timeline,
+                            'weight_percent' => $mfo->weight_percent,
+                            'success_indicators' => $mfo->successIndicators->map(function ($indicator) {
+                                return [
+                                    'id' => $indicator->id,
+                                    'indicator_text' => $indicator->indicator_text,
+                                    'target_quantity' => $this->normalizeTargetQuantity($indicator->target_quantity),
+                                    'target_timeline' => $indicator->target_timeline,
+                                    'qet_standards' => $indicator->qetStandards->map(function ($standard) {
+                                        return [
+                                            'id' => $standard->id,
+                                            'dimension' => $standard->dimension,
+                                            'rating' => $standard->rating,
+                                            'standard_text' => $standard->standard_text,
+                                        ];
+                                    })->values()->all(),
+                                    'assignments' => $indicator->assignments->map(function ($assignment) {
+                                        return [
+                                            'id' => $assignment->id,
+                                            'assigned_at' => optional($assignment->assigned_at)->toDateTimeString(),
+                                            'employee' => [
+                                                'id' => $assignment->employee?->id,
+                                                'name' => $assignment->employee?->name,
+                                                'office' => [
+                                                    'id' => $assignment->employee?->office?->id,
+                                                    'name' => $assignment->employee?->office?->name,
+                                                ],
+                                            ],
+                                        ];
+                                    })->values()->all(),
+                                ];
+                            })->values()->all(),
+                        ];
+                    })->values()->all(),
+                ];
+            })->values()->all(),
+        ];
     }
 }

@@ -655,6 +655,7 @@
                 justify-content: center;
                 background: var(--page-bg);
                 padding: 1.5rem 1rem;
+                gap: 1.5rem;
             }
 
             .auth-hero {
