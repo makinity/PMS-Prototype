@@ -13,6 +13,31 @@ use Illuminate\Support\Facades\DB;
 
 class QarController extends Controller
 {
+    public function show(Request $request, QarHeader $qarHeader)
+    {
+        $qarHeader->load([
+            'office:id,name',
+            'performancePeriod:id,name,start_date,end_date',
+            'approver:id,name',
+            'pmtValidator:id,name',
+            'mporLinks',
+            'rows',
+        ]);
+
+        if (!in_array((string) $qarHeader->status, [QarHeader::STATUS_DEPT_HEAD_ENDORSED, QarHeader::STATUS_PMT_APPROVED], true)) {
+            return redirect()->route('pmt.qar', $this->buildRedirectParams($request))->with('info', 'QAR is not viewable yet.');
+        }
+
+        $quarterInputValue = (int) $request->query('q', 0);
+        $officeSearchSafe = trim((string) $request->query('office', ''));
+
+        return view('pmt.qar-show', [
+            'header' => $qarHeader,
+            'quarterInputValue' => $quarterInputValue,
+            'officeSearchSafe' => $officeSearchSafe,
+        ]);
+    }
+
     public function index(Request $request)
     {
         $officeSearch = trim((string) $request->query('office', ''));

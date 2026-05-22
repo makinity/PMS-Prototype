@@ -156,6 +156,10 @@ Route::prefix('employee')->middleware('auth')->group(function () {
 
     // Stage II - Accomplishment Submission
     Route::get('/accomplishment-submission', [SmporIpcrAccomplishmentController::class, 'index'])->name('employee.accomplishment-submission');
+    Route::get('/accomplishment-submission/smpor-preview', [SmporIpcrAccomplishmentController::class, 'showSmporPreview'])
+        ->name('employee.accomplishment.smpor-preview');
+    Route::get('/accomplishment-submission/ipcr-preview', [SmporIpcrAccomplishmentController::class, 'showIpcrPreview'])
+        ->name('employee.accomplishment.ipcr-preview');
     Route::post('/accomplishment/submit', [SmporIpcrAccomplishmentController::class, 'submit'])
         ->name('employee.accomplishment.submit');
 
@@ -338,6 +342,8 @@ Route::prefix('pmt')->middleware('auth')->group(function () {
     // Stage II - QAR
     Route::get('/qar', [PmtQarController::class, 'index'])
         ->name('pmt.qar');
+    Route::get('/qar/{qarHeader}/show', [PmtQarController::class, 'show'])
+        ->name('pmt.qar.show');
     Route::get('/qar/{qarHeader}/preview-pdf', [PmtQarController::class, 'previewPdf'])
         ->name('pmt.qar.previewPdf');
     Route::post('/qar/{qarHeader}/approve', [PmtQarController::class, 'approve'])

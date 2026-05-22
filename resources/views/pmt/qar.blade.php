@@ -168,12 +168,10 @@
                                 <td class="px-4 py-3 text-slate-300">{{ $formatDate($header->pmt_validated_at) }}</td>
                                 <td class="px-4 py-3 text-right">
                                     @if ($isEndorsed || $isApproved)
-                                        <button type="button"
-                                            data-modal-target="pmtQarViewModal-{{ $header->id }}"
-                                            data-modal-toggle="pmtQarViewModal-{{ $header->id }}"
+                                        <a href="{{ route('pmt.qar.show', ['qarHeader' => $header->id, 'q' => $quarterInputValue, 'office' => $officeSearchSafe]) }}"
                                             class="rounded-lg border border-slate-600 bg-slate-900/70 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-slate-800">
                                             View
-                                        </button>
+                                        </a>
                                     @else
                                         <span class="text-slate-500">-</span>
                                     @endif

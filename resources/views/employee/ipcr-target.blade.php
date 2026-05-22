@@ -13,10 +13,6 @@
                 <h1 class="text-2xl font-bold text-white">
                     Individual Performance Commitment and Review (IPCR)
                 </h1>
-                <p class="text-sm text-gray-400 mt-1">
-                    Stage I – Performance Planning and Commitment
-                </p>
-                <p class="text-[11px] text-gray-500 mt-2">Read-only | No edits or validation by employee.</p>
             </div>
 
             <span id="ipcr-status-badge" class="px-3 py-1 text-xs font-medium rounded bg-blue-900 text-blue-300 border border-blue-800">

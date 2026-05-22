@@ -4,7 +4,7 @@
     @php
         $isCalibrated = strtolower((string) ($submissionStatus ?? '')) === 'calibrated';
         $isSubmitted = !in_array(strtolower((string) ($submissionStatus ?? 'draft')), ['draft', 'returned_to_employee'], true);
-        
+
         $statusBadgeClasses = 'inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold border ';
         if ($isCalibrated) {
             $statusBadgeClasses .= 'bg-violet-500/10 text-violet-200 border-violet-500/40';
@@ -26,7 +26,6 @@
         <div class="flex flex-wrap items-start justify-between gap-3">
             <div>
                 <h1 class="text-2xl font-bold text-white">SMPOR &amp; IPCR Accomplishment Submission</h1>
-                <p class="text-sm text-slate-400">Formal end-of-period submission of accomplishments</p>
                 <p class="text-xs text-slate-500 mt-1">Performance Period: {{ $periodHeaderLabel }}</p>
             </div>
             <div class="flex flex-col items-end gap-1">
@@ -44,11 +43,9 @@
             <div class="flex items-start justify-between gap-3">
                 <div>
                     <h2 class="text-lg font-semibold text-white">SMPOR &ndash; Monitoring Summary</h2>
-                    <p class="text-sm text-slate-400">System-generated summary. {{ $smporModeLabel ?? 'Preview (monitoring-only)' }}.</p>
                 </div>
                 <div class="flex gap-2">
-                    <a href="#"
-                       data-open-modal="smpor-preview-modal"
+                    <a href="{{ route('employee.accomplishment.smpor-preview') }}"
                        aria-label="View SMPOR"
                        title="View SMPOR"
                        class="inline-flex items-center justify-center rounded-lg border border-slate-700 px-3 py-2 text-slate-200 hover:bg-slate-800 transition">
@@ -88,11 +85,9 @@
             <div class="flex items-start justify-between gap-3">
                 <div>
                     <h2 class="text-lg font-semibold text-white">IPCR Accomplishment Report</h2>
-                    <p class="text-sm text-slate-400">System-generated accomplishments derived from SMPOR totals. Read-only.</p>
                 </div>
                 <div class="flex gap-2">
-                    <a href="#"
-                       data-open-modal="ipcr-preview-modal"
+                    <a href="{{ route('employee.accomplishment.ipcr-preview') }}"
                        aria-label="View IPCR Accomplishment"
                        title="View IPCR Accomplishment"
                        class="inline-flex items-center justify-center rounded-lg border border-slate-700 px-3 py-2 text-slate-200 hover:bg-slate-800 transition">
@@ -147,7 +142,6 @@
                 <div class="flex items-start justify-between">
                     <div>
                         <h2 class="text-lg font-semibold text-white">Supporting Documents (Optional)</h2>
-                        <p class="text-sm text-slate-400">Uploads are optional and disabled after submission.</p>
                     </div>
                 </div>
                 <input id="supporting-files"
@@ -174,7 +168,6 @@
                 <div class="flex items-start justify-between">
                     <div>
                         <h2 class="text-lg font-semibold text-white">Employee Remarks (Optional)</h2>
-                        <p class="text-sm text-slate-400">Remarks become read-only after submission.</p>
                     </div>
                 </div>
                 <textarea id="employee-remarks"

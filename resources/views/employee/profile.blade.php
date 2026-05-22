@@ -41,10 +41,7 @@
                                  alt="Profile picture">
                         @endif
                         <button type="button"
-                                data-manager-action
-                                data-action-title="Update profile photo"
-                                data-action-message="Upload a new profile image (JPG/PNG, max 5MB)."
-                                data-action-confirm="Choose file"
+                                onclick="document.getElementById('profile_photo').click()"
                                 class="absolute bottom-2 right-2 p-2 bg-blue-600 hover:bg-blue-700 rounded-full text-white transition-colors duration-200">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
@@ -58,9 +55,10 @@
 
                 {{-- Profile Form --}}
                 <div class="lg:col-span-3 space-y-6">
-                    <form method="POST" action="{{ route('user-profile-information.update') }}">
+                    <form method="POST" action="{{ route('user-profile-information.update') }}" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
+                        <input id="profile_photo" name="profile_photo" type="file" accept="image/*" class="hidden" onchange="this.form.requestSubmit()">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block mb-2 text-sm font-medium text-white">Full Name</label>
@@ -112,6 +110,9 @@
                         @if(session('status') === 'profile-information-updated')
                             <p class="mt-3 text-xs text-emerald-400 font-medium">Profile updated successfully.</p>
                         @endif
+                        @error('profile_photo', 'updateProfileInformation')
+                            <p class="mt-2 text-xs text-red-400">{{ $message }}</p>
+                        @enderror
 
                         <div class="pt-4 border-t border-gray-700">
                             <button type="submit"

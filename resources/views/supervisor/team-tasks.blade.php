@@ -85,8 +85,6 @@
                     <thead class="bg-gray-900/70 text-slate-300">
                         <tr>
                             <th class="px-4 py-3 text-left font-semibold">Employee</th>
-                            <th class="px-4 py-3 text-left font-semibold">Task / Indicator</th>
-                            <th class="px-4 py-3 text-left font-semibold">Work Date</th>
                             <th class="px-4 py-3 text-left font-semibold">Status</th>
                             <th class="px-4 py-3 text-left font-semibold">Quantity</th>
                             <th class="px-4 py-3 text-left font-semibold">Action</th>
@@ -95,14 +93,24 @@
                     <tbody class="divide-y divide-gray-800 text-slate-200">
                         @forelse ($entries as $entry)
                             @php
-                                $taskLabel = ($entry->ipcrItem->output_title ?? '—') . ' — ' . ($entry->ipcrItem->indicator_text ?? '');
                                 $status = strtolower((string) ($entry->status ?? 'draft'));
                                 $statusBadge = $statusMeta[$status] ?? 'bg-slate-800 border border-slate-700 text-slate-200';
                             @endphp
                             <tr class="hover:bg-slate-900/60">
-                                <td class="px-4 py-3 text-white">{{ $entry->employee->name ?? '—' }}</td>
-                                <td class="px-4 py-3 text-slate-100">{{ $taskLabel }}</td>
-                                <td class="px-4 py-3">{{ $entry->work_date ?? '—' }}</td>
+                                <td class="px-4 py-3 text-white">
+                                    <div class="flex items-center gap-3">
+                                        @if(!empty($entry->employee?->profile_photo_url))
+                                            <img src="{{ $entry->employee->profile_photo_url }}"
+                                                alt="{{ $entry->employee->name ?? 'Employee' }}"
+                                                class="h-8 w-8 rounded-full object-cover ring-1 ring-slate-600/80">
+                                        @else
+                                            <img src="https://ui-avatars.com/api/?name={{ urlencode($entry->employee->name ?? 'Employee') }}&background=1e40af&color=fff&size=64"
+                                                alt="{{ $entry->employee->name ?? 'Employee' }}"
+                                                class="h-8 w-8 rounded-full object-cover ring-1 ring-slate-600/80">
+                                        @endif
+                                        <span>{{ $entry->employee->name ?? '—' }}</span>
+                                    </div>
+                                </td>
                                 <td class="px-4 py-3">
                                     <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $statusBadge }}">
                                         {{ ucfirst($status) }}
@@ -126,7 +134,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-4 py-8 text-center text-sm text-slate-400">
+                                <td colspan="4" class="px-4 py-8 text-center text-sm text-slate-400">
                                     No ORS entries found for the selected filters.
                                 </td>
                             </tr>

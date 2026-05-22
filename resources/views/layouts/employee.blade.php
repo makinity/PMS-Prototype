@@ -129,7 +129,7 @@
                             <li>
                                 <a href="{{ route('employee.accomplishment-submission') }}" class="sidebar-link" @if($isAccomplishmentSubmission) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-file-arrow-up"></i>
-                                    <span>SMPOR & IPCR Accomplishment Submission</span>
+                                    <span>Accomplishments</span>
                                 </a>
                             </li>
                             {{-- <li>

@@ -51,11 +51,7 @@
 
         <div class="flex flex-col gap-3 md:gap-4 md:flex-row md:items-start md:justify-between">
             <div class="min-w-0">
-                <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Monthly Performance Output Report</p>
                 <h1 class="mt-1 text-xl font-bold leading-tight text-white sm:text-2xl md:text-3xl">MONTHLY PERFORMANCE OUTPUT REPORT</h1>
-                <p class="mt-1 text-sm text-slate-400 md:text-base">
-                    Read-only mirror of locked ORS entries with supervisor ratings.
-                </p>
 
                 <div class="mt-3 grid grid-cols-2 gap-2 text-xs uppercase tracking-[0.2em] text-white sm:grid-cols-3">
                     <div class="rounded-lg border border-slate-800 bg-slate-900/50 px-3 py-2">
@@ -276,10 +272,6 @@
                 </div>
             </div>
         </div>
-
-        <p class="mt-3 text-xs text-slate-400">
-            Stage II demo: MPOR points = Quantity &times; Supervisor Rating (Q/T). Only rated ORS entries with supervisor ratings are included.
-        </p>
 
         <div class="grid gap-4 lg:grid-cols-2">
             <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 text-xs uppercase tracking-[0.3em] text-slate-400">

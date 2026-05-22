@@ -42,7 +42,7 @@
                                  src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=0369a1&color=fff&size=128"
                                  alt="Profile picture">
                         @endif
-                        <button class="absolute bottom-2 right-2 p-2 bg-sky-600 hover:bg-sky-700 rounded-full text-white transition-colors duration-200">
+                        <button type="button" onclick="document.getElementById('profile_photo').click()" class="absolute bottom-2 right-2 p-2 bg-sky-600 hover:bg-sky-700 rounded-full text-white transition-colors duration-200">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -55,9 +55,10 @@
 
                 {{-- Profile Form --}}
                 <div class="lg:col-span-3">
-                    <form method="POST" action="{{ route('user-profile-information.update') }}">
+                    <form method="POST" action="{{ route('user-profile-information.update') }}" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
+                        <input id="profile_photo" name="profile_photo" type="file" accept="image/*" class="hidden" onchange="this.form.requestSubmit()">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div>
                                 <label class="block mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">Full Name</label>
@@ -100,6 +101,9 @@
                         @if(session('status') === 'profile-information-updated')
                             <p class="mt-4 text-xs text-emerald-400 font-medium">Profile updated successfully.</p>
                         @endif
+                        @error('profile_photo', 'updateProfileInformation')
+                            <p class="mt-2 text-xs text-red-400">{{ $message }}</p>
+                        @enderror
 
                         <div class="mt-5 pt-4 border-t border-slate-800">
                             <button type="submit"

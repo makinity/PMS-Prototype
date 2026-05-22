@@ -24,6 +24,18 @@ class SmporIpcrAccomplishmentController extends Controller
 {
     use ResolvesIpcrTargetScores;
 
+    public function showSmporPreview(Request $request)
+    {
+        $indexView = $this->index($request);
+        return view('employee.accomplishment-smpor-preview', $indexView->getData());
+    }
+
+    public function showIpcrPreview(Request $request)
+    {
+        $indexView = $this->index($request);
+        return view('employee.accomplishment-ipcr-preview', $indexView->getData());
+    }
+
     public function index(Request $request)
     {
         $user = $request->user();

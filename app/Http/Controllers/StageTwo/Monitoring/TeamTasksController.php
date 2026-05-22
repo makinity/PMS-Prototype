@@ -22,7 +22,7 @@ class TeamTasksController extends Controller
 
         $entriesQuery = OrsEntry::query()
             ->with([
-                'employee:id,name,office_id',
+                'employee:id,name,office_id,profile_photo_path',
                 'ipcrItem',
                 'monitoring.supervisor.office',
                 'supervisor.office',
