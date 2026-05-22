@@ -314,7 +314,8 @@
                     : @json(route('supervisor.uwp.submitData'));
 
                 const mfoSuccessIndicatorUrls = @json($mfoSuccessIndicatorUrls ?? []);
-
+                const successIndicatorsUrlTemplate = @json(route('supervisor.uwp.success-indicators', ['uwpId' => '__UWPID__', 'mfoId' => '__MFOID__']));
+                
                 let activeRowConfirmId = null;
                 let activeFunctionConfirmId = null;
 
@@ -826,11 +827,15 @@
                                                 `;
                                             }
                                             return `
-                                                <span
-                                                    title="Save the UWP first to manage indicators"
-                                                    class="inline-flex items-center rounded-full border border-slate-800 bg-slate-950 px-3 py-1 text-xs font-semibold text-slate-500 opacity-70 cursor-not-allowed">
+                                                <button type="button"
+                                                    data-action="open-indicators"
+                                                    data-function-index="${funcIndex}"
+                                                    data-mfo-index="${mfoIndex}"
+                                                    title="Save draft & manage success indicators"
+                                                    class="inline-flex items-center gap-1 rounded-full border border-cyan-700/40 bg-slate-950 px-3 py-1 text-xs font-semibold text-cyan-400 transition hover:bg-cyan-500/10 hover:border-cyan-500/60 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 cursor-pointer">
                                                     ${label}
-                                                </span>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                                                </button>
                                             `;
                                         })()}
                                     </td>
@@ -1170,6 +1175,93 @@
                     uwpForm.submit();
                 }
 
+                /**
+                 * Auto-save the UWP draft via AJAX, then navigate to the
+                 * success-indicators page for the given function/MFO row.
+                 */
+                async function saveDraftAndOpenIndicators(btn, funcIndex, mfoIndex) {
+                    if (btn) {
+                        btn.dataset.originalText = btn.textContent.trim();
+                        btn.disabled = true;
+                        btn.textContent = 'Saving...';
+                        btn.classList.add('opacity-60', 'cursor-wait');
+                    }
+
+                    try {
+                        const formData = new FormData(uwpForm);
+                        if (selectedUwpId && !formData.has('uwp_id')) {
+                            formData.append('uwp_id', String(selectedUwpId));
+                        }
+
+                        formData.set('functions_payload', JSON.stringify(buildFunctionsPayload()));
+                        formData.set('mfos_payload', JSON.stringify(buildMfosPayloadFromState()));
+                        formData.set('assignments_payload', JSON.stringify(buildAssignmentsPayloadMvp()));
+
+                        const csrfToken = formData.get('_token') || document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+                        const saveDraftUrl = selectedUwpId
+                            ? @json(route('supervisor.uwp.saveDraftData.byId', ['id' => '__ID__'])).replace('__ID__', selectedUwpId)
+                            : @json(route('supervisor.uwp.saveDraftData'));
+
+                        const response = await fetch(saveDraftUrl, {
+                            method: 'POST',
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': csrfToken,
+                            },
+                            body: formData,
+                        });
+
+                        const json = await response.json();
+
+                        if (!response.ok || (json.hasOwnProperty('success') && !json.success)) {
+                            let errorMsg = json.error || json.message || 'Failed to save draft.';
+                            if (json.errors) {
+                                errorMsg += '\n' + Object.values(json.errors).map(e => e.join('\n')).join('\n');
+                            }
+                            alert(errorMsg);
+                            if (btn) {
+                                btn.disabled = false;
+                                btn.classList.remove('opacity-60', 'cursor-wait');
+                                btn.textContent = btn.dataset.originalText || '0 indicators';
+                            }
+                            return;
+                        }
+
+                        const uwpId = json.uwp_id;
+                        const mfoIds = Array.isArray(json.mfo_ids) ? json.mfo_ids : [];
+
+                        let globalIdx = 0;
+                        for (let f = 0; f < uwpState.functions.length; f++) {
+                            if (f === funcIndex) {
+                                globalIdx += mfoIndex;
+                                break;
+                            }
+                            globalIdx += (uwpState.functions[f].mfos || []).length;
+                        }
+
+                        const mfoId = mfoIds[globalIdx];
+                        if (!mfoId) {
+                            window.location.href = window.location.pathname + '?uwp_id=' + uwpId;
+                            return;
+                        }
+
+                        let targetUrl = successIndicatorsUrlTemplate;
+                        targetUrl = targetUrl.replace('__UWPID__', uwpId).replace('__MFOID__', mfoId);
+                        window.location.href = targetUrl;
+                        
+                    } catch (err) {
+                        console.error('saveDraftAndOpenIndicators error:', err);
+                        alert('An error occurred while saving. Please try again.');
+                        if (btn) {
+                            btn.disabled = false;
+                            btn.classList.remove('opacity-60', 'cursor-wait');
+                            btn.textContent = btn.dataset.originalText || '0 indicators';
+                        }
+                    }
+                }
+
                 // ===== Wire events =====
                 if (functionsWrapper) {
                     functionsWrapper.addEventListener('input', (event) => {
@@ -1243,6 +1335,14 @@
                             if (!isDraft) return;
                             const rowId = triggerRemoveBtn.dataset.rowId;
                             enterRowConfirm(rowId);
+                            return;
+                        }
+
+                        const openIndicatorsBtn = event.target.closest('[data-action="open-indicators"]');
+                        if (openIndicatorsBtn) {
+                            const funcIdx = Number(openIndicatorsBtn.dataset.functionIndex);
+                            const mfoIdx = Number(openIndicatorsBtn.dataset.mfoIndex);
+                            saveDraftAndOpenIndicators(openIndicatorsBtn, funcIdx, mfoIdx);
                             return;
                         }
 

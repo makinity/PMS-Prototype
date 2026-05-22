@@ -38,13 +38,14 @@ class MporController extends Controller
         $isMporLocked = in_array($mporStatus, ['submitted', 'endorsed', 'approved'], true);
 
         $functionWeights = [];
+        $mporEmptyReason = null;
 
         $activePeriod = PerformancePeriod::query()
             ->where('is_active', true)
             ->orderByDesc('start_date')
             ->first();
 
-        $ipcrQuery = Ipcr::query()
+        $committedIpcrQuery = Ipcr::query()
             ->with([
                 'office:id,name',
                 'employee:id,name,office_id',
@@ -53,19 +54,29 @@ class MporController extends Controller
                 'items.uwpFunction:id,function_type,weight_percent',
             ])
             ->where('employee_id', $user->id)
-            ->whereIn('status', [Ipcr::STATUS_COMMITTED, Ipcr::STATUS_FOR_COMMITMENT]);
+            ->where(function ($q) {
+                $q->whereNotNull('locked_at')
+                    ->orWhereIn('status', [
+                        Ipcr::STATUS_COMMITTED,
+                        Ipcr::STATUS_PENDING_PMT_CALIBRATION,
+                        Ipcr::STATUS_RETURNED_BY_PMT,
+                        Ipcr::STATUS_APPROVED_BY_PMT,
+                        Ipcr::STATUS_ADJUSTED_BY_PMT,
+                        Ipcr::STATUS_RELEASED_BY_PMT,
+                    ]);
+            });
 
         if ($activePeriod) {
-            $ipcrQuery->where('performance_period_id', $activePeriod->id);
+            $committedIpcrQuery->where('performance_period_id', $activePeriod->id);
         }
 
-        $ipcr = $ipcrQuery
+        $committedIpcr = $committedIpcrQuery
             ->orderByDesc('generated_at')
             ->orderByDesc('id')
             ->first();
 
-        if (!$ipcr) {
-            $ipcr = Ipcr::query()
+        if (!$committedIpcr) {
+            $committedIpcr = Ipcr::query()
                 ->with([
                     'office:id,name',
                     'employee:id,name,office_id',
@@ -74,7 +85,17 @@ class MporController extends Controller
                     'items.uwpFunction:id,function_type,weight_percent',
                 ])
                 ->where('employee_id', $user->id)
-                ->whereIn('status', [Ipcr::STATUS_COMMITTED, Ipcr::STATUS_FOR_COMMITMENT])
+                ->where(function ($q) {
+                    $q->whereNotNull('locked_at')
+                        ->orWhereIn('status', [
+                            Ipcr::STATUS_COMMITTED,
+                            Ipcr::STATUS_PENDING_PMT_CALIBRATION,
+                            Ipcr::STATUS_RETURNED_BY_PMT,
+                            Ipcr::STATUS_APPROVED_BY_PMT,
+                            Ipcr::STATUS_ADJUSTED_BY_PMT,
+                            Ipcr::STATUS_RELEASED_BY_PMT,
+                        ]);
+                })
                 ->orderByDesc('generated_at')
                 ->orderByDesc('id')
                 ->first();
@@ -90,9 +111,9 @@ class MporController extends Controller
         $sectionOrder = ['core', 'support'];
         $sectionLabels = [];
 
-        if ($ipcr) {
-            $functionWeights = $this->resolveFunctionWeights($ipcr);
-            $detectedTypes = $ipcr->items
+        if ($committedIpcr) {
+            $functionWeights = $this->resolveFunctionWeights($committedIpcr);
+            $detectedTypes = $committedIpcr->items
                 ->map(fn ($item) => $this->normalizeFunctionType((string) ($item->function_type ?? '')))
                 ->filter()
                 ->unique()
@@ -118,7 +139,7 @@ class MporController extends Controller
                 );
             }
 
-            foreach ($ipcr->items as $item) {
+            foreach ($committedIpcr->items as $item) {
                 $outputTitle = trim((string) ($item->output_title ?? ''));
                 if ($outputTitle === '') {
                     continue;
@@ -145,28 +166,31 @@ class MporController extends Controller
                     ];
                 }
             }
+
+            if (empty($mporRows)) {
+                $mporEmptyReason = 'Committed IPCR targets are not available for this period.';
+            }
+        } else {
+            $mporEmptyReason = 'No committed/locked IPCR targets found. Commit your IPCR targets first to populate MPOR rows.';
         }
 
         $ratedEntries = collect();
 
-        if ($ipcr) {
-            $ratedEntries = OrsEntry::query()
-                ->with([
-                    'ipcrItem:id,output_title,function_type',
-                    'monitoring:ors_entry_id,quality_rating,timeliness_rating',
-                ])
-                ->where('employee_id', $user->id)
-                ->where('ipcr_id', $ipcr->id)
-                ->where('status', 'rated')
-                ->where('quantity', '>', 0)
-                ->whereBetween('work_date', [$start->toDateString(), $end->toDateString()])
-                ->whereHas('monitoring', function ($q) {
-                    $q->whereNotNull('quality_rating')
-                        ->whereNotNull('timeliness_rating');
-                })
-                ->orderBy('work_date')
-                ->get();
-        }
+        $ratedEntries = OrsEntry::query()
+            ->with([
+                'ipcrItem:id,output_title,function_type',
+                'monitoring:ors_entry_id,quality_rating,timeliness_rating',
+            ])
+            ->where('employee_id', $user->id)
+            ->where('status', 'rated')
+            ->where('quantity', '>', 0)
+            ->whereBetween('work_date', [$start->toDateString(), $end->toDateString()])
+            ->whereHas('monitoring', function ($q) {
+                $q->whereNotNull('quality_rating')
+                    ->whereNotNull('timeliness_rating');
+            })
+            ->orderBy('work_date')
+            ->get();
 
         $orsTasks = $ratedEntries->map(function (OrsEntry $entry) use ($normalizeOutputKey) {
             $outputTitle = trim((string) data_get($entry, 'ipcrItem.output_title', ''));
@@ -191,7 +215,39 @@ class MporController extends Controller
 
         foreach ($includedRatedTasks as $task) {
             $outputKey = (string) ($task['outputKey'] ?? '');
-            if ($outputKey === '' || !isset($mporRows[$outputKey])) {
+            if ($outputKey === '') {
+                continue;
+            }
+
+            if (!isset($mporRows[$outputKey]) && $committedIpcr) {
+                $taskLabel = trim((string) ($task['uwpOutputLabel'] ?? ''));
+                if ($taskLabel === '' || $taskLabel === '--') {
+                    continue;
+                }
+
+                $rawSection = (string) ($task['functionType'] ?? '');
+                $section = $this->normalizeFunctionType($rawSection);
+                if (!isset($sectionLabels[$section])) {
+                    $sectionLabels[$section] = $this->formatFunctionLabel(
+                        $section,
+                        $functionWeights[$section] ?? null
+                    );
+                }
+
+                $mporRows[$outputKey] = [
+                    'id' => $outputKey,
+                    'label' => $taskLabel,
+                    'section' => $section,
+                    'qty' => [1 => 0, 2 => 0, 3 => 0, 4 => 0],
+                    'qual' => [1 => 0, 2 => 0, 3 => 0, 4 => 0],
+                    'time' => [1 => 0, 2 => 0, 3 => 0, 4 => 0],
+                    'qtyTotal' => 0,
+                    'qualTotal' => 0,
+                    'timeTotal' => 0,
+                ];
+            }
+
+            if (!isset($mporRows[$outputKey])) {
                 continue;
             }
 
@@ -228,10 +284,6 @@ class MporController extends Controller
             $row['qtyTotal'] = array_sum($row['qty']);
             $row['qualTotal'] = array_sum($row['qual']);
             $row['timeTotal'] = array_sum($row['time']);
-
-            if ($row['qtyTotal'] <= 0) {
-                continue;
-            }
 
             $sectionKey = (string) ($row['section'] ?? 'core');
             if (!isset($sectionRows[$sectionKey])) {
@@ -281,7 +333,8 @@ class MporController extends Controller
             'includedRatedTasks',
             'sectionRows',
             'grandTotals',
-            'sectionLabels'
+            'sectionLabels',
+            'mporEmptyReason'
         ));
     }
 

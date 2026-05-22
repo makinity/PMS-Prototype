@@ -138,9 +138,8 @@
                     @csrf
                     <input type="hidden" name="unit_work_plan_id" value="{{ (int) $uwp->id }}">
                     <input type="hidden" name="action" value="endorse">
-                    <input type="hidden" name="signature" id="dh-signature">
                     <input type="hidden" name="status" value="{{ $statusFilter }}">
-                    <button type="button" id="dh-endorse-btn" class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500">Consolidate to OPCR</button>
+                    <button type="submit" id="dh-endorse-btn" class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500">Consolidate to OPCR</button>
                 </form>
             @else
                 <button type="button" class="inline-flex items-center rounded-lg bg-slate-700 px-4 py-2 text-sm font-semibold text-slate-300" disabled>Consolidate to OPCR</button>
@@ -148,17 +147,6 @@
         </div>
     </div>
 </div>
-
-@include('partials.signature-pad-modal', [
-    'modalId' => 'dh-signature-modal',
-    'canvasId' => 'dh-signature-canvas',
-    'clearButtonId' => 'dh-signature-clear',
-    'confirmButtonId' => 'dh-signature-confirm',
-    'cancelSelector' => 'data-signature-close',
-    'title' => 'Department Head Signature',
-    'message' => 'Sign to confirm UWP consolidation to OPCR.',
-    'confirmText' => 'Confirm & Consolidate',
-])
 
 <script>
 (() => {
@@ -335,46 +323,6 @@
             }
             returnRemarks.value = value;
             returnForm.submit();
-        });
-    }
-
-    const endorseBtn = document.getElementById('dh-endorse-btn');
-    const endorseForm = document.getElementById('dh-endorse-form');
-    const signatureModal = document.getElementById('dh-signature-modal');
-    const signatureConfirm = document.getElementById('dh-signature-confirm');
-    const signatureHidden = document.getElementById('dh-signature');
-
-    function closeSignatureModal() {
-        if (!signatureModal) return;
-        signatureModal.classList.add('hidden');
-        signatureModal.classList.remove('flex');
-    }
-
-    if (endorseBtn && signatureModal) {
-        endorseBtn.addEventListener('click', () => {
-            signatureModal.classList.remove('hidden');
-            signatureModal.classList.add('flex');
-        });
-    }
-
-    if (signatureModal) {
-        signatureModal.querySelectorAll('[data-signature-close]').forEach((btn) => {
-            btn.addEventListener('click', closeSignatureModal);
-        });
-        signatureModal.addEventListener('click', (event) => {
-            if (event.target === signatureModal) closeSignatureModal();
-        });
-    }
-
-    if (signatureConfirm && endorseForm && signatureHidden) {
-        signatureConfirm.addEventListener('click', () => {
-            const signatureData = window.getSignatureData_dh_signature_modal ? window.getSignatureData_dh_signature_modal() : null;
-            if (!signatureData) {
-                window.PMSnackbar?.show({ type: 'error', message: 'Please provide a signature first.' });
-                return;
-            }
-            signatureHidden.value = signatureData;
-            endorseForm.submit();
         });
     }
 

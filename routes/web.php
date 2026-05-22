@@ -378,6 +378,7 @@ Route::prefix('pmt')->middleware('auth')->group(function () {
     // Stage III - Final Calibration
     Route::prefix('employee-calibration')->name('pmt.employee-calibration.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Pmt\EmployeeCalibrationController::class, 'index'])->name('index');
+        Route::get('/{ipcr}', [\App\Http\Controllers\Pmt\EmployeeCalibrationController::class, 'show'])->name('show');
         Route::post('/{ipcr}/adjust', [\App\Http\Controllers\Pmt\EmployeeCalibrationController::class, 'adjust'])->name('adjust');
         Route::post('/{ipcr}/approve', [\App\Http\Controllers\Pmt\EmployeeCalibrationController::class, 'approve'])->name('approve');
         Route::post('/{ipcr}/release', [\App\Http\Controllers\Pmt\EmployeeCalibrationController::class, 'release'])->name('release');

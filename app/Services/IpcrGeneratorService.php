@@ -130,8 +130,25 @@ class IpcrGeneratorService
                 ->where('employee_id', $employeeId)
                 ->first();
 
-            // We remove the hard block on committed IPCrs here because 
-            // if a plan is re-approved, the employee needs to re-commit to the new targets.
+            // Preserve already committed/locked/downstream IPCRs.
+            // Do not reset them back to "for_commitment" during later OPCR/QAR actions.
+            if ($existingIpcr) {
+                $existingStatus = strtolower((string) $existingIpcr->status);
+                $isCommittedOrBeyond = !is_null($existingIpcr->committed_at)
+                    || !is_null($existingIpcr->locked_at)
+                    || in_array($existingStatus, [
+                        Ipcr::STATUS_COMMITTED,
+                        Ipcr::STATUS_PENDING_PMT_CALIBRATION,
+                        Ipcr::STATUS_RETURNED_BY_PMT,
+                        Ipcr::STATUS_APPROVED_BY_PMT,
+                        Ipcr::STATUS_ADJUSTED_BY_PMT,
+                        Ipcr::STATUS_RELEASED_BY_PMT,
+                    ], true);
+
+                if ($isCommittedOrBeyond) {
+                    continue;
+                }
+            }
 
             $updateData = [
                 'status' => Ipcr::STATUS_FOR_COMMITMENT,
@@ -152,7 +169,7 @@ class IpcrGeneratorService
                 $updateData['generated_at'] = now();
             }
 
-            // Reset commitment status to allow the employee to review and click 'Commit'
+            // Keep uncommitted records in reviewable state.
             $updateData['committed_at'] = null;
             $updateData['locked_at'] = null;
 
@@ -163,10 +180,6 @@ class IpcrGeneratorService
                 ],
                 $updateData
             );
-
-            if (!empty($ipcr->committed_at)) {
-                continue;
-            }
 
             DB::transaction(function () use ($ipcr, $items) {
                 IpcrItem::query()

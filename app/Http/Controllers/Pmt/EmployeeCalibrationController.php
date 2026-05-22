@@ -168,6 +168,88 @@ class EmployeeCalibrationController extends Controller
         ));
     }
 
+    public function show(Request $request, $id)
+    {
+        $user = $request->user();
+        abort_unless($user, 403);
+
+        $ipcr = Ipcr::with([
+                'employee:id,name,office_id',
+                'employee.office:id,name',
+                'unitWorkPlan.uwpFunctions.mfos:id,uwp_function_id,title,target_quantity,target_timeline',
+                'items:id,ipcr_id,uwp_function_id,uwp_success_indicator_id,output_title,function_type,indicator_text,target_quantity,target_timeline,target_summary,standards_payload',
+            ])
+            ->findOrFail($id);
+
+        $period = PerformancePeriod::find($ipcr->performance_period_id);
+        $periodLabel = $period ? $this->buildPeriodLabel($period) : '--';
+        $monthLabels = $period ? $this->buildMonthLabels($period) : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+
+        $submission = AccomplishmentSubmission::where('ipcr_id', $ipcr->id)
+            ->with(['mpors:id,employee_id,office_id,month,status'])
+            ->first();
+
+        $employeeName = (string) ($ipcr->employee?->name ?? '--');
+        $officeName = (string) ($ipcr->employee?->office?->name ?? '--');
+        $status = strtolower(trim((string) ($ipcr->status ?? '')));
+        
+        $attachments = $submission ? $this->buildAttachmentPayload($submission->attachments ?? []) : [];
+
+        [$smporSections, $ratingsByOutput, $ratingsByIndicator] = $this->buildSmporSectionsFromSnapshot(
+            $submission ? ($submission->mpors ?? collect()) : collect(),
+            $monthLabels,
+            $ipcr
+        );
+
+        $source = $submission ? strtolower((string) ($submission->dataset_source ?? '')) : '';
+        $smporModeLabel = $source === 'qar_official'
+            ? 'Official (Submitted Snapshot)'
+            : 'Preview (Submitted Snapshot)';
+        $smporSourceLabel = $source === 'qar_official'
+            ? 'QAR-linked MPORs (snapshot)'
+            : 'Submitted MPORs (snapshot)';
+
+        $ipcrSections = $this->buildIpcrSections(
+            $ipcr,
+            $periodLabel,
+            $ratingsByOutput,
+            $ratingsByIndicator
+        );
+
+        $ratingService = app(\App\Services\PerformanceRatingService::class);
+        $computedScore = (float) ($ipcr->final_score ?? 0);
+        if ($computedScore <= 0) {
+            $computedScore = $ratingService->calculateComputedScore($ipcr);
+        }
+
+        $payload = [
+            'id' => (int) $ipcr->id,
+            'employee_name' => $employeeName,
+            'office_name' => $officeName,
+            'period_label' => $periodLabel,
+            'status' => $status,
+            'status_label' => $this->formatStatusLabel($status),
+            'computed_score' => $computedScore,
+            'computed_rating' => $ipcr->adjectival_rating ?: $ratingService->resolveAdjectivalRating($computedScore),
+            'adjusted_score' => $ipcr->pmt_adjusted_score,
+            'adjusted_rating' => $ipcr->pmt_adjusted_rating,
+            'adjustment_reason' => $ipcr->pmt_adjustment_reason,
+            'pmt_remarks' => $ipcr->pmt_remarks,
+            'released_at' => $ipcr->released_at?->format('M d, Y h:i A'),
+            'attachments' => $attachments,
+            'smporMonths' => $monthLabels,
+            'smporSections' => $smporSections,
+            'smporSourceLabel' => $smporSourceLabel,
+            'smporModeLabel' => $smporModeLabel,
+            'ipcrSections' => $ipcrSections,
+        ];
+
+        return view('pmt.employee-calibration.show', [
+            'ipcr' => $ipcr,
+            'payload' => $payload,
+        ]);
+    }
+
     public function adjust(Request $request, $id)
     {
         $request->validate([

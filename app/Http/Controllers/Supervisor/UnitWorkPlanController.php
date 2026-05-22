@@ -373,11 +373,23 @@ class UnitWorkPlanController extends Controller
         );
 
         if ($request->expectsJson() || $request->ajax()) {
+            // Build a flat ordered list of MFO IDs so the client can
+            // construct the success-indicators URL right after saving,
+            // without a full page reload.
+            $mfoIds = [];
+            $uwp->load('uwpFunctions.mfos');
+            foreach ($uwp->uwpFunctions->sortBy('sort_order') as $func) {
+                foreach ($func->mfos->sortBy('sort_order') as $mfo) {
+                    $mfoIds[] = $mfo->id;
+                }
+            }
+
             return response()->json([
                 'success' => true,
                 'uwp_id' => $uwp->id,
                 'status' => $uwp->status,
                 'message' => 'UWP draft saved.',
+                'mfo_ids' => $mfoIds,
             ]);
         }
 

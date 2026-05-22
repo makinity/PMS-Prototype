@@ -26,12 +26,12 @@
             <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Top Employees</p>
                 <p class="mt-1 text-3xl font-semibold text-emerald-300">{{ $summaryCounts['top_employees'] ?? 0 }}</p>
-                <p class="text-xs text-slate-400">Outstanding or Very Satisfactory</p>
+                <p class="text-xs text-slate-400">Outstanding, Very Satisfactory, or Satisfactory</p>
             </div>
             <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Top Offices</p>
                 <p class="mt-1 text-3xl font-semibold text-emerald-300">{{ $summaryCounts['top_offices'] ?? 0 }}</p>
-                <p class="text-xs text-slate-400">Outstanding or Very Satisfactory</p>
+                <p class="text-xs text-slate-400">Outstanding, Very Satisfactory, or Satisfactory</p>
             </div>
         </div>
 
@@ -60,7 +60,7 @@
                 <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
                     <div class="border-b border-slate-800 px-5 py-4">
                         <h3 class="text-lg font-semibold text-white">Employees</h3>
-                        <p class="mt-1 text-sm text-slate-400">Released employee IPCR results classified as Outstanding or Very Satisfactory, arranged for Stage IV reporting.</p>
+                        <p class="mt-1 text-sm text-slate-400">Released employee IPCR results classified as Outstanding, Very Satisfactory, or Satisfactory, arranged for Stage IV reporting.</p>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="min-w-full text-sm text-slate-200">
@@ -118,7 +118,7 @@
                 <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
                     <div class="border-b border-slate-800 px-5 py-4">
                         <h3 class="text-lg font-semibold text-white">Offices</h3>
-                        <p class="mt-1 text-sm text-slate-400">Released office OPCR results classified as Outstanding or Very Satisfactory.</p>
+                        <p class="mt-1 text-sm text-slate-400">Released office OPCR results classified as Outstanding, Very Satisfactory, or Satisfactory.</p>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="min-w-full text-sm text-slate-200">

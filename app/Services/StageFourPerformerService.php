@@ -10,7 +10,7 @@ use Illuminate\Support\Collection;
 
 class StageFourPerformerService
 {
-    private const TOP_RATINGS = ['Outstanding', 'Very Satisfactory'];
+    private const TOP_RATINGS = ['Outstanding', 'Very Satisfactory', 'Satisfactory'];
     private const LOW_RATINGS = ['Unsatisfactory', 'Poor'];
 
     public function getTopAndLowPerformers(?PerformancePeriod $period): array

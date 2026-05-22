@@ -19,9 +19,7 @@
     <section class="space-y-4">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-xs uppercase tracking-[0.2em] text-blue-300">SMPOR (Monitoring Summary)</p>
                 <h1 class="text-2xl font-semibold text-white">SMPOR Preview — {{ $periodLabelValue }}</h1>
-                <p class="text-sm text-slate-400 mt-1">System-generated, monitoring-only. {{ $smporModeLabel ?? '' }}</p>
             </div>
             <a href="{{ route('employee.accomplishment-submission') }}"
                 class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-800 transition">
@@ -29,7 +27,7 @@
             </a>
         </div>
 
-        <div class="rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl space-y-4">
+        <div class="space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
                 <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Employee</p>
@@ -59,7 +57,6 @@
                     <button type="button" data-smpor-tab="quality" class="rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:bg-slate-800">Quality/Effectiveness</button>
                     <button type="button" data-smpor-tab="timeliness" class="rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:bg-slate-800">Timeliness</button>
                 </div>
-                <p class="text-xs text-slate-400">Monthly totals are derived from rated ORS monitoring from the selected SMPOR data source.</p>
 
                 @foreach (['quantity', 'quality', 'timeliness'] as $panel)
                     <div data-smpor-tab-panel="{{ $panel }}" class="{{ $panel === 'quantity' ? '' : 'hidden' }} overflow-x-auto rounded-xl border border-slate-800">

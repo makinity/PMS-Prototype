@@ -66,8 +66,6 @@
                             <th class="px-5 py-3 text-left">Office</th>
                             <th class="px-5 py-3 text-left">Head</th>
                             <th class="px-5 py-3 text-left">Status</th>
-                            <th class="px-5 py-3 text-left">Computed Score</th>
-                            <th class="px-5 py-3 text-left">Adjusted Score</th>
                             <th class="px-5 py-3 text-center">Actions</th>
                         </tr>
                     </thead>
@@ -91,18 +89,17 @@
                                 <td class="px-5 py-3">
                                     <span class="{{ $statusBadgeClasses }}">{{ $statusLabel }}</span>
                                 </td>
-                                <td class="px-5 py-3 font-medium text-slate-300">{{ $opcr->final_score !== null ? number_format($opcr->final_score, 2) : '--' }}</td>
-                                <td class="px-5 py-3 font-medium text-blue-300">{{ $opcr->pmt_adjusted_score !== null ? number_format($opcr->pmt_adjusted_score, 2) : '--' }}</td>
                                 <td class="px-5 py-3 text-center">
                                     <a href="{{ route('pmt.office-calibration.show', $opcr->id) }}"
-                                       class="inline-flex items-center justify-center rounded-lg border border-slate-700 px-3 py-1.5 text-slate-200 transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/40">
-                                        Review
+                                       class="inline-flex items-center justify-center rounded-lg border border-slate-700 p-2 text-slate-200 transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+                                       title="Review">
+                                        <i class="fa-solid fa-eye"></i>
                                     </a>
                                 </td>
                             </tr>
                         @empty
                             <tr class="bg-slate-900/40">
-                                <td colspan="6" class="px-5 py-8 text-center text-sm text-slate-400">{{ $infoMessage ?? 'No OPCRs pending calibration or calibrated found for the active period.' }}</td>
+                                <td colspan="4" class="px-5 py-8 text-center text-sm text-slate-400">{{ $infoMessage ?? 'No OPCRs pending calibration or calibrated found for the active period.' }}</td>
                             </tr>
                         @endforelse
                     </tbody>

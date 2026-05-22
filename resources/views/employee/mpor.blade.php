@@ -30,11 +30,18 @@
 
         $orsTasks = $orsTasks ?? [];
         $includedRatedTasks = $includedRatedTasks ?? [];
+        $mporEmptyReason = trim((string) ($mporEmptyReason ?? ''));
         $isReturned = strtolower((string) $mporStatus) === 'returned';
         $returnRemarks = trim((string) ($mpor?->return_remarks ?? ''));
     @endphp
 
     <section class="space-y-6">
+        @if ($mporEmptyReason !== '')
+            <div class="rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+                {{ $mporEmptyReason }}
+            </div>
+        @endif
+
         @if ($isReturned)
             <div id="mporReturnedBanner" class="rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-100">
                 <p class="font-semibold">MPOR returned by Supervisor</p>

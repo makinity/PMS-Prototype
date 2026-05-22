@@ -8,9 +8,7 @@
     <section class="space-y-4">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-xs uppercase tracking-[0.2em] text-blue-300">IPCR Accomplishment Report</p>
-                <h1 class="text-2xl font-semibold text-white">IPCR Accomplishment Preview — {{ $periodLabelValue }}</h1>
-                <p class="text-sm text-slate-400 mt-1">System-generated commitments for digital accomplishment submission.</p>
+                <h1 class="text-2xl font-semibold text-white">IPCR Accomplishment Report — {{ $periodLabelValue }}</h1>
             </div>
             <a href="{{ route('employee.accomplishment-submission') }}"
                 class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-800 transition">
@@ -18,7 +16,7 @@
             </a>
         </div>
 
-        <div class="rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl space-y-4">
+        <div class="space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
                 <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Employee</p>

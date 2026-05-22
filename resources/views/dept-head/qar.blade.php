@@ -59,7 +59,6 @@
     <section class="space-y-6">
         <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
-                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Annex I - Office Quarterly Accomplishment Report</p>
                 <h1 class="mt-1 text-2xl font-bold text-white">Office Quarterly Accomplishment Report (QAR)</h1>
                 <p class="mt-1 text-sm text-slate-400">
                     Approved MPORs automatically populate this QAR snapshot for PMT validation.
@@ -110,7 +109,6 @@
             <div class="flex flex-wrap items-start justify-between gap-3">
                 <div>
                     <h2 class="text-lg font-semibold text-white">A) Incoming MPORs</h2>
-                    <p class="text-xs text-slate-400">Approved MPORs received for automatic QAR population.</p>
                 </div>
             </div>
 
@@ -174,7 +172,6 @@
             <div class="flex flex-wrap items-start justify-between gap-3">
                 <div>
                     <h2 class="text-lg font-semibold text-white">B) QAR Summary</h2>
-                    <p class="text-xs text-slate-400">Snapshot auto-populated from approved MPORs.</p>
                 </div>
                 <div class="text-right text-xs text-slate-500">
                     <p>Last updated: {{ $generatedDateLabel }}</p>
@@ -220,7 +217,6 @@
             <div class="flex flex-wrap items-start justify-between gap-3">
                 <div>
                     <h2 class="text-lg font-semibold text-white">C) Annex I QAR</h2>
-                    <p class="text-xs text-slate-400">Rows are auto-populated from approved MPORs.</p>
                 </div>
                 <button type="button"
                     data-modal-target="qarApproveConfirmModal"

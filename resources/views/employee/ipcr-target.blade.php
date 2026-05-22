@@ -4,6 +4,20 @@
     @php
         $ipcr = $ipcr ?? null;
         $ipcrPayload = $ipcrPayload ?? ['status' => null, 'core' => [], 'support' => []];
+        $ipcrStatusKey = strtolower((string) ($ipcr->status ?? $ipcrPayload['status'] ?? ''));
+        $isCommitReady = $ipcr && $ipcrStatusKey === 'for_commitment';
+        $isCommittedLike = $ipcr && (
+            !empty($ipcr->committed_at) ||
+            !empty($ipcr->locked_at) ||
+            in_array($ipcrStatusKey, [
+                'committed',
+                'pending_pmt_calibration',
+                'returned_by_pmt',
+                'approved_by_pmt',
+                'adjusted_by_pmt',
+                'released_by_pmt',
+            ], true)
+        );
     @endphp
     <div class="space-y-6">
 
@@ -133,11 +147,11 @@
                             id="commit-targets-btn"
                             data-employee-loading="true"
                             data-loading-text="Committing..."
-                            @disabled(!$ipcr || strtolower($ipcr->status ?? '') === 'committed')
+                            @disabled(!$ipcr || !$isCommitReady)
                             class="inline-flex items-center gap-2 px-5 py-2.5 text-white font-medium rounded-lg focus:ring-4 focus:ring-blue-800 transition-colors duration-200
-                                {{ $ipcr ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-600 opacity-60 cursor-not-allowed' }}">
+                                {{ $isCommitReady ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-600 opacity-60 cursor-not-allowed' }}">
                         <span data-button-label>
-                            {{ strtolower($ipcr->status ?? '') === 'committed' ? 'Committed' : 'Commit Targets' }}
+                            {{ $isCommitReady ? 'Commit Targets' : 'Committed' }}
                         </span>
                         <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
                     </button>
@@ -602,8 +616,16 @@
 
         function applyStatusUi(statusValue) {
             const statusKey = String(statusValue || '').toLowerCase();
+            const committedLike = new Set([
+                'committed',
+                'pending_pmt_calibration',
+                'returned_by_pmt',
+                'approved_by_pmt',
+                'adjusted_by_pmt',
+                'released_by_pmt',
+            ]);
 
-            if (statusKey === 'committed') {
+            if (committedLike.has(statusKey)) {
                 if (statusBadge) {
                     statusBadge.textContent = 'COMMITTED';
                     statusBadge.className = 'px-3 py-1 text-xs font-medium rounded bg-emerald-900 text-emerald-300 border border-emerald-800';
@@ -614,12 +636,23 @@
                 return;
             }
 
+            if (statusKey === 'for_commitment') {
+                if (statusBadge) {
+                    statusBadge.textContent = 'FOR COMMITMENT';
+                    statusBadge.className = 'px-3 py-1 text-xs font-medium rounded bg-blue-900 text-blue-300 border border-blue-800';
+                }
+                if (statusText) {
+                    statusText.textContent = 'For Commitment';
+                }
+                return;
+            }
+
             if (statusBadge) {
-                statusBadge.textContent = 'FOR COMMITMENT';
-                statusBadge.className = 'px-3 py-1 text-xs font-medium rounded bg-blue-900 text-blue-300 border border-blue-800';
+                statusBadge.textContent = (statusKey || 'LOCKED').replace(/_/g, ' ').toUpperCase();
+                statusBadge.className = 'px-3 py-1 text-xs font-medium rounded bg-slate-800 text-slate-200 border border-slate-700';
             }
             if (statusText) {
-                statusText.textContent = 'For Commitment';
+                statusText.textContent = statusKey ? statusKey.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : 'Locked';
             }
         }
 

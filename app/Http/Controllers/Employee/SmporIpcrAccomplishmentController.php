@@ -315,7 +315,7 @@ class SmporIpcrAccomplishmentController extends Controller
             $previewMporQuery = Mpor::query()
                 ->where('employee_id', $user->id)
                 ->where('office_id', $user->office_id)
-                ->whereIn('status', ['submitted']);
+                ->whereIn('status', ['submitted', 'approved', 'endorsed']);
 
             if ($rangeStartYm && $rangeEndYm) {
                 $previewMporQuery->whereBetween(DB::raw('LEFT(month, 7)'), [$rangeStartYm, $rangeEndYm]);
