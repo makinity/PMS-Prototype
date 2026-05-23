@@ -34,8 +34,13 @@
                         'info' => 'text-sky-300 bg-sky-500/10',
                         default => 'text-slate-300 bg-slate-500/10',
                     };
+                    $url = $notification['url'] ?? null;
                 @endphp
-                <button type="button" wire:click="markRead({{ $index }})" class="flex w-full items-start gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-slate-800/70">
+                @if ($url)
+                    <a href="{{ $url }}" wire:click="markRead({{ $index }})" class="flex w-full items-start gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-slate-800/70">
+                @else
+                    <button type="button" wire:click="markRead({{ $index }})" class="flex w-full items-start gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-slate-800/70">
+                @endif
                     <span class="mt-0.5 flex h-9 w-9 items-center justify-center rounded-full {{ $accent }}">
                         <i class="{{ $icon }}"></i>
                     </span>
@@ -49,7 +54,11 @@
                     @if (empty($notification['is_read']))
                         <span class="mt-2 h-2 w-2 rounded-full bg-emerald-400"></span>
                     @endif
-                </button>
+                @if ($url)
+                    </a>
+                @else
+                    </button>
+                @endif
             @empty
                 <div class="px-3 py-6 text-center text-xs text-slate-400">
                     You're all caught up.

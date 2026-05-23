@@ -47,7 +47,7 @@ class EmployeeCalibrationController extends Controller
         $periodLabel = $this->buildPeriodLabel($period);
         $monthLabels = $this->buildMonthLabels($period);
 
-        // Fetch IPCRs that are in calibration states
+        // Fetch IPCRs that are in calibration states AND have accomplishment endorsed by dept head
         $ipcrsQuery = Ipcr::query()
             ->where('performance_period_id', $period->id)
             ->whereIn('status', [
@@ -56,6 +56,13 @@ class EmployeeCalibrationController extends Controller
                 Ipcr::STATUS_ADJUSTED_BY_PMT,
                 Ipcr::STATUS_RELEASED_BY_PMT,
             ])
+            ->whereHas('accomplishmentSubmission', function ($q) {
+                $q->whereIn('status', [
+                    AccomplishmentSubmission::STATUS_DEPT_HEAD_ENDORSED,
+                    AccomplishmentSubmission::STATUS_RECOMMENDED_BY_PMT,
+                    AccomplishmentSubmission::STATUS_RELEASED_BY_PMT,
+                ]);
+            })
             ->with([
                 'employee:id,name,office_id',
                 'employee.office:id,name',

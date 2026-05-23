@@ -327,9 +327,6 @@
                         <div class="flex items-start justify-between gap-3">
                             <div>
                                 <h2 class="text-lg font-semibold text-white">ORS Monitoring Detail</h2>
-                                <p class="text-xs text-slate-400">
-                                    Supervisor review (manual ORS equivalent). Rating applies only to Submitted ORS entries.
-                                </p>
                             </div>
                             <button type="button"
                                     onclick="closeOrsModal('ors-monitoring-modal')"
@@ -391,9 +388,6 @@
                                 <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
                                     <p class="text-xs text-slate-400">Quantity (employee-declared)</p>
                                     <p id="monitoringQuantity" class="mt-1 text-base font-semibold text-white">--</p>
-                                    <p class="mt-2 text-[11px] text-slate-400">
-                                        Declared by employee during ORS submission. Supervisor does not rate Quantity.
-                                    </p>
                                 </div>
 
                                 <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
@@ -407,9 +401,6 @@
                                 <!-- Rating Basis (compact + opens sub-modal) -->
                                 <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4 space-y-3 text-xs text-slate-200">
                                     <p class="text-[11px] uppercase text-slate-400">Rating basis</p>
-                                    <p class="text-[11px] text-slate-400">
-                                        Based on Stage I standards for this success indicator. Employee declares Quantity; supervisor rates Quality & Timeliness.
-                                    </p>
 
                                     <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                                         <p id="ratingBasisIndicator" class="text-sm font-semibold text-white">--</p>
@@ -421,9 +412,6 @@
                                         </button>
                                     </div>
 
-                                    <p class="text-[11px] text-slate-500">
-                                        The standards below are reference-only and come from Stage I approval.
-                                    </p>
                                 </div>
 
                                 <!-- Monitoring Rating -->
@@ -444,7 +432,6 @@
                                                     <option value="">--</option>
                                                     <option>5</option><option>4</option><option>3</option><option>2</option><option>1</option>
                                                 </select>
-                                                <p class="mt-2 text-[11px] text-slate-500">Rate against Stage I Quality standards.</p>
                                             </div>
                                             <div>
                                                 <label class="text-xs text-slate-300">Timeliness</label>
@@ -453,7 +440,6 @@
                                                     <option value="">--</option>
                                                     <option>5</option><option>4</option><option>3</option><option>2</option><option>1</option>
                                                 </select>
-                                                <p class="mt-2 text-[11px] text-slate-500">Rate against Stage I Timeliness standards.</p>
                                             </div>
                                         </div>
 
@@ -463,9 +449,6 @@
                                                       rows="4"
                                                       class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-sm text-slate-200"
                                                       placeholder="Coaching notes / observations..."></textarea>
-                                            <p class="mt-2 text-[11px] text-slate-400">
-                                                For monitoring & coaching only. Final IPCR rating is completed in Stage III.
-                                            </p>
                                         </div>
                                     </div>
                                 </div>
@@ -751,14 +734,12 @@
             document.addEventListener('DOMContentLoaded', () => {
                 function showSnackbar(type, message) {
                     if (!message) return;
-                    if (window.PMSnackbar && !window.PMSnackbar.hasActive()) {
+                    if (window.PMSnackbar) {
                         window.PMSnackbar.show({
                             type: String(type || 'info').toLowerCase(),
                             message: String(message),
                         });
-                        return;
                     }
-                    alert(String(message));
                 }
                 const modal = document.getElementById('ors-monitoring-modal');
                 const ratedMonitoringModal = document.getElementById('ors-rated-monitoring-modal');
@@ -1878,7 +1859,7 @@
                 saveBtn?.addEventListener('click', async () => {
                     const modalStatus = String(currentModalData?.status || '').toLowerCase();
                     if (!currentModalData || modalStatus !== 'submitted') {
-                        alert('Rating is available only for Submitted ORS entries.');
+                        showSnackbar('error', 'Rating is available only for Submitted ORS entries.');
                         return;
                     }
 
@@ -1886,12 +1867,12 @@
                     const t = document.getElementById('ratingTime').value;
 
                     if (!q || !t) {
-                        alert('Select Quality and Timeliness ratings.');
+                        showSnackbar('error', 'Select Quality and Timeliness ratings.');
                         return;
                     }
 
                     if (!saveForm || !saveForm.action) {
-                        alert('Unable to save rating for this entry.');
+                        showSnackbar('error', 'Unable to save rating for this entry.');
                         return;
                     }
 
@@ -1926,16 +1907,16 @@
                         if (!response.ok) {
                             if (response.status === 422 && payload?.errors) {
                                 const firstError = Object.values(payload.errors)?.[0]?.[0];
-                                alert(firstError || payload?.message || 'Unable to save rating.');
+                                showSnackbar('error', firstError || payload?.message || 'Unable to save rating.');
                                 return;
                             }
 
-                            alert(payload?.message || 'Unable to save rating.');
+                            showSnackbar('error', payload?.message || 'Unable to save rating.');
                             return;
                         }
 
                         if (!payload?.success) {
-                            alert(payload?.message || 'Unable to save rating.');
+                            showSnackbar('error', payload?.message || 'Unable to save rating.');
                             return;
                         }
 

@@ -5,15 +5,19 @@
         $selectedStatus = strtolower((string) request('status', 'all'));
         $selectedEmployee = (string) request('employee_id', '');
 
-        $statusOptions = collect(['all', 'draft', 'recording', 'submitted', 'rated']);
+        $statusOptions = collect(['all', 'draft', 'recording', 'paused', 'submitted', 'rated']);
 
         $statusMeta = [
             'draft' => 'bg-amber-900/40 border border-amber-700/40 text-amber-200',
             'recording' => 'bg-blue-900/40 border border-blue-700/40 text-blue-200',
+            'paused' => 'bg-orange-900/40 border border-orange-700/40 text-orange-200',
             'submitted' => 'bg-emerald-900/40 border border-emerald-700/40 text-emerald-300',
             'rated' => 'bg-cyan-900/40 border border-cyan-700/40 text-cyan-300',
         ];
     @endphp
+
+    @if (session('success'))
+    @endif
 
     <div class="mb-8 p-6 rounded-xl bg-gradient-to-r from-gray-900 to-gray-800 border border-gray-700 shadow-lg">
         <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -23,9 +27,7 @@
                 <p class="text-gray-300">Monitor assignments, risk signals, and progress at a glance without changing owners.</p>
             </div>
             <div class="flex items-center gap-3">
-                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <span class="px-3 py-1 rounded-full bg-emerald-900/30 border border-emerald-700/50 text-emerald-300 text-xs font-semibold">Read-only oversight</span>
-                {{-- DUMMY_DATA: replace with dynamic value --}}
                 <span class="px-3 py-1 rounded-full bg-amber-900/30 border border-amber-700/50 text-amber-200 text-xs font-semibold">Escalate via manager</span>
             </div>
         </div>
@@ -38,46 +40,26 @@
                 <span class="text-xs text-slate-400">Read-only supervision list</span>
             </div>
 
-            <form method="GET" action="{{ route('supervisor.team-tasks') }}"
-                class="mb-4 grid grid-cols-1 gap-3 rounded-lg border border-slate-800 bg-slate-950/40 p-4 md:grid-cols-3">
+            <div class="mb-4 flex flex-wrap gap-3 rounded-lg border border-slate-800 bg-slate-950/40 p-4">
+                <div class="flex-1 min-w-[180px]">
+                    <label for="tt-search" class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Search</label>
+                    <input id="tt-search" type="text" placeholder="Search employee..."
+                        style="background:#0f172a;color:#e5e7eb;"
+                        class="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-slate-200 placeholder-slate-500">
+                </div>
                 <div>
-                    <label for="status" class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Status</label>
-                    <select id="status" name="status"
-                    style="background:#0f172a;color:#e5e7eb;"
+                    <label for="tt-status" class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Status</label>
+                    <select id="tt-status"
+                        style="background:#0f172a;color:#e5e7eb;"
                         class="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-slate-200">
                         @foreach ($statusOptions as $statusOption)
-                            <option value="{{ $statusOption }}" @selected($selectedStatus === $statusOption)>
+                            <option value="{{ $statusOption }}">
                                 {{ $statusOption === 'all' ? 'All' : ucfirst($statusOption) }}
                             </option>
                         @endforeach
                     </select>
                 </div>
-
-                <div>
-                    <label for="employee_id" class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Employee</label>
-                    <select id="employee_id" name="employee_id"
-                    style="background:#0f172a;color:#e5e7eb;"
-                        class="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-slate-200">
-                        <option value="">All employees</option>
-                        @foreach ($teamEmployees as $teamEmployee)
-                            <option value="{{ $teamEmployee->id }}" @selected($selectedEmployee === (string) $teamEmployee->id)>
-                                {{ $teamEmployee->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="flex items-end gap-2">
-                    <button type="submit"
-                        class="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500">
-                        Apply Filters
-                    </button>
-                    <a href="{{ route('supervisor.team-tasks') }}"
-                        class="rounded-lg border border-slate-700 px-4 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-800">
-                        Reset
-                    </a>
-                </div>
-            </form>
+            </div>
 
             <div class="overflow-hidden rounded-lg border border-gray-800">
                 <div class="overflow-x-auto">
@@ -90,24 +72,20 @@
                             <th class="px-4 py-3 text-left font-semibold">Action</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-800 text-slate-200">
+                    <tbody id="tt-tbody" class="divide-y divide-gray-800 text-slate-200">
                         @forelse ($entries as $entry)
                             @php
                                 $status = strtolower((string) ($entry->status ?? 'draft'));
                                 $statusBadge = $statusMeta[$status] ?? 'bg-slate-800 border border-slate-700 text-slate-200';
                             @endphp
-                            <tr class="hover:bg-slate-900/60">
+                            <tr class="hover:bg-slate-900/60 tt-row"
+                                data-employee="{{ strtolower($entry->employee->name ?? '') }}"
+                                data-status="{{ $status }}">
                                 <td class="px-4 py-3 text-white">
                                     <div class="flex items-center gap-3">
-                                        @if(!empty($entry->employee?->profile_photo_url))
-                                            <img src="{{ $entry->employee->profile_photo_url }}"
-                                                alt="{{ $entry->employee->name ?? 'Employee' }}"
-                                                class="h-8 w-8 rounded-full object-cover ring-1 ring-slate-600/80">
-                                        @else
-                                            <img src="https://ui-avatars.com/api/?name={{ urlencode($entry->employee->name ?? 'Employee') }}&background=1e40af&color=fff&size=64"
-                                                alt="{{ $entry->employee->name ?? 'Employee' }}"
-                                                class="h-8 w-8 rounded-full object-cover ring-1 ring-slate-600/80">
-                                        @endif
+                                        <img src="https://ui-avatars.com/api/?name={{ urlencode($entry->employee->name ?? 'Employee') }}&background=1e40af&color=fff&size=64"
+                                            alt="{{ $entry->employee->name ?? 'Employee' }}"
+                                            class="h-8 w-8 rounded-full object-cover ring-1 ring-slate-600/80">
                                         <span>{{ $entry->employee->name ?? '—' }}</span>
                                     </div>
                                 </td>
@@ -124,11 +102,17 @@
                                             class="view-task-btn rounded-lg border border-slate-600 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-slate-800">
                                             View
                                         </button>
-                                    @else
+                                    @elseif (in_array($status, ['submitted', 'validated']))
                                         <a href="{{ route('supervisor.team-tasks.monitor', $entry) }}"
                                             class="inline-flex items-center rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-500">
                                             Monitor
                                         </a>
+                                    @else
+                                        <button type="button"
+                                            data-notify-id="{{ $entry->id }}"
+                                            class="notify-btn inline-flex items-center rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-500">
+                                            Notify
+                                        </button>
                                     @endif
                                 </td>
                             </tr>
@@ -498,6 +482,66 @@
 
             if (closeTopBtn) closeTopBtn.addEventListener('click', closeTaskViewModal);
             if (closeBottomBtn) closeBottomBtn.addEventListener('click', closeTaskViewModal);
+
+            // Live search & status filter
+            const searchInput = document.getElementById('tt-search');
+            const statusSelect = document.getElementById('tt-status');
+            const rows = document.querySelectorAll('.tt-row');
+
+            function filterRows() {
+                const query = (searchInput?.value || '').toLowerCase().trim();
+                const status = (statusSelect?.value || 'all').toLowerCase();
+
+                rows.forEach(row => {
+                    const name = row.dataset.employee || '';
+                    const rowStatus = row.dataset.status || '';
+                    const matchesSearch = !query || name.includes(query);
+                    const matchesStatus = status === 'all' || rowStatus === status;
+                    row.style.display = (matchesSearch && matchesStatus) ? '' : 'none';
+                });
+            }
+
+            searchInput?.addEventListener('input', filterRows);
+            statusSelect?.addEventListener('change', filterRows);
+
+            // AJAX Notify
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+            document.getElementById('tt-tbody')?.addEventListener('click', async (e) => {
+                const btn = e.target.closest('.notify-btn');
+                if (!btn) return;
+
+                const entryId = btn.dataset.notifyId;
+                if (!entryId || btn.disabled) return;
+
+                btn.disabled = true;
+                btn.textContent = 'Sending...';
+                btn.classList.add('opacity-70');
+
+                try {
+                    const res = await fetch(`{{ url('supervisor/team-tasks') }}/${entryId}/notify`, {
+                        method: 'POST',
+                        headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+                    });
+                    const data = await res.json().catch(() => ({}));
+
+                    if (res.ok) {
+                        if (window.PMSnackbar) {
+                            window.PMSnackbar.show({ type: 'success', message: data.message || 'Notification sent.' });
+                        }
+                        btn.textContent = 'Sent ✓';
+                    } else {
+                        throw new Error(data.message || 'Failed to send.');
+                    }
+                } catch (err) {
+                    if (window.PMSnackbar) {
+                        window.PMSnackbar.show({ type: 'error', message: err.message || 'Failed to send notification.' });
+                    }
+                    btn.textContent = 'Notify';
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-70');
+                }
+            });
         });
     </script>
 @endsection

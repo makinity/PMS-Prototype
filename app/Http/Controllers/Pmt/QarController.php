@@ -163,6 +163,33 @@ class QarController extends Controller
                 $ratingService->calculateAndSaveFinalScore($ipcr);
             }
 
+            // Calculate OPCR final_score from employee IPCR averages
+            $opcrs = \App\Models\Opcr::query()
+                ->where('office_id', $qarHeader->office_id)
+                ->where('performance_period_id', $qarHeader->performance_period_id)
+                ->whereIn('status', [
+                    \App\Models\Opcr::STATUS_APPROVED_BY_PMT,
+                    \App\Models\Opcr::STATUS_ADJUSTED_BY_PMT,
+                ])
+                ->get();
+
+            foreach ($opcrs as $opcr) {
+                $ipcrScores = \App\Models\Ipcr::query()
+                    ->where('office_id', $qarHeader->office_id)
+                    ->where('performance_period_id', $qarHeader->performance_period_id)
+                    ->whereNotNull('final_score')
+                    ->where('final_score', '>', 0)
+                    ->pluck('final_score');
+
+                if ($ipcrScores->isNotEmpty()) {
+                    $avgScore = round($ipcrScores->avg(), 2);
+                    $opcr->update([
+                        'final_score' => $avgScore,
+                        'adjectival_rating' => $ratingService->resolveAdjectivalRating($avgScore),
+                    ]);
+                }
+            }
+
             app(SmporGeneratorService::class)->generateFromApprovedQar($qarHeader, $request->user()?->id);
         });
 
@@ -193,6 +220,20 @@ class QarController extends Controller
             $qarHeader->pmt_validated_at = now();
             $qarHeader->pmt_validated_by = $request->user()?->id;
             $qarHeader->save();
+
+            // Restore IPCRs back to committed
+            \App\Models\Ipcr::query()
+                ->where('office_id', $qarHeader->office_id)
+                ->where('performance_period_id', $qarHeader->performance_period_id)
+                ->where('status', \App\Models\Ipcr::STATUS_PENDING_PMT_CALIBRATION)
+                ->update(['status' => \App\Models\Ipcr::STATUS_COMMITTED]);
+
+            // Restore OPCRs back to approved
+            \App\Models\Opcr::query()
+                ->where('office_id', $qarHeader->office_id)
+                ->where('performance_period_id', $qarHeader->performance_period_id)
+                ->where('status', \App\Models\Opcr::STATUS_PENDING_PMT_CALIBRATION)
+                ->update(['status' => \App\Models\Opcr::STATUS_APPROVED]);
 
             $mporIds = $qarHeader->mporLinks()
                 ->pluck('mpor_id')

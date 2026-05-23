@@ -11,29 +11,7 @@ class NotificationDropdown extends Component
 
     public function mount(): void
     {
-        $this->notifications = [
-            [
-                'title' => 'Missing Output',
-                'body' => 'Client Form Review is due today.',
-                'time' => 'Just now',
-                'type' => 'alert',
-                'is_read' => false,
-            ],
-            [
-                'title' => 'SMPOR Deadline',
-                'body' => 'Cutoff in 3 days. Prepare your submission.',
-                'time' => '1h ago',
-                'type' => 'info',
-                'is_read' => false,
-            ],
-            [
-                'title' => 'Performance Review',
-                'body' => 'Monthly review scheduled for next week.',
-                'time' => 'Yesterday',
-                'type' => 'success',
-                'is_read' => true,
-            ],
-        ];
+        $this->loadNotifications();
     }
 
     public function toggle(): void
@@ -48,34 +26,57 @@ class NotificationDropdown extends Component
 
     public function markAllRead(): void
     {
-        foreach ($this->notifications as $index => $notification) {
-            $notification['is_read'] = true;
-            $this->notifications[$index] = $notification;
+        $user = auth()->user();
+        if ($user) {
+            $user->unreadNotifications->markAsRead();
         }
+        $this->loadNotifications();
     }
 
     public function markRead(int $index): void
     {
-        if (! isset($this->notifications[$index])) {
-            return;
-        }
+        $user = auth()->user();
+        if (!$user) return;
 
-        $notification = $this->notifications[$index];
-        $notification['is_read'] = true;
-        $this->notifications[$index] = $notification;
+        $dbNotifications = $user->notifications()->latest()->take(10)->get();
+        if (isset($dbNotifications[$index])) {
+            $dbNotifications[$index]->markAsRead();
+        }
+        $this->loadNotifications();
     }
 
     public function getUnreadCountProperty(): int
     {
         $count = 0;
-
         foreach ($this->notifications as $notification) {
             if (empty($notification['is_read'])) {
                 $count++;
             }
         }
-
         return $count;
+    }
+
+    private function loadNotifications(): void
+    {
+        $user = auth()->user();
+        if (!$user) {
+            $this->notifications = [];
+            return;
+        }
+
+        $this->notifications = $user->notifications()
+            ->latest()
+            ->take(10)
+            ->get()
+            ->map(fn ($n) => [
+                'title' => $n->data['title'] ?? 'Notification',
+                'body' => $n->data['body'] ?? '',
+                'time' => $n->created_at->diffForHumans(),
+                'type' => $n->data['type'] ?? 'info',
+                'is_read' => !is_null($n->read_at),
+                'url' => $n->data['url'] ?? null,
+            ])
+            ->toArray();
     }
 
     public function render()

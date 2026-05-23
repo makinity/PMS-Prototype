@@ -44,7 +44,7 @@ class QarController extends Controller
             ->when($officeId > 0, function ($query) use ($officeId) {
                 $query->where('office_id', $officeId);
             })
-            ->whereIn(DB::raw('LOWER(status)'), ['approved'])
+            ->whereIn(DB::raw('LOWER(status)'), ['endorsed'])
             ->whereIn('month', $quarterMonths)
             ->orderByDesc('month')
             ->orderByDesc('id')
@@ -141,20 +141,25 @@ class QarController extends Controller
                 $norm = fn ($s) => mb_strtolower(trim(preg_replace('/\s+/', ' ', (string) $s)));
                 $groupKey = $norm($item->output_title ?? '') . '||' . $norm($item->indicator_text ?? '');
 
+                $tqty = is_numeric($item->target_quantity ?? null) ? number_format((float) $item->target_quantity) : '';
+                $tline = trim((string) ($item->target_timeline ?? ''));
+                $targetTimelineSentence = $tqty !== '' && $tline !== ''
+                    ? "{$tqty} {$tline}"
+                    : ($tqty !== '' ? $tqty : ($tline !== '' ? $tline : '-'));
+
                 if (!isset($annexRowsMap[$groupKey])) {
                     $annexRowsMap[$groupKey] = [
                         'ppa_code' => (string) ($item->id ?? ''),
                         'mfo' => (string) ($item->output_title ?? '-'),
                         'indicator' => (string) ($item->indicator_text ?? '-'),
-                        'target_quantity' => 0.0,
-                        'target_timeline' => (string) ($item->target_summary ?? '-'),
+                        'target_quantity' => is_numeric($item->target_quantity ?? null) ? (float) $item->target_quantity : 0.0,
+                        'target_timeline' => $targetTimelineSentence,
                         'actual_performance' => 0.0,
                         'variance' => null,
                         'remarks' => 'Consolidated from multiple employee MPORs',
                     ];
                 }
 
-                $annexRowsMap[$groupKey]['target_quantity'] += is_numeric($item->target_quantity ?? null) ? (float) $item->target_quantity : 0;
                 $annexRowsMap[$groupKey]['actual_performance'] += (float) ($entry->quantity ?? 0);
             }
         }
@@ -581,7 +586,7 @@ class QarController extends Controller
         $incomingMporModels = Mpor::query()
             ->with(['employee:id,name,office_id'])
             ->where('office_id', $officeId)
-            ->whereIn(DB::raw('LOWER(status)'), ['approved'])
+            ->whereIn(DB::raw('LOWER(status)'), ['endorsed'])
             ->whereIn('month', $quarterMonths)
             ->orderByDesc('month')
             ->orderByDesc('id')
@@ -614,20 +619,25 @@ class QarController extends Controller
                 $norm = fn ($s) => mb_strtolower(trim(preg_replace('/\s+/', ' ', (string) $s)));
                 $groupKey = $norm($item->output_title ?? '') . '||' . $norm($item->indicator_text ?? '');
 
+                $tqty = is_numeric($item->target_quantity ?? null) ? number_format((float) $item->target_quantity) : '';
+                $tline = trim((string) ($item->target_timeline ?? ''));
+                $targetTimelineSentence = $tqty !== '' && $tline !== ''
+                    ? "{$tqty} {$tline}"
+                    : ($tqty !== '' ? $tqty : ($tline !== '' ? $tline : '-'));
+
                 if (!isset($annexRowsMap[$groupKey])) {
                     $annexRowsMap[$groupKey] = [
                         'ppa_code' => (string) ($item->id ?? ''),
                         'mfo' => (string) ($item->output_title ?? '-'),
                         'indicator' => (string) ($item->indicator_text ?? '-'),
-                        'target_quantity' => 0.0,
-                        'target_timeline' => (string) ($item->target_summary ?? '-'),
+                        'target_quantity' => is_numeric($item->target_quantity ?? null) ? (float) $item->target_quantity : 0.0,
+                        'target_timeline' => $targetTimelineSentence,
                         'actual_performance' => 0.0,
                         'variance' => null,
                         'remarks' => 'Consolidated from multiple employee MPORs',
                     ];
                 }
 
-                $annexRowsMap[$groupKey]['target_quantity'] += is_numeric($item->target_quantity ?? null) ? (float) $item->target_quantity : 0;
                 $annexRowsMap[$groupKey]['actual_performance'] += (float) ($entry->quantity ?? 0);
             }
         }

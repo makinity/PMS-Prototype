@@ -4,6 +4,18 @@ namespace Database\Seeders;
 
 use App\Models\Office;
 use App\Models\PerformancePeriod;
+use App\Models\Ipcr;
+use App\Models\IpcrItem;
+use App\Models\Opcr;
+use App\Models\OrsEntry;
+use App\Models\MyTask;
+use App\Models\Mpor;
+use App\Models\QarHeader;
+use App\Models\QarRow;
+use App\Models\Smpor;
+use App\Models\SmporItem;
+use App\Models\TopPerformer;
+use App\Models\DevelopmentPlan;
 use App\Models\UnitWorkPlan;
 use App\Models\User;
 use App\Models\UwpFunction;
@@ -254,9 +266,9 @@ class DatabaseSeeder extends Seeder
                 ],
                 [
                     'created_by' => $supervisorRMU->id,
-                    'status' => UnitWorkPlan::STATUS_DRAFT,
-                    'submitted_at' => null,
-                    'locked_at' => null,
+                    'status' => UnitWorkPlan::STATUS_PMT_APPROVED,
+                    'submitted_at' => now()->subDays(5),
+                    'locked_at' => now()->subDays(4),
                 ]
             );
 
@@ -634,6 +646,310 @@ class DatabaseSeeder extends Seeder
                 $standardsMapRMU,
                 $rmuEmployeeIds
             );
+
+            // --- GENERATE OPCRs ---
+            $opcrRMU = Opcr::query()->firstOrCreate(
+                [
+                    'unit_work_plan_id' => $uwpRMU->id,
+                    'office_id' => $officeRMU->id,
+                    'performance_period_id' => $period->id,
+                ],
+                [
+                    'generated_by' => $supervisorRMU->id,
+                    'status' => Opcr::STATUS_APPROVED,
+                    'submitted_at' => now()->subDays(10),
+                    'approved_at' => now()->subDays(9),
+                    'pmt_reviewed_at' => null,
+                    'pmt_reviewed_by' => null,
+                    'final_score' => null,
+                    'adjectival_rating' => null,
+                    'released_at' => null,
+                ]
+            );
+
+            // --- Helper: seed IPCR + OrsEntries + MyTasks + Mpor for employees ---
+            $seedEmployeeData = function (
+                array $employeeIds,
+                Opcr $opcr,
+                UnitWorkPlan $uwp,
+                int $supervisorId,
+                int $officeId,
+                PerformancePeriod $period,
+                bool $perWeek = false
+            ): void {
+                $maxDay = (int) now()->format('d');
+
+                foreach ($employeeIds as $employeeId) {
+                    $ipcr = Ipcr::query()->firstOrCreate(
+                        [
+                            'opcr_id' => $opcr->id,
+                            'unit_work_plan_id' => $uwp->id,
+                            'employee_id' => $employeeId,
+                            'performance_period_id' => $period->id,
+                            'office_id' => $officeId,
+                        ],
+                        [
+                            'status' => Ipcr::STATUS_COMMITTED,
+                            'generated_at' => now()->subDays(14),
+                            'committed_at' => now()->subDays(12),
+                        ]
+                    );
+
+                    $assignments = UwpIndicatorAssignment::query()
+                        ->where('employee_id', $employeeId)
+                        ->with(['successIndicator.uwpMfo.uwpFunction'])
+                        ->get();
+
+                    foreach ($assignments as $assignment) {
+                        $indicator = $assignment->successIndicator;
+                        $mfo = $indicator->uwpMfo;
+                        $function = $mfo->uwpFunction;
+
+                        if ($function->unit_work_plan_id !== $uwp->id) {
+                            continue;
+                        }
+
+                        $qetStandards = UwpQetStandard::query()
+                            ->where('uwp_success_indicator_id', $indicator->id)
+                            ->get();
+
+                        $standardsPayload = [];
+                        foreach ($qetStandards as $std) {
+                            $standardsPayload[$std->rating][$std->dimension] = $std->standard_text;
+                        }
+
+                        $ipcrItem = IpcrItem::query()->firstOrCreate(
+                            [
+                                'ipcr_id' => $ipcr->id,
+                                'uwp_function_id' => $function->id,
+                                'uwp_success_indicator_id' => $indicator->id,
+                            ],
+                            [
+                                'output_title' => $mfo->title,
+                                'function_type' => $function->function_type,
+                                'indicator_text' => $indicator->indicator_text,
+                                'target_quantity' => $indicator->target_quantity,
+                                'target_timeline' => $indicator->target_timeline,
+                                'target_summary' => '',
+                                'standards_payload' => $standardsPayload,
+                            ]
+                        );
+
+                        // One entry per picked day (one per week if perWeek)
+                        $monthDays = [];
+                        if ($perWeek) {
+                            for ($d = 1; $d <= $maxDay; $d += 7) {
+                                $monthDays[] = rand($d, min($d + 6, $maxDay));
+                            }
+                        } else {
+                            $monthDays = [rand(1, $maxDay)];
+                        }
+
+                        foreach ($monthDays as $dayIndex) {
+                            $workDate = now()->startOfMonth()->addDays($dayIndex - 1)->startOfDay();
+
+                            $orsEntry = OrsEntry::query()->firstOrCreate(
+                                [
+                                    'employee_id' => $employeeId,
+                                    'ipcr_item_id' => $ipcrItem->id,
+                                    'work_date' => $workDate,
+                                ],
+                                [
+                                    'supervisor_id' => $supervisorId,
+                                    'office_id' => $officeId,
+                                    'performance_period_id' => $period->id,
+                                    'ipcr_id' => $ipcr->id,
+                                    'notes' => "Worked on {$indicator->indicator_text}",
+                                    'quantity' => rand(20, 100),
+                                    'status' => 'draft',
+                                    'submitted_at' => null,
+                                    'started_at' => null,
+                                    'stopped_at' => null,
+                                    'total_seconds' => rand(3600, 14400),
+                                ]
+                            );
+
+                            MyTask::query()->firstOrCreate(
+                                ['ors_entry_id' => $orsEntry->id],
+                                [
+                                    'employee_id' => $employeeId,
+                                    'office_id' => $officeId,
+                                    'performance_period_id' => $period->id,
+                                    'ipcr_id' => $ipcr->id,
+                                    'ipcr_item_id' => $ipcrItem->id,
+                                    'work_date' => $workDate,
+                                    'notes' => $orsEntry->notes,
+                                    'quantity' => $orsEntry->quantity,
+                                    'started_at' => $orsEntry->started_at,
+                                    'stopped_at' => $orsEntry->stopped_at,
+                                    'total_seconds' => $orsEntry->total_seconds,
+                                    'status' => 'draft',
+                                    'submitted_at' => $orsEntry->submitted_at,
+                                    'locked_at' => null,
+                                    'has_evidence' => false,
+                                ]
+                            );
+                        }
+                    }
+
+                    Mpor::query()->firstOrCreate(
+                        [
+                            'employee_id' => $employeeId,
+                            'office_id' => $officeId,
+                            'month' => now()->subMonth()->format('Y-m'),
+                        ],
+                        [
+                            'status' => 'approved',
+                            'generated_at' => now()->subDays(10),
+                            'submitted_at' => now()->subDays(9),
+                            'approved_by' => $supervisorId,
+                            'approved_at' => now()->subDays(8),
+                        ]
+                    );
+                }
+            };
+
+            // Seed RMU employees — one entry per week across the month
+            $seedEmployeeData($rmuEmployeeIds, $opcrRMU, $uwpRMU, $supervisorRMU->id, $officeRMU->id, $period, true);
+
+            // --- GENERATE DEVELOPMENT PLANS FOR RMU ---
+            foreach ($rmuEmployeeIds as $employeeId) {
+                $ipcr = Ipcr::query()->where('employee_id', $employeeId)->where('performance_period_id', $period->id)->first();
+                if ($ipcr) {
+                    DevelopmentPlan::query()->firstOrCreate(
+                        [
+                            'ipcr_id' => $ipcr->id,
+                            'employee_id' => $employeeId,
+                            'office_id' => $officeRMU->id,
+                            'performance_period_id' => $period->id,
+                        ],
+                        [
+                            'source_score' => 4.50,
+                            'source_rating' => 'Outstanding',
+                            'status' => DevelopmentPlan::STATUS_SUBMITTED_TO_LD,
+                            'pmt_remarks' => 'Excellent performance, recommended for leadership training.',
+                            'created_by' => $supervisorRMU->id,
+                            'submitted_to_ld_at' => now()->subDays(1),
+                        ]
+                    );
+                }
+            }
+
+            // --- GENERATE QAR ---
+            $qarHeader = QarHeader::query()->firstOrCreate(
+                [
+                    'office_id' => $officeRMU->id,
+                    'performance_period_id' => $period->id,
+                    'quarter_key' => 'Q1',
+                ],
+                [
+                    'status' => QarHeader::STATUS_PMT_APPROVED,
+                    'generated_at' => now()->subDays(7),
+                    'generated_by' => $supervisorRMU->id,
+                    'approved_at' => now()->subDays(6),
+                    'approved_by' => $deptHeadRMU->id,
+                    'pmt_status' => QarHeader::PMT_VALIDATED,
+                    'pmt_validated_at' => now()->subDays(5),
+                ]
+            );
+
+            $mfoCount = 1;
+            foreach ($functionSeedRMU as $func) {
+                foreach ($func['mfos'] as $mfo) {
+                    QarRow::query()->firstOrCreate(
+                        [
+                            'qar_header_id' => $qarHeader->id,
+                            'ppa_code' => 'PPA-00' . $mfoCount,
+                            'mfo_title' => $mfo['title'],
+                            'indicator_text' => $mfo['indicators'][0] ?? 'Indicator',
+                        ],
+                        [
+                            'target_quantity' => $mfo['target_quantity'] ?? 100,
+                            'target_timeline' => $mfo['target_timeline'] ?? 'Semester',
+                            'actual_performance' => ($mfo['target_quantity'] ?? 100) * 1.1,
+                            'variance' => ($mfo['target_quantity'] ?? 100) * 0.1,
+                            'remarks' => 'Exceeded targets for this quarter.',
+                            'sort_order' => $mfoCount,
+                        ]
+                    );
+                    $mfoCount++;
+                }
+            }
+
+            // --- GENERATE SMPOR ---
+            $smpor = Smpor::query()->firstOrCreate(
+                [
+                    'qar_header_id' => $qarHeader->id,
+                    'office_id' => $officeRMU->id,
+                    'performance_period_id' => $period->id,
+                    'quarter_key' => 'Q1',
+                ],
+                [
+                    'generated_at' => now()->subDays(4),
+                    'generated_by' => $deptHeadRMU->id,
+                    'avg_quality' => 4.60,
+                    'avg_timeliness' => 4.80,
+                    'overall_score' => 4.70,
+                    'adjectival_rating' => 'Outstanding',
+                ]
+            );
+
+            foreach ($rmuEmployeeIds as $index => $employeeId) {
+                SmporItem::query()->firstOrCreate(
+                    [
+                        'smpor_id' => $smpor->id,
+                        'employee_id' => $employeeId,
+                    ],
+                    [
+                        'quality_avg' => 4.5 + ($index * 0.1),
+                        'timeliness_avg' => 4.6 + ($index * 0.1),
+                        'overall_score' => 4.55 + ($index * 0.1),
+                        'adjectival_rating' => 'Outstanding',
+                    ]
+                );
+            }
+
+            // --- GENERATE TOP PERFORMERS ---
+            TopPerformer::query()->firstOrCreate(
+                [
+                    'performer_type' => TopPerformer::TYPE_OFFICE,
+                    'office_id' => $officeRMU->id,
+                    'performance_period_id' => $period->id,
+                    'rank' => 1,
+                ],
+                [
+                    'source_record_id' => $opcrRMU->id,
+                    'opcr_id' => $opcrRMU->id,
+                    'performer_name' => 'Revenue Management Unit',
+                    'office_name' => 'Revenue Management Unit',
+                    'department_head_name' => $deptHeadRMU->name,
+                    'official_score' => 4.70,
+                    'official_rating' => 'Outstanding',
+                    'released_at' => now(),
+                ]
+            );
+
+            foreach ($rmuEmployeeIds as $index => $employeeId) {
+                $employee = User::find($employeeId);
+                TopPerformer::query()->firstOrCreate(
+                    [
+                        'performer_type' => TopPerformer::TYPE_EMPLOYEE,
+                        'employee_id' => $employeeId,
+                        'performance_period_id' => $period->id,
+                        'rank' => count($rmuEmployeeIds) - $index,
+                    ],
+                    [
+                        'source_record_id' => Ipcr::where('employee_id', $employeeId)->where('performance_period_id', $period->id)->value('id'),
+                        'ipcr_id' => Ipcr::where('employee_id', $employeeId)->where('performance_period_id', $period->id)->value('id'),
+                        'office_id' => $officeRMU->id,
+                        'performer_name' => $employee->name,
+                        'office_name' => 'Revenue Management Unit',
+                        'official_score' => 4.55 + ($index * 0.1),
+                        'official_rating' => 'Outstanding',
+                        'released_at' => now(),
+                    ]
+                );
+            }
         });
     }
 }

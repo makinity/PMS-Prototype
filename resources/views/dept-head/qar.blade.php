@@ -133,6 +133,7 @@
                                         @php
                                             $mporStatusKey = strtolower(trim((string) ($mpor['status'] ?? '')));
                                             $mporBadgeClass = match ($mporStatusKey) {
+                                                'endorsed' => 'border-violet-400/40 bg-violet-400/10 text-violet-200',
                                                 'approved' => 'border-emerald-500/40 bg-emerald-500/10 text-emerald-200',
                                                 'draft' => 'border-amber-500/40 bg-amber-500/10 text-amber-200',
                                                 default => 'border-slate-700 bg-slate-950/40 text-slate-200',

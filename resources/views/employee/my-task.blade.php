@@ -187,6 +187,7 @@
                                 Preview
                         </a>
                         <a href="{{ route('employee.ors') }}"
+                            id="viewInOrsBtn"
                             class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-500">
                             View in ORS
                         </a>
@@ -273,6 +274,7 @@
                 const rawTasks = @json($orsEntries ?? []);
                 const evidencesEndpointTemplate = @json(route('stage2.my_tasks.evidences', ['orsEntry' => '__ENTRY__']));
                 const exportOrsBaseUrl = @json(route('employee.ors.export.pdf'));
+                const viewInOrsBaseUrl = @json(route('employee.ors'));
 
                 const tasks = Array.isArray(rawTasks)
                     ? rawTasks.map((entry) => {
@@ -324,6 +326,7 @@
                 const closeTopBtn = document.getElementById('closeTaskViewTop');
                 const closeBottomBtn = document.getElementById('closeTaskViewBottom');
                 const exportOrsBtn = document.getElementById('exportOrsBtn');
+                const viewInOrsBtn = document.getElementById('viewInOrsBtn');
                 const viewEvidenceBtn = document.getElementById('mvViewEvidenceBtn');
 
                 const evidenceModal = document.getElementById('evidence-preview-modal');
@@ -661,6 +664,10 @@
                     }
                     setExportButton(task);
 
+                    if (viewInOrsBtn) {
+                        viewInOrsBtn.href = `${viewInOrsBaseUrl}?ors_entry_id=${encodeURIComponent(task.id)}`;
+                    }
+
                     modal.classList.remove('hidden');
                     modal.classList.add('flex');
                     updateBodyScrollLock();
@@ -974,6 +981,13 @@
 
                 setExportButton(null);
                 renderRows();
+
+                // Auto-open task modal if ?task_id= is in URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const autoOpenTaskId = urlParams.get('task_id');
+                if (autoOpenTaskId) {
+                    openTaskViewModal(autoOpenTaskId);
+                }
             })();
         </script>
 

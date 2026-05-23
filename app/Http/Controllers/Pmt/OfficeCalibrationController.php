@@ -42,6 +42,8 @@ class OfficeCalibrationController extends Controller
                   ->orWhereHas('unitWorkPlan', fn ($uq) => $uq->where('performance_period_id', $activePeriod->id))
                   ->orWhereHas('unitWorkPlans', fn ($uq) => $uq->where('performance_period_id', $activePeriod->id));
             })
+            ->whereNotNull('final_score')
+            ->where('final_score', '>', 0)
             ->whereIn('status', [
                 Opcr::STATUS_PENDING_PMT_CALIBRATION,
                 Opcr::STATUS_APPROVED_BY_PMT,

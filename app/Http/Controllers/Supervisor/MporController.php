@@ -15,6 +15,7 @@ class MporController extends Controller
         $supervisor = $request->user();
         abort_unless($supervisor && $supervisor->role === 'supervisor', 403);
 
+        $search = trim((string) $request->query('search', ''));
         $selectedEmployeeId = (int) $request->query('employee_id', 0);
         $month = (string) $request->query('month', now()->format('Y-m'));
         $startDate = now()->startOfMonth()->toDateString();
@@ -70,13 +71,22 @@ class MporController extends Controller
             $query->where('mpors.employee_id', $selectedEmployeeId);
         }
 
+        if ($search !== '') {
+            $query->whereHas('employee', fn ($q) => $q->where('name', 'like', "%{$search}%"));
+        }
+
         $mpors = $query->get();
+
+        if ($request->wantsJson()) {
+            return response()->json(['html' => view('supervisor._mpor-table-body', compact('mpors'))->render()]);
+        }
 
         return view('supervisor.mpor', compact(
             'mpors',
             'selectedEmployeeId',
             'month',
-            'monthLabel'
+            'monthLabel',
+            'search'
         ));
     }
 

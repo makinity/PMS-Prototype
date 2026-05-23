@@ -254,6 +254,7 @@ Route::prefix('supervisor')->middleware('auth')->group(function () {
     // Views
     Route::get('/dashboard', [SupervisorDashboardController::class, 'index'])->name('supervisor.dashboard');
     Route::get('/team-tasks', [TeamTasksController::class, 'index'])->name('supervisor.team-tasks');
+    Route::post('/team-tasks/{orsEntry}/notify', [TeamTasksController::class, 'notify'])->name('supervisor.team-tasks.notify');
     Route::get('/team-tasks/{orsEntry}/monitor', [OrsMonitoringController::class, 'show'])->name('supervisor.team-tasks.monitor');
     Route::post('/team-tasks/{orsEntry}/monitor', [OrsMonitoringController::class, 'store'])->name('supervisor.team-tasks.monitor.store');
 

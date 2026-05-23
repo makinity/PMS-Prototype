@@ -747,7 +747,7 @@ class OrsController extends Controller
         }
 
         try {
-            $updated = DB::transaction(function () use ($orsEntry) {
+            $updated = DB::transaction(function () use ($orsEntry, $request) {
                 $entry = OrsEntry::query()->lockForUpdate()->findOrFail($orsEntry->id);
 
                 if ($this->isEntryLocked($entry)) {
@@ -781,6 +781,11 @@ class OrsController extends Controller
                 $entry->status = 'draft';
                 $entry->started_at = null;
                 $entry->stopped_at = $now;
+
+                if ($request->has('quantity')) {
+                    $entry->quantity = $request->input('quantity');
+                }
+
                 $entry->save();
 
                 return $entry->fresh();

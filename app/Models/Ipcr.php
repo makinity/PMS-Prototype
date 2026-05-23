@@ -96,6 +96,11 @@ class Ipcr extends Model
         return $this->hasMany(IpcrItem::class, 'ipcr_id');
     }
 
+    public function accomplishmentSubmission()
+    {
+        return $this->hasOne(AccomplishmentSubmission::class, 'ipcr_id');
+    }
+
     public function isLocked(): bool
     {
         return !is_null($this->locked_at);

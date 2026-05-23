@@ -5,6 +5,7 @@ namespace App\Http\Controllers\StageTwo\Monitoring;
 use App\Http\Controllers\Controller;
 use App\Models\OrsEntry;
 use App\Models\User;
+use App\Notifications\TaskReminderNotification;
 use Illuminate\Http\Request;
 
 class TeamTasksController extends Controller
@@ -34,19 +35,22 @@ class TeamTasksController extends Controller
             ->orderByDesc('work_date')
             ->orderByDesc('id');
 
-        $status = trim((string) $request->query('status', ''));
-        if ($status !== '' && strtolower($status) !== 'all') {
-            $entriesQuery->where('status', $status);
-        }
-
-        $employeeId = $request->query('employee_id');
-        if (!empty($employeeId)) {
-            $entriesQuery->where('employee_id', (int) $employeeId);
-        }
-
-        $entries = $entriesQuery->paginate(15)->withQueryString();
+        $entries = $entriesQuery->paginate(100)->withQueryString();
 
         return view('supervisor.team-tasks', compact('entries', 'teamEmployees', 'supervisor'));
+    }
+
+    public function notify(OrsEntry $orsEntry)
+    {
+        $supervisor = $this->authorizedSupervisor();
+
+        abort_if($orsEntry->supervisor_id !== $supervisor->id, 403);
+        abort_if(in_array($orsEntry->status, ['submitted', 'rated']), 422);
+
+        $orsEntry->load('employee');
+        $orsEntry->employee->notify(new TaskReminderNotification($orsEntry, $supervisor->name));
+
+        return response()->json(['message' => 'Notification sent to ' . $orsEntry->employee->name]);
     }
 
     private function authorizedSupervisor(): User

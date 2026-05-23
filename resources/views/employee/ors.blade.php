@@ -545,19 +545,25 @@
                 return String(template).replace(/:id|%3Aid|__ID__/gi, encodedId);
             }
 
-            async function postOrsAction(url) {
+            async function postOrsAction(url, body = null) {
                 const csrfToken = String(orsConfig.csrf || '')
                     || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
                     || document.querySelector('#ors-log-form input[name="_token"]')?.value
                     || '';
 
-                const res = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': csrfToken,
-                        'Accept': 'application/json'
-                    },
-                });
+                const headers = {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                };
+
+                const options = { method: 'POST', headers };
+
+                if (body && typeof body === 'object') {
+                    headers['Content-Type'] = 'application/json';
+                    options.body = JSON.stringify(body);
+                }
+
+                const res = await fetch(url, options);
 
                 const data = await res.json().catch(() => ({}));
                 if (!res.ok) {
@@ -1669,8 +1675,9 @@
                 if (!task) return false;
 
                 if (isDbBackedTask(task)) {
+                    syncQuantityFromInput(task);
                     try {
-                        const data = await postOrsAction(ORS_ROUTES.stop(task.id));
+                        const data = await postOrsAction(ORS_ROUTES.stop(task.id), { quantity: task.quantity || '' });
                         if (!data?.ok || !data?.entry) {
                             throw new Error('Unable to stop task.');
                         }
@@ -2104,6 +2111,13 @@
                 if (!taskId) return;
                 runWithLoading(e.currentTarget, 'Submitting...', () => submitTask(taskId));
             });
+
+            // Auto-open task details modal if ?ors_entry_id= is in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const autoOpenEntryId = urlParams.get('ors_entry_id');
+            if (autoOpenEntryId) {
+                openTaskDetails(autoOpenEntryId);
+            }
         });
     </script>
     @endpush
