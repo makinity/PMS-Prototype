@@ -783,6 +783,10 @@ class QarController extends Controller
         $state['generated_at'] = Carbon::parse($header?->generated_at ?? $generatedAt)->toDateTimeString();
         $request->session()->put($sessionKey, $state);
 
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json(['status' => 'endorsed', 'message' => 'QAR endorsed and saved.']);
+        }
+
         return redirect()
             ->route('dept-head.qar', ['q' => $quarterNumber])
             ->with('success', 'QAR endorsed and saved');

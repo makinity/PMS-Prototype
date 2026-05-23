@@ -418,6 +418,7 @@ class MporController extends Controller
     public function endorse(Mpor $mpor)
     {
         if ($mpor->status !== 'approved') {
+            if (request()->wantsJson()) return response()->json(['message' => 'MPOR must be approved first.'], 422);
             return back()->with('error', 'MPOR must be approved first.');
         }
 
@@ -427,12 +428,14 @@ class MporController extends Controller
             'endorsed_by' => auth()->id(),
         ]);
 
+        if (request()->wantsJson()) return response()->json(['status' => 'endorsed']);
         return back()->with('success', 'MPOR endorsed to Department Head.');
     }
 
     public function approve(Mpor $mpor)
     {
         if ($mpor->status !== 'submitted') {
+            if (request()->wantsJson()) return response()->json(['message' => 'MPOR cannot be approved.'], 422);
             return back()->with('error', 'MPOR cannot be approved.');
         }
 
@@ -448,6 +451,7 @@ class MporController extends Controller
             'return_remarks' => null,
         ]);
 
+        if (request()->wantsJson()) return response()->json(['status' => 'approved']);
         return back()->with('success', 'MPOR approved.');
     }
 
@@ -460,6 +464,7 @@ class MporController extends Controller
         abort_unless((int) ($mpor->employee?->office_id ?? 0) === (int) $supervisor->office_id, 403);
 
         if ($mpor->status !== 'submitted') {
+            if ($request->wantsJson()) return response()->json(['message' => 'Only submitted MPOR can be returned.'], 422);
             return back()->with('info', 'Only submitted MPOR can be returned to employee.');
         }
 
@@ -479,6 +484,7 @@ class MporController extends Controller
             'return_remarks' => trim((string) ($validated['return_remarks'] ?? '')) ?: null,
         ]);
 
+        if ($request->wantsJson()) return response()->json(['status' => 'returned']);
         return back()->with('success', 'MPOR returned to employee.');
     }
 }

@@ -77,7 +77,7 @@
                     </div>
                     <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-3">
                         <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Status</p>
-                        <span class="{{ $currentStatusMeta['badge'] }} mt-1 inline-flex rounded-full border px-2 py-1 text-xs font-semibold">
+                        <span data-qar-status-badge class="{{ $currentStatusMeta['badge'] }} mt-1 inline-flex rounded-full border px-2 py-1 text-xs font-semibold">
                             {{ $currentStatusMeta['label'] }}
                         </span>
                     </div>
@@ -860,7 +860,6 @@
                     form.dataset.ajaxBound = 'true';
 
                     form.addEventListener('submit', async (e) => {
-                        // If already submitting, do nothing
                         if (form.dataset.submitting === 'true') {
                             e.preventDefault();
                             return;
@@ -869,45 +868,56 @@
                         e.preventDefault();
                         form.dataset.submitting = 'true';
 
+                        const button = root.querySelector('#qarApproveProceedBtn');
+                        const spinner = button?.querySelector('[data-button-spinner]');
+                        const label = button?.querySelector('[data-button-label]');
+                        if (button) button.disabled = true;
+                        if (spinner) spinner.classList.remove('hidden');
+                        if (label) label.textContent = 'Endorsing...';
+
                         try {
                             const action = form.getAttribute('action');
-                            if (!action) {
-                                throw new Error('Missing action.');
-                            }
+                            if (!action) throw new Error('Missing action.');
 
                             const token = form.querySelector('input[name="_token"]')?.value || '';
+                            const formData = new FormData(form);
+                            const body = {};
+                            formData.forEach((v, k) => { body[k] = v; });
 
                             const response = await fetch(action, {
                                 method: 'POST',
                                 headers: {
                                     'X-Requested-With': 'XMLHttpRequest',
-                                    'Accept': 'text/html',
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'application/json',
                                     ...(token ? { 'X-CSRF-TOKEN': token } : {}),
                                 },
-                                body: new FormData(form),
-                                redirect: 'follow',
+                                body: JSON.stringify(body),
                             });
 
-                            if (!response.ok) {
-                                throw new Error('Request failed.');
+                            if (!response.ok) throw new Error('Request failed.');
+
+                            // Update status badge
+                            const statusBadge = document.querySelector('[data-qar-status-badge]');
+                            if (statusBadge) {
+                                statusBadge.textContent = 'Dept Head Endorsed';
+                                statusBadge.className = 'inline-flex rounded-full border px-3 py-1 text-xs font-semibold border-emerald-500/30 bg-emerald-500/10 text-emerald-200';
                             }
 
-                            const html = await response.text();
-
-                            // Use current URL (after endorse redirect it will be the QAR page)
-                            const updated = replaceQarRootFromHtml(html, { pushUrl: location.href });
-
-                            if (!updated) {
-                                // if we can't patch DOM, fallback to hard reload
-                                window.location.href = action;
-                                return;
-                            }
+                            // Hide the Endorse button
+                            const endorseBtn = document.querySelector('[data-modal-target="qarApproveConfirmModal"]');
+                            if (endorseBtn) endorseBtn.remove();
 
                             closeModalById('qarApproveConfirmModal');
+
+                            // Show success toast
+                            const toast = document.createElement('div');
+                            toast.className = 'fixed top-4 right-4 z-[9999] rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm font-semibold text-emerald-200 shadow-lg';
+                            toast.innerHTML = '<i class="fa-solid fa-check-circle mr-2"></i>QAR endorsed successfully.';
+                            document.body.appendChild(toast);
+                            setTimeout(() => toast.remove(), 3000);
                         } catch (err) {
-                            // fallback to normal page reload
-                            const action = form.getAttribute('action');
-                            window.location.href = action || location.href;
+                            window.location.reload();
                         } finally {
                             form.dataset.submitting = 'false';
                         }

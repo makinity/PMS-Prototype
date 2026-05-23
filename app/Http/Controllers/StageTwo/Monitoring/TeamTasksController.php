@@ -35,7 +35,7 @@ class TeamTasksController extends Controller
             ->orderByDesc('work_date')
             ->orderByDesc('id');
 
-        $entries = $entriesQuery->paginate(100)->withQueryString();
+        $entries = $entriesQuery->paginate(12)->withQueryString();
 
         return view('supervisor.team-tasks', compact('entries', 'teamEmployees', 'supervisor'));
     }

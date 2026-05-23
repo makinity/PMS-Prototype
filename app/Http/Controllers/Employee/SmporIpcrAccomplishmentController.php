@@ -1820,6 +1820,10 @@ class SmporIpcrAccomplishmentController extends Controller
             return back()->withErrors(['Submission failed: ' . $e->getMessage()]);
         }
 
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json(['status' => 'submitted', 'message' => 'Accomplishments submitted successfully.']);
+        }
+
         return back()->with('success', 'Accomplishments submitted successfully. Uploads and remarks are now read-only.');
     }
 

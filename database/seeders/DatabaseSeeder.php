@@ -8,6 +8,9 @@ use App\Models\Ipcr;
 use App\Models\IpcrItem;
 use App\Models\Opcr;
 use App\Models\OrsEntry;
+use App\Models\OrsEntryEvidence;
+use App\Models\OrsEntryMonitoring;
+use App\Models\AccomplishmentSubmission;
 use App\Models\MyTask;
 use App\Models\Mpor;
 use App\Models\QarHeader;
@@ -812,63 +815,89 @@ class DatabaseSeeder extends Seeder
             // Seed RMU employees — one entry per week across the month
             $seedEmployeeData($rmuEmployeeIds, $opcrRMU, $uwpRMU, $supervisorRMU->id, $officeRMU->id, $period, true);
 
-            // --- GENERATE DEVELOPMENT PLANS FOR RMU ---
+            // --- RATE ALL RMU ORS ENTRIES + ADD EVIDENCE ---
+            $rmuOrsEntries = OrsEntry::query()
+                ->where('office_id', $officeRMU->id)
+                ->where('performance_period_id', $period->id)
+                ->get();
+
+            foreach ($rmuOrsEntries as $entry) {
+                $entry->update(['status' => 'rated', 'submitted_at' => now()->subDays(3)]);
+
+                OrsEntryMonitoring::query()->firstOrCreate(
+                    ['ors_entry_id' => $entry->id, 'supervisor_id' => $supervisorRMU->id],
+                    [
+                        'quality_rating' => rand(4, 5),
+                        'timeliness_rating' => rand(4, 5),
+                        'remarks' => 'Good work.',
+                        'rated_at' => now()->subDays(2),
+                    ]
+                );
+
+                OrsEntryEvidence::query()->firstOrCreate(
+                    ['ors_entry_id' => $entry->id, 'file_name' => 'Sample Evidence.pdf'],
+                    [
+                        'file_path' => 'sample-evidence/Sample Evidence.pdf',
+                        'mime_type' => 'application/pdf',
+                        'file_size' => 13901,
+                        'uploaded_at' => now()->subDays(3),
+                    ]
+                );
+
+                // Update MyTask to submitted
+                MyTask::query()->where('ors_entry_id', $entry->id)->update(['status' => 'submitted', 'submitted_at' => now()->subDays(3), 'has_evidence' => true]);
+            }
+
+            // --- SUBMIT & APPROVE MPORs FOR RMU ---
+            $currentMonth = now()->format('Y-m');
             foreach ($rmuEmployeeIds as $employeeId) {
-                $ipcr = Ipcr::query()->where('employee_id', $employeeId)->where('performance_period_id', $period->id)->first();
-                if ($ipcr) {
-                    DevelopmentPlan::query()->firstOrCreate(
-                        [
-                            'ipcr_id' => $ipcr->id,
-                            'employee_id' => $employeeId,
-                            'office_id' => $officeRMU->id,
-                            'performance_period_id' => $period->id,
-                        ],
-                        [
-                            'source_score' => 4.50,
-                            'source_rating' => 'Outstanding',
-                            'status' => DevelopmentPlan::STATUS_SUBMITTED_TO_LD,
-                            'pmt_remarks' => 'Excellent performance, recommended for leadership training.',
-                            'created_by' => $supervisorRMU->id,
-                            'submitted_to_ld_at' => now()->subDays(1),
-                        ]
-                    );
+                $mpor = Mpor::query()->where('employee_id', $employeeId)->where('office_id', $officeRMU->id)->first();
+                if ($mpor) {
+                    $mpor->update([
+                        'month' => $currentMonth,
+                        'status' => 'endorsed',
+                        'submitted_at' => now()->subDays(2),
+                        'approved_at' => now()->subDays(1),
+                        'approved_by' => $supervisorRMU->id,
+                        'endorsed_at' => now()->subHours(12),
+                        'endorsed_by' => $supervisorRMU->id,
+                    ]);
                 }
             }
 
-            // --- GENERATE QAR ---
+            // --- GENERATE QAR (Q2 for current month) ---
+            $quarterKey = now()->year . '-Q' . (int) ceil(now()->month / 3);
             $qarHeader = QarHeader::query()->firstOrCreate(
                 [
                     'office_id' => $officeRMU->id,
                     'performance_period_id' => $period->id,
-                    'quarter_key' => 'Q1',
+                    'quarter_key' => $quarterKey,
                 ],
                 [
                     'status' => QarHeader::STATUS_PMT_APPROVED,
-                    'generated_at' => now()->subDays(7),
-                    'generated_by' => $supervisorRMU->id,
-                    'approved_at' => now()->subDays(6),
+                    'generated_at' => now()->subDays(5),
+                    'generated_by' => $deptHeadRMU->id,
+                    'approved_at' => now()->subDays(4),
                     'approved_by' => $deptHeadRMU->id,
                     'pmt_status' => QarHeader::PMT_VALIDATED,
-                    'pmt_validated_at' => now()->subDays(5),
+                    'pmt_validated_at' => now()->subDays(3),
                 ]
             );
 
+            // QAR Rows
             $mfoCount = 1;
             foreach ($functionSeedRMU as $func) {
                 foreach ($func['mfos'] as $mfo) {
+                    $tqty = number_format((float) ($mfo['target_quantity'] ?? 100));
+                    $tline = $mfo['target_timeline'] ?? 'Semester';
                     QarRow::query()->firstOrCreate(
-                        [
-                            'qar_header_id' => $qarHeader->id,
-                            'ppa_code' => 'PPA-00' . $mfoCount,
-                            'mfo_title' => $mfo['title'],
-                            'indicator_text' => $mfo['indicators'][0] ?? 'Indicator',
-                        ],
+                        ['qar_header_id' => $qarHeader->id, 'ppa_code' => (string) $mfoCount, 'mfo_title' => $mfo['title'], 'indicator_text' => $mfo['indicators'][0] ?? 'Indicator'],
                         [
                             'target_quantity' => $mfo['target_quantity'] ?? 100,
-                            'target_timeline' => $mfo['target_timeline'] ?? 'Semester',
-                            'actual_performance' => ($mfo['target_quantity'] ?? 100) * 1.1,
-                            'variance' => ($mfo['target_quantity'] ?? 100) * 0.1,
-                            'remarks' => 'Exceeded targets for this quarter.',
+                            'target_timeline' => "{$tqty} {$tline}",
+                            'actual_performance' => rand(150, 300),
+                            'variance' => ($mfo['target_quantity'] ?? 100) - rand(150, 300),
+                            'remarks' => 'Consolidated from multiple employee MPORs',
                             'sort_order' => $mfoCount,
                         ]
                     );
@@ -876,36 +905,64 @@ class DatabaseSeeder extends Seeder
                 }
             }
 
+            // --- CALCULATE IPCR SCORES ---
+            $ratingService = app(\App\Services\PerformanceRatingService::class);
+            foreach ($rmuEmployeeIds as $employeeId) {
+                $ipcr = Ipcr::query()->where('employee_id', $employeeId)->where('performance_period_id', $period->id)->first();
+                if ($ipcr) {
+                    $ratingService->calculateAndSaveFinalScore($ipcr);
+                    $ipcr->update(['status' => Ipcr::STATUS_RELEASED_BY_PMT, 'released_by' => 1, 'released_at' => now()->subDays(1), 'finalized_at' => now()->subDays(1), 'locked_at' => now()->subDays(1)]);
+                }
+            }
+
+            // --- UPDATE OPCR SCORE ---
+            $ipcrScores = Ipcr::where('office_id', $officeRMU->id)->where('performance_period_id', $period->id)->whereNotNull('final_score')->where('final_score', '>', 0)->pluck('final_score');
+            if ($ipcrScores->isNotEmpty()) {
+                $avgScore = round($ipcrScores->avg(), 2);
+                $opcrRMU->update([
+                    'final_score' => $avgScore,
+                    'adjectival_rating' => $ratingService->resolveAdjectivalRating($avgScore),
+                    'status' => Opcr::STATUS_RELEASED_BY_PMT,
+                    'released_by' => 1,
+                    'released_at' => now()->subDays(1),
+                    'locked_at' => now()->subDays(1),
+                ]);
+            }
+
+            // --- ACCOMPLISHMENT SUBMISSIONS ---
+            foreach ($rmuEmployeeIds as $employeeId) {
+                $ipcr = Ipcr::query()->where('employee_id', $employeeId)->where('performance_period_id', $period->id)->first();
+                if ($ipcr) {
+                    AccomplishmentSubmission::query()->firstOrCreate(
+                        ['employee_id' => $employeeId, 'performance_period_id' => $period->id],
+                        [
+                            'office_id' => $officeRMU->id,
+                            'ipcr_id' => $ipcr->id,
+                            'dataset_source' => 'qar_official',
+                            'qar_header_id' => $qarHeader->id,
+                            'status' => AccomplishmentSubmission::STATUS_RELEASED_BY_PMT,
+                            'submitted_at' => now()->subDays(3),
+                            'supervisor_id' => $supervisorRMU->id,
+                            'supervisor_action_at' => now()->subDays(2),
+                            'dept_head_id' => $deptHeadRMU->id,
+                            'dept_head_action_at' => now()->subDays(2),
+                            'pmt_id' => 2,
+                            'pmt_action_at' => now()->subDays(1),
+                        ]
+                    );
+                }
+            }
+
             // --- GENERATE SMPOR ---
             $smpor = Smpor::query()->firstOrCreate(
-                [
-                    'qar_header_id' => $qarHeader->id,
-                    'office_id' => $officeRMU->id,
-                    'performance_period_id' => $period->id,
-                    'quarter_key' => 'Q1',
-                ],
-                [
-                    'generated_at' => now()->subDays(4),
-                    'generated_by' => $deptHeadRMU->id,
-                    'avg_quality' => 4.60,
-                    'avg_timeliness' => 4.80,
-                    'overall_score' => 4.70,
-                    'adjectival_rating' => 'Outstanding',
-                ]
+                ['qar_header_id' => $qarHeader->id, 'office_id' => $officeRMU->id, 'performance_period_id' => $period->id, 'quarter_key' => $quarterKey],
+                ['generated_at' => now()->subDays(3), 'generated_by' => $deptHeadRMU->id, 'avg_quality' => 4.60, 'avg_timeliness' => 4.80, 'overall_score' => 4.70, 'adjectival_rating' => 'Outstanding']
             );
 
             foreach ($rmuEmployeeIds as $index => $employeeId) {
                 SmporItem::query()->firstOrCreate(
-                    [
-                        'smpor_id' => $smpor->id,
-                        'employee_id' => $employeeId,
-                    ],
-                    [
-                        'quality_avg' => 4.5 + ($index * 0.1),
-                        'timeliness_avg' => 4.6 + ($index * 0.1),
-                        'overall_score' => 4.55 + ($index * 0.1),
-                        'adjectival_rating' => 'Outstanding',
-                    ]
+                    ['smpor_id' => $smpor->id, 'employee_id' => $employeeId],
+                    ['quality_avg' => 4.5 + ($index * 0.1), 'timeliness_avg' => 4.6 + ($index * 0.1), 'overall_score' => 4.55 + ($index * 0.1), 'adjectival_rating' => 'Outstanding']
                 );
             }
 
@@ -931,6 +988,7 @@ class DatabaseSeeder extends Seeder
 
             foreach ($rmuEmployeeIds as $index => $employeeId) {
                 $employee = User::find($employeeId);
+                $ipcr = Ipcr::where('employee_id', $employeeId)->where('performance_period_id', $period->id)->first();
                 TopPerformer::query()->firstOrCreate(
                     [
                         'performer_type' => TopPerformer::TYPE_EMPLOYEE,
@@ -939,16 +997,31 @@ class DatabaseSeeder extends Seeder
                         'rank' => count($rmuEmployeeIds) - $index,
                     ],
                     [
-                        'source_record_id' => Ipcr::where('employee_id', $employeeId)->where('performance_period_id', $period->id)->value('id'),
-                        'ipcr_id' => Ipcr::where('employee_id', $employeeId)->where('performance_period_id', $period->id)->value('id'),
+                        'source_record_id' => $ipcr?->id,
+                        'ipcr_id' => $ipcr?->id,
                         'office_id' => $officeRMU->id,
                         'performer_name' => $employee->name,
                         'office_name' => 'Revenue Management Unit',
-                        'official_score' => 4.55 + ($index * 0.1),
-                        'official_rating' => 'Outstanding',
+                        'official_score' => $ipcr?->final_score ?? (4.55 + ($index * 0.1)),
+                        'official_rating' => $ipcr?->adjectival_rating ?? 'Outstanding',
                         'released_at' => now(),
                     ]
                 );
+
+                // Development Plan
+                if ($ipcr) {
+                    DevelopmentPlan::query()->firstOrCreate(
+                        ['ipcr_id' => $ipcr->id, 'employee_id' => $employeeId, 'office_id' => $officeRMU->id, 'performance_period_id' => $period->id],
+                        [
+                            'source_score' => $ipcr->final_score ?? 4.50,
+                            'source_rating' => $ipcr->adjectival_rating ?? 'Outstanding',
+                            'status' => DevelopmentPlan::STATUS_SUBMITTED_TO_LD,
+                            'pmt_remarks' => 'Recommended for leadership training.',
+                            'created_by' => $supervisorRMU->id,
+                            'submitted_to_ld_at' => now()->subDays(1),
+                        ]
+                    );
+                }
             }
         });
     }

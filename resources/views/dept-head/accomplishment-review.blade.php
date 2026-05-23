@@ -33,17 +33,40 @@
         </div>
 
         <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
+            <div class="border-b border-slate-800 px-5 py-4">
+                <div class="flex flex-wrap items-end gap-3">
+                    <div class="min-w-[220px] flex-1">
+                        <label for="dh-submissions-search" class="mb-1 block text-xs uppercase tracking-[0.14em] text-slate-400">Search</label>
+                        <input
+                            id="dh-submissions-search"
+                            type="text"
+                            placeholder="Search employee, status, rating..."
+                            style="background-color:#020617;color:#e2e8f0;border-color:#334155;"
+                            class="w-full rounded-xl border px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500">
+                    </div>
+                    <div class="w-full min-w-[180px] sm:w-auto">
+                        <label for="dh-submissions-rating" class="mb-1 block text-xs uppercase tracking-[0.14em] text-slate-400">Performance Rating</label>
+                        <select
+                            id="dh-submissions-rating"
+                            style="background-color:#020617;color:#e2e8f0;border-color:#334155;"
+                            class="w-full rounded-xl border px-3 py-2 text-sm text-slate-200 [color-scheme:dark]">
+                            <option value="">All</option>
+                            <option value="Outstanding">Outstanding</option>
+                            <option value="Very Satisfactory">Very Satisfactory</option>
+                            <option value="Satisfactory">Satisfactory</option>
+                            <option value="Unsatisfactory">Unsatisfactory</option>
+                            <option value="Poor">Poor</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm text-slate-200">
                     <thead class="bg-slate-950/70 text-xs uppercase tracking-[0.14em] text-slate-400">
                         <tr>
                             <th class="px-5 py-3 text-left">Employee</th>
-                            <th class="px-5 py-3 text-left">Office</th>
-                            <th class="px-5 py-3 text-left">Period</th>
                             <th class="px-5 py-3 text-left">Status</th>
                             <th class="px-5 py-3 text-center tabular-nums">Score</th>
-                            <th class="px-5 py-3 text-left">Submitted At</th>
-                            <th class="px-5 py-3 text-left">Supervisor Action</th>
                             <th class="px-5 py-3 text-center">Actions</th>
                         </tr>
                     </thead>
@@ -52,37 +75,48 @@
                             @php
                                 $statusKey = strtolower((string) ($row['status'] ?? 'draft'));
                                 $statusBadgeClasses = $statusBadgeClassMap[$statusKey] ?? $statusBadgeClassMap['draft'];
+                                $ratingText = (string) ($row['computed_rating'] ?? '--');
+                                $rowSearchText = strtolower(trim(implode(' ', [
+                                    (string) ($row['employee_name'] ?? ''),
+                                    (string) ($row['status_label'] ?? ''),
+                                    $ratingText,
+                                ])));
                             @endphp
-                            <tr class="bg-slate-900/40">
-                                <td class="px-5 py-3 font-semibold text-slate-100">{{ $row['employee_name'] ?? '--' }}</td>
-                                <td class="px-5 py-3">{{ $row['office_name'] ?? '--' }}</td>
-                                <td class="px-5 py-3">{{ $row['period_label'] ?? $periodLabelSafe }}</td>
+                            <tr class="bg-slate-900/40"
+                                data-submission-row
+                                data-search-text="{{ $rowSearchText }}"
+                                data-rating="{{ $ratingText }}">
+                                <td class="px-5 py-3 font-semibold text-slate-100">
+                                    <div class="flex items-center gap-2.5">
+                                        <img
+                                            src="{{ $row['employee_photo_url'] ?: ('https://ui-avatars.com/api/?name=' . urlencode($row['employee_name'] ?? 'Employee') . '&background=1e40af&color=fff&size=64') }}"
+                                            alt="{{ $row['employee_name'] ?? 'Employee' }}"
+                                            class="h-7 w-7 rounded-full object-cover ring-1 ring-slate-700/80">
+                                        <span>{{ $row['employee_name'] ?? '--' }}</span>
+                                    </div>
+                                </td>
                                 <td class="px-5 py-3">
                                     <span class="{{ $statusBadgeClasses }}">{{ $row['status_label'] ?? 'Draft' }}</span>
                                 </td>
                                 <td class="px-5 py-3 text-center tabular-nums font-bold text-emerald-400">
                                     {{ number_format($row['computed_score'] ?? 0, 2) }}
                                 </td>
-                                <td class="px-5 py-3">{{ $row['submitted_at_label'] ?? '--' }}</td>
-                                <td class="px-5 py-3">{{ $row['supervisor_action_at_label'] ?? '--' }}</td>
                                 <td class="px-5 py-3 text-center">
-                                    <button type="button"
-                                            data-open-submission
-                                            data-submission-id="{{ $row['id'] }}"
+                                    <a href="{{ route('dept-head.acc-review.show', $row['id']) }}"
                                             aria-label="View submission"
-                                            class="inline-flex items-center justify-center rounded-lg border border-slate-700 px-2.5 py-2 text-slate-200 transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/40">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-4 w-4" aria-hidden="true">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1 1 0 010-.644C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178a1 1 0 010 .644C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        </svg>
-                                    </button>
+                                            class="inline-flex text-slate-300 transition hover:text-white">
+                                        <i class="fa-regular fa-eye"></i>
+                                    </a>
                                 </td>
                             </tr>
                         @empty
                             <tr class="bg-slate-900/40">
-                                <td colspan="7" class="px-5 py-8 text-center text-sm text-slate-400">No submissions found for your office/unit.</td>
+                                <td colspan="4" class="px-5 py-8 text-center text-sm text-slate-400">No submissions found for your office/unit.</td>
                             </tr>
                         @endforelse
+                        <tr id="dept-head-submissions-no-match-row" class="hidden bg-slate-900/40">
+                            <td colspan="4" class="px-5 py-8 text-center text-sm text-slate-400">No matching submissions found.</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -931,6 +965,38 @@
 
                 refreshPreviewModalZIndices();
                 syncBodyScroll();
+
+                const liveSearchInput = document.getElementById('dh-submissions-search');
+                const ratingFilterSelect = document.getElementById('dh-submissions-rating');
+                const tableRows = Array.from(document.querySelectorAll('[data-submission-row]'));
+                const noMatchRow = document.getElementById('dept-head-submissions-no-match-row');
+
+                function applyDeptHeadSubmissionFilters() {
+                    if (!tableRows.length) return;
+
+                    const query = String(liveSearchInput?.value || '').trim().toLowerCase();
+                    const selectedRating = String(ratingFilterSelect?.value || '').trim().toLowerCase();
+                    let visibleCount = 0;
+
+                    tableRows.forEach((row) => {
+                        const haystack = String(row.dataset.searchText || '').toLowerCase();
+                        const rating = String(row.dataset.rating || '').toLowerCase();
+
+                        const matchesSearch = query === '' || haystack.includes(query);
+                        const matchesRating = selectedRating === '' || rating === selectedRating;
+                        const shouldShow = matchesSearch && matchesRating;
+
+                        row.classList.toggle('hidden', !shouldShow);
+                        if (shouldShow) visibleCount += 1;
+                    });
+
+                    if (noMatchRow) {
+                        noMatchRow.classList.toggle('hidden', visibleCount > 0);
+                    }
+                }
+
+                liveSearchInput?.addEventListener('input', applyDeptHeadSubmissionFilters);
+                ratingFilterSelect?.addEventListener('change', applyDeptHeadSubmissionFilters);
             });
         </script>
     @endpush

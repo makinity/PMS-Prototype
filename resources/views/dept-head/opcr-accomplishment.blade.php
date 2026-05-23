@@ -165,11 +165,11 @@
                 </div>
                 <div class="flex items-center justify-between border-b border-slate-800 pb-2">
                     <span class="text-slate-300">Computed Overall Rating</span>
-                    <span class="font-semibold text-blue-300">{{ number_format((float) $computedSummary['overall_score'], 2) }}</span>
+                    <span class="font-semibold text-blue-300">{{ number_format((float) ($currentOpcr->final_score ?: $computedSummary['overall_score']), 2) }}</span>
                 </div>
                 <div class="flex items-center justify-between border-b border-slate-800 pb-2">
                     <span class="text-slate-300">Computed Adjectival Rating</span>
-                    <span class="font-semibold text-white">{{ $computedSummary['adjectival_rating'] }}</span>
+                    <span class="font-semibold text-white">{{ $currentOpcr->adjectival_rating ?: $computedSummary['adjectival_rating'] }}</span>
                 </div>
                 <div class="flex items-center justify-between border-b border-slate-800 pb-2">
                     <span class="text-slate-300">Status</span>
@@ -201,6 +201,12 @@
                     <div>
                         <p class="text-sm font-bold text-white text-violet-300">CALIBRATED BY PMT</p>
                         <p class="text-xs text-slate-400">Final adjusted score: {{ $currentOpcr->pmt_adjusted_score }}</p>
+                    </div>
+                @elseif ($currentOpcr->final_score && abs($currentOpcr->final_score - ($computedSummary['overall_score'] ?? 0)) > 0.01)
+                    <div class="h-4 w-4 rounded-full bg-violet-500 animate-pulse"></div>
+                    <div>
+                        <p class="text-sm font-bold text-violet-300">CALIBRATED BY PMT</p>
+                        <p class="text-xs text-slate-400">Final adjusted score: {{ number_format($currentOpcr->final_score, 2) }} ({{ $currentOpcr->adjectival_rating }})</p>
                     </div>
                 @else
                     <div class="h-4 w-4 rounded-full bg-amber-500"></div>

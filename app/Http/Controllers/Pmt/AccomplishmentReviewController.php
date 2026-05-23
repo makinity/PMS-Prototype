@@ -55,7 +55,7 @@ class AccomplishmentReviewController extends Controller
                 AccomplishmentSubmission::STATUS_RELEASED_BY_PMT,
             ])
             ->with([
-                'employee:id,name,office_id',
+                'employee:id,name,office_id,profile_photo_path',
                 'employee.office:id,name',
                 'mpors:id,employee_id,office_id,month,status',
                 'ipcr:id,unit_work_plan_id,performance_period_id,office_id,employee_id',
@@ -86,6 +86,7 @@ class AccomplishmentReviewController extends Controller
 
         foreach ($submissions as $submission) {
             $employeeName = (string) ($submission->employee?->name ?? '--');
+            $employeePhotoUrl = (string) ($submission->employee?->profile_photo_url ?? '');
             $officeName = (string) ($submission->employee?->office?->name ?? '--');
             $status = strtolower(trim((string) ($submission->status ?? 'draft')));
 
@@ -127,6 +128,7 @@ class AccomplishmentReviewController extends Controller
             $payload = [
                 'id' => (int) $submission->id,
                 'employee_name' => $employeeName,
+                'employee_photo_url' => $employeePhotoUrl !== '' ? $employeePhotoUrl : null,
                 'office_name' => $officeName,
                 'period_label' => $periodLabel,
                 'status' => $status,
@@ -160,6 +162,7 @@ class AccomplishmentReviewController extends Controller
             $rows[] = [
                 'id' => (int) $submission->id,
                 'employee_name' => $employeeName,
+                'employee_photo_url' => $employeePhotoUrl !== '' ? $employeePhotoUrl : null,
                 'office_name' => $officeName,
                 'period_label' => $periodLabel,
                 'status' => $status,
@@ -564,10 +567,79 @@ class AccomplishmentReviewController extends Controller
         return $normalized;
     }
 
-    public function approve($id)
+    public function show(Request $request, $id)
+    {
+        $user = $request->user();
+        abort_unless($user, 403);
+
+        $period = PerformancePeriod::query()->where('is_active', 1)->first();
+        abort_unless($period, 404);
+
+        $submission = AccomplishmentSubmission::query()
+            ->where('id', $id)
+            ->where('performance_period_id', $period->id)
+            ->with(['employee:id,name,office_id', 'employee.office:id,name', 'ipcr'])
+            ->firstOrFail();
+
+        $periodLabel = $this->buildPeriodLabel($period);
+        $status = strtolower(trim((string) ($submission->status ?? 'draft')));
+        $ratingService = app(\App\Services\PerformanceRatingService::class);
+
+        if ($submission->ipcr) {
+            [$computedScore, $computedRating] = $ratingService->getResolvedScoreAndRating($submission->ipcr);
+        } else {
+            $computedScore = 0.00;
+            $computedRating = '--';
+        }
+
+        $attachments = $this->buildAttachmentPayload($submission->attachments ?? []);
+
+        return view('pmt.accomplishment-show', [
+            'submission' => $submission,
+            'periodLabel' => $periodLabel,
+            'status' => $status,
+            'statusLabel' => $this->formatStatusLabel($status),
+            'submittedAtLabel' => $submission->submitted_at ? $submission->submitted_at->format('M d, Y h:i A') : '--',
+            'employeeName' => $submission->employee?->name ?? '--',
+            'officeName' => $submission->employee?->office?->name ?? '--',
+            'computedScore' => $computedScore,
+            'computedRating' => $computedRating,
+            'remarks' => (string) ($submission->employee_remarks ?? ''),
+            'attachments' => $attachments,
+        ]);
+    }
+
+    public function smporPreview(Request $request, $id)
+    {
+        $submission = AccomplishmentSubmission::with(['employee'])->findOrFail($id);
+        $originalUser = $request->user();
+        Auth::login($submission->employee);
+        $controller = app(\App\Http\Controllers\Employee\SmporIpcrAccomplishmentController::class);
+        $indexView = $controller->index($request);
+        Auth::login($originalUser);
+        $data = $indexView->getData();
+        $data['backUrl'] = route('pmt.acc-review.show', $id);
+        return view('pmt.accomplishment-smpor-preview', $data);
+    }
+
+    public function ipcrPreview(Request $request, $id)
+    {
+        $submission = AccomplishmentSubmission::with(['employee'])->findOrFail($id);
+        $originalUser = $request->user();
+        Auth::login($submission->employee);
+        $controller = app(\App\Http\Controllers\Employee\SmporIpcrAccomplishmentController::class);
+        $indexView = $controller->index($request);
+        Auth::login($originalUser);
+        $data = $indexView->getData();
+        $data['backUrl'] = route('pmt.acc-review.show', $id);
+        return view('pmt.accomplishment-ipcr-preview', $data);
+    }
+
+    public function approve(Request $request, $id)
     {
         $submission = AccomplishmentSubmission::findOrFail($id);
         if ($submission->status !== AccomplishmentSubmission::STATUS_DEPT_HEAD_ENDORSED) {
+            if ($request->wantsJson()) return response()->json(['message' => 'Only submissions endorsed by Department Head can be recommended.'], 422);
             return back()->with('error', 'Only submissions endorsed by Department Head can be recommended by PMT.');
         }
 
@@ -587,6 +659,7 @@ class AccomplishmentReviewController extends Controller
             ]);
         }
 
+        if ($request->wantsJson()) return response()->json(['status' => 'recommended_by_pmt']);
         return back()->with('success', 'Submission successfully recommended by PMT and forwarded for calibration.');
     }
 
@@ -626,6 +699,7 @@ class AccomplishmentReviewController extends Controller
             }
         });
 
+        if ($request->wantsJson()) return response()->json(['status' => 'returned_to_employee']);
         return back()->with('success', 'Submission returned to employee for correction.');
     }
 }

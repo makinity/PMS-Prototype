@@ -33,6 +33,33 @@
         </div>
 
         <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
+            <div class="border-b border-slate-800 px-5 py-4">
+                <div class="flex flex-wrap items-end gap-3">
+                    <div class="min-w-[220px] flex-1">
+                        <label for="sup-submissions-search" class="mb-1 block text-xs uppercase tracking-[0.14em] text-slate-400">Search</label>
+                        <input
+                            id="sup-submissions-search"
+                            type="text"
+                            placeholder="Search employee, status, rating..."
+                            style="background-color:#020617;color:#e2e8f0;border-color:#334155;"
+                            class="w-full rounded-xl border px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500">
+                    </div>
+                    <div class="w-full min-w-[180px] sm:w-auto">
+                        <label for="sup-submissions-rating" class="mb-1 block text-xs uppercase tracking-[0.14em] text-slate-400">Performance Rating</label>
+                        <select
+                            id="sup-submissions-rating"
+                            style="background-color:#020617;color:#e2e8f0;border-color:#334155;"
+                            class="w-full rounded-xl border px-3 py-2 text-sm text-slate-200 [color-scheme:dark]">
+                            <option value="">All</option>
+                            <option value="Outstanding">Outstanding</option>
+                            <option value="Very Satisfactory">Very Satisfactory</option>
+                            <option value="Satisfactory">Satisfactory</option>
+                            <option value="Unsatisfactory">Unsatisfactory</option>
+                            <option value="Poor">Poor</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm text-slate-200">
                     <thead class="bg-slate-950/70 text-xs uppercase tracking-[0.14em] text-slate-400">
@@ -48,8 +75,17 @@
                             @php
                                 $statusKey = strtolower((string) ($row['status'] ?? 'draft'));
                                 $statusBadgeClasses = $statusBadgeClassMap[$statusKey] ?? $statusBadgeClassMap['draft'];
+                                $ratingText = (string) ($row['computed_rating'] ?? '--');
+                                $rowSearchText = strtolower(trim(implode(' ', [
+                                    (string) ($row['employee_name'] ?? ''),
+                                    (string) ($row['status_label'] ?? ''),
+                                    $ratingText,
+                                ])));
                             @endphp
-                            <tr class="bg-slate-900/40 hover:bg-slate-800/30 transition-colors">
+                            <tr class="bg-slate-900/40 hover:bg-slate-800/30 transition-colors"
+                                data-submission-row
+                                data-search-text="{{ $rowSearchText }}"
+                                data-rating="{{ $ratingText }}">
                                 <td class="px-5 py-4">
                                     <div class="flex items-center gap-3">
                                         <span class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 text-[10px] font-bold text-slate-300">
@@ -65,14 +101,12 @@
                                     {{ number_format($row['computed_score'] ?? 0, 2) }}
                                 </td>
                                 <td class="px-5 py-4 text-center">
-                                    <button type="button"
-                                            data-open-submission
-                                            data-submission-id="{{ $row['id'] }}"
+                                    <a href="{{ route('supervisor.submissions.show', $row['id']) }}"
                                             aria-label="View submission"
-                                            class="inline-flex items-center justify-center rounded-lg border border-slate-700 px-3 py-2 text-slate-200 transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/40">
-                                        <i class="fa-regular fa-eye text-sm mr-2"></i>
-                                        <span>View Details</span>
-                                    </button>
+                                            class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-700 bg-slate-800 text-slate-300 transition hover:bg-slate-700 hover:text-white"
+                                            title="View Details">
+                                        <i class="fa-regular fa-eye text-sm"></i>
+                                    </a>
                                 </td>
                             </tr>
                         @empty
@@ -83,6 +117,9 @@
                                 </td>
                             </tr>
                         @endforelse
+                        <tr id="supervisor-submissions-no-match-row" class="hidden bg-slate-900/40">
+                            <td colspan="4" class="px-5 py-10 text-center text-sm text-slate-400">No matching employee submissions found.</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -935,6 +972,38 @@
 
                 refreshPreviewModalZIndices();
                 syncBodyScroll();
+
+                const liveSearchInput = document.getElementById('sup-submissions-search');
+                const ratingFilterSelect = document.getElementById('sup-submissions-rating');
+                const tableRows = Array.from(document.querySelectorAll('[data-submission-row]'));
+                const noMatchRow = document.getElementById('supervisor-submissions-no-match-row');
+
+                function applySupervisorSubmissionFilters() {
+                    if (!tableRows.length) return;
+
+                    const query = String(liveSearchInput?.value || '').trim().toLowerCase();
+                    const selectedRating = String(ratingFilterSelect?.value || '').trim().toLowerCase();
+                    let visibleCount = 0;
+
+                    tableRows.forEach((row) => {
+                        const haystack = String(row.dataset.searchText || '').toLowerCase();
+                        const rating = String(row.dataset.rating || '').toLowerCase();
+
+                        const matchesSearch = query === '' || haystack.includes(query);
+                        const matchesRating = selectedRating === '' || rating === selectedRating;
+                        const shouldShow = matchesSearch && matchesRating;
+
+                        row.classList.toggle('hidden', !shouldShow);
+                        if (shouldShow) visibleCount += 1;
+                    });
+
+                    if (noMatchRow) {
+                        noMatchRow.classList.toggle('hidden', visibleCount > 0);
+                    }
+                }
+
+                liveSearchInput?.addEventListener('input', applySupervisorSubmissionFilters);
+                ratingFilterSelect?.addEventListener('change', applySupervisorSubmissionFilters);
             });
         </script>
     @endpush

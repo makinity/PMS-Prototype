@@ -40,7 +40,7 @@
                         <tr>
                             <th class="px-4 py-3 text-left font-medium text-white">Task</th>
                             <th class="hidden px-4 py-3 text-left font-medium text-white sm:table-cell">Date</th>
-                            <th class="hidden px-4 py-3 text-left font-medium text-white sm:table-cell">Status</th>
+                            <th class="px-4 py-3 text-left font-medium text-white">Status</th>
                             <th class="hidden px-4 py-3 text-left font-medium text-white md:table-cell">Evidence</th>
                             <th class="hidden px-4 py-3 text-left font-medium text-white md:table-cell">Quantity (ORS)</th>
                             <th class="px-4 py-3 text-left font-medium text-white">Action</th>
@@ -581,7 +581,7 @@
                             <tr class="hover:bg-gray-750">
                                 <td class="px-4 py-3 text-gray-300">${task.title || '--'}</td>
                                 <td class="hidden px-4 py-3 text-gray-300 sm:table-cell">${formatDateHuman(task.date)}</td>
-                                <td class="hidden px-4 py-3 sm:table-cell">
+                                <td class="px-4 py-3">
                                     <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusChipClasses(task.state)}">
                                         ${statusLabel(task.state)}
                                     </span>

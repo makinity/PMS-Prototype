@@ -113,17 +113,16 @@
                     <div class="grid gap-4 lg:grid-cols-2">
                         <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
                             <h4 class="text-sm font-semibold text-white">Adjust Rating</h4>
-                            <form method="POST" action="{{ route('pmt.employee-calibration.adjust', $currentIpcr->id) }}" class="mt-3 space-y-3">
-                                @csrf
+                            <div class="mt-3 space-y-3">
                                 <div>
                                     <label class="text-xs text-slate-400">Adjusted Score</label>
-                                    <input type="number" step="0.01" min="1" max="5" name="adjusted_score" value="{{ $defaultAdjustedScore }}"
+                                    <input type="number" id="adjustedScoreInput" step="0.01" min="1" max="5" value="{{ $defaultAdjustedScore }}"
                                         style="background-color: #020617 !important; color: #f1f5f9 !important; border-color: #334155 !important;"
                                         class="w-full rounded border px-3 py-2 text-sm" required>
                                 </div>
                                 <div>
                                     <label class="text-xs text-slate-400">Adjusted Rating</label>
-                                    <select name="adjusted_rating"
+                                    <select id="adjustedRatingInput"
                                         style="background-color: #020617 !important; color: #f1f5f9 !important; border-color: #334155 !important;"
                                         class="w-full rounded border px-3 py-2 text-sm" required>
                                         <option value="Outstanding" @selected($selectedAdjustedRating === 'Outstanding')>Outstanding</option>
@@ -135,45 +134,124 @@
                                 </div>
                                 <div>
                                     <label class="text-xs text-slate-400">Adjustment Reason</label>
-                                    <textarea name="adjustment_reason" rows="2"
+                                    <textarea id="adjustmentReasonInput" rows="2"
                                         style="background-color: #020617 !important; color: #f1f5f9 !important; border-color: #334155 !important;"
                                         class="w-full rounded border px-3 py-2 text-sm" required></textarea>
                                 </div>
                                 <div class="text-right">
-                                    <button type="submit" class="rounded border border-blue-600 bg-blue-600/20 px-4 py-2 text-sm font-semibold text-blue-300 hover:bg-blue-600/30">Submit Adjustment</button>
+                                    <button type="button" id="btnSubmitAdjust" class="inline-flex items-center gap-2 rounded border border-blue-600 bg-blue-600/20 px-4 py-2 text-sm font-semibold text-blue-300 hover:bg-blue-600/30">
+                                        <span id="adjust-spinner" class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-blue-300/30 border-t-blue-300"></span>
+                                        <span id="adjust-label">Submit Adjustment</span>
+                                    </button>
                                 </div>
-                            </form>
+                            </div>
                         </div>
 
                         <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
-                            <h4 class="text-sm font-semibold text-white">Approve / Release / Return</h4>
-                            <form method="POST" action="{{ route('pmt.employee-calibration.approve', $currentIpcr->id) }}" class="mt-3 space-y-3">
-                                @csrf
+                            <h4 class="text-sm font-semibold text-white">Release / Return</h4>
+                            <div class="mt-3 space-y-3">
                                 <div>
                                     <label class="text-xs text-slate-400">PMT Remarks</label>
-                                    <textarea name="remarks" id="pmtRemarksInput" rows="3"
+                                    <textarea id="pmtRemarksInput" rows="3"
                                         style="background-color: #020617 !important; color: #f1f5f9 !important; border-color: #334155 !important;"
                                         class="w-full rounded border px-3 py-2 text-sm"></textarea>
                                 </div>
                                 <div class="mt-4 flex flex-wrap items-center justify-end gap-3">
-                                    <button type="button" id="pmtReturnBtn" class="rounded border border-rose-600 bg-rose-600/20 px-4 py-2 text-sm font-semibold text-rose-300 hover:bg-rose-600/30">Return to Employee</button>
+                                    <button type="button" id="btnReturn" class="inline-flex items-center gap-2 rounded border border-rose-600 bg-rose-600/20 px-4 py-2 text-sm font-semibold text-rose-300 hover:bg-rose-600/30">
+                                        <span id="return-spinner" class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-rose-300/30 border-t-rose-300"></span>
+                                        <span id="return-label">Return to Employee</span>
+                                    </button>
                                     @if ($canRelease)
-                                        <button type="button" id="pmtReleaseBtn" class="rounded border border-cyan-600 bg-cyan-600/20 px-4 py-2 text-sm font-semibold text-cyan-300 hover:bg-cyan-600/30">Release Official Result</button>
+                                        <button type="button" id="btnRelease" class="inline-flex items-center gap-2 rounded border border-cyan-600 bg-cyan-600/20 px-4 py-2 text-sm font-semibold text-cyan-300 hover:bg-cyan-600/30">
+                                            <span id="release-spinner" class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-cyan-300/30 border-t-cyan-300"></span>
+                                            <span id="release-label">Release Official Result</span>
+                                        </button>
                                     @endif
-                                    <button type="submit" class="rounded border border-emerald-600 bg-emerald-600/20 px-4 py-2 text-sm font-semibold text-emerald-300 hover:bg-emerald-600/30">Approve As Is</button>
                                 </div>
-                            </form>
-
-                            <form method="POST" id="pmtSubmissionReturnForm" action="{{ route('pmt.employee-calibration.return', $currentIpcr->id) }}" class="hidden">
-                                @csrf
-                                <input type="hidden" name="remarks" id="pmtReturnRemarksInput">
-                            </form>
-                            <form method="POST" id="pmtSubmissionReleaseForm" action="{{ route('pmt.employee-calibration.release', $currentIpcr->id) }}" class="hidden">
-                                @csrf
-                                <input type="hidden" name="remarks" id="pmtReleaseRemarksInput">
-                            </form>
+                            </div>
                         </div>
                     </div>
+
+                    <script>
+                    (function() {
+                        const csrfToken = '{{ csrf_token() }}';
+                        const adjustUrl = '{{ route("pmt.employee-calibration.adjust", $currentIpcr->id) }}';
+                        const releaseUrl = '{{ route("pmt.employee-calibration.release", $currentIpcr->id) }}';
+                        const returnUrl = '{{ route("pmt.employee-calibration.return", $currentIpcr->id) }}';
+
+                        function showSnackbar(msg, isError = false) {
+                            const el = document.createElement('div');
+                            el.className = `fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] rounded-lg px-5 py-3 text-sm font-semibold shadow-lg ${isError ? 'border border-rose-500/30 bg-rose-500/10 text-rose-200' : 'border border-emerald-500/30 bg-emerald-500/10 text-emerald-200'}`;
+                            el.innerHTML = `<i class="fa-solid ${isError ? 'fa-exclamation-circle' : 'fa-check-circle'} mr-2"></i>${msg}`;
+                            document.body.appendChild(el);
+                            setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 3000);
+                        }
+
+                        function setLoading(btn, spinnerId, labelId, loading, text) {
+                            const spinner = document.getElementById(spinnerId);
+                            const label = document.getElementById(labelId);
+                            btn.disabled = loading;
+                            if (spinner) spinner.classList.toggle('hidden', !loading);
+                            if (label) label.textContent = loading ? 'Processing...' : text;
+                        }
+
+                        async function postAction(url, body) {
+                            const res = await fetch(url, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+                                body: JSON.stringify(body),
+                            });
+                            if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(d.message || Object.values(d.errors || {}).flat().join(', ') || 'Failed.'); }
+                            return res.json();
+                        }
+
+                        document.getElementById('btnSubmitAdjust')?.addEventListener('click', async function() {
+                            const btn = this;
+                            setLoading(btn, 'adjust-spinner', 'adjust-label', true, 'Submit Adjustment');
+                            try {
+                                const data = await postAction(adjustUrl, {
+                                    adjusted_score: document.getElementById('adjustedScoreInput').value,
+                                    adjusted_rating: document.getElementById('adjustedRatingInput').value,
+                                    adjustment_reason: document.getElementById('adjustmentReasonInput').value,
+                                    remarks: document.getElementById('pmtRemarksInput')?.value || '',
+                                });
+                                showSnackbar('Rating adjusted successfully.');
+                            } catch (err) {
+                                showSnackbar(err.message, true);
+                            } finally {
+                                setLoading(btn, 'adjust-spinner', 'adjust-label', false, 'Submit Adjustment');
+                            }
+                        });
+
+                        document.getElementById('btnRelease')?.addEventListener('click', async function() {
+                            const btn = this;
+                            setLoading(btn, 'release-spinner', 'release-label', true, 'Release Official Result');
+                            try {
+                                await postAction(releaseUrl, { remarks: document.getElementById('pmtRemarksInput')?.value || '' });
+                                showSnackbar('Official result released.');
+                                setTimeout(() => location.reload(), 1000);
+                            } catch (err) {
+                                showSnackbar(err.message, true);
+                                setLoading(btn, 'release-spinner', 'release-label', false, 'Release Official Result');
+                            }
+                        });
+
+                        document.getElementById('btnReturn')?.addEventListener('click', async function() {
+                            const remarks = document.getElementById('pmtRemarksInput')?.value || '';
+                            if (!remarks.trim()) { showSnackbar('Please enter remarks before returning.', true); return; }
+                            const btn = this;
+                            setLoading(btn, 'return-spinner', 'return-label', true, 'Return to Employee');
+                            try {
+                                await postAction(returnUrl, { remarks });
+                                showSnackbar('Returned to employee.');
+                                setTimeout(() => location.reload(), 1000);
+                            } catch (err) {
+                                showSnackbar(err.message, true);
+                                setLoading(btn, 'return-spinner', 'return-label', false, 'Return to Employee');
+                            }
+                        });
+                    })();
+                    </script>
                 </div>
             @endif
         @else

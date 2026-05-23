@@ -58,7 +58,6 @@ class EmployeeCalibrationController extends Controller
             ])
             ->whereHas('accomplishmentSubmission', function ($q) {
                 $q->whereIn('status', [
-                    AccomplishmentSubmission::STATUS_DEPT_HEAD_ENDORSED,
                     AccomplishmentSubmission::STATUS_RECOMMENDED_BY_PMT,
                     AccomplishmentSubmission::STATUS_RELEASED_BY_PMT,
                 ]);
@@ -291,7 +290,9 @@ class EmployeeCalibrationController extends Controller
 
         $ratingService = app(\App\Services\PerformanceRatingService::class);
         $ratingService->calculateAndSaveFinalScore($ipcr);
+        $this->recalculateOpcrScore($ipcr);
 
+        if ($request->wantsJson()) return response()->json(['status' => 'adjusted', 'score' => $ipcr->pmt_adjusted_score, 'rating' => $ipcr->pmt_adjusted_rating]);
         return back()->with('success', 'IPCR rating adjusted and calibrated successfully.');
     }
 
@@ -323,7 +324,9 @@ class EmployeeCalibrationController extends Controller
 
         $ratingService = app(\App\Services\PerformanceRatingService::class);
         $ratingService->calculateAndSaveFinalScore($ipcr);
+        $this->recalculateOpcrScore($ipcr);
 
+        if ($request->wantsJson()) return response()->json(['status' => 'approved']);
         return back()->with('success', 'IPCR rating approved and calibrated successfully.');
     }
 
@@ -362,6 +365,10 @@ class EmployeeCalibrationController extends Controller
             }
         });
 
+        $this->recalculateOpcrScore($ipcr);
+        $this->autoReleaseOpcrIfAllReleased($ipcr);
+
+        if ($request->wantsJson()) return response()->json(['status' => 'released']);
         return back()->with('success', 'IPCR official rating released to the office and employee.');
     }
 
@@ -402,11 +409,64 @@ class EmployeeCalibrationController extends Controller
             }
         });
 
+        if ($request->wantsJson()) return response()->json(['status' => 'returned']);
         return back()->with('success', 'IPCR returned successfully.');
     }
 
     // Helper functions (same as AccomplishmentReviewController)
     
+    private function recalculateOpcrScore(Ipcr $ipcr): void
+    {
+        $officeId = $ipcr->office_id;
+        $periodId = $ipcr->performance_period_id;
+        if (!$officeId || !$periodId) return;
+
+        $scores = Ipcr::where('office_id', $officeId)
+            ->where('performance_period_id', $periodId)
+            ->whereNotNull('final_score')
+            ->where('final_score', '>', 0)
+            ->pluck('final_score');
+
+        if ($scores->isEmpty()) return;
+
+        $avg = round($scores->avg(), 2);
+        $ratingService = app(\App\Services\PerformanceRatingService::class);
+
+        \App\Models\Opcr::where('office_id', $officeId)
+            ->where('performance_period_id', $periodId)
+            ->update([
+                'final_score' => $avg,
+                'adjectival_rating' => $ratingService->resolveAdjectivalRating($avg),
+            ]);
+    }
+
+    private function autoReleaseOpcrIfAllReleased(Ipcr $ipcr): void
+    {
+        $officeId = $ipcr->office_id;
+        $periodId = $ipcr->performance_period_id;
+        if (!$officeId || !$periodId) return;
+
+        $totalIpcrs = Ipcr::where('office_id', $officeId)
+            ->where('performance_period_id', $periodId)
+            ->count();
+
+        $releasedIpcrs = Ipcr::where('office_id', $officeId)
+            ->where('performance_period_id', $periodId)
+            ->where('status', Ipcr::STATUS_RELEASED_BY_PMT)
+            ->count();
+
+        if ($totalIpcrs > 0 && $totalIpcrs === $releasedIpcrs) {
+            \App\Models\Opcr::where('office_id', $officeId)
+                ->where('performance_period_id', $periodId)
+                ->update([
+                    'status' => \App\Models\Opcr::STATUS_RELEASED_BY_PMT,
+                    'released_by' => Auth::id(),
+                    'released_at' => now(),
+                    'locked_at' => now(),
+                ]);
+        }
+    }
+
     private function buildPeriodLabel(PerformancePeriod $period): string
     {
         if ($period->start_date && $period->end_date) {

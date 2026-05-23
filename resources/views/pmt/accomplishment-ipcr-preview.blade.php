@@ -1,4 +1,4 @@
-@extends('layouts.employee')
+@extends('layouts.pmt')
 
 @section('main-content')
     @php
@@ -10,7 +10,7 @@
             <div>
                 <h1 class="text-2xl font-semibold text-white">IPCR Accomplishment Report — {{ $periodLabelValue }}</h1>
             </div>
-            <a href="{{ route('employee.accomplishment-submission') }}"
+            <a href="{{ $backUrl ?? route('supervisor.employee-submissions') }}"
                 class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-800 transition">
                 Back
             </a>

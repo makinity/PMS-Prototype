@@ -10,6 +10,10 @@ class DevelopmentPlan extends Model
     public const STATUS_DRAFT = 'draft';
     public const STATUS_PENDING_DETAILS = 'pending_details';
     public const STATUS_SUBMITTED_TO_LD = 'submitted_to_ld';
+    public const LND_SYNC_NOT_SENT = 'not_sent';
+    public const LND_SYNC_SENT = 'sent';
+    public const LND_SYNC_ACKNOWLEDGED = 'acknowledged';
+    public const LND_SYNC_FAILED = 'failed';
 
     protected $fillable = [
         'ipcr_id',
@@ -23,11 +27,16 @@ class DevelopmentPlan extends Model
         'created_by',
         'updated_by',
         'submitted_to_ld_at',
+        'lnd_sync_status',
+        'lnd_reference_id',
+        'lnd_synced_at',
+        'lnd_last_error',
     ];
 
     protected $casts = [
         'source_score' => 'decimal:2',
         'submitted_to_ld_at' => 'datetime',
+        'lnd_synced_at' => 'datetime',
     ];
 
     public function ipcr(): BelongsTo

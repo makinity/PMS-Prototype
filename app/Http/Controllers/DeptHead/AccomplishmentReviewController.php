@@ -88,6 +88,7 @@ class AccomplishmentReviewController extends Controller
         foreach ($submissions as $submission) {
             $employeeName = (string) ($submission->employee?->name ?? '--');
             $officeName = (string) ($submission->employee?->office?->name ?? '--');
+            $employeePhotoUrl = (string) ($submission->employee?->profile_photo_url ?? '');
             $status = strtolower(trim((string) ($submission->status ?? 'draft')));
 
             $submittedAtLabel = $submission->submitted_at
@@ -125,6 +126,7 @@ class AccomplishmentReviewController extends Controller
             $payload = [
                 'id' => (int) $submission->id,
                 'employee_name' => $employeeName,
+                'employee_photo_url' => $employeePhotoUrl !== '' ? $employeePhotoUrl : null,
                 'office_name' => $officeName,
                 'period_label' => $periodLabel,
                 'status' => $status,
@@ -156,6 +158,7 @@ class AccomplishmentReviewController extends Controller
             $rows[] = [
                 'id' => (int) $submission->id,
                 'employee_name' => $employeeName,
+                'employee_photo_url' => $employeePhotoUrl !== '' ? $employeePhotoUrl : null,
                 'office_name' => $officeName,
                 'period_label' => $periodLabel,
                 'status' => $status,
@@ -163,6 +166,7 @@ class AccomplishmentReviewController extends Controller
                 'submitted_at_label' => $submittedAtLabel,
                 'supervisor_action_at_label' => $supervisorActionLabel,
                 'computed_score' => $computedScore,
+                'computed_rating' => $computedRating,
             ];
 
             $submissionPayloads[(string) $submission->id] = $payload;
@@ -558,10 +562,104 @@ class AccomplishmentReviewController extends Controller
         return $normalized;
     }
 
-    public function endorseToPmt($id)
+    public function show(Request $request, $id)
+    {
+        $user = $request->user();
+        abort_unless($user, 403);
+
+        $period = PerformancePeriod::query()->where('is_active', 1)->first();
+        abort_unless($period, 404);
+
+        $submission = AccomplishmentSubmission::query()
+            ->where('id', $id)
+            ->where('performance_period_id', $period->id)
+            ->with(['employee:id,name,office_id', 'employee.office:id,name', 'ipcr'])
+            ->firstOrFail();
+
+        // Ensure dept-head owns this office
+        abort_unless((int) ($submission->employee?->office_id ?? 0) === (int) $user->office_id, 403);
+
+        $periodLabel = $this->buildPeriodLabel($period);
+        $status = strtolower(trim((string) ($submission->status ?? 'draft')));
+        $ratingService = app(\App\Services\PerformanceRatingService::class);
+
+        if ($submission->ipcr) {
+            [$computedScore, $computedRating] = $ratingService->getResolvedScoreAndRating($submission->ipcr);
+        } else {
+            $computedScore = 0.00;
+            $computedRating = '--';
+        }
+
+        $attachments = $this->buildAttachmentPayload($submission->attachments ?? []);
+
+        return view('dept-head.accomplishment-show', [
+            'submission' => $submission,
+            'periodLabel' => $periodLabel,
+            'status' => $status,
+            'statusLabel' => $this->formatStatusLabel($status),
+            'submittedAtLabel' => $submission->submitted_at ? $submission->submitted_at->format('M d, Y h:i A') : '--',
+            'employeeName' => $submission->employee?->name ?? '--',
+            'officeName' => $submission->employee?->office?->name ?? '--',
+            'computedScore' => $computedScore,
+            'computedRating' => $computedRating,
+            'remarks' => (string) ($submission->employee_remarks ?? ''),
+            'attachments' => $attachments,
+        ]);
+    }
+
+    public function smporPreview(Request $request, $id)
+    {
+        $user = $request->user();
+        abort_unless($user, 403);
+
+        $submission = AccomplishmentSubmission::query()
+            ->where('id', $id)
+            ->with(['employee:id,name,office_id', 'employee.office:id,name'])
+            ->firstOrFail();
+        abort_unless((int) ($submission->employee?->office_id ?? 0) === (int) $user->office_id, 403);
+
+        $originalUser = $request->user();
+        Auth::login($submission->employee);
+        $controller = app(\App\Http\Controllers\Employee\SmporIpcrAccomplishmentController::class);
+        $indexView = $controller->index($request);
+        Auth::login($originalUser);
+
+        $data = $indexView->getData();
+        $data['layout'] = 'layouts.dept-head';
+        $data['backUrl'] = route('dept-head.acc-review.show', $id);
+
+        return view('dept-head.accomplishment-smpor-preview', $data);
+    }
+
+    public function ipcrPreview(Request $request, $id)
+    {
+        $user = $request->user();
+        abort_unless($user, 403);
+
+        $submission = AccomplishmentSubmission::query()
+            ->where('id', $id)
+            ->with(['employee:id,name,office_id', 'employee.office:id,name'])
+            ->firstOrFail();
+        abort_unless((int) ($submission->employee?->office_id ?? 0) === (int) $user->office_id, 403);
+
+        $originalUser = $request->user();
+        Auth::login($submission->employee);
+        $controller = app(\App\Http\Controllers\Employee\SmporIpcrAccomplishmentController::class);
+        $indexView = $controller->index($request);
+        Auth::login($originalUser);
+
+        $data = $indexView->getData();
+        $data['layout'] = 'layouts.dept-head';
+        $data['backUrl'] = route('dept-head.acc-review.show', $id);
+
+        return view('dept-head.accomplishment-ipcr-preview', $data);
+    }
+
+    public function endorseToPmt(Request $request, $id)
     {
         $submission = AccomplishmentSubmission::findOrFail($id);
         if ($submission->status !== 'supervisor_endorsed') {
+            if ($request->wantsJson()) return response()->json(['message' => 'Only submissions endorsed by supervisor can be endorsed to PMT.'], 422);
             return back()->with('error', 'Only submissions endorsed by supervisor can be endorsed to pmt.');
         }
 
@@ -571,12 +669,7 @@ class AccomplishmentReviewController extends Controller
             'dept_head_action_at' => now(),
         ]);
 
-        if ($submission->ipcr) {
-            $submission->ipcr->update([
-                'status' => \App\Models\Ipcr::STATUS_PENDING_PMT_CALIBRATION,
-            ]);
-        }
-
+        if ($request->wantsJson()) return response()->json(['status' => 'dept_head_endorsed']);
         return back()->with('success', 'Submission successfully endorsed to PMT.');
     }
 }

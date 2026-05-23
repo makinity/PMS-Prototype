@@ -365,19 +365,55 @@ document.addEventListener('DOMContentLoaded', function() {
     // ── Signature Pad logic for OPCR ──────────────────────────────────────
     const opcrSigConfirm = document.getElementById('signature-pad-confirm');
     if (opcrSigConfirm) {
-        opcrSigConfirm.addEventListener('click', function() {
+        opcrSigConfirm.addEventListener('click', async function() {
             const signature = window.getSignatureData_opcr_signature_modal();
             if (!signature) {
-                alert('Please provide your signature before endorsing.');
+                showSnackbar('Please provide your signature before endorsing.', true);
                 return;
             }
 
+            this.disabled = true;
+            this.innerHTML = '<svg class="inline h-4 w-4 animate-spin mr-1" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" class="opacity-25"/><path d="M4 12a8 8 0 018-8" stroke="currentColor" stroke-width="3" stroke-linecap="round" class="opacity-75"/></svg> Endorsing...';
+
+            const form = document.getElementById('form-opcr-endorse');
+            const formData = new FormData(form);
             const sigInput = document.getElementById('opcr-endorse-signature');
-            if (sigInput) {
-                sigInput.value = signature;
-                document.getElementById('form-opcr-endorse').submit();
+            if (sigInput) sigInput.value = signature;
+            formData.set('signature', signature);
+
+            try {
+                const res = await fetch(form.action, {
+                    method: 'POST',
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': formData.get('_token') },
+                    body: formData,
+                });
+                if (!res.ok) throw new Error('Failed');
+
+                // Close modal
+                const modal = document.getElementById('opcr-signature-modal');
+                if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+
+                // Update UI
+                const actionArea = document.querySelector('[data-confirm-action="endorse"]')?.closest('.flex');
+                if (actionArea) {
+                    actionArea.innerHTML = '<div class="rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-6 py-2.5 text-sm font-bold text-emerald-300"><i class="fa-solid fa-clock mr-2"></i> Endorsed - Awaiting PMT Review</div>';
+                }
+
+                showSnackbar('OPCR endorsed to PMT.');
+            } catch (e) {
+                this.disabled = false;
+                this.textContent = 'Confirm & Endorse';
+                showSnackbar('Failed to endorse.', true);
             }
         });
+    }
+
+    function showSnackbar(msg, isError = false) {
+        const el = document.createElement('div');
+        el.className = `fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] rounded-lg px-5 py-3 text-sm font-semibold shadow-lg ${isError ? 'border border-rose-500/30 bg-rose-500/10 text-rose-200' : 'border border-emerald-500/30 bg-emerald-500/10 text-emerald-200'}`;
+        el.innerHTML = `<i class="fa-solid ${isError ? 'fa-exclamation-circle' : 'fa-check-circle'} mr-2"></i>${msg}`;
+        document.body.appendChild(el);
+        setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 3000);
     }
 
     document.querySelectorAll('[data-signature-close]').forEach(btn => {

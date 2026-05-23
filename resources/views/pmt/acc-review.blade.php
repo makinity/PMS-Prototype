@@ -44,7 +44,7 @@
                             type="text"
                             value="{{ $searchTermSafe }}"
                             data-live-submission-search
-                            placeholder="Search employee, office, period, status..."
+                            placeholder="Search employee, period, status..."
                             style="background-color: #020617 !important; color: #f8fafc !important; border-color: #1e293b !important;"
                             class="w-full rounded-xl border px-4 py-3 text-sm placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/30">
                     </div>
@@ -71,7 +71,6 @@
                     <thead class="bg-slate-950/70 text-xs uppercase tracking-[0.14em] text-slate-400">
                         <tr>
                             <th class="px-5 py-3 text-left">Employee</th>
-                            <th class="px-5 py-3 text-left">Office</th>
                             <th class="px-5 py-3 text-left">Status</th>
                             <th class="px-5 py-3 text-center tabular-nums">Score</th>
                             <th class="px-5 py-3 text-center">Actions</th>
@@ -84,7 +83,6 @@
                                 $statusBadgeClasses = $statusBadgeClassMap[$statusKey] ?? $statusBadgeClassMap['draft'];
                                 $rowSearchText = collect([
                                     $row['employee_name'] ?? '',
-                                    $row['office_name'] ?? '',
                                     $row['period_label'] ?? $periodLabelSafe,
                                     $row['status_label'] ?? 'Draft',
                                     $row['submitted_at_label'] ?? '',
@@ -94,8 +92,15 @@
                             <tr class="bg-slate-900/40"
                                 data-review-row
                                 data-search-text="{{ \Illuminate\Support\Str::lower($rowSearchText) }}">
-                                <td class="px-5 py-3 font-semibold text-slate-100">{{ $row['employee_name'] ?? '--' }}</td>
-                                <td class="px-5 py-3">{{ $row['office_name'] ?? '--' }}</td>
+                                <td class="px-5 py-3 font-semibold text-slate-100">
+                                    <div class="flex items-center gap-2.5">
+                                        <img
+                                            src="{{ $row['employee_photo_url'] ?: ('https://ui-avatars.com/api/?name=' . urlencode($row['employee_name'] ?? 'Employee') . '&background=1e40af&color=fff&size=64') }}"
+                                            alt="{{ $row['employee_name'] ?? 'Employee' }}"
+                                            class="h-7 w-7 rounded-full object-cover ring-1 ring-slate-700/80">
+                                        <span>{{ $row['employee_name'] ?? '--' }}</span>
+                                    </div>
+                                </td>
                                 <td class="px-5 py-3">
                                     <span class="{{ $statusBadgeClasses }}">{{ $row['status_label'] ?? 'Draft' }}</span>
                                 </td>
@@ -103,25 +108,20 @@
                                     {{ number_format($row['computed_score'] ?? 0, 2) }}
                                 </td>
                                 <td class="px-5 py-3 text-center">
-                                    <button type="button"
-                                            data-open-submission
-                                            data-submission-id="{{ $row['id'] }}"
+                                    <a href="{{ route('pmt.acc-review.show', $row['id']) }}"
                                             aria-label="View submission"
-                                            class="inline-flex items-center justify-center rounded-lg border border-slate-700 px-2.5 py-2 text-slate-200 transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/40">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-4 w-4" aria-hidden="true">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1 1 0 010-.644C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178a1 1 0 010 .644C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        </svg>
-                                    </button>
+                                            class="inline-flex text-slate-300 transition hover:text-white">
+                                        <i class="fa-regular fa-eye"></i>
+                                    </a>
                                 </td>
                             </tr>
                         @empty
                             <tr class="bg-slate-900/40">
-                                <td colspan="5" class="px-5 py-8 text-center text-sm text-slate-400">No dept-head-endorsed or PMT-approved submissions found for the active period.</td>
+                                <td colspan="4" class="px-5 py-8 text-center text-sm text-slate-400">No dept-head-endorsed or PMT-approved submissions found for the active period.</td>
                             </tr>
                         @endforelse
                         <tr id="pmt-submissions-no-match-row" class="hidden bg-slate-900/40">
-                            <td colspan="5" class="px-5 py-8 text-center text-sm text-slate-400">No matching accomplishment submissions found.</td>
+                            <td colspan="4" class="px-5 py-8 text-center text-sm text-slate-400">No matching accomplishment submissions found.</td>
                         </tr>
                     </tbody>
                 </table>

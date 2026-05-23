@@ -61,74 +61,102 @@
                 </div>
             </div>
 
-            <div class="overflow-hidden rounded-lg border border-gray-800">
-                <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-800 text-sm">
-                    <thead class="bg-gray-900/70 text-slate-300">
-                        <tr>
-                            <th class="px-4 py-3 text-left font-semibold">Employee</th>
-                            <th class="px-4 py-3 text-left font-semibold">Status</th>
-                            <th class="px-4 py-3 text-left font-semibold">Quantity</th>
-                            <th class="px-4 py-3 text-left font-semibold">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tt-tbody" class="divide-y divide-gray-800 text-slate-200">
-                        @forelse ($entries as $entry)
-                            @php
-                                $status = strtolower((string) ($entry->status ?? 'draft'));
-                                $statusBadge = $statusMeta[$status] ?? 'bg-slate-800 border border-slate-700 text-slate-200';
-                            @endphp
-                            <tr class="hover:bg-slate-900/60 tt-row"
-                                data-employee="{{ strtolower($entry->employee->name ?? '') }}"
-                                data-status="{{ $status }}">
-                                <td class="px-4 py-3 text-white">
-                                    <div class="flex items-center gap-3">
-                                        <img src="https://ui-avatars.com/api/?name={{ urlencode($entry->employee->name ?? 'Employee') }}&background=1e40af&color=fff&size=64"
-                                            alt="{{ $entry->employee->name ?? 'Employee' }}"
-                                            class="h-8 w-8 rounded-full object-cover ring-1 ring-slate-600/80">
-                                        <span>{{ $entry->employee->name ?? '—' }}</span>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-3">
-                                    <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $statusBadge }}">
-                                        {{ ucfirst($status) }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-3">{{ $entry->quantity ?: '—' }}</td>
-                                <td class="px-4 py-3">
-                                    @if ($status === 'rated' || (int) ($entry->supervisor_id ?? 0) !== (int) ($supervisor->id ?? 0))
-                                        <button type="button"
-                                            data-task-id="{{ $entry->id }}"
-                                            class="view-task-btn rounded-lg border border-slate-600 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-slate-800">
-                                            View
-                                        </button>
-                                    @elseif (in_array($status, ['submitted', 'validated']))
-                                        <a href="{{ route('supervisor.team-tasks.monitor', $entry) }}"
-                                            class="inline-flex items-center rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-500">
-                                            Monitor
-                                        </a>
-                                    @else
-                                        <button type="button"
-                                            data-notify-id="{{ $entry->id }}"
-                                            class="notify-btn inline-flex items-center rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-500">
-                                            Notify
-                                        </button>
-                                    @endif
-                                </td>
-                            </tr>
-                        @empty
+            <div id="tt-queue-region">
+                <div class="overflow-hidden rounded-lg border border-gray-800">
+                    <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-800 text-sm">
+                        <thead class="bg-gray-900/70 text-slate-300">
                             <tr>
-                                <td colspan="4" class="px-4 py-8 text-center text-sm text-slate-400">
-                                    No ORS entries found for the selected filters.
-                                </td>
+                                <th class="px-4 py-3 text-left font-semibold">Employee</th>
+                                <th class="px-4 py-3 text-left font-semibold">Status</th>
+                                <th class="px-4 py-3 text-left font-semibold">Quantity</th>
+                                <th class="px-4 py-3 text-left font-semibold">Action</th>
                             </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody id="tt-tbody" class="divide-y divide-gray-800 text-slate-200">
+                            @forelse ($entries as $entry)
+                                @php
+                                    $status = strtolower((string) ($entry->status ?? 'draft'));
+                                    $statusBadge = $statusMeta[$status] ?? 'bg-slate-800 border border-slate-700 text-slate-200';
+                                @endphp
+                                <tr class="hover:bg-slate-900/60 tt-row"
+                                    data-employee="{{ strtolower($entry->employee->name ?? '') }}"
+                                    data-status="{{ $status }}">
+                                    <td class="px-4 py-3 text-white">
+                                        <div class="flex items-center gap-3">
+                                            <img src="https://ui-avatars.com/api/?name={{ urlencode($entry->employee->name ?? 'Employee') }}&background=1e40af&color=fff&size=64"
+                                                alt="{{ $entry->employee->name ?? 'Employee' }}"
+                                                class="h-8 w-8 rounded-full object-cover ring-1 ring-slate-600/80">
+                                            <span>{{ $entry->employee->name ?? '—' }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $statusBadge }}">
+                                            {{ ucfirst($status) }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3">{{ $entry->quantity ?: '—' }}</td>
+                                    <td class="px-4 py-3">
+                                        @if ($status === 'rated' || (int) ($entry->supervisor_id ?? 0) !== (int) ($supervisor->id ?? 0))
+                                            <button type="button"
+                                                data-task-id="{{ $entry->id }}"
+                                                class="view-task-btn rounded-lg border border-slate-600 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-slate-800">
+                                                View
+                                            </button>
+                                        @elseif (in_array($status, ['submitted', 'validated']))
+                                            <a href="{{ route('supervisor.team-tasks.monitor', $entry) }}"
+                                                class="inline-flex items-center rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-500">
+                                                Monitor
+                                            </a>
+                                        @else
+                                            <button type="button"
+                                                data-notify-id="{{ $entry->id }}"
+                                                class="notify-btn inline-flex items-center rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-500">
+                                                Notify
+                                            </button>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4" class="px-4 py-8 text-center text-sm text-slate-400">
+                                        No ORS entries found for the selected filters.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                    </div>
                 </div>
-            </div>
-            <div class="mt-4">
-                {{ $entries->links() }}
+                @if ($entries->hasPages())
+                    <div class="mt-5 flex flex-col gap-3 border-t border-slate-800 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                        <p class="text-xs text-slate-400">
+                            Showing {{ $entries->firstItem() }}-{{ $entries->lastItem() }} of {{ $entries->total() }} tasks
+                        </p>
+                        <nav class="inline-flex items-center gap-1" aria-label="Pagination">
+                            @if ($entries->onFirstPage())
+                                <span class="rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs text-slate-500">Prev</span>
+                            @else
+                                <a href="{{ $entries->previousPageUrl() }}" class="tt-pagination-link rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs text-slate-300 hover:border-slate-500 hover:bg-slate-800">Prev</a>
+                            @endif
+
+                            @foreach ($entries->getUrlRange(max(1, $entries->currentPage() - 2), min($entries->lastPage(), $entries->currentPage() + 2)) as $page => $url)
+                                @if ($page === $entries->currentPage())
+                                    <span class="rounded-md border border-blue-500/70 bg-blue-600/30 px-3 py-1.5 text-xs font-semibold text-blue-100">{{ $page }}</span>
+                                @else
+                                    <a href="{{ $url }}" class="tt-pagination-link rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs text-slate-300 hover:border-slate-500 hover:bg-slate-800">{{ $page }}</a>
+                                @endif
+                            @endforeach
+
+                            @if ($entries->hasMorePages())
+                                <a href="{{ $entries->nextPageUrl() }}" class="tt-pagination-link rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs text-slate-300 hover:border-slate-500 hover:bg-slate-800">Next</a>
+                            @else
+                                <span class="rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs text-slate-500">Next</span>
+                            @endif
+                        </nav>
+                    </div>
+                @endif
+                <script id="tt-page-tasks-json" type="application/json">{!! json_encode($entries->items() ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!}</script>
             </div>
         </div>
 
@@ -293,51 +321,17 @@
         </div>
     </div>
 
-    <script>
+        <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const rawTasks = @json($entries->items() ?? []);
-            
-            const tasks = Array.isArray(rawTasks)
-                ? rawTasks.map((entry) => {
-                    const status = String(entry?.status || 'draft').toLowerCase();
-                    const submittedAt = entry?.submitted_at ? new Date(entry.submitted_at) : null;
-                    const startedAt = entry?.started_at ? new Date(entry.started_at) : null;
-                    const stoppedAt = entry?.stopped_at ? new Date(entry.stopped_at) : null;
-                    
-                    return {
-                        id: String(entry?.id ?? ''),
-                        employeeName: entry?.employee?.name || '--',
-                        title: String(entry?.ipcr_item?.indicator_text || '--'),
-                        date: String(entry?.work_date || ''),
-                        uwpOutputLabel: String(entry?.ipcr_item?.output_title || '--'),
-                        quantity: entry?.quantity || '--',
-                        state: status,
-                        durationMs: Number(entry?.total_seconds || 0) * 1000,
-                        startTime: startedAt && !Number.isNaN(startedAt.getTime()) ? startedAt : null,
-                        stoppedAt: stoppedAt && !Number.isNaN(stoppedAt.getTime()) ? stoppedAt : null,
-                        output_state: (status === 'submitted' || status === 'rated') ? 'submitted' : 'none',
-                        hasEvidence: Number(entry?.evidences_count || 0) > 0,
-                        evidenceCount: Number(entry?.evidences_count || 0),
-                        submittedAt: submittedAt && !Number.isNaN(submittedAt.getTime()) ? submittedAt : null,
-                        notes: entry?.notes || '--',
-                        supervisor: {
-                            name: entry?.supervisor?.name || '--',
-                            office: entry?.supervisor?.office?.name || '--'
-                        },
-                        monitoring: entry?.monitoring ? {
-                            supervisor_name: entry.monitoring?.supervisor?.name || entry?.supervisor?.name || '--',
-                            quality_rating: entry.monitoring?.quality_rating ?? null,
-                            timeliness_rating: entry.monitoring?.timeliness_rating ?? null,
-                            remarks: entry.monitoring?.remarks || null,
-                            rated_at: entry.monitoring?.rated_at || null,
-                        } : null,
-                    };
-                })
-                : [];
-
+            const queueRegion = document.getElementById('tt-queue-region');
             const modal = document.getElementById('task-view-modal');
             const closeTopBtn = document.getElementById('closeTaskViewTop');
             const closeBottomBtn = document.getElementById('closeTaskViewBottom');
+            const searchInput = document.getElementById('tt-search');
+            const statusSelect = document.getElementById('tt-status');
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+            let tasks = [];
 
             const fields = {
                 employee: document.getElementById('mvEmployee'),
@@ -358,6 +352,59 @@
                 supTimeliness: document.getElementById('mvSupTimeliness'),
                 supRemarks: document.getElementById('mvSupRemarks'),
             };
+
+            function mapTasks(rawTasks) {
+                return Array.isArray(rawTasks)
+                    ? rawTasks.map((entry) => {
+                        const status = String(entry?.status || 'draft').toLowerCase();
+                        const submittedAt = entry?.submitted_at ? new Date(entry.submitted_at) : null;
+                        const startedAt = entry?.started_at ? new Date(entry.started_at) : null;
+                        const stoppedAt = entry?.stopped_at ? new Date(entry.stopped_at) : null;
+
+                        return {
+                            id: String(entry?.id ?? ''),
+                            employeeName: entry?.employee?.name || '--',
+                            title: String(entry?.ipcr_item?.indicator_text || '--'),
+                            date: String(entry?.work_date || ''),
+                            uwpOutputLabel: String(entry?.ipcr_item?.output_title || '--'),
+                            quantity: entry?.quantity || '--',
+                            state: status,
+                            durationMs: Number(entry?.total_seconds || 0) * 1000,
+                            startTime: startedAt && !Number.isNaN(startedAt.getTime()) ? startedAt : null,
+                            stoppedAt: stoppedAt && !Number.isNaN(stoppedAt.getTime()) ? stoppedAt : null,
+                            output_state: (status === 'submitted' || status === 'rated') ? 'submitted' : 'none',
+                            hasEvidence: Number(entry?.evidences_count || 0) > 0,
+                            evidenceCount: Number(entry?.evidences_count || 0),
+                            submittedAt: submittedAt && !Number.isNaN(submittedAt.getTime()) ? submittedAt : null,
+                            notes: entry?.notes || '--',
+                            supervisor: {
+                                name: entry?.supervisor?.name || '--',
+                                office: entry?.supervisor?.office?.name || '--'
+                            },
+                            monitoring: entry?.monitoring ? {
+                                supervisor_name: entry.monitoring?.supervisor?.name || entry?.supervisor?.name || '--',
+                                quality_rating: entry.monitoring?.quality_rating ?? null,
+                                timeliness_rating: entry.monitoring?.timeliness_rating ?? null,
+                                remarks: entry.monitoring?.remarks || null,
+                                rated_at: entry.monitoring?.rated_at || null,
+                            } : null,
+                        };
+                    })
+                    : [];
+            }
+
+            function hydrateTasksFromDom(root = document) {
+                const payload = root.querySelector('#tt-page-tasks-json');
+                if (!payload) {
+                    tasks = [];
+                    return;
+                }
+                try {
+                    tasks = mapTasks(JSON.parse(payload.textContent || '[]'));
+                } catch (_) {
+                    tasks = [];
+                }
+            }
 
             function formatDateHuman(dateStr) {
                 if (!dateStr) return '--';
@@ -445,7 +492,6 @@
                 fields.submittedAt.textContent = formatDateTime(task.submittedAt);
                 fields.duration.textContent = task.durationMs || task.startTime ? formatDuration(computeElapsed(task)) : '--';
                 fields.notes.textContent = task.notes || '--';
-                
                 fields.supName.textContent = task.supervisor.name || '--';
                 fields.supOffice.textContent = task.supervisor.office || '--';
 
@@ -470,27 +516,10 @@
                 modal.classList.remove('flex');
             }
 
-            document.querySelectorAll('.view-task-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const taskId = btn.dataset.taskId;
-                    if (taskId) {
-                        openTaskViewModal(taskId);
-                    }
-                });
-            });
-
-            if (closeTopBtn) closeTopBtn.addEventListener('click', closeTaskViewModal);
-            if (closeBottomBtn) closeBottomBtn.addEventListener('click', closeTaskViewModal);
-
-            // Live search & status filter
-            const searchInput = document.getElementById('tt-search');
-            const statusSelect = document.getElementById('tt-status');
-            const rows = document.querySelectorAll('.tt-row');
-
             function filterRows() {
                 const query = (searchInput?.value || '').toLowerCase().trim();
                 const status = (statusSelect?.value || 'all').toLowerCase();
+                const rows = document.querySelectorAll('.tt-row');
 
                 rows.forEach(row => {
                     const name = row.dataset.employee || '';
@@ -501,13 +530,74 @@
                 });
             }
 
+            async function loadPaginationPage(url, shouldPushState = true) {
+                if (!queueRegion || !url) return;
+
+                queueRegion.classList.add('opacity-60', 'pointer-events-none');
+                try {
+                    const response = await fetch(url, {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    });
+
+                    if (!response.ok) {
+                        window.location.href = url;
+                        return;
+                    }
+
+                    const html = await response.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const nextRegion = doc.getElementById('tt-queue-region');
+
+                    if (!nextRegion) {
+                        window.location.href = url;
+                        return;
+                    }
+
+                    queueRegion.innerHTML = nextRegion.innerHTML;
+                    hydrateTasksFromDom(queueRegion);
+                    filterRows();
+
+                    if (shouldPushState) {
+                        window.history.pushState({}, '', url);
+                    }
+                } catch (_) {
+                    window.location.href = url;
+                } finally {
+                    queueRegion.classList.remove('opacity-60', 'pointer-events-none');
+                }
+            }
+
+            hydrateTasksFromDom(queueRegion || document);
+
             searchInput?.addEventListener('input', filterRows);
             statusSelect?.addEventListener('change', filterRows);
 
-            // AJAX Notify
-            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+            if (closeTopBtn) closeTopBtn.addEventListener('click', closeTaskViewModal);
+            if (closeBottomBtn) closeBottomBtn.addEventListener('click', closeTaskViewModal);
 
-            document.getElementById('tt-tbody')?.addEventListener('click', async (e) => {
+            window.addEventListener('popstate', function () {
+                loadPaginationPage(window.location.href, false);
+            });
+
+            document.addEventListener('click', async (e) => {
+                const paginationLink = e.target.closest('.tt-pagination-link');
+                if (paginationLink) {
+                    e.preventDefault();
+                    await loadPaginationPage(paginationLink.href);
+                    return;
+                }
+
+                const viewBtn = e.target.closest('.view-task-btn');
+                if (viewBtn) {
+                    e.preventDefault();
+                    const taskId = viewBtn.dataset.taskId;
+                    if (taskId) {
+                        openTaskViewModal(taskId);
+                    }
+                    return;
+                }
+
                 const btn = e.target.closest('.notify-btn');
                 if (!btn) return;
 
@@ -529,7 +619,7 @@
                         if (window.PMSnackbar) {
                             window.PMSnackbar.show({ type: 'success', message: data.message || 'Notification sent.' });
                         }
-                        btn.textContent = 'Sent ✓';
+                        btn.textContent = 'Sent ?';
                     } else {
                         throw new Error(data.message || 'Failed to send.');
                     }
@@ -545,3 +635,5 @@
         });
     </script>
 @endsection
+
+

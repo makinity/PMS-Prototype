@@ -179,7 +179,7 @@
             </div>
         </div>
 
-        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
+        <div id="mpor-action-section" class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
             @if ($status === 'submitted')
                 <div class="space-y-4">
                     <div>
@@ -187,34 +187,146 @@
                         <p class="mt-1 text-sm text-slate-400">Approve this MPOR or return it with optional remarks.</p>
                     </div>
 
-                    <form method="POST" action="{{ route('supervisor.mpor.return', $mpor) }}" class="space-y-3" id="mporReturnInlineForm">
-                        @csrf
+                    <div class="space-y-3">
                         <label class="block text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-slate-400">Return Remarks (Optional)</label>
-                        <textarea name="return_remarks" rows="3"
+                        <textarea id="returnRemarksInput" rows="3"
                             style="background:#0b1220;color:#e2e8f0;"
                             class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:border-rose-400 focus:outline-none focus:ring-1 focus:ring-rose-400"
                             placeholder="Reason for returning this MPOR..."></textarea>
-                    </form>
+                    </div>
 
                     <div class="flex flex-wrap items-center justify-end gap-2 border-t border-slate-800 pt-3">
-                        <button type="submit" form="mporReturnInlineForm"
+                        <button type="button" id="btnReturnMpor"
                             class="rounded-lg border border-rose-500/40 bg-rose-500/10 px-4 py-2 text-sm font-semibold text-rose-200 hover:bg-rose-500/20">
                             Return to Employee
                         </button>
-                        <form method="POST" action="{{ route('supervisor.mpor.approve', $mpor) }}">
-                            @csrf
-                            <button type="submit" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500">Approve MPOR</button>
-                        </form>
+                        <button type="button" id="btnApproveMpor"
+                            class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500">
+                            Approve MPOR
+                        </button>
                     </div>
                 </div>
             @elseif ($status === 'approved')
-                <form method="POST" action="{{ route('supervisor.mpor.endorse', $mpor) }}" class="flex items-center justify-end">
-                    @csrf
-                    <button type="submit" class="rounded-lg border border-violet-500/40 bg-violet-500/10 px-4 py-2 text-sm font-semibold text-violet-200 hover:bg-violet-500/20">Endorse to Department Head</button>
-                </form>
+                <div class="flex items-center justify-end">
+                    <button type="button" id="btnEndorseMpor"
+                        class="rounded-lg border border-violet-500/40 bg-violet-500/10 px-4 py-2 text-sm font-semibold text-violet-200 hover:bg-violet-500/20">
+                        Endorse to Department Head
+                    </button>
+                </div>
             @else
                 <div class="text-sm text-slate-400">This MPOR is view-only.</div>
             @endif
         </div>
+
+        <script>
+        (function() {
+            const csrfToken = '{{ csrf_token() }}';
+            const approveUrl = '{{ route("supervisor.mpor.approve", $mpor) }}';
+            const endorseUrl = '{{ route("supervisor.mpor.endorse", $mpor) }}';
+            const returnUrl = '{{ route("supervisor.mpor.return", $mpor) }}';
+            const actionSection = document.getElementById('mpor-action-section');
+
+            function showSnackbar(msg, isError = false) {
+                const el = document.createElement('div');
+                el.className = `fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] rounded-lg px-5 py-3 text-sm font-semibold shadow-lg ${isError ? 'border border-rose-500/30 bg-rose-500/10 text-rose-200' : 'border border-emerald-500/30 bg-emerald-500/10 text-emerald-200'}`;
+                el.innerHTML = `<i class="fa-solid ${isError ? 'fa-exclamation-circle' : 'fa-check-circle'} mr-2"></i>${msg}`;
+                document.body.appendChild(el);
+                setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 3000);
+            }
+
+            function setLoading(btn, loading) {
+                if (loading) {
+                    btn.disabled = true;
+                    btn.dataset.origText = btn.textContent;
+                    btn.innerHTML = '<svg class="inline h-4 w-4 animate-spin mr-1" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" class="opacity-25"/><path d="M4 12a8 8 0 018-8" stroke="currentColor" stroke-width="3" stroke-linecap="round" class="opacity-75"/></svg> Processing...';
+                } else {
+                    btn.disabled = false;
+                    btn.textContent = btn.dataset.origText || 'Done';
+                }
+            }
+
+            function updateStatus(newStatus) {
+                const badge = document.querySelector('span.inline-flex.rounded-full.border.uppercase');
+                if (badge) {
+                    badge.textContent = newStatus.toUpperCase();
+                    badge.className = 'mt-2 inline-flex rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] ' +
+                        (newStatus === 'approved' ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200' :
+                         newStatus === 'endorsed' ? 'border-violet-500/30 bg-violet-500/10 text-violet-200' :
+                         newStatus === 'returned' ? 'border-rose-500/30 bg-rose-500/10 text-rose-200' :
+                         'border-slate-700 bg-slate-800 text-slate-200');
+                }
+
+                if (newStatus === 'approved') {
+                    actionSection.innerHTML = `
+                        <div class="flex items-center justify-end">
+                            <button type="button" id="btnEndorseMpor"
+                                class="rounded-lg border border-violet-500/40 bg-violet-500/10 px-4 py-2 text-sm font-semibold text-violet-200 hover:bg-violet-500/20">
+                                Endorse to Department Head
+                            </button>
+                        </div>`;
+                    bindEndorse();
+                    showSnackbar('MPOR approved.');
+                } else if (newStatus === 'endorsed') {
+                    actionSection.innerHTML = '<div class="text-center text-sm text-emerald-300"><i class="fa-solid fa-check-circle mr-1"></i> MPOR endorsed to Department Head.</div>';
+                    showSnackbar('MPOR endorsed to Department Head.');
+                } else if (newStatus === 'returned') {
+                    actionSection.innerHTML = '<div class="text-center text-sm text-rose-300"><i class="fa-solid fa-rotate-left mr-1"></i> MPOR returned to employee.</div>';
+                    showSnackbar('MPOR returned to employee.');
+                }
+            }
+
+            async function postAction(url, body, btn) {
+                setLoading(btn, true);
+                try {
+                    const res = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+                        body: JSON.stringify(body || {})
+                    });
+                    if (res.ok) return true;
+                    const data = await res.json().catch(() => ({}));
+                    showSnackbar(data.message || 'Action failed.', true);
+                    setLoading(btn, false);
+                    return false;
+                } catch (e) {
+                    showSnackbar('Network error.', true);
+                    setLoading(btn, false);
+                    return false;
+                }
+            }
+
+            function bindApprove() {
+                const btn = document.getElementById('btnApproveMpor');
+                if (!btn) return;
+                btn.addEventListener('click', async () => {
+                    const ok = await postAction(approveUrl, {}, btn);
+                    if (ok) updateStatus('approved');
+                });
+            }
+
+            function bindReturn() {
+                const btn = document.getElementById('btnReturnMpor');
+                if (!btn) return;
+                btn.addEventListener('click', async () => {
+                    const remarks = document.getElementById('returnRemarksInput')?.value || '';
+                    const ok = await postAction(returnUrl, { return_remarks: remarks }, btn);
+                    if (ok) updateStatus('returned');
+                });
+            }
+
+            function bindEndorse() {
+                const btn = document.getElementById('btnEndorseMpor');
+                if (!btn) return;
+                btn.addEventListener('click', async () => {
+                    const ok = await postAction(endorseUrl, {}, btn);
+                    if (ok) updateStatus('endorsed');
+                });
+            }
+
+            bindApprove();
+            bindReturn();
+            bindEndorse();
+        })();
+        </script>
     </section>
 @endsection

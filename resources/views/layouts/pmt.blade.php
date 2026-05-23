@@ -274,12 +274,6 @@
                                     <span>Employee Calibration</span>
                                 </a>
                             </li>
-                            <li>
-                                <a href="{{ route('pmt.office-calibration.index') }}" class="sidebar-link" @if($isOfficeCalibration) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-building-circle-check"></i>
-                                    <span>Office Calibration</span>
-                                </a>
-                            </li>
                         </ul>
                     </div>
 

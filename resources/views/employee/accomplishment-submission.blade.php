@@ -1026,7 +1026,46 @@
                     modalConfirm.disabled = true;
                     modalConfirm.classList.add('opacity-70', 'cursor-not-allowed');
 
-                    submissionForm.requestSubmit();
+                    const formData = new FormData(submissionForm);
+                    fetch(submissionForm.action, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json',
+                        },
+                        body: formData,
+                    })
+                    .then(r => r.json().then(data => ({ ok: r.ok, data })))
+                    .then(({ ok, data }) => {
+                        if (!ok) throw new Error(data.message || 'Submission failed.');
+                        closeModal();
+
+                        // Update UI to show submitted state
+                        if (submitBtn) {
+                            submitBtn.disabled = true;
+                            submitBtn.classList.add('opacity-70', 'cursor-not-allowed');
+                            const lbl = submitBtn.querySelector('[data-button-label]');
+                            if (lbl) lbl.textContent = 'Already Submitted';
+                        }
+
+                        // Disable remarks
+                        const remarks = document.getElementById('employee-remarks');
+                        if (remarks) { remarks.disabled = true; remarks.classList.add('opacity-70'); }
+
+                        // Show success toast
+                        const toast = document.createElement('div');
+                        toast.className = 'fixed top-4 right-4 z-[9999] rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm font-semibold text-emerald-200 shadow-lg';
+                        toast.innerHTML = '<i class="fa-solid fa-check-circle mr-2"></i>Accomplishments submitted successfully.';
+                        document.body.appendChild(toast);
+                        setTimeout(() => toast.remove(), 4000);
+                    })
+                    .catch(err => {
+                        alert(err.message || 'Submission failed.');
+                        if (modalSpinner) modalSpinner.classList.add('hidden');
+                        if (modalLabel) modalLabel.textContent = 'Submit Accomplishments';
+                        modalConfirm.disabled = false;
+                        modalConfirm.classList.remove('opacity-70', 'cursor-not-allowed');
+                    });
                 }
 
                 document.querySelectorAll('[data-action]').forEach((btn) => {

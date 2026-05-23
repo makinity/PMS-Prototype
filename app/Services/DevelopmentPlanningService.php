@@ -86,6 +86,11 @@ class DevelopmentPlanningService
                     'development_plan_id' => $plan?->id,
                     'development_plan_status' => (string) ($plan?->status ?? ''),
                     'development_plan_status_label' => $this->formatStatusLabel((string) ($plan?->status ?? '')),
+                    'lnd_sync_status' => (string) ($plan?->lnd_sync_status ?? DevelopmentPlan::LND_SYNC_NOT_SENT),
+                    'lnd_sync_status_label' => $this->formatLndSyncStatusLabel((string) ($plan?->lnd_sync_status ?? DevelopmentPlan::LND_SYNC_NOT_SENT)),
+                    'lnd_reference_id' => $plan?->lnd_reference_id,
+                    'lnd_synced_at' => optional($plan?->lnd_synced_at)?->toISOString(),
+                    'lnd_last_error' => (string) ($plan?->lnd_last_error ?? ''),
                 ];
             })
             ->filter()
@@ -136,10 +141,25 @@ class DevelopmentPlanningService
                     'created_by_name' => (string) ($plan->creator?->name ?? '--'),
                     'updated_by_name' => (string) ($plan->updater?->name ?? '--'),
                     'submitted_to_ld_at' => optional($plan->submitted_to_ld_at)?->toISOString(),
+                    'lnd_sync_status' => (string) ($plan->lnd_sync_status ?? DevelopmentPlan::LND_SYNC_NOT_SENT),
+                    'lnd_sync_status_label' => $this->formatLndSyncStatusLabel((string) ($plan->lnd_sync_status ?? DevelopmentPlan::LND_SYNC_NOT_SENT)),
+                    'lnd_reference_id' => $plan->lnd_reference_id,
+                    'lnd_synced_at' => optional($plan->lnd_synced_at)?->toISOString(),
+                    'lnd_last_error' => (string) ($plan->lnd_last_error ?? ''),
                     'created_at' => optional($plan->created_at)?->toISOString(),
                     'updated_at' => optional($plan->updated_at)?->toISOString(),
                 ];
             })
             ->values();
+    }
+
+    public function formatLndSyncStatusLabel(string $status): string
+    {
+        return match (strtolower(trim($status))) {
+            DevelopmentPlan::LND_SYNC_SENT => 'Sent',
+            DevelopmentPlan::LND_SYNC_ACKNOWLEDGED => 'Acknowledged',
+            DevelopmentPlan::LND_SYNC_FAILED => 'Failed',
+            default => 'Not Sent',
+        };
     }
 }

@@ -237,6 +237,9 @@ Route::prefix('dept-head')->middleware('auth')->group(function () {
         ->name('stage1.ipcr.export.pdf');
 
     Route::get('/accomplishment-review', [AccomplishmentReviewController::class, 'index'])->name('dept-head.acc-review');
+    Route::get('/accomplishment-review/{id}', [AccomplishmentReviewController::class, 'show'])->name('dept-head.acc-review.show');
+    Route::get('/accomplishment-review/{id}/smpor-preview', [AccomplishmentReviewController::class, 'smporPreview'])->name('dept-head.acc-review.smpor-preview');
+    Route::get('/accomplishment-review/{id}/ipcr-preview', [AccomplishmentReviewController::class, 'ipcrPreview'])->name('dept-head.acc-review.ipcr-preview');
     Route::post('/accomplishment-review/{id}', [AccomplishmentReviewController::class, 'endorseToPmt'])->name('dept-head.acc-review.endorse');
     
     // Stage III - Export
@@ -260,6 +263,12 @@ Route::prefix('supervisor')->middleware('auth')->group(function () {
 
     Route::get('/submissions', [SupervisorAccomplishmentController::class, 'index'])
         ->name('supervisor.employee-submissions');
+    Route::get('/submissions/{id}', [SupervisorAccomplishmentController::class, 'show'])
+        ->name('supervisor.submissions.show');
+    Route::get('/submissions/{id}/smpor-preview', [SupervisorAccomplishmentController::class, 'smporPreview'])
+        ->name('supervisor.submissions.smpor-preview');
+    Route::get('/submissions/{id}/ipcr-preview', [SupervisorAccomplishmentController::class, 'ipcrPreview'])
+        ->name('supervisor.submissions.ipcr-preview');
     Route::post('/submissions/{id}/endorse', [SupervisorAccomplishmentController::class, 'endorseToDeptHead'])
         ->name('supervisor.submissions.endorse');
 
@@ -373,6 +382,9 @@ Route::prefix('pmt')->middleware('auth')->group(function () {
         ->name('stage3.ipcr.export.pdf');
 
     Route::get('/acc-review', [PmtAccomplishmentReviewController::class, 'index'])->name('pmt.acc-review');
+    Route::get('/acc-review/{id}', [PmtAccomplishmentReviewController::class, 'show'])->name('pmt.acc-review.show');
+    Route::get('/acc-review/{id}/smpor-preview', [PmtAccomplishmentReviewController::class, 'smporPreview'])->name('pmt.acc-review.smpor-preview');
+    Route::get('/acc-review/{id}/ipcr-preview', [PmtAccomplishmentReviewController::class, 'ipcrPreview'])->name('pmt.acc-review.ipcr-preview');
     Route::post('/acc-review/{id}/approve', [PmtAccomplishmentReviewController::class, 'approve'])->name('pmt.acc-review.approve');
     Route::post('/acc-review/{id}/return', [PmtAccomplishmentReviewController::class, 'returnSubmission'])->name('pmt.acc-review.return');
 
@@ -405,6 +417,7 @@ Route::prefix('pmt')->middleware('auth')->group(function () {
         Route::post('/', [\App\Http\Controllers\Pmt\DevelopmentPlanningController::class, 'store'])->name('store');
         Route::get('/{developmentPlan}', [\App\Http\Controllers\Pmt\DevelopmentPlanningController::class, 'show'])->name('show');
         Route::post('/{developmentPlan}/status', [\App\Http\Controllers\Pmt\DevelopmentPlanningController::class, 'updateStatus'])->name('status');
+        Route::post('/{developmentPlan}/send-to-lnd', [\App\Http\Controllers\Pmt\DevelopmentPlanningController::class, 'sendToLnd'])->name('send-to-lnd');
     });
 });
 

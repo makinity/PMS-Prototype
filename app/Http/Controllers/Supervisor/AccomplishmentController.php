@@ -127,6 +127,7 @@ class AccomplishmentController extends Controller
                 'status_label' => $this->formatStatusLabel($status),
                 'submitted_at_label' => $submittedAtLabel,
                 'computed_score' => $computedScore,
+                'computed_rating' => $computedRating,
             ];
 
             $submissionPayloads[(string) $submission->id] = $payload;
@@ -527,10 +528,109 @@ class AccomplishmentController extends Controller
         return $normalized;
     }
 
-    public function endorseToDeptHead($id)
+    public function show(Request $request, $id)
+    {
+        $user = $request->user();
+        abort_unless($user, 403);
+
+        $period = PerformancePeriod::query()->where('is_active', 1)->first();
+        abort_unless($period, 404);
+
+        $submission = AccomplishmentSubmission::query()
+            ->where('id', $id)
+            ->where('supervisor_id', $user->id)
+            ->where('performance_period_id', $period->id)
+            ->with([
+                'employee:id,name,office_id',
+                'employee.office:id,name',
+                'mpors:id,employee_id,office_id,month,status',
+                'ipcr:id,unit_work_plan_id,performance_period_id,office_id,employee_id',
+                'ipcr.items:id,ipcr_id,uwp_function_id,uwp_success_indicator_id,output_title,function_type,indicator_text,target_quantity,target_timeline,target_summary,standards_payload',
+            ])
+            ->firstOrFail();
+
+        $periodLabel = $this->buildPeriodLabel($period);
+        $status = strtolower(trim((string) ($submission->status ?? 'draft')));
+        $ratingService = app(\App\Services\PerformanceRatingService::class);
+
+        if ($submission->ipcr) {
+            [$computedScore, $computedRating] = $ratingService->getResolvedScoreAndRating($submission->ipcr);
+        } else {
+            $computedScore = 0.00;
+            $computedRating = '--';
+        }
+
+        $attachments = $this->buildAttachmentPayload($submission->attachments ?? []);
+
+        return view('supervisor.accomplishment-show', [
+            'submission' => $submission,
+            'periodLabel' => $periodLabel,
+            'status' => $status,
+            'statusLabel' => $this->formatStatusLabel($status),
+            'submittedAtLabel' => $submission->submitted_at ? $submission->submitted_at->format('M d, Y h:i A') : '--',
+            'employeeName' => $submission->employee?->name ?? '--',
+            'officeName' => $submission->employee?->office?->name ?? '--',
+            'computedScore' => $computedScore,
+            'computedRating' => $computedRating,
+            'remarks' => (string) ($submission->employee_remarks ?? ''),
+            'attachments' => $attachments,
+        ]);
+    }
+
+    public function smporPreview(Request $request, $id)
+    {
+        $user = $request->user();
+        abort_unless($user, 403);
+
+        $submission = AccomplishmentSubmission::query()
+            ->where('id', $id)
+            ->where('supervisor_id', $user->id)
+            ->with(['employee:id,name,office_id', 'employee.office:id,name'])
+            ->firstOrFail();
+
+        // Impersonate the employee to reuse the same controller logic
+        $originalUser = $request->user();
+        Auth::login($submission->employee);
+        $controller = app(\App\Http\Controllers\Employee\SmporIpcrAccomplishmentController::class);
+        $indexView = $controller->index($request);
+        Auth::login($originalUser);
+
+        $data = $indexView->getData();
+        $data['layout'] = 'layouts.supervisor';
+        $data['backUrl'] = route('supervisor.submissions.show', $id);
+
+        return view('supervisor.accomplishment-smpor-preview', $data);
+    }
+
+    public function ipcrPreview(Request $request, $id)
+    {
+        $user = $request->user();
+        abort_unless($user, 403);
+
+        $submission = AccomplishmentSubmission::query()
+            ->where('id', $id)
+            ->where('supervisor_id', $user->id)
+            ->with(['employee:id,name,office_id', 'employee.office:id,name'])
+            ->firstOrFail();
+
+        $originalUser = $request->user();
+        Auth::login($submission->employee);
+        $controller = app(\App\Http\Controllers\Employee\SmporIpcrAccomplishmentController::class);
+        $indexView = $controller->index($request);
+        Auth::login($originalUser);
+
+        $data = $indexView->getData();
+        $data['layout'] = 'layouts.supervisor';
+        $data['backUrl'] = route('supervisor.submissions.show', $id);
+
+        return view('supervisor.accomplishment-ipcr-preview', $data);
+    }
+
+    public function endorseToDeptHead(Request $request, $id)
     {
         $submission = AccomplishmentSubmission::findOrFail($id);
         if ($submission->status !== 'submitted_to_supervisor') {
+            if ($request->wantsJson()) return response()->json(['message' => 'Only submissions submitted to supervisor can be endorsed.'], 422);
             return back()->with('error', 'Only submissions submitted to supervisor can be endorsed.');
         }
 
@@ -540,6 +640,7 @@ class AccomplishmentController extends Controller
             'supervisor_action_at' => now(),
         ]);
 
+        if ($request->wantsJson()) return response()->json(['status' => 'supervisor_endorsed']);
         return back()->with('success', 'Submission successfully endorsed to Department Head.');
     }
 }

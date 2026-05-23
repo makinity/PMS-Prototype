@@ -39,7 +39,33 @@
                     <h2 class="mt-1 text-xl font-bold text-white">Top Performers</h2>
                 </div>
 
-                <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
+                <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
+                    <div class="flex flex-wrap items-end gap-3">
+                        <div class="inline-flex rounded-xl border border-slate-700 bg-slate-950/60 p-1">
+                            <button type="button" data-tp-tab-btn="employees" class="rounded-lg bg-sky-600/20 px-4 py-2 text-xs font-semibold text-sky-200">Employees</button>
+                            <button type="button" data-tp-tab-btn="offices" class="rounded-lg px-4 py-2 text-xs font-semibold text-slate-300">Offices</button>
+                        </div>
+                        <div class="min-w-[220px] flex-1">
+                            <label for="tp-live-search" class="mb-1 block text-xs uppercase tracking-[0.14em] text-slate-400">Search</label>
+                            <input id="tp-live-search" type="text" placeholder="Search name, office, adjective..."
+                                style="background-color:#020617;color:#e2e8f0;border-color:#334155;"
+                                class="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500">
+                        </div>
+                        <div class="w-full min-w-[180px] sm:w-auto">
+                            <label for="tp-adjective-filter" class="mb-1 block text-xs uppercase tracking-[0.14em] text-slate-400">Adjective</label>
+                            <select id="tp-adjective-filter"
+                                style="background-color:#020617;color:#e2e8f0;border-color:#334155;"
+                                class="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-3 py-2 text-sm text-slate-200 [color-scheme:dark]">
+                                <option value="">All</option>
+                                <option value="Outstanding">Outstanding</option>
+                                <option value="Very Satisfactory">Very Satisfactory</option>
+                                <option value="Satisfactory">Satisfactory</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div data-tp-panel="employees" class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
                     <div class="border-b border-slate-800 px-5 py-4">
                         <h3 class="text-lg font-semibold text-white">Employees</h3>
                     </div>
@@ -48,35 +74,34 @@
                             <thead class="bg-slate-950/60 text-xs uppercase tracking-[0.22em] text-slate-500">
                                 <tr>
                                     <th class="px-4 py-4 text-center">Rank</th>
-                                    <th class="px-4 py-4 text-left">Surname</th>
-                                    <th class="px-4 py-4 text-left">Given Name</th>
-                                    <th class="px-4 py-4 text-left">Middle Name</th>
-                                    <th class="px-4 py-4 text-center">Ext.</th>
-                                    <th class="px-4 py-4 text-left">Designation</th>
-                                    <th class="px-4 py-4 text-left">Office</th>
+                                    <th class="px-4 py-4 text-left">Employee</th>
                                     <th class="px-4 py-4 text-center">Numerical</th>
                                     <th class="px-4 py-4 text-center">Adjective</th>
-                                    <th class="px-4 py-4 text-left">Remarks</th>
                                     <th class="px-4 py-4 text-right">Action</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-800">
                                 @forelse ($topEmployees as $row)
-                                    <tr class="hover:bg-slate-950/40">
+                                    @php
+                                        $rowSearch = strtolower(trim(implode(' ', [
+                                            $row['employee_name'] ?? '',
+                                            $row['office_name'] ?? '',
+                                            $row['official_rating'] ?? '',
+                                        ])));
+                                    @endphp
+                                    <tr class="hover:bg-slate-950/40"
+                                        data-tp-row
+                                        data-tp-kind="employees"
+                                        data-tp-search="{{ $rowSearch }}"
+                                        data-tp-adjective="{{ $row['official_rating'] ?? '' }}">
                                         <td class="px-4 py-4 text-center text-slate-300">{{ $loop->iteration }}</td>
-                                        <td class="px-4 py-4 font-medium text-white">{{ $row['surname'] }}</td>
-                                        <td class="px-4 py-4 text-slate-300">{{ $row['given_name'] }}</td>
-                                        <td class="px-4 py-4 text-slate-300">{{ $row['middle_name'] }}</td>
-                                        <td class="px-4 py-4 text-center text-slate-300">{{ $row['name_extension'] }}</td>
-                                        <td class="px-4 py-4 text-slate-300">{{ $row['designation'] }}</td>
-                                        <td class="px-4 py-4 text-slate-300">{{ $row['office_name'] }}</td>
+                                        <td class="px-4 py-4 font-medium text-white">{{ $row['employee_name'] }}</td>
                                         <td class="px-4 py-4 text-center">
                                             <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-300 border border-emerald-500/20">
                                                 {{ number_format((float) $row['official_score'], 2) }}
                                             </span>
                                         </td>
                                         <td class="px-4 py-4 text-center text-slate-200">{{ $row['official_rating'] }}</td>
-                                        <td class="px-4 py-4 text-slate-400">{{ $row['remarks'] }}</td>
                                         <td class="px-4 py-4 text-right">
                                             <button type="button"
                                                 data-open-details
@@ -88,15 +113,18 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="11" class="px-5 py-10 text-center text-sm text-slate-400">No top employee performers identified for the active period.</td>
+                                        <td colspan="5" class="px-5 py-10 text-center text-sm text-slate-400">No top employee performers identified for the active period.</td>
                                     </tr>
                                 @endforelse
+                                <tr data-tp-no-match="employees" class="hidden">
+                                    <td colspan="5" class="px-5 py-10 text-center text-sm text-slate-400">No matching employee performers.</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
+                <div data-tp-panel="offices" class="hidden overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
                     <div class="border-b border-slate-800 px-5 py-4">
                         <h3 class="text-lg font-semibold text-white">Offices</h3>
                     </div>
@@ -113,7 +141,18 @@
                             </thead>
                             <tbody class="divide-y divide-slate-800">
                                 @forelse ($topOffices as $row)
-                                    <tr class="hover:bg-slate-950/40">
+                                    @php
+                                        $rowSearch = strtolower(trim(implode(' ', [
+                                            $row['office_name'] ?? '',
+                                            $row['department_head_name'] ?? '',
+                                            $row['official_rating'] ?? '',
+                                        ])));
+                                    @endphp
+                                    <tr class="hover:bg-slate-950/40"
+                                        data-tp-row
+                                        data-tp-kind="offices"
+                                        data-tp-search="{{ $rowSearch }}"
+                                        data-tp-adjective="{{ $row['official_rating'] ?? '' }}">
                                         <td class="px-5 py-4 font-medium text-white">{{ $row['office_name'] }}</td>
                                         <td class="px-5 py-4 text-slate-300">{{ $row['department_head_name'] }}</td>
                                         <td class="px-5 py-4 text-center">
@@ -136,6 +175,9 @@
                                         <td colspan="5" class="px-5 py-10 text-center text-sm text-slate-400">No top office performers identified for the active period.</td>
                                     </tr>
                                 @endforelse
+                                <tr data-tp-no-match="offices" class="hidden">
+                                    <td colspan="5" class="px-5 py-10 text-center text-sm text-slate-400">No matching office performers.</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -259,6 +301,56 @@
                     openModal(data);
                 });
             });
+
+            const tabButtons = Array.from(document.querySelectorAll('[data-tp-tab-btn]'));
+            const panels = Array.from(document.querySelectorAll('[data-tp-panel]'));
+            const liveSearchInput = document.getElementById('tp-live-search');
+            const adjectiveSelect = document.getElementById('tp-adjective-filter');
+            let activeTab = 'employees';
+
+            function setActiveTab(nextTab) {
+                activeTab = nextTab;
+                tabButtons.forEach((btn) => {
+                    const isActive = btn.dataset.tpTabBtn === nextTab;
+                    btn.classList.toggle('bg-sky-600/20', isActive);
+                    btn.classList.toggle('text-sky-200', isActive);
+                    btn.classList.toggle('text-slate-300', !isActive);
+                });
+                panels.forEach((panel) => panel.classList.toggle('hidden', panel.dataset.tpPanel !== nextTab));
+                applyTopPerformerFilters();
+            }
+
+            function applyTopPerformerFilters() {
+                const query = (liveSearchInput?.value || '').trim().toLowerCase();
+                const adjective = adjectiveSelect?.value || '';
+                const rows = Array.from(document.querySelectorAll('[data-tp-row]'));
+                const tabRows = rows.filter((row) => row.dataset.tpKind === activeTab);
+                let visibleCount = 0;
+
+                rows.forEach((row) => {
+                    const isTabMatch = row.dataset.tpKind === activeTab;
+                    if (!isTabMatch) {
+                        row.classList.add('hidden');
+                        return;
+                    }
+                    const haystack = (row.dataset.tpSearch || '').toLowerCase();
+                    const rowAdj = row.dataset.tpAdjective || '';
+                    const matchesQuery = query === '' || haystack.includes(query);
+                    const matchesAdjective = adjective === '' || rowAdj === adjective;
+                    const shouldShow = matchesQuery && matchesAdjective;
+                    row.classList.toggle('hidden', !shouldShow);
+                    if (shouldShow) visibleCount += 1;
+                });
+
+                document.querySelectorAll('[data-tp-no-match]').forEach((row) => {
+                    row.classList.toggle('hidden', row.dataset.tpNoMatch !== activeTab || visibleCount > 0 || tabRows.length === 0);
+                });
+            }
+
+            tabButtons.forEach((btn) => btn.addEventListener('click', () => setActiveTab(btn.dataset.tpTabBtn)));
+            liveSearchInput?.addEventListener('input', applyTopPerformerFilters);
+            adjectiveSelect?.addEventListener('change', applyTopPerformerFilters);
+            setActiveTab('employees');
 
             closeBtns.forEach(btn => btn.addEventListener('click', closeModal));
             modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
