@@ -32,69 +32,9 @@
             $isIPCRTARGET = request()->routeIs('employee.ipcr-target');
             $isProfile = request()->routeIs('employee.profile');
         @endphp
-        <!-- Top Navigation -->
-        <nav class="fixed top-0 z-50 w-full border-b border-slate-800/80 bg-slate-950/90 text-slate-100 shadow-lg shadow-slate-950/30 backdrop-blur">
-            <div class="flex items-center justify-between gap-4 px-4 py-3 lg:px-6">
-                <div class="flex items-center gap-3">
-                    <button type="button" data-drawer-target="employee-sidebar" data-drawer-toggle="employee-sidebar" aria-controls="employee-sidebar" class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-800 bg-slate-900/70 text-slate-200 shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-400/30 sm:hidden">
-                        <span class="sr-only">Open sidebar</span>
-                        <i class="fa-solid fa-bars"></i>
-                    </button>
-                    <a href="#" class="flex items-center gap-3">
-                        <span class="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-600 via-blue-600 to-emerald-500 text-white shadow-sm">
-                            <i class="fa-solid fa-chart-line"></i>
-                        </span>
-                        <span class="hidden sm:block">
-                            <span class="block text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">PMS</span>
-                            <span class="block text-lg font-semibold leading-tight text-white">Employee Hub</span>
-                        </span>
-                    </a>
-                </div>
-
-                <div class="flex items-center gap-2">
-                    @if (class_exists(\Livewire\Livewire::class))
-                        <livewire:notification-dropdown />
-                    @else
-                        <button type="button" class="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-800 bg-slate-900/70 text-slate-300 shadow-sm transition hover:bg-slate-800">
-                            <span class="sr-only">View notifications</span>
-                            <i class="fa-regular fa-bell"></i>
-                            <span class="absolute right-2 top-2 h-2 w-2 rounded-full bg-rose-500"></span>
-                        </button>
-                    @endif
-                    <div class="relative">
-                        <button type="button" id="employee-user-menu-button" data-dropdown-toggle="employee-user-menu" class="flex items-center gap-3 rounded-full border border-slate-800 bg-slate-900/70 px-2 py-1.5 text-left text-slate-100 shadow-sm transition hover:bg-slate-800">
-                            @include('partials.user-avatar', ['user' => Auth::user()])
-                            <span class="hidden sm:block">
-                                <span class="block text-sm font-semibold text-white">{{ Auth::user()->name }}</span>
-                                <span class="block text-xs text-slate-400">{{ Auth::user()->office->name }}</span>
-                            </span>
-                            <i class="fa-solid fa-chevron-down hidden text-xs text-slate-500 sm:block"></i>
-                        </button>
-                        <div id="employee-user-menu" class="z-50 hidden w-56 divide-y divide-slate-800 rounded-2xl bg-slate-900 shadow-lg ring-1 ring-slate-800">
-                            <div class="px-4 py-3">
-                                <p class="text-xs font-semibold uppercase tracking-widest text-slate-400">Signed in as</p>
-                                <p class="mt-1 text-sm font-semibold text-white">{{ Auth::user()->name }}</p>
-                                <p class="text-xs text-slate-400">{{ Auth::user()->position }}</p>
-                            </div>
-                            <ul class="py-2 text-sm text-slate-200" aria-labelledby="employee-user-menu-button">
-                                <li><a href="{{ route('employee.profile') }}" class="block px-4 py-2 transition hover:bg-slate-800">My profile</a></li>
-                                <li><a href="#" class="block px-4 py-2 transition hover:bg-slate-800">Settings</a></li>
-                                <li><a href="#" class="block px-4 py-2 transition hover:bg-slate-800">Support</a></li>
-                            </ul>
-                            <div class="py-2">
-                                <a href="{{ route('logout') }}" data-logout-url="{{ route('logout') }}" id="logoutBtn" class="flex w-full items-center gap-2 px-4 py-2 text-sm font-semibold text-rose-300 transition hover:bg-rose-500/10">
-                                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                                    <span>Sign out</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </nav>
 
         <!-- Sidebar -->
-        <aside id="employee-sidebar" class="fixed left-0 top-0 z-40 h-screen w-72 -translate-x-full border-r border-slate-800/80 bg-slate-950/95 pt-16 text-slate-100 shadow-sm transition-transform sm:translate-x-0" aria-label="Sidebar">
+        <aside id="employee-sidebar" class="fixed left-0 top-0 z-40 h-screen w-72 -translate-x-full bg-slate-950 pt-16 text-slate-100 transition-transform sm:translate-x-0" aria-label="Sidebar">
             <div class="flex h-full flex-col gap-6 overflow-y-auto px-4 pb-6">
 
 
@@ -175,14 +115,93 @@
                                 </a>
                             </li>
                         </ul>
-                    </div>
                 </nav>
             </div>
         </aside>
 
+        <!-- Top Navigation -->
+        <nav class="fixed top-0 z-50 w-full bg-slate-950 text-slate-100" id="top-nav">
+            <div class="flex items-center justify-between gap-4 px-4 py-3 lg:px-6">
+                <div class="flex items-center gap-3">
+                    <button type="button" id="sidebar-toggle-btn" aria-controls="employee-sidebar" class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-800 bg-slate-900/70 text-slate-200 shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-400/30">
+                        <span class="sr-only">Toggle sidebar</span>
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <a href="#" class="flex items-center gap-3" id="nav-logo-link">
+                        <span class="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-600 via-blue-600 to-emerald-500 text-white shadow-sm" id="nav-logo-icon">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </span>
+                        <span class="hidden sm:block" id="nav-logo-text">
+                            <span class="block text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">PMS</span>
+                            <span class="block text-lg font-semibold leading-tight text-white">Employee Hub</span>
+                        </span>
+                    </a>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    @if (class_exists(\Livewire\Livewire::class))
+                        <livewire:notification-dropdown />
+                    @else
+                        <button type="button" class="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-800 bg-slate-900/70 text-slate-300 shadow-sm transition hover:bg-slate-800">
+                            <span class="sr-only">View notifications</span>
+                            <i class="fa-regular fa-bell"></i>
+                            <span class="absolute right-2 top-2 h-2 w-2 rounded-full bg-rose-500"></span>
+                        </button>
+                    @endif
+                    <div class="relative">
+                        <button type="button" id="employee-user-menu-button" data-dropdown-toggle="employee-user-menu" class="flex items-center gap-3 rounded-full border border-slate-800 bg-slate-900/70 px-2 py-1.5 text-left text-slate-100 shadow-sm transition hover:bg-slate-800">
+                            @include('partials.user-avatar', ['user' => Auth::user()])
+                            <span class="hidden sm:block">
+                                <span class="block text-sm font-semibold text-white">{{ Auth::user()->name }}</span>
+                                <span class="block text-xs text-slate-400">{{ Auth::user()->office->name }}</span>
+                            </span>
+                            <i class="fa-solid fa-chevron-down hidden text-xs text-slate-500 sm:block"></i>
+                        </button>
+                        <div id="employee-user-menu" class="z-50 hidden w-56 divide-y divide-slate-800 rounded-2xl bg-slate-900 shadow-lg ring-1 ring-slate-800">
+                            <div class="px-4 py-3">
+                                <p class="text-xs font-semibold uppercase tracking-widest text-slate-400">Signed in as</p>
+                                <p class="mt-1 text-sm font-semibold text-white">{{ Auth::user()->name }}</p>
+                                <p class="text-xs text-slate-400">{{ Auth::user()->position }}</p>
+                            </div>
+                            <ul class="py-2 text-sm text-slate-200" aria-labelledby="employee-user-menu-button">
+                                <li><a href="{{ route('employee.profile') }}" class="block px-4 py-2 transition hover:bg-slate-800">My profile</a></li>
+                                <li><a href="#" class="block px-4 py-2 transition hover:bg-slate-800">Settings</a></li>
+                                <li><a href="#" class="block px-4 py-2 transition hover:bg-slate-800">Support</a></li>
+                            </ul>
+                            <div class="py-2">
+                                <a href="{{ route('logout') }}" data-logout-url="{{ route('logout') }}" id="logoutBtn" class="flex w-full items-center gap-2 px-4 py-2 text-sm font-semibold text-rose-300 transition hover:bg-rose-500/10">
+                                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                                    <span>Sign out</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+
+
         <!-- Main Content -->
-        <div class="pt-2 sm:ml-72">
+        <div id="main-wrapper" class="pt-2 sm:ml-72">
             <main id="main-content" class="px-4 pb-12 pt-6 lg:px-8">
+                @php
+                    $breadcrumbMap = [
+                        'employee.dashboard' => 'Dashboard',
+                        'employee.my-task' => 'My Tasks',
+                        'employee.accomplishment-submission' => 'Accomplishments',
+                        'employee.ors' => 'Output Rating Sheet',
+                        'employee.mpor' => 'MPOR',
+                        'employee.ipcr-target' => 'IPCR Target',
+                        'employee.profile' => 'Profile & Security',
+                    ];
+                    $currentBreadcrumb = collect($breadcrumbMap)->first(fn($label, $route) => request()->routeIs($route . '*')) ?? 'Page';
+                @endphp
+                <nav class="mb-4 flex items-center gap-2 text-sm text-slate-400">
+                    <i class="fa-solid fa-house text-xs text-slate-500"></i>
+                    <span class="text-slate-600">/</span>
+                    <span class="text-slate-200">{{ $currentBreadcrumb }}</span>
+                </nav>
                 <div class="mx-auto max-w-7xl">
                     @yield('main-content')
                 </div>
@@ -200,5 +219,58 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     @include('partials.auth-snackbar')
     @stack('scripts')
+    <script>
+    (function() {
+        document.documentElement.classList.remove('sidebar-collapsed');
+
+        const sidebar = document.getElementById('employee-sidebar');
+        const mainWrapper = document.getElementById('main-wrapper');
+        const toggleBtn = document.getElementById('sidebar-toggle-btn');
+        const logoText = document.getElementById('nav-logo-text');
+        const logoIcon = document.getElementById('nav-logo-icon');
+        let collapsed = false;
+
+        function isDesktop() { return window.innerWidth >= 640; }
+
+        function resetCollapse() {
+            sidebar.style.width = '';
+            sidebar.style.overflow = '';
+            mainWrapper.style.marginLeft = '';
+            sidebar.querySelectorAll('.sidebar-link span, nav > div > p').forEach(el => el.style.display = '');
+            if (logoText) logoText.style.display = '';
+            if (logoIcon) logoIcon.style.display = '';
+            collapsed = false;
+        }
+
+        toggleBtn?.addEventListener('click', () => {
+            if (!isDesktop()) {
+                // Mobile: full drawer toggle
+                resetCollapse();
+                sidebar.classList.toggle('-translate-x-full');
+                return;
+            }
+            // Desktop: collapse/expand
+            collapsed = !collapsed;
+            if (collapsed) {
+                sidebar.style.width = '4.5rem';
+                sidebar.style.overflow = 'hidden';
+                mainWrapper.style.marginLeft = '4.5rem';
+                sidebar.querySelectorAll('.sidebar-link span, nav > div > p').forEach(el => el.style.display = 'none');
+                if (logoText) logoText.style.display = 'none';
+                if (logoIcon) logoIcon.style.display = 'none';
+            } else {
+                resetCollapse();
+            }
+        });
+
+        // On resize: if going to mobile, reset collapse
+        window.addEventListener('resize', () => {
+            if (!isDesktop() && collapsed) {
+                resetCollapse();
+                sidebar.classList.add('-translate-x-full');
+            }
+        });
+    })();
+    </script>
 </body>
 </html>
