@@ -5,8 +5,6 @@
     <div class="flex flex-wrap items-start justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold text-white">PMT Final OPCR Approval</h1>
-            <p class="text-sm text-slate-400">Stage I - Performance Planning and Commitment</p>
-            <p class="text-xs text-slate-500">Review Department Head-endorsed OPCRs and issue final approval to proceed to Stage II.</p>
         </div>
     </div>
 

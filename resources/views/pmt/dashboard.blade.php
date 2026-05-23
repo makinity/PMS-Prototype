@@ -14,7 +14,6 @@
         <div class="rounded-2xl border border-white/10 bg-transparent p-5">
             <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">Performance Management Team</p>
             <h1 class="mt-1 text-2xl font-bold text-white">Dashboard</h1>
-            <p class="mt-1 text-sm text-slate-400">Operational queue and approval workflow overview.</p>
             <p class="mt-2 text-xs text-slate-500">{{ $periodLabel }}</p>
         </div>
 

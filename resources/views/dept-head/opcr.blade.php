@@ -5,13 +5,13 @@
     $opcrStatus = strtolower((string) ($currentOpcr?->status ?? ''));
     $canRefreshPreview = !empty($submittedSeedUwpId) && in_array($opcrStatus, ['', \App\Models\Opcr::STATUS_DRAFT, \App\Models\Opcr::STATUS_RETURNED, \App\Models\Opcr::STATUS_SUBMITTED], true);
     $canSubmitToPmt = $currentOpcr && in_array($opcrStatus, [\App\Models\Opcr::STATUS_DRAFT, \App\Models\Opcr::STATUS_RETURNED, \App\Models\Opcr::STATUS_SUBMITTED, \App\Models\Opcr::STATUS_APPROVED], true);
-    
+
     // Stage-based logic: Only allow calibration submission if we are in the rating phase
     $hasRatings = false;
     if ($currentOpcr) {
         $hasRatings = \App\Models\Ipcr::where('opcr_id', $currentOpcr->id)->whereNotNull('final_score')->exists();
     }
-    
+
     $sourceCount = $sourceUwps->count();
 @endphp
 
@@ -19,8 +19,6 @@
     <div class="flex flex-wrap items-start justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold text-white">Office Performance Commitment and Review (OPCR)</h1>
-            <p class="text-sm text-slate-400">Stage I - Performance Planning and Commitment</p>
-            <p class="text-xs text-slate-500">Review Source UWPs, inspect each submission, then submit the consolidated OPCR to PMT.</p>
         </div>
         <div class="rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3 text-right">
             <p class="text-[11px] uppercase tracking-[0.24em] text-slate-500">Active Period</p>
@@ -32,7 +30,6 @@
         <div class="flex flex-wrap items-start justify-between gap-4 border-b border-slate-800 px-5 py-4">
             <div>
                 <h2 class="text-lg font-semibold text-white">Source UWPs</h2>
-                <p class="mt-1 text-sm text-slate-400">Submitted UWPs and already included source records for the current office-period OPCR.</p>
             </div>
             <div class="flex flex-wrap items-center gap-2 text-xs">
                 <span class="rounded-full border border-slate-700 bg-slate-950/70 px-3 py-1 text-slate-300">{{ $sourceCount }} source record{{ $sourceCount === 1 ? '' : 's' }}</span>
@@ -100,7 +97,6 @@
         <div class="flex flex-wrap items-start justify-between gap-4 border-b border-slate-800 px-5 py-4">
             <div>
                 <h2 class="text-lg font-semibold text-white">OPCR Preview</h2>
-                <p class="mt-1 text-sm text-slate-400">Consolidated preview of all Source UWP contents that feed the current office-period OPCR.</p>
             </div>
             <div class="flex flex-wrap items-center gap-2 text-xs">
                 @if ($currentOpcr)
@@ -204,9 +200,8 @@
                     </tbody>
                 </table>
             </div>
-            
+
             <div class="border-t border-slate-800 p-6 flex flex-wrap items-center justify-between gap-4">
-                <p class="text-sm text-slate-400 max-w-lg">Verify the consolidated outputs above. You can endorse this OPCR to PMT for final approval, or return it to supervisors if adjustments are needed.</p>
                 <div class="flex gap-3">
                     @if ($canSubmitToPmt && $opcrStatus !== \App\Models\Opcr::STATUS_ENDORSED)
                         {{-- Hidden forms submitted by the confirmation modal --}}
@@ -257,11 +252,11 @@
             </div>
             <button type="button" data-close-modal class="shrink-0 rounded-lg border border-slate-800 bg-slate-950/50 px-2.5 py-2 text-slate-400 hover:bg-slate-950 hover:text-white">&times;</button>
         </div>
-        
+
         <div id="uwp-modal-content" class="mt-5 max-h-[70vh] overflow-auto">
             <!-- Dynamic UWP Content -->
         </div>
-        
+
         <div class="mt-6 flex justify-end border-t border-slate-800 pt-4">
             <button type="button" data-close-modal class="rounded-lg border border-slate-700 bg-slate-900 px-6 py-2 text-sm font-semibold text-slate-300 hover:bg-slate-800">Close Preview</button>
         </div>
@@ -396,14 +391,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // ── UWP Preview Modal ─────────────────────────────────────────────────
     const uwpModal = document.getElementById('uwp-preview-modal');
     const uwpContent = document.getElementById('uwp-modal-content');
-    
+
     document.querySelectorAll('[data-open-source-uwp]').forEach(btn => {
         btn.addEventListener('click', () => {
             const payload = JSON.parse(btn.getAttribute('data-uwp'));
             if (!payload) return;
-            
+
             document.getElementById('uwp-modal-title').textContent = `Unit Work Plan - ${payload.uwp.office.name}`;
-            
+
             let html = `
                 <div class="grid gap-3 sm:grid-cols-2 mb-6">
                     <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
@@ -416,7 +411,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 </div>
             `;
-            
+
             payload.outputs.forEach(output => {
                 html += `
                     <div class="mb-6 rounded-xl border border-slate-800 bg-slate-950/40 overflow-hidden">
@@ -447,14 +442,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 `;
             });
-            
+
             uwpContent.innerHTML = html;
             uwpModal.classList.remove('hidden');
             uwpModal.classList.add('flex');
             document.body.classList.add('overflow-hidden');
         });
     });
-    
+
     document.querySelectorAll('[data-close-modal]').forEach(btn => {
         btn.addEventListener('click', () => {
             const modal = btn.closest('[data-modal-container]');

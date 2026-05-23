@@ -25,7 +25,6 @@
         <div class="flex flex-wrap items-start justify-between gap-3">
             <div>
                 <h1 class="text-2xl font-bold text-white">IPCR Recommendation</h1>
-                <p class="text-sm text-slate-400">Review dept-head-endorsed submissions, recommend them for calibration, and monitor released results.</p>
                 <p class="mt-1 text-xs text-slate-500">Active Performance Period: {{ $periodLabelSafe }}</p>
             </div>
             <div class="rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3 text-right">
@@ -138,7 +137,6 @@
                 <div>
                     <p class="text-xs uppercase tracking-[0.2em] text-sky-300">PMT Review</p>
                     <h3 class="text-lg font-semibold text-white">Accomplishment Review Details</h3>
-                    <p class="mt-1 text-sm text-slate-400">Read-only snapshot of employee accomplishment submission.</p>
                 </div>
                 <button type="button" data-close-modal class="text-2xl leading-none text-slate-400 transition hover:text-white">&times;</button>
             </div>
@@ -247,7 +245,7 @@
             </div>
 
             <div class="mt-5 flex items-center justify-end gap-4 border-t border-slate-800 pt-4">
-                <button type="button" 
+                <button type="button"
                     id="pmtSubmissionReturnTrigger"
                     class="rounded-lg border border-red-600/40 bg-red-600/10 px-3 py-2 text-xs font-semibold text-red-300 transition hover:bg-red-600/20">
                     Return
@@ -400,23 +398,23 @@
                 <h3 class="text-lg font-semibold text-white">Return Submission</h3>
                 <button type="button" data-close-modal class="text-2xl leading-none text-slate-400 transition hover:text-white">&times;</button>
             </div>
-            
+
             <p class="mt-3 text-sm text-slate-400">Provide feedback to the employee on why this submission is being returned.</p>
-            
+
             <form id="pmtSubmissionReturnForm" method="POST" action="" class="mt-4">
                 @csrf
                 <div class="space-y-2">
                     <label for="pmt_return_remarks" class="text-[11px] uppercase tracking-wider text-slate-500">Remarks / Feedback</label>
-                    <textarea 
-                        id="pmt_return_remarks" 
-                        name="remarks" 
+                    <textarea
+                        id="pmt_return_remarks"
+                        name="remarks"
                         required
                         rows="4"
                         placeholder="e.g., Please provide supporting documents for task X. The current evidence is insufficient."
                         style="background-color: #020617 !important; color: #f1f5f9 !important; border-color: #334155 !important;"
                         class="w-full rounded-xl border p-3 text-sm placeholder:text-slate-600 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"></textarea>
                 </div>
-                
+
                 <div class="mt-6 flex justify-end gap-3">
                     <button type="button" data-close-modal class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-300 transition hover:bg-slate-800">Cancel</button>
                     <button type="submit" class="rounded-lg bg-red-600 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-red-900/20 transition hover:bg-red-700">Confirm Return</button>
@@ -1005,7 +1003,7 @@
                         const actionTemplate = "{{ route('pmt.acc-review.return', ['id' => '__SUBMISSION_ID__']) }}";
                         pmtReturnForm.action = actionTemplate.replace('__SUBMISSION_ID__', currentPayload.id);
                     }
-                    
+
                     if (pmtReturnRemarksInput) pmtReturnRemarksInput.value = '';
                     openPreviewModal('pmt-submission-return-modal');
                 });

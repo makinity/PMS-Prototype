@@ -18,7 +18,6 @@
                 &larr; Back to Calibration List
             </a>
             <h1 class="text-2xl font-bold text-white">Employee Performance Calibration</h1>
-            <p class="text-sm text-slate-400">Review PMT-recommended IPCR ratings, calibrate them, and release official results only after final PMT action.</p>
         </div>
         <div class="rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3 text-right">
             <p class="text-[11px] uppercase tracking-[0.24em] text-slate-500">Active Period</p>
@@ -375,7 +374,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!payload) return;
         const ipcrSections = Array.isArray(payload.ipcrSections) ? payload.ipcrSections : [];
         if (!ipcrSectionsContainerEl) return;
-        
+
         if (ipcrSections.length === 0) {
             ipcrSectionsContainerEl.innerHTML = '<div class="rounded-xl border border-slate-800 bg-slate-950/60 px-4 py-8 text-center text-slate-400">No IPCR commitments found for this submission.</div>';
         } else {

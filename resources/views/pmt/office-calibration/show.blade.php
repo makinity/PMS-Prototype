@@ -19,7 +19,6 @@
                 &larr; Back to Calibration List
             </a>
             <h1 class="text-2xl font-bold text-white">Office OPCR Calibration</h1>
-            <p class="text-sm text-slate-400">Review, calibrate, and release the final OPCR rating.</p>
         </div>
         <div class="rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3 text-right">
             <p class="text-[11px] uppercase tracking-[0.24em] text-slate-500">Active Period</p>
@@ -31,7 +30,6 @@
         <div class="flex flex-wrap items-start justify-between gap-4 border-b border-slate-800 px-5 py-4">
             <div>
                 <h2 class="text-lg font-semibold text-white">OPCR Final Snapshot</h2>
-                <p class="mt-1 text-sm text-slate-400">Consolidated snapshot of all Source UWP contents that feed the current office-period OPCR.</p>
             </div>
             <div class="flex flex-wrap items-center gap-2 text-xs">
                 @if ($currentOpcr)

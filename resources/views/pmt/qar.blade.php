@@ -53,7 +53,6 @@
         <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
             <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Stage II - PMT Approval</p>
             <h1 class="mt-1 text-2xl font-bold text-white">Office Quarterly Accomplishment Report (QAR) - PMT</h1>
-            <p class="mt-1 text-sm text-slate-400">Approve endorsed QAR records to open the employee IPCR/SMPOR accomplishment gate.</p>
 
             <div class="mt-4 grid gap-3 sm:grid-cols-3">
                 <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">

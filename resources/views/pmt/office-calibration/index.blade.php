@@ -18,7 +18,6 @@
         <div class="flex flex-wrap items-start justify-between gap-3">
             <div>
                 <h1 class="text-2xl font-bold text-white">OPCR Final Calibration</h1>
-                <p class="text-sm text-slate-400">Calibrate office OPCR ratings, then explicitly release official office results.</p>
                 <p class="mt-1 text-xs text-slate-500">Active Performance Period: {{ $periodLabelSafe }}</p>
             </div>
             <div class="rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3 text-right">

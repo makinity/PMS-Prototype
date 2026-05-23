@@ -6,7 +6,6 @@
             <div>
                 <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">Stage IV</p>
                 <h1 class="mt-1 text-2xl font-bold text-white">Top Performers</h1>
-                <p class="text-sm text-slate-400">Released top-performing employees and offices from Stage III results.</p>
             </div>
             <div class="flex items-center gap-3">
                 <a href="{{ route('pmt.top-performers.preview-pdf') }}"
@@ -26,27 +25,10 @@
             <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Top Employees</p>
                 <p class="mt-1 text-3xl font-semibold text-emerald-300">{{ $summaryCounts['top_employees'] ?? 0 }}</p>
-                <p class="text-xs text-slate-400">Outstanding, Very Satisfactory, or Satisfactory</p>
             </div>
             <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
                 <p class="text-xs text-slate-400">Top Offices</p>
                 <p class="mt-1 text-3xl font-semibold text-emerald-300">{{ $summaryCounts['top_offices'] ?? 0 }}</p>
-                <p class="text-xs text-slate-400">Outstanding, Very Satisfactory, or Satisfactory</p>
-            </div>
-        </div>
-
-        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
-            <div class="flex items-start gap-3">
-                <span class="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-blue-500/30 bg-blue-500/10 text-blue-300">
-                    <i class="fa-solid fa-circle-info"></i>
-                </span>
-                <div>
-                    <h2 class="text-lg font-semibold text-white">Stage IV v1</h2>
-                    <p class="mt-1 text-sm text-slate-400">This module only identifies released top performers. Endorsement, API handoff, and integration workflows are intentionally not included yet.</p>
-                    @if ($infoMessage)
-                        <p class="mt-3 text-sm font-medium text-amber-300">{{ $infoMessage }}</p>
-                    @endif
-                </div>
             </div>
         </div>
 
@@ -60,7 +42,6 @@
                 <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
                     <div class="border-b border-slate-800 px-5 py-4">
                         <h3 class="text-lg font-semibold text-white">Employees</h3>
-                        <p class="mt-1 text-sm text-slate-400">Released employee IPCR results classified as Outstanding, Very Satisfactory, or Satisfactory, arranged for Stage IV reporting.</p>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="min-w-full text-sm text-slate-200">
@@ -97,7 +78,7 @@
                                         <td class="px-4 py-4 text-center text-slate-200">{{ $row['official_rating'] }}</td>
                                         <td class="px-4 py-4 text-slate-400">{{ $row['remarks'] }}</td>
                                         <td class="px-4 py-4 text-right">
-                                            <button type="button" 
+                                            <button type="button"
                                                 data-open-details
                                                 data-details='@json($row)'
                                                 class="inline-flex items-center justify-center rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/40">
@@ -118,7 +99,6 @@
                 <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
                     <div class="border-b border-slate-800 px-5 py-4">
                         <h3 class="text-lg font-semibold text-white">Offices</h3>
-                        <p class="mt-1 text-sm text-slate-400">Released office OPCR results classified as Outstanding, Very Satisfactory, or Satisfactory.</p>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="min-w-full text-sm text-slate-200">
@@ -143,7 +123,7 @@
                                         </td>
                                         <td class="px-5 py-4 text-center text-slate-200">{{ $row['official_rating'] }}</td>
                                         <td class="px-5 py-4 text-right">
-                                            <button type="button" 
+                                            <button type="button"
                                                 data-open-details
                                                 data-details='@json($row)'
                                                 class="inline-flex items-center justify-center rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/40">
@@ -222,7 +202,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             const modal = document.getElementById('performer-details-modal');
             const closeBtns = modal.querySelectorAll('[data-close-modal]');
-            
+
             const titleEl = document.getElementById('modal-title');
             const scoreEl = document.getElementById('modal-score');
             const ratingEl = document.getElementById('modal-rating');
@@ -235,12 +215,12 @@
 
             function openModal(data) {
                 const isEmployee = !!data.employee_name;
-                
+
                 titleEl.textContent = isEmployee ? data.employee_name : data.office_name;
                 scoreEl.textContent = Number(data.official_score).toFixed(2);
                 ratingEl.textContent = data.official_rating;
                 officeEl.textContent = data.office_name;
-                
+
                 if (isEmployee) {
                     extraLabelEl.textContent = 'Designation';
                     extraValueEl.textContent = data.designation || '--';

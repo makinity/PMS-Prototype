@@ -19,7 +19,6 @@
         <div class="flex flex-wrap items-start justify-between gap-3">
             <div>
                 <h1 class="text-2xl font-bold text-white">IPCR Final Calibration</h1>
-                <p class="text-sm text-slate-400">Calibrate recommended IPCR ratings, then explicitly release official results to employees and offices.</p>
                 <p class="mt-1 text-xs text-slate-500">Active Performance Period: {{ $periodLabelSafe }}</p>
             </div>
             <div class="rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3 text-right">

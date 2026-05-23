@@ -10,8 +10,6 @@
     <div class="flex flex-wrap items-start justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold text-white">Office Performance Commitment and Review (OPCR)</h1>
-            <p class="text-sm text-emerald-400">Stage III - Performance Review and Evaluation</p>
-            <p class="text-xs text-slate-500">Consolidated office accomplishments and average staff ratings based on calibrated IPCRs.</p>
         </div>
         <div class="rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3 text-right">
             <p class="text-[11px] uppercase tracking-[0.24em] text-slate-500">Active Period</p>
@@ -26,7 +24,6 @@
             </div>
             <div>
                 <h3 class="font-bold text-white">Performance Consolidation</h3>
-                <p class="text-xs text-slate-400">Values below are automatically aggregated from approved and calibrated IPCRs of your staff.</p>
             </div>
         </div>
         @if ($canSubmitFinalRating)
@@ -49,7 +46,6 @@
         <div class="flex flex-wrap items-start justify-between gap-4 border-b border-slate-800 px-5 py-4">
             <div>
                 <h2 class="text-lg font-semibold text-white">Office Accomplishments Preview</h2>
-                <p class="mt-1 text-sm text-slate-400">Summary of targets vs. actual results for the entire office.</p>
             </div>
             <div class="flex flex-wrap items-center gap-2 text-xs">
                 @if ($currentOpcr)

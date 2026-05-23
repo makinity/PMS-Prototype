@@ -11,7 +11,6 @@
     <section class="space-y-5">
         {{-- Header --}}
         <div>
-            <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Stage II</p>
             <h1 class="mt-1 text-xl font-bold text-white md:text-2xl">MPOR List (Supervisor)</h1>
             <p class="mt-1 text-sm text-slate-400">Showing submitted, approved, and endorsed MPORs for <span id="mpor-month-label">{{ $monthLabel }}</span>.</p>
         </div>

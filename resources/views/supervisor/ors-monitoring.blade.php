@@ -114,9 +114,6 @@
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <div>
                     <p class="text-xs font-semibold text-slate-400">ORS Monitoring Legend</p>
-                    <p class="text-[11px] text-slate-500">
-                        Visibility: submitted/rated outputs only · Rating: submitted/rated only
-                    </p>
                 </div>
 
                 <div class="flex flex-wrap items-center gap-2 text-xs text-slate-400">
