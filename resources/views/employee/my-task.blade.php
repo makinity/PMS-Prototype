@@ -7,20 +7,27 @@
             <h1 class="mt-1 text-2xl font-bold text-white">My Tasks</h1>
         </div>
 
-        <div class="flex flex-wrap gap-3">
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <div class="relative flex-1">
+                <i class="fa-solid fa-magnifying-glass pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-500"></i>
+                <input id="myTasksSearchFilter" type="text" placeholder="Search task..."
+                    style="color-scheme: dark; background-color: #0f172a;"
+                    class="w-full rounded-lg border border-slate-700 bg-slate-900 py-2.5 pl-10 pr-3 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-0">
+            </div>
             <select id="myTasksStatusFilter"
-                class="rounded-lg border border-gray-600 bg-gray-700 px-3 py-2.5 text-sm text-white focus:border-blue-500 focus:ring-blue-500">
-                <option value="all" class="bg-gray-700">Status: All</option>
-                <option value="draft" class="bg-gray-700">Draft</option>
-                <option value="recording" class="bg-gray-700">Recording</option>
-                <option value="submitted" class="bg-gray-700">Submitted</option>
-                <option value="rated" class="bg-gray-700">Rated</option>
-                <option value="missing" class="bg-gray-700">Missing / Overdue</option>
-                <option value="returned" class="bg-gray-700">Returned</option>
+                style="color-scheme: dark; background-color: #0f172a;"
+                class="shrink-0 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white focus:border-emerald-500 focus:outline-none focus:ring-0 sm:w-44">
+                <option value="all">All Status</option>
+                <option value="draft">Draft</option>
+                <option value="recording">Recording</option>
+                <option value="submitted">Submitted</option>
+                <option value="rated">Rated</option>
+                <option value="missing">Missing / Overdue</option>
+                <option value="returned">Returned</option>
             </select>
-
             <input id="myTasksDateFilter" type="date"
-                class="rounded-lg border border-gray-600 bg-gray-700 px-3 py-2.5 text-sm text-white focus:border-blue-500 focus:ring-blue-500">
+                style="color-scheme: dark; background-color: #0f172a;"
+                class="shrink-0 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white focus:border-emerald-500 focus:outline-none focus:ring-0 sm:w-44">
         </div>
 
         <div class="overflow-hidden rounded-lg border border-gray-700 bg-transparent">
@@ -32,16 +39,22 @@
                     <thead class="bg-gray-900">
                         <tr>
                             <th class="px-4 py-3 text-left font-medium text-white">Task</th>
-                            <th class="px-4 py-3 text-left font-medium text-white">Date</th>
-                            <th class="px-4 py-3 text-left font-medium text-white">Status</th>
-                            <th class="px-4 py-3 text-left font-medium text-white">Evidence</th>
-                            <th class="px-4 py-3 text-left font-medium text-white">Quantity (ORS)</th>
+                            <th class="hidden px-4 py-3 text-left font-medium text-white sm:table-cell">Date</th>
+                            <th class="hidden px-4 py-3 text-left font-medium text-white sm:table-cell">Status</th>
+                            <th class="hidden px-4 py-3 text-left font-medium text-white md:table-cell">Evidence</th>
+                            <th class="hidden px-4 py-3 text-left font-medium text-white md:table-cell">Quantity (ORS)</th>
                             <th class="px-4 py-3 text-left font-medium text-white">Action</th>
                         </tr>
                     </thead>
                     <tbody id="myTasksTbody" class="divide-y divide-gray-700"></tbody>
                 </table>
             </div>
+        </div>
+
+        {{-- Pagination --}}
+        <div id="myTasksPagination" class="flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
+            <p id="myTasksPageInfo" class="text-sm text-slate-400"></p>
+            <div id="myTasksPageButtons" class="flex items-center gap-1"></div>
         </div>
 
         <div class="flex items-center rounded-lg border border-gray-700 bg-transparent p-4 text-sm text-gray-400">
@@ -321,6 +334,12 @@
                 const tbody = document.getElementById('myTasksTbody');
                 const statusFilter = document.getElementById('myTasksStatusFilter');
                 const dateFilter = document.getElementById('myTasksDateFilter');
+                const searchFilter = document.getElementById('myTasksSearchFilter');
+                const pageInfo = document.getElementById('myTasksPageInfo');
+                const pageButtons = document.getElementById('myTasksPageButtons');
+
+                const PER_PAGE = 10;
+                let currentPage = 1;
 
                 const modal = document.getElementById('task-view-modal');
                 const closeTopBtn = document.getElementById('closeTaskViewTop');
@@ -518,6 +537,9 @@
                     const dateValue = dateFilter ? dateFilter.value : '';
                     if (dateValue && task.date !== dateValue) return false;
 
+                    const searchValue = (searchFilter ? searchFilter.value : '').toLowerCase().trim();
+                    if (searchValue && !task.title.toLowerCase().includes(searchValue) && !task.uwpOutputLabel.toLowerCase().includes(searchValue)) return false;
+
                     return true;
                 }
 
@@ -541,8 +563,12 @@
                     if (!tbody) return;
 
                     const filteredTasks = tasks.filter(matchesFilters);
+                    const totalPages = Math.max(1, Math.ceil(filteredTasks.length / PER_PAGE));
+                    if (currentPage > totalPages) currentPage = totalPages;
+                    const start = (currentPage - 1) * PER_PAGE;
+                    const pageTasks = filteredTasks.slice(start, start + PER_PAGE);
 
-                    if (!filteredTasks.length) {
+                    if (!pageTasks.length) {
                         tbody.innerHTML = `
                             <tr>
                                 <td colspan="6" class="px-4 py-8 text-center text-sm text-gray-400">
@@ -550,33 +576,65 @@
                                 </td>
                             </tr>
                         `;
-                        return;
+                    } else {
+                        tbody.innerHTML = pageTasks.map((task) => `
+                            <tr class="hover:bg-gray-750">
+                                <td class="px-4 py-3 text-gray-300">${task.title || '--'}</td>
+                                <td class="hidden px-4 py-3 text-gray-300 sm:table-cell">${formatDateHuman(task.date)}</td>
+                                <td class="hidden px-4 py-3 sm:table-cell">
+                                    <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusChipClasses(task.state)}">
+                                        ${statusLabel(task.state)}
+                                    </span>
+                                </td>
+                                <td class="hidden px-4 py-3 md:table-cell">
+                                    <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${task.hasEvidence ? 'bg-emerald-900 text-emerald-300' : 'bg-slate-700 text-slate-200'}">
+                                        ${task.hasEvidence ? 'Attached' : 'None'}
+                                    </span>
+                                </td>
+                                <td class="hidden px-4 py-3 text-gray-300 md:table-cell">${quantityLabel(task.quantity)}</td>
+                                <td class="px-4 py-3">
+                                    <button type="button"
+                                        data-task-id="${task.id}"
+                                        class="rounded-lg border border-gray-600 px-3 py-1.5 text-xs font-semibold text-gray-200 hover:bg-gray-800">
+                                        View
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('');
                     }
 
-                    tbody.innerHTML = filteredTasks.map((task) => `
-                        <tr class="hover:bg-gray-750">
-                            <td class="px-4 py-3 text-gray-300">${task.title || '--'}</td>
-                            <td class="px-4 py-3 text-gray-300">${formatDateHuman(task.date)}</td>
-                            <td class="px-4 py-3">
-                                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusChipClasses(task.state)}">
-                                    ${statusLabel(task.state)}
-                                </span>
-                            </td>
-                            <td class="px-4 py-3">
-                                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${task.hasEvidence ? 'bg-emerald-900 text-emerald-300' : 'bg-slate-700 text-slate-200'}">
-                                    ${task.hasEvidence ? 'Attached' : 'None'}
-                                </span>
-                            </td>
-                            <td class="px-4 py-3 text-gray-300">${quantityLabel(task.quantity)}</td>
-                            <td class="px-4 py-3">
-                                <button type="button"
-                                    data-task-id="${task.id}"
-                                    class="rounded-lg border border-gray-600 px-3 py-1.5 text-xs font-semibold text-gray-200 hover:bg-gray-800">
-                                    View
-                                </button>
-                            </td>
-                        </tr>
-                    `).join('');
+                    // Pagination info
+                    if (pageInfo) {
+                        pageInfo.textContent = filteredTasks.length
+                            ? `Showing ${start + 1}–${Math.min(start + PER_PAGE, filteredTasks.length)} of ${filteredTasks.length}`
+                            : '';
+                    }
+
+                    // Pagination buttons
+                    if (pageButtons) {
+                        if (totalPages <= 1) {
+                            pageButtons.innerHTML = '';
+                        } else {
+                            let html = '';
+                            const btnClass = 'rounded-lg border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-slate-800 transition';
+                            const activeClass = 'rounded-lg border border-emerald-500/50 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-200';
+
+                            if (currentPage > 1) {
+                                html += `<button data-page="${currentPage - 1}" class="${btnClass}">‹</button>`;
+                            }
+                            for (let i = 1; i <= totalPages; i++) {
+                                if (totalPages > 7 && i > 2 && i < totalPages - 1 && Math.abs(i - currentPage) > 1) {
+                                    if (html.slice(-3) !== '...') html += `<span class="px-1 text-xs text-slate-500">...</span>`;
+                                    continue;
+                                }
+                                html += `<button data-page="${i}" class="${i === currentPage ? activeClass : btnClass}">${i}</button>`;
+                            }
+                            if (currentPage < totalPages) {
+                                html += `<button data-page="${currentPage + 1}" class="${btnClass}">›</button>`;
+                            }
+                            pageButtons.innerHTML = html;
+                        }
+                    }
                 }
 
                 function resetSupervisorMonitoring() {
@@ -931,8 +989,16 @@
                     openTaskViewModal(detailButton.dataset.taskId);
                 });
 
-                statusFilter?.addEventListener('change', renderRows);
-                dateFilter?.addEventListener('change', renderRows);
+                statusFilter?.addEventListener('change', () => { currentPage = 1; renderRows(); });
+                dateFilter?.addEventListener('change', () => { currentPage = 1; renderRows(); });
+                searchFilter?.addEventListener('input', () => { currentPage = 1; renderRows(); });
+
+                pageButtons?.addEventListener('click', (e) => {
+                    const btn = e.target.closest('button[data-page]');
+                    if (!btn) return;
+                    currentPage = parseInt(btn.dataset.page, 10);
+                    renderRows();
+                });
 
                 closeTopBtn?.addEventListener('click', closeTaskViewModal);
                 closeBottomBtn?.addEventListener('click', closeTaskViewModal);
