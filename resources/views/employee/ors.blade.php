@@ -9,6 +9,16 @@
     @endphp
 
     <style>
+        #ors-calendar {
+            width: 100%;
+            overflow-x: hidden;
+        }
+        #ors-calendar .fc {
+            max-width: 100%;
+        }
+        #ors-calendar .fc-scrollgrid {
+            width: 100% !important;
+        }
         #ors-calendar .fc-col-header-cell {
             background-color: rgba(15, 23, 42, 0.85);
         }
@@ -94,22 +104,22 @@
 
         <!-- Stats Overview (DEMO LOCKED: 4 tasks total) -->
         <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
-            <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+            <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                 <p class="text-xs text-slate-400">This Week</p>
                 <p class="mt-1 text-2xl font-semibold text-white">{{ $orsStats['thisWeek'] ?? 0 }}</p>
                 <p class="text-xs text-slate-400">Tasks logged (ORS)</p>
             </div>
-            <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+            <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                 <p class="text-xs text-slate-400">Drafts</p>
                 <p class="mt-1 text-2xl font-semibold text-amber-300">{{ $orsStats['drafts'] ?? 0 }}</p>
                 <p class="text-xs text-slate-400">Need submission</p>
             </div>
-            <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+            <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                 <p class="text-xs text-slate-400">Submitted</p>
                 <p class="mt-1 text-2xl font-semibold text-blue-300">{{ $orsStats['submitted'] ?? 0 }}</p>
                 <p class="text-xs text-slate-400">Eligible for MPOR summary</p>
             </div>
-            <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+            <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                 <p class="text-xs text-slate-400">Validated</p>
                 <p class="mt-1 text-2xl font-semibold text-emerald-300">{{ $orsStats['validated'] ?? 0 }}</p>
                 <p class="text-xs text-slate-400">In SMPOR</p>
@@ -117,7 +127,7 @@
         </div>
 
         <!-- Active Task Timer -->
-        <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+        <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
             <div class="flex flex-wrap items-start justify-between gap-4">
                 <div>
                     <h2 class="text-lg font-semibold text-white">Task Tracking (single source)</h2>
@@ -127,12 +137,12 @@
                 </span>
             </div>
 
-            <div id="active-task-empty" class="mt-4 rounded-lg border border-slate-800 bg-slate-950/60 p-4 text-sm text-slate-300">
+            <div id="active-task-empty" class="mt-4 rounded-lg border border-gray-700 bg-slate-900/40 p-4 text-sm text-slate-300">
                 No task is recording. Open a Draft from the calendar task details to start timing.
                 Starting a second task is blocked until the current one is stopped or submitted.
             </div>
 
-            <div id="active-task-card" class="mt-4 hidden rounded-lg border border-slate-800 bg-slate-950/60 p-4 text-sm">
+            <div id="active-task-card" class="mt-4 hidden rounded-lg border border-gray-700 bg-slate-900/40 p-4 text-sm">
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
                     <div>
                         <p class="text-[11px] uppercase text-slate-500">Task</p>
@@ -181,7 +191,7 @@
         </div>
 
         <!-- Calendar -->
-        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
+        <div class="rounded-2xl border border-gray-700 bg-slate-900/40 p-4">
             <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
                 <div>
                     <h2 class="text-lg font-semibold text-white">ORS Calendar</h2>
@@ -203,7 +213,7 @@
         aria-modal="true"
         class="ors-modal fixed inset-0 z-[60] hidden flex items-start justify-center overflow-y-auto bg-black/60 px-4 py-6 sm:px-6">
 
-        <div class="w-full max-w-md max-h-[calc(100vh-3rem)] overflow-y-auto rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
+        <div class="w-full max-w-md max-h-[calc(100vh-3rem)] overflow-y-auto rounded-2xl border border-gray-700 bg-slate-900 p-5 shadow-xl">
 
             <div class="mb-4">
                 <h2 class="text-lg font-semibold text-white">Log ORS Task</h2>
@@ -226,7 +236,7 @@
                         name="work_date"
                         type="text"
                         readonly
-                        class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-400">
+                        class="mt-1 w-full rounded-lg border border-gray-700 bg-slate-950 px-3 py-2 text-sm text-slate-400">
                 </div>
 
                 <!-- UWP OUTPUT -->
@@ -236,7 +246,7 @@
                     </label>
                     <select id="orsUwpOutput"
                         name="uwp_output_key"
-                        class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200"
+                        class="mt-1 w-full rounded-lg border border-gray-700 bg-slate-950 px-3 py-2 text-sm text-slate-200"
                         @disabled($orsModalBlocked)
                         required>
                         <option value="">Select approved UWP output</option>
@@ -259,7 +269,7 @@
                     </label>
                     <select id="orsTaskType"
                         name="ipcr_item_id"
-                        class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200"
+                        class="mt-1 w-full rounded-lg border border-gray-700 bg-slate-950 px-3 py-2 text-sm text-slate-200"
                         @disabled($orsModalBlocked)
                         required>
                         <option value="">Select task / activity</option>
@@ -274,7 +284,7 @@
                     </label>
                     <select id="orsSupervisorId"
                         name="supervisor_id"
-                        class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200"
+                        class="mt-1 w-full rounded-lg border border-gray-700 bg-slate-950 px-3 py-2 text-sm text-slate-200"
                         @disabled($orsModalBlocked)
                         required>
                         <option value="">Select supervisor</option>
@@ -292,18 +302,18 @@
                     <textarea id="orsNotes"
                             name="notes"
                             rows="2"
-                            class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200"
+                            class="mt-1 w-full rounded-lg border border-gray-700 bg-slate-950 px-3 py-2 text-sm text-slate-200"
                             placeholder="Exceptions, clarifications, or additional context"></textarea>
                 </div>
 
                 <!-- SYSTEM RULE -->
-                <div class="rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-[11px] text-slate-400">
-                    • Tasks must align with approved UWP outputs<br>
-                    • Duration is tracked automatically<br>
-                    • Draft until submitted inside ORS
+                <div class="rounded-lg border border-gray-700 bg-slate-950 px-3 py-2 text-[11px] text-slate-400">
+                    â€¢ Tasks must align with approved UWP outputs<br>
+                    â€¢ Duration is tracked automatically<br>
+                    â€¢ Draft until submitted inside ORS
                 </div>
 
-                <!-- ACTIONS (RESTORED – LOADING SAFE) -->
+                <!-- ACTIONS (RESTORED â€“ LOADING SAFE) -->
                 <div class="flex justify-end gap-2 pt-2">
                     <button type="button"
                             onclick="closeOrsModal('orsTaskModal')"
@@ -333,8 +343,8 @@
         class="ors-modal fixed inset-0 z-[60] hidden flex items-start justify-center overflow-y-auto bg-black/60 px-4 py-6 sm:px-6">
         <div class="flex w-full max-w-[95vw] sm:max-w-xl md:max-w-2xl lg:max-w-3xl
             max-h-[calc(100vh-3rem)] flex-col overflow-hidden
-            rounded-2xl border border-slate-800 bg-slate-900 shadow-xl">
-            <div class="shrink-0 border-b border-slate-800 bg-slate-900/95 p-5 backdrop-blur">
+            rounded-2xl border border-gray-700 bg-slate-900 shadow-xl">
+            <div class="shrink-0 border-b border-gray-700 bg-slate-900/95 p-5 backdrop-blur">
                 <div class="flex items-start justify-between">
                     <div>
                         <h2 class="text-lg font-semibold text-white" id="taskDetailTitle">Task Details</h2>
@@ -365,7 +375,7 @@
                         <p class="text-xs text-slate-400">Quantity</p>
                         <input id="taskDetailQuantity"
                                type="text"
-                               class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-200"
+                               class="mt-1 w-full rounded-lg border border-gray-700 bg-slate-950 px-3 py-2 text-sm text-slate-200"
                                placeholder="e.g., 12 transactions">
                     </div>
                     <div>
@@ -382,7 +392,7 @@
                     </div>
                 </div>
 
-                <div class="mt-4 rounded-xl border border-slate-800 bg-slate-950/60 p-3 text-sm">
+                <div class="mt-4 rounded-xl border border-gray-700 bg-slate-900/40 p-3 text-sm">
                     <p class="text-[11px] uppercase text-slate-400">Submission & Output</p>
 
                     <div class="mt-3 grid grid-cols-1 gap-3 md:grid-cols-3">
@@ -412,7 +422,7 @@
                         <input id="taskDetailUpload"
                             type="file"
                             multiple
-                            class="block w-full rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-xs text-slate-200 file:mr-3 file:rounded-md file:border-0 file:bg-slate-800 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-slate-200">
+                            class="block w-full rounded-lg border border-gray-700 bg-slate-900 px-3 py-2 text-xs text-slate-200 file:mr-3 file:rounded-md file:border-0 file:bg-slate-800 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-slate-200">
                     </div>
 
                     <div class="mt-3 flex flex-wrap gap-2" id="taskDetailActions">
@@ -449,13 +459,13 @@
                     </div>
 
                     <p id="taskDetailLockMessage" class="mt-2 hidden text-[11px] text-emerald-300">
-                        Submitted (Locked) — visible in MPOR monthly summary. SMPOR is system-generated after validation.
+                        Submitted (Locked) â€” visible in MPOR monthly summary. SMPOR is system-generated after validation.
                     </p>
                     <p id="taskDetailDraftMessage" class="mt-2 text-[11px] text-slate-400"></p>
                 </div>
             </div>
 
-            <div class="shrink-0 flex justify-end gap-2 border-t border-slate-800 bg-slate-900/95 p-4 backdrop-blur">
+            <div class="shrink-0 flex justify-end gap-2 border-t border-gray-700 bg-slate-900/95 p-4 backdrop-blur">
                 <button onclick="closeOrsModal('taskDetailsModal')"
                         class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800">
                     Close
@@ -470,8 +480,8 @@
         role="dialog"
         aria-modal="true"
         class="ors-modal fixed inset-0 z-[59] hidden flex items-center justify-center overflow-y-auto bg-black/60 px-4 py-6 sm:px-6">
-        <div class="flex w-full max-w-[95vw] sm:max-w-xl md:max-w-2xl max-h-[calc(100vh-3rem)] flex-col overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-xl">
-            <div class="shrink-0 border-b border-slate-800 bg-slate-900/95 p-5 backdrop-blur">
+        <div class="flex w-full max-w-[95vw] sm:max-w-xl md:max-w-2xl max-h-[calc(100vh-3rem)] flex-col overflow-hidden rounded-2xl border border-gray-700 bg-slate-900 shadow-xl">
+            <div class="shrink-0 border-b border-gray-700 bg-slate-900/95 p-5 backdrop-blur">
                 <div class="flex items-start justify-between gap-3">
                     <div>
                         <h2 class="text-lg font-semibold text-white">ORS Entries</h2>
@@ -488,7 +498,7 @@
                 <div id="daySummaryList" class="space-y-4"></div>
             </div>
 
-            <div class="shrink-0 flex items-center justify-between gap-2 border-t border-slate-800 bg-slate-900/95 p-4 backdrop-blur">
+            <div class="shrink-0 flex items-center justify-between gap-2 border-t border-gray-700 bg-slate-900/95 p-4 backdrop-blur">
                 <button type="button" onclick="closeOrsModal('orsDaySummaryModal')" class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800">
                     Close
                 </button>
@@ -912,6 +922,34 @@
             });
             calendar.render();
 
+            const syncCalendarSize = () => {
+                requestAnimationFrame(() => {
+                    calendar.updateSize();
+                });
+            };
+            const syncCalendarDuringTransition = (durationMs = 260) => {
+                const startedAt = performance.now();
+                const tick = (now) => {
+                    calendar.updateSize();
+                    if ((now - startedAt) < durationMs) {
+                        requestAnimationFrame(tick);
+                    }
+                };
+                requestAnimationFrame(tick);
+            };
+            syncCalendarSize();
+            setTimeout(syncCalendarSize, 180);
+            setTimeout(syncCalendarSize, 320);
+
+            window.addEventListener('resize', syncCalendarSize);
+            document.getElementById('sidebar-toggle-btn')?.addEventListener('click', () => {
+                syncCalendarDuringTransition(280);
+                setTimeout(syncCalendarSize, 210);
+                setTimeout(syncCalendarSize, 320);
+            });
+            document.getElementById('employee-sidebar')?.addEventListener('transitionstart', () => syncCalendarDuringTransition(260));
+            document.getElementById('employee-sidebar')?.addEventListener('transitionend', syncCalendarSize);
+
             const orsModals = Array.from(document.querySelectorAll('.ors-modal'));
 
             function updateModalState() {
@@ -1288,7 +1326,7 @@
 
                 if (statusKeys.length === 0) {
                     const empty = document.createElement('p');
-                    empty.className = 'rounded-lg border border-slate-800 bg-slate-950/60 px-3 py-2 text-sm text-slate-300';
+                    empty.className = 'rounded-lg border border-gray-700 bg-slate-900/40 px-3 py-2 text-sm text-slate-300';
                     empty.textContent = 'No ORS entries for this date.';
                     daySummaryListEl.appendChild(empty);
                 } else {
@@ -1537,7 +1575,7 @@
                         if (monthLocked && monthLockReason) {
                             lockMsg.textContent = monthLockReason;
                         } else {
-                            lockMsg.textContent = 'Submitted (Locked) — visible in MPOR monthly summary. SMPOR is system-generated after validation.';
+                            lockMsg.textContent = 'Submitted (Locked) â€” visible in MPOR monthly summary. SMPOR is system-generated after validation.';
                         }
                         lockMsg.classList.toggle('hidden', !locked);
                         lockMsg.style.display = locked ? '' : 'none';

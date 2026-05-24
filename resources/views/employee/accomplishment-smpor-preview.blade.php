@@ -2,7 +2,7 @@
 
 @section('main-content')
     @php
-        $periodLabelValue = $periodLabel ?? '—';
+        $periodLabelValue = $periodLabel ?? 'â€”';
         $smporMonthLabels = !empty($smporMonths ?? []) && is_array($smporMonths)
             ? array_values($smporMonths)
             : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
@@ -19,7 +19,7 @@
     <section class="space-y-4">
         <div class="flex items-center justify-between">
             <div>
-                <h1 class="text-2xl font-semibold text-white">SMPOR Preview — {{ $periodLabelValue }}</h1>
+                <h1 class="text-2xl font-semibold text-white">SMPOR Preview â€” {{ $periodLabelValue }}</h1>
             </div>
             <a href="{{ route('employee.accomplishment-submission') }}"
                 class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-800 transition">
@@ -29,19 +29,19 @@
 
         <div class="space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-                <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Employee</p>
-                    <p class="mt-1 font-semibold text-white">{{ $employeeName ?? '—' }}</p>
+                    <p class="mt-1 font-semibold text-white">{{ $employeeName ?? 'â€”' }}</p>
                 </div>
-                <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Office/Unit</p>
-                    <p class="mt-1 font-semibold text-white">{{ $officeName ?? '—' }}</p>
+                    <p class="mt-1 font-semibold text-white">{{ $officeName ?? 'â€”' }}</p>
                 </div>
-                <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Period</p>
                     <p class="mt-1 font-semibold text-white">{{ $periodLabelValue }}</p>
                 </div>
-                <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Source</p>
                     <p class="mt-1 font-semibold text-white">{{ $smporSourceLabel ?? 'Submitted MPORs' }}</p>
                 </div>
@@ -50,7 +50,7 @@
             <div class="space-y-2">
                 <div class="flex items-center justify-between">
                     <h4 class="text-base font-semibold text-white">Monitoring Totals</h4>
-                    <span class="text-xs text-slate-400">Quality Points = Quantity × Quality Rating · Timeliness Points = Quantity × Timeliness Rating</span>
+                    <span class="text-xs text-slate-400">Quality Points = Quantity Ã— Quality Rating Â· Timeliness Points = Quantity Ã— Timeliness Rating</span>
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
                     <button type="button" data-smpor-tab="quantity" class="rounded-lg border border-sky-500/40 bg-sky-500/20 px-3 py-1.5 text-xs font-semibold text-sky-200 transition">Efficiency/Quantity</button>
@@ -59,7 +59,7 @@
                 </div>
 
                 @foreach (['quantity', 'quality', 'timeliness'] as $panel)
-                    <div data-smpor-tab-panel="{{ $panel }}" class="{{ $panel === 'quantity' ? '' : 'hidden' }} overflow-x-auto rounded-xl border border-slate-800">
+                    <div data-smpor-tab-panel="{{ $panel }}" class="{{ $panel === 'quantity' ? '' : 'hidden' }} overflow-x-auto rounded-xl border border-gray-700">
                         <table class="min-w-full text-left text-sm text-slate-200">
                             <thead class="bg-slate-950/70 text-xs uppercase text-slate-400">
                                 <tr>
@@ -82,7 +82,7 @@
                                     </tr>
                                     @forelse ($sectionRows as $row)
                                         <tr class="bg-slate-900/40">
-                                            <td class="px-4 py-3 font-semibold">{{ $row['expected_output'] ?? '—' }}</td>
+                                            <td class="px-4 py-3 font-semibold">{{ $row['expected_output'] ?? 'â€”' }}</td>
                                             @foreach ($smporMonthLabels as $monthLabel)
                                                 <td class="px-4 py-3 text-right">{{ $formatSmporValue($row[$key][$monthLabel] ?? 0) }}</td>
                                             @endforeach
@@ -104,7 +104,7 @@
                 @endforeach
             </div>
 
-            <div class="flex items-center justify-end gap-3 border-t border-slate-800 pt-4">
+            <div class="flex items-center justify-end gap-3 border-t border-gray-700 pt-4">
                 <a href="{{ route('smpor.export.excel') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg">Export</a>
             </div>
         </div>

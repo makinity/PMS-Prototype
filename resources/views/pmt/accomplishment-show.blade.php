@@ -15,7 +15,7 @@
         </div>
 
         <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
+            <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                 <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Status</p>
                 @php
                     $badgeClass = match ($status) {
@@ -29,7 +29,7 @@
                     {{ $statusLabel }}
                 </span>
             </div>
-            <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
+            <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                 <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Submitted At</p>
                 <p class="mt-1 text-sm font-semibold text-white">{{ $submittedAtLabel }}</p>
             </div>
@@ -44,26 +44,26 @@
         </div>
 
         <div class="grid gap-3 sm:grid-cols-3">
-            <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
+            <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                 <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Employee</p>
                 <p class="mt-1 text-sm font-semibold text-white">{{ $employeeName }}</p>
             </div>
-            <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
+            <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                 <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Office</p>
                 <p class="mt-1 text-sm font-semibold text-white">{{ $officeName }}</p>
             </div>
-            <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
+            <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                 <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Period</p>
                 <p class="mt-1 text-sm font-semibold text-white">{{ $periodLabel }}</p>
             </div>
         </div>
 
-        <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
+        <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
             <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Employee Remarks</p>
             <p class="mt-2 text-sm text-slate-300">{{ $remarks ?: '--' }}</p>
         </div>
 
-        <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
+        <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
             <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Attachments</p>
             @if (!empty($attachments))
                 <div class="mt-2 space-y-2">
@@ -81,11 +81,11 @@
         </div>
 
         <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+            <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                 <div class="flex items-start justify-between gap-3">
                     <div>
                         <h4 class="text-sm font-semibold text-white">SMPOR - Monitoring Summary</h4>
-                        <p class="mt-1 text-xs text-slate-400">Official (Submitted Snapshot) – QAR-linked MPORs</p>
+                        <p class="mt-1 text-xs text-slate-400">Official (Submitted Snapshot) â€“ QAR-linked MPORs</p>
                     </div>
                     <a href="{{ route('pmt.acc-review.smpor-preview', $submission->id) }}"
                         class="inline-flex text-slate-300 transition hover:text-white">
@@ -93,7 +93,7 @@
                     </a>
                 </div>
             </div>
-            <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+            <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                 <div class="flex items-start justify-between gap-3">
                     <div>
                         <h4 class="text-sm font-semibold text-white">IPCR Accomplishment Report</h4>
@@ -107,7 +107,7 @@
             </div>
         </div>
 
-        <div id="action-section" class="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
+        <div id="action-section" class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
             @if ($status === 'dept_head_endorsed')
                 <div class="flex flex-wrap items-center justify-end gap-2">
                     <button type="button" id="btnReturn"

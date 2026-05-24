@@ -14,7 +14,7 @@
                     <i class="fa-solid fa-file-pdf text-xs"></i>
                     <span>Preview PDF</span>
                 </a>
-                <div class="rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3 text-right">
+                <div class="rounded-xl border border-gray-700 bg-slate-900/40 px-4 py-3 text-right">
                     <p class="text-[11px] uppercase tracking-[0.24em] text-slate-500">Active Period</p>
                     <p class="mt-1 text-sm font-semibold text-white">{{ $activePeriod?->name ?? '--' }}</p>
                 </div>
@@ -22,11 +22,11 @@
         </div>
 
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+            <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                 <p class="text-xs text-slate-400">Top Employees</p>
                 <p class="mt-1 text-3xl font-semibold text-emerald-300">{{ $summaryCounts['top_employees'] ?? 0 }}</p>
             </div>
-            <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+            <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                 <p class="text-xs text-slate-400">Top Offices</p>
                 <p class="mt-1 text-3xl font-semibold text-emerald-300">{{ $summaryCounts['top_offices'] ?? 0 }}</p>
             </div>
@@ -39,7 +39,7 @@
                     <h2 class="mt-1 text-xl font-bold text-white">Top Performers</h2>
                 </div>
 
-                <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
+                <div class="rounded-2xl border border-gray-700 bg-slate-900/40 p-4">
                     <div class="flex flex-wrap items-end gap-3">
                         <div class="inline-flex rounded-xl border border-slate-700 bg-slate-950/60 p-1">
                             <button type="button" data-tp-tab-btn="employees" class="rounded-lg bg-sky-600/20 px-4 py-2 text-xs font-semibold text-sky-200">Employees</button>
@@ -65,8 +65,8 @@
                     </div>
                 </div>
 
-                <div data-tp-panel="employees" class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
-                    <div class="border-b border-slate-800 px-5 py-4">
+                <div data-tp-panel="employees" class="overflow-hidden rounded-2xl border border-gray-700 bg-slate-900/40">
+                    <div class="border-b border-gray-700 px-5 py-4">
                         <h3 class="text-lg font-semibold text-white">Employees</h3>
                     </div>
                     <div class="overflow-x-auto">
@@ -124,8 +124,8 @@
                     </div>
                 </div>
 
-                <div data-tp-panel="offices" class="hidden overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
-                    <div class="border-b border-slate-800 px-5 py-4">
+                <div data-tp-panel="offices" class="hidden overflow-hidden rounded-2xl border border-gray-700 bg-slate-900/40">
+                    <div class="border-b border-gray-700 px-5 py-4">
                         <h3 class="text-lg font-semibold text-white">Offices</h3>
                     </div>
                     <div class="overflow-x-auto">
@@ -188,8 +188,8 @@
 
     <!-- Details Modal -->
     <div id="performer-details-modal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 px-4 py-6">
-        <div class="w-full max-w-lg rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl">
-            <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-4">
+        <div class="w-full max-w-lg rounded-2xl border border-gray-700 bg-slate-900 p-6 shadow-2xl">
+            <div class="flex items-start justify-between gap-3 border-b border-gray-700 pb-4">
                 <div>
                     <p class="text-[10px] uppercase tracking-[0.2em] text-emerald-300">Stage III Result Details</p>
                     <h3 id="modal-title" class="text-xl font-bold text-white">Performer Details</h3>
@@ -199,11 +199,11 @@
 
             <div class="mt-6 space-y-5">
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+                    <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                         <p class="text-[10px] uppercase tracking-[0.2em] text-slate-500">Official Score</p>
                         <p id="modal-score" class="mt-1 text-2xl font-bold text-emerald-300">--</p>
                     </div>
-                    <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+                    <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                         <p class="text-[10px] uppercase tracking-[0.2em] text-slate-500">Official Rating</p>
                         <p id="modal-rating" class="mt-1 text-lg font-semibold text-white">--</p>
                     </div>

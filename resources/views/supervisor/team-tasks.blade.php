@@ -40,7 +40,7 @@
                 <span class="text-xs text-slate-400">Read-only supervision list</span>
             </div>
 
-            <div class="mb-4 flex flex-wrap gap-3 rounded-lg border border-slate-800 bg-slate-950/40 p-4">
+            <div class="mb-4 flex flex-wrap gap-3 rounded-lg border border-gray-700 bg-slate-900/40 p-4">
                 <div class="flex-1 min-w-[180px]">
                     <label for="tt-search" class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Search</label>
                     <input id="tt-search" type="text" placeholder="Search employee..."
@@ -87,7 +87,7 @@
                                             <img src="https://ui-avatars.com/api/?name={{ urlencode($entry->employee->name ?? 'Employee') }}&background=1e40af&color=fff&size=64"
                                                 alt="{{ $entry->employee->name ?? 'Employee' }}"
                                                 class="h-8 w-8 rounded-full object-cover ring-1 ring-slate-600/80">
-                                            <span>{{ $entry->employee->name ?? '—' }}</span>
+                                            <span>{{ $entry->employee->name ?? 'â€”' }}</span>
                                         </div>
                                     </td>
                                     <td class="px-4 py-3">
@@ -95,7 +95,7 @@
                                             {{ ucfirst($status) }}
                                         </span>
                                     </td>
-                                    <td class="px-4 py-3">{{ $entry->quantity ?: '—' }}</td>
+                                    <td class="px-4 py-3">{{ $entry->quantity ?: 'â€”' }}</td>
                                     <td class="px-4 py-3">
                                         @if ($status === 'rated' || (int) ($entry->supervisor_id ?? 0) !== (int) ($supervisor->id ?? 0))
                                             <button type="button"
@@ -129,7 +129,7 @@
                     </div>
                 </div>
                 @if ($entries->hasPages())
-                    <div class="mt-5 flex flex-col gap-3 border-t border-slate-800 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="mt-5 flex flex-col gap-3 border-t border-gray-700 pt-4 sm:flex-row sm:items-center sm:justify-between">
                         <p class="text-xs text-slate-400">
                             Showing {{ $entries->firstItem() }}-{{ $entries->lastItem() }} of {{ $entries->total() }} tasks
                         </p>
@@ -160,7 +160,7 @@
             </div>
         </div>
 
-        <div class="p-6 rounded-xl bg-gradient-to-br from-slate-950 to-slate-900 border border-slate-800 shadow-lg space-y-4">
+        <div class="p-6 rounded-xl bg-gradient-to-br from-slate-950 to-slate-900 border border-gray-700 shadow-lg space-y-4">
             <div class="flex items-center justify-between">
                 <h3 class="text-lg font-semibold text-white">Oversight Signals</h3>
                 {{-- DUMMY_DATA: replace with dynamic value --}}
@@ -193,7 +193,7 @@
                 </li>
             </ul>
 
-            <div class="rounded-lg border border-slate-800 bg-slate-900/70 p-4 text-xs text-slate-300">
+            <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-4 text-xs text-slate-300">
                 <p class="font-semibold text-slate-100 mb-1">Helper note</p>
                 <p>Observation-only dashboard. Capture concerns for the manager; do not reassign or close tasks here.</p>
             </div>

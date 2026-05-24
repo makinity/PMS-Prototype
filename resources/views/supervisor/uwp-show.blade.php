@@ -34,10 +34,10 @@
     @endphp
 
     <section class="space-y-6">
-        <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
+        <div class="flex flex-wrap items-center justify-between gap-4 border-b border-gray-700 pb-4">
             <div>
                 <h1 class="text-2xl font-semibold tracking-tight text-white">UWP Preview</h1>
-                <p class="mt-0.5 text-sm text-slate-400">{{ $officeName }} · {{ $periodName }}</p>
+                <p class="mt-0.5 text-sm text-slate-400">{{ $officeName }} Â· {{ $periodName }}</p>
             </div>
             <div class="flex items-center gap-4">
                 <span class="inline-flex items-center gap-1.5 rounded-full border {{ $statusClass }} px-3 py-1 text-xs font-medium">
@@ -187,7 +187,7 @@
                 <!-- Assignee items injected here -->
             </div>
             {{-- Footer --}}
-            <div class="border-t border-slate-800/40 px-5 py-3">
+            <div class="border-t border-gray-700/40 px-5 py-3">
                 <button type="button" data-assignees-modal-close class="w-full rounded-xl bg-slate-800/80 py-2.5 text-sm font-semibold text-slate-200 transition hover:bg-slate-700">Close</button>
             </div>
         </div>
@@ -215,7 +215,7 @@
             </div>
 
             <div class="max-h-[65vh] overflow-y-auto px-5 py-4">
-                <div class="overflow-hidden rounded-xl border border-slate-800">
+                <div class="overflow-hidden rounded-xl border border-gray-700">
                     <table class="min-w-full text-sm text-slate-200">
                         <thead class="bg-slate-950/70 text-xs uppercase tracking-wide text-slate-400">
                             <tr>
@@ -230,7 +230,7 @@
                 </div>
             </div>
 
-            <div class="border-t border-slate-800/40 px-5 py-3">
+            <div class="border-t border-gray-700/40 px-5 py-3">
                 <button type="button" data-standards-modal-close class="w-full rounded-xl bg-slate-800/80 py-2.5 text-sm font-semibold text-slate-200 transition hover:bg-slate-700">Close</button>
             </div>
         </div>

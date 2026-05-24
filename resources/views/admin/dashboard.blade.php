@@ -40,7 +40,7 @@
     @endphp
 
     <section class="space-y-4 px-3 md:px-6">
-        <div class="rounded-2xl border border-white/10 bg-transparent p-4 shadow-sm">
+        <div class="rounded-2xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-4 shadow-sm">
             <div class="flex flex-wrap items-start justify-between gap-4">
                 <div>
                     <h1 class="text-lg font-semibold text-gray-100 sm:text-xl">Administrator Dashboard</h1>
@@ -62,14 +62,14 @@
 
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             @foreach ($kpiCards as $card)
-                <div class="rounded-xl border border-white/10 bg-transparent p-4 shadow-sm">
+                <div class="rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-4 shadow-sm">
                     <p class="text-xs uppercase tracking-wide text-gray-400">{{ $card['label'] }}</p>
                     <p class="mt-2 text-2xl font-semibold text-white">{{ $card['value'] }}</p>
                 </div>
             @endforeach
         </div>
 
-        <details id="roleDistributionPanel" class="rounded-xl border border-white/10 bg-transparent p-4 shadow-sm">
+        <details id="roleDistributionPanel" class="rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-4 shadow-sm">
             <summary class="cursor-pointer list-none text-sm font-semibold text-gray-100 [&::-webkit-details-marker]:hidden">
                 <div class="flex items-center justify-between gap-2">
                     <span>User Role Distribution</span>
@@ -77,33 +77,33 @@
                 </div>
             </summary>
             <div class="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-                <div class="min-w-0 rounded-xl border border-white/10 bg-transparent p-3">
+                <div class="min-w-0 rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-3">
                     <p class="text-xs uppercase tracking-wide text-gray-400">Total Users</p>
                     <p class="text-lg font-semibold text-white">{{ number_format($totalUsers) }}</p>
                 </div>
-                <div class="min-w-0 rounded-xl border border-white/10 bg-transparent p-3">
+                <div class="min-w-0 rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-3">
                     <p class="text-xs uppercase tracking-wide text-gray-400">Active Users</p>
                     <p class="text-lg font-semibold text-white">{{ number_format($activeUsers) }}</p>
                 </div>
-                <div class="min-w-0 rounded-xl border border-white/10 bg-transparent p-3">
+                <div class="min-w-0 rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-3">
                     <p class="text-xs uppercase tracking-wide text-gray-400">Offices</p>
                     <p class="text-lg font-semibold text-white">{{ number_format($totalOffices) }}</p>
                 </div>
             </div>
             <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                <div class="min-w-0 rounded-xl border border-white/10 bg-transparent p-3">
+                <div class="min-w-0 rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-3">
                     <p class="text-xs uppercase tracking-wide text-gray-400">PMT</p>
                     <p class="text-lg font-semibold text-white">{{ number_format((int) ($roleCounts['pmt'] ?? 0)) }}</p>
                 </div>
-                <div class="min-w-0 rounded-xl border border-white/10 bg-transparent p-3">
+                <div class="min-w-0 rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-3">
                     <p class="text-xs uppercase tracking-wide text-gray-400">Dept Head</p>
                     <p class="text-lg font-semibold text-white">{{ number_format((int) ($roleCounts['dept-head'] ?? 0)) }}</p>
                 </div>
-                <div class="min-w-0 rounded-xl border border-white/10 bg-transparent p-3">
+                <div class="min-w-0 rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-3">
                     <p class="text-xs uppercase tracking-wide text-gray-400">Supervisor</p>
                     <p class="text-lg font-semibold text-white">{{ number_format((int) ($roleCounts['supervisor'] ?? 0)) }}</p>
                 </div>
-                <div class="min-w-0 rounded-xl border border-white/10 bg-transparent p-3">
+                <div class="min-w-0 rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-3">
                     <p class="text-xs uppercase tracking-wide text-gray-400">Employee</p>
                     <p class="text-lg font-semibold text-white">{{ number_format((int) ($roleCounts['employee'] ?? 0)) }}</p>
                 </div>
@@ -111,21 +111,21 @@
         </details>
 
         <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <div class="min-w-0 rounded-xl border border-white/10 bg-transparent p-4 shadow-sm">
+            <div class="min-w-0 rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-4 shadow-sm">
                 <h2 class="text-sm font-semibold text-gray-100">UWP Status</h2>
                 <div class="relative mt-3 h-64 w-full overflow-hidden sm:h-72">
                     <canvas id="uwpStatusChart" class="block h-full w-full"></canvas>
                 </div>
             </div>
 
-            <div class="min-w-0 rounded-xl border border-white/10 bg-transparent p-4 shadow-sm">
+            <div class="min-w-0 rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-4 shadow-sm">
                 <h2 class="text-sm font-semibold text-gray-100">IPCR Status</h2>
                 <div class="relative mt-3 h-64 w-full overflow-hidden sm:h-72">
                     <canvas id="ipcrStatusChart" class="block h-full w-full"></canvas>
                 </div>
             </div>
 
-            <div class="min-w-0 rounded-xl border border-white/10 bg-transparent p-4 shadow-sm lg:col-span-2">
+            <div class="min-w-0 rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-4 shadow-sm lg:col-span-2">
                 <h2 class="text-sm font-semibold text-gray-100">ORS Entries Trend (Last 14 Days)</h2>
                 <div class="relative mt-3 h-64 w-full overflow-hidden sm:h-72">
                     <canvas id="orsTrendChart" class="block h-full w-full"></canvas>

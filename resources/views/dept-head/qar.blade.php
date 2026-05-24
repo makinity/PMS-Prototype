@@ -67,15 +67,15 @@
 
             <div class="w-full space-y-2 lg:w-auto">
                 <div class="grid gap-3 sm:grid-cols-3">
-                    <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-3">
+                    <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                         <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Office</p>
                         <p class="mt-1 text-sm font-semibold text-white">{{ $office }}</p>
                     </div>
-                    <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-3">
+                    <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                         <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Quarter</p>
                         <p class="mt-1 text-sm font-semibold text-white">{{ $quarterLabel ?? '-' }}</p>
                     </div>
-                    <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-3">
+                    <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                         <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Status</p>
                         <span data-qar-status-badge class="{{ $currentStatusMeta['badge'] }} mt-1 inline-flex rounded-full border px-2 py-1 text-xs font-semibold">
                             {{ $currentStatusMeta['label'] }}
@@ -105,7 +105,7 @@
             </div>
         </div>
 
-        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
+        <div class="rounded-2xl border border-gray-700 bg-slate-900/40 p-4">
             <div class="flex flex-wrap items-start justify-between gap-3">
                 <div>
                     <h2 class="text-lg font-semibold text-white">A) Incoming MPORs</h2>
@@ -169,7 +169,7 @@
             </div>
         </div>
 
-        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
+        <div class="rounded-2xl border border-gray-700 bg-slate-900/40 p-4">
             <div class="flex flex-wrap items-start justify-between gap-3">
                 <div>
                     <h2 class="text-lg font-semibold text-white">B) QAR Summary</h2>
@@ -180,25 +180,25 @@
             </div>
 
             <div class="mt-4 grid gap-3 sm:grid-cols-4">
-                <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Included MPORs</p>
                     <p class="mt-1 text-base font-semibold text-white">{{ $includedMporCount }}</p>
                 </div>
-                <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Included Employees</p>
                     <p class="mt-1 text-base font-semibold text-white">{{ $includedEmployeeCount }}</p>
                 </div>
-                <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Included Months in Quarter</p>
                     <p class="mt-1 text-base font-semibold text-white">{{ $includedMonthsCount }}/{{ $includedMonthsTotal }}</p>
                 </div>
-                <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Data Source</p>
                     <p class="mt-1 text-sm font-semibold text-white">Approved MPOR snapshot</p>
                 </div>
             </div>
 
-            <div class="mt-4 rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+            <div class="mt-4 rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                 <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Approved MPOR Records</p>
                 @if ($hasConsolidated)
                     <div class="mt-2 max-h-40 overflow-y-auto pr-2 overscroll-contain">
@@ -214,7 +214,7 @@
             </div>
         </div>
 
-        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
+        <div class="rounded-2xl border border-gray-700 bg-slate-900/40 p-4">
             <div class="flex flex-wrap items-start justify-between gap-3">
                 <div>
                     <h2 class="text-lg font-semibold text-white">C) Annex I QAR</h2>
@@ -272,13 +272,13 @@
             </div>
 
             <div class="mt-4 grid gap-4 sm:grid-cols-2">
-                <div class="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                     <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Prepared/Approved by</p>
                     <p class="mt-2 text-sm font-semibold text-white">{{ $deptHeadName }}</p>
                     <p class="mt-2 text-xs text-slate-500">Date:</p>
                     <p class="text-sm text-slate-300">{{ $approvedDateLabel }}</p>
                 </div>
-                <div class="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                     <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Validated by</p>
                     <p class="mt-2 text-sm font-semibold text-white">PMT</p>
                     <p class="mt-2 text-sm text-amber-200">{{ $pmtStatusLabel }}</p>
@@ -290,8 +290,8 @@
         <div id="qarApproveConfirmModal" tabindex="-1" aria-hidden="true"
         class="fixed left-0 right-0 top-0 z-50 hidden h-[calc(100%-1rem)] max-h-full w-full items-center justify-center overflow-y-auto overflow-x-hidden md:inset-0">
         <div class="relative max-h-full w-full max-w-lg p-4">
-            <div class="relative rounded-2xl border border-slate-800 bg-slate-900 shadow-lg">
-                <div class="flex items-start justify-between border-b border-slate-800 p-5">
+            <div class="relative rounded-2xl border border-gray-700 bg-slate-900 shadow-lg">
+                <div class="flex items-start justify-between border-b border-gray-700 p-5">
                     <h3 class="text-lg font-semibold text-white">Endorse QAR</h3>
                     <button type="button" data-modal-hide="qarApproveConfirmModal"
                         class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-800 hover:text-white">
@@ -304,7 +304,7 @@
                     <p>Once endorsed, QAR becomes read-only at Dept Head level.</p>
                 </div>
                 <form id="qarEndorseForm" method="POST" action="{{ route('dept-head.qar.endorse') }}"
-                    class="flex items-center justify-end gap-2 border-t border-slate-800 p-5">
+                    class="flex items-center justify-end gap-2 border-t border-gray-700 p-5">
                     @csrf
                     <input type="hidden" name="q" value="{{ $selectedQuarterNumberSafe }}">
                     <button type="button" data-modal-hide="qarApproveConfirmModal"
@@ -324,8 +324,8 @@
     <div id="qarViewMporModal" tabindex="-1" aria-hidden="true"
         class="fixed left-0 right-0 top-0 z-50 hidden h-[calc(100%-1rem)] max-h-full w-full items-center justify-center overflow-y-auto overflow-x-hidden md:inset-0">
         <div class="relative max-h-full w-full max-w-7xl p-4">
-            <div class="relative rounded-2xl border border-slate-800 bg-slate-900 shadow-lg">
-                <div class="flex items-start justify-between gap-3 border-b border-slate-800 p-5">
+            <div class="relative rounded-2xl border border-gray-700 bg-slate-900 shadow-lg">
+                <div class="flex items-start justify-between gap-3 border-b border-gray-700 p-5">
                     <div>
                         <h3 class="text-lg font-semibold text-white">Monthly Performance Output Report</h3>
                         <p class="mt-1 text-xs text-slate-400">Read-only mirror of locked ORS entries with supervisor ratings.</p>
@@ -347,19 +347,19 @@
                 </div>
 
                 <div class="space-y-5 p-5 text-sm text-slate-300">
-                    <div id="qarModalLoading" class="hidden rounded-xl border border-slate-800 bg-slate-950/60 p-3 text-sm text-slate-300">
+                    <div id="qarModalLoading" class="hidden rounded-xl border border-gray-700 bg-slate-900/40 p-3 text-sm text-slate-300">
                         Loading MPOR...
                     </div>
                     <div class="grid gap-3 sm:grid-cols-3">
-                        <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                        <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                             <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Name</p>
                             <p id="qarModalEmployeeName" class="mt-1 text-sm font-semibold text-white">{{ $selectedEmployeeName }}</p>
                         </div>
-                        <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                        <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                             <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Office / Division</p>
                             <p id="qarModalOfficeDivision" class="mt-1 text-sm font-semibold text-white">{{ $selectedOfficeDivision }}</p>
                         </div>
-                        <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                        <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                             <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Month</p>
                             <p id="qarModalMonthLabel" class="mt-1 text-sm font-semibold text-white">{{ $selectedMonthLabel }}</p>
                         </div>
@@ -367,27 +367,27 @@
 
                     <div>
                         <div>
-                            <div class="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-950/60">
+                            <div class="overflow-x-auto rounded-2xl border border-gray-700 bg-slate-900/40">
                                 <table class="min-w-full text-[0.75rem] text-slate-200">
                                     <thead>
                                         <tr class="text-left text-[0.65rem] uppercase tracking-[0.3em] text-slate-500">
                                             <th class="whitespace-nowrap px-3 py-2 align-bottom" rowspan="2">Output / Task</th>
-                                            <th class="border-l border-slate-800 px-3 py-2 text-center" colspan="5">Efficiency / Quantity</th>
-                                            <th class="border-l border-slate-800 px-3 py-2 text-center" colspan="5">Quality / Effectiveness</th>
-                                            <th class="border-l border-slate-800 px-3 py-2 text-center" colspan="5">Timeliness</th>
+                                            <th class="border-l border-gray-700 px-3 py-2 text-center" colspan="5">Efficiency / Quantity</th>
+                                            <th class="border-l border-gray-700 px-3 py-2 text-center" colspan="5">Quality / Effectiveness</th>
+                                            <th class="border-l border-gray-700 px-3 py-2 text-center" colspan="5">Timeliness</th>
                                         </tr>
                                         <tr class="text-[0.6rem] uppercase tracking-[0.3em] text-slate-500">
-                                            <th class="border-l border-slate-800 px-2 py-1 text-right">W1</th>
+                                            <th class="border-l border-gray-700 px-2 py-1 text-right">W1</th>
                                             <th class="px-2 py-1 text-right">W2</th>
                                             <th class="px-2 py-1 text-right">W3</th>
                                             <th class="px-2 py-1 text-right">W4</th>
                                             <th class="px-2 py-1 text-right font-semibold">Total</th>
-                                            <th class="border-l border-slate-800 px-2 py-1 text-right">W1</th>
+                                            <th class="border-l border-gray-700 px-2 py-1 text-right">W1</th>
                                             <th class="px-2 py-1 text-right">W2</th>
                                             <th class="px-2 py-1 text-right">W3</th>
                                             <th class="px-2 py-1 text-right">W4</th>
                                             <th class="px-2 py-1 text-right font-semibold">Total</th>
-                                            <th class="border-l border-slate-800 px-2 py-1 text-right">W1</th>
+                                            <th class="border-l border-gray-700 px-2 py-1 text-right">W1</th>
                                             <th class="px-2 py-1 text-right">W2</th>
                                             <th class="px-2 py-1 text-right">W3</th>
                                             <th class="px-2 py-1 text-right">W4</th>
@@ -414,19 +414,19 @@
                                                 <tr class="text-slate-200">
                                                     <td class="px-3 py-2 font-medium text-white">{{ $row['task_title'] ?? '-' }}</td>
 
-                                                    <td class="border-l border-slate-800 px-2 py-2 text-right tabular-nums">{{ $eff['w1'] ?? 0 }}</td>
+                                                    <td class="border-l border-gray-700 px-2 py-2 text-right tabular-nums">{{ $eff['w1'] ?? 0 }}</td>
                                                     <td class="px-2 py-2 text-right tabular-nums">{{ $eff['w2'] ?? 0 }}</td>
                                                     <td class="px-2 py-2 text-right tabular-nums">{{ $eff['w3'] ?? 0 }}</td>
                                                     <td class="px-2 py-2 text-right tabular-nums">{{ $eff['w4'] ?? 0 }}</td>
                                                     <td class="px-2 py-2 text-right font-semibold text-white tabular-nums">{{ $eff['total'] ?? 0 }}</td>
 
-                                                    <td class="border-l border-slate-800 px-2 py-2 text-right tabular-nums">{{ $qual['w1'] ?? 0 }}</td>
+                                                    <td class="border-l border-gray-700 px-2 py-2 text-right tabular-nums">{{ $qual['w1'] ?? 0 }}</td>
                                                     <td class="px-2 py-2 text-right tabular-nums">{{ $qual['w2'] ?? 0 }}</td>
                                                     <td class="px-2 py-2 text-right tabular-nums">{{ $qual['w3'] ?? 0 }}</td>
                                                     <td class="px-2 py-2 text-right tabular-nums">{{ $qual['w4'] ?? 0 }}</td>
                                                     <td class="px-2 py-2 text-right font-semibold text-white tabular-nums">{{ $qual['total'] ?? 0 }}</td>
 
-                                                    <td class="border-l border-slate-800 px-2 py-2 text-right tabular-nums">{{ $time['w1'] ?? 0 }}</td>
+                                                    <td class="border-l border-gray-700 px-2 py-2 text-right tabular-nums">{{ $time['w1'] ?? 0 }}</td>
                                                     <td class="px-2 py-2 text-right tabular-nums">{{ $time['w2'] ?? 0 }}</td>
                                                     <td class="px-2 py-2 text-right tabular-nums">{{ $time['w3'] ?? 0 }}</td>
                                                     <td class="px-2 py-2 text-right tabular-nums">{{ $time['w4'] ?? 0 }}</td>
@@ -453,7 +453,7 @@
                             </p>
 
                             <div class="mt-4 grid gap-4 lg:grid-cols-2">
-                                <div class="rounded-2xl border border-slate-800 bg-slate-950/60 p-4 text-xs uppercase tracking-[0.3em] text-slate-400">
+                                <div class="rounded-2xl border border-gray-700 bg-slate-900/40 p-4 text-xs uppercase tracking-[0.3em] text-slate-400">
                                     <div class="flex items-center justify-between text-[0.6rem] tracking-[0.3em] text-slate-500">
                                         <span>Week 1</span><span>Week 2</span><span>Week 3</span><span>Week 4</span><span>Total</span>
                                     </div>
@@ -477,18 +477,18 @@
                                     </div>
                                 </div>
 
-                                <div class="rounded-2xl border border-slate-800 bg-slate-950/60 p-4 text-[0.65rem] uppercase tracking-[0.3em] text-slate-400">
+                                <div class="rounded-2xl border border-gray-700 bg-slate-900/40 p-4 text-[0.65rem] uppercase tracking-[0.3em] text-slate-400">
                                     <div class="flex items-center justify-between text-sm font-semibold text-white">
                                         <span>Confirmed:</span>
                                         <span class="text-slate-500">Stage II</span>
                                     </div>
                                     <div class="mt-4 grid gap-3 sm:grid-cols-2">
-                                        <div class="space-y-1 rounded-xl border border-slate-800 bg-slate-900/40 p-3 text-center">
+                                        <div class="space-y-1 rounded-xl border border-gray-700 bg-slate-900/40 p-3 text-center">
                                             <p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">Supervisor</p>
                                             <p id="qarModalSupervisorName" class="text-sm font-semibold text-white normal-case tracking-normal">{{ $selectedConfirmed['supervisor_name'] ?? '--' }}</p>
                                             <p class="text-[0.6rem] text-slate-500 normal-case tracking-normal">Signature over printed name</p>
                                         </div>
-                                        <div class="space-y-1 rounded-xl border border-slate-800 bg-slate-900/40 p-3 text-center">
+                                        <div class="space-y-1 rounded-xl border border-gray-700 bg-slate-900/40 p-3 text-center">
                                             <p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">Employee</p>
                                             <p id="qarModalEmployeeConfirmName" class="text-sm font-semibold text-white normal-case tracking-normal">{{ $selectedConfirmed['employee_name'] ?? '--' }}</p>
                                             <p class="text-[0.6rem] text-slate-500 normal-case tracking-normal">Signature over printed name</p>
@@ -500,7 +500,7 @@
                     </div>
                 </div>
 
-                <div class="flex items-center justify-end border-t border-slate-800 p-5">
+                <div class="flex items-center justify-end border-t border-gray-700 p-5">
                     <button type="button" data-modal-hide="qarViewMporModal"
                         class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 transition hover:bg-slate-800">
                         Close
@@ -683,19 +683,19 @@
                                 <tr class="text-slate-200">
                                     <td class="px-3 py-2 font-medium text-white">${escapeHtml(rowData.task_title ?? '-')}</td>
 
-                                    <td class="border-l border-slate-800 px-2 py-2 text-right tabular-nums">${val(eff, 'w1')}</td>
+                                    <td class="border-l border-gray-700 px-2 py-2 text-right tabular-nums">${val(eff, 'w1')}</td>
                                     <td class="px-2 py-2 text-right tabular-nums">${val(eff, 'w2')}</td>
                                     <td class="px-2 py-2 text-right tabular-nums">${val(eff, 'w3')}</td>
                                     <td class="px-2 py-2 text-right tabular-nums">${val(eff, 'w4')}</td>
                                     <td class="px-2 py-2 text-right font-semibold text-white tabular-nums">${val(eff, 'total')}</td>
 
-                                    <td class="border-l border-slate-800 px-2 py-2 text-right tabular-nums">${val(qual, 'w1')}</td>
+                                    <td class="border-l border-gray-700 px-2 py-2 text-right tabular-nums">${val(qual, 'w1')}</td>
                                     <td class="px-2 py-2 text-right tabular-nums">${val(qual, 'w2')}</td>
                                     <td class="px-2 py-2 text-right tabular-nums">${val(qual, 'w3')}</td>
                                     <td class="px-2 py-2 text-right tabular-nums">${val(qual, 'w4')}</td>
                                     <td class="px-2 py-2 text-right font-semibold text-white tabular-nums">${val(qual, 'total')}</td>
 
-                                    <td class="border-l border-slate-800 px-2 py-2 text-right tabular-nums">${val(time, 'w1')}</td>
+                                    <td class="border-l border-gray-700 px-2 py-2 text-right tabular-nums">${val(time, 'w1')}</td>
                                     <td class="px-2 py-2 text-right tabular-nums">${val(time, 'w2')}</td>
                                     <td class="px-2 py-2 text-right tabular-nums">${val(time, 'w3')}</td>
                                     <td class="px-2 py-2 text-right tabular-nums">${val(time, 'w4')}</td>

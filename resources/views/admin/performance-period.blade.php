@@ -2,7 +2,7 @@
 
 @section('main-content')
     <section class="space-y-4 px-3 md:px-6">
-        <div class="rounded-2xl border border-white/10 bg-transparent p-4 shadow-sm">
+        <div class="rounded-2xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-4 shadow-sm">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                     <h1 class="text-lg font-semibold text-gray-100 sm:text-xl">Performance Periods</h1>
@@ -17,7 +17,7 @@
             </div>
         </div>
 
-        <div class="rounded-2xl border border-white/10 bg-transparent shadow-sm">
+        <div class="rounded-2xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 shadow-sm">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-white/10 text-sm">
                     <thead class="bg-gray-900/70 text-xs uppercase tracking-wide text-gray-400">

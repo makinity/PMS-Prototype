@@ -20,14 +20,14 @@
                 <h1 class="text-2xl font-bold text-white">OPCR Final Calibration</h1>
                 <p class="mt-1 text-xs text-slate-500">Active Performance Period: {{ $periodLabelSafe }}</p>
             </div>
-            <div class="rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3 text-right">
+            <div class="rounded-xl border border-gray-700 bg-slate-900/40 px-4 py-3 text-right">
                 <p class="text-[11px] uppercase tracking-[0.14em] text-slate-500">Records</p>
                 <p class="mt-1 text-lg font-semibold text-white">{{ $opcrs->count() }}</p>
             </div>
         </div>
 
-        <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
-            <div class="border-b border-slate-800 px-5 py-4">
+        <div class="overflow-hidden rounded-2xl border border-gray-700 bg-slate-900/40">
+            <div class="border-b border-gray-700 px-5 py-4">
                 <form method="GET" class="flex w-full max-w-xl items-end gap-2">
                     <div class="flex-1">
                         <label for="pmt-calibration-search" class="mb-2 block text-xs uppercase tracking-[0.14em] text-slate-400">Search</label>

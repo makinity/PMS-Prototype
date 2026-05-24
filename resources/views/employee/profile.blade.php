@@ -12,7 +12,7 @@
         </div>
 
         {{-- Profile Card --}}
-        <div class="bg-transparent border border-gray-700 rounded-xl p-6 space-y-6">
+        <div class="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 rounded-xl p-6 space-y-6">
             <div class="flex items-center justify-between">
                 <h2 class="text-lg font-semibold text-white flex items-center">
                     <svg class="w-5 h-5 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -88,7 +88,7 @@
                                 <label class="block mb-2 text-sm font-medium text-white">Position</label>
                                 <input type="text"
                                        class="!bg-gray-700 !border-gray-600 !text-white text-sm rounded-lg block w-full p-2.5 opacity-60 cursor-not-allowed"
-                                       value="{{ auth()->user()->position ?? '—' }}" disabled>
+                                       value="{{ auth()->user()->position ?? 'â€”' }}" disabled>
                                 <p class="mt-1 text-xs text-gray-400">Updated by HR</p>
                             </div>
 
@@ -96,14 +96,14 @@
                                 <label class="block mb-2 text-sm font-medium text-white">Employee ID</label>
                                 <input type="text"
                                        class="!bg-gray-700 !border-gray-600 !text-white text-sm rounded-lg block w-full p-2.5 opacity-60 cursor-not-allowed"
-                                       value="{{ auth()->user()->employee_id ?? '—' }}" disabled>
+                                       value="{{ auth()->user()->employee_id ?? 'â€”' }}" disabled>
                             </div>
 
                             <div>
                                 <label class="block mb-2 text-sm font-medium text-white">Department</label>
                                 <input type="text"
                                        class="!bg-gray-700 !border-gray-600 !text-white text-sm rounded-lg block w-full p-2.5 opacity-60 cursor-not-allowed"
-                                       value="{{ auth()->user()->office?->name ?? '—' }}" disabled>
+                                       value="{{ auth()->user()->office?->name ?? 'â€”' }}" disabled>
                             </div>
                         </div>
 
@@ -129,7 +129,7 @@
         </div>
 
         {{-- Security Card --}}
-        <div class="bg-transparent border border-gray-700 rounded-xl p-6 space-y-6">
+        <div class="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 rounded-xl p-6 space-y-6">
             <h2 class="text-lg font-semibold text-white flex items-center">
                 <svg class="w-5 h-5 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>

@@ -36,7 +36,7 @@
             <div id="sidebar-nav-divider" class="pointer-events-none absolute inset-y-0 w-px bg-gray-700" style="left: calc(18rem - 1px); display: none; transform: translateX(-18rem); transition: transform 200ms ease-out;"></div>
             <div class="flex items-center justify-between gap-4 px-4 py-3 lg:px-6">
                 <div class="flex items-center gap-3">
-                    <button type="button" id="sidebar-toggle-btn" aria-controls="admin-sidebar" class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-800 bg-slate-900/70 text-slate-200 shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-400/30">
+                    <button type="button" id="sidebar-toggle-btn" aria-controls="admin-sidebar" class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-700 bg-slate-900/40 text-slate-200 shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-400/30">
                         <span class="sr-only">Toggle sidebar</span>
                         <i class="fa-solid fa-bars"></i>
                     </button>
@@ -55,14 +55,14 @@
                     @if (class_exists(\Livewire\Livewire::class))
                         <livewire:notification-dropdown />
                     @else
-                        <button type="button" class="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-800 bg-slate-900/70 text-slate-300 shadow-sm transition hover:bg-slate-800">
+                        <button type="button" class="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-700 bg-slate-900/40 text-slate-300 shadow-sm transition hover:bg-slate-800">
                             <span class="sr-only">View notifications</span>
                             <i class="fa-regular fa-bell"></i>
                             <span class="absolute right-2 top-2 h-2 w-2 rounded-full bg-rose-500"></span>
                         </button>
                     @endif
                     <div class="relative">
-                        <button type="button" id="admin-user-menu-button" data-dropdown-toggle="admin-user-menu" class="flex items-center gap-3 rounded-full border border-slate-800 bg-slate-900/70 px-2 py-1.5 text-left text-slate-100 shadow-sm transition hover:bg-slate-800">
+                        <button type="button" id="admin-user-menu-button" data-dropdown-toggle="admin-user-menu" class="flex items-center gap-3 rounded-full border border-gray-700 bg-slate-900/40 px-2 py-1.5 text-left text-slate-100 shadow-sm transition hover:bg-slate-800">
                             @include('partials.user-avatar', ['user' => Auth::user()])
                             <span class="hidden sm:block">
                                 <span class="block text-sm font-semibold text-white">{{ Auth::user()->name }}</span>
@@ -169,8 +169,8 @@
 
         <!-- Main Content -->
         <div id="main-wrapper" class="pt-2 sm:ml-72">
-            <main id="main-content" class="px-4 pb-12 pt-6 lg:px-8">
-                <div class="mx-auto max-w-7xl">
+            <main id="main-content" class="px-3 pb-12 pt-6 lg:px-5">
+                <div class="mx-auto w-full max-w-none">
 
                     @yield('main-content')
                 </div>

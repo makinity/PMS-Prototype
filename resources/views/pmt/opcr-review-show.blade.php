@@ -23,7 +23,7 @@
         </a>
     </div>
 
-    <div class="grid gap-3 rounded-2xl border border-slate-800 bg-slate-900/70 p-4 sm:grid-cols-4">
+    <div class="grid gap-3 rounded-2xl border border-gray-700 bg-slate-900/40 p-4 sm:grid-cols-4">
         <div>
             <p class="text-[11px] uppercase tracking-wide text-slate-500">Office / Unit</p>
             <p class="mt-1 text-sm font-semibold text-white">{{ $payload['opcr']['office']['name'] ?? '-' }}</p>
@@ -42,13 +42,13 @@
         </div>
     </div>
 
-    <div class="grid min-h-0 gap-0 overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 lg:grid-cols-[320px_minmax(0,1fr)]">
-        <aside class="flex min-h-0 flex-col border-b border-slate-800 lg:border-b-0 lg:border-r">
-            <div class="flex h-14 items-center justify-between border-b border-slate-800 px-4">
+    <div class="grid min-h-0 gap-0 overflow-hidden rounded-2xl border border-gray-700 bg-slate-900 lg:grid-cols-[320px_minmax(0,1fr)]">
+        <aside class="flex min-h-0 flex-col border-b border-gray-700 lg:border-b-0 lg:border-r">
+            <div class="flex h-14 items-center justify-between border-b border-gray-700 px-4">
                 <p class="text-sm font-semibold uppercase tracking-[0.22em] text-slate-400">Consolidated Outputs</p>
                 <span id="pmt-output-count" class="text-sm font-semibold text-blue-300">0</span>
             </div>
-            <div class="flex h-10 items-end border-b border-slate-800 px-2">
+            <div class="flex h-10 items-end border-b border-gray-700 px-2">
                 <button type="button" data-fn-filter="all" class="flex-1 border-b-2 border-blue-400 px-2.5 py-2.5 text-sm font-semibold text-white">All</button>
                 <button type="button" data-fn-filter="core" class="flex-1 border-b-2 border-transparent px-2.5 py-2.5 text-sm font-medium text-slate-400">Core</button>
                 <button type="button" data-fn-filter="support" class="flex-1 border-b-2 border-transparent px-2.5 py-2.5 text-sm font-medium text-slate-400">Support</button>
@@ -57,7 +57,7 @@
         </aside>
 
         <section class="flex min-h-0 flex-col">
-            <div class="flex h-14 items-center border-b border-slate-800 px-6">
+            <div class="flex h-14 items-center border-b border-gray-700 px-6">
                 <div class="flex flex-wrap items-center gap-3">
                     <h3 id="pmt-detail-title" class="text-lg font-semibold leading-tight text-white">No output selected</h3>
                     <span id="pmt-detail-function" class="hidden rounded-md border px-2 py-1 text-xs font-medium"></span>
@@ -66,7 +66,7 @@
             </div>
 
             <div class="px-5">
-                <div class="flex h-10 items-end gap-1.5 border-b border-slate-800">
+                <div class="flex h-10 items-end gap-1.5 border-b border-gray-700">
                     <button type="button" data-panel-tab="overview" class="border-b-2 border-blue-400 px-2.5 py-2.5 text-sm font-semibold text-white">Overview</button>
                     <button type="button" data-panel-tab="indicators" class="border-b-2 border-transparent px-2.5 py-2.5 text-sm font-medium text-slate-400">Success Indicators</button>
                 </div>
@@ -79,7 +79,7 @@
                 </div>
 
                 <div data-panel="indicators" class="hidden">
-                    <div class="overflow-hidden rounded-xl border border-slate-800">
+                    <div class="overflow-hidden rounded-xl border border-gray-700">
                         <table class="min-w-full text-sm text-slate-200">
                             <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.22em] text-slate-400">
                                 <tr>
@@ -97,7 +97,7 @@
         </section>
     </div>
 
-    <form id="pmt-opcr-show-form" method="POST" action="{{ route('pmt.opcr.review.action') }}" class="grid gap-3 rounded-2xl border border-slate-800 bg-slate-900/70 px-5 py-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+    <form id="pmt-opcr-show-form" method="POST" action="{{ route('pmt.opcr.review.action') }}" class="grid gap-3 rounded-2xl border border-gray-700 bg-slate-900/40 px-5 py-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
         @csrf
         <input type="hidden" name="opcr_id" value="{{ $payload['opcr']['id'] ?? $opcr->id }}">
         <input type="hidden" name="action" id="pmt-show-action">
@@ -120,8 +120,8 @@
 </section>
 
 <div id="pmt-standards-modal" class="fixed inset-0 z-[90] hidden items-center justify-center bg-black/70 px-4 py-6">
-    <div class="w-full max-w-4xl rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl">
-        <div class="flex items-start justify-between gap-4 border-b border-slate-800 px-6 py-5">
+    <div class="w-full max-w-4xl rounded-2xl border border-gray-700 bg-slate-900 shadow-2xl">
+        <div class="flex items-start justify-between gap-4 border-b border-gray-700 px-6 py-5">
             <div>
                 <p class="text-xs uppercase tracking-[0.22em] text-slate-400">QET Standards</p>
                 <h3 id="pmt-standards-modal-title" class="mt-2 text-lg font-semibold text-white">Indicator Standards</h3>
@@ -129,7 +129,7 @@
             <button type="button" data-pmt-modal-close class="rounded-lg border border-slate-700 px-3 py-2 text-slate-400 hover:bg-slate-800 hover:text-white">&times;</button>
         </div>
         <div class="px-6 py-5">
-            <div class="overflow-hidden rounded-xl border border-slate-800">
+            <div class="overflow-hidden rounded-xl border border-gray-700">
                 <table class="min-w-full text-sm text-slate-200">
                     <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.22em] text-slate-400">
                         <tr>
@@ -147,8 +147,8 @@
 </div>
 
 <div id="pmt-assignees-modal" class="fixed inset-0 z-[95] hidden items-center justify-center bg-black/70 px-4 py-6">
-    <div class="w-full max-w-3xl rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl">
-        <div class="flex items-start justify-between gap-4 border-b border-slate-800 px-6 py-5">
+    <div class="w-full max-w-3xl rounded-2xl border border-gray-700 bg-slate-900 shadow-2xl">
+        <div class="flex items-start justify-between gap-4 border-b border-gray-700 px-6 py-5">
             <div>
                 <p class="text-xs uppercase tracking-[0.22em] text-slate-400">Assigned Employees</p>
                 <h3 id="pmt-assignees-modal-title" class="mt-2 text-lg font-semibold text-white">Indicator Assignees</h3>
@@ -156,7 +156,7 @@
             <button type="button" data-pmt-modal-close class="rounded-lg border border-slate-700 px-3 py-2 text-slate-400 hover:bg-slate-800 hover:text-white">&times;</button>
         </div>
         <div class="px-6 py-5">
-            <div class="overflow-hidden rounded-xl border border-slate-800">
+            <div class="overflow-hidden rounded-xl border border-gray-700">
                 <table class="min-w-full text-sm text-slate-200">
                     <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.22em] text-slate-400">
                         <tr>
@@ -293,7 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
         list.forEach((o, i) => {
             const btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = `w-full rounded-xl border px-3 py-3 text-left transition ${i === selectedIndex ? 'border-blue-500/40 bg-blue-500/10' : 'border-slate-800 bg-slate-900/50 hover:border-slate-700'}`;
+            btn.className = `w-full rounded-xl border px-3 py-3 text-left transition ${i === selectedIndex ? 'border-blue-500/40 bg-blue-500/10' : 'border-gray-700 bg-slate-900/50 hover:border-slate-700'}`;
             btn.innerHTML = `<div class="text-base font-semibold leading-snug text-white">${o.title || '-'}</div><div class="mt-2 text-xs text-slate-500">${(o.success_indicators || []).length} indicator(s)</div>`;
             btn.addEventListener('click', () => { selectedIndex = i; renderOutputs(); });
             outputList.appendChild(btn);
@@ -323,7 +323,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const indicators = Array.isArray(o.success_indicators) ? o.success_indicators : [];
         overview.innerHTML = indicators.length
-            ? indicators.map((i) => `<div class="rounded-xl border border-slate-800 bg-slate-900/40 px-4 py-3 text-sm text-slate-100">${i.indicator_text || '-'}</div>`).join('')
+            ? indicators.map((i) => `<div class="rounded-xl border border-gray-700 bg-slate-900/40 px-4 py-3 text-sm text-slate-100">${i.indicator_text || '-'}</div>`).join('')
             : '<p class="text-sm text-slate-500">No linked indicators.</p>';
 
         indicatorsBody.innerHTML = indicators.length

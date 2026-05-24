@@ -20,14 +20,14 @@
         <div>
             <h1 class="text-2xl font-bold text-white">Office Performance Commitment and Review (OPCR)</h1>
         </div>
-        <div class="rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3 text-right">
+        <div class="rounded-xl border border-gray-700 bg-slate-900/40 px-4 py-3 text-right">
             <p class="text-[11px] uppercase tracking-[0.24em] text-slate-500">Active Period</p>
-            <p class="mt-1 text-sm font-semibold text-white">{{ $activePeriod?->name ?? '—' }}</p>
+            <p class="mt-1 text-sm font-semibold text-white">{{ $activePeriod?->name ?? 'â€”' }}</p>
         </div>
     </div>
 
-    <section class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
-        <div class="flex flex-wrap items-start justify-between gap-4 border-b border-slate-800 px-5 py-4">
+    <section class="overflow-hidden rounded-2xl border border-gray-700 bg-slate-900/40">
+        <div class="flex flex-wrap items-start justify-between gap-4 border-b border-gray-700 px-5 py-4">
             <div>
                 <h2 class="text-lg font-semibold text-white">Source UWPs</h2>
             </div>
@@ -65,10 +65,10 @@
                         @endphp
                         <tr class="hover:bg-slate-950/40">
                             <td class="px-5 py-4">
-                                <div class="font-medium text-white">{{ $uwp->office?->name ?? '—' }}</div>
+                                <div class="font-medium text-white">{{ $uwp->office?->name ?? 'â€”' }}</div>
                                 <div class="mt-1 text-xs text-slate-500">UWP #{{ $uwp->id }}</div>
                             </td>
-                            <td class="px-5 py-4 text-slate-300">{{ $uwp->creator?->name ?? '—' }}</td>
+                            <td class="px-5 py-4 text-slate-300">{{ $uwp->creator?->name ?? 'â€”' }}</td>
                             <td class="px-5 py-4 text-center text-slate-300">{{ $outputCount }}</td>
                             <td class="px-5 py-4 text-center">
                                 <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold {{ $statusMeta['class'] }}">{{ $statusMeta['label'] }}</span>
@@ -93,8 +93,8 @@
         </div>
     </section>
 
-    <section class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
-        <div class="flex flex-wrap items-start justify-between gap-4 border-b border-slate-800 px-5 py-4">
+    <section class="overflow-hidden rounded-2xl border border-gray-700 bg-slate-900/40">
+        <div class="flex flex-wrap items-start justify-between gap-4 border-b border-gray-700 px-5 py-4">
             <div>
                 <h2 class="text-lg font-semibold text-white">OPCR Preview</h2>
             </div>
@@ -122,22 +122,22 @@
         </div>
 
         @if ($currentOpcr)
-            <div class="grid gap-3 border-b border-slate-800 px-5 py-4 sm:grid-cols-4">
-                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+            <div class="grid gap-3 border-b border-gray-700 px-5 py-4 sm:grid-cols-4">
+                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase tracking-wide text-slate-500">Office / Unit</p>
-                    <p class="mt-1 text-sm font-semibold text-white">{{ $currentOpcrPayload['opcr']['office']['name'] ?? '—' }}</p>
+                    <p class="mt-1 text-sm font-semibold text-white">{{ $currentOpcrPayload['opcr']['office']['name'] ?? 'â€”' }}</p>
                 </div>
-                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase tracking-wide text-slate-500">Period</p>
-                    <p class="mt-1 text-sm font-semibold text-white">{{ $currentOpcrPayload['opcr']['period']['name'] ?? '—' }}</p>
+                    <p class="mt-1 text-sm font-semibold text-white">{{ $currentOpcrPayload['opcr']['period']['name'] ?? 'â€”' }}</p>
                 </div>
-                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase tracking-wide text-slate-500">Source UWP IDs</p>
-                    <p class="mt-1 text-sm font-semibold text-white">{{ $currentOpcrPayload['opcr']['source_uwp']['id'] ?? '—' }}</p>
+                    <p class="mt-1 text-sm font-semibold text-white">{{ $currentOpcrPayload['opcr']['source_uwp']['id'] ?? 'â€”' }}</p>
                 </div>
-                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase tracking-wide text-slate-500">Source Status</p>
-                    <p class="mt-1 text-sm font-semibold text-white">{{ ucwords(str_replace('_', ' ', (string) ($currentOpcrPayload['opcr']['source_uwp']['status'] ?? '—'))) }}</p>
+                    <p class="mt-1 text-sm font-semibold text-white">{{ ucwords(str_replace('_', ' ', (string) ($currentOpcrPayload['opcr']['source_uwp']['status'] ?? 'â€”'))) }}</p>
                 </div>
             </div>
 
@@ -157,10 +157,10 @@
                         @forelse (($currentOpcrPayload['outputs'] ?? []) as $output)
                             <tr class="hover:bg-slate-950/40">
                                 <td class="px-5 py-4 align-top">
-                                    <div class="font-medium text-white">{{ $output['source_supervisor'] ?? '—' }}</div>
-                                    <div class="mt-1 text-xs text-slate-500">UWP #{{ $output['source_uwp_id'] ?? '—' }}</div>
+                                    <div class="font-medium text-white">{{ $output['source_supervisor'] ?? 'â€”' }}</div>
+                                    <div class="mt-1 text-xs text-slate-500">UWP #{{ $output['source_uwp_id'] ?? 'â€”' }}</div>
                                 </td>
-                                <td class="px-5 py-4 align-top text-white">{{ $output['title'] ?? '—' }}</td>
+                                <td class="px-5 py-4 align-top text-white">{{ $output['title'] ?? 'â€”' }}</td>
                                 <td class="px-5 py-4 align-top text-center text-slate-300">
                                     <a href="{{ route('dept-head.opcr.success-indicators', ['opcr' => $currentOpcr->id, 'mfoId' => $output['mfo_id']]) }}" class="group inline-flex items-center justify-center gap-1.5 text-cyan-400 hover:text-cyan-300 transition" title="View Success Indicators">
                                         <i class="fa-regular fa-eye transition group-hover:scale-110"></i>
@@ -177,10 +177,10 @@
                                     @elseif ($targetQuantity !== null)
                                         {{ $targetQuantity }}
                                     @else
-                                        —
+                                        â€”
                                     @endif
                                 </td>
-                                <td class="px-5 py-4 align-top text-slate-300">{{ ($output['weight_percent'] ?? '') !== '' ? $output['weight_percent'] . '%' : '—' }}</td>
+                                <td class="px-5 py-4 align-top text-slate-300">{{ ($output['weight_percent'] ?? '') !== '' ? $output['weight_percent'] . '%' : 'â€”' }}</td>
                                 <td class="px-5 py-4 align-top">
                                     @php $functionType = strtolower((string) ($output['function_type'] ?? '')); @endphp
                                     @if ($functionType === 'core')
@@ -201,7 +201,7 @@
                 </table>
             </div>
 
-            <div class="border-t border-slate-800 p-6 flex flex-wrap items-center justify-between gap-4">
+            <div class="border-t border-gray-700 p-6 flex flex-wrap items-center justify-between gap-4">
                 <div class="flex gap-3">
                     @if ($canSubmitToPmt && $opcrStatus !== \App\Models\Opcr::STATUS_ENDORSED)
                         {{-- Hidden forms submitted by the confirmation modal --}}
@@ -244,20 +244,20 @@
 </section>
 
 <div id="uwp-preview-modal" data-modal-container class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 px-4 py-6">
-    <div class="w-full max-w-6xl rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl">
-        <div class="flex items-start justify-between gap-4 border-b border-slate-800 pb-4">
+    <div class="w-full max-w-6xl rounded-2xl border border-gray-700 bg-slate-900 p-6 shadow-2xl">
+        <div class="flex items-start justify-between gap-4 border-b border-gray-700 pb-4">
             <div class="min-w-0">
                 <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Unit Work Plan Preview</p>
                 <h2 id="uwp-modal-title" class="mt-1 truncate text-lg font-semibold text-white">Review UWP</h2>
             </div>
-            <button type="button" data-close-modal class="shrink-0 rounded-lg border border-slate-800 bg-slate-950/50 px-2.5 py-2 text-slate-400 hover:bg-slate-950 hover:text-white">&times;</button>
+            <button type="button" data-close-modal class="shrink-0 rounded-lg border border-gray-700 bg-slate-900/40 px-2.5 py-2 text-slate-400 hover:bg-slate-950 hover:text-white">&times;</button>
         </div>
 
         <div id="uwp-modal-content" class="mt-5 max-h-[70vh] overflow-auto">
             <!-- Dynamic UWP Content -->
         </div>
 
-        <div class="mt-6 flex justify-end border-t border-slate-800 pt-4">
+        <div class="mt-6 flex justify-end border-t border-gray-700 pt-4">
             <button type="button" data-close-modal class="rounded-lg border border-slate-700 bg-slate-900 px-6 py-2 text-sm font-semibold text-slate-300 hover:bg-slate-800">Close Preview</button>
         </div>
     </div>
@@ -265,7 +265,7 @@
 
 {{-- Confirmation Modal --}}
 <div id="opcr-confirm-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/70 px-4 backdrop-blur-sm">
-    <div class="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-950 shadow-2xl">
+    <div class="w-full max-w-md rounded-2xl border border-gray-700 bg-slate-950 shadow-2xl">
         <div class="px-6 pt-6 pb-2">
             <p id="opcr-confirm-eyebrow" class="text-xs font-semibold uppercase tracking-[0.22em]"></p>
             <h3 id="opcr-confirm-title" class="mt-2 text-xl font-semibold text-white"></h3>
@@ -294,7 +294,7 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // ── Confirmation Modal ────────────────────────────────────────────────
+    // â”€â”€ Confirmation Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const confirmModal   = document.getElementById('opcr-confirm-modal');
     const confirmTitle   = document.getElementById('opcr-confirm-title');
     const confirmEyebrow = document.getElementById('opcr-confirm-eyebrow');
@@ -362,7 +362,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // ── Signature Pad logic for OPCR ──────────────────────────────────────
+    // â”€â”€ Signature Pad logic for OPCR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const opcrSigConfirm = document.getElementById('signature-pad-confirm');
     if (opcrSigConfirm) {
         opcrSigConfirm.addEventListener('click', async function() {
@@ -424,7 +424,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // ── UWP Preview Modal ─────────────────────────────────────────────────
+    // â”€â”€ UWP Preview Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const uwpModal = document.getElementById('uwp-preview-modal');
     const uwpContent = document.getElementById('uwp-modal-content');
 
@@ -437,11 +437,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
             let html = `
                 <div class="grid gap-3 sm:grid-cols-2 mb-6">
-                    <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                    <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                         <p class="text-[11px] uppercase tracking-wide text-slate-500">Supervisor</p>
                         <p class="mt-1 text-sm font-semibold text-white">${payload.uwp.creator.name}</p>
                     </div>
-                    <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                    <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                         <p class="text-[11px] uppercase tracking-wide text-slate-500">Period</p>
                         <p class="mt-1 text-sm font-semibold text-white">${payload.uwp.period.name}</p>
                     </div>
@@ -450,8 +450,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
             payload.outputs.forEach(output => {
                 html += `
-                    <div class="mb-6 rounded-xl border border-slate-800 bg-slate-950/40 overflow-hidden">
-                        <div class="bg-slate-900/50 px-4 py-3 border-b border-slate-800 flex justify-between items-center">
+                    <div class="mb-6 rounded-xl border border-gray-700 bg-slate-900/40 overflow-hidden">
+                        <div class="bg-slate-900/50 px-4 py-3 border-b border-gray-700 flex justify-between items-center">
                             <h3 class="font-bold text-white text-sm">${output.title}</h3>
                             <span class="text-xs font-semibold text-slate-400">${output.weight_percent}% Weight</span>
                         </div>

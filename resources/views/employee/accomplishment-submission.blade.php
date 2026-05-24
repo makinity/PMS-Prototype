@@ -13,8 +13,8 @@
         } else {
             $statusBadgeClasses .= 'bg-amber-500/10 text-amber-200 border-amber-500/40';
         }
-        $periodLabelValue = $periodLabel ?? '—';
-        $periodHeaderLabel = $periodLabelValue === '—' ? 'No active period' : $periodLabelValue;
+        $periodLabelValue = $periodLabel ?? 'â€”';
+        $periodHeaderLabel = $periodLabelValue === 'â€”' ? 'No active period' : $periodLabelValue;
 
         $smporMonthLabels = !empty($smporMonths ?? []) && is_array($smporMonths)
             ? array_values($smporMonths)
@@ -39,7 +39,7 @@
         </div>
 
         <!-- SMPOR Card -->
-        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 space-y-3">
+        <div class="rounded-2xl border border-gray-700 bg-slate-900/40 p-4 space-y-3">
             <div class="flex items-start justify-between gap-3">
                 <div>
                     <h2 class="text-lg font-semibold text-white">SMPOR &ndash; Monitoring Summary</h2>
@@ -65,15 +65,15 @@
                 </div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-slate-200">
-                <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Period</p>
                     <p class="mt-1 font-semibold">{{ $periodLabelValue }}</p>
                 </div>
-                <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Status</p>
                     <p class="mt-1 font-semibold">{{ $smporModeLabel ?? 'Preview (monitoring-only)' }}</p>
                 </div>
-                <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Data Source</p>
                     <p class="mt-1 font-semibold">{{ $smporSourceLabel ?? 'Submitted MPORs' }}</p>
                 </div>
@@ -81,7 +81,7 @@
         </div>
 
         <!-- IPCR Card -->
-        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 space-y-3">
+        <div class="rounded-2xl border border-gray-700 bg-slate-900/40 p-4 space-y-3">
             <div class="flex items-start justify-between gap-3">
                 <div>
                     <h2 class="text-lg font-semibold text-white">IPCR Accomplishment Report</h2>
@@ -107,11 +107,11 @@
                 </div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-sm text-slate-200">
-                <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Rating Period</p>
                     <p class="mt-1 font-semibold">{{ $periodLabelValue }}</p>
                 </div>
-                <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Status</p>
                     <p class="mt-1 font-semibold">System-generated, read-only</p>
                 </div>
@@ -138,7 +138,7 @@
             @csrf
 
             <!-- Supporting Documents -->
-            <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 space-y-3">
+            <div class="rounded-2xl border border-gray-700 bg-slate-900/40 p-4 space-y-3">
                 <div class="flex items-start justify-between">
                     <div>
                         <h2 class="text-lg font-semibold text-white">Supporting Documents (Optional)</h2>
@@ -152,7 +152,7 @@
                        class="block w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200 file:mr-3 file:rounded-md file:border-0 file:bg-slate-800 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-slate-200 disabled:cursor-not-allowed disabled:opacity-60">
 
                 @if (!empty($attachmentNames ?? []))
-                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                    <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                         <p class="text-xs uppercase text-slate-500">Submitted Attachments (Prototype)</p>
                         <ul class="mt-2 space-y-1 text-sm text-slate-300">
                             @foreach ($attachmentNames as $attachmentName)
@@ -164,7 +164,7 @@
             </div>
 
             <!-- Remarks -->
-            <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 space-y-3">
+            <div class="rounded-2xl border border-gray-700 bg-slate-900/40 p-4 space-y-3">
                 <div class="flex items-start justify-between">
                     <div>
                         <h2 class="text-lg font-semibold text-white">Employee Remarks (Optional)</h2>
@@ -198,8 +198,8 @@
     <div id="smpor-preview-modal"
          data-preview-modal
          class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 px-4 py-6">
-        <div class="w-full max-w-5xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
-            <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
+        <div class="w-full max-w-5xl rounded-2xl border border-gray-700 bg-slate-900 p-5 shadow-2xl">
+            <div class="flex items-start justify-between gap-3 border-b border-gray-700 pb-3">
                 <div>
                     <p class="text-xs uppercase tracking-[0.2em] text-blue-300">SMPOR (Monitoring Summary)</p>
                     <h3 class="text-lg font-semibold text-white">SMPOR Preview &mdash; {{ $periodLabelValue }}</h3>
@@ -209,19 +209,19 @@
             </div>
             <div class="mt-4 space-y-4 max-h-[65vh] overflow-y-auto text-sm text-slate-200">
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                    <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                         <p class="text-[11px] uppercase text-slate-500">Employee</p>
                         <p class="mt-1 font-semibold">{{ $employeeName ?? 'Ramon Reyes' }}</p>
                     </div>
-                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                    <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                         <p class="text-[11px] uppercase text-slate-500">Office/Unit</p>
                         <p class="mt-1 font-semibold">{{ $officeName ?? 'Revenue Collection Unit' }}</p>
                     </div>
-                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                    <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                         <p class="text-[11px] uppercase text-slate-500">Period</p>
                         <p class="mt-1 font-semibold">{{ $periodLabelValue }}</p>
                     </div>
-                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                    <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                         <p class="text-[11px] uppercase text-slate-500">Source</p>
                         <p class="mt-1 font-semibold">{{ $smporSourceLabel ?? 'Submitted MPORs' }}</p>
                     </div>
@@ -261,7 +261,7 @@
                         };
                     @endphp
 
-                    <div data-smpor-tab-panel="quantity" class="overflow-x-auto rounded-xl border border-slate-800">
+                    <div data-smpor-tab-panel="quantity" class="overflow-x-auto rounded-xl border border-gray-700">
                         <table class="min-w-full text-left text-sm text-slate-200">
                             <thead class="bg-slate-950/70 text-xs uppercase text-slate-400">
                                 <tr>
@@ -287,7 +287,7 @@
                                     </tr>
                                     @forelse ($sectionRows as $row)
                                         <tr class="bg-slate-900/40">
-                                            <td class="px-4 py-3 font-semibold">{{ $row['expected_output'] ?? '—' }}</td>
+                                            <td class="px-4 py-3 font-semibold">{{ $row['expected_output'] ?? 'â€”' }}</td>
                                             @foreach ($smporMonthLabels as $monthLabel)
                                                 <td class="px-4 py-3 text-right">{{ $formatSmporValue($row['quantity'][$monthLabel] ?? 0) }}</td>
                                             @endforeach
@@ -307,7 +307,7 @@
                         </table>
                     </div>
 
-                    <div data-smpor-tab-panel="quality" class="hidden overflow-x-auto rounded-xl border border-slate-800">
+                    <div data-smpor-tab-panel="quality" class="hidden overflow-x-auto rounded-xl border border-gray-700">
                         <table class="min-w-full text-left text-sm text-slate-200">
                             <thead class="bg-slate-950/70 text-xs uppercase text-slate-400">
                                 <tr>
@@ -340,7 +340,7 @@
                                             $rowQualityAvg = $rowQty > 0 ? $rowQuality / $rowQty : 0;
                                         @endphp
                                         <tr class="bg-slate-900/40">
-                                            <td class="px-4 py-3 font-semibold">{{ $row['expected_output'] ?? '—' }}</td>
+                                            <td class="px-4 py-3 font-semibold">{{ $row['expected_output'] ?? 'â€”' }}</td>
                                             @foreach ($smporMonthLabels as $monthLabel)
                                                 <td class="px-4 py-3 text-right">{{ $formatSmporValue($row['quality'][$monthLabel] ?? 0) }}</td>
                                             @endforeach
@@ -361,7 +361,7 @@
                         </table>
                     </div>
 
-                    <div data-smpor-tab-panel="timeliness" class="hidden overflow-x-auto rounded-xl border border-slate-800">
+                    <div data-smpor-tab-panel="timeliness" class="hidden overflow-x-auto rounded-xl border border-gray-700">
                         <table class="min-w-full text-left text-sm text-slate-200">
                             <thead class="bg-slate-950/70 text-xs uppercase text-slate-400">
                                 <tr>
@@ -394,7 +394,7 @@
                                             $rowTimelinessAvg = $rowQty > 0 ? $rowTimeliness / $rowQty : 0;
                                         @endphp
                                         <tr class="bg-slate-900/40">
-                                            <td class="px-4 py-3 font-semibold">{{ $row['expected_output'] ?? '—' }}</td>
+                                            <td class="px-4 py-3 font-semibold">{{ $row['expected_output'] ?? 'â€”' }}</td>
                                             @foreach ($smporMonthLabels as $monthLabel)
                                                 <td class="px-4 py-3 text-right">{{ $formatSmporValue($row['timeliness'][$monthLabel] ?? 0) }}</td>
                                             @endforeach
@@ -417,7 +417,7 @@
 
                 </div>
             </div>
-            <div class="flex items-center justify-end gap-3 border-t border-slate-800 pt-4 mt-4">
+            <div class="flex items-center justify-end gap-3 border-t border-gray-700 pt-4 mt-4">
                 <a href="{{ route('smpor.export.excel') }}"
                    class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg">
                     Export
@@ -435,8 +435,8 @@
     <div id="ipcr-preview-modal"
          data-preview-modal
          class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 px-4 py-6">
-        <div class="w-full max-w-6xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
-            <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
+        <div class="w-full max-w-6xl rounded-2xl border border-gray-700 bg-slate-900 p-5 shadow-2xl">
+            <div class="flex items-start justify-between gap-3 border-b border-gray-700 pb-3">
                 <div>
                     <p class="text-xs uppercase tracking-[0.2em] text-blue-300">IPCR Accomplishment Report</p>
                     <h3 class="text-lg font-semibold text-white">IPCR Accomplishment Preview &mdash; {{ $periodLabelValue }}</h3>
@@ -446,19 +446,19 @@
             </div>
             <div class="mt-4 space-y-4 max-h-[65vh] overflow-y-auto text-sm text-slate-200">
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                    <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                         <p class="text-[11px] uppercase text-slate-500">Employee</p>
                         <p class="mt-1 font-semibold">{{ $employeeName ?? 'Ramon Reyes' }}</p>
                     </div>
-                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                    <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                         <p class="text-[11px] uppercase text-slate-500">Office/Unit</p>
                         <p class="mt-1 font-semibold">{{ $officeName ?? 'Revenue Collection Unit' }}</p>
                     </div>
-                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                    <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                         <p class="text-[11px] uppercase text-slate-500">Period</p>
                         <p class="mt-1 font-semibold">{{ $periodLabelValue }}</p>
                     </div>
-                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                    <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                         <p class="text-[11px] uppercase text-slate-500">Source</p>
                         <p class="mt-1 font-semibold">IPCR Commitments</p>
                     </div>
@@ -471,7 +471,7 @@
                             $sectionWeight = $section['weight_percent'] ?? null;
                             $sectionRows = $section['rows'] ?? [];
                         @endphp
-                        <div class="rounded-xl border border-slate-800 bg-slate-950/50 p-4 space-y-3">
+                        <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4 space-y-3">
                             <div class="flex flex-wrap items-center justify-between gap-2">
                                 <h4 class="text-sm font-semibold uppercase tracking-[0.14em] text-slate-100">{{ $sectionTitle }}</h4>
                                 @if (!is_null($sectionWeight))
@@ -480,7 +480,7 @@
                                     </span>
                                 @endif
                             </div>
-                            <div class="overflow-x-auto rounded-lg border border-slate-800">
+                            <div class="overflow-x-auto rounded-lg border border-gray-700">
                                 <table class="min-w-full text-left text-sm text-slate-200">
                                     <thead class="bg-slate-950/70 text-xs uppercase text-slate-400">
                                         <tr>
@@ -492,7 +492,7 @@
                                     <tbody class="divide-y divide-slate-800">
                                         @forelse ($sectionRows as $rowIndex => $row)
                                             <tr class="bg-slate-900/40">
-                                                <td class="px-4 py-3 font-semibold text-slate-100">{{ $row['major_output'] ?? '—' }}</td>
+                                                <td class="px-4 py-3 font-semibold text-slate-100">{{ $row['major_output'] ?? 'â€”' }}</td>
                                                 <td class="px-4 py-3">
                                                     <a href="javascript:void(0)"
                                                        data-ipcr-open-indicators
@@ -529,13 +529,13 @@
                             </div>
                         </div>
                     @empty
-                        <div class="rounded-xl border border-slate-800 bg-slate-950/50 p-4 text-sm text-slate-400">
+                        <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4 text-sm text-slate-400">
                             No IPCR commitments found for this period.
                         </div>
                     @endforelse
                 </div>
             </div>
-            <div class="flex items-center justify-end gap-3 border-t border-slate-800 pt-4 mt-4">
+            <div class="flex items-center justify-end gap-3 border-t border-gray-700 pt-4 mt-4">
                 <a href="{{ route('ipcr.export.excel') }}"
                    class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg">
                     Export
@@ -554,8 +554,8 @@
          data-preview-modal
          data-parent-modal-id="ipcr-preview-modal"
          class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 px-4 py-6">
-        <div class="w-full max-w-6xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
-            <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
+        <div class="w-full max-w-6xl rounded-2xl border border-gray-700 bg-slate-900 p-5 shadow-2xl">
+            <div class="flex items-start justify-between gap-3 border-b border-gray-700 pb-3">
                 <div>
                     <p class="text-xs uppercase tracking-[0.2em] text-blue-300">IPCR Success Indicators</p>
                     <h3 id="ipcrIndicatorsMajorOutput" class="text-lg font-semibold text-white">Success Indicators</h3>
@@ -564,21 +564,21 @@
             </div>
             <div class="mt-4 space-y-4 max-h-[65vh] overflow-y-auto text-sm text-slate-200">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                    <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                         <p class="text-[11px] uppercase text-slate-500">Employee</p>
                         <p class="mt-1 font-semibold">{{ $employeeName ?? 'Ramon Reyes' }}</p>
                     </div>
-                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                    <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                         <p class="text-[11px] uppercase text-slate-500">Office/Unit</p>
                         <p class="mt-1 font-semibold">{{ $officeName ?? 'Revenue Collection Unit' }}</p>
                     </div>
-                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                    <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                         <p class="text-[11px] uppercase text-slate-500">Period</p>
                         <p class="mt-1 font-semibold">{{ $periodLabelValue }}</p>
                     </div>
                 </div>
 
-                <div class="overflow-hidden rounded-xl border border-slate-800 bg-slate-950/40">
+                <div class="overflow-hidden rounded-xl border border-gray-700 bg-slate-900/40">
                     <div class="overflow-x-auto">
                         <table class="min-w-full table-fixed text-left text-sm text-slate-200">
                             <colgroup>
@@ -608,7 +608,7 @@
                     </div>
                 </div>
             </div>
-            <div class="mt-3 flex items-center justify-end gap-3 border-t border-slate-800 pt-4">
+            <div class="mt-3 flex items-center justify-end gap-3 border-t border-gray-700 pt-4">
                 <button type="button"
                         data-close-modal
                         class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-800 transition">
@@ -623,8 +623,8 @@
          data-preview-modal
          data-parent-modal-id="ipcr-indicators-modal"
          class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 px-4 py-6">
-        <div class="w-full max-w-6xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
-            <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
+        <div class="w-full max-w-6xl rounded-2xl border border-gray-700 bg-slate-900 p-5 shadow-2xl">
+            <div class="flex items-start justify-between gap-3 border-b border-gray-700 pb-3">
                 <div>
                     <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Standards (Q/E/T)</p>
                     <h3 class="text-lg font-semibold text-white">Performance Standards</h3>
@@ -633,7 +633,7 @@
                 <button type="button" data-close-modal class="text-slate-400 hover:text-white">&times;</button>
             </div>
             <div class="mt-4 max-h-[65vh] overflow-y-auto text-sm text-slate-200">
-                <div class="overflow-x-auto rounded-xl border border-slate-800">
+                <div class="overflow-x-auto rounded-xl border border-gray-700">
                     <table class="min-w-full text-left text-sm text-slate-200">
                         <thead class="bg-slate-950/70 text-xs uppercase text-slate-400">
                             <tr>
@@ -651,7 +651,7 @@
                     </table>
                 </div>
             </div>
-            <div class="flex items-center justify-end gap-3 border-t border-slate-800 pt-4 mt-4">
+            <div class="flex items-center justify-end gap-3 border-t border-gray-700 pt-4 mt-4">
                 <button type="button"
                         data-close-modal
                         class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-800 transition">
@@ -666,8 +666,8 @@
     <!-- Generic Modal -->
     <div id="action-modal"
          class="fixed inset-0 z-[70] hidden items-center justify-center bg-black/60 px-4 py-6">
-        <div class="w-full max-w-2xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
-            <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
+        <div class="w-full max-w-2xl rounded-2xl border border-gray-700 bg-slate-900 p-5 shadow-2xl">
+            <div class="flex items-start justify-between gap-3 border-b border-gray-700 pb-3">
                 <div>
                     <p id="modal-eyebrow" class="text-xs uppercase tracking-[0.2em] text-blue-300">Action</p>
                     <h3 id="modal-title" class="text-lg font-semibold text-white">--</h3>
@@ -677,7 +677,7 @@
             <div class="mt-4 space-y-3 max-h-[60vh] overflow-y-auto text-sm text-slate-200">
                 <p id="modal-body" class="text-slate-200"></p>
             </div>
-            <div class="flex items-center justify-end gap-3 border-t border-slate-800 pt-4 mt-4">
+            <div class="flex items-center justify-end gap-3 border-t border-gray-700 pt-4 mt-4">
                 <button type="button"
                         id="modal-cancel"
                         class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-800 transition">
@@ -902,7 +902,7 @@
 
                 function buildStandardsCell(values) {
                     if (!Array.isArray(values) || values.length === 0) {
-                        return '<span class="text-slate-400">—</span>';
+                        return '<span class="text-slate-400">â€”</span>';
                     }
 
                     return `
@@ -949,7 +949,7 @@
                         } else {
                             ipcrIndicatorsTbody.innerHTML = selectedIndicators.map((indicator, indicatorIndex) => `
                                 <tr class="bg-slate-900/40 hover:bg-slate-900/60 transition">
-                                    <td class="px-4 py-4 text-slate-100 font-medium leading-snug break-words">${escapeHtml(indicator?.indicator_text ?? '—')}</td>
+                                    <td class="px-4 py-4 text-slate-100 font-medium leading-snug break-words">${escapeHtml(indicator?.indicator_text ?? 'â€”')}</td>
                                     <td class="px-4 py-4 text-right tabular-nums whitespace-nowrap text-slate-200">${formatQuantity(indicator?.q)}</td>
                                     <td class="px-4 py-4 text-right tabular-nums whitespace-nowrap text-slate-200">${formatIndicatorRating(indicator?.e)}</td>
                                     <td class="px-4 py-4 text-right tabular-nums whitespace-nowrap text-slate-200">${formatIndicatorRating(indicator?.t)}</td>
@@ -987,7 +987,7 @@
                     if (!indicator) return;
 
                     if (ipcrStandardsIndicatorText) {
-                        ipcrStandardsIndicatorText.textContent = indicator.indicator_text || '—';
+                        ipcrStandardsIndicatorText.textContent = indicator.indicator_text || 'â€”';
                     }
 
                     const payload = normalizeStandardsPayload(indicator.standards_payload);

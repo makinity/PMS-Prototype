@@ -8,7 +8,7 @@
         </div>
     </div>
 
-    <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
+    <div class="rounded-2xl border border-gray-700 bg-slate-900/40 p-4">
         <div class="mb-4 flex flex-wrap items-end justify-between gap-4">
             <form method="GET" action="{{ route('pmt.opcr.review.index') }}" id="pmt-opcr-search-form" class="flex flex-wrap items-end justify-start gap-2">
                 <input type="hidden" name="status" value="{{ $selectedStatus }}">
@@ -86,7 +86,7 @@
                                 'OPCR ' . $opcr->id,
                             ])));
                         @endphp
-                        <tr class="border-t border-slate-800" data-opcr-row data-search-text="{{ $searchHaystack }}">
+                        <tr class="border-t border-gray-700" data-opcr-row data-search-text="{{ $searchHaystack }}">
                             <td class="px-4 py-3 text-white">{{ $officeName }}</td>
                             <td class="px-4 py-3">{{ $periodName }}</td>
                             <td class="px-4 py-3">

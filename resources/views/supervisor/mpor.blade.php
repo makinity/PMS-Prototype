@@ -32,11 +32,11 @@
         </div>
 
         {{-- Table --}}
-        <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
+        <div class="overflow-hidden rounded-2xl border border-gray-700 bg-slate-900/40">
             <div class="overflow-x-auto">
                 <table class="min-w-full text-left text-sm text-slate-200">
                     <thead class="text-[0.65rem] uppercase tracking-[0.3em] text-slate-500">
-                        <tr class="border-b border-slate-800">
+                        <tr class="border-b border-gray-700">
                             <th class="px-4 py-3">Employee</th>
                             <th class="px-4 py-3 text-center">Status</th>
                             <th class="px-4 py-3 text-right">Actions</th>

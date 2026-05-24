@@ -14,7 +14,7 @@
         </div>
 
         {{-- Profile Card --}}
-        <div class="rounded-2xl border border-slate-800 bg-transparent p-6 space-y-6">
+        <div class="rounded-2xl border border-gray-700 bg-slate-900/40 p-6 space-y-6">
             <div class="flex items-center justify-between">
                 <h2 class="text-lg font-semibold text-white flex items-center gap-2">
                     <svg class="w-5 h-5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -94,7 +94,7 @@
                                 <label class="block mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">Employee ID</label>
                                 <input type="text"
                                        class="!bg-slate-900 !border-slate-700 !text-white text-sm rounded-lg block w-full p-2.5 opacity-60 cursor-not-allowed"
-                                       value="{{ auth()->user()->employee_id ?? '—' }}" disabled>
+                                       value="{{ auth()->user()->employee_id ?? 'â€”' }}" disabled>
                             </div>
                         </div>
 
@@ -105,7 +105,7 @@
                             <p class="mt-2 text-xs text-red-400">{{ $message }}</p>
                         @enderror
 
-                        <div class="mt-5 pt-4 border-t border-slate-800">
+                        <div class="mt-5 pt-4 border-t border-gray-700">
                             <button type="submit"
                                     class="px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold rounded-lg transition-colors duration-200 flex items-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -120,7 +120,7 @@
         </div>
 
         {{-- Security Card --}}
-        <div class="rounded-2xl border border-slate-800 bg-transparent p-6 space-y-6">
+        <div class="rounded-2xl border border-gray-700 bg-slate-900/40 p-6 space-y-6">
             <h2 class="text-lg font-semibold text-white flex items-center gap-2">
                 <svg class="w-5 h-5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
@@ -129,7 +129,7 @@
             </h2>
 
             {{-- Password Change --}}
-            <div class="rounded-xl border border-slate-800 bg-transparent p-5">
+            <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-5">
                 <h3 class="font-semibold text-white mb-4">Change Password</h3>
                 <form method="POST" action="{{ route('user-password.update') }}" class="space-y-4">
                     @csrf
@@ -139,7 +139,7 @@
                             <label for="current_password" class="block mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">Current Password</label>
                             <input id="current_password" name="current_password" type="password"
                                    class="!bg-slate-900 !border-slate-700 !text-white text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-full p-2.5 [color-scheme:dark] @error('current_password', 'updatePassword') border-red-500 @enderror"
-                                   placeholder="••••••••" autocomplete="current-password">
+                                   placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" autocomplete="current-password">
                             @error('current_password', 'updatePassword')
                                 <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
                             @enderror
@@ -148,7 +148,7 @@
                             <label for="password" class="block mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">New Password</label>
                             <input id="password" name="password" type="password"
                                    class="!bg-slate-900 !border-slate-700 !text-white text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-full p-2.5 [color-scheme:dark] @error('password', 'updatePassword') border-red-500 @enderror"
-                                   placeholder="••••••••" autocomplete="new-password">
+                                   placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" autocomplete="new-password">
                             @error('password', 'updatePassword')
                                 <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
                             @enderror
@@ -157,7 +157,7 @@
                             <label for="password_confirmation" class="block mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">Confirm Password</label>
                             <input id="password_confirmation" name="password_confirmation" type="password"
                                    class="!bg-slate-900 !border-slate-700 !text-white text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-full p-2.5 [color-scheme:dark]"
-                                   placeholder="••••••••" autocomplete="new-password">
+                                   placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" autocomplete="new-password">
                         </div>
                     </div>
 

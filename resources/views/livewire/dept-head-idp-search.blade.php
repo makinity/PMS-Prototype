@@ -1,6 +1,6 @@
 <div class="space-y-6">
     <!-- Employee search & dropdown list -->
-    <div class="rounded-2xl border border-slate-800 bg-slate-950 p-5 shadow-lg shadow-black/30">
+    <div class="rounded-2xl border border-gray-700 bg-slate-950 p-5 shadow-lg shadow-black/30">
         <div class="space-y-1">
             <p class="text-sm font-semibold text-white">Employee lookup</p>
             <p class="text-xs text-slate-400">Type a name or ID, then pick an employee to review and encode their IDP.</p>
@@ -50,7 +50,7 @@
     </div>
 
     <!-- Employee info -->
-    <div class="rounded-2xl border border-slate-800 bg-slate-950 p-5 shadow-lg shadow-black/30">
+    <div class="rounded-2xl border border-gray-700 bg-slate-950 p-5 shadow-lg shadow-black/30">
         <div class="flex items-start justify-between gap-2">
             <div>
                 <p class="text-sm font-semibold text-white">Employee information</p>
@@ -62,32 +62,32 @@
         </div>
 
         @if (empty($selectedEmployee))
-            <div class="mt-4 rounded-xl border border-dashed border-slate-800 bg-slate-950/40 p-6 text-center text-sm text-slate-400">
+            <div class="mt-4 rounded-xl border border-dashed border-gray-700 bg-slate-950/40 p-6 text-center text-sm text-slate-400">
                 Select an employee to view their IDP details.
             </div>
         @else
             <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
+                <div class="rounded-lg border border-gray-700 bg-slate-900 p-4">
                     <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Full name</p>
                     <p class="mt-1 text-sm font-semibold text-white">{{ $selectedEmployee['name'] ?? '--' }}</p>
                 </div>
-                <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
+                <div class="rounded-lg border border-gray-700 bg-slate-900 p-4">
                     <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Employee ID</p>
                     <p class="mt-1 text-sm font-semibold text-white">{{ $selectedEmployee['id'] ?? '--' }}</p>
                 </div>
-                <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
+                <div class="rounded-lg border border-gray-700 bg-slate-900 p-4">
                     <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Department</p>
                     <p class="mt-1 text-sm font-semibold text-white">{{ $selectedEmployee['department'] ?? '--' }}</p>
                 </div>
-                <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
+                <div class="rounded-lg border border-gray-700 bg-slate-900 p-4">
                     <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Position / Role</p>
                     <p class="mt-1 text-sm font-semibold text-white">{{ $selectedEmployee['role'] ?? '--' }}</p>
                 </div>
-                <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
+                <div class="rounded-lg border border-gray-700 bg-slate-900 p-4">
                     <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Latest rating</p>
                     <p class="mt-1 text-sm font-semibold text-emerald-200">{{ $selectedEmployee['rating'] ?? '--' }}</p>
                 </div>
-                <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
+                <div class="rounded-lg border border-gray-700 bg-slate-900 p-4">
                     <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">IDP progress</p>
                     <p class="mt-1 text-sm font-semibold text-blue-200">{{ $selectedEmployee['progress'] ?? '--' }}</p>
                 </div>
@@ -98,7 +98,7 @@
     <!-- IDP plan entry -->
     <div
         x-data="{ submitting: false, showDraftModal: false, savingDraft: false }"
-        class="rounded-2xl border border-slate-800 bg-slate-950 p-5 shadow-lg shadow-black/30 {{ empty($selectedEmployee) ? 'hidden' : '' }}"
+        class="rounded-2xl border border-gray-700 bg-slate-950 p-5 shadow-lg shadow-black/30 {{ empty($selectedEmployee) ? 'hidden' : '' }}"
     >
         <div class="flex items-start justify-between gap-2">
             <div>
@@ -205,7 +205,7 @@
                 </div>
                 <button @click="showDraftModal = false" class="rounded-full p-1 text-slate-400 hover:bg-slate-800 hover:text-white">
                     <span class="sr-only">Close</span>
-                    ×
+                    Ã—
                 </button>
             </div>
             <div class="mt-5 flex justify-end gap-2">

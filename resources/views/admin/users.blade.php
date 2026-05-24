@@ -21,7 +21,7 @@
     @endphp
 
     <section class="space-y-4 px-3 md:px-6">
-        <div class="min-w-0 rounded-xl border border-white/10 bg-transparent p-4 shadow-sm">
+        <div class="min-w-0 rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-4 shadow-sm">
             <h1 class="text-lg font-semibold text-gray-100 sm:text-xl">Users Management</h1>
             <p class="mt-1 text-sm text-gray-300">Manage roles, offices, and activation status.</p>
         </div>
@@ -33,7 +33,7 @@
             </div>
         @endif
 
-        <div class="min-w-0 rounded-xl border border-white/10 bg-transparent p-4 shadow-sm">
+        <div class="min-w-0 rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-4 shadow-sm">
             <form method="GET" action="{{ $indexUrl }}" class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
                 <div class="min-w-0 xl:col-span-2">
                     <label for="filterSearch" class="mb-1 block text-xs uppercase tracking-wide text-gray-400">Search</label>
@@ -100,7 +100,7 @@
             </form>
         </div>
 
-        <div class="min-w-0 rounded-xl border border-white/10 bg-transparent shadow-sm">
+        <div class="min-w-0 rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 shadow-sm">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-white/10 text-xs sm:text-sm">
                     <thead class="bg-gray-900/70 text-[11px] uppercase tracking-wide text-gray-400 sm:text-xs">

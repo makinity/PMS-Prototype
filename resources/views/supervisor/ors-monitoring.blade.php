@@ -72,6 +72,16 @@
     @endphp
 
     <style>
+        #ors-calendar {
+            width: 100%;
+            overflow-x: hidden;
+        }
+        #ors-calendar .fc {
+            max-width: 100%;
+        }
+        #ors-calendar .fc-scrollgrid {
+            width: 100% !important;
+        }
         #ors-calendar .fc-col-header-cell { background-color: rgba(15, 23, 42, 0.85); }
         #ors-calendar .fc-col-header-cell-cushion,
         #ors-calendar .fc-daygrid-day-number { color: #e2e8f0; }
@@ -110,7 +120,7 @@
         </div>
 
         <!-- Legend (submitted/rated + missing only, aligned with manual ORS) -->
-        <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+        <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <div>
                     <p class="text-xs font-semibold text-slate-400">ORS Monitoring Legend</p>
@@ -135,7 +145,7 @@
             </div>
         </div>
 
-        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
+        <div class="rounded-2xl border border-gray-700 bg-slate-900/40 p-4">
             <div class="mb-3 flex flex-wrap items-start justify-between gap-3">
                 <div>
                     <h2 class="text-lg font-semibold text-white">ORS Calendar</h2>
@@ -144,7 +154,7 @@
             <div id="ors-calendar"></div>
         </div>
 
-        <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-4 text-xs text-slate-400">
+        <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4 text-xs text-slate-400">
             ORS Monitoring is daily coaching and documentation. Final IPCR evaluation occurs in Stage III.
         </div>
 
@@ -153,9 +163,9 @@
              class="ors-modal fixed inset-0 z-[61] hidden items-center justify-center overflow-y-auto bg-black/60 px-4 py-6 sm:px-6"
              role="dialog"
              aria-modal="true">
-            <div class="w-full max-w-3xl rounded-2xl border border-slate-800 bg-slate-900 shadow-xl overflow-hidden">
+            <div class="w-full max-w-3xl rounded-2xl border border-gray-700 bg-slate-900 shadow-xl overflow-hidden">
                 <div class="flex max-h-[84vh] flex-col">
-                    <div class="border-b border-slate-800 bg-slate-900/80 px-6 py-4">
+                    <div class="border-b border-gray-700 bg-slate-900/80 px-6 py-4">
                         <div class="flex items-start justify-between gap-3">
                             <div>
                                 <h2 class="text-lg font-semibold text-white">Submitted ORS Entries</h2>
@@ -173,7 +183,7 @@
                         <div id="dayListEntries" class="space-y-3"></div>
                     </div>
 
-                    <div class="border-t border-slate-800 bg-slate-900/80 px-6 py-4">
+                    <div class="border-t border-gray-700 bg-slate-900/80 px-6 py-4">
                         <div class="flex items-center justify-end">
                             <button id="closeDayListBottomBtn"
                                     type="button"
@@ -191,9 +201,9 @@
              class="ors-modal fixed inset-0 z-[61] hidden items-center justify-center overflow-y-auto bg-black/60 px-4 py-6 sm:px-6"
              role="dialog"
              aria-modal="true">
-            <div class="w-full max-w-3xl rounded-2xl border border-slate-800 bg-slate-900 shadow-xl overflow-hidden">
+            <div class="w-full max-w-3xl rounded-2xl border border-gray-700 bg-slate-900 shadow-xl overflow-hidden">
                 <div class="flex max-h-[84vh] flex-col">
-                    <div class="border-b border-slate-800 bg-slate-900/80 px-6 py-4">
+                    <div class="border-b border-gray-700 bg-slate-900/80 px-6 py-4">
                         <div class="flex items-start justify-between gap-3">
                             <div>
                                 <h2 class="text-lg font-semibold text-white">Rated ORS Entries</h2>
@@ -211,7 +221,7 @@
                         <div id="ratedDayListEntries" class="space-y-3"></div>
                     </div>
 
-                    <div class="border-t border-slate-800 bg-slate-900/80 px-6 py-4">
+                    <div class="border-t border-gray-700 bg-slate-900/80 px-6 py-4">
                         <div class="flex items-center justify-end">
                             <button id="closeRatedDayListBottomBtn"
                                     type="button"
@@ -229,9 +239,9 @@
              class="ors-modal fixed inset-0 z-[64] hidden items-center justify-center overflow-y-auto bg-black/70 px-4 py-6 sm:px-6"
              role="dialog"
              aria-modal="true">
-            <div class="w-full max-w-5xl rounded-2xl border border-slate-800 bg-slate-900 shadow-xl overflow-hidden">
+            <div class="w-full max-w-5xl rounded-2xl border border-gray-700 bg-slate-900 shadow-xl overflow-hidden">
                 <div class="flex max-h-[88vh] flex-col">
-                    <div class="border-b border-slate-800 bg-slate-900/80 px-6 py-4">
+                    <div class="border-b border-gray-700 bg-slate-900/80 px-6 py-4">
                         <div class="flex items-start justify-between gap-3">
                             <div>
                                 <h2 class="text-lg font-semibold text-white">Evidence Files</h2>
@@ -247,13 +257,13 @@
                     </div>
 
                     <div class="grid flex-1 grid-cols-1 overflow-hidden lg:grid-cols-3">
-                        <div class="border-b border-slate-800 p-4 lg:border-b-0 lg:border-r">
+                        <div class="border-b border-gray-700 p-4 lg:border-b-0 lg:border-r">
                             <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Attached Files</p>
                             <div id="evidenceFileList" class="space-y-2 overflow-y-auto max-h-[30vh] lg:max-h-[60vh]"></div>
                         </div>
 
                         <div class="lg:col-span-2 flex min-h-[320px] flex-col">
-                            <div class="flex items-center justify-between gap-3 border-b border-slate-800 px-4 py-3">
+                            <div class="flex items-center justify-between gap-3 border-b border-gray-700 px-4 py-3">
                                 <p id="evidencePreviewFileName" class="truncate text-sm font-semibold text-white">Select a file</p>
                                 <a id="evidenceTopDownloadBtn"
                                    href="#"
@@ -268,7 +278,7 @@
                         </div>
                     </div>
 
-                    <div class="border-t border-slate-800 bg-slate-900/80 px-6 py-4">
+                    <div class="border-t border-gray-700 bg-slate-900/80 px-6 py-4">
                         <div class="flex items-center justify-end">
                             <button id="closeEvidenceBottomBtn"
                                     type="button"
@@ -286,8 +296,8 @@
              class="ors-modal fixed inset-0 z-[62] hidden items-center justify-center overflow-y-auto bg-black/60 px-4 py-6 sm:px-6"
              role="dialog"
              aria-modal="true">
-            <div class="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 shadow-xl overflow-hidden">
-                <div class="border-b border-slate-800 bg-slate-900/80 px-5 py-4">
+            <div class="w-full max-w-md rounded-2xl border border-gray-700 bg-slate-900 shadow-xl overflow-hidden">
+                <div class="border-b border-gray-700 bg-slate-900/80 px-5 py-4">
                     <div class="flex items-start justify-between gap-3">
                         <div>
                             <h2 class="text-base font-semibold text-white">No Submitted Entries</h2>
@@ -303,7 +313,7 @@
                 <div class="px-5 py-4 text-sm text-slate-300">
                     No submitted or rated entries for this date.
                 </div>
-                <div class="border-t border-slate-800 bg-slate-900/80 px-5 py-3 text-right">
+                <div class="border-t border-gray-700 bg-slate-900/80 px-5 py-3 text-right">
                     <button id="closeEmptyDateBottomBtn"
                             type="button"
                             class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800">
@@ -318,9 +328,9 @@
              class="ors-modal fixed inset-0 z-[63] hidden items-center justify-center overflow-y-auto bg-black/60 px-4 py-6 sm:px-6"
              role="dialog"
              aria-modal="true">
-            <div class="w-full max-w-5xl rounded-2xl border border-slate-800 bg-slate-900 shadow-xl overflow-hidden">
+            <div class="w-full max-w-5xl rounded-2xl border border-gray-700 bg-slate-900 shadow-xl overflow-hidden">
                 <div class="flex max-h-[86vh] flex-col">
-                    <div class="border-b border-slate-800 bg-slate-900/80 px-6 py-4">
+                    <div class="border-b border-gray-700 bg-slate-900/80 px-6 py-4">
                         <div class="flex items-start justify-between gap-3">
                             <div>
                                 <h2 class="text-lg font-semibold text-white">ORS Monitoring Detail</h2>
@@ -337,7 +347,7 @@
                         <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
                             <!-- LEFT -->
                             <div class="space-y-5">
-                                <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+                                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                                     <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
                                         <div>
                                             <p class="text-xs text-slate-400">Ratee (Employee)</p>
@@ -354,7 +364,7 @@
                                     </div>
                                 </div>
 
-                                <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4 space-y-3 text-sm text-slate-200">
+                                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4 space-y-3 text-sm text-slate-200">
                                     <div>
                                         <p class="text-xs text-slate-400">Major Output (MFO)</p>
                                         <p id="monitoringMajorOutput" class="text-white">--</p>
@@ -365,12 +375,12 @@
                                     </div>
                                 </div>
 
-                                <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+                                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                                     <p class="text-xs text-slate-400">Time Spent</p>
                                     <p id="monitoringDuration" class="text-slate-100 mt-1">--</p>
                                 </div>
 
-                                <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+                                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                                     <p class="text-xs text-slate-400">Evidence Attached</p>
                                     <div class="mt-1 flex items-center justify-between gap-2">
                                         <p id="monitoringEvidence" class="text-emerald-300 font-semibold">--</p>
@@ -382,12 +392,12 @@
                                     </div>
                                 </div>
 
-                                <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+                                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                                     <p class="text-xs text-slate-400">Quantity (employee-declared)</p>
                                     <p id="monitoringQuantity" class="mt-1 text-base font-semibold text-white">--</p>
                                 </div>
 
-                                <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+                                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                                     <p class="text-xs text-slate-400">Notes</p>
                                     <p id="monitoringNotes" class="mt-1 text-sm text-slate-200 whitespace-pre-wrap break-words">--</p>
                                 </div>
@@ -396,7 +406,7 @@
                             <!-- RIGHT -->
                             <div class="space-y-5">
                                 <!-- Rating Basis (compact + opens sub-modal) -->
-                                <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4 space-y-3 text-xs text-slate-200">
+                                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4 space-y-3 text-xs text-slate-200">
                                     <p class="text-[11px] uppercase text-slate-400">Rating basis</p>
 
                                     <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -412,7 +422,7 @@
                                 </div>
 
                                 <!-- Monitoring Rating -->
-                                <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4 space-y-3 text-xs text-slate-200">
+                                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4 space-y-3 text-xs text-slate-200">
                                     <p class="text-[11px] uppercase text-slate-400">Monitoring Rating (ORS Format)</p>
 
                                     <div id="rating-locked-note" class="mt-2 text-[11px] text-slate-400">
@@ -425,7 +435,7 @@
                                             <div>
                                                 <label class="text-xs text-slate-300">Quality</label>
                                                 <select id="ratingQual"
-                                                        class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-sm text-slate-200">
+                                                        class="mt-1 w-full rounded-lg border border-gray-700 bg-slate-900 px-3 py-2 text-sm text-slate-200">
                                                     <option value="">--</option>
                                                     <option>5</option><option>4</option><option>3</option><option>2</option><option>1</option>
                                                 </select>
@@ -433,7 +443,7 @@
                                             <div>
                                                 <label class="text-xs text-slate-300">Timeliness</label>
                                                 <select id="ratingTime"
-                                                        class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-sm text-slate-200">
+                                                        class="mt-1 w-full rounded-lg border border-gray-700 bg-slate-900 px-3 py-2 text-sm text-slate-200">
                                                     <option value="">--</option>
                                                     <option>5</option><option>4</option><option>3</option><option>2</option><option>1</option>
                                                 </select>
@@ -444,13 +454,13 @@
                                             <label class="text-xs text-slate-300">Remarks</label>
                                             <textarea id="ratingRemarks"
                                                       rows="4"
-                                                      class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-sm text-slate-200"
+                                                      class="mt-1 w-full rounded-lg border border-gray-700 bg-slate-900 px-3 py-2 text-sm text-slate-200"
                                                       placeholder="Coaching notes / observations..."></textarea>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+                                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                                     <p class="text-xs text-slate-400">Status</p>
                                     <div class="mt-2 inline-flex flex-col gap-1">
                                         <span id="monitoringStatus" class="status-chip border border-slate-700 bg-slate-800 text-slate-200"></span>
@@ -458,14 +468,14 @@
                                     </div>
                                 </div>
 
-                                <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4 text-xs text-slate-400">
+                                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4 text-xs text-slate-400">
                                     Tip: Use remarks for coaching notes. This ORS rating supports monitoring documentation only.
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="border-t border-slate-800 bg-slate-900/80 px-6 py-4">
+                    <div class="border-t border-gray-700 bg-slate-900/80 px-6 py-4">
                         <div class="flex items-center justify-end gap-2">
                             <form id="saveMonitoringForm"
                                   method="POST"
@@ -496,9 +506,9 @@
              class="ors-modal fixed inset-0 z-[63] hidden items-center justify-center overflow-y-auto bg-black/60 px-4 py-6 sm:px-6"
              role="dialog"
              aria-modal="true">
-            <div class="w-full max-w-5xl rounded-2xl border border-slate-800 bg-slate-900 shadow-xl overflow-hidden">
+            <div class="w-full max-w-5xl rounded-2xl border border-gray-700 bg-slate-900 shadow-xl overflow-hidden">
                 <div class="flex max-h-[86vh] flex-col">
-                    <div class="border-b border-slate-800 bg-slate-900/80 px-6 py-4">
+                    <div class="border-b border-gray-700 bg-slate-900/80 px-6 py-4">
                         <div class="flex items-start justify-between gap-3">
                             <div>
                                 <h2 class="text-lg font-semibold text-white">Rated ORS Monitoring Detail</h2>
@@ -517,7 +527,7 @@
                     <div class="flex-1 overflow-y-auto px-6 py-5">
                         <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
                             <div class="space-y-5">
-                                <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+                                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                                     <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
                                         <div>
                                             <p class="text-xs text-slate-400">Ratee (Employee)</p>
@@ -534,7 +544,7 @@
                                     </div>
                                 </div>
 
-                                <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4 space-y-3 text-sm text-slate-200">
+                                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4 space-y-3 text-sm text-slate-200">
                                     <div>
                                         <p class="text-xs text-slate-400">Major Output (MFO)</p>
                                         <p id="ratedMonitoringMajorOutput" class="text-white">--</p>
@@ -545,12 +555,12 @@
                                     </div>
                                 </div>
 
-                                <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+                                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                                     <p class="text-xs text-slate-400">Time Spent</p>
                                     <p id="ratedMonitoringDuration" class="text-slate-100 mt-1">--</p>
                                 </div>
 
-                                <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+                                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                                     <p class="text-xs text-slate-400">Evidence Attached</p>
                                     <div class="mt-1 flex items-center justify-between gap-2">
                                         <p id="ratedMonitoringEvidence" class="text-emerald-300 font-semibold">--</p>
@@ -562,19 +572,19 @@
                                     </div>
                                 </div>
 
-                                <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+                                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                                     <p class="text-xs text-slate-400">Quantity (employee-declared)</p>
                                     <p id="ratedMonitoringQuantity" class="mt-1 text-base font-semibold text-white">--</p>
                                 </div>
 
-                                <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+                                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                                     <p class="text-xs text-slate-400">Notes</p>
                                     <p id="ratedMonitoringNotes" class="mt-1 text-sm text-slate-200 whitespace-pre-wrap break-words">--</p>
                                 </div>
                             </div>
 
                             <div class="space-y-5">
-                                <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4 space-y-3 text-xs text-slate-200">
+                                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4 space-y-3 text-xs text-slate-200">
                                     <p class="text-[11px] uppercase text-slate-400">Rating basis</p>
                                     <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                                         <p id="ratedRatingBasisIndicator" class="text-sm font-semibold text-white">--</p>
@@ -586,7 +596,7 @@
                                     </div>
                                 </div>
 
-                                <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4 space-y-3 text-xs text-slate-200">
+                                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4 space-y-3 text-xs text-slate-200">
                                     <p class="text-[11px] uppercase text-slate-400">Monitoring Rating (Read-only)</p>
                                     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                         <div>
@@ -600,11 +610,11 @@
                                     </div>
                                     <div>
                                         <p class="text-xs text-slate-400">Remarks</p>
-                                        <p id="ratedMonitoringRemarks" class="mt-1 rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-sm text-slate-200 whitespace-pre-wrap break-words">--</p>
+                                        <p id="ratedMonitoringRemarks" class="mt-1 rounded-lg border border-gray-700 bg-slate-900 px-3 py-2 text-sm text-slate-200 whitespace-pre-wrap break-words">--</p>
                                     </div>
                                 </div>
 
-                                <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+                                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                                     <p class="text-xs text-slate-400">Status</p>
                                     <div class="mt-2 inline-flex flex-col gap-1">
                                         <span id="ratedMonitoringStatus" class="status-chip border border-slate-700 bg-slate-800 text-slate-200"></span>
@@ -612,14 +622,14 @@
                                     </div>
                                 </div>
 
-                                <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4 text-xs text-slate-400">
+                                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4 text-xs text-slate-400">
                                     Tip: Rated entries remain locked. Use this view for review and evidence inspection.
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="border-t border-slate-800 bg-slate-900/80 px-6 py-4">
+                    <div class="border-t border-gray-700 bg-slate-900/80 px-6 py-4">
                         <div class="flex items-center justify-end">
                             <button id="closeRatedMonitoringBottomBtn"
                                     type="button"
@@ -644,7 +654,7 @@
                 <div class="flex max-h-[85vh] flex-col">
 
                     <!-- Header (sticky-like look) -->
-                    <div class="flex flex-wrap items-start justify-between gap-4 border-b border-slate-800/70 bg-slate-950 px-6 py-5">
+                    <div class="flex flex-wrap items-start justify-between gap-4 border-b border-gray-700/70 bg-slate-950 px-6 py-5">
 
                         <div class="space-y-1">
                             <p class="text-[11px] uppercase tracking-[0.18em] text-slate-400">Standards (Q/E/T)</p>
@@ -708,7 +718,7 @@
                     </div>
 
                     <!-- Footer -->
-                    <div class="border-t border-slate-800/70 bg-slate-950 px-6 py-4 text-[11px] text-slate-400">
+                    <div class="border-t border-gray-700/70 bg-slate-950 px-6 py-4 text-[11px] text-slate-400">
                         <div class="flex flex-wrap items-center justify-between gap-3">
                             <p>Stage I standards are reference-only. Efficiency is advisory; supervisors rate Quality & Timeliness.</p>
                             <button type="button"
@@ -1085,6 +1095,34 @@
                 });
                 calendar.render();
 
+                const syncCalendarSize = () => {
+                    requestAnimationFrame(() => {
+                        calendar.updateSize();
+                    });
+                };
+                const syncCalendarDuringTransition = (durationMs = 260) => {
+                    const startedAt = performance.now();
+                    const tick = (now) => {
+                        calendar.updateSize();
+                        if ((now - startedAt) < durationMs) {
+                            requestAnimationFrame(tick);
+                        }
+                    };
+                    requestAnimationFrame(tick);
+                };
+                syncCalendarSize();
+                setTimeout(syncCalendarSize, 180);
+                setTimeout(syncCalendarSize, 320);
+
+                window.addEventListener('resize', syncCalendarSize);
+                document.getElementById('sidebar-toggle-btn')?.addEventListener('click', () => {
+                    syncCalendarDuringTransition(280);
+                    setTimeout(syncCalendarSize, 210);
+                    setTimeout(syncCalendarSize, 320);
+                });
+                document.getElementById('manager-sidebar')?.addEventListener('transitionstart', () => syncCalendarDuringTransition(260));
+                document.getElementById('manager-sidebar')?.addEventListener('transitionend', syncCalendarSize);
+
                 function refreshCalendarEvents() {
                     calendar.removeAllEvents();
                     buildSummaryEvents().forEach((eventConfig) => {
@@ -1336,7 +1374,7 @@
                     if (evidenceType === 'pdf' && file?.preview_url) {
                         const iframe = document.createElement('iframe');
                         iframe.src = file.preview_url;
-                        iframe.className = 'h-[70vh] w-full rounded-lg border border-slate-800 bg-black';
+                        iframe.className = 'h-[70vh] w-full rounded-lg border border-gray-700 bg-black';
                         iframe.setAttribute('title', file.file_name || 'Evidence PDF');
                         evidencePreviewArea.appendChild(iframe);
                         return;
@@ -1383,14 +1421,14 @@
 
                     if (files.length === 0) {
                         const empty = document.createElement('div');
-                        empty.className = 'rounded-lg border border-slate-800 bg-slate-950/40 px-3 py-3 text-xs text-slate-400';
+                        empty.className = 'rounded-lg border border-gray-700 bg-slate-900/40 px-3 py-3 text-xs text-slate-400';
                         empty.textContent = 'No evidence files found for this entry.';
                         evidenceFileList.appendChild(empty);
                         renderEvidencePreview(null);
                     } else {
                         files.forEach((file, index) => {
                             const item = document.createElement('div');
-                            item.className = 'rounded-lg border border-slate-800 bg-slate-950/40 px-3 py-3';
+                            item.className = 'rounded-lg border border-gray-700 bg-slate-900/40 px-3 py-3';
 
                             const name = document.createElement('p');
                             name.className = 'truncate text-xs font-semibold text-slate-100';
@@ -1444,7 +1482,7 @@
 
                 function createDayListEntryCard(entry, openHandler) {
                     const card = document.createElement('div');
-                    card.className = 'rounded-xl border border-slate-800 bg-slate-950/40 p-4';
+                    card.className = 'rounded-xl border border-gray-700 bg-slate-900/40 p-4';
 
                     const left = document.createElement('div');
                     left.className = 'min-w-0';
@@ -1502,7 +1540,7 @@
 
                     if (!Array.isArray(entries) || entries.length === 0) {
                         const empty = document.createElement('p');
-                        empty.className = 'rounded-lg border border-slate-800 bg-slate-950/50 px-4 py-3 text-sm text-slate-400';
+                        empty.className = 'rounded-lg border border-gray-700 bg-slate-900/40 px-4 py-3 text-sm text-slate-400';
                         empty.textContent = emptyMessage;
                         container.appendChild(empty);
                         return;

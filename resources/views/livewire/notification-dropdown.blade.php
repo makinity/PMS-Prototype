@@ -1,5 +1,5 @@
 <div class="relative" wire:keydown.escape.window="close">
-    <button type="button" wire:click="toggle" aria-expanded="{{ $open ? 'true' : 'false' }}" class="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-800 bg-slate-900/70 text-slate-300 shadow-sm transition hover:bg-slate-800">
+    <button type="button" wire:click="toggle" aria-expanded="{{ $open ? 'true' : 'false' }}" class="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-700 bg-slate-900/40 text-slate-300 shadow-sm transition hover:bg-slate-800">
         <span class="sr-only">View notifications</span>
         <i class="fa-regular fa-bell"></i>
         @if ($this->unreadCount)
@@ -7,7 +7,7 @@
         @endif
     </button>
 
-    <div class="{{ $open ? '' : 'hidden' }} absolute right-0 mt-3 w-80 rounded-2xl border border-slate-800 bg-slate-900/95 shadow-xl shadow-slate-950/40" wire:click.outside="close">
+    <div class="{{ $open ? '' : 'hidden' }} absolute right-0 mt-3 w-80 rounded-2xl border border-gray-700 bg-slate-900/95 shadow-xl shadow-slate-950/40" wire:click.outside="close">
         <div class="flex items-center justify-between px-4 py-3">
             <div>
                 <p class="text-sm font-semibold text-white">Notifications</p>
@@ -66,7 +66,7 @@
             @endforelse
         </div>
 
-        <div class="border-t border-slate-800 px-4 py-3">
+        <div class="border-t border-gray-700 px-4 py-3">
             <a href="#" class="text-xs font-semibold text-slate-300 transition hover:text-white">View all notifications</a>
         </div>
     </div>

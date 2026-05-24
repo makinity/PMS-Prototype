@@ -41,7 +41,7 @@
         <div>
             <a href="{{ route('supervisor.uwp-page') }}"
                class="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-300">
-                ← Back to Unit Work Plans
+                â† Back to Unit Work Plans
             </a>
         </div>
 
@@ -65,7 +65,7 @@
             <input type="hidden" name="assignments_payload" id="assignments_payload">
             <input type="hidden" name="functions_payload" id="functions_payload">
 
-            <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5 shadow-sm space-y-6">
+            <div class="rounded-2xl border border-gray-700 bg-slate-900/40 p-5 shadow-sm space-y-6">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div class="space-y-1">
                     <p class="text-sm font-semibold text-white">Planning details</p>
@@ -85,7 +85,7 @@
                         <span class="inline-flex items-center gap-1 rounded-full border border-blue-500/30 bg-blue-500/10 px-2.5 py-1 font-semibold text-blue-200">
                             Status: {{ $status }}
                         </span>
-                        <span class="text-[10px] text-slate-500">Draft/Returned: editable · Submitted: read-only</span>
+                        <span class="text-[10px] text-slate-500">Draft/Returned: editable Â· Submitted: read-only</span>
                     </div>
                 </div>
             </div>
@@ -96,7 +96,7 @@
 
                     @if(auth()->user()->role === 'supervisor')
                         <!-- Supervisors: Show their assigned office as plain text -->
-                        <div class="w-full rounded-lg border border-slate-800 bg-slate-950/50 px-3 py-2 text-sm text-slate-100">
+                        <div class="w-full rounded-lg border border-gray-700 bg-slate-900/40 px-3 py-2 text-sm text-slate-100">
                             {{ auth()->user()->office->name ?? 'No office assigned' }}
                         </div>
                         <!-- Hidden field to submit the office_id -->
@@ -106,7 +106,7 @@
                         <select
                             id="uwp-office-unit"
                             name="office_id"
-                            class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2
+                            class="w-full rounded-lg border border-gray-700 bg-slate-950 px-3 py-2
                                 text-sm text-slate-100 focus:border-blue-500
                                 focus:ring-2 focus:ring-blue-500/40 focus:outline-none"
                             style="background:#0f172a;color:#e5e7eb;"
@@ -126,7 +126,7 @@
 
                     <select
                         name="performance_period_id"
-                        class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2
+                        class="w-full rounded-lg border border-gray-700 bg-slate-950 px-3 py-2
                             text-sm text-slate-100 focus:border-blue-500
                             focus:ring-2 focus:ring-blue-500/40 focus:outline-none"
                             style="background:#0f172a;color:#e5e7eb;"
@@ -155,7 +155,7 @@
                 </div>
             @endif
 
-            <div class="sticky bottom-0 z-30 -mx-5 mt-6 border-t border-slate-800 bg-slate-950/95 px-5 py-4 backdrop-blur">
+            <div class="sticky bottom-0 z-30 -mx-5 mt-6 border-t border-gray-700 bg-slate-950/95 px-5 py-4 backdrop-blur">
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <div class="space-y-1">
                         <p class="text-xs text-slate-400">Once submitted, this plan becomes read-only until reviewed.</p>
@@ -185,7 +185,7 @@
 
     {{-- GENERIC ACTION MODAL (unchanged) --}}
     <div id="employee-action-modal" role="dialog" aria-modal="true" class="fixed inset-0 z-[70] hidden flex items-center justify-center bg-black/60 px-4 py-6">
-        <div class="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
+        <div class="w-full max-w-md rounded-2xl border border-gray-700 bg-slate-900 p-5 shadow-xl">
             <div class="flex items-start justify-between">
                 <div>
                     <h2 id="employee-action-title" class="text-lg font-semibold text-white">Action</h2>
@@ -397,126 +397,126 @@
                     'All e-bank transactions scanned and encoded daily': {
                         5: { q: ['No errors; accurate encoding'], e: ['100% processed'], t: ['Same working day'] },
                         4: { q: ['Minor errors'], e: ['100% processed'], t: ['Same working day'] },
-                        3: { q: ['Few minor errors'], e: ['95–99% processed'], t: ['End of working day'] },
+                        3: { q: ['Few minor errors'], e: ['95â€“99% processed'], t: ['End of working day'] },
                         2: { q: ['Multiple errors'], e: ['<95% processed'], t: ['Beyond working day'] },
                         1: { q: ['Major errors/missing'], e: ['Majority unprocessed'], t: ['Not within acceptable time'] },
                     },
                     'Indexing complete with no missing pages': {
                         5: { q: ['Indexing fully verified, zero gaps'], e: ['100% pages indexed'], t: ['Same day'] },
                         4: { q: ['Indexing minor rechecks'], e: ['100% pages indexed'], t: ['Same day'] },
-                        3: { q: ['Occasional missing indexes fixed'], e: ['95–99% indexed'], t: ['Within 24 hours'] },
+                        3: { q: ['Occasional missing indexes fixed'], e: ['95â€“99% indexed'], t: ['Within 24 hours'] },
                         2: { q: ['Frequent missing pages'], e: ['<95% indexed'], t: ['Beyond 24 hours'] },
                         1: { q: ['Indexing largely incomplete'], e: ['Major gaps'], t: ['Unacceptable'] },
                     },
                     'Audit trail maintained within 24 hours': {
                         5: { q: ['Complete trail, no errors'], e: ['100% entries captured'], t: ['Within 24 hours'] },
                         4: { q: ['Minor corrections only'], e: ['100% entries captured'], t: ['Within 24 hours'] },
-                        3: { q: ['Some gaps corrected'], e: ['95–99% entries captured'], t: ['Within 48 hours'] },
+                        3: { q: ['Some gaps corrected'], e: ['95â€“99% entries captured'], t: ['Within 48 hours'] },
                         2: { q: ['Multiple missing logs'], e: ['<95% captured'], t: ['Beyond 48 hours'] },
                         1: { q: ['Trail missing'], e: ['Majority uncaptured'], t: ['Unacceptable'] },
                     },
                     'Same-day verification of OTC transactions': {
                         5: { q: ['Verified without discrepancies'], e: ['100% OTC verified'], t: ['Same working day'] },
                         4: { q: ['Minor verifications pending'], e: ['100% OTC verified'], t: ['Same working day'] },
-                        3: { q: ['Few pending verifications'], e: ['95–99% verified'], t: ['End of working day'] },
+                        3: { q: ['Few pending verifications'], e: ['95â€“99% verified'], t: ['End of working day'] },
                         2: { q: ['Several unverified'], e: ['<95% verified'], t: ['Beyond working day'] },
                         1: { q: ['Verification not done'], e: ['Majority unverified'], t: ['Unacceptable'] },
                     },
                     '95% encoded within the business day': {
                         5: { q: ['Encodings error-free'], e: ['100% encoded'], t: ['Same business day'] },
                         4: { q: ['Minor corrections'], e: ['100% encoded'], t: ['Same business day'] },
-                        3: { q: ['Few delays'], e: ['95–99% encoded'], t: ['By end of day'] },
+                        3: { q: ['Few delays'], e: ['95â€“99% encoded'], t: ['By end of day'] },
                         2: { q: ['Multiple delays'], e: ['<95% encoded'], t: ['Next day'] },
                         1: { q: ['Encoding largely incomplete'], e: ['Major backlog'], t: ['Unacceptable'] },
                     },
                     'OR validation completed daily': {
                         5: { q: ['All ORs validated error-free'], e: ['100% validated'], t: ['Daily'] },
                         4: { q: ['Minor issues corrected same day'], e: ['100% validated'], t: ['Daily'] },
-                        3: { q: ['Some validations late'], e: ['95–99% validated'], t: ['Within 48 hours'] },
+                        3: { q: ['Some validations late'], e: ['95â€“99% validated'], t: ['Within 48 hours'] },
                         2: { q: ['Frequent late validations'], e: ['<95% validated'], t: ['Beyond 48 hours'] },
                         1: { q: ['Validations mostly missing'], e: ['Majority unvalidated'], t: ['Unacceptable'] },
                     },
                     'Weekly filing updated and retrievable': {
                         5: { q: ['Zero retrieval issues'], e: ['100% weekly updates'], t: ['Within week'] },
                         4: { q: ['Minor retrieval fixes'], e: ['100% weekly updates'], t: ['Within week'] },
-                        3: { q: ['Some items late'], e: ['95–99% updates'], t: ['Within next week'] },
+                        3: { q: ['Some items late'], e: ['95â€“99% updates'], t: ['Within next week'] },
                         2: { q: ['Many late updates'], e: ['<95% updates'], t: ['Beyond next week'] },
                         1: { q: ['Updates not done'], e: ['Major gaps'], t: ['Unacceptable'] },
                     },
                     'Digital backups synced monthly': {
                         5: { q: ['Backups verified'], e: ['100% synced'], t: ['Within month'] },
                         4: { q: ['Minor sync corrections'], e: ['100% synced'], t: ['Within month'] },
-                        3: { q: ['Some delays'], e: ['95–99% synced'], t: ['Within following week'] },
+                        3: { q: ['Some delays'], e: ['95â€“99% synced'], t: ['Within following week'] },
                         2: { q: ['Frequent delays'], e: ['<95% synced'], t: ['Beyond following week'] },
                         1: { q: ['Backups largely missing'], e: ['Major gaps'], t: ['Unacceptable'] },
                     },
                     'Retrieval logs maintained for audits': {
                         5: { q: ['Logs complete and audit-ready'], e: ['100% requests logged'], t: ['Same day'] },
                         4: { q: ['Minor log gaps corrected'], e: ['100% requests logged'], t: ['Same day'] },
-                        3: { q: ['Some gaps'], e: ['95–99% logged'], t: ['Within 48 hours'] },
+                        3: { q: ['Some gaps'], e: ['95â€“99% logged'], t: ['Within 48 hours'] },
                         2: { q: ['Many gaps'], e: ['<95% logged'], t: ['Beyond 48 hours'] },
                         1: { q: ['Logs largely missing'], e: ['Majority unlogged'], t: ['Unacceptable'] },
                     },
                     'All daily collections posted to the ledger within the day': {
                         5: { q: ['Zero posting errors; entries accurate'], e: ['100% posted'], t: ['Same working day'] },
                         4: { q: ['Minor corrections only'], e: ['100% posted'], t: ['Same working day'] },
-                        3: { q: ['Few correctable errors'], e: ['95–99% posted'], t: ['By end of day'] },
+                        3: { q: ['Few correctable errors'], e: ['95â€“99% posted'], t: ['By end of day'] },
                         2: { q: ['Multiple errors requiring rework'], e: ['<95% posted'], t: ['Next day'] },
                         1: { q: ['Major inaccuracies'], e: ['Major backlog'], t: ['Unacceptable delay'] },
                     },
                     'Daily totals reconciled against validated ORs': {
                         5: { q: ['Reconciled with zero variance'], e: ['All ORs included'], t: ['Same day'] },
                         4: { q: ['Minor variance resolved'], e: ['All ORs included'], t: ['Same day'] },
-                        3: { q: ['Some variances corrected'], e: ['95–99% ORs included'], t: ['Within 24 hours'] },
+                        3: { q: ['Some variances corrected'], e: ['95â€“99% ORs included'], t: ['Within 24 hours'] },
                         2: { q: ['Frequent variances'], e: ['<95% ORs included'], t: ['Beyond 24 hours'] },
                         1: { q: ['Not reconciled'], e: ['Majority missing'], t: ['Unacceptable'] },
                     },
                     'Posting errors corrected within 24 hours': {
                         5: { q: ['All corrections documented'], e: ['100% corrected'], t: ['Within 24 hours'] },
                         4: { q: ['Minor corrections documented'], e: ['100% corrected'], t: ['Within 24 hours'] },
-                        3: { q: ['Some corrections delayed'], e: ['95–99% corrected'], t: ['Within 48 hours'] },
+                        3: { q: ['Some corrections delayed'], e: ['95â€“99% corrected'], t: ['Within 48 hours'] },
                         2: { q: ['Many corrections delayed'], e: ['<95% corrected'], t: ['Beyond 48 hours'] },
                         1: { q: ['Corrections not done'], e: ['Majority pending'], t: ['Unacceptable'] },
                     },
                     'Monthly revenue report prepared with complete schedules': {
                         5: { q: ['Complete schedules, no gaps'], e: ['All sections included'], t: ['Within 3 working days'] },
                         4: { q: ['Minor schedule tweaks'], e: ['All sections included'], t: ['Within 3 working days'] },
-                        3: { q: ['Some missing items fixed'], e: ['95–99% complete'], t: ['Within 5 working days'] },
+                        3: { q: ['Some missing items fixed'], e: ['95â€“99% complete'], t: ['Within 5 working days'] },
                         2: { q: ['Many missing schedules'], e: ['<95% complete'], t: ['Beyond 5 working days'] },
                         1: { q: ['Report incomplete'], e: ['Majority missing'], t: ['Unacceptable'] },
                     },
                     'Report figures match the ledger and subsidiary records': {
                         5: { q: ['Exact match, no variance'], e: ['All reconciled'], t: ['Before submission'] },
                         4: { q: ['Minor variance resolved'], e: ['All reconciled'], t: ['Before submission'] },
-                        3: { q: ['Few variances corrected'], e: ['95–99% reconciled'], t: ['At submission'] },
+                        3: { q: ['Few variances corrected'], e: ['95â€“99% reconciled'], t: ['At submission'] },
                         2: { q: ['Frequent variances'], e: ['<95% reconciled'], t: ['After submission'] },
                         1: { q: ['Not reconciled'], e: ['Majority not reconciled'], t: ['Unacceptable'] },
                     },
                     'Report submitted on or before deadline': {
                         5: { q: ['Submission complete'], e: ['All attachments included'], t: ['On/before deadline'] },
                         4: { q: ['Minor attachment fixes'], e: ['All included'], t: ['On/before deadline'] },
-                        3: { q: ['Late minor attachment'], e: ['95–99% included'], t: ['1 day late'] },
-                        2: { q: ['Several missing attachments'], e: ['<95% included'], t: ['2–3 days late'] },
+                        3: { q: ['Late minor attachment'], e: ['95â€“99% included'], t: ['1 day late'] },
+                        2: { q: ['Several missing attachments'], e: ['<95% included'], t: ['2â€“3 days late'] },
                         1: { q: ['Not submitted/very late'], e: ['Majority missing'], t: ['Unacceptable'] },
                     },
                     'Audit request documents compiled complete and accurate': {
                         5: { q: ['Complete packet, error-free'], e: ['All requested docs included'], t: ['Within 2 working days'] },
                         4: { q: ['Minor formatting fixes'], e: ['All included'], t: ['Within 2 working days'] },
-                        3: { q: ['Some missing docs recovered'], e: ['95–99% included'], t: ['Within 3 working days'] },
+                        3: { q: ['Some missing docs recovered'], e: ['95â€“99% included'], t: ['Within 3 working days'] },
                         2: { q: ['Many missing docs'], e: ['<95% included'], t: ['Beyond 3 working days'] },
                         1: { q: ['Packet incomplete'], e: ['Major gaps'], t: ['Unacceptable'] },
                     },
                     'Verification responses issued within 2 working days': {
                         5: { q: ['Clear, accurate response'], e: ['All queries answered'], t: ['Within 2 working days'] },
                         4: { q: ['Minor clarifications'], e: ['All answered'], t: ['Within 2 working days'] },
-                        3: { q: ['Some clarifications needed'], e: ['95–99% answered'], t: ['Within 3 working days'] },
+                        3: { q: ['Some clarifications needed'], e: ['95â€“99% answered'], t: ['Within 3 working days'] },
                         2: { q: ['Many clarifications needed'], e: ['<95% answered'], t: ['Beyond 3 working days'] },
                         1: { q: ['Responses inadequate'], e: ['Majority unanswered'], t: ['Unacceptable'] },
                     },
                     'Follow-up clarifications resolved within 3 working days': {
                         5: { q: ['Resolved fully with evidence'], e: ['All follow-ups closed'], t: ['Within 3 working days'] },
                         4: { q: ['Minor evidence follow-up'], e: ['All closed'], t: ['Within 3 working days'] },
-                        3: { q: ['Some follow-ups delayed'], e: ['95–99% closed'], t: ['Within 5 working days'] },
+                        3: { q: ['Some follow-ups delayed'], e: ['95â€“99% closed'], t: ['Within 5 working days'] },
                         2: { q: ['Many follow-ups delayed'], e: ['<95% closed'], t: ['Beyond 5 working days'] },
                         1: { q: ['Follow-ups not closed'], e: ['Majority open'], t: ['Unacceptable'] },
                     },
@@ -806,7 +806,7 @@
                                             data-function-index="${funcIndex}"
                                             data-mfo-index="${mfoIndex}"
                                             value="${escapeHtml(mfo.title)}"
-                                            class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none ${mutedClass}"
+                                            class="w-full rounded-lg border border-gray-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none ${mutedClass}"
                                             style="background:#0f172a;color:#e5e7eb;"
                                             placeholder="e.g., Records management and archiving"
                                             ${inputDisabled}>
@@ -890,7 +890,7 @@
                         `;
 
                         return `
-                            <div data-function-card data-function-index="${funcIndex}" class="group scroll-mt-24 rounded-2xl border border-slate-800 bg-slate-900/60 p-6 shadow-sm space-y-4">
+                            <div data-function-card data-function-index="${funcIndex}" class="group scroll-mt-24 rounded-2xl border border-gray-700 bg-slate-900/40 p-6 shadow-sm space-y-4">
                                 <div class="flex flex-wrap items-start justify-between gap-3">
                                     <div class="space-y-1">
                                         <div class="flex flex-wrap items-center gap-2">
@@ -898,7 +898,7 @@
                                                 data-function-title
                                                 data-function-index="${funcIndex}"
                                                 value="${escapeHtml(func.title)}"
-                                                class="rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-lg font-semibold text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none ${mutedClass}"
+                                                class="rounded-lg border border-gray-700 bg-slate-950 px-3 py-2 text-lg font-semibold text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none ${mutedClass}"
                                                 style="background:#0f172a;color:#e5e7eb;"
                                                 ${inputDisabled}>
                                             <span class="inline-flex items-center rounded-full border border-slate-700 bg-slate-800 px-3 py-1 text-xs font-semibold text-slate-300" data-function-weight-label="${funcIndex}">(${weightValue}%)</span>
@@ -913,7 +913,7 @@
                                         <select
                                             data-function-type
                                             data-function-index="${funcIndex}"
-                                            class="rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none ${mutedClass}"
+                                            class="rounded-lg border border-gray-700 bg-slate-950 px-3 py-2 text-xs text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none ${mutedClass}"
                                             style="background:#0f172a;color:#e5e7eb;"
                                             ${inputDisabled}>
                                             <option value="core" ${functionType === 'core' ? 'selected' : ''} ${functionType !== 'core' && coreTakenByOther ? 'disabled' : ''}>Core</option>
@@ -925,7 +925,7 @@
                                             data-function-weight
                                             data-function-index="${funcIndex}"
                                             value="${weightValue}"
-                                            class="w-24 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none ${mutedClass}"
+                                            class="w-24 rounded-lg border border-gray-700 bg-slate-950 px-3 py-2 text-xs text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none ${mutedClass}"
                                             style="background:#0f172a;color:#e5e7eb;"
                                             ${inputDisabled}>
 
@@ -970,7 +970,7 @@
                                     </div>
                                 </div>
 
-                                <div class="relative rounded-xl overflow-hidden border border-slate-800 bg-slate-950/60">
+                                <div class="relative rounded-xl overflow-hidden border border-gray-700 bg-slate-900/40">
                                     <div class="${isDraft ? '' : 'opacity-60'}">
                                         <div class="overflow-x-auto">
                                             <table class="min-w-full text-sm">

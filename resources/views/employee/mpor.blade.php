@@ -7,8 +7,8 @@
          * Keep this small guard only (no hardcoded defaults, no computations).
          */
         $mporMonthYear = $mporMonthYear ?? now()->format('F Y');
-        $employeeName = $employeeName ?? (auth()->user()->name ?? '—');
-        $officeName = $officeName ?? (optional(auth()->user()->office)->name ?? '—');
+        $employeeName = $employeeName ?? (auth()->user()->name ?? 'â€”');
+        $officeName = $officeName ?? (optional(auth()->user()->office)->name ?? 'â€”');
 
         $mporStatus = $mporStatus ?? 'draft';
         $isMporLocked = $isMporLocked ?? in_array($mporStatus, ['submitted', 'endorsed'], true);
@@ -61,15 +61,15 @@
                 <h1 class="mt-1 text-xl font-bold leading-tight text-white sm:text-2xl md:text-3xl">MONTHLY PERFORMANCE OUTPUT REPORT</h1>
 
                 <div class="mt-3 grid grid-cols-2 gap-2 text-xs uppercase tracking-[0.2em] text-white sm:grid-cols-3">
-                    <div class="rounded-lg border border-slate-800 bg-slate-900/50 px-3 py-2">
+                    <div class="rounded-lg border border-gray-700 bg-slate-900/40 px-3 py-2">
                         <p class="text-[0.6rem] text-slate-500">NAME</p>
                         <p class="mt-0.5 truncate text-sm font-semibold normal-case tracking-normal">{{ $employeeName }}</p>
                     </div>
-                    <div class="rounded-lg border border-slate-800 bg-slate-900/50 px-3 py-2">
+                    <div class="rounded-lg border border-gray-700 bg-slate-900/40 px-3 py-2">
                         <p class="text-[0.6rem] text-slate-500">OFFICE / DIVISION</p>
                         <p class="mt-0.5 truncate text-sm font-semibold normal-case tracking-normal">{{ $officeName }}</p>
                     </div>
-                    <div class="col-span-2 rounded-lg border border-slate-800 bg-slate-900/50 px-3 py-2 sm:col-span-1">
+                    <div class="col-span-2 rounded-lg border border-gray-700 bg-slate-900/40 px-3 py-2 sm:col-span-1">
                         <p class="text-[0.6rem] text-slate-500">MONTH</p>
                         <p class="mt-0.5 truncate text-sm font-semibold normal-case tracking-normal">{{ $mporMonthYear }}</p>
                     </div>
@@ -101,7 +101,7 @@
 
         {{-- Mobile: Hybrid tabs + output drawer --}}
         <div class="space-y-4 lg:hidden" id="mporMobileWorkspace">
-            <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
+            <div class="rounded-2xl border border-gray-700 bg-slate-900/40 p-4">
                 <div class="flex flex-wrap items-center justify-between gap-2">
                     <p class="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-slate-400">Output Metrics</p>
                 </div>
@@ -152,7 +152,7 @@
                             $rowId = $sectionKey . '-' . md5($rowLabel . '|' . $loop->index);
                         @endphp
                         <article data-mpor-mobile-row data-section="{{ $sectionKey }}"
-                            class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
+                            class="overflow-hidden rounded-2xl border border-gray-700 bg-slate-900/40">
                             <button type="button"
                                 class="flex w-full items-start justify-between gap-3 px-4 py-3 text-left"
                                 data-mpor-row-toggle="{{ $rowId }}" aria-expanded="false" aria-controls="mpor-row-panel-{{ $rowId }}">
@@ -174,12 +174,12 @@
                                 </div>
                             </button>
 
-                            <div id="mpor-row-panel-{{ $rowId }}" class="hidden border-t border-slate-800 px-4 pb-4 pt-3"
+                            <div id="mpor-row-panel-{{ $rowId }}" class="hidden border-t border-gray-700 px-4 pb-4 pt-3"
                                 data-mpor-row-panel>
                                 <p class="mb-2 text-[0.6rem] uppercase tracking-[0.25em] text-slate-500">Weekly breakdown</p>
                                 <div class="grid grid-cols-5 gap-2">
                                     @for ($week = 1; $week <= 4; $week++)
-                                        <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-2 text-center">
+                                        <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-2 text-center">
                                             <p class="text-[0.55rem] uppercase tracking-[0.25em] text-slate-500">W{{ $week }}</p>
                                             <p data-mpor-week-value data-qty="{{ number_format((float) data_get($row, "qty.{$week}", 0), 0, '.', '') }}"
                                                 data-qual="{{ number_format((float) data_get($row, "qual.{$week}", 0), 0, '.', '') }}"
@@ -203,7 +203,7 @@
                         </article>
                     @endforeach
                 @empty
-                    <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 text-sm text-slate-500">
+                    <div class="rounded-2xl border border-gray-700 bg-slate-900/40 p-4 text-sm text-slate-500">
                         No entries available.
                     </div>
                 @endforelse
@@ -212,19 +212,19 @@
 
         {{-- Desktop table --}}
         <div class="hidden lg:block">
-            <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
+            <div class="overflow-hidden rounded-2xl border border-gray-700 bg-slate-900/40">
                 <div class="overflow-x-auto max-h-[38rem]">
                     <table class="min-w-full text-[0.75rem] text-slate-200">
                         <thead class="sticky top-0 z-20 bg-slate-900/95 backdrop-blur-sm">
                             <tr class="text-left text-[0.65rem] uppercase tracking-[0.3em] text-slate-500">
                                 <th class="sticky left-0 z-30 whitespace-nowrap px-3 py-3 align-bottom bg-slate-900/95" rowspan="2">Output / Task</th>
-                                <th class="border-l border-slate-800 px-3 py-3 text-center" colspan="5">Efficiency / Quantity</th>
-                                <th class="border-l border-slate-800 px-3 py-3 text-center" colspan="5">Quality / Effectiveness</th>
-                                <th class="border-l border-slate-800 px-3 py-3 text-center" colspan="5">Timeliness</th>
+                                <th class="border-l border-gray-700 px-3 py-3 text-center" colspan="5">Efficiency / Quantity</th>
+                                <th class="border-l border-gray-700 px-3 py-3 text-center" colspan="5">Quality / Effectiveness</th>
+                                <th class="border-l border-gray-700 px-3 py-3 text-center" colspan="5">Timeliness</th>
                             </tr>
                             <tr class="text-[0.6rem] uppercase tracking-[0.3em] text-slate-500">
                                 @for ($i = 0; $i < 3; $i++)
-                                    <th class="{{ $i === 0 ? 'border-l border-slate-800' : '' }} px-2 py-2 text-right">W1</th>
+                                    <th class="{{ $i === 0 ? 'border-l border-gray-700' : '' }} px-2 py-2 text-right">W1</th>
                                     <th class="px-2 py-2 text-right">W2</th>
                                     <th class="px-2 py-2 text-right">W3</th>
                                     <th class="px-2 py-2 text-right">W4</th>
@@ -236,33 +236,33 @@
                         <tbody class="divide-y divide-slate-800 text-[0.75rem]">
                             @foreach ($sectionLabels as $sectionKey => $sectionLabel)
                                 <tr class="bg-slate-800/40 text-[0.65rem] uppercase tracking-[0.3em] text-slate-400">
-                                    <td class="sticky left-0 z-10 border-r border-slate-800 bg-slate-800/80 px-3 py-2 font-semibold text-slate-100" colspan="16">
+                                    <td class="sticky left-0 z-10 border-r border-gray-700 bg-slate-800/80 px-3 py-2 font-semibold text-slate-100" colspan="16">
                                         {{ $sectionLabel }}
                                     </td>
                                 </tr>
 
                                 @forelse ($sectionRows[$sectionKey] ?? [] as $row)
                                     <tr>
-                                        <td class="sticky left-0 z-10 max-w-[20rem] border-r border-slate-800 bg-slate-900/95 px-3 py-3 font-semibold text-white">
+                                        <td class="sticky left-0 z-10 max-w-[20rem] border-r border-gray-700 bg-slate-900/95 px-3 py-3 font-semibold text-white">
                                             <span class="block truncate" title="{{ $row['label'] }}">{{ $row['label'] }}</span>
                                         </td>
 
                                         {{-- qty --}}
-                                        <td class="border-l border-slate-800 px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qty.1', 0), 0) }}</td>
+                                        <td class="border-l border-gray-700 px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qty.1', 0), 0) }}</td>
                                         <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qty.2', 0), 0) }}</td>
                                         <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qty.3', 0), 0) }}</td>
                                         <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qty.4', 0), 0) }}</td>
                                         <td class="px-2 py-3 text-right font-semibold tabular-nums">{{ number_format(data_get($row, 'qtyTotal', 0), 0) }}</td>
 
                                         {{-- qual --}}
-                                        <td class="border-l border-slate-800 px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qual.1', 0), 0) }}</td>
+                                        <td class="border-l border-gray-700 px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qual.1', 0), 0) }}</td>
                                         <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qual.2', 0), 0) }}</td>
                                         <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qual.3', 0), 0) }}</td>
                                         <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'qual.4', 0), 0) }}</td>
                                         <td class="px-2 py-3 text-right font-semibold tabular-nums">{{ number_format(data_get($row, 'qualTotal', 0), 0) }}</td>
 
                                         {{-- time --}}
-                                        <td class="border-l border-slate-800 px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'time.1', 0), 0) }}</td>
+                                        <td class="border-l border-gray-700 px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'time.1', 0), 0) }}</td>
                                         <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'time.2', 0), 0) }}</td>
                                         <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'time.3', 0), 0) }}</td>
                                         <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, 'time.4', 0), 0) }}</td>
@@ -281,7 +281,7 @@
         </div>
 
         <div class="grid gap-4 lg:grid-cols-2">
-            <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 text-xs uppercase tracking-[0.3em] text-slate-400">
+            <div class="rounded-2xl border border-gray-700 bg-slate-900/40 p-4 text-xs uppercase tracking-[0.3em] text-slate-400">
                 <div class="flex items-center justify-between text-[0.6rem] tracking-[0.3em] text-slate-500">
                     <span>Week 1</span><span>Week 2</span><span>Week 3</span><span>Week 4</span><span>Total</span>
                 </div>
@@ -305,18 +305,18 @@
                 </div>
             </div>
 
-            <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 text-[0.65rem] uppercase tracking-[0.3em] text-slate-400">
+            <div class="rounded-2xl border border-gray-700 bg-slate-900/40 p-4 text-[0.65rem] uppercase tracking-[0.3em] text-slate-400">
                 <div class="flex items-center justify-between text-sm font-semibold text-white">
                     <span>Confirmed:</span>
                     <span class="text-slate-500">Stage II</span>
                 </div>
                 <div class="mt-4 grid gap-3 sm:grid-cols-2">
-                    <div class="space-y-1 rounded-xl border border-slate-800 bg-slate-900/40 p-3 text-center">
+                    <div class="space-y-1 rounded-xl border border-gray-700 bg-slate-900/40 p-3 text-center">
                         <p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">Supervisor</p>
                         <p class="text-sm font-semibold text-white normal-case tracking-normal">Carlo D. Beray</p>
                         <p class="text-[0.6rem] text-slate-500 normal-case tracking-normal">Signature over printed name</p>
                     </div>
-                    <div class="space-y-1 rounded-xl border border-slate-800 bg-slate-900/40 p-3 text-center">
+                    <div class="space-y-1 rounded-xl border border-gray-700 bg-slate-900/40 p-3 text-center">
                         <p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">Employee</p>
                         <p class="text-sm font-semibold text-white normal-case tracking-normal">{{ $employeeName }}</p>
                         <p class="text-[0.6rem] text-slate-500 normal-case tracking-normal">Signature over printed name</p>
@@ -328,8 +328,8 @@
         <div id="mporSubmitConfirmModal" tabindex="-1" aria-hidden="true"
             class="fixed left-0 right-0 top-0 z-50 hidden h-[calc(100%-1rem)] max-h-full w-full items-center justify-center overflow-y-auto overflow-x-hidden md:inset-0">
             <div class="relative max-h-full w-full max-w-lg p-4">
-                <div class="relative rounded-2xl border border-slate-800 bg-slate-900 shadow-lg">
-                    <div class="flex items-start justify-between border-b border-slate-800 p-5">
+                <div class="relative rounded-2xl border border-gray-700 bg-slate-900 shadow-lg">
+                    <div class="flex items-start justify-between border-b border-gray-700 p-5">
                         <h3 class="text-lg font-semibold text-white">Submit MPOR</h3>
                         <button type="button" data-modal-hide="mporSubmitConfirmModal"
                             class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-800 hover:text-white">
@@ -345,7 +345,7 @@
                     </div>
 
                     <form id="mporSubmitForm" method="POST" action="{{ route('employee.mpor.submit') }}" data-snackbar-ignore="true"
-                        class="flex items-center justify-end gap-2 border-t border-slate-800 p-5">
+                        class="flex items-center justify-end gap-2 border-t border-gray-700 p-5">
                         @csrf
                         <input type="hidden" name="month" value="{{ $month }}">
 

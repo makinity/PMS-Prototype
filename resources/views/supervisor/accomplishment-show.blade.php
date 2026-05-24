@@ -17,7 +17,7 @@
 
         {{-- Status & Meta --}}
         <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
+            <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                 <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Status</p>
                 @php
                     $badgeClass = match ($status) {
@@ -31,7 +31,7 @@
                     {{ $statusLabel }}
                 </span>
             </div>
-            <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
+            <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                 <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Submitted At</p>
                 <p class="mt-1 text-sm font-semibold text-white">{{ $submittedAtLabel }}</p>
             </div>
@@ -47,28 +47,28 @@
 
         {{-- Employee Info --}}
         <div class="grid gap-3 sm:grid-cols-3">
-            <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
+            <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                 <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Employee</p>
                 <p class="mt-1 text-sm font-semibold text-white">{{ $employeeName }}</p>
             </div>
-            <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
+            <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                 <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Office</p>
                 <p class="mt-1 text-sm font-semibold text-white">{{ $officeName }}</p>
             </div>
-            <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
+            <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                 <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Period</p>
                 <p class="mt-1 text-sm font-semibold text-white">{{ $periodLabel }}</p>
             </div>
         </div>
 
         {{-- Remarks --}}
-        <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
+        <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
             <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Employee Remarks</p>
             <p class="mt-2 text-sm text-slate-300">{{ $remarks ?: '--' }}</p>
         </div>
 
         {{-- Attachments --}}
-        <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
+        <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
             <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Attachments</p>
             @if (!empty($attachments))
                 <div class="mt-2 space-y-2">
@@ -87,11 +87,11 @@
 
         {{-- SMPOR & IPCR Cards --}}
         <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+            <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                 <div class="flex items-start justify-between gap-3">
                     <div>
                         <h4 class="text-sm font-semibold text-white">SMPOR - Monitoring Summary</h4>
-                        <p class="mt-1 text-xs text-slate-400">Official (Submitted Snapshot) – QAR-linked MPORs (snapshot)</p>
+                        <p class="mt-1 text-xs text-slate-400">Official (Submitted Snapshot) â€“ QAR-linked MPORs (snapshot)</p>
                     </div>
                     <a href="{{ route('supervisor.submissions.smpor-preview', $submission->id) }}"
                         class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-700 text-slate-200 transition hover:bg-slate-800">
@@ -99,7 +99,7 @@
                     </a>
                 </div>
             </div>
-            <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+            <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                 <div class="flex items-start justify-between gap-3">
                     <div>
                         <h4 class="text-sm font-semibold text-white">IPCR Accomplishment Report</h4>
@@ -114,7 +114,7 @@
         </div>
 
         {{-- Action --}}
-        <div id="action-section" class="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
+        <div id="action-section" class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
             @if ($status === 'submitted_to_supervisor')
                 <div class="flex items-center justify-end">
                     <button type="button" id="btnEndorseSubmission"

@@ -50,21 +50,21 @@
 
     <div id="pmtQarPageRoot">
     <section class="space-y-6">
-        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
+        <div class="rounded-2xl border border-gray-700 bg-slate-900/40 p-4">
             <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Stage II - PMT Approval</p>
             <h1 class="mt-1 text-2xl font-bold text-white">Office Quarterly Accomplishment Report (QAR) - PMT</h1>
 
             <div class="mt-4 grid gap-3 sm:grid-cols-3">
-                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Quarter</p>
                     <p class="mt-1 text-sm font-semibold text-white">{{ $quarterLabel ?? '-' }}</p>
                 </div>
-                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Performance Period</p>
                     <p class="mt-1 text-sm font-semibold text-white">{{ $periodSafe?->name ?? 'No active period' }}</p>
                     <p class="text-xs text-slate-400">{{ $periodRange }}</p>
                 </div>
-                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Queue</p>
                     <p class="mt-1 text-sm font-semibold text-white">Endorsed: {{ $endorsedCount ?? 0 }} | Approved: {{ $approvedCount ?? 0 }}</p>
                 </div>
@@ -96,7 +96,7 @@
             </div>
         @endif
 
-        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
+        <div class="rounded-2xl border border-gray-700 bg-slate-900/40 p-4">
             <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
                 <h2 class="text-lg font-semibold text-white">QAR Approval Queue</h2>
                 <div class="flex flex-wrap items-center justify-end gap-2">
@@ -204,8 +204,8 @@
             <div id="pmtQarViewModal-{{ $header->id }}" tabindex="-1" aria-hidden="true"
                 class="fixed left-0 right-0 top-0 z-50 hidden h-[calc(100%-1rem)] max-h-full w-full items-center justify-center overflow-y-auto overflow-x-hidden md:inset-0">
                 <div class="relative max-h-full w-full max-w-6xl p-4">
-                    <div class="relative rounded-2xl border border-slate-800 bg-slate-900 shadow-lg">
-                        <div class="flex items-start justify-between border-b border-slate-800 p-5">
+                    <div class="relative rounded-2xl border border-gray-700 bg-slate-900 shadow-lg">
+                        <div class="flex items-start justify-between border-b border-gray-700 p-5">
                             <div>
                                 <h3 class="text-lg font-semibold text-white">QAR Details</h3>
                                 <p class="mt-1 text-xs text-slate-400">Review annex rows and included MPOR links before final action.</p>
@@ -219,31 +219,31 @@
 
                         <div class="space-y-4 p-5 text-sm text-slate-300">
                             <div class="grid gap-3 md:grid-cols-4">
-                                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                                     <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Office</p>
                                     <p class="mt-1 text-sm font-semibold text-white">{{ $header->office?->name ?? 'Office' }}</p>
                                 </div>
-                                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                                     <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Quarter</p>
                                     <p class="mt-1 text-sm font-semibold text-white">{{ $header->quarter_key ?? ($quarterKey ?? '-') }}</p>
                                 </div>
-                                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                                     <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Status</p>
                                     <span class="mt-1 inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold {{ $headerMeta['badge'] }}">
                                         {{ $headerMeta['label'] }}
                                     </span>
                                 </div>
-                                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                                     <p class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Endorsed Date</p>
                                     <p class="mt-1 text-sm font-semibold text-white">{{ $formatDate($endorsedDate) }}</p>
                                 </div>
                             </div>
 
-                            <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+                            <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                                 <h4 class="text-sm font-semibold text-white">Included MPORs</h4>
                                 <div class="mt-3 max-h-56 space-y-2 overflow-y-auto pr-1">
                                     @forelse (($header->mporLinks ?? collect()) as $link)
-                                        <div class="rounded-lg border border-slate-800 bg-slate-900/80 px-3 py-2">
+                                        <div class="rounded-lg border border-gray-700 bg-slate-900/80 px-3 py-2">
                                             <div class="flex flex-wrap items-center gap-2 text-sm">
                                                 <span class="font-semibold text-white">{{ $link->employee_name ?: '-' }}</span>
                                                 <span class="text-slate-500">-</span>
@@ -258,9 +258,9 @@
                                 </div>
                             </div>
 
-                            <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+                            <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                                 <h4 class="text-sm font-semibold text-white">Annex I QAR Rows</h4>
-                                <div class="mt-3 max-h-72 overflow-y-auto rounded-lg border border-slate-800">
+                                <div class="mt-3 max-h-72 overflow-y-auto rounded-lg border border-gray-700">
                                     <table class="min-w-full divide-y divide-slate-800 text-xs">
                                         <thead class="bg-slate-900/90 text-[11px] uppercase tracking-[0.2em] text-slate-400">
                                             <tr>
@@ -297,7 +297,7 @@
                             </div>
                         </div>
 
-                        <div class="flex items-center justify-between gap-2 border-t border-slate-800 p-5">
+                        <div class="flex items-center justify-between gap-2 border-t border-gray-700 p-5">
                             <button type="button" data-modal-hide="pmtQarViewModal-{{ $header->id }}"
                                 class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 transition hover:bg-slate-800">
                                 Close

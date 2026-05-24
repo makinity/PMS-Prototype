@@ -8,10 +8,10 @@
     </p>
 </div>
 
-<div class="mb-6 flex flex-col gap-4 rounded-xl border border-slate-800 bg-slate-900/80 p-5 md:flex-row md:items-center md:justify-between">
+<div class="mb-6 flex flex-col gap-4 rounded-xl border border-gray-700 bg-slate-900/80 p-5 md:flex-row md:items-center md:justify-between">
     <div>
         <p class="text-xs uppercase tracking-wide text-slate-400">Performance Period</p>
-        <p class="font-medium text-slate-100">{{ $activePeriod->name ?? '—' }}</p>
+        <p class="font-medium text-slate-100">{{ $activePeriod->name ?? 'â€”' }}</p>
     </div>
 
     @php
@@ -32,8 +32,8 @@
     </form>
 </div>
 
-<div class="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/80">
-    <div class="border-b border-slate-800 p-5">
+<div class="overflow-hidden rounded-xl border border-gray-700 bg-slate-900/80">
+    <div class="border-b border-gray-700 p-5">
         <h2 class="text-lg font-medium text-slate-100">Offices / Units</h2>
         <p class="mt-1 text-sm text-slate-400">Open a unit to review its UWP details on a dedicated page.</p>
     </div>
@@ -63,8 +63,8 @@
                         };
                     @endphp
                     <tr class="transition hover:bg-slate-800/40">
-                        <td class="px-4 py-3 text-sm font-medium text-slate-100">{{ $uwp->office?->name ?? '—' }}</td>
-                        <td class="px-4 py-3 text-sm text-slate-300">{{ $uwp->creator?->name ?? '—' }}</td>
+                        <td class="px-4 py-3 text-sm font-medium text-slate-100">{{ $uwp->office?->name ?? 'â€”' }}</td>
+                        <td class="px-4 py-3 text-sm text-slate-300">{{ $uwp->creator?->name ?? 'â€”' }}</td>
                         <td class="px-4 py-3 text-center text-sm text-slate-300">Unit-Level Plan</td>
                         <td class="px-4 py-3 text-center text-sm">
                             <span class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium {{ $badge['bg'] }} {{ $badge['text'] }} {{ $badge['border'] }}">

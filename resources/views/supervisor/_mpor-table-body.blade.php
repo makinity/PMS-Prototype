@@ -1,5 +1,5 @@
 @forelse ($mpors as $mpor)
-    <tr class="border-b border-slate-800/50 transition hover:bg-slate-800/30">
+    <tr class="border-b border-gray-700/50 transition hover:bg-slate-800/30">
         <td class="px-4 py-3">
             <div class="flex items-center gap-3">
                 @if ($mpor->employee?->profile_photo_url)
@@ -11,7 +11,7 @@
                     </span>
                 @endif
                 <div class="min-w-0">
-                    <p class="truncate font-semibold text-white">{{ $mpor->employee?->name ?? '—' }}</p>
+                    <p class="truncate font-semibold text-white">{{ $mpor->employee?->name ?? 'â€”' }}</p>
                     <p class="truncate text-xs text-slate-400">{{ $mpor->employee?->position ?? 'Employee' }}</p>
                 </div>
             </div>
@@ -26,7 +26,7 @@
                     default => 'border-slate-700 bg-slate-800 text-slate-200',
                 };
             @endphp
-            <span class="inline-block rounded-full border px-3 py-1 text-xs font-semibold {{ $badgeClass }}">{{ strtoupper($statusKey ?: '—') }}</span>
+            <span class="inline-block rounded-full border px-3 py-1 text-xs font-semibold {{ $badgeClass }}">{{ strtoupper($statusKey ?: 'â€”') }}</span>
         </td>
         <td class="px-4 py-3 text-right">
             <a href="{{ route('supervisor.mpor.show', ['mpor' => $mpor->id]) }}"

@@ -11,9 +11,9 @@
         <div>
             <h1 class="text-2xl font-bold text-white">Office Performance Commitment and Review (OPCR)</h1>
         </div>
-        <div class="rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3 text-right">
+        <div class="rounded-xl border border-gray-700 bg-slate-900/40 px-4 py-3 text-right">
             <p class="text-[11px] uppercase tracking-[0.24em] text-slate-500">Active Period</p>
-            <p class="mt-1 text-sm font-semibold text-white">{{ $activePeriod?->name ?? '—' }}</p>
+            <p class="mt-1 text-sm font-semibold text-white">{{ $activePeriod?->name ?? 'â€”' }}</p>
         </div>
     </div>
 
@@ -42,8 +42,8 @@
         @endif
     </div>
 
-    <section class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70 shadow-xl">
-        <div class="flex flex-wrap items-start justify-between gap-4 border-b border-slate-800 px-5 py-4">
+    <section class="overflow-hidden rounded-2xl border border-gray-700 bg-slate-900/40 shadow-xl">
+        <div class="flex flex-wrap items-start justify-between gap-4 border-b border-gray-700 px-5 py-4">
             <div>
                 <h2 class="text-lg font-semibold text-white">Office Accomplishments Preview</h2>
             </div>
@@ -97,8 +97,8 @@
                     @forelse (($currentOpcrPayload['outputs'] ?? []) as $output)
                         <tr class="hover:bg-slate-950/40 transition">
                             <td class="px-5 py-4 align-top">
-                                <div class="font-medium text-white">{{ $output['title'] ?? '—' }}</div>
-                                <div class="mt-1 text-xs text-slate-500">Source: {{ $output['source_supervisor'] ?? '—' }}</div>
+                                <div class="font-medium text-white">{{ $output['title'] ?? 'â€”' }}</div>
+                                <div class="mt-1 text-xs text-slate-500">Source: {{ $output['source_supervisor'] ?? 'â€”' }}</div>
                             </td>
                             <td class="px-5 py-4 align-top text-slate-300">
                                 @php
@@ -110,7 +110,7 @@
                                 @elseif ($targetQuantity !== null)
                                     {{ $targetQuantity }}
                                 @else
-                                    —
+                                    â€”
                                 @endif
                             </td>
                             <td class="px-5 py-4 align-top">
@@ -138,7 +138,7 @@
                                 @endphp
                                 <div class="text-[10px] uppercase font-bold {{ $ratingClass }}">{{ $ratingLabel }}</div>
                             </td>
-                            <td class="px-5 py-4 align-top text-slate-300">{{ ($output['weight_percent'] ?? '') !== '' ? $output['weight_percent'] . '%' : '—' }}</td>
+                            <td class="px-5 py-4 align-top text-slate-300">{{ ($output['weight_percent'] ?? '') !== '' ? $output['weight_percent'] . '%' : 'â€”' }}</td>
                         </tr>
                     @empty
                         <tr>
@@ -152,26 +152,26 @@
 
     @if ($currentOpcr && $computedSummary && $computedSummary['is_ready'])
     <div class="grid gap-6 lg:grid-cols-2">
-        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-6">
+        <div class="rounded-2xl border border-gray-700 bg-slate-900/40 p-6">
             <h3 class="text-sm font-semibold uppercase tracking-wider text-slate-400">Office Overall Rating</h3>
             <div class="mt-4 space-y-4">
-                <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                <div class="flex items-center justify-between border-b border-gray-700 pb-2">
                     <span class="text-slate-300">Core Weighted Score</span>
                     <span class="font-semibold text-white">{{ number_format((float) $computedSummary['core_weighted'], 2) }}</span>
                 </div>
-                <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                <div class="flex items-center justify-between border-b border-gray-700 pb-2">
                     <span class="text-slate-300">Support Weighted Score</span>
                     <span class="font-semibold text-white">{{ number_format((float) $computedSummary['support_weighted'], 2) }}</span>
                 </div>
-                <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                <div class="flex items-center justify-between border-b border-gray-700 pb-2">
                     <span class="text-slate-300">Computed Overall Rating</span>
                     <span class="font-semibold text-blue-300">{{ number_format((float) ($currentOpcr->final_score ?: $computedSummary['overall_score']), 2) }}</span>
                 </div>
-                <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                <div class="flex items-center justify-between border-b border-gray-700 pb-2">
                     <span class="text-slate-300">Computed Adjectival Rating</span>
                     <span class="font-semibold text-white">{{ $currentOpcr->adjectival_rating ?: $computedSummary['adjectival_rating'] }}</span>
                 </div>
-                <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                <div class="flex items-center justify-between border-b border-gray-700 pb-2">
                     <span class="text-slate-300">Status</span>
                     @if ($computedSummary['is_provisional'])
                         <span class="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-300">Provisional</span>
@@ -193,7 +193,7 @@
             </div>
         </div>
 
-        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-6">
+        <div class="rounded-2xl border border-gray-700 bg-slate-900/40 p-6">
             <h3 class="text-sm font-semibold uppercase tracking-wider text-slate-400">Calibration Status</h3>
             <div class="mt-4 flex items-center gap-4">
                 @if ($currentOpcr->pmt_adjusted_score)

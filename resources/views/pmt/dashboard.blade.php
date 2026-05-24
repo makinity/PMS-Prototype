@@ -11,39 +11,39 @@
     @endphp
 
     <section class="space-y-6">
-        <div class="rounded-2xl border border-white/10 bg-transparent p-5">
+        <div class="rounded-xl border border-gray-700 bg-gradient-to-r from-gray-900 to-gray-800 p-6 shadow-lg">
             <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">Performance Management Team</p>
             <h1 class="mt-1 text-2xl font-bold text-white">Dashboard</h1>
-            <p class="mt-2 text-xs text-slate-500">{{ $periodLabel }}</p>
+            <p class="mt-2 text-sm text-gray-400">{{ $periodLabel }}</p>
         </div>
 
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <div class="rounded-xl border border-white/10 bg-transparent p-4">
+            <div class="rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-6 shadow-lg">
                 <p class="text-xs text-slate-400">Pending Actions</p>
                 <p class="mt-1 text-3xl font-semibold text-amber-300">{{ (int) ($kpis['pendingActions'] ?? 0) }}</p>
             </div>
-            <div class="rounded-xl border border-white/10 bg-transparent p-4">
+            <div class="rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-6 shadow-lg">
                 <p class="text-xs text-slate-400">Returned / Escalated</p>
                 <p class="mt-1 text-3xl font-semibold text-rose-300">{{ (int) ($kpis['returnedEscalated'] ?? 0) }}</p>
             </div>
-            <div class="rounded-xl border border-white/10 bg-transparent p-4">
+            <div class="rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-6 shadow-lg">
                 <p class="text-xs text-slate-400">Finalized Approvals</p>
                 <p class="mt-1 text-3xl font-semibold text-emerald-300">{{ (int) ($kpis['finalizedApprovals'] ?? 0) }}</p>
             </div>
-            <div class="rounded-xl border border-white/10 bg-transparent p-4">
+            <div class="rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-6 shadow-lg">
                 <p class="text-xs text-slate-400">Queue Items</p>
                 <p class="mt-1 text-3xl font-semibold text-white">{{ (int) ($kpis['queueItems'] ?? 0) }}</p>
             </div>
         </div>
 
         <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <div class="rounded-xl border border-white/10 bg-transparent p-4">
+            <div class="rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-6 shadow-lg">
                 <h2 class="text-sm font-semibold text-white">PMT Action Trend (Last 14 Days)</h2>
                 <div class="relative mt-3 h-64 w-full overflow-hidden sm:h-72">
                     <canvas id="pmtTrendChart" class="block h-full w-full"></canvas>
                 </div>
             </div>
-            <div class="rounded-xl border border-white/10 bg-transparent p-4">
+            <div class="rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-6 shadow-lg">
                 <h2 class="text-sm font-semibold text-white">Current Queue Composition</h2>
                 <div class="relative mt-3 h-64 w-full overflow-hidden sm:h-72">
                     <canvas id="pmtQueueChart" class="block h-full w-full"></canvas>
@@ -52,11 +52,11 @@
         </div>
 
         <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <div class="rounded-xl border border-white/10 bg-transparent p-4">
+            <div class="rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-6 shadow-lg">
                 <h2 class="text-sm font-semibold text-white">Approval Queue</h2>
                 <div class="mt-3 space-y-2 text-sm text-slate-200">
                     @forelse ($approvalQueue as $item)
-                        <div class="rounded-lg border border-white/10 bg-transparent px-3 py-2">
+                        <div class="rounded-lg border border-gray-700 bg-gray-900/40 px-3 py-2">
                             <p class="font-semibold text-white">{{ $item['office'] ?? 'Unknown Office' }}</p>
                             <p class="text-xs text-slate-400">
                                 Status: {{ strtoupper((string) ($item['status'] ?? '--')) }} |
@@ -69,11 +69,11 @@
                 </div>
             </div>
 
-            <div class="rounded-xl border border-white/10 bg-transparent p-4">
+            <div class="rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-6 shadow-lg">
                 <h2 class="text-sm font-semibold text-white">Recent Actions</h2>
                 <div class="mt-3 space-y-2 text-sm text-slate-200">
                     @forelse ($recentActions as $item)
-                        <div class="rounded-lg border border-white/10 bg-transparent px-3 py-2">
+                        <div class="rounded-lg border border-gray-700 bg-gray-900/40 px-3 py-2">
                             <p class="font-semibold text-white">{{ $item['office'] ?? 'Unknown Office' }}</p>
                             <p class="text-xs text-slate-400">
                                 Status: {{ strtoupper((string) ($item['status'] ?? '--')) }} |
@@ -157,4 +157,3 @@
         </script>
     @endpush
 @endsection
-
