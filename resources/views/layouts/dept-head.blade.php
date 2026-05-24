@@ -19,6 +19,31 @@
     @if (class_exists(\Livewire\Livewire::class))
         @livewireStyles
     @endif
+    <style>
+        html.sidebar-collapsed #dept-head-sidebar {
+            width: 4.5rem;
+            overflow: hidden;
+        }
+
+        html.sidebar-collapsed #main-wrapper {
+            margin-left: 4.5rem !important;
+        }
+
+        html.sidebar-collapsed #dept-head-sidebar .sidebar-link span,
+        html.sidebar-collapsed #dept-head-sidebar nav > div > p,
+        html.sidebar-collapsed #nav-logo-link {
+            display: none !important;
+        }
+    </style>
+    <script>
+    (function() {
+        try {
+            if (window.localStorage.getItem('pms:sidebar:dept-head:collapsed') === '1') {
+                document.documentElement.classList.add('sidebar-collapsed');
+            }
+        } catch (error) {}
+    })();
+    </script>
 </head>
 <body class="min-h-screen antialiased font-sans">
     <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-slate-900 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white">Skip to content</a>
@@ -194,8 +219,6 @@
     @stack('scripts')
     <script>
     (function() {
-        document.documentElement.classList.remove('sidebar-collapsed');
-
         const sidebar = document.getElementById('dept-head-sidebar');
         const navDivider = document.getElementById('sidebar-nav-divider');
         const mainWrapper = document.getElementById('main-wrapper');
@@ -204,8 +227,24 @@
         const logoText = document.getElementById('nav-logo-text');
         const logoIcon = document.getElementById('nav-logo-icon');
         let collapsed = false;
+        const SIDEBAR_STATE_KEY = 'pms:sidebar:dept-head:collapsed';
         const MOBILE_SIDEBAR_WIDTH = '18rem';
         const DIVIDER_OFFSET_PX = -1;
+
+        function persistCollapsedState() {
+            document.documentElement.classList.toggle('sidebar-collapsed', collapsed);
+            try {
+                window.localStorage.setItem(SIDEBAR_STATE_KEY, collapsed ? '1' : '0');
+            } catch (error) {}
+        }
+
+        function readCollapsedState() {
+            try {
+                return window.localStorage.getItem(SIDEBAR_STATE_KEY) === '1';
+            } catch (error) {
+                return false;
+            }
+        }
 
         function setDividerLeft(value) {
             if (!navDivider) return;
@@ -280,6 +319,29 @@
             if (logoText) logoText.style.display = '';
             if (logoIcon) logoIcon.style.display = '';
             collapsed = false;
+            persistCollapsedState();
+            updateNavDivider();
+            updateMobileLogoVisibility();
+        }
+
+        function applyDesktopCollapseState(nextCollapsed) {
+            collapsed = Boolean(nextCollapsed);
+            if (collapsed) {
+                sidebar.style.width = '4.5rem';
+                sidebar.style.overflow = 'hidden';
+                mainWrapper.style.marginLeft = '4.5rem';
+                sidebar.querySelectorAll('.sidebar-link span, nav > div > p').forEach(el => el.style.display = 'none');
+                if (logoText) logoText.style.display = 'none';
+                if (logoIcon) logoIcon.style.display = 'none';
+            } else {
+                sidebar.style.width = '';
+                sidebar.style.overflow = '';
+                mainWrapper.style.marginLeft = '';
+                sidebar.querySelectorAll('.sidebar-link span, nav > div > p').forEach(el => el.style.display = '');
+                if (logoText) logoText.style.display = '';
+                if (logoIcon) logoIcon.style.display = '';
+            }
+            persistCollapsedState();
             updateNavDivider();
             updateMobileLogoVisibility();
         }
@@ -294,6 +356,7 @@
                 mainWrapper.style.marginLeft = '';
                 sidebar.querySelectorAll('.sidebar-link span, nav > div > p').forEach(el => el.style.display = '');
                 collapsed = false;
+                persistCollapsedState();
                 const isOpening = sidebar.classList.contains('-translate-x-full');
                 if (isOpening) {
                     setMobileDividerOpenState(false, false);
@@ -309,19 +372,7 @@
             }
 
             // Desktop: collapse/expand
-            collapsed = !collapsed;
-            if (collapsed) {
-                sidebar.style.width = '4.5rem';
-                sidebar.style.overflow = 'hidden';
-                mainWrapper.style.marginLeft = '4.5rem';
-                sidebar.querySelectorAll('.sidebar-link span, nav > div > p').forEach(el => el.style.display = 'none');
-                if (logoText) logoText.style.display = 'none';
-                if (logoIcon) logoIcon.style.display = 'none';
-            } else {
-                resetCollapse();
-            }
-            updateNavDivider();
-            updateMobileLogoVisibility();
+            applyDesktopCollapseState(!collapsed);
         });
 
         // On resize: if going to mobile, reset collapse
@@ -329,6 +380,8 @@
             if (!isDesktop() && collapsed) {
                 resetCollapse();
                 sidebar.classList.add('-translate-x-full');
+            } else if (isDesktop()) {
+                applyDesktopCollapseState(readCollapsedState());
             }
             updateNavDivider();
             updateMobileLogoVisibility();
@@ -342,6 +395,9 @@
             observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
         }
 
+        if (isDesktop()) {
+            applyDesktopCollapseState(readCollapsedState());
+        }
         updateNavDivider();
         updateMobileLogoVisibility();
     })();
