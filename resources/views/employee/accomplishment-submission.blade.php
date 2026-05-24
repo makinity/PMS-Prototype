@@ -25,7 +25,7 @@
         <!-- Page Header -->
         <div class="flex flex-wrap items-start justify-between gap-3">
             <div>
-                <h1 class="text-2xl font-bold text-white">SMPOR &amp; IPCR Accomplishment Submission</h1>
+                <h1 class="text-2xl font-bold text-white">Accomplishments</h1>
                 <p class="text-xs text-slate-500 mt-1">Performance Period: {{ $periodHeaderLabel }}</p>
             </div>
             <div class="flex flex-col items-end gap-1">

@@ -34,6 +34,26 @@
         html.sidebar-collapsed #nav-logo-link {
             display: none !important;
         }
+
+        .employee-top-breadcrumb {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: calc(18rem + 1.25rem);
+            transform: translateY(-50%);
+            max-width: clamp(10rem, 36vw, 24rem);
+            pointer-events: none;
+        }
+
+        @media (min-width: 640px) {
+            .employee-top-breadcrumb {
+                display: flex;
+            }
+        }
+
+        html.sidebar-collapsed .employee-top-breadcrumb {
+            left: calc(4.5rem + 1rem);
+        }
     </style>
     <script>
     (function() {
@@ -51,11 +71,23 @@
         @php
             $isDashboard = request()->routeIs('employee.dashboard');
             $isMyTasks = request()->routeIs('employee.my-task');
-            $isAccomplishmentSubmission = request()->routeIs('employee.accomplishment-submission');
+            $isAccomplishmentSubmission = request()->routeIs('employee.accomplishment*');
             $isOutputRating = request()->routeIs('employee.ors');
             $isMpor = request()->routeIs('employee.mpor');
             $isIPCRTARGET = request()->routeIs('employee.ipcr-target');
             $isProfile = request()->routeIs('employee.profile');
+            $breadcrumbMap = [
+                'employee.dashboard' => 'Dashboard',
+                'employee.my-task' => 'My Tasks',
+                'employee.accomplishment.smpor-preview' => 'Accomplishments / SMPOR',
+                'employee.accomplishment.ipcr-preview' => 'Accomplishments / IPCR',
+                'employee.accomplishment-submission' => 'Accomplishments',
+                'employee.ors' => 'Output Rating Sheet',
+                'employee.mpor' => 'MPOR',
+                'employee.ipcr-target' => 'IPCR Target',
+                'employee.profile' => 'Profile & Security',
+            ];
+            $currentBreadcrumb = collect($breadcrumbMap)->first(fn($label, $route) => request()->routeIs($route . '*')) ?? 'Page';
         @endphp
 
         <!-- Sidebar -->
@@ -204,6 +236,11 @@
                     </div>
                 </div>
             </div>
+            <nav class="employee-top-breadcrumb min-w-0 items-center gap-2 border-l border-slate-700/80 pl-3 text-sm text-slate-400" aria-label="Breadcrumb">
+                <i class="fa-solid fa-house text-xs text-slate-500"></i>
+                <span class="text-slate-600">/</span>
+                <span class="truncate text-slate-200">{{ $currentBreadcrumb }}</span>
+            </nav>
         </nav>
 
 
@@ -211,23 +248,6 @@
         <!-- Main Content -->
         <div id="main-wrapper" class="pt-2 sm:ml-72">
             <main id="main-content" class="px-3 pb-12 pt-6 lg:px-5">
-                @php
-                    $breadcrumbMap = [
-                        'employee.dashboard' => 'Dashboard',
-                        'employee.my-task' => 'My Tasks',
-                        'employee.accomplishment-submission' => 'Accomplishments',
-                        'employee.ors' => 'Output Rating Sheet',
-                        'employee.mpor' => 'MPOR',
-                        'employee.ipcr-target' => 'IPCR Target',
-                        'employee.profile' => 'Profile & Security',
-                    ];
-                    $currentBreadcrumb = collect($breadcrumbMap)->first(fn($label, $route) => request()->routeIs($route . '*')) ?? 'Page';
-                @endphp
-                <nav class="mb-4 flex items-center gap-2 text-sm text-slate-400">
-                    <i class="fa-solid fa-house text-xs text-slate-500"></i>
-                    <span class="text-slate-600">/</span>
-                    <span class="text-slate-200">{{ $currentBreadcrumb }}</span>
-                </nav>
                 <div class="mx-auto w-full max-w-none">
                     @yield('main-content')
                 </div>
