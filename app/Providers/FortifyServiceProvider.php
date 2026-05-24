@@ -42,8 +42,9 @@ class FortifyServiceProvider extends ServiceProvider
         $this->app->singleton(LoginResponseContract::class, LoginResponse::class);
 
         RateLimiter::for('login', function (Request $request) {
-            $name = (string) $request->input('name');
-            return Limit::perMinute(5)->by(Str::lower($name).'|'.$request->ip());
+            $identifier = (string) ($request->input('email') ?: $request->input('name'));
+
+            return Limit::perMinute(5)->by(Str::lower($identifier).'|'.$request->ip());
         });
 
         RateLimiter::for('two-factor', function (Request $request) {
@@ -52,7 +53,7 @@ class FortifyServiceProvider extends ServiceProvider
 
         Fortify::authenticateUsing(function (Request $request) {
             $loginField = Fortify::username();
-            $value = trim((string) $request->input($loginField));
+            $value = trim((string) ($request->input($loginField) ?: $request->input('name')));
 
             if (! $value || ! $request->password) {
                 return null;
@@ -70,14 +71,14 @@ class FortifyServiceProvider extends ServiceProvider
             }
 
             if (! $user->activated_at) {
-                $key = $loginField ?: 'name';
+                $key = $loginField ?: 'email';
                 throw ValidationException::withMessages([
                     $key => 'Activate account first.',
                 ]);
             }
 
             if (! $user->is_active) {
-                $key = $loginField ?: 'name';
+                $key = $loginField ?: 'email';
                 throw ValidationException::withMessages([
                     $key => 'This account is currently disabled.',
                 ]);

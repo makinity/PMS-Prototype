@@ -37,6 +37,38 @@ class DatabaseSeeder extends Seeder
         DB::transaction(function (): void {
             $now = now();
             $password = Hash::make('password');
+            $seedUser = function (array $attributes): User {
+                $employeeId = (string) $attributes['employee_id'];
+                $email = (string) $attributes['email'];
+
+                $user = User::query()->where('employee_id', $employeeId)->first()
+                    ?: User::query()->where('email', $email)->first()
+                    ?: new User();
+
+                $userKey = $user->exists ? $user->getKey() : 0;
+                $emailIsAvailable = ! User::query()
+                    ->where('email', $email)
+                    ->whereKeyNot($userKey)
+                    ->exists();
+                $employeeIdIsAvailable = ! User::query()
+                    ->where('employee_id', $employeeId)
+                    ->whereKeyNot($userKey)
+                    ->exists();
+
+                if ($emailIsAvailable) {
+                    $user->email = $email;
+                }
+
+                if ($employeeIdIsAvailable) {
+                    $user->employee_id = $employeeId;
+                }
+
+                unset($attributes['email'], $attributes['employee_id']);
+                $user->fill($attributes);
+                $user->save();
+
+                return $user;
+            };
 
             $officeRCU = Office::query()->updateOrCreate(
                 ['code' => 'RCU'],
@@ -54,10 +86,9 @@ class DatabaseSeeder extends Seeder
                 ]
             );
 
-            User::query()->updateOrCreate(
-                ['email' => 'admin@example.com'],
-                [
+            $admin = $seedUser([
                     'employee_id' => 'ADM-0001',
+                    'email' => 'admin@example.com',
                     'name' => 'admin',
                     'password' => $password,
                     'role' => 'admin',
@@ -65,13 +96,11 @@ class DatabaseSeeder extends Seeder
                     'position' => 'Administrator',
                     'is_active' => true,
                     'activated_at' => $now,
-                ]
-            );
+            ]);
 
-            User::query()->updateOrCreate(
-                ['email' => 'pmt@example.com'],
-                [
+            $pmt = $seedUser([
                     'employee_id' => 'PMT-0001',
+                    'email' => 'pmt@example.com',
                     'name' => 'pmt',
                     'password' => $password,
                     'role' => 'pmt',
@@ -79,13 +108,11 @@ class DatabaseSeeder extends Seeder
                     'position' => 'PMT',
                     'is_active' => true,
                     'activated_at' => $now,
-                ]
-            );
+            ]);
 
-            $deptHeadRCU = User::query()->updateOrCreate(
-                ['email' => 'dept-head.rcu@example.com'],
-                [
+            $deptHeadRCU = $seedUser([
                     'employee_id' => 'DH-RCU-0001',
+                    'email' => 'dept-head.rcu@example.com',
                     'name' => 'dept-head',
                     'password' => $password,
                     'role' => 'dept-head',
@@ -93,13 +120,11 @@ class DatabaseSeeder extends Seeder
                     'position' => 'Department Head',
                     'is_active' => true,
                     'activated_at' => $now,
-                ]
-            );
+            ]);
 
-            $supervisorRCU = User::query()->updateOrCreate(
-                ['email' => 'carlo.beray@example.com'],
-                [
+            $supervisorRCU = $seedUser([
                     'employee_id' => 'SUP-RCU-0001',
+                    'email' => 'carlo.beray@example.com',
                     'name' => 'Carlo D. Beray',
                     'password' => $password,
                     'role' => 'supervisor',
@@ -107,13 +132,11 @@ class DatabaseSeeder extends Seeder
                     'position' => 'Supervisor',
                     'is_active' => true,
                     'activated_at' => $now,
-                ]
-            );
+            ]);
 
-            $supervisorRCU2 = User::query()->updateOrCreate(
-                ['email' => 'juan.delacruz@example.com'],
-                [
+            $supervisorRCU2 = $seedUser([
                     'employee_id' => 'SUP-RCU-0002',
+                    'email' => 'juan.delacruz@example.com',
                     'name' => 'Juan Dela Cruz',
                     'password' => $password,
                     'role' => 'supervisor',
@@ -121,13 +144,11 @@ class DatabaseSeeder extends Seeder
                     'position' => 'Supervisor',
                     'is_active' => true,
                     'activated_at' => $now,
-                ]
-            );
+            ]);
 
-            $empRamon = User::query()->updateOrCreate(
-                ['email' => 'ramon.reyes@example.com'],
-                [
+            $empRamon = $seedUser([
                     'employee_id' => 'EMP-RCU-0001',
+                    'email' => 'ramon.reyes@example.com',
                     'name' => 'Ramon Reyes',
                     'password' => $password,
                     'role' => 'employee',
@@ -135,13 +156,23 @@ class DatabaseSeeder extends Seeder
                     'position' => 'Employee',
                     'is_active' => true,
                     'activated_at' => $now,
-                ]
-            );
+            ]);
 
-            $empMark = User::query()->updateOrCreate(
-                ['email' => 'marklionesios@gmail.com'],
-                [
+            $empJustine = $seedUser([
+                    'employee_id' => 'EMP-RCU-0004',
+                    'email' => 'justineaguirre@example.com',
+                    'name' => 'Justine Aguirre',
+                    'password' => $password,
+                    'role' => 'employee',
+                    'office_id' => $officeRCU->id,
+                    'position' => 'Employee',
+                    'is_active' => true,
+                    'activated_at' => $now,
+            ]);
+
+            $empMark = $seedUser([
                     'employee_id' => 'EMP-RCU-0002',
+                    'email' => 'marklionesios@gmail.com',
                     'name' => 'Mark Juntilla',
                     'password' => $password,
                     'role' => 'employee',
@@ -149,13 +180,11 @@ class DatabaseSeeder extends Seeder
                     'position' => 'Employee',
                     'is_active' => true,
                     'activated_at' => $now,
-                ]
-            );
+            ]);
 
-            $empDenji = User::query()->updateOrCreate(
-                ['email' => 'denjikun1030@gmail.com'],
-                [
+            $empDenji = $seedUser([
                     'employee_id' => 'EMP-RCU-0003',
+                    'email' => 'denjikun1030@gmail.com',
                     'name' => 'Denji Kun',
                     'password' => $password,
                     'role' => 'employee',
@@ -163,13 +192,11 @@ class DatabaseSeeder extends Seeder
                     'position' => 'Employee',
                     'is_active' => true,
                     'activated_at' => $now,
-                ]
-            );
+            ]);
 
-            $deptHeadRMU = User::query()->updateOrCreate(
-                ['email' => 'dept-head.rmu@example.com'],
-                [
+            $deptHeadRMU = $seedUser([
                     'employee_id' => 'DH-RMU-0001',
+                    'email' => 'dept-head.rmu@example.com',
                     'name' => 'dept-head-rmu',
                     'password' => $password,
                     'role' => 'dept-head',
@@ -177,13 +204,11 @@ class DatabaseSeeder extends Seeder
                     'position' => 'Department Head',
                     'is_active' => true,
                     'activated_at' => $now,
-                ]
-            );
+            ]);
 
-            $supervisorRMU = User::query()->updateOrCreate(
-                ['email' => 'maria.navarro@example.com'],
-                [
+            $supervisorRMU = $seedUser([
                     'employee_id' => 'SUP-RMU-0001',
+                    'email' => 'maria.navarro@example.com',
                     'name' => 'Maria P. Navarro',
                     'password' => $password,
                     'role' => 'supervisor',
@@ -191,13 +216,11 @@ class DatabaseSeeder extends Seeder
                     'position' => 'Supervisor',
                     'is_active' => true,
                     'activated_at' => $now,
-                ]
-            );
+            ]);
 
-            $empMilo = User::query()->updateOrCreate(
-                ['email' => 'milo.ramos@example.com'],
-                [
+            $empMilo = $seedUser([
                     'employee_id' => 'EMP-RMU-0001',
+                    'email' => 'milo.ramos@example.com',
                     'name' => 'Milo Ramos',
                     'password' => $password,
                     'role' => 'employee',
@@ -205,13 +228,11 @@ class DatabaseSeeder extends Seeder
                     'position' => 'Employee',
                     'is_active' => true,
                     'activated_at' => $now,
-                ]
-            );
+            ]);
 
-            $empXuiie = User::query()->updateOrCreate(
-                ['email' => 'xuiie.fernandez@example.com'],
-                [
+            $empXuiie = $seedUser([
                     'employee_id' => 'EMP-RMU-0002',
+                    'email' => 'xuiie.fernandez@example.com',
                     'name' => 'Xuiie Fernandez',
                     'password' => $password,
                     'role' => 'employee',
@@ -219,8 +240,7 @@ class DatabaseSeeder extends Seeder
                     'position' => 'Employee',
                     'is_active' => true,
                     'activated_at' => $now,
-                ]
-            );
+            ]);
 
             $officeRCU->update(['head_id' => $deptHeadRCU->id]);
             $officeRMU->update(['head_id' => $deptHeadRMU->id]);
@@ -851,18 +871,21 @@ class DatabaseSeeder extends Seeder
             // --- SUBMIT & APPROVE MPORs FOR RMU ---
             $currentMonth = now()->format('Y-m');
             foreach ($rmuEmployeeIds as $employeeId) {
-                $mpor = Mpor::query()->where('employee_id', $employeeId)->where('office_id', $officeRMU->id)->first();
-                if ($mpor) {
-                    $mpor->update([
+                Mpor::query()->updateOrCreate(
+                    [
+                        'employee_id' => $employeeId,
                         'month' => $currentMonth,
+                    ],
+                    [
+                        'office_id' => $officeRMU->id,
                         'status' => 'endorsed',
                         'submitted_at' => now()->subDays(2),
                         'approved_at' => now()->subDays(1),
                         'approved_by' => $supervisorRMU->id,
                         'endorsed_at' => now()->subHours(12),
                         'endorsed_by' => $supervisorRMU->id,
-                    ]);
-                }
+                    ]
+                );
             }
 
             // --- GENERATE QAR (Q2 for current month) ---
@@ -911,7 +934,7 @@ class DatabaseSeeder extends Seeder
                 $ipcr = Ipcr::query()->where('employee_id', $employeeId)->where('performance_period_id', $period->id)->first();
                 if ($ipcr) {
                     $ratingService->calculateAndSaveFinalScore($ipcr);
-                    $ipcr->update(['status' => Ipcr::STATUS_RELEASED_BY_PMT, 'released_by' => 1, 'released_at' => now()->subDays(1), 'finalized_at' => now()->subDays(1), 'locked_at' => now()->subDays(1)]);
+                    $ipcr->update(['status' => Ipcr::STATUS_RELEASED_BY_PMT, 'released_by' => $pmt->id, 'released_at' => now()->subDays(1), 'finalized_at' => now()->subDays(1), 'locked_at' => now()->subDays(1)]);
                 }
             }
 
@@ -923,7 +946,7 @@ class DatabaseSeeder extends Seeder
                     'final_score' => $avgScore,
                     'adjectival_rating' => $ratingService->resolveAdjectivalRating($avgScore),
                     'status' => Opcr::STATUS_RELEASED_BY_PMT,
-                    'released_by' => 1,
+                    'released_by' => $pmt->id,
                     'released_at' => now()->subDays(1),
                     'locked_at' => now()->subDays(1),
                 ]);
@@ -946,7 +969,7 @@ class DatabaseSeeder extends Seeder
                             'supervisor_action_at' => now()->subDays(2),
                             'dept_head_id' => $deptHeadRMU->id,
                             'dept_head_action_at' => now()->subDays(2),
-                            'pmt_id' => 2,
+                            'pmt_id' => $pmt->id,
                             'pmt_action_at' => now()->subDays(1),
                         ]
                     );

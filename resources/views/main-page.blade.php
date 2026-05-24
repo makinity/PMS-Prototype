@@ -890,10 +890,10 @@
                     <section class="auth-view is-active" id="loginView" data-auth-view="login">
                         <form id="loginForm" class="auth-form" novalidate>
                             <div class="field-group">
-                                <label class="field-label" for="login_name">Username</label>
+                                <label class="field-label" for="login_name">Email or Employee ID</label>
                                 <div class="field-shell">
                                     <i class="fa-regular fa-user leading-icon"></i>
-                                    <input type="text" id="login_name" name="name" class="field-input" placeholder="Enter your username" autocomplete="username">
+                                    <input type="text" id="login_name" name="email" class="field-input" placeholder="admin@example.com" autocomplete="username">
                                 </div>
                                 <div class="field-error" data-error-for="login_name"></div>
                             </div>
@@ -1108,7 +1108,7 @@
             const activationStepSummary = document.getElementById('activationStepSummary');
             const authPage = document.querySelector('.auth-page');
             const authViews = Array.from(document.querySelectorAll('[data-auth-view]'));
-            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
+            let csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
 
             const loginView = document.getElementById('loginView');
             const activationView = document.getElementById('activationView');
@@ -1345,7 +1345,7 @@
                 const password = loginPasswordInput.value.trim();
 
                 if (!identifier) {
-                    showFieldError(loginNameInput, 'Name, email, or employee ID is required.');
+                    showFieldError(loginNameInput, 'Email or employee ID is required.');
                     return;
                 }
 
@@ -1358,6 +1358,21 @@
                 loginText.classList.add('hidden');
 
                 try {
+                    const switchResponse = await fetch('/auth/switch-session', {
+                        method: 'POST',
+                        credentials: 'same-origin',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                    });
+                    const switchPayload = await parseJsonSafe(switchResponse);
+                    if (switchResponse.ok && switchPayload?.csrf_token) {
+                        csrfToken = switchPayload.csrf_token;
+                        document.querySelector('meta[name="csrf-token"]')?.setAttribute('content', csrfToken);
+                    }
+
                     const response = await fetch('/login', {
                         method: 'POST',
                         credentials: 'same-origin',
@@ -1368,7 +1383,7 @@
                             'X-Requested-With': 'XMLHttpRequest',
                         },
                         body: new URLSearchParams({
-                            name: identifier,
+                            email: identifier,
                             password,
                             remember: document.getElementById('remember').checked ? 'on' : '',
                         }),
@@ -1383,8 +1398,8 @@
 
                     if (response.status === 422) {
                         const errors = payload?.errors ?? {};
-                        if (errors.name?.length) {
-                            showFieldError(loginNameInput, errors.name[0]);
+                        if (errors.email?.length) {
+                            showFieldError(loginNameInput, errors.email[0]);
                         }
                         if (errors.password?.length) {
                             showFieldError(loginPasswordInput, errors.password[0]);

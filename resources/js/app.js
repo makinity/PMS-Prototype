@@ -290,11 +290,11 @@ if (loginForm && loginNameInput && loginPasswordInput && loginText && loginSpinn
     loginForm.addEventListener('submit', async function(e) {
         e.preventDefault();
 
-        const name = loginNameInput.value.trim();
+        const email = loginNameInput.value.trim();
         const password = loginPasswordInput.value.trim();
 
-        if (!name) {
-            showError(loginNameInput, 'Name is required');
+        if (!email) {
+            showError(loginNameInput, 'Email or employee ID is required');
             return;
         }
 
@@ -309,14 +309,29 @@ if (loginForm && loginNameInput && loginPasswordInput && loginText && loginSpinn
         loginSubmitBtn.style.pointerEvents = 'none';
 
         try {
-            const csrf = getLoginCsrfToken();
+            let csrf = getLoginCsrfToken();
             const rememberInput = document.getElementById('remember');
             const remember = rememberInput && rememberInput.checked ? 'on' : '';
             const body = new URLSearchParams({
-                name,
+                email,
                 password,
                 remember,
             });
+
+            const switchResponse = await fetch('/auth/switch-session', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrf,
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            });
+            const switchPayload = await parseLoginJsonSafe(switchResponse);
+            if (switchResponse.ok && switchPayload?.csrf_token) {
+                csrf = switchPayload.csrf_token;
+                document.querySelector('meta[name="csrf-token"]')?.setAttribute('content', csrf);
+            }
 
             const response = await fetch('/login', {
                 method: 'POST',
@@ -359,8 +374,8 @@ if (loginForm && loginNameInput && loginPasswordInput && loginText && loginSpinn
             if (response.status === 422) {
                 const errors = payload?.errors ?? {};
                 const message = payload?.message ?? '';
-                if (errors.name) {
-                    showError(loginNameInput, errors.name[0]);
+                if (errors.email) {
+                    showError(loginNameInput, errors.email[0]);
                 }
                 if (errors.password) {
                     showError(loginPasswordInput, errors.password[0]);

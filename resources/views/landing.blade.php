@@ -361,9 +361,9 @@
                 <div class="p-4 md:p-6">
                     <form id="loginForm" class="space-y-4 md:space-y-5">
                         <div>
-                            <label for="login_name" class="block mb-2 text-sm font-medium text-gray-300">Name</label>
+                            <label for="login_name" class="block mb-2 text-sm font-medium text-gray-300">Email or Employee ID</label>
                             {{-- DUMMY_DATA: replace with dynamic value --}}
-                            <input type="text" name="name" id="login_name" class="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg block w-full p-3" placeholder="Ramon Reyes">
+                            <input type="text" name="email" id="login_name" class="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg block w-full p-3" placeholder="admin@example.com" autocomplete="username">
                         </div>
                         <div>
                             <label for="password" class="block mb-2 text-sm font-medium text-gray-300">Password</label>

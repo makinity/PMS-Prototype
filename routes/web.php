@@ -91,6 +91,15 @@ Route::get('/logout', function (Request $request) {
     return redirect('/');
 })->name('logout');
 
+Route::post('/auth/switch-session', function (Request $request) {
+    Auth::logout();
+    $request->session()->regenerate();
+
+    return response()->json([
+        'csrf_token' => csrf_token(),
+    ]);
+})->name('auth.switch-session');
+
 Route::get('/send/id', [ActivationController::class, 'index']);
 Route::post('/activate/verify', [ActivationController::class, 'verify']);
 Route::post('/activate/complete', [ActivationController::class, 'complete']);
@@ -123,7 +132,7 @@ Route::get('/dashboard', function () {
 |--------------------------------------------------------------------------
 */
 
-Route::prefix('employee')->middleware('auth')->group(function () {
+Route::prefix('employee')->middleware(['auth', 'role:employee'])->group(function () {
     // Views
     Route::get('/dashboard', [EmployeeDashboardController::class, 'index'])
     ->name('employee.dashboard');
@@ -200,7 +209,7 @@ Route::prefix('employee')->middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::prefix('dept-head')->middleware('auth')->group(function () {
+Route::prefix('dept-head')->middleware(['auth', 'role:dept-head'])->group(function () {
     // Views
     Route::get('/dashboard', [DeptHeadDashboardController::class, 'index'])->name('dept-head.dashboard');
     Route::get('/profile', fn () => view('dept-head.profile'))->name('dept-head.profile');
@@ -253,7 +262,7 @@ Route::prefix('dept-head')->middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::prefix('supervisor')->middleware('auth')->group(function () {
+Route::prefix('supervisor')->middleware(['auth', 'role:supervisor'])->group(function () {
     // Views
     Route::get('/dashboard', [SupervisorDashboardController::class, 'index'])->name('supervisor.dashboard');
     Route::get('/team-tasks', [TeamTasksController::class, 'index'])->name('supervisor.team-tasks');
@@ -334,7 +343,7 @@ Route::prefix('supervisor')->middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::prefix('pmt')->middleware('auth')->group(function () {
+Route::prefix('pmt')->middleware(['auth', 'role:pmt'])->group(function () {
     // Views
     Route::get('/dashboard', [PmtDashboardController::class, 'index'])->name('pmt.dashboard');
     Route::get('/profile', fn () => view('pmt.profile'))->name('pmt.profile');
@@ -439,7 +448,7 @@ Route::middleware(['auth'])->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::prefix('administrator')->middleware('auth')->group(function () {
+Route::prefix('administrator')->middleware(['auth', 'role:admin'])->group(function () {
     // Views
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
     Route::get('/profile', fn () => view('admin.profile'))->name('admin.profile');
