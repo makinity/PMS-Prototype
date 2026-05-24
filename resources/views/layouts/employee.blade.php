@@ -78,14 +78,20 @@
             $isProfile = request()->routeIs('employee.profile');
             $breadcrumbMap = [
                 'employee.dashboard' => 'Dashboard',
-                'employee.my-task' => 'My Tasks',
+                'employee.my-task*' => 'My Tasks',
                 'employee.accomplishment.smpor-preview' => 'Accomplishments / SMPOR',
                 'employee.accomplishment.ipcr-preview' => 'Accomplishments / IPCR',
-                'employee.accomplishment-submission' => 'Accomplishments',
-                'employee.ors' => 'Output Rating Sheet',
-                'employee.mpor' => 'MPOR',
-                'employee.ipcr-target' => 'IPCR Target',
-                'employee.profile' => 'Profile & Security',
+                'employee.accomplishment.submit' => 'Accomplishments / Submit',
+                'employee.accomplishment-submission*' => 'Accomplishments',
+                'employee.ors.export.pdf.download' => 'Output Rating Sheet / Export PDF',
+                'employee.ors.export.pdf' => 'Output Rating Sheet / Preview PDF',
+                'employee.ors*' => 'Output Rating Sheet',
+                'employee.mpor.preview.excel' => 'MPOR / Preview Excel',
+                'employee.mpor.export.excel' => 'MPOR / Export Excel',
+                'employee.mpor.submit' => 'MPOR / Submit',
+                'employee.mpor*' => 'MPOR',
+                'employee.ipcr-target*' => 'IPCR Target',
+                'employee.profile*' => 'Profile & Security',
             ];
             $currentBreadcrumb = collect($breadcrumbMap)->first(fn($label, $route) => request()->routeIs($route . '*')) ?? 'Page';
         @endphp

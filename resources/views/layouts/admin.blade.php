@@ -32,6 +32,26 @@
         html.sidebar-collapsed #nav-logo-link {
             display: none !important;
         }
+
+        .admin-top-breadcrumb {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: calc(18rem + 1.25rem);
+            transform: translateY(-50%);
+            max-width: clamp(10rem, 36vw, 24rem);
+            pointer-events: none;
+        }
+
+        @media (min-width: 640px) {
+            .admin-top-breadcrumb {
+                display: flex;
+            }
+        }
+
+        html.sidebar-collapsed .admin-top-breadcrumb {
+            left: calc(4.5rem + 1rem);
+        }
     </style>
     <script>
     (function() {
@@ -48,13 +68,37 @@
     <div class="min-h-screen">
         @php
             $isAdminDashboard = request()->routeIs('admin.dashboard');
-            $isAdminPRF = request()->routeIs('admin.performance-period');
-            $isAdminOffice = request()->routeIs('admin.office');
-            $isAdminUsers = request()->routeIs('admin.users');
-            $isAdminHris = request()->routeIs('admin.hris');
-            $isAdminAuditLogs = request()->routeIs('admin.audit-logs');
+            $isAdminPRF = request()->routeIs('admin.performance-period*') || request()->routeIs('admin.performance-periods.*');
+            $isAdminOffice = request()->routeIs('admin.office*');
+            $isAdminUsers = request()->routeIs('admin.users*');
+            $isAdminHris = request()->routeIs('admin.hris*');
+            $isAdminAuditLogs = request()->routeIs('admin.audit-logs*');
             $isAdminDatabase = request()->routeIs('admin.database*');
             $isAdminReports = request()->routeIs('admin.reports*');
+            $breadcrumbMap = [
+                'admin.dashboard' => 'Dashboard',
+                'admin.performance-period*' => 'Performance Period',
+                'admin.performance-periods.*' => 'Performance Period',
+                'admin.office*' => 'Offices',
+                'admin.users*' => 'Users',
+                'admin.hris*' => 'HRIS Integration',
+                'admin.audit-logs*' => 'Audit Logs',
+                'admin.database.backups.download' => 'Database / Backup Download',
+                'admin.database.backups.restore' => 'Database / Backup Restore',
+                'admin.database.backups.destroy' => 'Database / Backup Delete',
+                'admin.database*' => 'Database',
+                'admin.reports.preview' => 'Reports / Preview',
+                'admin.reports.download' => 'Reports / Download',
+                'admin.reports*' => 'Reports',
+                'admin.profile*' => 'Profile',
+            ];
+            $currentBreadcrumb = 'Page';
+            foreach ($breadcrumbMap as $pattern => $label) {
+                if (request()->routeIs($pattern)) {
+                    $currentBreadcrumb = $label;
+                    break;
+                }
+            }
         @endphp
         <!-- Top Navigation -->
         <nav class="fixed top-0 z-50 w-full bg-slate-950 text-slate-100" id="top-nav">
@@ -116,6 +160,11 @@
                     </div>
                 </div>
             </div>
+            <nav class="admin-top-breadcrumb min-w-0 items-center gap-2 border-l border-slate-700/80 pl-3 text-sm text-slate-400" aria-label="Breadcrumb">
+                <i class="fa-solid fa-house text-xs text-slate-500"></i>
+                <span class="text-slate-600">/</span>
+                <span class="truncate text-slate-200">{{ $currentBreadcrumb }}</span>
+            </nav>
         </nav>
 
         <!-- Sidebar -->

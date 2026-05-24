@@ -152,6 +152,26 @@
         html.sidebar-collapsed #nav-logo-link {
             display: none !important;
         }
+
+        .supervisor-top-breadcrumb {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: calc(18rem + 1.25rem);
+            transform: translateY(-50%);
+            max-width: clamp(10rem, 36vw, 24rem);
+            pointer-events: none;
+        }
+
+        @media (min-width: 640px) {
+            .supervisor-top-breadcrumb {
+                display: flex;
+            }
+        }
+
+        html.sidebar-collapsed .supervisor-top-breadcrumb {
+            left: calc(4.5rem + 1rem);
+        }
     </style>
     <script>
     (function() {
@@ -169,12 +189,38 @@
     <div class="min-h-screen">
         @php
             $isSupervisorDashboard = request()->routeIs('supervisor.dashboard');
-            $isSupervisorTeamTasks = request()->routeIs('supervisor.team-tasks');
-            $isSupervisorUWP = request()->routeIs('supervisor.uwp-page');
-            $isSupervisorMPOR = request()->routeIs('supervisor.mpor');
-            $isSupervisorEmpAcc = request()->routeIs('supervisor.employee-submissions');
-            $isSupervisorORS = request()->routeIs('supervisor.ors-monitoring');
-            $isSupervisorProfile = request()->routeIs('supervisor.profile');
+            $isSupervisorTeamTasks = request()->routeIs('supervisor.team-tasks*');
+            $isSupervisorUWP = request()->routeIs('supervisor.uwp*');
+            $isSupervisorMPOR = request()->routeIs('supervisor.mpor*');
+            $isSupervisorEmpAcc = request()->routeIs('supervisor.employee-submissions*') || request()->routeIs('supervisor.submissions.*');
+            $isSupervisorORS = request()->routeIs('supervisor.ors-monitoring*');
+            $isSupervisorProfile = request()->routeIs('supervisor.profile*');
+            $breadcrumbMap = [
+                'supervisor.dashboard' => 'Dashboard',
+                'supervisor.team-tasks*' => 'Team Tasks',
+                'supervisor.uwp.success-indicators*' => 'Unit Work Plan / Success Indicators',
+                'supervisor.uwp.show.page' => 'Unit Work Plan / Show',
+                'supervisor.uwp.show' => 'Unit Work Plan / Show',
+                'supervisor.uwp.preview*' => 'Unit Work Plan / Preview',
+                'supervisor.uwp*' => 'Unit Work Plan',
+                'supervisor.submissions.smpor-preview' => 'Accomplishment Review / SMPOR Preview',
+                'supervisor.submissions.ipcr-preview' => 'Accomplishment Review / IPCR Preview',
+                'supervisor.submissions.show' => 'Accomplishment Review / Detail',
+                'supervisor.employee-submissions*' => 'Accomplishment Review',
+                'supervisor.submissions.*' => 'Accomplishment Review',
+                'supervisor.mpor.show' => 'MPOR / Detail',
+                'supervisor.mpor.preview.json' => 'MPOR / Preview',
+                'supervisor.mpor*' => 'MPOR',
+                'supervisor.ors-monitoring*' => 'ORS Monitoring',
+                'supervisor.profile*' => 'Profile & Security',
+            ];
+            $currentBreadcrumb = 'Page';
+            foreach ($breadcrumbMap as $pattern => $label) {
+                if (request()->routeIs($pattern)) {
+                    $currentBreadcrumb = $label;
+                    break;
+                }
+            }
         @endphp
         <!-- Top Navigation -->
         <nav class="fixed top-0 z-50 w-full bg-slate-950 text-slate-100" id="top-nav">
@@ -240,6 +286,11 @@
                     </div>
                 </div>
             </div>
+            <nav class="supervisor-top-breadcrumb min-w-0 items-center gap-2 border-l border-slate-700/80 pl-3 text-sm text-slate-400" aria-label="Breadcrumb">
+                <i class="fa-solid fa-house text-xs text-slate-500"></i>
+                <span class="text-slate-600">/</span>
+                <span class="truncate text-slate-200">{{ $currentBreadcrumb }}</span>
+            </nav>
         </nav>
 
         <!-- Sidebar -->

@@ -152,6 +152,26 @@
         html.sidebar-collapsed #nav-logo-link {
             display: none !important;
         }
+
+        .pmt-top-breadcrumb {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: calc(18rem + 1.25rem);
+            transform: translateY(-50%);
+            max-width: clamp(10rem, 36vw, 24rem);
+            pointer-events: none;
+        }
+
+        @media (min-width: 640px) {
+            .pmt-top-breadcrumb {
+                display: flex;
+            }
+        }
+
+        html.sidebar-collapsed .pmt-top-breadcrumb {
+            left: calc(4.5rem + 1rem);
+        }
     </style>
     <script>
     (function() {
@@ -169,14 +189,43 @@
     <div class="min-h-screen">
         @php
             $isPmtDashboard = request()->routeIs('pmt.dashboard');
-            $isOpcr = request()->routeIs('pmt.opcr.review.index');
-            $isQAR = request()->routeIs('pmt.qar');
-            $isDeptHeadAccReview = request()->routeIs('pmt.acc-review');
+            $isOpcr = request()->routeIs('pmt.opcr.review.*');
+            $isQAR = request()->routeIs('pmt.qar*');
+            $isDeptHeadAccReview = request()->routeIs('pmt.acc-review*');
             $isEmployeeCalibration = request()->routeIs('pmt.employee-calibration.*');
             $isOfficeCalibration = request()->routeIs('pmt.office-calibration.*');
             $isTopPerformers = request()->routeIs('pmt.top-performers.*');
             $isDevelopmentPlanning = request()->routeIs('pmt.development-planning.*');
-            $isPmtProfile = request()->routeIs('pmt.profile');
+            $isPmtProfile = request()->routeIs('pmt.profile*');
+            $breadcrumbMap = [
+                'pmt.dashboard' => 'Dashboard',
+                'pmt.opcr.review.show' => 'OPCR Review / Detail',
+                'pmt.opcr.review.export' => 'OPCR Review / Export',
+                'pmt.opcr.review*' => 'OPCR Review',
+                'pmt.qar.show' => 'QAR Validation / Detail',
+                'pmt.qar.previewPdf' => 'QAR Validation / Preview PDF',
+                'pmt.qar*' => 'QAR Validation',
+                'pmt.acc-review.smpor-preview' => 'Accomplishment Review / SMPOR Preview',
+                'pmt.acc-review.ipcr-preview' => 'Accomplishment Review / IPCR Preview',
+                'pmt.acc-review.show' => 'Accomplishment Review / Detail',
+                'pmt.acc-review*' => 'Accomplishment Review',
+                'pmt.employee-calibration.show' => 'Employee Calibration / Detail',
+                'pmt.employee-calibration.*' => 'Employee Calibration',
+                'pmt.office-calibration.show' => 'Office Calibration / Detail',
+                'pmt.office-calibration.*' => 'Office Calibration',
+                'pmt.top-performers.preview-pdf' => 'Top Performers / Preview PDF',
+                'pmt.top-performers.*' => 'Top Performers',
+                'pmt.development-planning.show' => 'Development Planning / Detail',
+                'pmt.development-planning.*' => 'Development Planning',
+                'pmt.profile*' => 'Profile & Security',
+            ];
+            $currentBreadcrumb = 'Page';
+            foreach ($breadcrumbMap as $pattern => $label) {
+                if (request()->routeIs($pattern)) {
+                    $currentBreadcrumb = $label;
+                    break;
+                }
+            }
         @endphp
         <!-- Top Navigation -->
         <nav class="fixed top-0 z-50 w-full bg-slate-950 text-slate-100" id="top-nav">
@@ -242,6 +291,11 @@
                     </div>
                 </div>
             </div>
+            <nav class="pmt-top-breadcrumb min-w-0 items-center gap-2 border-l border-slate-700/80 pl-3 text-sm text-slate-400" aria-label="Breadcrumb">
+                <i class="fa-solid fa-house text-xs text-slate-500"></i>
+                <span class="text-slate-600">/</span>
+                <span class="truncate text-slate-200">{{ $currentBreadcrumb }}</span>
+            </nav>
         </nav>
 
         <!-- Sidebar -->

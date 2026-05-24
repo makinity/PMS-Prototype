@@ -34,6 +34,26 @@
         html.sidebar-collapsed #nav-logo-link {
             display: none !important;
         }
+
+        .dept-head-top-breadcrumb {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: calc(18rem + 1.25rem);
+            transform: translateY(-50%);
+            max-width: clamp(10rem, 36vw, 24rem);
+            pointer-events: none;
+        }
+
+        @media (min-width: 640px) {
+            .dept-head-top-breadcrumb {
+                display: flex;
+            }
+        }
+
+        html.sidebar-collapsed .dept-head-top-breadcrumb {
+            left: calc(4.5rem + 1rem);
+        }
     </style>
     <script>
     (function() {
@@ -50,12 +70,33 @@
     <div class="min-h-screen">
         @php
             $isDashboard = request()->routeIs('dept-head.dashboard');
-            $isUnitWorkPlan = request()->routeIs('dept-head.uwp');
+            $isUnitWorkPlan = request()->routeIs('dept-head.uwp*');
             $isOpcr = request()->routeIs('dept-head.opcr');
-            $isOpcrAcc = request()->routeIs('dept-head.opcr.accomplishment');
-            $isQar = request()->routeIs('dept-head.qar');
-            $isDeptHeadAccReview = request()->routeIs('dept-head.acc-review');
-            $isProfile = request()->routeIs('dept-head.profile');
+            $isOpcrAcc = request()->routeIs('dept-head.opcr.accomplishment*');
+            $isQar = request()->routeIs('dept-head.qar*');
+            $isDeptHeadAccReview = request()->routeIs('dept-head.acc-review*');
+            $isProfile = request()->routeIs('dept-head.profile*');
+            $breadcrumbMap = [
+                'dept-head.dashboard' => 'Dashboard',
+                'dept-head.uwp.show' => 'Unit Work Plan Review / Detail',
+                'dept-head.uwp*' => 'Unit Work Plan Review',
+                'dept-head.opcr.success-indicators' => 'OPCR Planning / Success Indicators',
+                'dept-head.opcr' => 'OPCR Planning',
+                'dept-head.opcr.index' => 'OPCR Planning',
+                'dept-head.opcr.accomplishment*' => 'OPCR Evaluation',
+                'dept-head.qar.mpor.show' => 'QAR / MPOR Detail',
+                'dept-head.qar*' => 'QAR',
+                'dept-head.acc-review.show' => 'Accomplishment Review / Detail',
+                'dept-head.acc-review*' => 'Accomplishment Review',
+                'dept-head.profile*' => 'Profile & Security',
+            ];
+            $currentBreadcrumb = 'Page';
+            foreach ($breadcrumbMap as $pattern => $label) {
+                if (request()->routeIs($pattern)) {
+                    $currentBreadcrumb = $label;
+                    break;
+                }
+            }
         @endphp
         <!-- Top Navigation -->
         <nav class="fixed top-0 z-50 w-full bg-slate-950 text-slate-100" id="top-nav">
@@ -117,6 +158,11 @@
                     </div>
                 </div>
             </div>
+            <nav class="dept-head-top-breadcrumb min-w-0 items-center gap-2 border-l border-slate-700/80 pl-3 text-sm text-slate-400" aria-label="Breadcrumb">
+                <i class="fa-solid fa-house text-xs text-slate-500"></i>
+                <span class="text-slate-600">/</span>
+                <span class="truncate text-slate-200">{{ $currentBreadcrumb }}</span>
+            </nav>
         </nav>
 
         <!-- Sidebar -->
