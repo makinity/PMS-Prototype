@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Pmt;
 use App\Http\Controllers\Controller;
 use App\Models\Opcr;
 use App\Models\PerformancePeriod;
+use App\Notifications\WorkflowEventNotification;
 use App\Services\OpcrOfficeRatingService;
 use App\Services\PerformanceRatingService;
+use App\Services\WorkflowNotificationDispatcher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -165,6 +167,8 @@ class OfficeCalibrationController extends Controller
             return back()->with('error', 'Only calibrated OPCR ratings can be released.');
         }
 
+        $previousStatus = (string) $opcr->status;
+
         $opcr->update([
             'status' => Opcr::STATUS_RELEASED_BY_PMT,
             'pmt_remarks' => $request->remarks,
@@ -174,6 +178,39 @@ class OfficeCalibrationController extends Controller
             'released_at' => now(),
             'locked_at' => now(),
         ]);
+
+        if ($previousStatus !== Opcr::STATUS_RELEASED_BY_PMT) {
+            $notifier = app(WorkflowNotificationDispatcher::class);
+            $meta = [
+                'event' => 'stage4.data_updated',
+                'source' => 'opcr_release',
+                'opcr_id' => $opcr->id,
+                'office_id' => $opcr->office_id,
+                'performance_period_id' => $opcr->performance_period_id,
+                'status' => Opcr::STATUS_RELEASED_BY_PMT,
+            ];
+
+            $notifier->notifyRole(
+                'pmt',
+                new WorkflowEventNotification(
+                    title: 'Stage IV Data Updated',
+                    body: 'Released OPCR results are ready for Top Performers review.',
+                    url: route('pmt.top-performers.index'),
+                    type: 'info',
+                    meta: $meta
+                )
+            );
+            $notifier->notifyRole(
+                'pmt',
+                new WorkflowEventNotification(
+                    title: 'Stage IV Data Updated',
+                    body: 'Released OPCR/IPCR results are ready for Development Planning review.',
+                    url: route('pmt.development-planning.index'),
+                    type: 'info',
+                    meta: $meta
+                )
+            );
+        }
 
         return back()->with('success', 'OPCR official rating released to the office.');
     }

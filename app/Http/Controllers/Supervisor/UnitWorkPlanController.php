@@ -13,6 +13,8 @@ use App\Models\UwpIndicatorAssignment;
 use App\Models\UwpQetStandard;
 use App\Models\UwpSuccessIndicator;
 use App\Models\UwpConsolidationSignature;
+use App\Notifications\WorkflowEventNotification;
+use App\Services\WorkflowNotificationDispatcher;
 use App\Services\UwpConsolidationSignatureService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -476,6 +478,28 @@ class UnitWorkPlanController extends Controller
             }
         });
 
+        $uwp->loadMissing(['office.head', 'performancePeriod']);
+        $departmentHead = $uwp->office?->head;
+        if ($departmentHead) {
+            app(WorkflowNotificationDispatcher::class)->notifyUser(
+                $departmentHead,
+                new WorkflowEventNotification(
+                    title: 'UWP Submitted',
+                    body: "{$user->name} submitted a Unit Work Plan for review.",
+                    url: route('dept-head.uwp.show', ['id' => $uwp->id]),
+                    type: 'info',
+                    meta: [
+                        'event' => 'uwp.submitted',
+                        'uwp_id' => $uwp->id,
+                        'office_id' => $uwp->office_id,
+                        'performance_period_id' => $uwp->performance_period_id,
+                        'status' => UnitWorkPlan::STATUS_SUBMITTED,
+                        'source_role' => 'supervisor',
+                    ],
+                )
+            );
+        }
+
         if (!($request->expectsJson() || $request->ajax())) {
             return redirect()
                 ->route('supervisor.uwp-page')
@@ -593,6 +617,28 @@ class UnitWorkPlanController extends Controller
                     'submitted_at' => now()
                 ]);
             });
+
+            $uwp->loadMissing(['office.head', 'performancePeriod']);
+            $departmentHead = $uwp->office?->head;
+            if ($departmentHead) {
+                app(WorkflowNotificationDispatcher::class)->notifyUser(
+                    $departmentHead,
+                    new WorkflowEventNotification(
+                        title: 'UWP Submitted',
+                        body: "{$user->name} submitted a Unit Work Plan for review.",
+                        url: route('dept-head.uwp.show', ['id' => $uwp->id]),
+                        type: 'info',
+                        meta: [
+                            'event' => 'uwp.submitted',
+                            'uwp_id' => $uwp->id,
+                            'office_id' => $uwp->office_id,
+                            'performance_period_id' => $uwp->performance_period_id,
+                            'status' => UnitWorkPlan::STATUS_SUBMITTED,
+                            'source_role' => 'supervisor',
+                        ],
+                    )
+                );
+            }
 
             return $this->respondSubmitForApproval(
                 $request,

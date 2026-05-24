@@ -4,10 +4,13 @@ namespace App\Http\Controllers\Pmt;
 
 use App\Exports\StageOne\OpcrExcelExport;
 use App\Http\Controllers\Controller;
+use App\Models\Ipcr;
 use App\Models\Opcr;
 use App\Models\PerformancePeriod;
 use App\Models\UnitWorkPlan;
+use App\Notifications\WorkflowEventNotification;
 use App\Services\IpcrGeneratorService;
+use App\Services\WorkflowNotificationDispatcher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -144,6 +147,39 @@ class OpcrController extends Controller
                 ])->save();
 
                 app(IpcrGeneratorService::class)->generateFromOpcr($opcr);
+
+                $opcr->loadMissing(['performancePeriod']);
+                $ipcrs = Ipcr::query()
+                    ->with('employee')
+                    ->where('opcr_id', $opcr->id)
+                    ->where('performance_period_id', $opcr->performance_period_id)
+                    ->get();
+
+                $notifier = app(WorkflowNotificationDispatcher::class);
+                foreach ($ipcrs as $ipcr) {
+                    if (!$ipcr->employee) {
+                        continue;
+                    }
+
+                    $notifier->notifyUser(
+                        $ipcr->employee,
+                        new WorkflowEventNotification(
+                            title: 'IPCR Target Ready',
+                            body: 'Your IPCR target for the current period is now ready for commitment.',
+                            url: route('employee.ipcr-target'),
+                            type: 'success',
+                            meta: [
+                                'event' => 'ipcr.ready_for_commitment',
+                                'ipcr_id' => $ipcr->id,
+                                'opcr_id' => $opcr->id,
+                                'office_id' => $opcr->office_id,
+                                'performance_period_id' => $opcr->performance_period_id,
+                                'status' => (string) $ipcr->status,
+                                'source_role' => 'pmt',
+                            ],
+                        )
+                    );
+                }
 
                 return $redirect('success', 'OPCR final approved.');
             }

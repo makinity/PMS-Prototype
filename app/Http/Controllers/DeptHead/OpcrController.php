@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Opcr;
 use App\Models\PerformancePeriod;
 use App\Models\UnitWorkPlan;
+use App\Notifications\WorkflowEventNotification;
 use App\Services\OpcrOfficeRatingService;
+use App\Services\WorkflowNotificationDispatcher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -211,6 +213,25 @@ class OpcrController extends Controller
                 ]);
             }
         });
+
+        $model->loadMissing(['office', 'performancePeriod']);
+        app(WorkflowNotificationDispatcher::class)->notifyRole(
+            'pmt',
+            new WorkflowEventNotification(
+                title: 'OPCR Endorsed by Department Head',
+                body: "{$user->name} endorsed an OPCR for PMT review.",
+                url: route('pmt.opcr.review.show', ['opcr' => $model->id]),
+                type: 'info',
+                meta: [
+                    'event' => 'opcr.endorsed_to_pmt',
+                    'opcr_id' => $model->id,
+                    'office_id' => $model->office_id,
+                    'performance_period_id' => $model->performance_period_id,
+                    'status' => Opcr::STATUS_ENDORSED,
+                    'source_role' => 'dept-head',
+                ],
+            )
+        );
 
         if ($request->expectsJson()) {
             return response()->json(['success' => true, 'message' => 'OPCR submitted to PMT.']);

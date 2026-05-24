@@ -7,6 +7,9 @@ use App\Models\Ipcr;
 use App\Models\Mpor;
 use App\Models\OrsEntry;
 use App\Models\PerformancePeriod;
+use App\Models\User;
+use App\Notifications\WorkflowEventNotification;
+use App\Services\WorkflowNotificationDispatcher;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -544,6 +547,29 @@ class MporController extends Controller
         $mpor->returned_by = null;
         $mpor->return_remarks = null;
         $mpor->save();
+
+        // Notify supervisors in the same office that an MPOR was submitted.
+        if (!is_null($mpor->office_id)) {
+            app(WorkflowNotificationDispatcher::class)->notifyRole(
+                'supervisor',
+                new WorkflowEventNotification(
+                    title: 'New MPOR Submission',
+                    body: "{$user->name} submitted MPOR for {$start->format('F Y')}.",
+                    url: route('supervisor.mpor'),
+                    type: 'info',
+                    meta: [
+                        'event' => 'mpor.submitted_to_supervisor',
+                        'mpor_id' => $mpor->id,
+                        'employee_id' => $mpor->employee_id,
+                        'office_id' => $mpor->office_id,
+                        'month' => $mpor->month,
+                        'status' => (string) $mpor->status,
+                        'source_role' => 'employee',
+                    ],
+                ),
+                fn (User $supervisor): bool => (int) ($supervisor->office_id ?? 0) === (int) $mpor->office_id
+            );
+        }
 
         if ($request->expectsJson()) {
             return response()->json([

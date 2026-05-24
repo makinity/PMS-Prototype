@@ -10,6 +10,8 @@ use App\Models\OrsEntry;
 use App\Models\OrsEntryEvidence;
 use App\Models\PerformancePeriod;
 use App\Models\User;
+use App\Notifications\WorkflowEventNotification;
+use App\Services\WorkflowNotificationDispatcher;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -911,6 +913,36 @@ class OrsController extends Controller
         $updated = $result['entry'];
         $latestEvidence = $result['latestEvidence'];
         $uploadedEvidences = $result['uploadedEvidences'] ?? [];
+        $updated->loadMissing(['employee:id,name', 'supervisor:id,name']);
+
+        if ($updated->supervisor_id) {
+            $supervisor = User::query()
+                ->whereKey((int) $updated->supervisor_id)
+                ->where('role', 'supervisor')
+                ->first();
+
+            if ($supervisor) {
+                app(WorkflowNotificationDispatcher::class)->notifyUser(
+                    $supervisor,
+                    new WorkflowEventNotification(
+                        title: 'New ORS Submission',
+                        body: ($updated->employee?->name ?? 'An employee') . ' submitted an ORS entry for your review.',
+                        url: route('supervisor.ors-monitoring', ['ors_entry_id' => $updated->id]),
+                        type: 'info',
+                        meta: [
+                            'event' => 'ors.submitted_to_supervisor',
+                            'ors_entry_id' => $updated->id,
+                            'employee_id' => $updated->employee_id,
+                            'supervisor_id' => $updated->supervisor_id,
+                            'work_date' => optional($updated->work_date)->toDateString() ?? (string) $updated->work_date,
+                            'status' => (string) $updated->status,
+                            'source_role' => 'employee',
+                        ],
+                    )
+                );
+            }
+        }
+
         $latestEvidencePayload = $latestEvidence
             ? [
                 'file_name' => $latestEvidence->file_name,

@@ -613,10 +613,13 @@ class AccomplishmentReviewController extends Controller
     {
         $submission = AccomplishmentSubmission::with(['employee'])->findOrFail($id);
         $originalUser = $request->user();
-        Auth::login($submission->employee);
-        $controller = app(\App\Http\Controllers\Employee\SmporIpcrAccomplishmentController::class);
-        $indexView = $controller->index($request);
-        Auth::login($originalUser);
+        try {
+            Auth::login($submission->employee);
+            $controller = app(\App\Http\Controllers\Employee\SmporIpcrAccomplishmentController::class);
+            $indexView = $controller->index($request);
+        } finally {
+            Auth::login($originalUser);
+        }
         $data = $indexView->getData();
         $data['backUrl'] = route('pmt.acc-review.show', $id);
         return view('pmt.accomplishment-smpor-preview', $data);
@@ -626,10 +629,13 @@ class AccomplishmentReviewController extends Controller
     {
         $submission = AccomplishmentSubmission::with(['employee'])->findOrFail($id);
         $originalUser = $request->user();
-        Auth::login($submission->employee);
-        $controller = app(\App\Http\Controllers\Employee\SmporIpcrAccomplishmentController::class);
-        $indexView = $controller->index($request);
-        Auth::login($originalUser);
+        try {
+            Auth::login($submission->employee);
+            $controller = app(\App\Http\Controllers\Employee\SmporIpcrAccomplishmentController::class);
+            $indexView = $controller->index($request);
+        } finally {
+            Auth::login($originalUser);
+        }
         $data = $indexView->getData();
         $data['backUrl'] = route('pmt.acc-review.show', $id);
         return view('pmt.accomplishment-ipcr-preview', $data);

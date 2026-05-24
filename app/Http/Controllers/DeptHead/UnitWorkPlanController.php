@@ -4,10 +4,12 @@ namespace App\Http\Controllers\DeptHead;
 
 use App\Http\Controllers\Controller;
 use App\Models\UwpConsolidationSignature;
+use App\Notifications\WorkflowEventNotification;
 use Illuminate\Http\Request;
 use App\Models\Opcr;
 use App\Models\PerformancePeriod;
 use App\Models\UnitWorkPlan;
+use App\Services\WorkflowNotificationDispatcher;
 use App\Services\UwpConsolidationSignatureService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -324,9 +326,10 @@ class UnitWorkPlanController extends Controller
 
         $signedArtifact = [];
         $reviewedUwp = $uwp;
+        $consolidatedUwpIds = [];
 
         try {
-            DB::transaction(function () use ($request, $uwp, $validated, $user, &$signedArtifact, &$reviewedUwp) {
+            DB::transaction(function () use ($request, $uwp, $validated, $user, &$signedArtifact, &$reviewedUwp, &$consolidatedUwpIds) {
                 if ($validated['action'] === 'endorse') {
                     $lockedUwp = UnitWorkPlan::query()
                         ->with($this->signatureRelations())
@@ -368,13 +371,15 @@ class UnitWorkPlanController extends Controller
                             ],
                         ]);
 
-                        $opcr = $this->consolidateSubmittedUwpsFor($lockedUwp, $user);
+                        $consolidation = $this->consolidateSubmittedUwpsFor($lockedUwp, $user);
+                        $consolidatedUwpIds = $consolidation['consolidated_uwp_ids'];
 
                         $signatureRecord->forceFill([
-                            'opcr_id' => $opcr->id,
+                            'opcr_id' => $consolidation['opcr']->id,
                         ])->save();
                     } else {
-                        $this->consolidateSubmittedUwpsFor($lockedUwp, $user);
+                        $consolidation = $this->consolidateSubmittedUwpsFor($lockedUwp, $user);
+                        $consolidatedUwpIds = $consolidation['consolidated_uwp_ids'];
                     }
 
                     $lockedUwp->refresh();
@@ -422,6 +427,57 @@ class UnitWorkPlanController extends Controller
             }
 
             throw $e;
+        }
+
+        $notifier = app(WorkflowNotificationDispatcher::class);
+        if ($validated['action'] === 'return') {
+            $reviewedUwp->loadMissing(['creator', 'office', 'performancePeriod']);
+            if ($reviewedUwp->creator) {
+                $notifier->notifyUser(
+                    $reviewedUwp->creator,
+                    new WorkflowEventNotification(
+                        title: 'UWP Returned by Department Head',
+                        body: "Your Unit Work Plan was returned for revision by {$user->name}.",
+                        url: route('supervisor.uwp.show.page', ['id' => $reviewedUwp->id]),
+                        type: 'alert',
+                        meta: [
+                            'event' => 'uwp.returned',
+                            'uwp_id' => $reviewedUwp->id,
+                            'office_id' => $reviewedUwp->office_id,
+                            'performance_period_id' => $reviewedUwp->performance_period_id,
+                            'status' => UnitWorkPlan::STATUS_RETURNED,
+                            'source_role' => 'dept-head',
+                        ],
+                    )
+                );
+            }
+        } elseif ($validated['action'] === 'endorse' && !empty($consolidatedUwpIds)) {
+            $consolidatedUwps = UnitWorkPlan::query()
+                ->with(['creator'])
+                ->whereIn('id', $consolidatedUwpIds)
+                ->get();
+            foreach ($consolidatedUwps as $consolidatedUwp) {
+                if (!$consolidatedUwp->creator) {
+                    continue;
+                }
+                $notifier->notifyUser(
+                    $consolidatedUwp->creator,
+                    new WorkflowEventNotification(
+                        title: 'UWP Consolidated to OPCR',
+                        body: "Your Unit Work Plan was consolidated by {$user->name}.",
+                        url: route('supervisor.uwp.show.page', ['id' => $consolidatedUwp->id]),
+                        type: 'success',
+                        meta: [
+                            'event' => 'uwp.consolidated',
+                            'uwp_id' => $consolidatedUwp->id,
+                            'office_id' => $consolidatedUwp->office_id,
+                            'performance_period_id' => $consolidatedUwp->performance_period_id,
+                            'status' => UnitWorkPlan::STATUS_CONSOLIDATED,
+                            'source_role' => 'dept-head',
+                        ],
+                    )
+                );
+            }
         }
 
         if ($expectsJson) {
@@ -558,6 +614,27 @@ class UnitWorkPlanController extends Controller
             return back()->with('error', $result['message'] ?? 'Unable to return Unit Work Plan.');
         }
 
+        $returnedUwp = UnitWorkPlan::query()->with('creator')->find((int) ($result['uwp_id'] ?? 0));
+        if ($returnedUwp?->creator) {
+            app(WorkflowNotificationDispatcher::class)->notifyUser(
+                $returnedUwp->creator,
+                new WorkflowEventNotification(
+                    title: 'UWP Returned by Department Head',
+                    body: "Your Unit Work Plan was returned for revision by {$user->name}.",
+                    url: route('supervisor.uwp.show.page', ['id' => $returnedUwp->id]),
+                    type: 'alert',
+                    meta: [
+                        'event' => 'uwp.returned',
+                        'uwp_id' => $returnedUwp->id,
+                        'office_id' => $returnedUwp->office_id,
+                        'performance_period_id' => $returnedUwp->performance_period_id,
+                        'status' => UnitWorkPlan::STATUS_RETURNED,
+                        'source_role' => 'dept-head',
+                    ],
+                )
+            );
+        }
+
         if ($expectsJson) {
             return response()->json([
                 'success' => true,
@@ -574,7 +651,7 @@ class UnitWorkPlanController extends Controller
             ->with('success', 'Unit Work Plan returned to Supervisor.');
     }
 
-    private function consolidateSubmittedUwpsFor(UnitWorkPlan $seedUwp, $user): Opcr
+    private function consolidateSubmittedUwpsFor(UnitWorkPlan $seedUwp, $user): array
     {
         $submittedUwps = UnitWorkPlan::query()
             ->where('office_id', $seedUwp->office_id)
@@ -658,7 +735,10 @@ class UnitWorkPlanController extends Controller
                 'return_remarks' => null,
             ]);
 
-        return $opcr;
+        return [
+            'opcr' => $opcr,
+            'consolidated_uwp_ids' => $submittedUwps->pluck('id')->map(fn ($id) => (int) $id)->all(),
+        ];
     }
 
     private function signatureRelations(): array

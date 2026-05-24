@@ -6,16 +6,29 @@ use App\Http\Controllers\Controller;
 use App\Models\OrsEntry;
 use App\Models\OrsEntryMonitoring;
 use App\Models\User;
+use App\Notifications\WorkflowEventNotification;
+use App\Services\WorkflowNotificationDispatcher;
 use Illuminate\Http\Request;
 
 class OrsMonitoringController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $supervisor = $this->authorizedSupervisor();
         $submittedEntries = $this->submittedEntriesForSupervisor($supervisor);
+        $orsEntry = null;
+        $isSubmitted = false;
 
-        return view('supervisor.ors-monitoring', compact('submittedEntries'));
+        $autoOpenEntryId = (int) $request->query('ors_entry_id', 0);
+        if ($autoOpenEntryId > 0) {
+            $candidate = $submittedEntries->firstWhere('id', $autoOpenEntryId);
+            if ($candidate) {
+                $orsEntry = $candidate;
+                $isSubmitted = strtolower((string) ($candidate->status ?? '')) === 'submitted';
+            }
+        }
+
+        return view('supervisor.ors-monitoring', compact('submittedEntries', 'orsEntry', 'isSubmitted'));
     }
 
     public function show(OrsEntry $orsEntry)
@@ -95,6 +108,28 @@ class OrsMonitoringController extends Controller
         }
 
         $orsEntry->refresh();
+
+        if ($orsEntry->employee) {
+            app(WorkflowNotificationDispatcher::class)->notifyUser(
+                $orsEntry->employee,
+                new WorkflowEventNotification(
+                    title: 'ORS Task Rated',
+                    body: "{$supervisor->name} rated your submitted ORS task.",
+                    url: route('employee.my-task', ['task_id' => $orsEntry->id]),
+                    type: 'success',
+                    meta: [
+                        'event' => 'ors.rated_by_supervisor',
+                        'ors_entry_id' => $orsEntry->id,
+                        'employee_id' => $orsEntry->employee_id,
+                        'supervisor_id' => $supervisor->id,
+                        'quality_rating' => (int) ($monitoring->quality_rating ?? 0),
+                        'timeliness_rating' => (int) ($monitoring->timeliness_rating ?? 0),
+                        'status' => strtolower((string) $orsEntry->status),
+                        'source_role' => 'supervisor',
+                    ],
+                )
+            );
+        }
 
         if ($request->expectsJson()) {
             return response()->json([

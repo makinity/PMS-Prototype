@@ -619,10 +619,13 @@ class AccomplishmentReviewController extends Controller
         abort_unless((int) ($submission->employee?->office_id ?? 0) === (int) $user->office_id, 403);
 
         $originalUser = $request->user();
-        Auth::login($submission->employee);
-        $controller = app(\App\Http\Controllers\Employee\SmporIpcrAccomplishmentController::class);
-        $indexView = $controller->index($request);
-        Auth::login($originalUser);
+        try {
+            Auth::login($submission->employee);
+            $controller = app(\App\Http\Controllers\Employee\SmporIpcrAccomplishmentController::class);
+            $indexView = $controller->index($request);
+        } finally {
+            Auth::login($originalUser);
+        }
 
         $data = $indexView->getData();
         $data['layout'] = 'layouts.dept-head';
@@ -643,10 +646,13 @@ class AccomplishmentReviewController extends Controller
         abort_unless((int) ($submission->employee?->office_id ?? 0) === (int) $user->office_id, 403);
 
         $originalUser = $request->user();
-        Auth::login($submission->employee);
-        $controller = app(\App\Http\Controllers\Employee\SmporIpcrAccomplishmentController::class);
-        $indexView = $controller->index($request);
-        Auth::login($originalUser);
+        try {
+            Auth::login($submission->employee);
+            $controller = app(\App\Http\Controllers\Employee\SmporIpcrAccomplishmentController::class);
+            $indexView = $controller->index($request);
+        } finally {
+            Auth::login($originalUser);
+        }
 
         $data = $indexView->getData();
         $data['layout'] = 'layouts.dept-head';

@@ -890,10 +890,10 @@
                     <section class="auth-view is-active" id="loginView" data-auth-view="login">
                         <form id="loginForm" class="auth-form" novalidate>
                             <div class="field-group">
-                                <label class="field-label" for="login_name">Username</label>
+                                <label class="field-label" for="login_name">Name</label>
                                 <div class="field-shell">
                                     <i class="fa-regular fa-user leading-icon"></i>
-                                    <input type="text" id="login_name" name="name" class="field-input" placeholder="Enter your username" autocomplete="username">
+                                    <input type="text" id="login_name" name="name" class="field-input" placeholder="Enter your login name" autocomplete="username">
                                 </div>
                                 <div class="field-error" data-error-for="login_name"></div>
                             </div>
@@ -1345,7 +1345,7 @@
                 const password = loginPasswordInput.value.trim();
 
                 if (!identifier) {
-                    showFieldError(loginNameInput, 'Name, email, or employee ID is required.');
+                    showFieldError(loginNameInput, 'Name (login name) is required.');
                     return;
                 }
 

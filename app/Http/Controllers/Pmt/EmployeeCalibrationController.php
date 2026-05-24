@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\AccomplishmentSubmission;
 use App\Models\Ipcr;
 use App\Models\PerformancePeriod;
+use App\Notifications\WorkflowEventNotification;
+use App\Services\WorkflowNotificationDispatcher;
 use App\Support\ResolvesIpcrTargetScores;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -342,6 +344,8 @@ class EmployeeCalibrationController extends Controller
             return back()->with('error', 'Only calibrated IPCR ratings can be released.');
         }
 
+        $previousStatus = (string) $ipcr->status;
+
         DB::transaction(function () use ($ipcr, $request) {
             $ipcr->update([
                 'status' => Ipcr::STATUS_RELEASED_BY_PMT,
@@ -367,6 +371,39 @@ class EmployeeCalibrationController extends Controller
 
         $this->recalculateOpcrScore($ipcr);
         $this->autoReleaseOpcrIfAllReleased($ipcr);
+
+        if ($previousStatus !== Ipcr::STATUS_RELEASED_BY_PMT) {
+            $notifier = app(WorkflowNotificationDispatcher::class);
+            $meta = [
+                'event' => 'stage4.data_updated',
+                'source' => 'ipcr_release',
+                'ipcr_id' => $ipcr->id,
+                'office_id' => $ipcr->office_id,
+                'performance_period_id' => $ipcr->performance_period_id,
+                'status' => Ipcr::STATUS_RELEASED_BY_PMT,
+            ];
+
+            $notifier->notifyRole(
+                'pmt',
+                new WorkflowEventNotification(
+                    title: 'Stage IV Data Updated',
+                    body: 'Released IPCR results are ready for Top Performers review.',
+                    url: route('pmt.top-performers.index'),
+                    type: 'info',
+                    meta: $meta
+                )
+            );
+            $notifier->notifyRole(
+                'pmt',
+                new WorkflowEventNotification(
+                    title: 'Stage IV Data Updated',
+                    body: 'Released IPCR results are ready for Development Planning review.',
+                    url: route('pmt.development-planning.index'),
+                    type: 'info',
+                    meta: $meta
+                )
+            );
+        }
 
         if ($request->wantsJson()) return response()->json(['status' => 'released']);
         return back()->with('success', 'IPCR official rating released to the office and employee.');

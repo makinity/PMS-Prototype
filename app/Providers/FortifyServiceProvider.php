@@ -59,11 +59,19 @@ class FortifyServiceProvider extends ServiceProvider
             }
 
             $normalizedValue = Str::lower($value);
-            $user = User::query()
-                ->whereRaw('LOWER(name) = ?', [$normalizedValue])
-                ->orWhereRaw('LOWER(email) = ?', [$normalizedValue])
-                ->orWhereRaw('LOWER(employee_id) = ?', [$normalizedValue])
-                ->first();
+            $matchedUsers = User::query()
+                ->whereRaw('LOWER(TRIM(name)) = ?', [$normalizedValue])
+                ->limit(2)
+                ->get();
+
+            if ($matchedUsers->count() > 1) {
+                $key = $loginField ?: 'name';
+                throw ValidationException::withMessages([
+                    $key => 'Duplicate login name detected. Please contact your administrator.',
+                ]);
+            }
+
+            $user = $matchedUsers->first();
 
             if (! $user || ! Hash::check($request->password, $user->password)) {
                 return null;

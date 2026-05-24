@@ -294,7 +294,7 @@ if (loginForm && loginNameInput && loginPasswordInput && loginText && loginSpinn
         const password = loginPasswordInput.value.trim();
 
         if (!name) {
-            showError(loginNameInput, 'Name is required');
+            showError(loginNameInput, 'Name (login name) is required');
             return;
         }
 

@@ -590,10 +590,13 @@ class AccomplishmentController extends Controller
 
         // Impersonate the employee to reuse the same controller logic
         $originalUser = $request->user();
-        Auth::login($submission->employee);
-        $controller = app(\App\Http\Controllers\Employee\SmporIpcrAccomplishmentController::class);
-        $indexView = $controller->index($request);
-        Auth::login($originalUser);
+        try {
+            Auth::login($submission->employee);
+            $controller = app(\App\Http\Controllers\Employee\SmporIpcrAccomplishmentController::class);
+            $indexView = $controller->index($request);
+        } finally {
+            Auth::login($originalUser);
+        }
 
         $data = $indexView->getData();
         $data['layout'] = 'layouts.supervisor';
@@ -614,10 +617,13 @@ class AccomplishmentController extends Controller
             ->firstOrFail();
 
         $originalUser = $request->user();
-        Auth::login($submission->employee);
-        $controller = app(\App\Http\Controllers\Employee\SmporIpcrAccomplishmentController::class);
-        $indexView = $controller->index($request);
-        Auth::login($originalUser);
+        try {
+            Auth::login($submission->employee);
+            $controller = app(\App\Http\Controllers\Employee\SmporIpcrAccomplishmentController::class);
+            $indexView = $controller->index($request);
+        } finally {
+            Auth::login($originalUser);
+        }
 
         $data = $indexView->getData();
         $data['layout'] = 'layouts.supervisor';
