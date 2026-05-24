@@ -34,67 +34,64 @@
     @endphp
 
     <section class="space-y-6">
-        <div class="flex flex-wrap items-start justify-between gap-4">
+        <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
             <div>
-                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Stage I - Unit Work Plan (UWP)</p>
-                <h1 class="mt-1 text-2xl font-semibold text-white">UWP Preview</h1>
-                <p class="mt-1 text-sm text-slate-400">Read-only preview of planned outputs and success indicators.</p>
+                <h1 class="text-2xl font-semibold tracking-tight text-white">UWP Preview</h1>
+                <p class="mt-0.5 text-sm text-slate-400">{{ $officeName }} · {{ $periodName }}</p>
             </div>
-            <a href="{{ route('supervisor.uwp-page') }}"
-               class="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-950/60 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-900">
-                Back to UWP List
-            </a>
+            <div class="flex items-center gap-4">
+                <span class="inline-flex items-center gap-1.5 rounded-full border {{ $statusClass }} px-3 py-1 text-xs font-medium">
+                    <span class="h-1.5 w-1.5 rounded-full bg-current"></span>
+                    {{ ucfirst(str_replace('_', ' ', $status ?: '--')) }}
+                </span>
+                <a href="{{ route('supervisor.uwp-page') }}"
+                   class="inline-flex items-center gap-1 text-sm text-slate-400 transition hover:text-white">
+                    <i class="fas fa-arrow-left text-xs"></i> Back to list
+                </a>
+            </div>
         </div>
 
-        <div class="rounded-2xl border border-slate-800 bg-slate-950/60 p-5">
-            <div class="flex flex-wrap gap-6">
-                <div class="min-w-[200px]">
-                    <p class="text-xs uppercase tracking-widest text-slate-500">Office / Unit</p>
-                    <p class="mt-1 font-medium text-white">{{ $officeName }}</p>
-                </div>
-                <div class="min-w-[200px]">
-                    <p class="text-xs uppercase tracking-widest text-slate-500">Performance Period</p>
-                    <p class="mt-1 font-medium text-white">{{ $periodName }}</p>
-                </div>
-                <div class="min-w-[200px]">
-                    <p class="text-xs uppercase tracking-widest text-slate-500">Supervisor</p>
-                    <p class="mt-1 font-medium text-white">{{ $supervisorName }}</p>
-                </div>
-                <div class="min-w-[200px]">
-                    <p class="text-xs uppercase tracking-widest text-slate-500">Department Head</p>
-                    <p class="mt-1 font-medium text-white">{{ $deptHeadName }}</p>
-                </div>
-                <div class="min-w-[160px]">
-                    <p class="text-xs uppercase tracking-widest text-slate-500">Status</p>
-                    <span class="mt-2 inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold {{ $statusClass }}">
-                        {{ ucfirst(str_replace('_', ' ', $status ?: '--')) }}
-                    </span>
-                </div>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-5 shadow-lg">
+                <p class="text-xs uppercase tracking-widest text-slate-500">Office / Unit</p>
+                <p class="mt-1 font-medium text-white">{{ $officeName }}</p>
             </div>
-
-            @if (!empty($uwp['return_remarks']))
-                <div class="mt-5 rounded-xl border border-rose-500/20 bg-rose-500/5 p-4">
-                    <p class="text-xs font-semibold uppercase tracking-wide text-rose-200">Returned Remarks</p>
-                    <p class="mt-2 whitespace-pre-wrap text-sm text-slate-100">{{ $uwp['return_remarks'] }}</p>
-                    <p class="mt-2 text-[11px] text-slate-400">
-                        @if (!empty($uwp['returned_at']))
-                            Returned at {{ $uwp['returned_at'] }}
-                        @endif
-                        @if (!empty($uwp['returned_by_user']['name']))
-                            by {{ $uwp['returned_by_user']['name'] }}
-                        @endif
-                    </p>
-                </div>
-            @endif
+            <div class="rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-5 shadow-lg">
+                <p class="text-xs uppercase tracking-widest text-slate-500">Performance Period</p>
+                <p class="mt-1 font-medium text-white">{{ $periodName }}</p>
+            </div>
+            <div class="rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-5 shadow-lg">
+                <p class="text-xs uppercase tracking-widest text-slate-500">Supervisor</p>
+                <p class="mt-1 font-medium text-white">{{ $supervisorName }}</p>
+            </div>
+            <div class="rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-5 shadow-lg">
+                <p class="text-xs uppercase tracking-widest text-slate-500">Department Head</p>
+                <p class="mt-1 font-medium text-white">{{ $deptHeadName }}</p>
+            </div>
         </div>
+
+        @if (!empty($uwp['return_remarks']))
+            <div class="rounded-xl border border-rose-500/20 bg-rose-500/5 p-4">
+                <p class="text-xs font-semibold uppercase tracking-wide text-rose-200">Returned Remarks</p>
+                <p class="mt-2 whitespace-pre-wrap text-sm text-slate-100">{{ $uwp['return_remarks'] }}</p>
+                <p class="mt-2 text-[11px] text-slate-400">
+                    @if (!empty($uwp['returned_at']))
+                        Returned at {{ $uwp['returned_at'] }}
+                    @endif
+                    @if (!empty($uwp['returned_by_user']['name']))
+                        by {{ $uwp['returned_by_user']['name'] }}
+                    @endif
+                </p>
+            </div>
+        @endif
 
         <div class="grid min-h-0 gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
-            <aside class="rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
-                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <aside class="rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-4 shadow-lg">
+                <div class="flex items-center justify-between border-b border-gray-700 pb-3">
                     <p class="text-sm font-semibold uppercase tracking-[0.22em] text-slate-400">Planned Outputs</p>
                     <span id="uwpOutputCountBadge" class="text-sm font-semibold text-blue-300">{{ $flattenedOutputs->count() }}</span>
                 </div>
-                <div class="mt-3 flex border-b border-slate-800 pb-2">
+                <div class="mt-3 flex border-b border-gray-700 pb-2">
                     <button type="button" data-uwp-filter="all" class="flex-1 border-b-2 border-blue-400 pb-2 text-xs font-semibold text-white">All</button>
                     <button type="button" data-uwp-filter="core" class="flex-1 border-b-2 border-transparent pb-2 text-xs font-medium text-slate-400 hover:text-slate-200">Core</button>
                     <button type="button" data-uwp-filter="support" class="flex-1 border-b-2 border-transparent pb-2 text-xs font-medium text-slate-400 hover:text-slate-200">Support</button>
@@ -102,15 +99,15 @@
                 <div id="uwpOutputList" class="mt-3 min-h-0 space-y-2 overflow-y-auto pr-1"></div>
             </aside>
 
-            <section class="rounded-2xl border border-slate-800 bg-slate-950/60">
-                <div class="border-b border-slate-800 px-5 py-4">
+            <section class="rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 shadow-lg">
+                <div class="border-b border-gray-700 px-5 py-4">
                     <div class="flex flex-wrap items-center gap-3">
                         <h2 id="uwpDetailTitle" class="text-lg font-semibold text-white">Select an output</h2>
                         <span id="uwpDetailTypeBadge" class="hidden rounded-md border px-2 py-1 text-xs font-medium"></span>
                         <span id="uwpDetailWeight" class="hidden text-sm font-semibold text-slate-300"></span>
                     </div>
                 </div>
-                <div class="border-b border-slate-800 px-5">
+                <div class="border-b border-gray-700 px-5">
                     <div class="flex flex-wrap gap-1.5">
                         <button type="button" data-uwp-tab="overview" class="border-b-2 border-blue-400 px-2.5 py-3 text-sm font-semibold text-white">Overview</button>
                         <button type="button" data-uwp-tab="indicators" class="border-b-2 border-transparent px-2.5 py-3 text-sm font-medium text-slate-400 hover:text-slate-200">Success Indicators</button>
@@ -129,9 +126,9 @@
                     </div>
 
                     <div data-uwp-panel="indicators" class="hidden space-y-4">
-                        <div class="overflow-hidden rounded-xl border border-slate-800">
+                        <div class="overflow-hidden rounded-lg border border-gray-700 bg-gray-900/40">
                             <table class="min-w-full text-sm text-slate-200">
-                                <thead class="bg-slate-950/70 text-xs uppercase tracking-wide text-slate-400">
+                                <thead class="bg-gray-900/50 text-xs uppercase tracking-wide text-slate-400">
                                     <tr>
                                         <th class="px-4 py-3 text-left">Indicator</th>
                                         <th class="px-4 py-3 text-left">Target</th>
@@ -147,9 +144,9 @@
             </section>
         </div>
 
-        <div class="flex flex-wrap items-center justify-end gap-3 rounded-2xl border border-slate-800 bg-slate-950/60 px-5 py-4">
+        <div class="flex flex-wrap items-center justify-end gap-3 rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 px-5 py-4 shadow-lg">
             <a href="{{ route('uwp.excel.export', ['uwp' => (int) ($uwp['id'] ?? 0)]) }}"
-               class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-900 {{ empty($uwp['id']) ? 'pointer-events-none opacity-60' : '' }}">
+               class="rounded-lg border border-gray-600 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-gray-800 {{ empty($uwp['id']) ? 'pointer-events-none opacity-60' : '' }}">
                 Export Excel
             </a>
 
@@ -363,7 +360,7 @@
                         const isActive = idx === activeIndex;
                         const btn = document.createElement('button');
                         btn.type = 'button';
-                        btn.className = `block w-full rounded-xl border px-3 py-3 text-left transition ${isActive ? 'border-blue-400/60 bg-blue-500/10' : 'border-slate-800 bg-slate-950/30 hover:bg-slate-900/50'}`;
+                        btn.className = `block w-full rounded-lg border px-3 py-3 text-left transition ${isActive ? 'border-blue-400/60 bg-blue-500/10' : 'border-gray-700 bg-gray-900/40 hover:bg-gray-800/60'}`;
                         btn.innerHTML = `
                             <div class="line-clamp-2 text-sm font-semibold leading-snug text-white">${escapeHtml(mfo.title || 'Untitled Output')}</div>
                             <div class="mt-2 flex flex-wrap items-center gap-2">
@@ -429,7 +426,7 @@
 
                     const indicators = Array.isArray(mfo.success_indicators) ? mfo.success_indicators : [];
                     indicatorsSummaryEl.innerHTML = indicators.length
-                        ? indicators.map((ind) => `<div class="rounded-xl border border-slate-800 bg-slate-950/40 px-4 py-3 text-sm text-slate-100">${escapeHtml(ind.indicator_text || '--')}</div>`).join('')
+                        ? indicators.map((ind) => `<div class="rounded-lg border border-gray-700 bg-gray-900/40 px-4 py-3 text-sm text-slate-100">${escapeHtml(ind.indicator_text || '--')}</div>`).join('')
                         : '<p class="text-sm text-slate-500">No success indicators.</p>';
 
                     indicatorsTableBodyEl.innerHTML = indicators.length
