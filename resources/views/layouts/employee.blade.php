@@ -34,7 +34,7 @@
         @endphp
 
         <!-- Sidebar -->
-        <aside id="employee-sidebar" class="fixed left-0 top-0 z-40 h-screen w-72 -translate-x-full border-r border-gray-700 bg-slate-950 pt-16 text-slate-100 transition-transform sm:translate-x-0" aria-label="Sidebar">
+        <aside id="employee-sidebar" class="fixed left-0 top-0 z-40 h-screen w-72 -translate-x-full border-r border-gray-700 bg-slate-950 pt-16 text-slate-100 transition-[transform] duration-200 ease-out will-change-transform motion-reduce:transition-none sm:translate-x-0" aria-label="Sidebar">
             <div class="flex h-full flex-col gap-6 overflow-y-auto px-4 pb-6">
 
 
@@ -121,7 +121,7 @@
 
         <!-- Top Navigation -->
         <nav class="fixed top-0 z-50 w-full bg-slate-950 text-slate-100" id="top-nav">
-            <div id="sidebar-nav-divider" class="pointer-events-none absolute inset-y-0 w-px bg-gray-700" style="left: 18rem; display: none;"></div>
+            <div id="sidebar-nav-divider" class="pointer-events-none absolute inset-y-0 w-px bg-gray-700" style="left: calc(18rem - 1px); display: none; transform: translateX(-18rem); transition: transform 200ms ease-out;"></div>
             <div class="flex items-center justify-between gap-4 px-4 py-3 lg:px-6">
                 <div class="flex items-center gap-3">
                     <button type="button" id="sidebar-toggle-btn" aria-controls="employee-sidebar" class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-800 bg-slate-900/70 text-slate-200 shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-400/30">
@@ -232,6 +232,29 @@
         const logoText = document.getElementById('nav-logo-text');
         const logoIcon = document.getElementById('nav-logo-icon');
         let collapsed = false;
+        const MOBILE_SIDEBAR_WIDTH = '18rem';
+        const DIVIDER_OFFSET_PX = -1;
+
+        function setDividerLeft(value) {
+            if (!navDivider) return;
+            navDivider.style.left = `calc(${value} + ${DIVIDER_OFFSET_PX}px)`;
+        }
+
+        function setMobileDividerOpenState(isOpen, animate = true) {
+            if (!navDivider) return;
+            navDivider.style.display = 'block';
+            setDividerLeft(MOBILE_SIDEBAR_WIDTH);
+            if (!animate) {
+                navDivider.style.transition = 'none';
+            } else {
+                navDivider.style.transition = 'transform 200ms ease-out';
+            }
+            navDivider.style.transform = isOpen ? 'translateX(0)' : `translateX(-${MOBILE_SIDEBAR_WIDTH})`;
+            if (!animate) {
+                navDivider.offsetHeight;
+                navDivider.style.transition = 'transform 200ms ease-out';
+            }
+        }
 
         function isDesktop() { return window.innerWidth >= 640; }
 
@@ -240,10 +263,17 @@
             const sidebarHidden = !isDesktop() && sidebar?.classList.contains('-translate-x-full');
             if (sidebarHidden) {
                 navDivider.style.display = 'none';
+                navDivider.style.transform = `translateX(-${MOBILE_SIDEBAR_WIDTH})`;
                 return;
             }
             navDivider.style.display = 'block';
-            navDivider.style.left = (!isDesktop() || !collapsed) ? '18rem' : '4.5rem';
+            if (isDesktop()) {
+                setDividerLeft(!collapsed ? '18rem' : '4.5rem');
+                navDivider.style.transform = 'translateX(0)';
+            } else {
+                setDividerLeft(MOBILE_SIDEBAR_WIDTH);
+                navDivider.style.transform = 'translateX(0)';
+            }
         }
 
         function updateMobileLogoVisibility() {
@@ -284,13 +314,23 @@
 
         toggleBtn?.addEventListener('click', () => {
             if (!isDesktop()) {
-                // Mobile: full drawer toggle
-                resetCollapse();
-                const willOpen = sidebar.classList.contains('-translate-x-full');
-                if (willOpen) {
+                // Mobile: mirror desktop toggle flow (toggle, then update UI state)
+                // Ensure mobile drawer always uses full sidebar width/content,
+                // even if desktop was previously in collapsed mode.
+                sidebar.style.width = '';
+                sidebar.style.overflow = '';
+                mainWrapper.style.marginLeft = '';
+                sidebar.querySelectorAll('.sidebar-link span, nav > div > p').forEach(el => el.style.display = '');
+                collapsed = false;
+                const isOpening = sidebar.classList.contains('-translate-x-full');
+                if (isOpening) {
+                    setMobileDividerOpenState(false, false);
                     sidebar.classList.remove('-translate-x-full');
+                    requestAnimationFrame(() => setMobileDividerOpenState(true, true));
                 } else {
+                    setMobileDividerOpenState(true, false);
                     sidebar.classList.add('-translate-x-full');
+                    requestAnimationFrame(() => setMobileDividerOpenState(false, true));
                 }
                 updateMobileLogoVisibility();
                 return;
@@ -321,7 +361,9 @@
             updateMobileLogoVisibility();
         });
 
-        sidebar?.addEventListener('transitionend', updateNavDivider);
+        sidebar?.addEventListener('transitionend', () => {
+            updateNavDivider();
+        });
         if (sidebar) {
             const observer = new MutationObserver(updateNavDivider);
             observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
