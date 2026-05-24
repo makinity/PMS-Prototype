@@ -407,6 +407,14 @@ class SmporExcelExport implements FromArray, WithStyles, WithColumnWidths, WithT
             $timelinessBand = $this->buildBandFromMonths($months, 't_points');
 
             $qtyTotal = (int) ($qtyBand['total'] ?? 0);
+            $targetQuantity = isset($row['target_quantity']) && is_numeric($row['target_quantity'])
+                ? (float) $row['target_quantity']
+                : 0.0;
+
+            $qtyBand['avg'] = ($qtyTotal > 0 && $targetQuantity > 0)
+                ? round(min(5.0, 5.0 * ($qtyTotal / $targetQuantity)), 2)
+                : 0;
+
             $qualityBand['avg'] = $qtyTotal > 0
                 ? round(((int) ($qualityBand['total'] ?? 0)) / $qtyTotal, 2)
                 : 0;
@@ -479,15 +487,19 @@ class SmporExcelExport implements FromArray, WithStyles, WithColumnWidths, WithT
     {
         $band = [];
         $total = 0;
+        $activeMonths = 0;
 
         foreach (self::RAW_MONTH_KEYS as $month) {
             $value = (int) ($months[$month][$field] ?? 0);
             $band[$month] = $value;
             $total += $value;
+            if ($value > 0) {
+                $activeMonths++;
+            }
         }
 
         $band['total'] = $total;
-        $band['avg'] = round($total / 6, 2);
+        $band['avg'] = $activeMonths > 0 ? round($total / $activeMonths, 2) : 0;
 
         return $band;
     }

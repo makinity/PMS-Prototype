@@ -249,9 +249,13 @@
         function updateMobileLogoVisibility() {
             if (!logoLink || !logoText || !logoIcon || !sidebar) return;
             if (isDesktop()) {
-                logoLink.style.display = '';
-                logoIcon.style.display = '';
-                logoText.style.display = '';
+                if (collapsed) {
+                    logoLink.style.display = 'none';
+                } else {
+                    logoLink.style.display = 'flex';
+                    logoIcon.style.display = '';
+                    logoText.style.display = '';
+                }
                 return;
             }
 

@@ -916,7 +916,31 @@ class SmporIpcrAccomplishmentController extends Controller
             ? constant(QarHeader::class . '::STATUS_PMT_APPROVED')
             : 'pmt_approved';
 
-        if ($user->office_id && $rangeStartMonth && $rangeEndMonth) {
+        // Path 1: Submission-linked MPORs (matches preview logic)
+        $submission = AccomplishmentSubmission::query()
+            ->where('employee_id', $user->id)
+            ->where('performance_period_id', $period->id)
+            ->with(['mpors:id,employee_id,office_id,month,status'])
+            ->first();
+
+        if (
+            $submission
+            && in_array(strtolower((string) $submission->status), [
+                'submitted_to_supervisor',
+                'supervisor_endorsed',
+                'dept_head_endorsed',
+                'recommended_by_pmt',
+                'pmt_approved',
+                'released_by_pmt',
+            ], true)
+            && $submission->mpors->isNotEmpty()
+        ) {
+            $selectedMpors = $submission->mpors->sortBy('month')->values();
+            $usingOfficialDataset = strtolower((string) $submission->dataset_source) === 'qar_official';
+        }
+
+        // Path 2: QAR-linked MPORs
+        if ($selectedMpors->isEmpty() && $user->office_id && $rangeStartMonth && $rangeEndMonth) {
             $qar = QarHeader::query()
                 ->where('office_id', $user->office_id)
                 ->where('performance_period_id', $period->id)
@@ -948,11 +972,12 @@ class SmporIpcrAccomplishmentController extends Controller
             }
         }
 
-        if (!$usingOfficialDataset && $user?->id && $user?->office_id && $rangeStartMonth && $rangeEndMonth) {
+        // Path 3: Fallback to status-filtered MPORs (matching preview statuses)
+        if (!$usingOfficialDataset && $selectedMpors->isEmpty() && $user?->id && $user?->office_id && $rangeStartMonth && $rangeEndMonth) {
             $selectedMpors = Mpor::query()
                 ->where('employee_id', $user->id)
                 ->where('office_id', $user->office_id)
-                ->whereIn('status', ['submitted'])
+                ->whereIn('status', ['submitted', 'approved', 'endorsed'])
                 ->whereBetween(DB::raw('LEFT(month, 7)'), [$rangeStartMonth, $rangeEndMonth])
                 ->orderBy('month')
                 ->get();
@@ -1121,6 +1146,8 @@ class SmporIpcrAccomplishmentController extends Controller
             return strnatcasecmp((string) ($left['title'] ?? ''), (string) ($right['title'] ?? ''));
         });
 
+        $targetQuantityByOutput = $this->buildTargetQuantityByOutput($ipcr);
+
         $sections = [];
         foreach ($sectionDefinitions as $sectionType => $definition) {
             $orderedLabels = [];
@@ -1145,7 +1172,8 @@ class SmporIpcrAccomplishmentController extends Controller
 
             $rows = [];
             foreach ($labels as $label) {
-                $rows[] = $this->makeOutputRow($label, $aggregateMap[$label] ?? []);
+                $targetQty = $targetQuantityByOutput[$label] ?? null;
+                $rows[] = $this->makeOutputRow($label, $aggregateMap[$label] ?? [], $targetQty);
             }
 
             $weightPercent = (float) ($definition['weight_percent'] ?? 0);
@@ -1211,7 +1239,7 @@ class SmporIpcrAccomplishmentController extends Controller
      *  - ['jan' => 12]  (qty only)
      *  - ['jan' => ['qty'=>12,'q_points'=>60,'t_points'=>60]] (explicit per-band values)
      */
-    private function makeOutputRow(string $label, array $monthValues): array
+    private function makeOutputRow(string $label, array $monthValues, ?float $targetQuantity = null): array
     {
         $months = [];
         $keys = ['jan', 'feb', 'mar', 'apr', 'may', 'jun'];
@@ -1239,6 +1267,7 @@ class SmporIpcrAccomplishmentController extends Controller
         return [
             'label' => $label,
             'months' => $months,
+            'target_quantity' => $targetQuantity,
         ];
     }
 
@@ -1547,6 +1576,15 @@ class SmporIpcrAccomplishmentController extends Controller
             ->orderByDesc('start_date')
             ->first();
 
+        $validStatuses = [
+            Ipcr::STATUS_COMMITTED,
+            Ipcr::STATUS_FOR_COMMITMENT,
+            Ipcr::STATUS_PENDING_PMT_CALIBRATION,
+            Ipcr::STATUS_APPROVED_BY_PMT,
+            Ipcr::STATUS_ADJUSTED_BY_PMT,
+            Ipcr::STATUS_RELEASED_BY_PMT,
+        ];
+
         $query = Ipcr::query()
             ->with([
                 'employee:id,name,office_id',
@@ -1555,7 +1593,7 @@ class SmporIpcrAccomplishmentController extends Controller
                 'items:id,ipcr_id,uwp_function_id,uwp_success_indicator_id,output_title,function_type,indicator_text,target_quantity,target_timeline,target_summary,standards_payload',
             ])
             ->where('employee_id', $user->id)
-            ->whereIn('status', [Ipcr::STATUS_COMMITTED, Ipcr::STATUS_FOR_COMMITMENT]);
+            ->whereIn('status', $validStatuses);
 
         if ($activePeriod) {
             $query->where('performance_period_id', $activePeriod->id);
@@ -1575,7 +1613,7 @@ class SmporIpcrAccomplishmentController extends Controller
                     'items:id,ipcr_id,uwp_function_id,uwp_success_indicator_id,output_title,function_type,indicator_text,target_quantity,target_timeline,target_summary,standards_payload',
                 ])
                 ->where('employee_id', $user->id)
-                ->whereIn('status', [Ipcr::STATUS_COMMITTED, Ipcr::STATUS_FOR_COMMITMENT])
+                ->whereIn('status', $validStatuses)
                 ->orderByDesc('generated_at')
                 ->orderByDesc('id')
                 ->first();
