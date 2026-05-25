@@ -23,51 +23,51 @@
     @endphp
 
     <section class="space-y-4 px-3 md:px-6">
-        <div class="rounded-xl border border-white/10 bg-transparent p-4 shadow-sm">
+        <div class="rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-4 shadow-sm">
             <h1 class="text-lg font-semibold text-gray-100 sm:text-xl">Audit Logs</h1>
             <p class="mt-1 text-sm text-gray-300">Monitor state-changing activity across authentication, admin, and workflow modules.</p>
         </div>
 
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <div class="rounded-xl border border-white/10 bg-transparent p-4 shadow-sm">
+            <div class="rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-4 shadow-sm">
                 <p class="text-xs uppercase tracking-wide text-gray-400">Total Events</p>
                 <p id="audit-summary-total" class="mt-2 text-2xl font-semibold text-white">{{ number_format((int) ($summary['total'] ?? 0)) }}</p>
             </div>
-            <div class="rounded-xl border border-white/10 bg-transparent p-4 shadow-sm">
+            <div class="rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-4 shadow-sm">
                 <p class="text-xs uppercase tracking-wide text-gray-400">Successful</p>
                 <p id="audit-summary-success" class="mt-2 text-2xl font-semibold text-emerald-300">{{ number_format((int) ($summary['success'] ?? 0)) }}</p>
             </div>
-            <div class="rounded-xl border border-white/10 bg-transparent p-4 shadow-sm">
+            <div class="rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-4 shadow-sm">
                 <p class="text-xs uppercase tracking-wide text-gray-400">Failed</p>
                 <p id="audit-summary-failed" class="mt-2 text-2xl font-semibold text-rose-300">{{ number_format((int) ($summary['failed'] ?? 0)) }}</p>
             </div>
-            <div class="rounded-xl border border-white/10 bg-transparent p-4 shadow-sm">
+            <div class="rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-4 shadow-sm">
                 <p class="text-xs uppercase tracking-wide text-gray-400">Unique Actors</p>
                 <p id="audit-summary-actors" class="mt-2 text-2xl font-semibold text-white">{{ number_format((int) ($summary['unique_actors'] ?? 0)) }}</p>
             </div>
         </div>
 
-        <div class="rounded-xl border border-white/10 bg-transparent p-4 shadow-sm">
+        <div class="rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-4 shadow-sm">
             <form id="audit-filter-form" method="GET" action="{{ $indexUrl }}" class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
                 <div class="xl:col-span-2">
-                    <label for="auditSearch" class="mb-1 block text-xs uppercase tracking-wide text-gray-400">Search</label>
+                    <label for="auditSearch" class="mb-1 block text-xs uppercase tracking-[0.14em] text-slate-400">Search</label>
                     <input
                         id="auditSearch"
                         type="text"
                         name="search"
                         value="{{ $filters['search'] ?? '' }}"
                         placeholder="Actor, summary, module, target, IP"
-                        style="background:#0f172a;color:#e5e7eb;"
-                        class="w-full rounded-lg border border-white/10 bg-gray-900/60 px-3 py-2 text-sm text-gray-100 outline-none focus:border-blue-500" />
+                        style="background-color:#020617;color:#e2e8f0;border-color:#334155;"
+                        class="w-full rounded-xl border px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500" />
                 </div>
 
                 <div>
-                    <label for="auditActor" class="mb-1 block text-xs uppercase tracking-wide text-gray-400">Actor</label>
+                    <label for="auditActor" class="mb-1 block text-xs uppercase tracking-[0.14em] text-slate-400">Actor</label>
                     <select
                         id="auditActor"
                         name="actor_user_id"
-                        style="background:#0f172a;color:#e5e7eb;"
-                        class="w-full rounded-lg border border-white/10 bg-gray-900/60 px-3 py-2 text-sm text-gray-100 outline-none focus:border-blue-500">
+                        style="background-color:#020617;color:#e2e8f0;border-color:#334155;"
+                        class="w-full rounded-xl border px-3 py-2 text-sm text-slate-200 [color-scheme:dark]">
                         <option value="">All Actors</option>
                         @foreach ($actors as $actor)
                             <option value="{{ $actor['id'] }}" @selected((string) ($filters['actor_user_id'] ?? '') === (string) $actor['id'])>
@@ -78,12 +78,12 @@
                 </div>
 
                 <div>
-                    <label for="auditModule" class="mb-1 block text-xs uppercase tracking-wide text-gray-400">Module</label>
+                    <label for="auditModule" class="mb-1 block text-xs uppercase tracking-[0.14em] text-slate-400">Module</label>
                     <select
                         id="auditModule"
                         name="module"
-                        style="background:#0f172a;color:#e5e7eb;"
-                        class="w-full rounded-lg border border-white/10 bg-gray-900/60 px-3 py-2 text-sm text-gray-100 outline-none focus:border-blue-500">
+                        style="background-color:#020617;color:#e2e8f0;border-color:#334155;"
+                        class="w-full rounded-xl border px-3 py-2 text-sm text-slate-200 [color-scheme:dark]">
                         <option value="">All Modules</option>
                         @foreach ($modules as $module)
                             <option value="{{ $module }}" @selected(($filters['module'] ?? '') === $module)>{{ $formatLabel($module) }}</option>
@@ -92,12 +92,12 @@
                 </div>
 
                 <div>
-                    <label for="auditStatus" class="mb-1 block text-xs uppercase tracking-wide text-gray-400">Status</label>
+                    <label for="auditStatus" class="mb-1 block text-xs uppercase tracking-[0.14em] text-slate-400">Status</label>
                     <select
                         id="auditStatus"
                         name="status"
-                        style="background:#0f172a;color:#e5e7eb;"
-                        class="w-full rounded-lg border border-white/10 bg-gray-900/60 px-3 py-2 text-sm text-gray-100 outline-none focus:border-blue-500">
+                        style="background-color:#020617;color:#e2e8f0;border-color:#334155;"
+                        class="w-full rounded-xl border px-3 py-2 text-sm text-slate-200 [color-scheme:dark]">
                         <option value="">All Statuses</option>
                         <option value="success" @selected(($filters['status'] ?? '') === 'success')>Success</option>
                         <option value="failed" @selected(($filters['status'] ?? '') === 'failed')>Failed</option>
@@ -115,7 +115,7 @@
             </form>
         </div>
 
-        <div class="rounded-xl border border-white/10 bg-transparent shadow-sm">
+        <div class="rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 shadow-sm">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-white/10 text-xs sm:text-sm">
                     <thead class="bg-gray-900/70 text-[11px] uppercase tracking-wide text-gray-400 sm:text-xs">
@@ -169,7 +169,7 @@
                                 <td class="px-4 py-3">
                                     <div class="font-medium text-white">{{ $log->summary ?: $formatLabel($log->action_key) }}</div>
                                     <div class="mt-1 text-xs text-gray-400">{{ optional($log->created_at)->format('M d, Y h:i A') }}</div>
-                                    <div class="text-xs text-gray-400">{{ $log->actor_name ?: 'System / Guest' }}{{ $log->actor_role ? ' • ' . $formatLabel($log->actor_role) : '' }}</div>
+                                    <div class="text-xs text-gray-400">{{ $log->actor_name ?: 'System / Guest' }}{{ $log->actor_role ? ' Ã¢â‚¬Â¢ ' . $formatLabel($log->actor_role) : '' }}</div>
                                     <div class="text-xs text-gray-400">{{ $formatLabel($log->module_key) }}</div>
                                 </td>
                                 <td class="px-4 py-3">
@@ -206,8 +206,8 @@
     </section>
 
     <div id="audit-detail-modal" class="fixed inset-0 z-[70] hidden items-center justify-center bg-black/70 px-4 py-6">
-        <div class="w-full max-w-3xl rounded-2xl border border-slate-800 bg-slate-900 shadow-xl">
-            <div class="flex items-start justify-between gap-4 border-b border-slate-800 px-5 py-4">
+        <div class="w-full max-w-3xl rounded-2xl border border-gray-700 bg-slate-900 shadow-xl">
+            <div class="flex items-start justify-between gap-4 border-b border-gray-700 px-5 py-4">
                 <div>
                     <h2 id="audit-detail-title" class="text-lg font-semibold text-white">Audit Event</h2>
                     <p id="audit-detail-subtitle" class="mt-1 text-sm text-slate-400">Details</p>

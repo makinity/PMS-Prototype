@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Opcr;
 use App\Models\PerformancePeriod;
 use App\Models\UnitWorkPlan;
+use App\Notifications\WorkflowEventNotification;
 use App\Services\OpcrOfficeRatingService;
+use App\Services\WorkflowNotificationDispatcher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -212,6 +214,25 @@ class OpcrController extends Controller
             }
         });
 
+        $model->loadMissing(['office', 'performancePeriod']);
+        app(WorkflowNotificationDispatcher::class)->notifyRole(
+            'pmt',
+            new WorkflowEventNotification(
+                title: 'OPCR Endorsed by Department Head',
+                body: "{$user->name} endorsed an OPCR for PMT review.",
+                url: route('pmt.opcr.review.show', ['opcr' => $model->id]),
+                type: 'info',
+                meta: [
+                    'event' => 'opcr.endorsed_to_pmt',
+                    'opcr_id' => $model->id,
+                    'office_id' => $model->office_id,
+                    'performance_period_id' => $model->performance_period_id,
+                    'status' => Opcr::STATUS_ENDORSED,
+                    'source_role' => 'dept-head',
+                ],
+            )
+        );
+
         if ($request->expectsJson()) {
             return response()->json(['success' => true, 'message' => 'OPCR submitted to PMT.']);
         }
@@ -281,6 +302,24 @@ class OpcrController extends Controller
                 'adjectival_rating' => $computedSummary['is_ready'] ? $computedSummary['adjectival_rating'] : null,
             ])->save();
         });
+
+        // Notify PMT that OPCR was submitted for calibration
+        app(WorkflowNotificationDispatcher::class)->notifyRole(
+            'pmt',
+            new WorkflowEventNotification(
+                title: 'OPCR Submitted for Calibration',
+                body: ($user->name ?? 'Department Head') . " submitted an OPCR for final calibration.",
+                url: route('pmt.office-calibration.show', ['opcr' => $model->id]),
+                type: 'info',
+                meta: [
+                    'event' => 'opcr.submitted_for_calibration',
+                    'opcr_id' => $model->id,
+                    'office_id' => $model->office_id,
+                    'performance_period_id' => $model->performance_period_id,
+                    'source_role' => 'dept-head',
+                ],
+            )
+        );
 
         if ($request->expectsJson()) {
             return response()->json(['success' => true, 'message' => 'Final OPCR submitted to PMT for Calibration.']);

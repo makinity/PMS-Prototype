@@ -10,39 +10,39 @@
     @endphp
 
     <section class="space-y-6">
-        <div class="rounded-2xl border border-white/10 bg-transparent p-5">
+        <div class="rounded-2xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-5">
             <h1 class="text-2xl font-semibold text-white">Department Head Dashboard</h1>
             <p class="mt-1 text-sm text-slate-400">Operational view of office workflow queues and team throughput.</p>
             <p class="mt-2 text-xs text-slate-500">{{ $periodLabel }}</p>
         </div>
 
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <div class="rounded-xl border border-white/10 bg-transparent p-4">
+            <div class="rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-4">
                 <p class="text-xs uppercase tracking-wide text-slate-400">Team Members</p>
                 <p class="mt-2 text-3xl font-semibold text-white">{{ (int) ($kpis['teamMembers'] ?? 0) }}</p>
             </div>
-            <div class="rounded-xl border border-white/10 bg-transparent p-4">
+            <div class="rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-4">
                 <p class="text-xs uppercase tracking-wide text-slate-400">Pending Reviews</p>
                 <p class="mt-2 text-3xl font-semibold text-amber-300">{{ (int) ($kpis['pendingReviews'] ?? 0) }}</p>
             </div>
-            <div class="rounded-xl border border-white/10 bg-transparent p-4">
+            <div class="rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-4">
                 <p class="text-xs uppercase tracking-wide text-slate-400">At Risk / Returned</p>
                 <p class="mt-2 text-3xl font-semibold text-rose-300">{{ (int) ($kpis['atRisk'] ?? 0) }}</p>
             </div>
-            <div class="rounded-xl border border-white/10 bg-transparent p-4">
+            <div class="rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-4">
                 <p class="text-xs uppercase tracking-wide text-slate-400">Completed / Endorsed</p>
                 <p class="mt-2 text-3xl font-semibold text-emerald-300">{{ (int) ($kpis['completedEndorsed'] ?? 0) }}</p>
             </div>
         </div>
 
         <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <div class="rounded-xl border border-white/10 bg-transparent p-4">
+            <div class="rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-4">
                 <h2 class="text-sm font-semibold text-gray-100">Team Throughput (Last 14 Days)</h2>
                 <div class="relative mt-3 h-64 w-full overflow-hidden sm:h-72">
                     <canvas id="deptHeadThroughputChart" class="block h-full w-full"></canvas>
                 </div>
             </div>
-            <div class="rounded-xl border border-white/10 bg-transparent p-4">
+            <div class="rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-4">
                 <h2 class="text-sm font-semibold text-gray-100">Workflow Status Mix</h2>
                 <div class="relative mt-3 h-64 w-full overflow-hidden sm:h-72">
                     <canvas id="deptHeadStatusChart" class="block h-full w-full"></canvas>
@@ -50,7 +50,7 @@
             </div>
         </div>
 
-        <div class="rounded-xl border border-white/10 bg-transparent p-4">
+        <div class="rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-4">
             <h2 class="text-sm font-semibold text-gray-100">Recent Office Activity</h2>
             <div class="mt-3 overflow-x-auto">
                 <table class="min-w-full divide-y divide-white/10 text-xs sm:text-sm">

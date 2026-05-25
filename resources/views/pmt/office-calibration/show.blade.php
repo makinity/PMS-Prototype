@@ -20,14 +20,14 @@
             </a>
             <h1 class="text-2xl font-bold text-white">Office OPCR Calibration</h1>
         </div>
-        <div class="rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3 text-right">
+        <div class="rounded-xl border border-gray-700 bg-slate-900/40 px-4 py-3 text-right">
             <p class="text-[11px] uppercase tracking-[0.24em] text-slate-500">Active Period</p>
             <p class="mt-1 text-sm font-semibold text-white">{{ $currentOpcr->performancePeriod?->name ?? '-' }}</p>
         </div>
     </div>
 
-    <section class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
-        <div class="flex flex-wrap items-start justify-between gap-4 border-b border-slate-800 px-5 py-4">
+    <section class="overflow-hidden rounded-2xl border border-gray-700 bg-slate-900/40">
+        <div class="flex flex-wrap items-start justify-between gap-4 border-b border-gray-700 px-5 py-4">
             <div>
                 <h2 class="text-lg font-semibold text-white">OPCR Final Snapshot</h2>
             </div>
@@ -61,40 +61,40 @@
         </div>
 
         @if ($currentOpcr)
-            <div class="grid gap-3 border-b border-slate-800 px-5 py-4 sm:grid-cols-4">
-                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+            <div class="grid gap-3 border-b border-gray-700 px-5 py-4 sm:grid-cols-4">
+                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase tracking-wide text-slate-500">Office / Unit</p>
                     <p class="mt-1 text-sm font-semibold text-white">{{ $currentOpcrPayload['opcr']['office']['name'] ?? '-' }}</p>
                 </div>
-                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase tracking-wide text-slate-500">Period</p>
                     <p class="mt-1 text-sm font-semibold text-white">{{ $currentOpcrPayload['opcr']['period']['name'] ?? '-' }}</p>
                 </div>
-                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase tracking-wide text-slate-500">Computed Score</p>
                     <p class="mt-1 text-sm font-semibold text-white">{{ $computedSummary && $computedSummary['is_ready'] ? number_format((float) $computedSummary['overall_score'], 2) : '-' }}</p>
                 </div>
-                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase tracking-wide text-slate-500">Adjusted Score</p>
                     <p class="mt-1 text-sm font-semibold text-blue-300">{{ $currentOpcr->pmt_adjusted_score !== null ? number_format($currentOpcr->pmt_adjusted_score, 2) : '-' }}</p>
                 </div>
             </div>
 
             @if ($computedSummary && $computedSummary['is_ready'])
-                <div class="grid gap-3 border-b border-slate-800 px-5 py-4 sm:grid-cols-4">
-                    <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                <div class="grid gap-3 border-b border-gray-700 px-5 py-4 sm:grid-cols-4">
+                    <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                         <p class="text-[11px] uppercase tracking-wide text-slate-500">Core Weighted</p>
                         <p class="mt-1 text-sm font-semibold text-white">{{ number_format((float) $computedSummary['core_weighted'], 2) }}</p>
                     </div>
-                    <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                    <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                         <p class="text-[11px] uppercase tracking-wide text-slate-500">Support Weighted</p>
                         <p class="mt-1 text-sm font-semibold text-white">{{ number_format((float) $computedSummary['support_weighted'], 2) }}</p>
                     </div>
-                    <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                    <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                         <p class="text-[11px] uppercase tracking-wide text-slate-500">Computed Rating</p>
                         <p class="mt-1 text-sm font-semibold text-white">{{ $computedSummary['adjectival_rating'] }}</p>
                     </div>
-                    <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                    <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                         <p class="text-[11px] uppercase tracking-wide text-slate-500">Computation Status</p>
                         @if ($computedSummary['is_provisional'])
                             <p class="mt-1 text-sm font-semibold text-amber-300">Provisional</p>
@@ -144,10 +144,8 @@
                                     @php $functionType = strtolower((string) ($output['function_type'] ?? '')); @endphp
                                     @if ($functionType === 'core')
                                         <span class="rounded-md border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-300">Core</span>
-                                    @elseif ($functionType === 'support')
-                                        <span class="rounded-md border border-blue-400/30 bg-blue-500/10 px-2 py-1 text-xs font-medium text-blue-300">Support</span>
                                     @else
-                                        <span class="rounded-md border border-slate-500/20 bg-slate-500/10 px-2 py-1 text-xs font-medium text-slate-300">{{ $functionType !== '' ? ucfirst($functionType) : 'Custom' }}</span>
+                                        <span class="rounded-md border border-blue-400/30 bg-blue-500/10 px-2 py-1 text-xs font-medium text-blue-300">Support</span>
                                     @endif
                                 </td>
                             </tr>
@@ -166,9 +164,9 @@
         @endif
 
         @if ($canCalibrate)
-            <div class="border-t border-slate-800 bg-slate-950/80 px-5 py-4">
+            <div class="border-t border-gray-700 bg-slate-950/80 px-5 py-4">
                 <div class="grid gap-4 lg:grid-cols-2">
-                    <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
+                    <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                         <h4 class="text-sm font-semibold text-white">Adjust Rating</h4>
                         <form method="POST" action="{{ route('pmt.office-calibration.adjust', $currentOpcr->id) }}" class="mt-3 space-y-3">
                             @csrf
@@ -202,7 +200,7 @@
                         </form>
                     </div>
 
-                    <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
+                    <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                         <h4 class="text-sm font-semibold text-white">Approve / Release / Return</h4>
                         @if ($computedSummary && $computedSummary['is_provisional'])
                             <p class="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-300">Computed office rating is provisional because one function bucket has no rated OPCR rows yet.</p>

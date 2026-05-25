@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Pmt;
 use App\Http\Controllers\Controller;
 use App\Models\PerformancePeriod;
 use App\Models\QarHeader;
+use App\Notifications\WorkflowEventNotification;
 use App\Services\SmporGeneratorService;
+use App\Services\WorkflowNotificationDispatcher;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -193,6 +195,29 @@ class QarController extends Controller
             app(SmporGeneratorService::class)->generateFromApprovedQar($qarHeader, $request->user()?->id);
         });
 
+        // Notify Dept Head that QAR was approved
+        $qarHeader->loadMissing('office.head');
+        $deptHead = $qarHeader->office?->head;
+        if ($deptHead) {
+            $user = $request->user();
+            app(WorkflowNotificationDispatcher::class)->notifyUser(
+                $deptHead,
+                new WorkflowEventNotification(
+                    title: 'QAR Approved by PMT',
+                    body: ($user->name ?? 'PMT') . " approved your QAR.",
+                    url: route('dept-head.qar'),
+                    type: 'success',
+                    meta: [
+                        'event' => 'qar.pmt_approved',
+                        'qar_header_id' => $qarHeader->id,
+                        'office_id' => $qarHeader->office_id,
+                        'performance_period_id' => $qarHeader->performance_period_id,
+                        'source_role' => 'pmt',
+                    ],
+                )
+            );
+        }
+
         return redirect()
             ->route('pmt.qar', $redirectParams)
             ->with('success', 'QAR approved. Employees may now proceed to IPCR/SMPOR accomplishments.');
@@ -250,6 +275,29 @@ class QarController extends Controller
                     ]);
             }
         });
+
+        // Notify Dept Head that QAR was returned
+        $qarHeader->loadMissing('office.head');
+        $deptHead = $qarHeader->office?->head;
+        if ($deptHead) {
+            $user = $request->user();
+            app(WorkflowNotificationDispatcher::class)->notifyUser(
+                $deptHead,
+                new WorkflowEventNotification(
+                    title: 'QAR Returned by PMT',
+                    body: ($user->name ?? 'PMT') . " returned your QAR for revision.",
+                    url: route('dept-head.qar'),
+                    type: 'alert',
+                    meta: [
+                        'event' => 'qar.pmt_returned',
+                        'qar_header_id' => $qarHeader->id,
+                        'office_id' => $qarHeader->office_id,
+                        'performance_period_id' => $qarHeader->performance_period_id,
+                        'source_role' => 'pmt',
+                    ],
+                )
+            );
+        }
 
         return redirect()
             ->route('pmt.qar', $redirectParams)

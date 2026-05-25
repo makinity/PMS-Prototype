@@ -1,17 +1,20 @@
-<div class="relative" wire:keydown.escape.window="close">
-    <button type="button" wire:click="toggle" aria-expanded="{{ $open ? 'true' : 'false' }}" class="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-800 bg-slate-900/70 text-slate-300 shadow-sm transition hover:bg-slate-800">
+<div class="relative"
+     x-data
+     @pms-notification-received.window="$wire.refreshNotifications()"
+     wire:keydown.escape.window="close">
+    <button type="button" wire:click="toggle" aria-expanded="{{ $open ? 'true' : 'false' }}" class="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-700 bg-slate-900/40 text-slate-300 shadow-sm transition hover:bg-slate-800">
         <span class="sr-only">View notifications</span>
         <i class="fa-regular fa-bell"></i>
-        @if ($this->unreadCount)
+        @if ($unreadCount > 0)
             <span class="absolute right-2 top-2 h-2 w-2 rounded-full bg-rose-500"></span>
         @endif
     </button>
 
-    <div class="{{ $open ? '' : 'hidden' }} absolute right-0 mt-3 w-80 rounded-2xl border border-slate-800 bg-slate-900/95 shadow-xl shadow-slate-950/40" wire:click.outside="close">
+    <div class="{{ $open ? '' : 'hidden' }} absolute right-0 mt-3 w-80 rounded-2xl border border-gray-700 bg-slate-900/95 shadow-xl shadow-slate-950/40" wire:click.outside="close">
         <div class="flex items-center justify-between px-4 py-3">
             <div>
                 <p class="text-sm font-semibold text-white">Notifications</p>
-                <p class="text-xs text-slate-400">{{ $this->unreadCount }} unread</p>
+                <p class="text-xs text-slate-400">{{ $unreadCount }} unread</p>
             </div>
             <button type="button" wire:click="markAllRead" class="text-xs font-semibold text-emerald-300 transition hover:text-emerald-200">
                 Mark all
@@ -66,7 +69,7 @@
             @endforelse
         </div>
 
-        <div class="border-t border-slate-800 px-4 py-3">
+        <div class="border-t border-gray-700 px-4 py-3">
             <a href="#" class="text-xs font-semibold text-slate-300 transition hover:text-white">View all notifications</a>
         </div>
     </div>

@@ -33,34 +33,34 @@
         </div>
 
         <div class="grid grid-cols-2 gap-2 text-xs uppercase tracking-[0.2em] text-white sm:grid-cols-3">
-            <div class="rounded-lg border border-slate-800 bg-slate-900/50 px-3 py-2">
+            <div class="rounded-lg border border-gray-700 bg-slate-900/40 px-3 py-2">
                 <p class="text-[0.6rem] text-slate-500">NAME</p>
                 <p class="mt-0.5 truncate text-sm font-semibold normal-case tracking-normal">{{ $meta['employeeName'] ?? '--' }}</p>
             </div>
-            <div class="rounded-lg border border-slate-800 bg-slate-900/50 px-3 py-2">
+            <div class="rounded-lg border border-gray-700 bg-slate-900/40 px-3 py-2">
                 <p class="text-[0.6rem] text-slate-500">OFFICE / DIVISION</p>
                 <p class="mt-0.5 truncate text-sm font-semibold normal-case tracking-normal">{{ $meta['officeName'] ?? '--' }}</p>
             </div>
-            <div class="col-span-2 rounded-lg border border-slate-800 bg-slate-900/50 px-3 py-2 sm:col-span-1">
+            <div class="col-span-2 rounded-lg border border-gray-700 bg-slate-900/40 px-3 py-2 sm:col-span-1">
                 <p class="text-[0.6rem] text-slate-500">MONTH</p>
                 <p class="mt-0.5 truncate text-sm font-semibold normal-case tracking-normal">{{ $meta['monthLabel'] ?? '--' }}</p>
             </div>
         </div>
 
         <div class="hidden lg:block">
-            <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
+            <div class="overflow-hidden rounded-2xl border border-gray-700 bg-slate-900/40">
                 <div class="overflow-x-auto max-h-[38rem]">
                     <table class="min-w-full text-[0.75rem] text-slate-200">
                         <thead class="sticky top-0 z-20 bg-slate-900/95">
                             <tr class="text-left text-[0.65rem] uppercase tracking-[0.3em] text-slate-500">
                                 <th class="sticky left-0 z-30 whitespace-nowrap px-3 py-3 align-bottom bg-slate-900/95" rowspan="2">Output / Task</th>
-                                <th class="border-l border-slate-800 px-3 py-3 text-center" colspan="5">Efficiency / Quantity</th>
-                                <th class="border-l border-slate-800 px-3 py-3 text-center" colspan="5">Quality / Effectiveness</th>
-                                <th class="border-l border-slate-800 px-3 py-3 text-center" colspan="5">Timeliness</th>
+                                <th class="border-l border-gray-700 px-3 py-3 text-center" colspan="5">Efficiency / Quantity</th>
+                                <th class="border-l border-gray-700 px-3 py-3 text-center" colspan="5">Quality / Effectiveness</th>
+                                <th class="border-l border-gray-700 px-3 py-3 text-center" colspan="5">Timeliness</th>
                             </tr>
                             <tr class="text-[0.6rem] uppercase tracking-[0.3em] text-slate-500">
                                 @for ($i = 0; $i < 3; $i++)
-                                    <th class="{{ $i === 0 ? 'border-l border-slate-800' : '' }} px-2 py-2 text-right">W1</th>
+                                    <th class="{{ $i === 0 ? 'border-l border-gray-700' : '' }} px-2 py-2 text-right">W1</th>
                                     <th class="px-2 py-2 text-right">W2</th>
                                     <th class="px-2 py-2 text-right">W3</th>
                                     <th class="px-2 py-2 text-right">W4</th>
@@ -71,15 +71,15 @@
                         <tbody class="divide-y divide-slate-800 text-[0.75rem]">
                             @foreach ($sectionLabels as $sectionKey => $sectionLabel)
                                 <tr class="bg-slate-800/40 text-[0.65rem] uppercase tracking-[0.3em] text-slate-400">
-                                    <td class="sticky left-0 z-10 border-r border-slate-800 bg-slate-800/80 px-3 py-2 font-semibold text-slate-100" colspan="16">{{ $sectionLabel }}</td>
+                                    <td class="sticky left-0 z-10 border-r border-gray-700 bg-slate-800/80 px-3 py-2 font-semibold text-slate-100" colspan="16">{{ $sectionLabel }}</td>
                                 </tr>
                                 @forelse ($sectionRows[$sectionKey] ?? [] as $row)
                                     <tr>
-                                        <td class="sticky left-0 z-10 max-w-[20rem] border-r border-slate-800 bg-slate-900/95 px-3 py-3 font-semibold text-white">
+                                        <td class="sticky left-0 z-10 max-w-[20rem] border-r border-gray-700 bg-slate-900/95 px-3 py-3 font-semibold text-white">
                                             <span class="block truncate" title="{{ $row['label'] }}">{{ $row['label'] }}</span>
                                         </td>
                                         @foreach (['qty', 'qual', 'time'] as $group)
-                                            <td class="border-l border-slate-800 px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, "{$group}.1", 0), 0) }}</td>
+                                            <td class="border-l border-gray-700 px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, "{$group}.1", 0), 0) }}</td>
                                             <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, "{$group}.2", 0), 0) }}</td>
                                             <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, "{$group}.3", 0), 0) }}</td>
                                             <td class="px-2 py-3 text-right tabular-nums">{{ number_format(data_get($row, "{$group}.4", 0), 0) }}</td>
@@ -96,10 +96,10 @@
             </div>
         </div>
 
-        <p class="mt-3 text-xs text-slate-400">MPOR points = Quantity × Supervisor Rating (Q/T). Only rated ORS entries with supervisor ratings are included.</p>
+        <p class="mt-3 text-xs text-slate-400">MPOR points = Quantity Ã— Supervisor Rating (Q/T). Only rated ORS entries with supervisor ratings are included.</p>
 
         <div class="grid gap-4 lg:grid-cols-2">
-            <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 text-xs uppercase tracking-[0.3em] text-slate-400">
+            <div class="rounded-2xl border border-gray-700 bg-slate-900/40 p-4 text-xs uppercase tracking-[0.3em] text-slate-400">
                 <div class="flex items-center justify-between text-[0.6rem] tracking-[0.3em] text-slate-500">
                     <span>Week 1</span><span>Week 2</span><span>Week 3</span><span>Week 4</span><span>Total</span>
                 </div>
@@ -122,18 +122,18 @@
                     </div>
                 </div>
             </div>
-            <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 text-[0.65rem] uppercase tracking-[0.3em] text-slate-400">
+            <div class="rounded-2xl border border-gray-700 bg-slate-900/40 p-4 text-[0.65rem] uppercase tracking-[0.3em] text-slate-400">
                 <div class="flex items-center justify-between text-sm font-semibold text-white">
                     <span>Confirmed:</span>
                     <span class="text-slate-500">Stage II</span>
                 </div>
                 <div class="mt-4 grid gap-3 sm:grid-cols-2">
-                    <div class="space-y-1 rounded-xl border border-slate-800 bg-slate-900/40 p-3 text-center">
+                    <div class="space-y-1 rounded-xl border border-gray-700 bg-slate-900/40 p-3 text-center">
                         <p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">Supervisor</p>
                         <p class="text-sm font-semibold text-white normal-case tracking-normal">{{ $meta['officeName'] ?? '--' }}</p>
                         <p class="text-[0.6rem] text-slate-500 normal-case tracking-normal">Signature over printed name</p>
                     </div>
-                    <div class="space-y-1 rounded-xl border border-slate-800 bg-slate-900/40 p-3 text-center">
+                    <div class="space-y-1 rounded-xl border border-gray-700 bg-slate-900/40 p-3 text-center">
                         <p class="text-[0.55rem] uppercase tracking-[0.3em] text-slate-500">Employee</p>
                         <p class="text-sm font-semibold text-white normal-case tracking-normal">{{ $meta['employeeName'] ?? '--' }}</p>
                         <p class="text-[0.6rem] text-slate-500 normal-case tracking-normal">Signature over printed name</p>

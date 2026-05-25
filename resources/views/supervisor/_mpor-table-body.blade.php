@@ -1,5 +1,5 @@
 @forelse ($mpors as $mpor)
-    <tr class="border-b border-slate-800/50 transition hover:bg-slate-800/30">
+    <tr class="border-b border-gray-700/50 transition hover:bg-slate-800/30">
         <td class="px-4 py-3">
             <div class="flex items-center gap-3">
                 @if ($mpor->employee?->profile_photo_url)

@@ -25,7 +25,7 @@
 
         $flattenedOutputs = collect($functions)
             ->flatMap(fn ($fn) => collect($fn['mfos'] ?? [])->map(fn ($mfo) => [
-                'function_type' => strtolower((string) ($fn['function_type'] ?? 'custom')),
+                'function_type' => strtolower((string) ($fn['function_type'] ?? 'core')),
                 'function_name' => (string) ($fn['name'] ?? ''),
                 'function_weight' => $fn['weight_percent'] ?? null,
                 'mfo' => $mfo,
@@ -34,10 +34,10 @@
     @endphp
 
     <section class="space-y-6">
-        <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
+        <div class="flex flex-wrap items-center justify-between gap-4 border-b border-gray-700 pb-4">
             <div>
                 <h1 class="text-2xl font-semibold tracking-tight text-white">UWP Preview</h1>
-                <p class="mt-0.5 text-sm text-slate-400">{{ $officeName }} · {{ $periodName }}</p>
+                <p class="mt-0.5 text-sm text-slate-400">{{ $officeName }} Â· {{ $periodName }}</p>
             </div>
             <div class="flex items-center gap-4">
                 <span class="inline-flex items-center gap-1.5 rounded-full border {{ $statusClass }} px-3 py-1 text-xs font-medium">
@@ -187,7 +187,7 @@
                 <!-- Assignee items injected here -->
             </div>
             {{-- Footer --}}
-            <div class="border-t border-slate-800/40 px-5 py-3">
+            <div class="border-t border-gray-700/40 px-5 py-3">
                 <button type="button" data-assignees-modal-close class="w-full rounded-xl bg-slate-800/80 py-2.5 text-sm font-semibold text-slate-200 transition hover:bg-slate-700">Close</button>
             </div>
         </div>
@@ -215,7 +215,7 @@
             </div>
 
             <div class="max-h-[65vh] overflow-y-auto px-5 py-4">
-                <div class="overflow-hidden rounded-xl border border-slate-800">
+                <div class="overflow-hidden rounded-xl border border-gray-700">
                     <table class="min-w-full text-sm text-slate-200">
                         <thead class="bg-slate-950/70 text-xs uppercase tracking-wide text-slate-400">
                             <tr>
@@ -230,7 +230,7 @@
                 </div>
             </div>
 
-            <div class="border-t border-slate-800/40 px-5 py-3">
+            <div class="border-t border-gray-700/40 px-5 py-3">
                 <button type="button" data-standards-modal-close class="w-full rounded-xl bg-slate-800/80 py-2.5 text-sm font-semibold text-slate-200 transition hover:bg-slate-700">Close</button>
             </div>
         </div>
@@ -350,7 +350,7 @@
 
                     list.forEach((item, idx) => {
                         const mfo = item.mfo || {};
-                        const type = String(item.function_type || 'custom').toLowerCase();
+                        const type = String(item.function_type || 'core').toLowerCase();
                         const badgeClass = type === 'core'
                             ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-400'
                             : (type === 'support'
@@ -398,7 +398,7 @@
                     }
 
                     const mfo = item.mfo || {};
-                    const type = String(item.function_type || 'custom').toLowerCase();
+                    const type = String(item.function_type || 'core').toLowerCase();
 
                     titleEl.textContent = mfo.title || 'Untitled Output';
                     typeBadgeEl.classList.remove('hidden');
@@ -409,7 +409,7 @@
                                 ? 'border-blue-400/30 bg-blue-500/10 text-blue-300'
                                 : 'border-slate-700 bg-slate-900/60 text-slate-300')
                     }`;
-                    typeBadgeEl.textContent = type ? (type.charAt(0).toUpperCase() + type.slice(1)) : 'Custom';
+                    typeBadgeEl.textContent = type ? (type.charAt(0).toUpperCase() + type.slice(1)) : 'Support';
 
                     if (item.function_weight !== null && item.function_weight !== undefined && String(item.function_weight) !== '') {
                         weightEl.classList.remove('hidden');

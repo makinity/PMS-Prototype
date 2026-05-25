@@ -7,7 +7,7 @@
         <div class="flex flex-wrap items-start justify-between gap-4">
             <div>
                 <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                    Stage I – Unit Work Plan (UWP)
+                    Stage I â€“ Unit Work Plan (UWP)
                 </p>
                 <h1 class="text-2xl font-semibold text-white">Performance Period Planning and Commitment</h1>
             </div>
@@ -18,7 +18,7 @@
         </div>
 
         <!-- UWP List -->
-        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5 space-y-4">
+        <div class="rounded-2xl border border-gray-700 bg-slate-900/40 p-5 space-y-4">
 
             <!-- Filter / Context Bar -->
             <div class="flex flex-wrap items-end justify-between gap-4">
@@ -38,7 +38,7 @@
                     {{ $office ? 'No Unit Work Plans found for your assigned office.' : 'No assigned office found for your account.' }}
                 </div>
             @else
-                <div class="overflow-x-auto rounded-xl border border-slate-800">
+                <div class="overflow-x-auto rounded-xl border border-gray-700">
                     <table class="min-w-full text-sm text-slate-200">
                         <thead class="bg-slate-950/60">
                             <tr>
@@ -132,16 +132,16 @@
 
         </div>
     </section>
-    
+
     {{-- UWP preview modal removed: migrated to dedicated show page. --}}
 
     <!-- Success Indicators Modal -->
     <div id="successIndicatorsModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/70 backdrop-blur-sm overflow-y-auto">
         <div class="w-full max-w-5xl px-6">
-            <div class="rounded-2xl border border-slate-800 bg-slate-950 text-slate-100">
+            <div class="rounded-2xl border border-gray-700 bg-slate-950 text-slate-100">
 
                 <!-- HEADER -->
-                <div class="border-b border-slate-800 px-6 py-5">
+                <div class="border-b border-gray-700 px-6 py-5">
                     <h3 id="modalPpaTitle" class="text-lg font-semibold">
                         Success Indicators
                     </h3>
@@ -152,7 +152,7 @@
 
                 <!-- BODY -->
                 <div class="px-6 py-6">
-                    <div class="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/40">
+                    <div class="overflow-hidden rounded-xl border border-gray-700 bg-slate-900/40">
                         <table class="w-full text-sm text-slate-100">
                             <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.2em] text-slate-400">
                                 <tr>
@@ -170,7 +170,7 @@
                 </div>
 
                 <!-- FOOTER -->
-                <div class="flex justify-end border-t border-slate-800 px-6 py-4">
+                <div class="flex justify-end border-t border-gray-700 px-6 py-4">
                     <button onclick="closeModal('successIndicatorsModal')"
                             class="rounded-lg border border-slate-700 bg-slate-900 px-5 py-2 text-sm hover:bg-slate-800">
                         Close
@@ -183,10 +183,10 @@
     <!-- Assignments Modal (for multiple employees) -->
 <div id="assignmentsModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/70 backdrop-blur-sm overflow-y-auto">
     <div class="w-full max-w-2xl px-6">
-        <div class="rounded-2xl border border-slate-800 bg-slate-950 text-slate-100">
+        <div class="rounded-2xl border border-gray-700 bg-slate-950 text-slate-100">
 
             <!-- HEADER -->
-            <div class="border-b border-slate-800 px-6 py-5">
+            <div class="border-b border-gray-700 px-6 py-5">
                 <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Employee Assignments</p>
                 <h3 id="assignmentsModalIndicator" class="text-lg font-semibold">
                     Success Indicator
@@ -198,7 +198,7 @@
 
             <!-- BODY -->
             <div class="px-6 py-6">
-                <div class="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/40">
+                <div class="overflow-hidden rounded-xl border border-gray-700 bg-slate-900/40">
                     <table class="w-full text-sm text-slate-100">
                         <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.2em] text-slate-400">
                             <tr>
@@ -216,7 +216,7 @@
             </div>
 
             <!-- FOOTER -->
-            <div class="flex justify-end border-t border-slate-800 px-6 py-4">
+            <div class="flex justify-end border-t border-gray-700 px-6 py-4">
                 <button onclick="closeModal('assignmentsModal')"
                         class="rounded-lg border border-slate-700 bg-slate-900 px-5 py-2 text-sm hover:bg-slate-800">
                     Close
@@ -229,8 +229,8 @@
     <!-- Standards Modal -->
     <div id="indicatorStandardsModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/70 backdrop-blur-sm overflow-y-auto">
         <div class="w-full max-w-3xl px-6">
-            <div class="rounded-2xl border border-slate-800 bg-slate-950 text-slate-100">
-                <div class="border-b border-slate-800 px-6 py-5">
+            <div class="rounded-2xl border border-gray-700 bg-slate-950 text-slate-100">
+                <div class="border-b border-gray-700 px-6 py-5">
                     <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Standards (Q/E/T)</p>
                     <h3 class="text-lg font-semibold">Performance Standards</h3>
                     <p class="mt-1 text-sm text-slate-400">
@@ -241,7 +241,7 @@
                     </p>
                 </div>
                 <div class="px-6 py-6 space-y-5">
-                    <div class="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/40">
+                    <div class="overflow-hidden rounded-xl border border-gray-700 bg-slate-900/40">
                         <table class="w-full text-sm text-slate-100">
                             <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.2em] text-slate-400">
                                 <tr>
@@ -257,7 +257,7 @@
                         </table>
                     </div>
                 </div>
-                <div class="flex justify-end border-t border-slate-800 px-6 py-4">
+                <div class="flex justify-end border-t border-gray-700 px-6 py-4">
                     <button onclick="closeModal('indicatorStandardsModal')"
                             class="rounded-lg border border-slate-700 bg-slate-900 px-5 py-2 text-sm hover:bg-slate-800">
                         Close
@@ -272,15 +272,15 @@
 
     <div id="deleteUwpModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/70 backdrop-blur-sm overflow-y-auto">
         <div class="w-full max-w-xl px-6">
-            <div class="rounded-2xl border border-slate-800 bg-slate-950 text-slate-100">
-                <div class="border-b border-slate-800 px-6 py-5">
+            <div class="rounded-2xl border border-gray-700 bg-slate-950 text-slate-100">
+                <div class="border-b border-gray-700 px-6 py-5">
                     <p class="text-xs uppercase tracking-[0.2em] text-rose-300">Delete Unit Work Plan</p>
                     <h3 class="text-lg font-semibold">Delete this UWP?</h3>
                     <p class="mt-1 text-sm text-slate-400">This action is permanent and cannot be undone.</p>
                 </div>
 
                 <div class="space-y-3 px-6 py-5 text-sm text-slate-200">
-                    <div class="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+                    <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                         <p><span class="text-slate-400">Office / Unit:</span> <span id="deleteUwpOffice">--</span></p>
                         <p class="mt-1"><span class="text-slate-400">Performance Period:</span> <span id="deleteUwpPeriod">--</span></p>
                         <p class="mt-1"><span class="text-slate-400">Status:</span> <span id="deleteUwpStatus">--</span></p>
@@ -288,7 +288,7 @@
                     <p class="text-xs text-rose-300/90">Only Draft/Returned and unlocked UWP records can be deleted.</p>
                 </div>
 
-                <form id="delete-uwp-form" method="POST" action="" class="flex items-center justify-end gap-3 border-t border-slate-800 px-6 py-4">
+                <form id="delete-uwp-form" method="POST" action="" class="flex items-center justify-end gap-3 border-t border-gray-700 px-6 py-4">
                     @csrf
                     @method('DELETE')
                     <button type="button"
@@ -737,7 +737,7 @@
                         : 'border-blue-400/30 bg-blue-500/10 text-blue-300';
                     const btn = document.createElement('button');
                     btn.type = 'button';
-                    btn.className = `block w-full rounded-xl border px-3 py-3 text-left transition ${active ? 'border-blue-400/60 bg-blue-500/10' : 'border-slate-800 bg-slate-950/30 hover:bg-slate-900/50'}`;
+                    btn.className = `block w-full rounded-xl border px-3 py-3 text-left transition ${active ? 'border-blue-400/60 bg-blue-500/10' : 'border-gray-700 bg-slate-950/30 hover:bg-slate-900/50'}`;
                     btn.innerHTML = `
                         <div class="line-clamp-2 text-sm font-semibold leading-snug text-white">${mfo.title || '<span class="text-slate-500 italic">Untitled MFO</span>'}</div>
                         <div class="mt-2 flex flex-wrap items-center gap-2">
@@ -782,7 +782,7 @@
                 const overviewEl = document.getElementById('creationOverviewIndicators');
                 const inds = mfo.indicators || [];
                 overviewEl.innerHTML = inds.length
-                    ? inds.map(ind => `<button type="button" class="flex w-full items-start justify-between rounded-xl border border-slate-800 bg-slate-950/50 px-4 py-3 text-left hover:bg-slate-900/60 transition"><span class="text-sm text-slate-100">${ind.text || '—'}</span><span class="ml-3 rounded-md bg-slate-900 px-2 py-0.5 text-xs text-slate-400">${ind.targetQuantity ? ind.targetQuantity + ' ' : ''}${ind.targetTimeline || ''}</span></button>`).join('')
+                    ? inds.map(ind => `<button type="button" class="flex w-full items-start justify-between rounded-xl border border-gray-700 bg-slate-900/40 px-4 py-3 text-left hover:bg-slate-900/60 transition"><span class="text-sm text-slate-100">${ind.text || '—'}</span><span class="ml-3 rounded-md bg-slate-900 px-2 py-0.5 text-xs text-slate-400">${ind.targetQuantity ? ind.targetQuantity + ' ' : ''}${ind.targetTimeline || ''}</span></button>`).join('')
                     : '<p class="text-sm text-slate-500">No success indicators yet. Add one from the "Success Indicators" tab.</p>';
 
                 // Indicators table

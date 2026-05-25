@@ -22,7 +22,7 @@
     <a href="{{ route('dept-head.uwp.index', ['status' => $statusFilter]) }}" class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">Back to UWP List</a>
 </div>
 
-<div class="mb-4 grid gap-3 rounded-xl border border-slate-800 bg-slate-900/80 p-5 md:grid-cols-5">
+<div class="mb-4 grid gap-3 rounded-xl border border-gray-700 bg-slate-900/80 p-5 md:grid-cols-5">
     <div>
         <p class="text-xs uppercase tracking-widest text-slate-500">Office / Unit</p>
         <p class="mt-1 font-medium text-slate-100">{{ $uwpPayload['office']['name'] ?? '—' }}</p>
@@ -195,7 +195,7 @@
         outputListEl.innerHTML = '';
 
         if (!list.length) {
-            outputListEl.innerHTML = '<div class="rounded-xl border border-slate-800 bg-slate-900/40 px-3 py-4 text-sm text-slate-400">No planned outputs.</div>';
+            outputListEl.innerHTML = '<div class="rounded-xl border border-gray-700 bg-slate-900/40 px-3 py-4 text-sm text-slate-400">No planned outputs.</div>';
             renderDetail();
             return;
         }
@@ -204,7 +204,7 @@
             const isActive = idx === state.selected;
             const btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = `w-full rounded-xl border px-3 py-3 text-left transition ${isActive ? 'border-blue-500/40 bg-blue-500/10' : 'border-slate-800 bg-slate-900/50 hover:border-slate-700'}`;
+            btn.className = `w-full rounded-xl border px-3 py-3 text-left transition ${isActive ? 'border-blue-500/40 bg-blue-500/10' : 'border-gray-700 bg-slate-900/50 hover:border-slate-700'}`;
             btn.innerHTML = `
                 <p class="text-base font-semibold text-slate-100">${item.title || 'Untitled Output'}</p>
                 <p class="mt-1 text-sm text-slate-400">${(item.success_indicators || []).length} indicators</p>
@@ -250,7 +250,7 @@
 
         const indicators = output.success_indicators || [];
         overviewIndicatorsEl.innerHTML = indicators.length
-            ? indicators.map((si) => `<div class="rounded-xl border border-slate-800 bg-slate-900/40 px-3 py-2.5 text-sm text-slate-200">${si.indicator_text || 'Untitled indicator'}</div>`).join('')
+            ? indicators.map((si) => `<div class="rounded-xl border border-gray-700 bg-slate-900/40 px-3 py-2.5 text-sm text-slate-200">${si.indicator_text || 'Untitled indicator'}</div>`).join('')
             : '<p class="text-sm text-slate-400">No linked success indicators.</p>';
 
         indicatorsTableEl.innerHTML = indicators.length

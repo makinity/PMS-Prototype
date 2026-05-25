@@ -11,39 +11,14 @@
         <div>
             <h1 class="text-2xl font-bold text-white">Office Performance Commitment and Review (OPCR)</h1>
         </div>
-        <div class="rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3 text-right">
+        <div class="rounded-xl border border-gray-700 bg-slate-900/40 px-4 py-3 text-right">
             <p class="text-[11px] uppercase tracking-[0.24em] text-slate-500">Active Period</p>
             <p class="mt-1 text-sm font-semibold text-white">{{ $activePeriod?->name ?? '—' }}</p>
         </div>
     </div>
 
-    <div class="flex items-center justify-between gap-4 rounded-2xl border border-blue-500/20 bg-blue-500/5 px-6 py-4">
-        <div class="flex items-center gap-4">
-            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-blue-500/20 text-blue-400">
-                <i class="fa-solid fa-chart-line text-xl"></i>
-            </div>
-            <div>
-                <h3 class="font-bold text-white">Performance Consolidation</h3>
-            </div>
-        </div>
-        @if ($canSubmitFinalRating)
-            <form action="{{ route('dept-head.opcr.submit-calibration', $currentOpcr->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to submit the final office calibration to PMT?')">
-                @csrf
-                <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-500 active:scale-95">
-                    <i class="fa-solid fa-paper-plane"></i>
-                    Submit Final OPCR to PMT
-                </button>
-            </form>
-        @else
-            <div class="rounded-lg border border-slate-700 bg-slate-800/50 px-4 py-2 text-xs text-slate-400">
-                <i class="fa-solid fa-circle-info mr-1"></i>
-                Submit button will appear once all staff IPCRs are calibrated and OPCR is approved.
-            </div>
-        @endif
-    </div>
-
-    <section class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70 shadow-xl">
-        <div class="flex flex-wrap items-start justify-between gap-4 border-b border-slate-800 px-5 py-4">
+    <section class="overflow-hidden rounded-2xl border border-gray-700 bg-slate-900/40 shadow-xl">
+        <div class="flex flex-wrap items-start justify-between gap-4 border-b border-gray-700 px-5 py-4">
             <div>
                 <h2 class="text-lg font-semibold text-white">Office Accomplishments Preview</h2>
             </div>
@@ -152,26 +127,26 @@
 
     @if ($currentOpcr && $computedSummary && $computedSummary['is_ready'])
     <div class="grid gap-6 lg:grid-cols-2">
-        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-6">
+        <div class="rounded-2xl border border-gray-700 bg-slate-900/40 p-6">
             <h3 class="text-sm font-semibold uppercase tracking-wider text-slate-400">Office Overall Rating</h3>
             <div class="mt-4 space-y-4">
-                <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                <div class="flex items-center justify-between border-b border-gray-700 pb-2">
                     <span class="text-slate-300">Core Weighted Score</span>
                     <span class="font-semibold text-white">{{ number_format((float) $computedSummary['core_weighted'], 2) }}</span>
                 </div>
-                <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                <div class="flex items-center justify-between border-b border-gray-700 pb-2">
                     <span class="text-slate-300">Support Weighted Score</span>
                     <span class="font-semibold text-white">{{ number_format((float) $computedSummary['support_weighted'], 2) }}</span>
                 </div>
-                <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                <div class="flex items-center justify-between border-b border-gray-700 pb-2">
                     <span class="text-slate-300">Computed Overall Rating</span>
                     <span class="font-semibold text-blue-300">{{ number_format((float) ($currentOpcr->final_score ?: $computedSummary['overall_score']), 2) }}</span>
                 </div>
-                <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                <div class="flex items-center justify-between border-b border-gray-700 pb-2">
                     <span class="text-slate-300">Computed Adjectival Rating</span>
                     <span class="font-semibold text-white">{{ $currentOpcr->adjectival_rating ?: $computedSummary['adjectival_rating'] }}</span>
                 </div>
-                <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                <div class="flex items-center justify-between border-b border-gray-700 pb-2">
                     <span class="text-slate-300">Status</span>
                     @if ($computedSummary['is_provisional'])
                         <span class="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-300">Provisional</span>
@@ -193,7 +168,7 @@
             </div>
         </div>
 
-        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-6">
+        <div class="rounded-2xl border border-gray-700 bg-slate-900/40 p-6">
             <h3 class="text-sm font-semibold uppercase tracking-wider text-slate-400">Calibration Status</h3>
             <div class="mt-4 flex items-center gap-4">
                 @if ($currentOpcr->pmt_adjusted_score)

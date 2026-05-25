@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Pmt;
 use App\Http\Controllers\Controller;
 use App\Models\PerformancePeriod;
 use App\Models\UnitWorkPlan;
+use App\Notifications\WorkflowEventNotification;
+use App\Services\WorkflowNotificationDispatcher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -134,6 +136,70 @@ class UnitWorkPlanController extends Controller
             return back()->with('error', $result['message']);
         }
 
+        $uwp = UnitWorkPlan::query()->with(['creator', 'office.head', 'performancePeriod'])->find((int) $validated['unit_work_plan_id']);
+        if ($uwp) {
+            $notifier = app(WorkflowNotificationDispatcher::class);
+            if ($validated['action'] === 'return' && $uwp->creator) {
+                $notifier->notifyUser(
+                    $uwp->creator,
+                    new WorkflowEventNotification(
+                        title: 'UWP Returned by PMT',
+                        body: "Your Unit Work Plan was returned by PMT reviewer {$user->name}.",
+                        url: route('supervisor.uwp.show.page', ['id' => $uwp->id]),
+                        type: 'alert',
+                        meta: [
+                            'event' => 'uwp.returned',
+                            'uwp_id' => $uwp->id,
+                            'office_id' => $uwp->office_id,
+                            'performance_period_id' => $uwp->performance_period_id,
+                            'status' => UnitWorkPlan::STATUS_RETURNED,
+                            'source_role' => 'pmt',
+                        ],
+                    )
+                );
+            }
+
+            if ($validated['action'] === 'approve') {
+                $notification = new WorkflowEventNotification(
+                    title: 'UWP Approved by PMT',
+                    body: "Unit Work Plan was approved by PMT reviewer {$user->name}.",
+                    url: route('supervisor.uwp.show.page', ['id' => $uwp->id]),
+                    type: 'success',
+                    meta: [
+                        'event' => 'uwp.pmt_approved',
+                        'uwp_id' => $uwp->id,
+                        'office_id' => $uwp->office_id,
+                        'performance_period_id' => $uwp->performance_period_id,
+                        'status' => UnitWorkPlan::STATUS_PMT_APPROVED,
+                        'source_role' => 'pmt',
+                    ],
+                );
+
+                if ($uwp->creator) {
+                    $notifier->notifyUser($uwp->creator, $notification);
+                }
+                if ($uwp->office?->head) {
+                    $notifier->notifyUser(
+                        $uwp->office->head,
+                        new WorkflowEventNotification(
+                            title: 'UWP Approved by PMT',
+                            body: "Unit Work Plan was approved by PMT reviewer {$user->name}.",
+                            url: route('dept-head.uwp.show', ['id' => $uwp->id]),
+                            type: 'success',
+                            meta: [
+                                'event' => 'uwp.pmt_approved',
+                                'uwp_id' => $uwp->id,
+                                'office_id' => $uwp->office_id,
+                                'performance_period_id' => $uwp->performance_period_id,
+                                'status' => UnitWorkPlan::STATUS_PMT_APPROVED,
+                                'source_role' => 'pmt',
+                            ],
+                        )
+                    );
+                }
+            }
+        }
+
         return back()->with('success', $result['message']);
     }
 
@@ -231,6 +297,49 @@ class UnitWorkPlanController extends Controller
             }
 
             return back()->with('error', $result['message']);
+        }
+
+        $uwp = UnitWorkPlan::query()->with(['creator', 'office.head'])->find((int) ($result['uwp_id'] ?? $validated['unit_work_plan_id']));
+        if ($uwp) {
+            $notifier = app(WorkflowNotificationDispatcher::class);
+            if ($uwp->creator) {
+                $notifier->notifyUser(
+                    $uwp->creator,
+                    new WorkflowEventNotification(
+                        title: 'UWP Approved by PMT',
+                        body: "Unit Work Plan was approved by PMT reviewer {$user->name}.",
+                        url: route('supervisor.uwp.show.page', ['id' => $uwp->id]),
+                        type: 'success',
+                        meta: [
+                            'event' => 'uwp.pmt_approved',
+                            'uwp_id' => $uwp->id,
+                            'office_id' => $uwp->office_id,
+                            'performance_period_id' => $uwp->performance_period_id,
+                            'status' => UnitWorkPlan::STATUS_PMT_APPROVED,
+                            'source_role' => 'pmt',
+                        ],
+                    )
+                );
+            }
+            if ($uwp->office?->head) {
+                $notifier->notifyUser(
+                    $uwp->office->head,
+                    new WorkflowEventNotification(
+                        title: 'UWP Approved by PMT',
+                        body: "Unit Work Plan was approved by PMT reviewer {$user->name}.",
+                        url: route('dept-head.uwp.show', ['id' => $uwp->id]),
+                        type: 'success',
+                        meta: [
+                            'event' => 'uwp.pmt_approved',
+                            'uwp_id' => $uwp->id,
+                            'office_id' => $uwp->office_id,
+                            'performance_period_id' => $uwp->performance_period_id,
+                            'status' => UnitWorkPlan::STATUS_PMT_APPROVED,
+                            'source_role' => 'pmt',
+                        ],
+                    )
+                );
+            }
         }
 
         if ($expectsJson) {
@@ -359,6 +468,27 @@ class UnitWorkPlanController extends Controller
             }
 
             return back()->with('error', $result['message']);
+        }
+
+        $uwp = UnitWorkPlan::query()->with('creator')->find((int) ($result['uwp_id'] ?? $validated['unit_work_plan_id']));
+        if ($uwp?->creator) {
+            app(WorkflowNotificationDispatcher::class)->notifyUser(
+                $uwp->creator,
+                new WorkflowEventNotification(
+                    title: 'UWP Returned by PMT',
+                    body: "Your Unit Work Plan was returned by PMT reviewer {$user->name}.",
+                    url: route('supervisor.uwp.show.page', ['id' => $uwp->id]),
+                    type: 'alert',
+                    meta: [
+                        'event' => 'uwp.returned',
+                        'uwp_id' => $uwp->id,
+                        'office_id' => $uwp->office_id,
+                        'performance_period_id' => $uwp->performance_period_id,
+                        'status' => UnitWorkPlan::STATUS_RETURNED,
+                        'source_role' => 'pmt',
+                    ],
+                )
+            );
         }
 
         if ($expectsJson) {

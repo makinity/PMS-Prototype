@@ -21,7 +21,7 @@
     @endphp
 
     <section class="space-y-4 px-3 md:px-6">
-        <div class="min-w-0 rounded-xl border border-white/10 bg-transparent p-4 shadow-sm">
+        <div class="min-w-0 rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-4 shadow-sm">
             <h1 class="text-lg font-semibold text-gray-100 sm:text-xl">Users Management</h1>
             <p class="mt-1 text-sm text-gray-300">Manage roles, offices, and activation status.</p>
         </div>
@@ -33,27 +33,27 @@
             </div>
         @endif
 
-        <div class="min-w-0 rounded-xl border border-white/10 bg-transparent p-4 shadow-sm">
+        <div class="min-w-0 rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-4 shadow-sm">
             <form method="GET" action="{{ $indexUrl }}" class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
                 <div class="min-w-0 xl:col-span-2">
-                    <label for="filterSearch" class="mb-1 block text-xs uppercase tracking-wide text-gray-400">Search</label>
+                    <label for="filterSearch" class="mb-1 block text-xs uppercase tracking-[0.14em] text-slate-400">Search</label>
                     <input
                         id="filterSearch"
                         type="text"
                         name="search"
                         value="{{ $filters['search'] ?? '' }}"
                         placeholder="Name, email, employee ID"
-                        style="background:#0f172a;color:#e5e7eb;"
-                        class="w-full rounded-lg border border-white/10 bg-gray-900/60 px-3 py-2 text-sm text-gray-100 outline-none focus:border-blue-500" />
+                        style="background-color:#020617;color:#e2e8f0;border-color:#334155;"
+                        class="w-full rounded-xl border px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500" />
                 </div>
 
                 <div>
-                    <label for="filterRole" class="mb-1 block text-xs uppercase tracking-wide text-gray-400">Role</label>
+                    <label for="filterRole" class="mb-1 block text-xs uppercase tracking-[0.14em] text-slate-400">Role</label>
                     <select
                         id="filterRole"
                         name="role"
-                        style="background:#0f172a;color:#e5e7eb;"
-                        class="w-full rounded-lg border border-white/10 bg-gray-900/60 px-3 py-2 text-sm text-gray-100 outline-none focus:border-blue-500">
+                        style="background-color:#020617;color:#e2e8f0;border-color:#334155;"
+                        class="w-full rounded-xl border px-3 py-2 text-sm text-slate-200 [color-scheme:dark]">
                         <option value="">All Roles</option>
                         <option value="employee" @selected(($filters['role'] ?? '') === 'employee')>Employee</option>
                         <option value="supervisor" @selected(($filters['role'] ?? '') === 'supervisor')>Supervisor</option>
@@ -63,12 +63,12 @@
                 </div>
 
                 <div>
-                    <label for="filterOffice" class="mb-1 block text-xs uppercase tracking-wide text-gray-400">Office</label>
+                    <label for="filterOffice" class="mb-1 block text-xs uppercase tracking-[0.14em] text-slate-400">Office</label>
                     <select
                         id="filterOffice"
                         name="office_id"
-                        style="background:#0f172a;color:#e5e7eb;"
-                        class="w-full rounded-lg border border-white/10 bg-gray-900/60 px-3 py-2 text-sm text-gray-100 outline-none focus:border-blue-500">
+                        style="background-color:#020617;color:#e2e8f0;border-color:#334155;"
+                        class="w-full rounded-xl border px-3 py-2 text-sm text-slate-200 [color-scheme:dark]">
                         <option value="">All Offices</option>
                         @foreach ($offices as $office)
                             <option value="{{ $office->id }}" @selected((string) ($filters['office_id'] ?? '') === (string) $office->id)>
@@ -79,12 +79,12 @@
                 </div>
 
                 <div>
-                    <label for="filterStatus" class="mb-1 block text-xs uppercase tracking-wide text-gray-400">Status</label>
+                    <label for="filterStatus" class="mb-1 block text-xs uppercase tracking-[0.14em] text-slate-400">Status</label>
                     <select
                         id="filterStatus"
                         name="status"
-                        style="background:#0f172a;color:#e5e7eb;"
-                        class="w-full rounded-lg border border-white/10 bg-gray-900/60 px-3 py-2 text-sm text-gray-100 outline-none focus:border-blue-500">
+                        style="background-color:#020617;color:#e2e8f0;border-color:#334155;"
+                        class="w-full rounded-xl border px-3 py-2 text-sm text-slate-200 [color-scheme:dark]">
                         <option value="all" @selected(($filters['status'] ?? 'all') === 'all')>All Statuses</option>
                         <option value="active" @selected(($filters['status'] ?? '') === 'active')>Active</option>
                         <option value="pending" @selected(($filters['status'] ?? '') === 'pending')>Pending Activation</option>
@@ -100,7 +100,7 @@
             </form>
         </div>
 
-        <div class="min-w-0 rounded-xl border border-white/10 bg-transparent shadow-sm">
+        <div class="min-w-0 rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 shadow-sm">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-white/10 text-xs sm:text-sm">
                     <thead class="bg-gray-900/70 text-[11px] uppercase tracking-wide text-gray-400 sm:text-xs">

@@ -10,6 +10,8 @@ use App\Models\PerformancePeriod;
 use App\Models\QarHeader;
 use App\Models\QarMporLink;
 use App\Models\QarRow;
+use App\Notifications\WorkflowEventNotification;
+use App\Services\WorkflowNotificationDispatcher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -783,6 +785,26 @@ class QarController extends Controller
         $state['generated_at'] = Carbon::parse($header?->generated_at ?? $generatedAt)->toDateTimeString();
         $request->session()->put($sessionKey, $state);
 
+        // Notify PMT that QAR was endorsed
+        if ($header) {
+            app(WorkflowNotificationDispatcher::class)->notifyRole(
+                'pmt',
+                new WorkflowEventNotification(
+                    title: 'QAR Endorsed by Department Head',
+                    body: ($deptHead->name ?? 'Department Head') . " endorsed a QAR for PMT review.",
+                    url: route('pmt.qar.show', ['qarHeader' => $header->id]),
+                    type: 'info',
+                    meta: [
+                        'event' => 'qar.endorsed_to_pmt',
+                        'qar_header_id' => $header->id,
+                        'office_id' => $officeId,
+                        'performance_period_id' => $period->id,
+                        'source_role' => 'dept-head',
+                    ],
+                )
+            );
+        }
+
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json(['status' => 'endorsed', 'message' => 'QAR endorsed and saved.']);
         }
@@ -984,10 +1006,10 @@ class QarController extends Controller
         $normalized = strtolower(trim((string) $type));
 
         if ($normalized === '') {
-            return 'custom';
+            return 'support';
         }
 
-        if (in_array($normalized, ['core', 'support', 'custom'], true)) {
+        if (in_array($normalized, ['core', 'support'], true)) {
             return $normalized;
         }
 
@@ -999,7 +1021,7 @@ class QarController extends Controller
             return 'core';
         }
 
-        return $normalized;
+        return 'support';
     }
 
     private function buildSectionMeta(string $type, ?float $weight = null): array
@@ -1007,7 +1029,6 @@ class QarController extends Controller
         $base = match ($type) {
             'core' => 'CORE FUNCTIONS',
             'support' => 'SUPPORT FUNCTIONS',
-            'custom' => 'CUSTOM FUNCTIONS',
             default => strtoupper(ucwords(str_replace('_', ' ', $type)) . ' FUNCTIONS'),
         };
 

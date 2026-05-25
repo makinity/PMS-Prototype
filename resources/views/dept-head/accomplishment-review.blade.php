@@ -26,14 +26,14 @@
                 <h1 class="text-2xl font-bold text-white">Accomplishment Review</h1>
                 <p class="mt-1 text-xs text-slate-500">Active Performance Period: {{ $periodLabelSafe }}</p>
             </div>
-            <div class="rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3 text-right">
+            <div class="rounded-xl border border-gray-700 bg-slate-900/40 px-4 py-3 text-right">
                 <p class="text-[11px] uppercase tracking-[0.14em] text-slate-500">Records</p>
                 <p class="mt-1 text-lg font-semibold text-white">{{ count($submissionRows) }}</p>
             </div>
         </div>
 
-        <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
-            <div class="border-b border-slate-800 px-5 py-4">
+        <div class="overflow-hidden rounded-2xl border border-gray-700 bg-slate-900/40">
+            <div class="border-b border-gray-700 px-5 py-4">
                 <div class="flex flex-wrap items-end gap-3">
                     <div class="min-w-[220px] flex-1">
                         <label for="dh-submissions-search" class="mb-1 block text-xs uppercase tracking-[0.14em] text-slate-400">Search</label>
@@ -126,8 +126,8 @@
     <script id="dept-head-submissions-json" type="application/json">{!! json_encode($submissionPayloads ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!}</script>
 
     <div id="submission-view-modal" data-preview-modal class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 px-4 py-6">
-        <div class="w-full max-w-5xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
-            <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
+        <div class="w-full max-w-5xl rounded-2xl border border-gray-700 bg-slate-900 p-5 shadow-2xl">
+            <div class="flex items-start justify-between gap-3 border-b border-gray-700 pb-3">
                 <div>
                     <p class="text-xs uppercase tracking-[0.2em] text-sky-300">Dept Head Review</p>
                     <h3 class="text-lg font-semibold text-white">Accomplishment Review Details</h3>
@@ -140,7 +140,7 @@
                 {{-- KPI Cards (JS-filled) --}}
                 <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
                     {{-- Row 1 (equal 50/50 on lg) --}}
-                    <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+                    <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                         <p class="text-[11px] uppercase tracking-[0.18em] text-slate-500">Status</p>
                         <div class="mt-2">
                             <span id="viewSubmissionStatus"
@@ -148,7 +148,7 @@
                         </div>
                     </div>
 
-                    <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+                    <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                         <p class="text-[11px] uppercase tracking-[0.18em] text-slate-500">Submitted At</p>
                         <p id="viewSubmissionSubmittedAt" class="mt-2 text-base font-semibold text-white">--</p>
                     </div>
@@ -165,42 +165,42 @@
 
                     {{-- Row 2 (3 equal cards under the 2-card row) --}}
                     <div class="grid grid-cols-1 gap-3 lg:col-span-2 lg:grid-cols-3">
-                        <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+                        <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                             <p class="text-[11px] uppercase tracking-[0.18em] text-slate-500">Employee</p>
                             <p id="viewSubmissionEmployee" class="mt-2 text-base font-semibold text-white">--</p>
                         </div>
 
-                        <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+                        <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                             <p class="text-[11px] uppercase tracking-[0.18em] text-slate-500">Office</p>
                             <p id="viewSubmissionOffice" class="mt-2 text-base font-semibold text-white">--</p>
                         </div>
 
-                        <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+                        <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                             <p class="text-[11px] uppercase tracking-[0.18em] text-slate-500">Period</p>
                             <p id="viewSubmissionPeriod" class="mt-2 text-base font-semibold text-white">--</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                     <p class="text-[11px] uppercase tracking-[0.14em] text-slate-500">Employee Remarks</p>
                     <p id="viewSubmissionRemarks" class="mt-2 whitespace-pre-line text-sm text-slate-200">--</p>
                 </div>
 
-                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                     <p class="text-[11px] uppercase tracking-[0.14em] text-slate-500">Supervisor Action</p>
                     <p id="viewSubmissionSupervisorActionAt" class="mt-2 text-sm font-semibold text-slate-100">--</p>
                     <p id="viewSubmissionSupervisorRemarks" class="mt-2 whitespace-pre-line text-sm text-slate-300">--</p>
                 </div>
 
-                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                     <p class="text-[11px] uppercase tracking-[0.14em] text-slate-500">Attachments</p>
                     <ul id="viewSubmissionAttachments" class="mt-2 space-y-2"></ul>
                     <p id="viewSubmissionAttachmentsEmpty" class="mt-2 text-sm text-slate-400">No attachments uploaded.</p>
                 </div>
 
                 <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
-                    <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+                    <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                         <div class="flex items-start justify-between gap-3">
                             <div>
                                 <h4 class="text-sm font-semibold text-white">SMPOR - Monitoring Summary</h4>
@@ -215,7 +215,7 @@
                         </div>
                     </div>
 
-                    <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+                    <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                         <div class="flex items-start justify-between gap-3">
                             <div>
                                 <h4 class="text-sm font-semibold text-white">IPCR Accomplishment Report</h4>
@@ -232,7 +232,7 @@
                 </div>
             </div>
 
-            <div class="mt-5 flex items-center justify-end gap-4 border-t border-slate-800 pt-4">
+            <div class="mt-5 flex items-center justify-end gap-4 border-t border-gray-700 pt-4">
                 <form method="POST"
                     id="submissionEndorseForm"
                     data-action-template="{{ route('dept-head.acc-review.endorse', ['id' => '__SUBMISSION_ID__']) }}"
@@ -250,8 +250,8 @@
     </div>
 
     <div id="dept-head-smpor-preview-modal" data-preview-modal data-parent-modal-id="submission-view-modal" class="fixed inset-0 z-[90] hidden items-center justify-center bg-black/60 px-4 py-6">
-        <div class="w-full max-w-6xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
-            <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
+        <div class="w-full max-w-6xl rounded-2xl border border-gray-700 bg-slate-900 p-5 shadow-2xl">
+            <div class="flex items-start justify-between gap-3 border-b border-gray-700 pb-3">
                 <div>
                     <p class="text-xs uppercase tracking-[0.2em] text-blue-300">SMPOR (Monitoring Summary)</p>
                     <h3 class="text-lg font-semibold text-white">SMPOR Preview</h3>
@@ -262,10 +262,10 @@
 
             <div class="mt-4 max-h-[66vh] space-y-5 overflow-y-auto pr-1 text-sm text-slate-200">
                 <div class="grid grid-cols-1 gap-3 md:grid-cols-4">
-                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3"><p class="text-[11px] uppercase text-slate-500">Employee</p><p id="smporEmployeeName" class="mt-1 font-semibold">--</p></div>
-                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3"><p class="text-[11px] uppercase text-slate-500">Office/Unit</p><p id="smporOfficeName" class="mt-1 font-semibold">--</p></div>
-                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3"><p class="text-[11px] uppercase text-slate-500">Period</p><p id="smporPeriodLabel" class="mt-1 font-semibold">--</p></div>
-                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3"><p class="text-[11px] uppercase text-slate-500">Source</p><p id="smporSourceLabel" class="mt-1 font-semibold">--</p></div>
+                    <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3"><p class="text-[11px] uppercase text-slate-500">Employee</p><p id="smporEmployeeName" class="mt-1 font-semibold">--</p></div>
+                    <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3"><p class="text-[11px] uppercase text-slate-500">Office/Unit</p><p id="smporOfficeName" class="mt-1 font-semibold">--</p></div>
+                    <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3"><p class="text-[11px] uppercase text-slate-500">Period</p><p id="smporPeriodLabel" class="mt-1 font-semibold">--</p></div>
+                    <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3"><p class="text-[11px] uppercase text-slate-500">Source</p><p id="smporSourceLabel" class="mt-1 font-semibold">--</p></div>
                 </div>
 
                 <div class="space-y-2">
@@ -277,18 +277,18 @@
                     <p class="text-xs text-slate-400">Monthly totals are derived from rated ORS monitoring within the selected submission snapshot.</p>
                 </div>
 
-                <div id="smporQuantityPanel" data-smpor-tab-panel="quantity" class="overflow-x-auto rounded-xl border border-slate-800"></div>
-                <div id="smporQualityPanel" data-smpor-tab-panel="quality" class="hidden overflow-x-auto rounded-xl border border-slate-800"></div>
-                <div id="smporTimelinessPanel" data-smpor-tab-panel="timeliness" class="hidden overflow-x-auto rounded-xl border border-slate-800"></div>
+                <div id="smporQuantityPanel" data-smpor-tab-panel="quantity" class="overflow-x-auto rounded-xl border border-gray-700"></div>
+                <div id="smporQualityPanel" data-smpor-tab-panel="quality" class="hidden overflow-x-auto rounded-xl border border-gray-700"></div>
+                <div id="smporTimelinessPanel" data-smpor-tab-panel="timeliness" class="hidden overflow-x-auto rounded-xl border border-gray-700"></div>
             </div>
 
-            <div class="mt-5 flex items-center justify-end gap-3 border-t border-slate-800 pt-4"><button type="button" data-close-modal class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-800">Close</button></div>
+            <div class="mt-5 flex items-center justify-end gap-3 border-t border-gray-700 pt-4"><button type="button" data-close-modal class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-800">Close</button></div>
         </div>
     </div>
 
     <div id="dept-head-ipcr-preview-modal" data-preview-modal data-parent-modal-id="submission-view-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/60 px-4 py-6">
-        <div class="w-full max-w-7xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
-            <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
+        <div class="w-full max-w-7xl rounded-2xl border border-gray-700 bg-slate-900 p-5 shadow-2xl">
+            <div class="flex items-start justify-between gap-3 border-b border-gray-700 pb-3">
                 <div>
                     <p class="text-xs uppercase tracking-[0.2em] text-blue-300">IPCR (Accomplishment Report)</p>
                     <h3 class="text-lg font-semibold text-white">IPCR Preview</h3>
@@ -299,20 +299,20 @@
 
             <div class="mt-4 max-h-[66vh] space-y-4 overflow-y-auto pr-1 text-sm text-slate-200">
                 <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
-                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3"><p class="text-[11px] uppercase text-slate-500">Employee</p><p id="ipcrEmployeeName" class="mt-1 font-semibold">--</p></div>
-                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3"><p class="text-[11px] uppercase text-slate-500">Office/Unit</p><p id="ipcrOfficeName" class="mt-1 font-semibold">--</p></div>
-                    <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3"><p class="text-[11px] uppercase text-slate-500">Period</p><p id="ipcrPeriodLabel" class="mt-1 font-semibold">--</p></div>
+                    <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3"><p class="text-[11px] uppercase text-slate-500">Employee</p><p id="ipcrEmployeeName" class="mt-1 font-semibold">--</p></div>
+                    <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3"><p class="text-[11px] uppercase text-slate-500">Office/Unit</p><p id="ipcrOfficeName" class="mt-1 font-semibold">--</p></div>
+                    <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3"><p class="text-[11px] uppercase text-slate-500">Period</p><p id="ipcrPeriodLabel" class="mt-1 font-semibold">--</p></div>
                 </div>
                 <div id="ipcrSectionsContainer" class="space-y-4"></div>
             </div>
 
-            <div class="mt-5 flex items-center justify-end gap-3 border-t border-slate-800 pt-4"><button type="button" data-close-modal class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-800">Close</button></div>
+            <div class="mt-5 flex items-center justify-end gap-3 border-t border-gray-700 pt-4"><button type="button" data-close-modal class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-800">Close</button></div>
         </div>
     </div>
 
     <div id="dept-head-ipcr-indicators-modal" data-preview-modal data-parent-modal-id="dept-head-ipcr-preview-modal" class="fixed inset-0 z-[110] hidden items-center justify-center bg-black/60 px-4 py-6">
-        <div class="w-full max-w-4xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
-            <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
+        <div class="w-full max-w-4xl rounded-2xl border border-gray-700 bg-slate-900 p-5 shadow-2xl">
+            <div class="flex items-start justify-between gap-3 border-b border-gray-700 pb-3">
                 <div>
                     <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Success Indicators</p>
                     <h3 id="ipcrIndicatorsTitle" class="text-lg font-semibold text-white">Success Indicators</h3>
@@ -321,7 +321,7 @@
             </div>
 
             <div class="mt-4 max-h-[60vh] overflow-y-auto pr-1">
-                <div class="overflow-x-auto rounded-xl border border-slate-800">
+                <div class="overflow-x-auto rounded-xl border border-gray-700">
                     <table class="min-w-full text-left text-sm text-slate-200">
                         <thead class="bg-slate-950/70 text-xs uppercase text-slate-400">
                             <tr>
@@ -338,13 +338,13 @@
                 </div>
             </div>
 
-            <div class="mt-5 flex items-center justify-end gap-3 border-t border-slate-800 pt-4"><button type="button" data-close-modal class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-800">Close</button></div>
+            <div class="mt-5 flex items-center justify-end gap-3 border-t border-gray-700 pt-4"><button type="button" data-close-modal class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-800">Close</button></div>
         </div>
     </div>
 
     <div id="dept-head-ipcr-standards-modal" data-preview-modal data-parent-modal-id="dept-head-ipcr-indicators-modal" class="fixed inset-0 z-[120] hidden items-center justify-center bg-black/60 px-4 py-6">
-        <div class="w-full max-w-5xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
-            <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
+        <div class="w-full max-w-5xl rounded-2xl border border-gray-700 bg-slate-900 p-5 shadow-2xl">
+            <div class="flex items-start justify-between gap-3 border-b border-gray-700 pb-3">
                 <div>
                     <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Standards Matrix</p>
                     <h3 class="text-lg font-semibold text-white">Standards (Q/E/T)</h3>
@@ -354,7 +354,7 @@
             </div>
 
             <div class="mt-4 max-h-[60vh] overflow-y-auto pr-1">
-                <div class="overflow-x-auto rounded-xl border border-slate-800">
+                <div class="overflow-x-auto rounded-xl border border-gray-700">
                     <table class="min-w-full text-left text-sm text-slate-200">
                         <thead class="bg-slate-950/70 text-xs uppercase text-slate-400">
                             <tr>
@@ -369,7 +369,7 @@
                 </div>
             </div>
 
-            <div class="mt-5 flex items-center justify-end gap-3 border-t border-slate-800 pt-4"><button type="button" data-close-modal class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-800">Close</button></div>
+            <div class="mt-5 flex items-center justify-end gap-3 border-t border-gray-700 pt-4"><button type="button" data-close-modal class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-800">Close</button></div>
         </div>
     </div>
 
@@ -646,7 +646,7 @@
                     submissionAttachmentsEmptyEl.classList.add('hidden');
                     list.forEach((attachment) => {
                         const item = document.createElement('li');
-                        item.className = 'rounded-lg border border-slate-800 bg-slate-900/40 px-3 py-2';
+                        item.className = 'rounded-lg border border-gray-700 bg-slate-900/40 px-3 py-2';
 
                         const name = escapeHtml(attachment?.name || 'Attachment');
                         const url = attachment?.url ? String(attachment.url) : null;
@@ -809,7 +809,7 @@
                     }
 
                     if (currentIpcrSections.length === 0) {
-                        ipcrSectionsContainerEl.innerHTML = '<div class="rounded-xl border border-slate-800 bg-slate-950/60 px-4 py-8 text-center text-slate-400">No IPCR commitments found for this submission.</div>';
+                        ipcrSectionsContainerEl.innerHTML = '<div class="rounded-xl border border-gray-700 bg-slate-900/40 px-4 py-8 text-center text-slate-400">No IPCR commitments found for this submission.</div>';
                     } else {
                         ipcrSectionsContainerEl.innerHTML = currentIpcrSections.map((section, sectionIndex) => {
                             const rows = Array.isArray(section?.rows) ? section.rows : [];
@@ -824,7 +824,7 @@
                                     return `<tr class="bg-slate-900/40 align-top"><td class="px-4 py-3 font-semibold text-slate-100">${escapeHtml(row?.major_output || '--')}</td><td class="px-4 py-3"><a href="javascript:void(0)" data-ipcr-open-indicators data-section-index="${sectionIndex}" data-row-index="${rowIndex}" aria-label="View success indicators (${indicatorsCount})" class="inline-flex items-center gap-1 text-sky-300 transition hover:text-sky-200 focus:outline-none focus:ring-2 focus:ring-sky-500/40"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-4 w-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1 1 0 010-.644C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178a1 1 0 010 .644C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg><span class="text-xs">(${indicatorsCount})</span></a></td><td class="px-4 py-3 text-slate-200">${escapeHtml(row?.target_summary || '--')}</td><td class="px-4 py-3 text-slate-300">${escapeHtml(row?.timeline || '--')}</td></tr>`;
                                 }).join('');
 
-                            return `<div class="rounded-xl border border-slate-800 bg-slate-950/60"><div class="border-b border-slate-800 px-4 py-3"><h4 class="text-sm font-semibold uppercase tracking-[0.12em] text-slate-100">${escapeHtml(String(section?.title || 'Section') + weightLabel)}</h4></div><div class="overflow-x-auto"><table class="min-w-full text-left text-sm text-slate-200"><thead class="bg-slate-950/70 text-xs uppercase text-slate-400"><tr><th class="px-4 py-3">Major Output</th><th class="px-4 py-3">Success Indicators</th><th class="px-4 py-3">Target Summary</th><th class="px-4 py-3">Timeline</th></tr></thead><tbody class="divide-y divide-slate-800">${rowsHtml}</tbody></table></div></div>`;
+                            return `<div class="rounded-xl border border-gray-700 bg-slate-900/40"><div class="border-b border-gray-700 px-4 py-3"><h4 class="text-sm font-semibold uppercase tracking-[0.12em] text-slate-100">${escapeHtml(String(section?.title || 'Section') + weightLabel)}</h4></div><div class="overflow-x-auto"><table class="min-w-full text-left text-sm text-slate-200"><thead class="bg-slate-950/70 text-xs uppercase text-slate-400"><tr><th class="px-4 py-3">Major Output</th><th class="px-4 py-3">Success Indicators</th><th class="px-4 py-3">Target Summary</th><th class="px-4 py-3">Timeline</th></tr></thead><tbody class="divide-y divide-slate-800">${rowsHtml}</tbody></table></div></div>`;
                         }).join('');
                     }
 

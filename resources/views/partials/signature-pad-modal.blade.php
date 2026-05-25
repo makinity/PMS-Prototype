@@ -12,8 +12,8 @@
 <div id="{{ $modalId }}"
      class="fixed inset-0 z-[90] hidden items-center justify-center bg-black/70 px-4 py-6"
      aria-hidden="true">
-    <div class="w-full max-w-2xl rounded-2xl border border-slate-800 bg-slate-950 shadow-2xl">
-        <div class="flex items-start justify-between gap-4 border-b border-slate-800 px-6 py-5">
+    <div class="w-full max-w-2xl rounded-2xl border border-gray-700 bg-slate-950 shadow-2xl">
+        <div class="flex items-start justify-between gap-4 border-b border-gray-700 px-6 py-5">
             <div>
                 <p class="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-300">E-Signature</p>
                 <h3 class="mt-2 text-xl font-semibold text-white">{{ $title }}</h3>
@@ -35,7 +35,7 @@
             <p class="mt-3 text-xs text-slate-500">Use your mouse, touch, or pen to provide the Department Head signature.</p>
         </div>
 
-        <div class="flex items-center justify-between gap-3 border-t border-slate-800 px-6 py-4">
+        <div class="flex items-center justify-between gap-3 border-t border-gray-700 px-6 py-4">
             <button type="button"
                     id="{{ $clearButtonId }}"
                     class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-slate-800">

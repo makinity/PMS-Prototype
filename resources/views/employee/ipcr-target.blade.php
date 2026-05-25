@@ -35,7 +35,7 @@
         </div>
 
         <!-- STATUS / CONTEXT -->
-        <div class="bg-transparent border border-gray-700 rounded-lg p-5">
+        <div class="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 rounded-lg p-5">
             <div class="flex items-start justify-between gap-4">
                 <div>
                     <h2 class="text-lg font-semibold text-white">Status & Context</h2>
@@ -56,7 +56,7 @@
                 </div>
                 <div class="bg-gray-700 rounded-lg p-3">
                     <p class="text-gray-400 mb-1">Basis</p>
-                    <p class="font-medium text-white">Approved UWP (PMT-approved) and OPCR (Department Head–approved)</p>
+                    <p class="font-medium text-white">Approved UWP (PMT-approved) and OPCR (Department HeadÃ¢â‚¬â€œapproved)</p>
                 </div>
             </div>
         </div>
@@ -71,7 +71,7 @@
         @endif
 
         <!-- EMPLOYEE INFORMATION -->
-        <div class="bg-transparent border border-gray-700 rounded-lg p-5">
+        <div class="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 rounded-lg p-5">
             <h2 class="font-semibold text-lg text-white mb-4">Employee Information</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
@@ -111,7 +111,7 @@
         <div id="ipcr-function-sections" class="space-y-6"></div>
 
         <!-- COMMITMENT SECTION -->
-        <div class="bg-transparent border border-gray-700 rounded-lg p-5">
+        <div class="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 rounded-lg p-5">
             <h2 class="font-semibold text-lg text-white mb-4">Employee Commitment</h2>
             <div class="bg-gray-700/50 rounded-lg p-4 mb-6">
                 <p class="text-sm text-gray-300 italic">
@@ -164,40 +164,36 @@
     <!-- SUCCESS INDICATORS MODAL -->
     <div id="ipcr-indicators-modal" data-modal-container role="dialog" aria-modal="true"
          class="fixed inset-0 z-[70] hidden items-center justify-center bg-black/60 px-4 py-6">
-        <div class="w-full max-w-4xl rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl">
-            <div class="flex items-start justify-between gap-4 border-b border-slate-800 pb-4">
+        <div class="w-full max-w-4xl rounded-2xl border border-gray-700 bg-slate-900 p-6 shadow-2xl">
+            <div class="flex items-start justify-between gap-4 border-b border-gray-700 pb-4">
                 <div class="min-w-0">
                     <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Individual Performance Commitment and Review</p>
                     <h2 id="ipcr-indicators-title" class="mt-1 text-lg font-semibold text-white truncate">
                         Success Indicators
                     </h2>
                 </div>
-                <button type="button" data-close-modal
-                        class="shrink-0 rounded-lg border border-slate-800 bg-slate-950/50 px-2.5 py-2 text-slate-400 hover:text-white hover:bg-slate-950">
-                    ✕
-                </button>
             </div>
 
             <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase tracking-wide text-slate-500">Office / Unit</p>
                     <p class="mt-1 text-sm font-semibold text-white">{{ ($officeName ?? '') ?: 'Revenue Collection Unit' }}</p>
                 </div>
-                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase tracking-wide text-slate-500">Period</p>
                     <p class="mt-1 text-sm font-semibold text-white">{{ ($periodName ?? '') ?: 'January - June 2026' }}</p>
                 </div>
-                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase tracking-wide text-slate-500">Employee</p>
                     <p class="mt-1 text-sm font-semibold text-white">{{ ($employeeName ?? '') ?: 'Ramon Reyes' }}</p>
                 </div>
             </div>
 
-            <div class="mt-5 rounded-xl border border-slate-800 bg-slate-950/40 overflow-hidden">
+            <div class="mt-5 rounded-xl border border-gray-700 bg-slate-900/40 overflow-hidden">
                 <div class="max-h-[46vh] overflow-auto">
                     <table class="w-full text-sm text-slate-200">
                         <thead class="sticky top-0 z-10 bg-slate-950 text-slate-300 text-xs uppercase">
-                            <tr class="border-b border-slate-800">
+                            <tr class="border-b border-gray-700">
                                 <th class="px-4 py-3 text-left w-[44%]">Indicator</th>
                                 <th class="px-4 py-3 text-left w-[32%]">Target Summary</th>
                                 <th class="px-4 py-3 text-left w-[24%]">Standards (Q/E/T)</th>
@@ -210,7 +206,7 @@
                 </div>
             </div>
 
-            <div class="mt-6 flex justify-end border-t border-slate-800 pt-4">
+            <div class="mt-6 flex justify-end border-t border-gray-700 pt-4">
                 <button type="button" data-close-modal
                         class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">
                     Close
@@ -222,24 +218,20 @@
     <!-- STANDARDS MODAL -->
     <div id="ipcr-standards-modal" data-modal-container role="dialog" aria-modal="true"
          class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 px-4 py-6">
-        <div class="w-full max-w-5xl rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl">
-            <div class="flex items-start justify-between gap-4 border-b border-slate-800 pb-4">
+        <div class="w-full max-w-5xl rounded-2xl border border-gray-700 bg-slate-900 p-6 shadow-2xl">
+            <div class="flex items-start justify-between gap-4 border-b border-gray-700 pb-4">
                 <div class="min-w-0">
                     <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Standards</p>
                     <h2 id="ipcr-standards-title" class="mt-1 text-lg font-semibold text-white truncate">Standards (Q/E/T)</h2>
                     <p class="text-sm text-slate-400">Read-only | Encoded by Supervisor during UWP Draft; locked after submission</p>
                 </div>
-                <button type="button" data-close-modal
-                        class="shrink-0 rounded-lg border border-slate-800 bg-slate-950/50 px-2.5 py-2 text-slate-400 hover:text-white hover:bg-slate-950">
-                    ✕
-                </button>
             </div>
 
-            <div class="mt-5 rounded-xl border border-slate-800 bg-slate-950/40 overflow-hidden">
+            <div class="mt-5 rounded-xl border border-gray-700 bg-slate-900/40 overflow-hidden">
                 <div class="max-h-[56vh] overflow-auto">
                     <table class="w-full text-sm text-slate-200">
                         <thead class="sticky top-0 z-10 bg-slate-950 text-slate-300 text-xs uppercase">
-                            <tr class="border-b border-slate-800">
+                            <tr class="border-b border-gray-700">
                                 <th class="px-4 py-3 text-left w-[8%]">Rating</th>
                                 <th class="px-4 py-3 text-left w-[42%]">Quality (Q)</th>
                                 <th class="px-4 py-3 text-left w-[25%]">Efficiency (E)</th>
@@ -253,7 +245,7 @@
                 </div>
             </div>
 
-            <div class="mt-6 flex justify-end border-t border-slate-800 pt-4">
+            <div class="mt-6 flex justify-end border-t border-gray-700 pt-4">
                 <button type="button" data-close-modal
                         class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">
                     Close
@@ -498,7 +490,7 @@
 
         function normalizeFunctionType(type) {
             const normalized = String(type || '').trim().toLowerCase();
-            return normalized !== '' ? normalized : 'custom';
+            return ['core', 'support'].includes(normalized) ? normalized : 'core';
         }
 
         function getFunctionSections() {
@@ -532,7 +524,6 @@
 
             if (type === 'core') return 'Core Functions';
             if (type === 'support') return 'Support Functions';
-            if (type === 'custom') return 'Custom Functions';
 
             return (type || 'Other').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) + ' Functions';
         }
@@ -559,7 +550,7 @@
                 const percent = buildSectionPercent(type);
                 const percentLabel = Number.isFinite(percent) ? `(${percent}%)` : '';
                 const section = document.createElement('div');
-                section.className = 'bg-transparent border border-gray-700 rounded-lg p-5 space-y-4';
+                section.className = 'bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 rounded-lg p-5 space-y-4';
                 section.innerHTML = `
                     <div class="flex justify-between items-start">
                         <div>
@@ -589,26 +580,7 @@
 
         renderFunctionSections();
 
-        function setButtonLoading(button, isLoading, loadingText) {
-            if (!button) return;
-            const label = button.querySelector('[data-button-label]');
-            const spinner = button.querySelector('[data-button-spinner]');
-            if (label && !button.dataset.originalLabel) {
-                button.dataset.originalLabel = label.textContent.trim();
-            }
-
-            if (isLoading) {
-                button.disabled = true;
-                button.classList.add('opacity-70', 'cursor-wait');
-                if (spinner) spinner.classList.remove('hidden');
-                if (label && loadingText) label.textContent = loadingText;
-            } else {
-                button.disabled = false;
-                button.classList.remove('opacity-70', 'cursor-wait');
-                if (spinner) spinner.classList.add('hidden');
-                if (label && button.dataset.originalLabel) label.textContent = button.dataset.originalLabel;
-            }
-        }
+        const setButtonLoading = window.setButtonLoading || function() {};
 
         // --------- COMMIT BUTTON DEMO (status updates + disable after commit) ----------
         const statusBadge = document.getElementById('ipcr-status-badge');

@@ -13,6 +13,8 @@ use App\Models\UwpIndicatorAssignment;
 use App\Models\UwpQetStandard;
 use App\Models\UwpSuccessIndicator;
 use App\Models\UwpConsolidationSignature;
+use App\Notifications\WorkflowEventNotification;
+use App\Services\WorkflowNotificationDispatcher;
 use App\Services\UwpConsolidationSignatureService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -476,6 +478,28 @@ class UnitWorkPlanController extends Controller
             }
         });
 
+        $uwp->loadMissing(['office.head', 'performancePeriod']);
+        $departmentHead = $uwp->office?->head;
+        if ($departmentHead) {
+            app(WorkflowNotificationDispatcher::class)->notifyUser(
+                $departmentHead,
+                new WorkflowEventNotification(
+                    title: 'UWP Submitted',
+                    body: "{$user->name} submitted a Unit Work Plan for review.",
+                    url: route('dept-head.uwp.show', ['id' => $uwp->id]),
+                    type: 'info',
+                    meta: [
+                        'event' => 'uwp.submitted',
+                        'uwp_id' => $uwp->id,
+                        'office_id' => $uwp->office_id,
+                        'performance_period_id' => $uwp->performance_period_id,
+                        'status' => UnitWorkPlan::STATUS_SUBMITTED,
+                        'source_role' => 'supervisor',
+                    ],
+                )
+            );
+        }
+
         if (!($request->expectsJson() || $request->ajax())) {
             return redirect()
                 ->route('supervisor.uwp-page')
@@ -593,6 +617,28 @@ class UnitWorkPlanController extends Controller
                     'submitted_at' => now()
                 ]);
             });
+
+            $uwp->loadMissing(['office.head', 'performancePeriod']);
+            $departmentHead = $uwp->office?->head;
+            if ($departmentHead) {
+                app(WorkflowNotificationDispatcher::class)->notifyUser(
+                    $departmentHead,
+                    new WorkflowEventNotification(
+                        title: 'UWP Submitted',
+                        body: "{$user->name} submitted a Unit Work Plan for review.",
+                        url: route('dept-head.uwp.show', ['id' => $uwp->id]),
+                        type: 'info',
+                        meta: [
+                            'event' => 'uwp.submitted',
+                            'uwp_id' => $uwp->id,
+                            'office_id' => $uwp->office_id,
+                            'performance_period_id' => $uwp->performance_period_id,
+                            'status' => UnitWorkPlan::STATUS_SUBMITTED,
+                            'source_role' => 'supervisor',
+                        ],
+                    )
+                );
+            }
 
             return $this->respondSubmitForApproval(
                 $request,
@@ -765,13 +811,14 @@ class UnitWorkPlanController extends Controller
             }
 
             $name = trim((string) ($functionPayload['title'] ?? $functionPayload['name'] ?? ''));
-            if ($name === '') {
-                $name = 'Custom Function';
+
+            $type = strtolower(trim((string) ($functionPayload['type'] ?? $functionPayload['function_type'] ?? 'core')));
+            if (!in_array($type, ['core', 'support'], true)) {
+                $type = 'core';
             }
 
-            $type = strtolower(trim((string) ($functionPayload['type'] ?? $functionPayload['function_type'] ?? 'custom')));
-            if (!in_array($type, ['core', 'support', 'custom'], true)) {
-                $type = 'custom';
+            if ($name === '') {
+                $name = $type === 'core' ? 'Core Functions' : 'Support Functions';
             }
 
             $weight = (float) ($functionPayload['weight'] ?? $functionPayload['weight_percent'] ?? 0);
@@ -847,15 +894,15 @@ class UnitWorkPlanController extends Controller
                 continue;
             }
 
-            $functionCode = strtolower(trim((string) ($mfoPayload['function_code'] ?? 'custom')));
-            if (!in_array($functionCode, ['core', 'support', 'custom'], true)) {
-                $functionCode = 'custom';
+            $functionCode = strtolower(trim((string) ($mfoPayload['function_code'] ?? 'core')));
+            if (!in_array($functionCode, ['core', 'support'], true)) {
+                $functionCode = 'core';
             }
 
             if (!isset($functionMap[$functionCode])) {
                 $functionMap[$functionCode] = $functionOrder++;
                 $functions[$functionCode] = [
-                    'name' => $functionCode === 'core' ? 'Core Functions' : ($functionCode === 'support' ? 'Support Functions' : 'Custom Functions'),
+                    'name' => $functionCode === 'core' ? 'Core Functions' : 'Support Functions',
                     'function_type' => $functionCode,
                     'weight_percent' => (float) ($mfoPayload['weight'] ?? 0),
                     'sort_order' => $functionMap[$functionCode],
@@ -1120,9 +1167,9 @@ class UnitWorkPlanController extends Controller
                     continue;
                 }
 
-                $type = strtolower(trim((string) ($functionPayload['function_type'] ?? 'custom')));
-                if (!in_array($type, ['core', 'support', 'custom'], true)) {
-                    $type = 'custom';
+                $type = strtolower(trim((string) ($functionPayload['function_type'] ?? 'core')));
+                if (!in_array($type, ['core', 'support'], true)) {
+                    $type = 'core';
                 }
 
                 $function = $uwp->uwpFunctions()->create([
@@ -1417,7 +1464,7 @@ class UnitWorkPlanController extends Controller
                     'title' => (string) $function->name,
                     'type' => (string) $function->function_type,
                     'weight' => (float) ($function->weight_percent ?? 0),
-                    'isCustom' => $function->function_type === 'custom',
+                    'isCustom' => false,
                     'mfos' => $function->mfos
                         ->sortBy('sort_order')
                         ->values()

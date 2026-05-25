@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="auth-user-id" content="{{ auth()->id() }}">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Employee Dashboard | Performance Management System</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,6 +20,51 @@
     @if (class_exists(\Livewire\Livewire::class))
         @livewireStyles
     @endif
+    <style>
+        html.sidebar-collapsed #employee-sidebar {
+            width: 4.5rem;
+            overflow: hidden;
+        }
+
+        html.sidebar-collapsed #main-wrapper {
+            margin-left: 4.5rem !important;
+        }
+
+        html.sidebar-collapsed #employee-sidebar .sidebar-link span,
+        html.sidebar-collapsed #employee-sidebar nav > div > p,
+        html.sidebar-collapsed #nav-logo-link {
+            display: none !important;
+        }
+
+        .employee-top-breadcrumb {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: calc(18rem + 1.25rem);
+            transform: translateY(-50%);
+            max-width: clamp(10rem, 36vw, 24rem);
+            pointer-events: none;
+        }
+
+        @media (min-width: 640px) {
+            .employee-top-breadcrumb {
+                display: flex;
+            }
+        }
+
+        html.sidebar-collapsed .employee-top-breadcrumb {
+            left: calc(4.5rem + 1rem);
+        }
+    </style>
+    <script>
+    (function() {
+        try {
+            if (window.localStorage.getItem('pms:sidebar:employee:collapsed') === '1') {
+                document.documentElement.classList.add('sidebar-collapsed');
+            }
+        } catch (error) {}
+    })();
+    </script>
 </head>
 <body class="min-h-screen antialiased font-sans">
     <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-slate-900 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white">Skip to content</a>
@@ -26,11 +72,29 @@
         @php
             $isDashboard = request()->routeIs('employee.dashboard');
             $isMyTasks = request()->routeIs('employee.my-task');
-            $isAccomplishmentSubmission = request()->routeIs('employee.accomplishment-submission');
+            $isAccomplishmentSubmission = request()->routeIs('employee.accomplishment*');
             $isOutputRating = request()->routeIs('employee.ors');
             $isMpor = request()->routeIs('employee.mpor');
             $isIPCRTARGET = request()->routeIs('employee.ipcr-target');
             $isProfile = request()->routeIs('employee.profile');
+            $breadcrumbMap = [
+                'employee.dashboard' => 'Dashboard',
+                'employee.my-task*' => 'My Tasks',
+                'employee.accomplishment.smpor-preview' => 'Accomplishments / SMPOR',
+                'employee.accomplishment.ipcr-preview' => 'Accomplishments / IPCR',
+                'employee.accomplishment.submit' => 'Accomplishments / Submit',
+                'employee.accomplishment-submission*' => 'Accomplishments',
+                'employee.ors.export.pdf.download' => 'Output Rating Sheet / Export PDF',
+                'employee.ors.export.pdf' => 'Output Rating Sheet / Preview PDF',
+                'employee.ors*' => 'Output Rating Sheet',
+                'employee.mpor.preview.excel' => 'MPOR / Preview Excel',
+                'employee.mpor.export.excel' => 'MPOR / Export Excel',
+                'employee.mpor.submit' => 'MPOR / Submit',
+                'employee.mpor*' => 'MPOR',
+                'employee.ipcr-target*' => 'IPCR Target',
+                'employee.profile*' => 'Profile & Security',
+            ];
+            $currentBreadcrumb = collect($breadcrumbMap)->first(fn($label, $route) => request()->routeIs($route . '*')) ?? 'Page';
         @endphp
 
         <!-- Sidebar -->
@@ -124,7 +188,7 @@
             <div id="sidebar-nav-divider" class="pointer-events-none absolute inset-y-0 w-px bg-gray-700" style="left: calc(18rem - 1px); display: none; transform: translateX(-18rem); transition: transform 200ms ease-out;"></div>
             <div class="flex items-center justify-between gap-4 px-4 py-3 lg:px-6">
                 <div class="flex items-center gap-3">
-                    <button type="button" id="sidebar-toggle-btn" aria-controls="employee-sidebar" class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-800 bg-slate-900/70 text-slate-200 shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-400/30">
+                    <button type="button" id="sidebar-toggle-btn" aria-controls="employee-sidebar" class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-700 bg-slate-900/40 text-slate-200 shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-400/30">
                         <span class="sr-only">Toggle sidebar</span>
                         <i class="fa-solid fa-bars"></i>
                     </button>
@@ -143,14 +207,14 @@
                     @if (class_exists(\Livewire\Livewire::class))
                         <livewire:notification-dropdown />
                     @else
-                        <button type="button" class="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-800 bg-slate-900/70 text-slate-300 shadow-sm transition hover:bg-slate-800">
+                        <button type="button" class="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-700 bg-slate-900/40 text-slate-300 shadow-sm transition hover:bg-slate-800">
                             <span class="sr-only">View notifications</span>
                             <i class="fa-regular fa-bell"></i>
                             <span class="absolute right-2 top-2 h-2 w-2 rounded-full bg-rose-500"></span>
                         </button>
                     @endif
                     <div class="relative">
-                        <button type="button" id="employee-user-menu-button" data-dropdown-toggle="employee-user-menu" class="flex items-center gap-3 rounded-full border border-slate-800 bg-slate-900/70 px-2 py-1.5 text-left text-slate-100 shadow-sm transition hover:bg-slate-800">
+                        <button type="button" id="employee-user-menu-button" data-dropdown-toggle="employee-user-menu" class="flex items-center gap-3 rounded-full border border-gray-700 bg-slate-900/40 px-2 py-1.5 text-left text-slate-100 shadow-sm transition hover:bg-slate-800">
                             @include('partials.user-avatar', ['user' => Auth::user()])
                             <span class="hidden sm:block">
                                 <span class="block text-sm font-semibold text-white">{{ Auth::user()->name }}</span>
@@ -179,31 +243,19 @@
                     </div>
                 </div>
             </div>
+            <nav class="employee-top-breadcrumb min-w-0 items-center gap-2 border-l border-slate-700/80 pl-3 text-sm text-slate-400" aria-label="Breadcrumb">
+                <i class="fa-solid fa-house text-xs text-slate-500"></i>
+                <span class="text-slate-600">/</span>
+                <span class="truncate text-slate-200">{{ $currentBreadcrumb }}</span>
+            </nav>
         </nav>
 
 
 
         <!-- Main Content -->
         <div id="main-wrapper" class="pt-2 sm:ml-72">
-            <main id="main-content" class="px-4 pb-12 pt-6 lg:px-8">
-                @php
-                    $breadcrumbMap = [
-                        'employee.dashboard' => 'Dashboard',
-                        'employee.my-task' => 'My Tasks',
-                        'employee.accomplishment-submission' => 'Accomplishments',
-                        'employee.ors' => 'Output Rating Sheet',
-                        'employee.mpor' => 'MPOR',
-                        'employee.ipcr-target' => 'IPCR Target',
-                        'employee.profile' => 'Profile & Security',
-                    ];
-                    $currentBreadcrumb = collect($breadcrumbMap)->first(fn($label, $route) => request()->routeIs($route . '*')) ?? 'Page';
-                @endphp
-                <nav class="mb-4 flex items-center gap-2 text-sm text-slate-400">
-                    <i class="fa-solid fa-house text-xs text-slate-500"></i>
-                    <span class="text-slate-600">/</span>
-                    <span class="text-slate-200">{{ $currentBreadcrumb }}</span>
-                </nav>
-                <div class="mx-auto max-w-7xl">
+            <main id="main-content" class="px-3 pb-12 pt-6 lg:px-5">
+                <div class="mx-auto w-full max-w-none">
                     @yield('main-content')
                 </div>
             </main>
@@ -222,8 +274,6 @@
     @stack('scripts')
     <script>
     (function() {
-        document.documentElement.classList.remove('sidebar-collapsed');
-
         const sidebar = document.getElementById('employee-sidebar');
         const navDivider = document.getElementById('sidebar-nav-divider');
         const mainWrapper = document.getElementById('main-wrapper');
@@ -232,8 +282,24 @@
         const logoText = document.getElementById('nav-logo-text');
         const logoIcon = document.getElementById('nav-logo-icon');
         let collapsed = false;
+        const SIDEBAR_STATE_KEY = 'pms:sidebar:employee:collapsed';
         const MOBILE_SIDEBAR_WIDTH = '18rem';
         const DIVIDER_OFFSET_PX = -1;
+
+        function persistCollapsedState() {
+            document.documentElement.classList.toggle('sidebar-collapsed', collapsed);
+            try {
+                window.localStorage.setItem(SIDEBAR_STATE_KEY, collapsed ? '1' : '0');
+            } catch (error) {}
+        }
+
+        function readCollapsedState() {
+            try {
+                return window.localStorage.getItem(SIDEBAR_STATE_KEY) === '1';
+            } catch (error) {
+                return false;
+            }
+        }
 
         function setDividerLeft(value) {
             if (!navDivider) return;
@@ -308,6 +374,29 @@
             if (logoText) logoText.style.display = '';
             if (logoIcon) logoIcon.style.display = '';
             collapsed = false;
+            persistCollapsedState();
+            updateNavDivider();
+            updateMobileLogoVisibility();
+        }
+
+        function applyDesktopCollapseState(nextCollapsed) {
+            collapsed = Boolean(nextCollapsed);
+            if (collapsed) {
+                sidebar.style.width = '4.5rem';
+                sidebar.style.overflow = 'hidden';
+                mainWrapper.style.marginLeft = '4.5rem';
+                sidebar.querySelectorAll('.sidebar-link span, nav > div > p').forEach(el => el.style.display = 'none');
+                if (logoText) logoText.style.display = 'none';
+                if (logoIcon) logoIcon.style.display = 'none';
+            } else {
+                sidebar.style.width = '';
+                sidebar.style.overflow = '';
+                mainWrapper.style.marginLeft = '';
+                sidebar.querySelectorAll('.sidebar-link span, nav > div > p').forEach(el => el.style.display = '');
+                if (logoText) logoText.style.display = '';
+                if (logoIcon) logoIcon.style.display = '';
+            }
+            persistCollapsedState();
             updateNavDivider();
             updateMobileLogoVisibility();
         }
@@ -322,6 +411,7 @@
                 mainWrapper.style.marginLeft = '';
                 sidebar.querySelectorAll('.sidebar-link span, nav > div > p').forEach(el => el.style.display = '');
                 collapsed = false;
+                persistCollapsedState();
                 const isOpening = sidebar.classList.contains('-translate-x-full');
                 if (isOpening) {
                     setMobileDividerOpenState(false, false);
@@ -336,19 +426,7 @@
                 return;
             }
             // Desktop: collapse/expand
-            collapsed = !collapsed;
-            if (collapsed) {
-                sidebar.style.width = '4.5rem';
-                sidebar.style.overflow = 'hidden';
-                mainWrapper.style.marginLeft = '4.5rem';
-                sidebar.querySelectorAll('.sidebar-link span, nav > div > p').forEach(el => el.style.display = 'none');
-                if (logoText) logoText.style.display = 'none';
-                if (logoIcon) logoIcon.style.display = 'none';
-            } else {
-                resetCollapse();
-            }
-            updateNavDivider();
-            updateMobileLogoVisibility();
+            applyDesktopCollapseState(!collapsed);
         });
 
         // On resize: if going to mobile, reset collapse
@@ -356,6 +434,8 @@
             if (!isDesktop() && collapsed) {
                 resetCollapse();
                 sidebar.classList.add('-translate-x-full');
+            } else if (isDesktop()) {
+                applyDesktopCollapseState(readCollapsedState());
             }
             updateNavDivider();
             updateMobileLogoVisibility();
@@ -369,9 +449,13 @@
             observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
         }
 
+        if (isDesktop()) {
+            applyDesktopCollapseState(readCollapsedState());
+        }
         updateNavDivider();
         updateMobileLogoVisibility();
     })();
     </script>
+    @include('partials.realtime-notifications')
 </body>
 </html>

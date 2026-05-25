@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Pmt;
 use App\Http\Controllers\Controller;
 use App\Models\Opcr;
 use App\Models\PerformancePeriod;
+use App\Notifications\WorkflowEventNotification;
 use App\Services\OpcrOfficeRatingService;
 use App\Services\PerformanceRatingService;
+use App\Services\WorkflowNotificationDispatcher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -165,6 +167,8 @@ class OfficeCalibrationController extends Controller
             return back()->with('error', 'Only calibrated OPCR ratings can be released.');
         }
 
+        $previousStatus = (string) $opcr->status;
+
         $opcr->update([
             'status' => Opcr::STATUS_RELEASED_BY_PMT,
             'pmt_remarks' => $request->remarks,
@@ -174,6 +178,62 @@ class OfficeCalibrationController extends Controller
             'released_at' => now(),
             'locked_at' => now(),
         ]);
+
+        if ($previousStatus !== Opcr::STATUS_RELEASED_BY_PMT) {
+            $notifier = app(WorkflowNotificationDispatcher::class);
+            $meta = [
+                'event' => 'stage4.data_updated',
+                'source' => 'opcr_release',
+                'opcr_id' => $opcr->id,
+                'office_id' => $opcr->office_id,
+                'performance_period_id' => $opcr->performance_period_id,
+                'status' => Opcr::STATUS_RELEASED_BY_PMT,
+            ];
+
+            $notifier->notifyRole(
+                'pmt',
+                new WorkflowEventNotification(
+                    title: 'Stage IV Data Updated',
+                    body: 'Released OPCR results are ready for Top Performers review.',
+                    url: route('pmt.top-performers.index'),
+                    type: 'info',
+                    meta: $meta
+                )
+            );
+            $notifier->notifyRole(
+                'pmt',
+                new WorkflowEventNotification(
+                    title: 'Stage IV Data Updated',
+                    body: 'Released OPCR/IPCR results are ready for Development Planning review.',
+                    url: route('pmt.development-planning.index'),
+                    type: 'info',
+                    meta: $meta
+                )
+            );
+
+            // Notify Dept Head that OPCR calibration was released
+            $opcr->loadMissing('office.head');
+            $deptHead = $opcr->office?->head;
+            if ($deptHead) {
+                $user = Auth::user();
+                $notifier->notifyUser(
+                    $deptHead,
+                    new WorkflowEventNotification(
+                        title: 'OPCR Calibration Released',
+                        body: ($user->name ?? 'PMT') . " released the official OPCR rating for your office.",
+                        url: route('dept-head.opcr'),
+                        type: 'success',
+                        meta: [
+                            'event' => 'opcr.calibration_released',
+                            'opcr_id' => $opcr->id,
+                            'office_id' => $opcr->office_id,
+                            'performance_period_id' => $opcr->performance_period_id,
+                            'source_role' => 'pmt',
+                        ],
+                    )
+                );
+            }
+        }
 
         return back()->with('success', 'OPCR official rating released to the office.');
     }
@@ -199,6 +259,29 @@ class OfficeCalibrationController extends Controller
             'released_at' => null,
             'locked_at' => null,
         ]);
+
+        // Notify Dept Head that OPCR calibration was returned
+        $opcr->loadMissing('office.head');
+        $deptHead = $opcr->office?->head;
+        if ($deptHead) {
+            $user = Auth::user();
+            app(WorkflowNotificationDispatcher::class)->notifyUser(
+                $deptHead,
+                new WorkflowEventNotification(
+                    title: 'OPCR Calibration Returned',
+                    body: ($user->name ?? 'PMT') . " returned your OPCR calibration for revision.",
+                    url: route('dept-head.opcr'),
+                    type: 'alert',
+                    meta: [
+                        'event' => 'opcr.calibration_returned',
+                        'opcr_id' => $opcr->id,
+                        'office_id' => $opcr->office_id,
+                        'performance_period_id' => $opcr->performance_period_id,
+                        'source_role' => 'pmt',
+                    ],
+                )
+            );
+        }
 
         return back()->with('success', 'OPCR returned successfully.');
     }

@@ -52,8 +52,8 @@
         @endif
 
         <div class="grid min-h-0 gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
-            <aside class="rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
-                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <aside class="rounded-2xl border border-gray-700 bg-slate-900/40 p-4">
+                <div class="flex items-center justify-between border-b border-gray-700 pb-3">
                     <p class="text-sm font-semibold uppercase tracking-[0.22em] text-slate-400">Indicators</p>
                     <span id="si-indicator-count-badge" class="text-sm font-semibold text-cyan-300">0</span>
                 </div>
@@ -73,8 +73,8 @@
                 <div id="si-indicator-nav" class="mt-4 space-y-2 overflow-y-auto pr-1 max-h-[calc(100vh-260px)]"></div>
             </aside>
 
-            <section class="rounded-2xl border border-slate-800 bg-slate-950/60">
-                <div class="border-b border-slate-800 px-6 py-5">
+            <section class="rounded-2xl border border-gray-700 bg-slate-900/40">
+                <div class="border-b border-gray-700 px-6 py-5">
                     <div class="flex flex-wrap items-start justify-between gap-4">
                         <div class="min-w-0">
                             <h2 id="si-selected-indicator-title" class="text-lg font-semibold text-white">Select an indicator</h2>
@@ -83,7 +83,7 @@
                     </div>
                 </div>
 
-                <div class="border-b border-slate-800 px-6">
+                <div class="border-b border-gray-700 px-6">
                     <div class="flex flex-wrap gap-1.5">
                         <button type="button" data-si-tab="overview" class="border-b-2 border-cyan-400 px-2.5 py-3 text-sm font-semibold text-white">Overview</button>
                         <button type="button" data-si-tab="targets" class="border-b-2 border-transparent px-2.5 py-3 text-sm font-medium text-slate-400 hover:text-slate-200">Targets</button>
@@ -94,11 +94,11 @@
 
                 <div class="min-h-0 overflow-y-auto px-6 py-5">
                     <div data-si-panel="overview" class="space-y-4">
-                        <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+                        <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                             <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Indicator Text</p>
                             <textarea id="si-indicator-text"
                                       rows="3"
-                                      class="mt-2 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/30 focus:outline-none {{ $canEdit ? '' : 'opacity-60 pointer-events-none' }}"
+                                      class="mt-2 w-full rounded-lg border border-gray-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/30 focus:outline-none {{ $canEdit ? '' : 'opacity-60 pointer-events-none' }}"
                                       style="background:#0f172a;color:#e5e7eb;"
                                       {{ $canEdit ? '' : 'disabled' }}></textarea>
                             @if(!$canEdit)
@@ -106,18 +106,18 @@
                             @endif
                         </div>
 
-                        <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+                        <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                             <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Quick Summary</p>
                             <div class="mt-3 grid gap-3 sm:grid-cols-3">
-                                <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                                <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                                     <p class="text-xs text-slate-500">Standards</p>
                                     <p id="si-summary-standards" class="mt-1 text-lg font-semibold text-white">0</p>
                                 </div>
-                                <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                                <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                                     <p class="text-xs text-slate-500">Assignees</p>
                                     <p id="si-summary-assignees" class="mt-1 text-lg font-semibold text-white">0</p>
                                 </div>
-                                <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                                <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                                     <p class="text-xs text-slate-500">Target</p>
                                     <p id="si-summary-target" class="mt-1 text-sm font-semibold text-slate-200">--</p>
                                 </div>
@@ -126,14 +126,14 @@
                     </div>
 
                     <div data-si-panel="targets" class="hidden space-y-4">
-                        <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+                        <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                             <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Targets</p>
                             <div class="mt-4 grid gap-4 sm:grid-cols-2">
                                 <label class="space-y-1">
                                     <span class="text-xs text-slate-400">Quantity</span>
                                     <input id="si-target-quantity"
                                            type="text"
-                                           class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/30 focus:outline-none {{ $canEdit ? '' : 'opacity-60 pointer-events-none' }}"
+                                           class="w-full rounded-lg border border-gray-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/30 focus:outline-none {{ $canEdit ? '' : 'opacity-60 pointer-events-none' }}"
                                            style="background:#0f172a;color:#e5e7eb;"
                                            {{ $canEdit ? '' : 'disabled' }}>
                                 </label>
@@ -141,7 +141,7 @@
                                     <span class="text-xs text-slate-400">Timeline</span>
                                     <input id="si-target-timeline"
                                            type="text"
-                                           class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/30 focus:outline-none {{ $canEdit ? '' : 'opacity-60 pointer-events-none' }}"
+                                           class="w-full rounded-lg border border-gray-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/30 focus:outline-none {{ $canEdit ? '' : 'opacity-60 pointer-events-none' }}"
                                            style="background:#0f172a;color:#e5e7eb;"
                                            {{ $canEdit ? '' : 'disabled' }}>
                                 </label>
@@ -153,21 +153,21 @@
                     </div>
 
                     <div data-si-panel="standards" class="hidden space-y-4">
-                        <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+                        <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                             <div class="flex items-center justify-between mb-3">
                                 <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">QET Standards Matrix</p>
-                                <p class="text-xs text-slate-500">Quality · Efficiency · Timeliness</p>
+                                <p class="text-xs text-slate-500">Quality Â· Efficiency Â· Timeliness</p>
                             </div>
                             @if(!$canEdit)
                                 <p class="mb-3 text-xs text-slate-500">Read-only: this UWP is locked.</p>
                             @endif
-                            <div class="overflow-hidden rounded-xl border border-slate-800">
+                            <div class="overflow-hidden rounded-xl border border-gray-700">
                                 <table class="min-w-full text-sm" id="si-standards-matrix">
                                     <thead class="bg-slate-900/80 text-xs uppercase tracking-wider text-slate-400">
                                         <tr>
-                                            <th class="w-16 px-4 py-3 text-center font-semibold border-r border-slate-800">Rating</th>
-                                            <th class="px-4 py-3 text-left font-semibold text-cyan-400/80 border-r border-slate-800">Q — Quality</th>
-                                            <th class="px-4 py-3 text-left font-semibold text-violet-400/80 border-r border-slate-800">E — Efficiency</th>
+                                            <th class="w-16 px-4 py-3 text-center font-semibold border-r border-gray-700">Rating</th>
+                                            <th class="px-4 py-3 text-left font-semibold text-cyan-400/80 border-r border-gray-700">Q — Quality</th>
+                                            <th class="px-4 py-3 text-left font-semibold text-violet-400/80 border-r border-gray-700">E — Efficiency</th>
                                             <th class="px-4 py-3 text-left font-semibold text-amber-400/80">T — Timeliness</th>
                                         </tr>
                                     </thead>
@@ -178,9 +178,9 @@
                                                 $ratingBg = [5=>'bg-emerald-500/5',4=>'bg-cyan-500/5',3=>'bg-blue-500/5',2=>'bg-amber-500/5',1=>'bg-rose-500/5'];
                                             @endphp
                                             <tr class="{{ $ratingBg[$r] ?? '' }} align-top">
-                                                <td class="w-16 px-4 py-3 text-center font-bold border-r border-slate-800 {{ $ratingColors[$r] ?? 'text-slate-300' }}">{{ $r }}</td>
+                                                <td class="w-16 px-4 py-3 text-center font-bold border-r border-gray-700 {{ $ratingColors[$r] ?? 'text-slate-300' }}">{{ $r }}</td>
                                                 @foreach(['q','e','t'] as $dim)
-                                                    <td class="px-3 py-2.5 align-top {{ $dim !== 't' ? 'border-r border-slate-800' : '' }}" data-si-matrix-cell data-rating="{{ $r }}" data-dimension="{{ $dim }}">
+                                                    <td class="px-3 py-2.5 align-top {{ $dim !== 't' ? 'border-r border-gray-700' : '' }}" data-si-matrix-cell data-rating="{{ $r }}" data-dimension="{{ $dim }}">
                                                         <!-- Rendered via JS -->
                                                     </td>
                                                 @endforeach
@@ -194,9 +194,9 @@
 
 
                     <div data-si-panel="assignees" class="hidden space-y-4">
-                        <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+                        <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                             <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Assignees</p>
-                            <div class="mt-4 overflow-hidden rounded-xl border border-slate-800">
+                            <div class="mt-4 overflow-hidden rounded-xl border border-gray-700">
                                 <table class="min-w-full text-sm text-slate-200">
                                     <thead class="bg-slate-950/70 text-xs uppercase tracking-wide text-slate-400">
                                         <tr>
@@ -216,7 +216,7 @@
             </section>
         </div>
 
-        <div class="flex items-center justify-end gap-3 rounded-2xl border border-slate-800 bg-slate-950/60 px-5 py-4">
+        <div class="flex items-center justify-end gap-3 rounded-2xl border border-gray-700 bg-slate-900/40 px-5 py-4">
             <a href="{{ route('dept-head.opcr.index') }}"
                class="rounded-lg border border-slate-700 bg-slate-950/50 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-900">
                 Back to OPCR Review
@@ -332,7 +332,7 @@
                     siState.indicators.forEach((ind, idx) => {
                         const active = idx === siState.activeIndex;
                         const itemWrapper = document.createElement('div');
-                        itemWrapper.className = `group relative block w-full rounded-xl border p-3 text-left transition ${active ? 'border-cyan-400/60 bg-cyan-500/10' : 'border-slate-800 bg-slate-950/30 hover:bg-slate-900/40'}`;
+                        itemWrapper.className = `group relative block w-full rounded-xl border p-3 text-left transition ${active ? 'border-cyan-400/60 bg-cyan-500/10' : 'border-gray-700 bg-slate-950/30 hover:bg-slate-900/40'}`;
 
                         let isEditing = false;
 
@@ -532,7 +532,7 @@
                                     }
                                 } else {
                                     td.innerHTML = `
-                                        <div class="flex min-h-[3rem] w-full cursor-pointer items-center justify-center rounded-lg border border-dashed border-slate-800/60 bg-slate-950/20 px-2 py-1.5 transition hover:border-slate-600 hover:bg-slate-900/40">
+                                        <div class="flex min-h-[3rem] w-full cursor-pointer items-center justify-center rounded-lg border border-dashed border-gray-700/60 bg-slate-950/20 px-2 py-1.5 transition hover:border-slate-600 hover:bg-slate-900/40">
                                             <span class="text-[10px] font-medium uppercase tracking-wider text-slate-600">Add Standard</span>
                                         </div>
                                     `;

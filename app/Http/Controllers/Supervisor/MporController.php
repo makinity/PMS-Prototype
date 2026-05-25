@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Supervisor;
 
 use App\Http\Controllers\Controller;
 use App\Models\Mpor;
+use App\Notifications\WorkflowEventNotification;
+use App\Services\WorkflowNotificationDispatcher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -335,10 +337,10 @@ class MporController extends Controller
         $normalized = strtolower(trim((string) $type));
 
         if ($normalized === '') {
-            return 'custom';
+            return 'support';
         }
 
-        if (in_array($normalized, ['core', 'support', 'custom'], true)) {
+        if (in_array($normalized, ['core', 'support'], true)) {
             return $normalized;
         }
 
@@ -350,7 +352,7 @@ class MporController extends Controller
             return 'core';
         }
 
-        return $normalized;
+        return 'support';
     }
 
     private function formatFunctionLabel(string $type, ?float $weight = null): string
@@ -358,7 +360,6 @@ class MporController extends Controller
         $base = match ($type) {
             'core' => 'Core Functions',
             'support' => 'Support Functions',
-            'custom' => 'Custom Functions',
             default => ucwords(str_replace('_', ' ', $type)) . ' Functions',
         };
 
@@ -428,6 +429,27 @@ class MporController extends Controller
             'endorsed_by' => auth()->id(),
         ]);
 
+        $mpor->loadMissing(['employee:id,name,office_id', 'employee.office.head']);
+        $deptHead = $mpor->employee?->office?->head;
+        if ($deptHead) {
+            $supervisor = auth()->user();
+            app(WorkflowNotificationDispatcher::class)->notifyUser(
+                $deptHead,
+                new WorkflowEventNotification(
+                    title: 'MPOR Endorsed by Supervisor',
+                    body: ($supervisor->name ?? 'Supervisor') . " endorsed an MPOR for {$mpor->employee->name} ({$mpor->month}).",
+                    url: route('dept-head.qar'),
+                    type: 'info',
+                    meta: [
+                        'event' => 'mpor.endorsed_to_dept_head',
+                        'mpor_id' => $mpor->id,
+                        'office_id' => $mpor->office_id,
+                        'source_role' => 'supervisor',
+                    ],
+                )
+            );
+        }
+
         if (request()->wantsJson()) return response()->json(['status' => 'endorsed']);
         return back()->with('success', 'MPOR endorsed to Department Head.');
     }
@@ -483,6 +505,29 @@ class MporController extends Controller
             'returned_by' => $supervisor->id,
             'return_remarks' => trim((string) ($validated['return_remarks'] ?? '')) ?: null,
         ]);
+
+        $mpor->loadMissing('employee:id,name');
+        if ($mpor->employee) {
+            app(WorkflowNotificationDispatcher::class)->notifyUser(
+                $mpor->employee,
+                new WorkflowEventNotification(
+                    title: 'MPOR Returned',
+                    body: ($supervisor->name ?? 'Your supervisor') . " returned your MPOR for {$mpor->month}.",
+                    url: route('employee.mpor', ['month' => $mpor->month]),
+                    type: 'alert',
+                    meta: [
+                        'event' => 'mpor.returned_to_employee',
+                        'mpor_id' => $mpor->id,
+                        'employee_id' => $mpor->employee_id,
+                        'supervisor_id' => $supervisor->id,
+                        'office_id' => $mpor->office_id,
+                        'month' => $mpor->month,
+                        'status' => (string) $mpor->status,
+                        'source_role' => 'supervisor',
+                    ],
+                )
+            );
+        }
 
         if ($request->wantsJson()) return response()->json(['status' => 'returned']);
         return back()->with('success', 'MPOR returned to employee.');

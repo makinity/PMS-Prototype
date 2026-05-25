@@ -40,18 +40,18 @@
                 <span class="text-xs text-slate-400">Read-only supervision list</span>
             </div>
 
-            <div class="mb-4 flex flex-wrap gap-3 rounded-lg border border-slate-800 bg-slate-950/40 p-4">
-                <div class="flex-1 min-w-[180px]">
-                    <label for="tt-search" class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Search</label>
+            <div class="mb-4 flex flex-wrap items-end gap-3 rounded-lg border border-gray-700 bg-slate-900/40 p-4">
+                <div class="flex-1 min-w-[220px]">
+                    <label for="tt-search" class="mb-1 block text-xs uppercase tracking-[0.14em] text-slate-400">Search</label>
                     <input id="tt-search" type="text" placeholder="Search employee..."
-                        style="background:#0f172a;color:#e5e7eb;"
-                        class="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-slate-200 placeholder-slate-500">
+                        style="background-color:#020617;color:#e2e8f0;border-color:#334155;"
+                        class="w-full rounded-xl border px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500">
                 </div>
-                <div>
-                    <label for="tt-status" class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Status</label>
+                <div class="w-full min-w-[180px] sm:w-auto">
+                    <label for="tt-status" class="mb-1 block text-xs uppercase tracking-[0.14em] text-slate-400">Status</label>
                     <select id="tt-status"
-                        style="background:#0f172a;color:#e5e7eb;"
-                        class="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-slate-200">
+                        style="background-color:#020617;color:#e2e8f0;border-color:#334155;"
+                        class="w-full rounded-xl border px-3 py-2 text-sm text-slate-200 [color-scheme:dark]">
                         @foreach ($statusOptions as $statusOption)
                             <option value="{{ $statusOption }}">
                                 {{ $statusOption === 'all' ? 'All' : ucfirst($statusOption) }}
@@ -129,7 +129,7 @@
                     </div>
                 </div>
                 @if ($entries->hasPages())
-                    <div class="mt-5 flex flex-col gap-3 border-t border-slate-800 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="mt-5 flex flex-col gap-3 border-t border-gray-700 pt-4 sm:flex-row sm:items-center sm:justify-between">
                         <p class="text-xs text-slate-400">
                             Showing {{ $entries->firstItem() }}-{{ $entries->lastItem() }} of {{ $entries->total() }} tasks
                         </p>
@@ -160,7 +160,7 @@
             </div>
         </div>
 
-        <div class="p-6 rounded-xl bg-gradient-to-br from-slate-950 to-slate-900 border border-slate-800 shadow-lg space-y-4">
+        <div class="p-6 rounded-xl bg-gradient-to-br from-slate-950 to-slate-900 border border-gray-700 shadow-lg space-y-4">
             <div class="flex items-center justify-between">
                 <h3 class="text-lg font-semibold text-white">Oversight Signals</h3>
                 {{-- DUMMY_DATA: replace with dynamic value --}}
@@ -193,7 +193,7 @@
                 </li>
             </ul>
 
-            <div class="rounded-lg border border-slate-800 bg-slate-900/70 p-4 text-xs text-slate-300">
+            <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-4 text-xs text-slate-300">
                 <p class="font-semibold text-slate-100 mb-1">Helper note</p>
                 <p>Observation-only dashboard. Capture concerns for the manager; do not reassign or close tasks here.</p>
             </div>

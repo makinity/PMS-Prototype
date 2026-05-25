@@ -29,19 +29,19 @@
 
         <div class="space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-                <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Employee</p>
                     <p class="mt-1 font-semibold text-white">{{ $employeeName ?? '—' }}</p>
                 </div>
-                <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Office/Unit</p>
                     <p class="mt-1 font-semibold text-white">{{ $officeName ?? '—' }}</p>
                 </div>
-                <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Period</p>
                     <p class="mt-1 font-semibold text-white">{{ $periodLabelValue }}</p>
                 </div>
-                <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Source</p>
                     <p class="mt-1 font-semibold text-white">{{ $smporSourceLabel ?? 'Submitted MPORs' }}</p>
                 </div>
@@ -50,7 +50,7 @@
             <div class="space-y-2">
                 <div class="flex items-center justify-between">
                     <h4 class="text-base font-semibold text-white">Monitoring Totals</h4>
-                    <span class="text-xs text-slate-400">Quality Points = Quantity × Quality Rating · Timeliness Points = Quantity × Timeliness Rating</span>
+                    <span class="text-xs text-slate-400">Quality Points = Quantity Ã— Quality Rating Â· Timeliness Points = Quantity Ã— Timeliness Rating</span>
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
                     <button type="button" data-smpor-tab="quantity" class="rounded-lg border border-sky-500/40 bg-sky-500/20 px-3 py-1.5 text-xs font-semibold text-sky-200 transition">Efficiency/Quantity</button>
@@ -59,7 +59,7 @@
                 </div>
 
                 @foreach (['quantity', 'quality', 'timeliness'] as $panel)
-                    <div data-smpor-tab-panel="{{ $panel }}" class="{{ $panel === 'quantity' ? '' : 'hidden' }} overflow-x-auto rounded-xl border border-slate-800">
+                    <div data-smpor-tab-panel="{{ $panel }}" class="{{ $panel === 'quantity' ? '' : 'hidden' }} overflow-x-auto rounded-xl border border-gray-700">
                         <table class="min-w-full text-left text-sm text-slate-200">
                             <thead class="bg-slate-950/70 text-xs uppercase text-slate-400">
                                 <tr>
@@ -104,7 +104,7 @@
                 @endforeach
             </div>
 
-            <div class="flex items-center justify-end gap-3 border-t border-slate-800 pt-4">
+            <div class="flex items-center justify-end gap-3 border-t border-gray-700 pt-4">
             </div>
         </div>
     </section>

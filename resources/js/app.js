@@ -1014,6 +1014,7 @@ function setButtonLoading(button, isLoading, loadingText) {
         }
     }
 }
+window.setButtonLoading = setButtonLoading;
 
 adminLoadingButtons.forEach((button) => {
     button.addEventListener('click', function () {

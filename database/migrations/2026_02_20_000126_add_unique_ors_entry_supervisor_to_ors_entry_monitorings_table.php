@@ -13,10 +13,7 @@ return new class extends Migration
             return;
         }
 
-        $indexNames = collect(DB::select('SHOW INDEX FROM ors_entry_monitorings'))
-            ->pluck('Key_name')
-            ->unique()
-            ->values();
+        $indexNames = $this->indexNames();
 
         if ($indexNames->contains('ors_entry_monitorings_ors_entry_id_unique')) {
             if (!$indexNames->contains('ors_entry_monitorings_ors_entry_id_index')) {
@@ -43,10 +40,7 @@ return new class extends Migration
             return;
         }
 
-        $indexNames = collect(DB::select('SHOW INDEX FROM ors_entry_monitorings'))
-            ->pluck('Key_name')
-            ->unique()
-            ->values();
+        $indexNames = $this->indexNames();
 
         if (!$indexNames->contains('ors_entry_monitorings_ors_entry_id_index')) {
             Schema::table('ors_entry_monitorings', function (Blueprint $table) {
@@ -66,15 +60,27 @@ return new class extends Migration
             });
         }
 
-        $indexNames = collect(DB::select('SHOW INDEX FROM ors_entry_monitorings'))
-            ->pluck('Key_name')
-            ->unique()
-            ->values();
+        $indexNames = $this->indexNames();
 
         if ($indexNames->contains('ors_entry_monitorings_ors_entry_id_index')) {
             Schema::table('ors_entry_monitorings', function (Blueprint $table) {
                 $table->dropIndex('ors_entry_monitorings_ors_entry_id_index');
             });
         }
+    }
+
+    private function indexNames()
+    {
+        if (DB::getDriverName() === 'sqlite') {
+            return collect(DB::select("PRAGMA index_list('ors_entry_monitorings')"))
+                ->pluck('name')
+                ->unique()
+                ->values();
+        }
+
+        return collect(DB::select('SHOW INDEX FROM ors_entry_monitorings'))
+            ->pluck('Key_name')
+            ->unique()
+            ->values();
     }
 };

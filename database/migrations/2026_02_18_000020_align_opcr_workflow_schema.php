@@ -61,10 +61,20 @@ return new class extends Migration
                 $query->whereNull('opcrs.office_id')
                     ->orWhereNull('opcrs.performance_period_id');
             })
-            ->update([
-                'opcrs.office_id' => DB::raw('unit_work_plans.office_id'),
-                'opcrs.performance_period_id' => DB::raw('unit_work_plans.performance_period_id'),
-            ]);
+            ->select([
+                'opcrs.id',
+                'unit_work_plans.office_id',
+                'unit_work_plans.performance_period_id',
+            ])
+            ->orderBy('opcrs.id')
+            ->each(function ($opcr) {
+                DB::table('opcrs')
+                    ->where('id', $opcr->id)
+                    ->update([
+                        'office_id' => $opcr->office_id,
+                        'performance_period_id' => $opcr->performance_period_id,
+                    ]);
+            });
 
         DB::table('opcrs')
             ->where('status', 'for_dept_head_review')

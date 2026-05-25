@@ -11,6 +11,9 @@ use App\Models\Mpor;
 use App\Models\OrsEntry;
 use App\Models\PerformancePeriod;
 use App\Models\QarHeader;
+use App\Models\User;
+use App\Notifications\WorkflowEventNotification;
+use App\Services\WorkflowNotificationDispatcher;
 use App\Support\ResolvesIpcrTargetScores;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -680,7 +683,6 @@ class SmporIpcrAccomplishmentController extends Controller
             $defaultTitle = match ($functionType) {
                 'core' => 'CORE FUNCTION',
                 'support' => 'SUPPORT FUNCTION',
-                'custom' => 'CUSTOM FUNCTION',
                 default => strtoupper(str_replace('_', ' ', $functionType)) . ' FUNCTION',
             };
             $candidateTitle = trim((string) ($function->name ?? ''));
@@ -716,11 +718,7 @@ class SmporIpcrAccomplishmentController extends Controller
     {
         $value = strtolower(trim($functionType));
 
-        if ($value === '') {
-            return 'custom';
-        }
-
-        return $value;
+        return in_array($value, ['core', 'support'], true) ? $value : 'support';
     }
 
     private function initializeMonthMap(array $monthLabels): array
@@ -1088,7 +1086,7 @@ class SmporIpcrAccomplishmentController extends Controller
                     $aggregateMap[$label] = $initializeMonthlyBuckets();
                 }
 
-                $functionType = $this->normalizeFunctionType((string) ($entry->ipcrItem?->function_type ?? ($outputSectionMap[$label] ?? 'custom')));
+                $functionType = $this->normalizeFunctionType((string) ($entry->ipcrItem?->function_type ?? ($outputSectionMap[$label] ?? 'core')));
                 if (!isset($labelGroupMap[$label])) {
                     $labelGroupMap[$label] = $functionType;
                 }
@@ -1159,7 +1157,7 @@ class SmporIpcrAccomplishmentController extends Controller
 
             $remainingLabels = collect($aggregateMap)
                 ->keys()
-                ->filter(fn ($label) => ($labelGroupMap[$label] ?? $outputSectionMap[$label] ?? 'custom') === $sectionType)
+                ->filter(fn ($label) => ($labelGroupMap[$label] ?? $outputSectionMap[$label] ?? 'core') === $sectionType)
                 ->reject(fn ($label) => in_array($label, $orderedLabels, true))
                 ->sort(static fn (string $a, string $b): int => strnatcasecmp($a, $b))
                 ->values()
@@ -1856,6 +1854,30 @@ class SmporIpcrAccomplishmentController extends Controller
         } catch (\Throwable $e) {
             DB::rollBack();
             return back()->withErrors(['Submission failed: ' . $e->getMessage()]);
+        }
+
+        // Notify Supervisor
+        if ($supervisorId) {
+            $supervisor = User::find($supervisorId);
+            if ($supervisor) {
+                app(WorkflowNotificationDispatcher::class)->notifyUser(
+                    $supervisor,
+                    new WorkflowEventNotification(
+                        title: 'Accomplishment Submitted',
+                        body: "{$user->name} submitted accomplishments for review.",
+                        url: route('supervisor.submissions.show', ['id' => $submission->id]),
+                        type: 'info',
+                        meta: [
+                            'event' => 'accomplishment.submitted_to_supervisor',
+                            'submission_id' => $submission->id,
+                            'employee_id' => $user->id,
+                            'office_id' => $user->office_id,
+                            'performance_period_id' => $period->id,
+                            'source_role' => 'employee',
+                        ],
+                    )
+                );
+            }
         }
 
         if ($request->wantsJson() || $request->ajax()) {

@@ -8,7 +8,7 @@
     </p>
 </div>
 
-<div class="mb-6 flex flex-col gap-4 rounded-xl border border-slate-800 bg-slate-900/80 p-5 md:flex-row md:items-center md:justify-between">
+<div class="mb-6 flex flex-col gap-4 rounded-xl border border-gray-700 bg-slate-900/80 p-5 md:flex-row md:items-center md:justify-between">
     <div>
         <p class="text-xs uppercase tracking-wide text-slate-400">Performance Period</p>
         <p class="font-medium text-slate-100">{{ $activePeriod->name ?? '—' }}</p>
@@ -18,12 +18,14 @@
         $statusFilter = strtolower((string) ($selectedStatus ?? request('status', '')));
     @endphp
     <form method="GET" action="{{ route('dept-head.uwp.index') }}">
+        <label for="dh-uwp-status" class="mb-1 block text-xs uppercase tracking-[0.14em] text-slate-400">Status</label>
         <select
+            id="dh-uwp-status"
             name="status"
             onchange="this.form.submit()"
-            class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            style="background:#0f172a;color:#e5e7eb;">
-            <option value="" {{ $statusFilter === '' ? 'selected' : '' }}>All Status</option>
+            style="background-color:#020617;color:#e2e8f0;border-color:#334155;"
+            class="w-full rounded-xl border px-3 py-2 text-sm text-slate-200 [color-scheme:dark]">
+            <option value="" {{ $statusFilter === '' ? 'selected' : '' }}>All</option>
             <option value="submitted" {{ $statusFilter === 'submitted' ? 'selected' : '' }}>Submitted</option>
             <option value="consolidated" {{ $statusFilter === 'consolidated' ? 'selected' : '' }}>Consolidated</option>
             <option value="returned" {{ $statusFilter === 'returned' ? 'selected' : '' }}>Returned</option>
@@ -32,8 +34,8 @@
     </form>
 </div>
 
-<div class="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/80">
-    <div class="border-b border-slate-800 p-5">
+<div class="overflow-hidden rounded-xl border border-gray-700 bg-slate-900/80">
+    <div class="border-b border-gray-700 p-5">
         <h2 class="text-lg font-medium text-slate-100">Offices / Units</h2>
         <p class="mt-1 text-sm text-slate-400">Open a unit to review its UWP details on a dedicated page.</p>
     </div>

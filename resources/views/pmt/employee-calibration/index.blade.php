@@ -21,44 +21,40 @@
                 <h1 class="text-2xl font-bold text-white">IPCR Final Calibration</h1>
                 <p class="mt-1 text-xs text-slate-500">Active Performance Period: {{ $periodLabelSafe }}</p>
             </div>
-            <div class="rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3 text-right">
+            <div class="rounded-xl border border-gray-700 bg-slate-900/40 px-4 py-3 text-right">
                 <p class="text-[11px] uppercase tracking-[0.14em] text-slate-500">Records</p>
                 <p class="mt-1 text-lg font-semibold text-white">{{ count($submissionRows) }}</p>
             </div>
         </div>
 
-        <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
-            <div class="border-b border-slate-800 px-5 py-4">
-                <form method="GET" class="flex w-full max-w-xl items-end gap-2">
-                    <div class="flex-1">
-                        <label for="pmt-calibration-search" class="mb-2 block text-xs uppercase tracking-[0.14em] text-slate-400">Search</label>
+        <div class="overflow-hidden rounded-2xl border border-gray-700 bg-slate-900/40">
+            <div class="border-b border-gray-700 px-5 py-4">
+                <div class="flex flex-wrap items-end gap-3">
+                    <div class="min-w-[220px] flex-1">
+                        <label for="pmt-calibration-search" class="mb-1 block text-xs uppercase tracking-[0.14em] text-slate-400">Search</label>
                         <input
                             id="pmt-calibration-search"
-                            name="search"
                             type="text"
-                            value="{{ $searchTermSafe }}"
                             data-live-search
-                            placeholder="Search employee, office, period, status..."
-                            style="background-color: #020617 !important; color: #f1f5f9 !important;"
-                            class="w-full rounded-xl border border-slate-700 px-4 py-3 text-sm placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/30">
+                            placeholder="Search employee, office, status..."
+                            style="background-color:#020617;color:#e2e8f0;border-color:#334155;"
+                            class="w-full rounded-xl border px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500">
                     </div>
-                    <button
-                        type="submit"
-                        aria-label="Search records"
-                        style="background-color: #020617 !important; color: #f1f5f9 !important;"
-                        class="inline-flex h-[50px] w-[50px] items-center justify-center rounded-xl border border-slate-700 text-slate-100 transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/40">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-5 w-5" aria-hidden="true">
-                            <circle cx="11" cy="11" r="7"></circle>
-                            <path stroke-linecap="round" d="M20 20l-3.5-3.5"></path>
-                        </svg>
-                    </button>
-                    @if ($searchTermSafe !== '')
-                        <a href="{{ route('pmt.employee-calibration.index') }}"
-                            class="inline-flex h-[50px] items-center rounded-xl border border-slate-700 px-4 text-sm font-medium text-slate-300 transition hover:bg-slate-800">
-                            Clear
-                        </a>
-                    @endif
-                </form>
+                    <div class="w-full min-w-[180px] sm:w-auto">
+                        <label for="pmt-calibration-status" class="mb-1 block text-xs uppercase tracking-[0.14em] text-slate-400">Status</label>
+                        <select id="pmt-calibration-status"
+                                data-live-status
+                                style="background-color:#020617;color:#e2e8f0;border-color:#334155;"
+                                class="w-full rounded-xl border px-3 py-2 text-sm text-slate-200 [color-scheme:dark]">
+                            <option value="">All</option>
+                            <option value="pending_pmt_calibration">Pending Calibration</option>
+                            <option value="approved_by_pmt">Approved</option>
+                            <option value="adjusted_by_pmt">Adjusted</option>
+                            <option value="released_by_pmt">Released</option>
+                            <option value="returned_by_pmt">Returned</option>
+                        </select>
+                    </div>
+                </div>
             </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm text-slate-200">
@@ -82,6 +78,7 @@
                             @endphp
                             <tr class="bg-slate-900/40"
                                 data-review-row
+                                data-status="{{ $statusKey }}"
                                 data-search-text="{{ \Illuminate\Support\Str::lower($rowSearchText) }}">
                                 <td class="px-5 py-3 font-semibold text-slate-100">
                                     <div class="flex items-center gap-3">
@@ -130,16 +127,21 @@
                 @endif
 
                 const liveSearchInput = document.querySelector('[data-live-search]');
+                const statusSelect = document.querySelector('[data-live-status]');
                 const submissionRows = Array.from(document.querySelectorAll('[data-review-row]'));
                 const noMatchRow = document.getElementById('pmt-submissions-no-match-row');
 
                 function applySubmissionLiveSearch() {
                     if (!liveSearchInput) return;
                     const term = String(liveSearchInput.value || '').trim().toLowerCase();
+                    const status = String(statusSelect?.value || '').toLowerCase();
                     let visibleCount = 0;
                     submissionRows.forEach((row) => {
                         const haystack = String(row.dataset.searchText || '').toLowerCase();
-                        const isVisible = term === '' || haystack.includes(term);
+                        const rowStatus = String(row.dataset.status || '').toLowerCase();
+                        const matchesTerm = term === '' || haystack.includes(term);
+                        const matchesStatus = status === '' || rowStatus === status;
+                        const isVisible = matchesTerm && matchesStatus;
                         row.classList.toggle('hidden', !isVisible);
                         if (isVisible) visibleCount += 1;
                     });
@@ -147,6 +149,7 @@
                 }
 
                 liveSearchInput?.addEventListener('input', applySubmissionLiveSearch);
+                statusSelect?.addEventListener('change', applySubmissionLiveSearch);
                 applySubmissionLiveSearch();
             });
         </script>

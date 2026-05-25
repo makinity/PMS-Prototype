@@ -92,7 +92,27 @@ class UsersController extends Controller
         }
 
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('users', 'name')->ignore($user->id),
+                function (string $attribute, mixed $value, \Closure $fail) use ($user): void {
+                    $normalized = Str::lower(trim((string) $value));
+                    if ($normalized === '') {
+                        return;
+                    }
+
+                    $exists = User::query()
+                        ->whereRaw('LOWER(TRIM(name)) = ?', [$normalized])
+                        ->whereKeyNot($user->id)
+                        ->exists();
+
+                    if ($exists) {
+                        $fail('This login name is already in use.');
+                    }
+                },
+            ],
             'email' => ['required', 'email'],
             'role' => ['required', Rule::in(['employee', 'supervisor', 'dept-head', 'pmt'])],
             'office_id' => ['nullable', 'exists:offices,id'],

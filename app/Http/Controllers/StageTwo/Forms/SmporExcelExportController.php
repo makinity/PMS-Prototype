@@ -1,4 +1,4 @@
-﻿<?php
+?php
 
 namespace App\Http\Controllers\StageTwo\Forms;
 
@@ -240,7 +240,7 @@ class SmporExcelExportController extends Controller
                         $aggregateMap[$label] = $initializeMonthlyBuckets();
                     }
 
-                    $functionType = $this->normalizeFunctionType((string) ($entry->ipcrItem?->function_type ?? ($outputSectionMap[$label] ?? 'custom')));
+                    $functionType = $this->normalizeFunctionType((string) ($entry->ipcrItem?->function_type ?? ($outputSectionMap[$label] ?? 'core')));
                     if (!isset($labelGroupMap[$label])) {
                         $labelGroupMap[$label] = $functionType;
                     }
@@ -293,7 +293,7 @@ class SmporExcelExportController extends Controller
 
             $remainingLabels = collect($aggregateMap)
                 ->keys()
-                ->filter(fn ($label) => ($labelGroupMap[$label] ?? $outputSectionMap[$label] ?? 'custom') === $functionType)
+                ->filter(fn ($label) => ($labelGroupMap[$label] ?? $outputSectionMap[$label] ?? 'core') === $functionType)
                 ->reject(fn ($label) => in_array($label, $orderedLabels, true))
                 ->sort(static fn (string $left, string $right): int => strnatcasecmp($left, $right))
                 ->values()
@@ -388,7 +388,7 @@ class SmporExcelExportController extends Controller
     {
         $value = strtolower(trim($functionType));
 
-        return $value !== '' ? $value : 'custom';
+        return in_array($value, ['core', 'support'], true) ? $value : 'support';
     }
 
     private function buildSectionDefinitions(?Ipcr $ipcr): array
@@ -434,7 +434,6 @@ class SmporExcelExportController extends Controller
         $baseLabel = match ($functionType) {
             'core' => 'CORE FUNCTION',
             'support' => 'SUPPORT FUNCTIONS',
-            'custom' => 'CUSTOM FUNCTIONS',
             default => strtoupper(str_replace('_', ' ', $functionType)) . ' FUNCTIONS',
         };
 

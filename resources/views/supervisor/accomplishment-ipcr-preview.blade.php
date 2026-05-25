@@ -18,19 +18,19 @@
 
         <div class="space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-                <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Employee</p>
                     <p class="mt-1 font-semibold text-white">{{ $employeeName ?? '—' }}</p>
                 </div>
-                <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Office/Unit</p>
                     <p class="mt-1 font-semibold text-white">{{ $officeName ?? '—' }}</p>
                 </div>
-                <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Period</p>
                     <p class="mt-1 font-semibold text-white">{{ $periodLabelValue }}</p>
                 </div>
-                <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Source</p>
                     <p class="mt-1 font-semibold text-white">IPCR Commitments</p>
                 </div>
@@ -38,14 +38,14 @@
 
             <div class="space-y-4">
                 @forelse ($ipcrSections ?? [] as $sectionIndex => $section)
-                    <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+                    <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                         <div class="mb-3 flex items-center justify-between">
                             <h3 class="text-2xl font-bold uppercase tracking-[0.12em] text-white">{{ strtoupper((string) ($section['title'] ?? 'Section')) }}</h3>
                             @if (isset($section['weight_percent']) && $section['weight_percent'] !== null)
                                 <span class="rounded-full border border-sky-500/50 bg-sky-500/10 px-3 py-1 text-sm font-semibold text-sky-200">{{ rtrim(rtrim(number_format((float) $section['weight_percent'], 2, '.', ''), '0'), '.') }}%</span>
                             @endif
                         </div>
-                        <div class="overflow-x-auto rounded-xl border border-slate-800">
+                        <div class="overflow-x-auto rounded-xl border border-gray-700">
                             <table class="min-w-full text-left text-sm text-slate-200">
                                 <thead class="bg-slate-950/70 text-xs uppercase text-slate-400">
                                     <tr>
@@ -83,21 +83,21 @@
                         </div>
                     </div>
                 @empty
-                    <div class="rounded-xl border border-slate-800 bg-slate-950/50 p-4 text-sm text-slate-400">
+                    <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4 text-sm text-slate-400">
                         No IPCR commitments found for this period.
                     </div>
                 @endforelse
             </div>
 
-            <div class="flex items-center justify-end gap-3 border-t border-slate-800 pt-4">
+            <div class="flex items-center justify-end gap-3 border-t border-gray-700 pt-4">
                 <a href="{{ route('ipcr.export.excel') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg">Export</a>
             </div>
         </div>
     </section>
 
     <div id="ipcr-indicators-modal" data-preview-modal class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 px-4 py-6">
-        <div class="w-full max-w-6xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
-            <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
+        <div class="w-full max-w-6xl rounded-2xl border border-gray-700 bg-slate-900 p-5 shadow-2xl">
+            <div class="flex items-start justify-between gap-3 border-b border-gray-700 pb-3">
                 <div>
                     <p class="text-xs uppercase tracking-[0.2em] text-blue-300">IPCR Success Indicators</p>
                     <h3 id="ipcrIndicatorsMajorOutput" class="text-lg font-semibold text-white">Success Indicators</h3>
@@ -105,7 +105,7 @@
                 <button type="button" data-close-modal class="text-slate-400 hover:text-white">&times;</button>
             </div>
             <div class="mt-4 space-y-4 max-h-[65vh] overflow-y-auto text-sm text-slate-200">
-                <div class="overflow-hidden rounded-xl border border-slate-800 bg-slate-950/40">
+                <div class="overflow-hidden rounded-xl border border-gray-700 bg-slate-900/40">
                     <div class="overflow-x-auto">
                         <table class="min-w-full table-fixed text-left text-sm text-slate-200">
                             <colgroup>
@@ -121,15 +121,15 @@
                     </div>
                 </div>
             </div>
-            <div class="mt-3 flex items-center justify-end gap-3 border-t border-slate-800 pt-4">
+            <div class="mt-3 flex items-center justify-end gap-3 border-t border-gray-700 pt-4">
                 <button type="button" data-close-modal class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-800 transition">Close</button>
             </div>
         </div>
     </div>
 
     <div id="ipcr-standards-modal" data-preview-modal data-parent-modal-id="ipcr-indicators-modal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/60 px-4 py-6">
-        <div class="w-full max-w-6xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
-            <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
+        <div class="w-full max-w-6xl rounded-2xl border border-gray-700 bg-slate-900 p-5 shadow-2xl">
+            <div class="flex items-start justify-between gap-3 border-b border-gray-700 pb-3">
                 <div>
                     <p class="text-xs uppercase tracking-[0.2em] text-blue-300">Standards (Q/E/T)</p>
                     <h3 class="text-lg font-semibold text-white">Performance Standards</h3>
@@ -138,7 +138,7 @@
                 <button type="button" data-close-modal class="text-slate-400 hover:text-white">&times;</button>
             </div>
             <div class="mt-4 max-h-[65vh] overflow-y-auto text-sm text-slate-200">
-                <div class="overflow-x-auto rounded-xl border border-slate-800">
+                <div class="overflow-x-auto rounded-xl border border-gray-700">
                     <table class="min-w-full text-left text-sm text-slate-200">
                         <thead class="bg-slate-950/70 text-xs uppercase text-slate-400">
                             <tr><th class="px-4 py-3">Rating</th><th class="px-4 py-3">Quality (Q)</th><th class="px-4 py-3">Efficiency (E)</th><th class="px-4 py-3">Timeliness (T)</th></tr>
@@ -149,7 +149,7 @@
                     </table>
                 </div>
             </div>
-            <div class="flex items-center justify-end gap-3 border-t border-slate-800 pt-4 mt-4">
+            <div class="flex items-center justify-end gap-3 border-t border-gray-700 pt-4 mt-4">
                 <button type="button" data-close-modal class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-800 transition">Close</button>
             </div>
         </div>

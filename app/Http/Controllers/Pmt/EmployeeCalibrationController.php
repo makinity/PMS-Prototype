@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\AccomplishmentSubmission;
 use App\Models\Ipcr;
 use App\Models\PerformancePeriod;
+use App\Notifications\WorkflowEventNotification;
+use App\Services\WorkflowNotificationDispatcher;
 use App\Support\ResolvesIpcrTargetScores;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -342,6 +344,8 @@ class EmployeeCalibrationController extends Controller
             return back()->with('error', 'Only calibrated IPCR ratings can be released.');
         }
 
+        $previousStatus = (string) $ipcr->status;
+
         DB::transaction(function () use ($ipcr, $request) {
             $ipcr->update([
                 'status' => Ipcr::STATUS_RELEASED_BY_PMT,
@@ -367,6 +371,84 @@ class EmployeeCalibrationController extends Controller
 
         $this->recalculateOpcrScore($ipcr);
         $this->autoReleaseOpcrIfAllReleased($ipcr);
+
+        if ($previousStatus !== Ipcr::STATUS_RELEASED_BY_PMT) {
+            $notifier = app(WorkflowNotificationDispatcher::class);
+            $meta = [
+                'event' => 'stage4.data_updated',
+                'source' => 'ipcr_release',
+                'ipcr_id' => $ipcr->id,
+                'office_id' => $ipcr->office_id,
+                'performance_period_id' => $ipcr->performance_period_id,
+                'status' => Ipcr::STATUS_RELEASED_BY_PMT,
+            ];
+
+            $notifier->notifyRole(
+                'pmt',
+                new WorkflowEventNotification(
+                    title: 'Stage IV Data Updated',
+                    body: 'Released IPCR results are ready for Top Performers review.',
+                    url: route('pmt.top-performers.index'),
+                    type: 'info',
+                    meta: $meta
+                )
+            );
+            $notifier->notifyRole(
+                'pmt',
+                new WorkflowEventNotification(
+                    title: 'Stage IV Data Updated',
+                    body: 'Released IPCR results are ready for Development Planning review.',
+                    url: route('pmt.development-planning.index'),
+                    type: 'info',
+                    meta: $meta
+                )
+            );
+
+            // Notify Employee that their IPCR calibration was released
+            $ipcr->loadMissing('employee');
+            if ($ipcr->employee) {
+                $user = Auth::user();
+                $notifier->notifyUser(
+                    $ipcr->employee,
+                    new WorkflowEventNotification(
+                        title: 'IPCR Rating Released',
+                        body: ($user->name ?? 'PMT') . " released your official IPCR rating.",
+                        url: route('employee.accomplishment-submission'),
+                        type: 'success',
+                        meta: [
+                            'event' => 'ipcr.calibration_released',
+                            'ipcr_id' => $ipcr->id,
+                            'office_id' => $ipcr->office_id,
+                            'performance_period_id' => $ipcr->performance_period_id,
+                            'source_role' => 'pmt',
+                        ],
+                    )
+                );
+            }
+
+            // Notify Dept Head
+            $ipcr->loadMissing('office.head');
+            $deptHead = $ipcr->office?->head;
+            if ($deptHead) {
+                $user = $user ?? Auth::user();
+                $notifier->notifyUser(
+                    $deptHead,
+                    new WorkflowEventNotification(
+                        title: 'IPCR Calibration Released',
+                        body: ($user->name ?? 'PMT') . " released an employee IPCR rating.",
+                        url: route('dept-head.opcr'),
+                        type: 'success',
+                        meta: [
+                            'event' => 'ipcr.calibration_released',
+                            'ipcr_id' => $ipcr->id,
+                            'office_id' => $ipcr->office_id,
+                            'performance_period_id' => $ipcr->performance_period_id,
+                            'source_role' => 'pmt',
+                        ],
+                    )
+                );
+            }
+        }
 
         if ($request->wantsJson()) return response()->json(['status' => 'released']);
         return back()->with('success', 'IPCR official rating released to the office and employee.');
@@ -408,6 +490,29 @@ class EmployeeCalibrationController extends Controller
                 ]);
             }
         });
+
+        // Notify Dept Head that IPCR calibration was returned
+        $ipcr->loadMissing('office.head');
+        $deptHead = $ipcr->office?->head;
+        if ($deptHead) {
+            $user = Auth::user();
+            app(WorkflowNotificationDispatcher::class)->notifyUser(
+                $deptHead,
+                new WorkflowEventNotification(
+                    title: 'IPCR Calibration Returned',
+                    body: ($user->name ?? 'PMT') . " returned an employee IPCR calibration for revision.",
+                    url: route('dept-head.acc-review'),
+                    type: 'alert',
+                    meta: [
+                        'event' => 'ipcr.calibration_returned',
+                        'ipcr_id' => $ipcr->id,
+                        'office_id' => $ipcr->office_id,
+                        'performance_period_id' => $ipcr->performance_period_id,
+                        'source_role' => 'pmt',
+                    ],
+                )
+            );
+        }
 
         if ($request->wantsJson()) return response()->json(['status' => 'returned']);
         return back()->with('success', 'IPCR returned successfully.');

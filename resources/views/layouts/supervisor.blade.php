@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    @auth
+        <meta name="auth-user-id" content="{{ auth()->id() }}">
+    @endauth
     <title>Supervisor Page</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -137,7 +140,51 @@
                 animation: none;
             }
         }
+
+        html.sidebar-collapsed #manager-sidebar {
+            width: 4.5rem;
+            overflow: hidden;
+        }
+
+        html.sidebar-collapsed #main-wrapper {
+            margin-left: 4.5rem !important;
+        }
+
+        html.sidebar-collapsed #manager-sidebar .sidebar-link span,
+        html.sidebar-collapsed #manager-sidebar nav > div > p,
+        html.sidebar-collapsed #nav-logo-link {
+            display: none !important;
+        }
+
+        .supervisor-top-breadcrumb {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: calc(18rem + 1.25rem);
+            transform: translateY(-50%);
+            max-width: clamp(10rem, 36vw, 24rem);
+            pointer-events: none;
+        }
+
+        @media (min-width: 640px) {
+            .supervisor-top-breadcrumb {
+                display: flex;
+            }
+        }
+
+        html.sidebar-collapsed .supervisor-top-breadcrumb {
+            left: calc(4.5rem + 1rem);
+        }
     </style>
+    <script>
+    (function() {
+        try {
+            if (window.localStorage.getItem('pms:sidebar:supervisor:collapsed') === '1') {
+                document.documentElement.classList.add('sidebar-collapsed');
+            }
+        } catch (error) {}
+    })();
+    </script>
 </head>
 
 <body class="min-h-screen antialiased font-sans">
@@ -145,12 +192,38 @@
     <div class="min-h-screen">
         @php
             $isSupervisorDashboard = request()->routeIs('supervisor.dashboard');
-            $isSupervisorTeamTasks = request()->routeIs('supervisor.team-tasks');
-            $isSupervisorUWP = request()->routeIs('supervisor.uwp-page');
-            $isSupervisorMPOR = request()->routeIs('supervisor.mpor');
-            $isSupervisorEmpAcc = request()->routeIs('supervisor.employee-submissions');
-            $isSupervisorORS = request()->routeIs('supervisor.ors-monitoring');
-            $isSupervisorProfile = request()->routeIs('supervisor.profile');
+            $isSupervisorTeamTasks = request()->routeIs('supervisor.team-tasks*');
+            $isSupervisorUWP = request()->routeIs('supervisor.uwp*');
+            $isSupervisorMPOR = request()->routeIs('supervisor.mpor*');
+            $isSupervisorEmpAcc = request()->routeIs('supervisor.employee-submissions*') || request()->routeIs('supervisor.submissions.*');
+            $isSupervisorORS = request()->routeIs('supervisor.ors-monitoring*');
+            $isSupervisorProfile = request()->routeIs('supervisor.profile*');
+            $breadcrumbMap = [
+                'supervisor.dashboard' => 'Dashboard',
+                'supervisor.team-tasks*' => 'Team Tasks',
+                'supervisor.uwp.success-indicators*' => 'Unit Work Plan / Success Indicators',
+                'supervisor.uwp.show.page' => 'Unit Work Plan / Show',
+                'supervisor.uwp.show' => 'Unit Work Plan / Show',
+                'supervisor.uwp.preview*' => 'Unit Work Plan / Preview',
+                'supervisor.uwp*' => 'Unit Work Plan',
+                'supervisor.submissions.smpor-preview' => 'Accomplishment Review / SMPOR Preview',
+                'supervisor.submissions.ipcr-preview' => 'Accomplishment Review / IPCR Preview',
+                'supervisor.submissions.show' => 'Accomplishment Review / Detail',
+                'supervisor.employee-submissions*' => 'Accomplishment Review',
+                'supervisor.submissions.*' => 'Accomplishment Review',
+                'supervisor.mpor.show' => 'MPOR / Detail',
+                'supervisor.mpor.preview.json' => 'MPOR / Preview',
+                'supervisor.mpor*' => 'MPOR',
+                'supervisor.ors-monitoring*' => 'ORS Monitoring',
+                'supervisor.profile*' => 'Profile & Security',
+            ];
+            $currentBreadcrumb = 'Page';
+            foreach ($breadcrumbMap as $pattern => $label) {
+                if (request()->routeIs($pattern)) {
+                    $currentBreadcrumb = $label;
+                    break;
+                }
+            }
         @endphp
         <!-- Top Navigation -->
         <nav class="fixed top-0 z-50 w-full bg-slate-950 text-slate-100" id="top-nav">
@@ -160,7 +233,7 @@
                     <button type="button"
                         id="sidebar-toggle-btn"
                         aria-controls="manager-sidebar"
-                        class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-800 bg-slate-900/70 text-slate-200 shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-400/30">
+                        class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-700 bg-slate-900/40 text-slate-200 shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-400/30">
                         <span class="sr-only">Toggle sidebar</span>
                         <i class="fa-solid fa-bars"></i>
                     </button>
@@ -180,14 +253,14 @@
                     @if (class_exists(\Livewire\Livewire::class))
                         <livewire:notification-dropdown />
                     @else
-                        <button type="button" class="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-800 bg-slate-900/70 text-slate-300 shadow-sm transition hover:bg-slate-800">
+                        <button type="button" class="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-700 bg-slate-900/40 text-slate-300 shadow-sm transition hover:bg-slate-800">
                             <span class="sr-only">View notifications</span>
                             <i class="fa-regular fa-bell"></i>
                             <span class="absolute right-2 top-2 h-2 w-2 rounded-full bg-rose-500"></span>
                         </button>
                     @endif
                     <div class="relative">
-                        <button type="button" id="manager-user-menu-button" data-dropdown-toggle="manager-user-menu" class="flex items-center gap-3 rounded-full border border-slate-800 bg-slate-900/70 px-2 py-1.5 text-left text-slate-100 shadow-sm transition hover:bg-slate-800">
+                        <button type="button" id="manager-user-menu-button" data-dropdown-toggle="manager-user-menu" class="flex items-center gap-3 rounded-full border border-gray-700 bg-slate-900/40 px-2 py-1.5 text-left text-slate-100 shadow-sm transition hover:bg-slate-800">
                             @include('partials.user-avatar', ['user' => Auth::user()])
                             <span class="hidden sm:block">
                                 <span class="block text-sm font-semibold text-white">{{ Auth::user()->name }}</span>
@@ -216,6 +289,11 @@
                     </div>
                 </div>
             </div>
+            <nav class="supervisor-top-breadcrumb min-w-0 items-center gap-2 border-l border-slate-700/80 pl-3 text-sm text-slate-400" aria-label="Breadcrumb">
+                <i class="fa-solid fa-house text-xs text-slate-500"></i>
+                <span class="text-slate-600">/</span>
+                <span class="truncate text-slate-200">{{ $currentBreadcrumb }}</span>
+            </nav>
         </nav>
 
         <!-- Sidebar -->
@@ -291,9 +369,9 @@
 
         <!-- Main Content -->
         <div id="main-wrapper" class="pt-2 sm:ml-72">
-            <main id="main-content" class="relative px-4 pb-12 pt-6 lg:px-8">
+            <main id="main-content" class="relative px-3 pb-12 pt-6 lg:px-5">
 
-                <div class="mx-auto max-w-7xl">
+                <div class="mx-auto w-full max-w-none">
                     @yield('main-content')
                 </div>
             </main>
@@ -309,10 +387,9 @@
     @stack('scripts')
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    @include('partials.realtime-notifications')
     <script>
     (function() {
-        document.documentElement.classList.remove('sidebar-collapsed');
-
         const sidebar = document.getElementById('manager-sidebar');
         const navDivider = document.getElementById('sidebar-nav-divider');
         const mainWrapper = document.getElementById('main-wrapper');
@@ -321,8 +398,24 @@
         const logoText = document.getElementById('nav-logo-text');
         const logoIcon = document.getElementById('nav-logo-icon');
         let collapsed = false;
+        const SIDEBAR_STATE_KEY = 'pms:sidebar:supervisor:collapsed';
         const MOBILE_SIDEBAR_WIDTH = '18rem';
         const DIVIDER_OFFSET_PX = -1;
+
+        function persistCollapsedState() {
+            document.documentElement.classList.toggle('sidebar-collapsed', collapsed);
+            try {
+                window.localStorage.setItem(SIDEBAR_STATE_KEY, collapsed ? '1' : '0');
+            } catch (error) {}
+        }
+
+        function readCollapsedState() {
+            try {
+                return window.localStorage.getItem(SIDEBAR_STATE_KEY) === '1';
+            } catch (error) {
+                return false;
+            }
+        }
 
         function setDividerLeft(value) {
             if (!navDivider) return;
@@ -397,6 +490,29 @@
             if (logoText) logoText.style.display = '';
             if (logoIcon) logoIcon.style.display = '';
             collapsed = false;
+            persistCollapsedState();
+            updateNavDivider();
+            updateMobileLogoVisibility();
+        }
+
+        function applyDesktopCollapseState(nextCollapsed) {
+            collapsed = Boolean(nextCollapsed);
+            if (collapsed) {
+                sidebar.style.width = '4.5rem';
+                sidebar.style.overflow = 'hidden';
+                mainWrapper.style.marginLeft = '4.5rem';
+                sidebar.querySelectorAll('.sidebar-link span, nav > div > p').forEach(el => el.style.display = 'none');
+                if (logoText) logoText.style.display = 'none';
+                if (logoIcon) logoIcon.style.display = 'none';
+            } else {
+                sidebar.style.width = '';
+                sidebar.style.overflow = '';
+                mainWrapper.style.marginLeft = '';
+                sidebar.querySelectorAll('.sidebar-link span, nav > div > p').forEach(el => el.style.display = '');
+                if (logoText) logoText.style.display = '';
+                if (logoIcon) logoIcon.style.display = '';
+            }
+            persistCollapsedState();
             updateNavDivider();
             updateMobileLogoVisibility();
         }
@@ -411,6 +527,7 @@
                 mainWrapper.style.marginLeft = '';
                 sidebar.querySelectorAll('.sidebar-link span, nav > div > p').forEach(el => el.style.display = '');
                 collapsed = false;
+                persistCollapsedState();
                 const isOpening = sidebar.classList.contains('-translate-x-full');
                 if (isOpening) {
                     setMobileDividerOpenState(false, false);
@@ -425,19 +542,7 @@
                 return;
             }
             // Desktop: collapse/expand
-            collapsed = !collapsed;
-            if (collapsed) {
-                sidebar.style.width = '4.5rem';
-                sidebar.style.overflow = 'hidden';
-                mainWrapper.style.marginLeft = '4.5rem';
-                sidebar.querySelectorAll('.sidebar-link span, nav > div > p').forEach(el => el.style.display = 'none');
-                if (logoText) logoText.style.display = 'none';
-                if (logoIcon) logoIcon.style.display = 'none';
-            } else {
-                resetCollapse();
-            }
-            updateNavDivider();
-            updateMobileLogoVisibility();
+            applyDesktopCollapseState(!collapsed);
         });
 
         // On resize: if going to mobile, reset collapse
@@ -445,6 +550,8 @@
             if (!isDesktop() && collapsed) {
                 resetCollapse();
                 sidebar.classList.add('-translate-x-full');
+            } else if (isDesktop()) {
+                applyDesktopCollapseState(readCollapsedState());
             }
             updateNavDivider();
             updateMobileLogoVisibility();
@@ -458,6 +565,9 @@
             observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
         }
 
+        if (isDesktop()) {
+            applyDesktopCollapseState(readCollapsedState());
+        }
         updateNavDivider();
         updateMobileLogoVisibility();
     })();

@@ -2,12 +2,14 @@
 
 namespace App\Livewire;
 
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class NotificationDropdown extends Component
 {
     public bool $open = false;
     public array $notifications = [];
+    public int $unreadCount = 0;
 
     public function mount(): void
     {
@@ -17,11 +19,20 @@ class NotificationDropdown extends Component
     public function toggle(): void
     {
         $this->open = ! $this->open;
+        if ($this->open) {
+            $this->loadNotifications();
+        }
     }
 
     public function close(): void
     {
         $this->open = false;
+    }
+
+    #[On('pms-notification-received')]
+    public function refreshNotifications(): void
+    {
+        $this->loadNotifications();
     }
 
     public function markAllRead(): void
@@ -45,22 +56,12 @@ class NotificationDropdown extends Component
         $this->loadNotifications();
     }
 
-    public function getUnreadCountProperty(): int
-    {
-        $count = 0;
-        foreach ($this->notifications as $notification) {
-            if (empty($notification['is_read'])) {
-                $count++;
-            }
-        }
-        return $count;
-    }
-
     private function loadNotifications(): void
     {
         $user = auth()->user();
         if (!$user) {
             $this->notifications = [];
+            $this->unreadCount = 0;
             return;
         }
 
@@ -77,6 +78,8 @@ class NotificationDropdown extends Component
                 'url' => $n->data['url'] ?? null,
             ])
             ->toArray();
+
+        $this->unreadCount = collect($this->notifications)->where('is_read', false)->count();
     }
 
     public function render()

@@ -11,6 +11,12 @@ return new class extends Migration
 
     private function indexExists(string $indexName): bool
     {
+        if (DB::getDriverName() === 'sqlite') {
+            return collect(DB::select("PRAGMA index_list('{$this->table}')"))
+                ->pluck('name')
+                ->contains($indexName);
+        }
+
         $dbName = DB::getDatabaseName();
 
         $count = DB::table('information_schema.statistics')
@@ -24,6 +30,10 @@ return new class extends Migration
 
     private function foreignKeyExists(string $constraintName): bool
     {
+        if (DB::getDriverName() === 'sqlite') {
+            return false;
+        }
+
         $dbName = DB::getDatabaseName();
 
         $count = DB::table('information_schema.table_constraints')
@@ -61,7 +71,7 @@ return new class extends Migration
         }
 
         // Add FK only if missing
-        if (!$this->foreignKeyExists('ipcrs_finalized_from_qar_header_fk')) {
+        if (DB::getDriverName() !== 'sqlite' && !$this->foreignKeyExists('ipcrs_finalized_from_qar_header_fk')) {
             Schema::table($this->table, function (Blueprint $table) {
                 $table->foreign('finalized_from_qar_header_id', 'ipcrs_finalized_from_qar_header_fk')
                     ->references('id')
@@ -74,7 +84,7 @@ return new class extends Migration
     public function down(): void
     {
         // Drop FK if it exists
-        if ($this->foreignKeyExists('ipcrs_finalized_from_qar_header_fk')) {
+        if (DB::getDriverName() !== 'sqlite' && $this->foreignKeyExists('ipcrs_finalized_from_qar_header_fk')) {
             Schema::table($this->table, function (Blueprint $table) {
                 $table->dropForeign('ipcrs_finalized_from_qar_header_fk');
             });

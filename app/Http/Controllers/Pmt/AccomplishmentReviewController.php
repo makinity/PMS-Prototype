@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\AccomplishmentSubmission;
 use App\Models\Ipcr;
 use App\Models\PerformancePeriod;
+use App\Notifications\WorkflowEventNotification;
+use App\Services\WorkflowNotificationDispatcher;
 use App\Support\ResolvesIpcrTargetScores;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -613,10 +615,13 @@ class AccomplishmentReviewController extends Controller
     {
         $submission = AccomplishmentSubmission::with(['employee'])->findOrFail($id);
         $originalUser = $request->user();
-        Auth::login($submission->employee);
-        $controller = app(\App\Http\Controllers\Employee\SmporIpcrAccomplishmentController::class);
-        $indexView = $controller->index($request);
-        Auth::login($originalUser);
+        try {
+            Auth::login($submission->employee);
+            $controller = app(\App\Http\Controllers\Employee\SmporIpcrAccomplishmentController::class);
+            $indexView = $controller->index($request);
+        } finally {
+            Auth::login($originalUser);
+        }
         $data = $indexView->getData();
         $data['backUrl'] = route('pmt.acc-review.show', $id);
         return view('pmt.accomplishment-smpor-preview', $data);
@@ -626,10 +631,13 @@ class AccomplishmentReviewController extends Controller
     {
         $submission = AccomplishmentSubmission::with(['employee'])->findOrFail($id);
         $originalUser = $request->user();
-        Auth::login($submission->employee);
-        $controller = app(\App\Http\Controllers\Employee\SmporIpcrAccomplishmentController::class);
-        $indexView = $controller->index($request);
-        Auth::login($originalUser);
+        try {
+            Auth::login($submission->employee);
+            $controller = app(\App\Http\Controllers\Employee\SmporIpcrAccomplishmentController::class);
+            $indexView = $controller->index($request);
+        } finally {
+            Auth::login($originalUser);
+        }
         $data = $indexView->getData();
         $data['backUrl'] = route('pmt.acc-review.show', $id);
         return view('pmt.accomplishment-ipcr-preview', $data);
@@ -657,6 +665,28 @@ class AccomplishmentReviewController extends Controller
                 'released_by' => null,
                 'released_at' => null,
             ]);
+        }
+
+        // Notify Dept Head that accomplishment was approved
+        $submission->loadMissing('office.head');
+        $deptHead = $submission->office?->head;
+        if ($deptHead) {
+            $user = Auth::user();
+            app(WorkflowNotificationDispatcher::class)->notifyUser(
+                $deptHead,
+                new WorkflowEventNotification(
+                    title: 'Accomplishment Approved by PMT',
+                    body: ($user->name ?? 'PMT') . " approved an accomplishment submission.",
+                    url: route('dept-head.acc-review.show', ['id' => $submission->id]),
+                    type: 'success',
+                    meta: [
+                        'event' => 'accomplishment.pmt_approved',
+                        'submission_id' => $submission->id,
+                        'office_id' => $submission->office_id,
+                        'source_role' => 'pmt',
+                    ],
+                )
+            );
         }
 
         if ($request->wantsJson()) return response()->json(['status' => 'recommended_by_pmt']);
@@ -698,6 +728,28 @@ class AccomplishmentReviewController extends Controller
                 ]);
             }
         });
+
+        // Notify Dept Head that accomplishment was returned
+        $submission->loadMissing('office.head');
+        $deptHead = $submission->office?->head;
+        if ($deptHead) {
+            $user = Auth::user();
+            app(WorkflowNotificationDispatcher::class)->notifyUser(
+                $deptHead,
+                new WorkflowEventNotification(
+                    title: 'Accomplishment Returned by PMT',
+                    body: ($user->name ?? 'PMT') . " returned an accomplishment submission for revision.",
+                    url: route('dept-head.acc-review.show', ['id' => $submission->id]),
+                    type: 'alert',
+                    meta: [
+                        'event' => 'accomplishment.pmt_returned',
+                        'submission_id' => $submission->id,
+                        'office_id' => $submission->office_id,
+                        'source_role' => 'pmt',
+                    ],
+                )
+            );
+        }
 
         if ($request->wantsJson()) return response()->json(['status' => 'returned_to_employee']);
         return back()->with('success', 'Submission returned to employee for correction.');

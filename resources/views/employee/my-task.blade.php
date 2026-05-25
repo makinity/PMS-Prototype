@@ -7,27 +7,33 @@
             <h1 class="mt-1 text-2xl font-bold text-white">My Tasks</h1>
         </div>
 
-        <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <div class="relative flex-1">
-                <i class="fa-solid fa-magnifying-glass pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-500"></i>
+        <div class="flex flex-wrap items-end gap-3">
+            <div class="min-w-[220px] flex-1">
+                <label for="myTasksSearchFilter" class="mb-1 block text-xs uppercase tracking-[0.14em] text-slate-400">Search</label>
                 <input id="myTasksSearchFilter" type="text" placeholder="Search task..."
-                    style="color-scheme: dark; background-color: #0f172a;"
-                    class="w-full rounded-lg border border-slate-700 bg-slate-900 py-2.5 pl-10 pr-3 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-0">
+                    style="background-color:#020617;color:#e2e8f0;border-color:#334155;"
+                    class="w-full rounded-xl border px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500">
             </div>
-            <select id="myTasksStatusFilter"
-                style="color-scheme: dark; background-color: #0f172a;"
-                class="shrink-0 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white focus:border-emerald-500 focus:outline-none focus:ring-0 sm:w-44">
-                <option value="all">All Status</option>
-                <option value="draft">Draft</option>
-                <option value="recording">Recording</option>
-                <option value="submitted">Submitted</option>
-                <option value="rated">Rated</option>
-                <option value="missing">Missing / Overdue</option>
-                <option value="returned">Returned</option>
-            </select>
-            <input id="myTasksDateFilter" type="date"
-                style="color-scheme: dark; background-color: #0f172a;"
-                class="shrink-0 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white focus:border-emerald-500 focus:outline-none focus:ring-0 sm:w-44">
+            <div class="w-full min-w-[140px] sm:w-auto">
+                <label for="myTasksStatusFilter" class="mb-1 block text-xs uppercase tracking-[0.14em] text-slate-400">Status</label>
+                <select id="myTasksStatusFilter"
+                    style="background-color:#020617;color:#e2e8f0;border-color:#334155;"
+                    class="w-full rounded-xl border px-3 py-2 text-sm text-slate-200 [color-scheme:dark]">
+                    <option value="all">All</option>
+                    <option value="draft">Draft</option>
+                    <option value="recording">Recording</option>
+                    <option value="submitted">Submitted</option>
+                    <option value="rated">Rated</option>
+                    <option value="missing">Missing / Overdue</option>
+                    <option value="returned">Returned</option>
+                </select>
+            </div>
+            <div class="w-full min-w-[140px] sm:w-auto">
+                <label for="myTasksDateFilter" class="mb-1 block text-xs uppercase tracking-[0.14em] text-slate-400">Date</label>
+                <input id="myTasksDateFilter" type="date"
+                    style="background-color:#020617;color:#e2e8f0;border-color:#334155;"
+                    class="w-full rounded-xl border px-3 py-2 text-sm text-slate-200 [color-scheme:dark] sm:w-44">
+            </div>
         </div>
 
         <div class="overflow-hidden rounded-lg border border-gray-700 bg-transparent">

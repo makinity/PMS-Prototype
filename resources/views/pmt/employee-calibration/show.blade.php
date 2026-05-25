@@ -19,14 +19,14 @@
             </a>
             <h1 class="text-2xl font-bold text-white">Employee Performance Calibration</h1>
         </div>
-        <div class="rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3 text-right">
+        <div class="rounded-xl border border-gray-700 bg-slate-900/40 px-4 py-3 text-right">
             <p class="text-[11px] uppercase tracking-[0.24em] text-slate-500">Active Period</p>
             <p class="mt-1 text-sm font-semibold text-white">{{ $currentPayload['period_label'] ?? '-' }}</p>
         </div>
     </div>
 
-    <section class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70">
-        <div class="flex flex-wrap items-start justify-between gap-4 border-b border-slate-800 px-5 py-4">
+    <section class="overflow-hidden rounded-2xl border border-gray-700 bg-slate-900/40">
+        <div class="flex flex-wrap items-start justify-between gap-4 border-b border-gray-700 px-5 py-4">
             <div>
                 <h2 class="text-lg font-semibold text-white">Submission Overview</h2>
             </div>
@@ -42,7 +42,7 @@
                             default => 'border-slate-500/30 bg-slate-500/10 text-slate-300',
                         };
                     @endphp
-                    <span class="rounded-full border px-3 py-1 {{ $ipcrBadge }}">
+                    <span data-status-badge class="rounded-full border px-3 py-1 {{ $ipcrBadge }}">
                         {{ $currentPayload['status_label'] ?? 'Draft' }}
                     </span>
                 @else
@@ -52,38 +52,38 @@
         </div>
 
         @if ($currentIpcr)
-            <div class="grid gap-3 border-b border-slate-800 px-5 py-4 sm:grid-cols-4">
-                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+            <div class="grid gap-3 border-b border-gray-700 px-5 py-4 sm:grid-cols-4">
+                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase tracking-wide text-slate-500">Employee</p>
                     <p class="mt-1 text-sm font-semibold text-white">{{ $currentPayload['employee_name'] ?? '-' }}</p>
                 </div>
-                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase tracking-wide text-slate-500">Office / Unit</p>
                     <p class="mt-1 text-sm font-semibold text-white">{{ $currentPayload['office_name'] ?? '-' }}</p>
                 </div>
-                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase tracking-wide text-slate-500">Computed Score</p>
                     <p class="mt-1 text-sm font-semibold text-white">{{ $currentPayload['computed_score'] !== null ? number_format((float) $currentPayload['computed_score'], 2) : '-' }}</p>
                 </div>
-                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase tracking-wide text-slate-500">Adjusted Score</p>
-                    <p class="mt-1 text-sm font-semibold text-blue-300">{{ $currentPayload['adjusted_score'] !== null ? number_format((float) $currentPayload['adjusted_score'], 2) : '-' }}</p>
+                    <p data-adjusted-score class="mt-1 text-sm font-semibold text-blue-300">{{ $currentPayload['adjusted_score'] !== null ? number_format((float) $currentPayload['adjusted_score'], 2) : '-' }}</p>
                 </div>
             </div>
 
-            <div class="grid gap-3 border-b border-slate-800 px-5 py-4 sm:grid-cols-2">
-                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+            <div class="grid gap-3 border-b border-gray-700 px-5 py-4 sm:grid-cols-2">
+                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase tracking-[0.14em] text-slate-500">PMT Remarks</p>
                     <p class="mt-1 whitespace-pre-line text-sm text-slate-200">{{ trim($currentPayload['pmt_remarks'] ?? '') !== '' ? $currentPayload['pmt_remarks'] : '--' }}</p>
                 </div>
-                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase tracking-[0.14em] text-slate-500">PMT Adjustment Reason</p>
                     <p class="mt-1 whitespace-pre-line text-sm text-slate-200">{{ trim($currentPayload['adjustment_reason'] ?? '') !== '' ? $currentPayload['adjustment_reason'] : '--' }}</p>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 gap-3 border-b border-slate-800 px-5 py-4 md:grid-cols-2">
-                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+            <div class="grid grid-cols-1 gap-3 border-b border-gray-700 px-5 py-4 md:grid-cols-2">
+                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                     <div class="flex items-start justify-between gap-3">
                         <div>
                             <h4 class="text-sm font-semibold text-white">SMPOR - Monitoring Summary</h4>
@@ -95,7 +95,7 @@
                     </div>
                 </div>
 
-                <div class="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+                <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                     <div class="flex items-start justify-between gap-3">
                         <div>
                             <h4 class="text-sm font-semibold text-white">IPCR Accomplishment Report</h4>
@@ -111,7 +111,7 @@
             @if ($canCalibrate)
                 <div class="bg-slate-950/80 px-5 py-4">
                     <div class="grid gap-4 lg:grid-cols-2">
-                        <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
+                        <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                             <h4 class="text-sm font-semibold text-white">Adjust Rating</h4>
                             <div class="mt-3 space-y-3">
                                 <div>
@@ -147,7 +147,7 @@
                             </div>
                         </div>
 
-                        <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
+                        <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                             <h4 class="text-sm font-semibold text-white">Release / Return</h4>
                             <div class="mt-3 space-y-3">
                                 <div>
@@ -166,6 +166,11 @@
                                             <span id="release-spinner" class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-cyan-300/30 border-t-cyan-300"></span>
                                             <span id="release-label">Release Official Result</span>
                                         </button>
+                                    @else
+                                        <button type="button" id="btnRelease" class="hidden inline-flex items-center gap-2 rounded border border-cyan-600 bg-cyan-600/20 px-4 py-2 text-sm font-semibold text-cyan-300 hover:bg-cyan-600/30">
+                                            <span id="release-spinner" class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-cyan-300/30 border-t-cyan-300"></span>
+                                            <span id="release-label">Release Official Result</span>
+                                        </button>
                                     @endif
                                 </div>
                             </div>
@@ -180,11 +185,9 @@
                         const returnUrl = '{{ route("pmt.employee-calibration.return", $currentIpcr->id) }}';
 
                         function showSnackbar(msg, isError = false) {
-                            const el = document.createElement('div');
-                            el.className = `fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] rounded-lg px-5 py-3 text-sm font-semibold shadow-lg ${isError ? 'border border-rose-500/30 bg-rose-500/10 text-rose-200' : 'border border-emerald-500/30 bg-emerald-500/10 text-emerald-200'}`;
-                            el.innerHTML = `<i class="fa-solid ${isError ? 'fa-exclamation-circle' : 'fa-check-circle'} mr-2"></i>${msg}`;
-                            document.body.appendChild(el);
-                            setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 3000);
+                            if (window.PMSnackbar) {
+                                window.PMSnackbar.show({ type: isError ? 'error' : 'success', message: msg });
+                            }
                         }
 
                         function setLoading(btn, spinnerId, labelId, loading, text) {
@@ -216,6 +219,18 @@
                                     remarks: document.getElementById('pmtRemarksInput')?.value || '',
                                 });
                                 showSnackbar('Rating adjusted successfully.');
+                                // Show Release button and update displayed values
+                                const releaseBtn = document.getElementById('btnRelease');
+                                if (releaseBtn) releaseBtn.classList.remove('hidden');
+                                // Update adjusted score display
+                                const adjScoreEl = document.querySelector('[data-adjusted-score]');
+                                if (adjScoreEl) adjScoreEl.textContent = document.getElementById('adjustedScoreInput').value;
+                                // Update status badge
+                                const statusBadge = document.querySelector('[data-status-badge]');
+                                if (statusBadge) {
+                                    statusBadge.textContent = 'Calibrated (Adjusted)';
+                                    statusBadge.className = 'inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold border-cyan-500/30 bg-cyan-500/10 text-cyan-300';
+                                }
                             } catch (err) {
                                 showSnackbar(err.message, true);
                             } finally {
@@ -264,8 +279,8 @@
 
 <!-- Modals from index.blade.php ported over -->
 <div id="pmt-smpor-preview-modal" data-preview-modal class="fixed inset-0 z-[90] hidden items-center justify-center bg-black/60 px-4 py-6">
-    <div class="w-full max-w-6xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
-        <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
+    <div class="w-full max-w-6xl rounded-2xl border border-gray-700 bg-slate-900 p-5 shadow-2xl">
+        <div class="flex items-start justify-between gap-3 border-b border-gray-700 pb-3">
             <div>
                 <p class="text-xs uppercase tracking-[0.2em] text-blue-300">SMPOR (Monitoring Summary)</p>
                 <h3 class="text-lg font-semibold text-white">SMPOR Preview</h3>
@@ -280,17 +295,17 @@
                     <button type="button" data-smpor-tab="timeliness" class="rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:bg-slate-800">Timeliness</button>
                 </div>
             </div>
-            <div id="smporQuantityPanel" data-smpor-tab-panel="quantity" class="overflow-x-auto rounded-xl border border-slate-800"></div>
-            <div id="smporQualityPanel" data-smpor-tab-panel="quality" class="hidden overflow-x-auto rounded-xl border border-slate-800"></div>
-            <div id="smporTimelinessPanel" data-smpor-tab-panel="timeliness" class="hidden overflow-x-auto rounded-xl border border-slate-800"></div>
+            <div id="smporQuantityPanel" data-smpor-tab-panel="quantity" class="overflow-x-auto rounded-xl border border-gray-700"></div>
+            <div id="smporQualityPanel" data-smpor-tab-panel="quality" class="hidden overflow-x-auto rounded-xl border border-gray-700"></div>
+            <div id="smporTimelinessPanel" data-smpor-tab-panel="timeliness" class="hidden overflow-x-auto rounded-xl border border-gray-700"></div>
         </div>
-        <div class="mt-5 flex items-center justify-end gap-3 border-t border-slate-800 pt-4"><button type="button" data-close-modal class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-800">Close</button></div>
+        <div class="mt-5 flex items-center justify-end gap-3 border-t border-gray-700 pt-4"><button type="button" data-close-modal class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-800">Close</button></div>
     </div>
 </div>
 
 <div id="pmt-ipcr-preview-modal" data-preview-modal class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/60 px-4 py-6">
-    <div class="w-full max-w-7xl rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl">
-        <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
+    <div class="w-full max-w-7xl rounded-2xl border border-gray-700 bg-slate-900 p-5 shadow-2xl">
+        <div class="flex items-start justify-between gap-3 border-b border-gray-700 pb-3">
             <div>
                 <p class="text-xs uppercase tracking-[0.2em] text-blue-300">IPCR (Accomplishment Report)</p>
                 <h3 class="text-lg font-semibold text-white">IPCR Preview</h3>
@@ -300,7 +315,7 @@
         <div class="mt-4 max-h-[66vh] space-y-4 overflow-y-auto pr-1 text-sm text-slate-200">
             <div id="ipcrSectionsContainer" class="space-y-4"></div>
         </div>
-        <div class="mt-5 flex items-center justify-end gap-3 border-t border-slate-800 pt-4"><button type="button" data-close-modal class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-800">Close</button></div>
+        <div class="mt-5 flex items-center justify-end gap-3 border-t border-gray-700 pt-4"><button type="button" data-close-modal class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-800">Close</button></div>
     </div>
 </div>
 
@@ -454,7 +469,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!ipcrSectionsContainerEl) return;
 
         if (ipcrSections.length === 0) {
-            ipcrSectionsContainerEl.innerHTML = '<div class="rounded-xl border border-slate-800 bg-slate-950/60 px-4 py-8 text-center text-slate-400">No IPCR commitments found for this submission.</div>';
+            ipcrSectionsContainerEl.innerHTML = '<div class="rounded-xl border border-gray-700 bg-slate-900/40 px-4 py-8 text-center text-slate-400">No IPCR commitments found for this submission.</div>';
         } else {
             ipcrSectionsContainerEl.innerHTML = ipcrSections.map((section) => {
                 const rows = Array.isArray(section?.rows) ? section.rows : [];
@@ -467,7 +482,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         return `<tr class="bg-slate-900/40 align-top"><td class="px-4 py-3 font-semibold text-slate-100">${escapeHtml(row?.major_output || '--')}</td><td class="px-4 py-3 text-slate-200">${escapeHtml(row?.target_summary || '--')}</td><td class="px-4 py-3 text-slate-300">${escapeHtml(row?.timeline || '--')}</td></tr>`;
                     }).join('');
 
-                return `<div class="rounded-xl border border-slate-800 bg-slate-950/60"><div class="border-b border-slate-800 px-4 py-3"><h4 class="text-sm font-semibold uppercase tracking-[0.12em] text-slate-100">${escapeHtml(String(section?.title || 'Section') + weightLabel)}</h4></div><div class="overflow-x-auto"><table class="min-w-full text-left text-sm text-slate-200"><thead class="bg-slate-950/70 text-xs uppercase text-slate-400"><tr><th class="px-4 py-3">Major Output</th><th class="px-4 py-3">Target Summary</th><th class="px-4 py-3">Timeline</th></tr></thead><tbody class="divide-y divide-slate-800">${rowsHtml}</tbody></table></div></div>`;
+                return `<div class="rounded-xl border border-gray-700 bg-slate-900/40"><div class="border-b border-gray-700 px-4 py-3"><h4 class="text-sm font-semibold uppercase tracking-[0.12em] text-slate-100">${escapeHtml(String(section?.title || 'Section') + weightLabel)}</h4></div><div class="overflow-x-auto"><table class="min-w-full text-left text-sm text-slate-200"><thead class="bg-slate-950/70 text-xs uppercase text-slate-400"><tr><th class="px-4 py-3">Major Output</th><th class="px-4 py-3">Target Summary</th><th class="px-4 py-3">Timeline</th></tr></thead><tbody class="divide-y divide-slate-800">${rowsHtml}</tbody></table></div></div>`;
             }).join('');
         }
         openPreviewModal('pmt-ipcr-preview-modal');

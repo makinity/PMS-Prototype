@@ -4,10 +4,13 @@ namespace App\Http\Controllers\Pmt;
 
 use App\Exports\StageOne\OpcrExcelExport;
 use App\Http\Controllers\Controller;
+use App\Models\Ipcr;
 use App\Models\Opcr;
 use App\Models\PerformancePeriod;
 use App\Models\UnitWorkPlan;
+use App\Notifications\WorkflowEventNotification;
 use App\Services\IpcrGeneratorService;
+use App\Services\WorkflowNotificationDispatcher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -111,7 +114,11 @@ class OpcrController extends Controller
         ]);
 
         $redirectToList = (bool) $request->boolean('redirect_to_list');
-        $redirect = function (string $type, string $message) use ($redirectToList) {
+        $wantsJson = $request->expectsJson() || $request->ajax();
+        $redirect = function (string $type, string $message) use ($redirectToList, $wantsJson, $request) {
+            if ($wantsJson) {
+                return response()->json(['status' => $type, 'message' => $message], $type === 'error' ? 422 : 200);
+            }
             if ($redirectToList) {
                 return redirect()->route('pmt.opcr.review.index')->with($type, $message);
             }
@@ -145,6 +152,61 @@ class OpcrController extends Controller
 
                 app(IpcrGeneratorService::class)->generateFromOpcr($opcr);
 
+                $opcr->loadMissing(['performancePeriod']);
+                $ipcrs = Ipcr::query()
+                    ->with('employee')
+                    ->where('opcr_id', $opcr->id)
+                    ->where('performance_period_id', $opcr->performance_period_id)
+                    ->get();
+
+                $notifier = app(WorkflowNotificationDispatcher::class);
+                foreach ($ipcrs as $ipcr) {
+                    if (!$ipcr->employee) {
+                        continue;
+                    }
+
+                    $notifier->notifyUser(
+                        $ipcr->employee,
+                        new WorkflowEventNotification(
+                            title: 'IPCR Target Ready',
+                            body: 'Your IPCR target for the current period is now ready for commitment.',
+                            url: route('employee.ipcr-target'),
+                            type: 'success',
+                            meta: [
+                                'event' => 'ipcr.ready_for_commitment',
+                                'ipcr_id' => $ipcr->id,
+                                'opcr_id' => $opcr->id,
+                                'office_id' => $opcr->office_id,
+                                'performance_period_id' => $opcr->performance_period_id,
+                                'status' => (string) $ipcr->status,
+                                'source_role' => 'pmt',
+                            ],
+                        )
+                    );
+                }
+
+                // Notify Dept Head that OPCR was approved
+                $opcr->loadMissing('office.head');
+                $deptHead = $opcr->office?->head;
+                if ($deptHead) {
+                    $notifier->notifyUser(
+                        $deptHead,
+                        new WorkflowEventNotification(
+                            title: 'OPCR Approved by PMT',
+                            body: "{$user->name} approved your office OPCR.",
+                            url: route('dept-head.opcr'),
+                            type: 'success',
+                            meta: [
+                                'event' => 'opcr.pmt_approved',
+                                'opcr_id' => $opcr->id,
+                                'office_id' => $opcr->office_id,
+                                'performance_period_id' => $opcr->performance_period_id,
+                                'source_role' => 'pmt',
+                            ],
+                        )
+                    );
+                }
+
                 return $redirect('success', 'OPCR final approved.');
             }
 
@@ -176,6 +238,28 @@ class OpcrController extends Controller
                     'returned_by_role' => 'pmt',
                     'return_remarks' => $remarks,
                 ]);
+
+            // Notify Dept Head that OPCR was returned
+            $opcr->loadMissing('office.head');
+            $deptHead = $opcr->office?->head;
+            if ($deptHead) {
+                app(WorkflowNotificationDispatcher::class)->notifyUser(
+                    $deptHead,
+                    new WorkflowEventNotification(
+                        title: 'OPCR Returned by PMT',
+                        body: "{$user->name} returned your office OPCR for revision.",
+                        url: route('dept-head.opcr'),
+                        type: 'alert',
+                        meta: [
+                            'event' => 'opcr.pmt_returned',
+                            'opcr_id' => $opcr->id,
+                            'office_id' => $opcr->office_id,
+                            'performance_period_id' => $opcr->performance_period_id,
+                            'source_role' => 'pmt',
+                        ],
+                    )
+                );
+            }
 
             return $redirect('success', 'OPCR returned to Supervisors for UWP correction.');
         });
