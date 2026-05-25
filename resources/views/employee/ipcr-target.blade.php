@@ -18,45 +18,80 @@
                 'released_by_pmt',
             ], true)
         );
+        $statusLabel = match ($ipcrStatusKey) {
+            'for_commitment' => 'For Commitment',
+            'committed' => 'Committed',
+            'pending_pmt_calibration' => 'Pending PMT Calibration',
+            'returned_by_pmt' => 'Returned by PMT',
+            'approved_by_pmt' => 'Approved by PMT',
+            'adjusted_by_pmt' => 'Adjusted by PMT',
+            'released_by_pmt' => 'Released by PMT',
+            default => $ipcr ? ucwords(str_replace('_', ' ', $ipcrStatusKey)) : 'Not Available',
+        };
+        $statusBadgeClass = $isCommitReady
+            ? 'bg-blue-900 text-blue-200 border-blue-700'
+            : ($isCommittedLike
+                ? 'bg-emerald-900 text-emerald-200 border-emerald-700'
+                : 'bg-slate-800 text-slate-200 border-slate-700');
+        $nextStepTitle = $isCommitReady
+            ? 'Review your targets, then click Commit IPCR Targets.'
+            : ($isCommittedLike
+                ? 'Targets are committed. You can now record accomplishments in ORS.'
+                : 'Your IPCR is not ready for commitment yet.');
+        $nextStepText = $isCommitReady
+            ? 'After commitment, these targets become locked and will be used for ORS, MPOR, and rating.'
+            : ($isCommittedLike
+                ? 'Use the Output Rating Sheet to log work and submit evidence against these targets.'
+                : 'Wait for the approved UWP and OPCR to generate your IPCR targets.');
+        $commitButtonLabel = $isCommitReady
+            ? 'Commit IPCR Targets'
+            : ($isCommittedLike ? 'Already Committed' : ($ipcr ? 'Not Ready to Commit' : 'No IPCR Available'));
     @endphp
     <div class="space-y-6">
 
         <!-- PAGE HEADER -->
-        <div class="flex justify-between items-start gap-4">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
                 <h1 class="text-2xl font-bold text-white">
-                    Individual Performance Commitment and Review (IPCR)
+                    IPCR Target
                 </h1>
+                <p class="mt-2 max-w-3xl text-sm text-slate-400">
+                    Review your assigned performance targets for the active rating period. Commit only after checking the outputs, indicators, and standards.
+                </p>
             </div>
 
-            <span id="ipcr-status-badge" class="px-3 py-1 text-xs font-medium rounded bg-blue-900 text-blue-300 border border-blue-800">
-                FOR COMMITMENT
-            </span>
+            <div class="flex flex-wrap items-center gap-3">
+                <a href="{{ route('stage1.ipcr.export.excel') }}"
+                   class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">
+                    Export Excel
+                </a>
+                <span id="ipcr-status-badge" class="rounded border px-3 py-1 text-xs font-semibold uppercase {{ $statusBadgeClass }}">
+                    {{ $statusLabel }}
+                </span>
+            </div>
         </div>
 
         <!-- STATUS / CONTEXT -->
         <div class="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 rounded-lg p-5">
-            <div class="flex items-start justify-between gap-4">
-                <div>
-                    <h2 class="text-lg font-semibold text-white">Status & Context</h2>
-                </div>
+            <div>
+                <h2 class="text-lg font-semibold text-white">Status and Next Step</h2>
+                <p class="mt-1 text-sm text-slate-400">This section tells you what the current IPCR state means.</p>
 
-                <div class="shrink-0">
-                    <a href="{{ route('stage1.ipcr.export.excel') }}"
-                    class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg">
-                        Export IPCR (Excel)
-                    </a>
-                </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 text-sm">
+            <div class="grid grid-cols-1 gap-4 mt-4 text-sm lg:grid-cols-3">
                 <div class="bg-gray-700 rounded-lg p-3">
                     <p class="text-gray-400 mb-1">Status</p>
-                    <p id="ipcr-status-text" class="font-medium text-white">For Commitment</p>
+                    <p id="ipcr-status-text" class="font-medium text-white">{{ $statusLabel }}</p>
                 </div>
                 <div class="bg-gray-700 rounded-lg p-3">
                     <p class="text-gray-400 mb-1">Basis</p>
-                    <p class="font-medium text-white">Approved UWP (PMT-approved) and OPCR (Department HeadÃ¢â‚¬â€œapproved)</p>
+                    <p class="font-medium text-white">Approved UWP and OPCR for the active performance period.</p>
+                </div>
+                <div class="rounded-lg border border-blue-800/70 bg-blue-950/50 p-3">
+                    <p class="text-blue-200 mb-1">Next Step</p>
+                    <p class="font-medium text-white">{{ $nextStepTitle }}</p>
+                    <p class="mt-1 text-xs leading-5 text-blue-100/80">{{ $nextStepText }}</p>
                 </div>
             </div>
         </div>
@@ -78,31 +113,31 @@
                     <label class="block mb-2 text-sm font-medium text-white">Employee Name</label>
                     <input type="text"
                            class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
-                           value="{{ ($employeeName ?? '') ?: 'Ramon Reyes' }}" disabled>
+                           value="{{ ($employeeName ?? '') ?: '--' }}" disabled>
                 </div>
                 <div>
                     <label class="block mb-2 text-sm font-medium text-white">Position</label>
                     <input type="text"
                            class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
-                           value="{{ ($employeePosition ?? '') ?: 'Records Management Officer' }}" disabled>
+                           value="{{ ($employeePosition ?? '') ?: '--' }}" disabled>
                 </div>
                 <div>
                     <label class="block mb-2 text-sm font-medium text-white">Office / Unit</label>
                     <input type="text"
                            class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
-                           value="{{ ($officeName ?? '') ?: 'Revenue Collection Unit' }}" disabled>
+                           value="{{ ($officeName ?? '') ?: '--' }}" disabled>
                 </div>
                 <div>
                     <label class="block mb-2 text-sm font-medium text-white">Rating Period</label>
                     <input type="text"
                            class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
-                           value="{{ ($periodName ?? '') ?: 'January - June 2026' }}" disabled>
+                           value="{{ ($periodName ?? '') ?: '--' }}" disabled>
                 </div>
                 <div>
                     <label class="block mb-2 text-sm font-medium text-white">Immediate Supervisor</label>
                     <input type="text"
                            class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
-                           value="{{ ($supervisorName ?? '') ?: 'Carlo D. Beray' }}" disabled>
+                           value="{{ ($supervisorName ?? '') ?: '--' }}" disabled>
                 </div>
             </div>
         </div>
@@ -115,24 +150,22 @@
             <h2 class="font-semibold text-lg text-white mb-4">Employee Commitment</h2>
             <div class="bg-gray-700/50 rounded-lg p-4 mb-6">
                 <p class="text-sm text-gray-300 italic">
-                    I acknowledge and commit to the above performance targets derived from the
-                    approved Unit Work Plan (UWP) and OPCR. I understand that these targets will
-                    serve as the basis for performance monitoring and evaluation.
+                    By committing, I confirm that I have reviewed these IPCR targets and understand that they will be used for ORS, MPOR, accomplishment review, and final performance rating.
                 </p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block mb-2 text-sm font-medium text-white">Employee Name</label>
+                    <label class="block mb-2 text-sm font-medium text-white">Committed By</label>
                     <input type="text"
                            class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5"
-                           value="{{ ($employeeName ?? '') ?: 'Ramon Reyes' }}" disabled>
+                           value="{{ ($employeeName ?? '') ?: '--' }}" disabled>
                 </div>
                 <div>
-                    <label class="block mb-2 text-sm font-medium text-white">Date<small>(Date will be recorded upon commitment)</small></label>
-                    <input type="date"
+                    <label class="block mb-2 text-sm font-medium text-white">Commitment Date</label>
+                    <input type="text"
                            class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5 opacity-80 cursor-not-allowed"
-                           value="" disabled>
+                           value="{{ $ipcr?->committed_at ? $ipcr->committed_at->format('M d, Y h:i A') : 'Recorded after commitment' }}" disabled>
                 </div>
             </div>
         </div>
@@ -149,9 +182,9 @@
                             data-loading-text="Committing..."
                             @disabled(!$ipcr || !$isCommitReady)
                             class="inline-flex items-center gap-2 px-5 py-2.5 text-white font-medium rounded-lg focus:ring-4 focus:ring-blue-800 transition-colors duration-200
-                                {{ $isCommitReady ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-600 opacity-60 cursor-not-allowed' }}">
+                                {{ $isCommitReady ? 'bg-blue-600 hover:bg-blue-700' : 'bg-slate-700 opacity-70 cursor-not-allowed' }}">
                         <span data-button-label>
-                            {{ $isCommitReady ? 'Commit Targets' : 'Committed' }}
+                            {{ $commitButtonLabel }}
                         </span>
                         <span data-button-spinner class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
                     </button>
@@ -177,15 +210,15 @@
             <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase tracking-wide text-slate-500">Office / Unit</p>
-                    <p class="mt-1 text-sm font-semibold text-white">{{ ($officeName ?? '') ?: 'Revenue Collection Unit' }}</p>
+                    <p class="mt-1 text-sm font-semibold text-white">{{ ($officeName ?? '') ?: '--' }}</p>
                 </div>
                 <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase tracking-wide text-slate-500">Period</p>
-                    <p class="mt-1 text-sm font-semibold text-white">{{ ($periodName ?? '') ?: 'January - June 2026' }}</p>
+                    <p class="mt-1 text-sm font-semibold text-white">{{ ($periodName ?? '') ?: '--' }}</p>
                 </div>
                 <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase tracking-wide text-slate-500">Employee</p>
-                    <p class="mt-1 text-sm font-semibold text-white">{{ ($employeeName ?? '') ?: 'Ramon Reyes' }}</p>
+                    <p class="mt-1 text-sm font-semibold text-white">{{ ($employeeName ?? '') ?: '--' }}</p>
                 </div>
             </div>
 
@@ -475,7 +508,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12Z" />
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                             </svg>
-                            <span>View (${indicatorCount})</span>
+                            <span>View indicators (${indicatorCount})</span>
                         </button>
                     </td>
                     <td class="border border-gray-700 px-4 py-3 text-gray-300">${escapeHtml(row.timeline || '--')}</td>
@@ -582,7 +615,7 @@
 
         const setButtonLoading = window.setButtonLoading || function() {};
 
-        // --------- COMMIT BUTTON DEMO (status updates + disable after commit) ----------
+        // --------- COMMIT BUTTON STATE ----------
         const statusBadge = document.getElementById('ipcr-status-badge');
         const statusText = document.getElementById('ipcr-status-text');
 
@@ -620,11 +653,11 @@
             }
 
             if (statusBadge) {
-                statusBadge.textContent = (statusKey || 'LOCKED').replace(/_/g, ' ').toUpperCase();
+                statusBadge.textContent = (statusKey || 'NOT AVAILABLE').replace(/_/g, ' ').toUpperCase();
                 statusBadge.className = 'px-3 py-1 text-xs font-medium rounded bg-slate-800 text-slate-200 border border-slate-700';
             }
             if (statusText) {
-                statusText.textContent = statusKey ? statusKey.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : 'Locked';
+                statusText.textContent = statusKey ? statusKey.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : 'Not Available';
             }
         }
 

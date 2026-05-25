@@ -7,6 +7,7 @@ use App\Support\ResolvesIpcrTargetScores;
 use Illuminate\Http\Request;
 use App\Models\Ipcr;
 use App\Models\PerformancePeriod;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -128,7 +129,7 @@ class IpcrTargetController extends Controller
                     $targetSummary = trim($storedTargetSummary);
                 }
                 if ($targetSummary === '') {
-                    $targetSummary = '—';
+                    $targetSummary = '--';
                 }
 
                 $indicators = $groupItems->map(function ($row) {
@@ -197,6 +198,16 @@ class IpcrTargetController extends Controller
             }
         }
 
+        $supervisorName = '';
+        $officeId = (int) ($ipcr?->office_id ?? $user->office_id ?? 0);
+        if ($officeId > 0) {
+            $supervisorName = (string) (User::query()
+                ->where('office_id', $officeId)
+                ->where('role', 'supervisor')
+                ->orderBy('name')
+                ->value('name') ?? '');
+        }
+
         return view('employee.ipcr-target', [
             'activePeriod' => $activePeriod,
             'ipcr' => $ipcr,
@@ -206,7 +217,7 @@ class IpcrTargetController extends Controller
             'employeeName' => $user->name,
             'officeName' => (string) ($ipcr?->office?->name ?? ''),
             'periodName' => (string) ($ipcr?->performancePeriod?->name ?? ($activePeriod?->name ?? '')),
-            'supervisorName' => '',
+            'supervisorName' => $supervisorName,
             'employeePosition' => (string) ($ipcr?->employee?->position ?? ''),
         ]);
     }
