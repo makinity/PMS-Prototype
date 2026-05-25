@@ -94,7 +94,7 @@
                                 <label class="block mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">Employee ID</label>
                                 <input type="text"
                                        class="!bg-slate-900 !border-slate-700 !text-white text-sm rounded-lg block w-full p-2.5 opacity-60 cursor-not-allowed"
-                                       value="{{ auth()->user()->employee_id ?? 'â€”' }}" disabled>
+                                       value="{{ auth()->user()->employee_id ?? '—' }}" disabled>
                             </div>
                         </div>
 
@@ -139,7 +139,7 @@
                             <label for="current_password" class="block mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">Current Password</label>
                             <input id="current_password" name="current_password" type="password"
                                    class="!bg-slate-900 !border-slate-700 !text-white text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-full p-2.5 [color-scheme:dark] @error('current_password', 'updatePassword') border-red-500 @enderror"
-                                   placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" autocomplete="current-password">
+                                   placeholder="••••••••" autocomplete="current-password">
                             @error('current_password', 'updatePassword')
                                 <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
                             @enderror
@@ -148,7 +148,7 @@
                             <label for="password" class="block mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">New Password</label>
                             <input id="password" name="password" type="password"
                                    class="!bg-slate-900 !border-slate-700 !text-white text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-full p-2.5 [color-scheme:dark] @error('password', 'updatePassword') border-red-500 @enderror"
-                                   placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" autocomplete="new-password">
+                                   placeholder="••••••••" autocomplete="new-password">
                             @error('password', 'updatePassword')
                                 <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
                             @enderror
@@ -157,7 +157,7 @@
                             <label for="password_confirmation" class="block mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">Confirm Password</label>
                             <input id="password_confirmation" name="password_confirmation" type="password"
                                    class="!bg-slate-900 !border-slate-700 !text-white text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-full p-2.5 [color-scheme:dark]"
-                                   placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" autocomplete="new-password">
+                                   placeholder="••••••••" autocomplete="new-password">
                         </div>
                     </div>
 

@@ -95,7 +95,7 @@
         signaturePadContext.lineJoin = 'round';
         signaturePadContext.lineWidth = 2.2;
         signaturePadContext.strokeStyle = '#1e293b'; // near-black ink
-        // Do NOT fill with any background â€” keep transparent so the PNG overlay
+        // Do NOT fill with any background — keep transparent so the PNG overlay
         // doesn't hide the name text underneath in Excel.
         // The white appearance in the modal comes from the CSS bg-white class.
 

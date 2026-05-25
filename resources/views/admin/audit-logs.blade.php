@@ -50,24 +50,24 @@
         <div class="rounded-xl border border-gray-700 bg-gradient-to-br from-gray-900 to-gray-800 p-4 shadow-sm">
             <form id="audit-filter-form" method="GET" action="{{ $indexUrl }}" class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
                 <div class="xl:col-span-2">
-                    <label for="auditSearch" class="mb-1 block text-xs uppercase tracking-wide text-gray-400">Search</label>
+                    <label for="auditSearch" class="mb-1 block text-xs uppercase tracking-[0.14em] text-slate-400">Search</label>
                     <input
                         id="auditSearch"
                         type="text"
                         name="search"
                         value="{{ $filters['search'] ?? '' }}"
                         placeholder="Actor, summary, module, target, IP"
-                        style="background:#0f172a;color:#e5e7eb;"
-                        class="w-full rounded-lg border border-white/10 bg-gray-900/60 px-3 py-2 text-sm text-gray-100 outline-none focus:border-blue-500" />
+                        style="background-color:#020617;color:#e2e8f0;border-color:#334155;"
+                        class="w-full rounded-xl border px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500" />
                 </div>
 
                 <div>
-                    <label for="auditActor" class="mb-1 block text-xs uppercase tracking-wide text-gray-400">Actor</label>
+                    <label for="auditActor" class="mb-1 block text-xs uppercase tracking-[0.14em] text-slate-400">Actor</label>
                     <select
                         id="auditActor"
                         name="actor_user_id"
-                        style="background:#0f172a;color:#e5e7eb;"
-                        class="w-full rounded-lg border border-white/10 bg-gray-900/60 px-3 py-2 text-sm text-gray-100 outline-none focus:border-blue-500">
+                        style="background-color:#020617;color:#e2e8f0;border-color:#334155;"
+                        class="w-full rounded-xl border px-3 py-2 text-sm text-slate-200 [color-scheme:dark]">
                         <option value="">All Actors</option>
                         @foreach ($actors as $actor)
                             <option value="{{ $actor['id'] }}" @selected((string) ($filters['actor_user_id'] ?? '') === (string) $actor['id'])>
@@ -78,12 +78,12 @@
                 </div>
 
                 <div>
-                    <label for="auditModule" class="mb-1 block text-xs uppercase tracking-wide text-gray-400">Module</label>
+                    <label for="auditModule" class="mb-1 block text-xs uppercase tracking-[0.14em] text-slate-400">Module</label>
                     <select
                         id="auditModule"
                         name="module"
-                        style="background:#0f172a;color:#e5e7eb;"
-                        class="w-full rounded-lg border border-white/10 bg-gray-900/60 px-3 py-2 text-sm text-gray-100 outline-none focus:border-blue-500">
+                        style="background-color:#020617;color:#e2e8f0;border-color:#334155;"
+                        class="w-full rounded-xl border px-3 py-2 text-sm text-slate-200 [color-scheme:dark]">
                         <option value="">All Modules</option>
                         @foreach ($modules as $module)
                             <option value="{{ $module }}" @selected(($filters['module'] ?? '') === $module)>{{ $formatLabel($module) }}</option>
@@ -92,12 +92,12 @@
                 </div>
 
                 <div>
-                    <label for="auditStatus" class="mb-1 block text-xs uppercase tracking-wide text-gray-400">Status</label>
+                    <label for="auditStatus" class="mb-1 block text-xs uppercase tracking-[0.14em] text-slate-400">Status</label>
                     <select
                         id="auditStatus"
                         name="status"
-                        style="background:#0f172a;color:#e5e7eb;"
-                        class="w-full rounded-lg border border-white/10 bg-gray-900/60 px-3 py-2 text-sm text-gray-100 outline-none focus:border-blue-500">
+                        style="background-color:#020617;color:#e2e8f0;border-color:#334155;"
+                        class="w-full rounded-xl border px-3 py-2 text-sm text-slate-200 [color-scheme:dark]">
                         <option value="">All Statuses</option>
                         <option value="success" @selected(($filters['status'] ?? '') === 'success')>Success</option>
                         <option value="failed" @selected(($filters['status'] ?? '') === 'failed')>Failed</option>

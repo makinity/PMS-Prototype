@@ -2,7 +2,7 @@
 
 @section('main-content')
     @php
-        $periodLabelValue = $periodLabel ?? 'â€”';
+        $periodLabelValue = $periodLabel ?? '—';
         $smporMonthLabels = !empty($smporMonths ?? []) && is_array($smporMonths)
             ? array_values($smporMonths)
             : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
@@ -19,7 +19,7 @@
     <section class="space-y-4">
         <div class="flex items-center justify-between">
             <div>
-                <h1 class="text-2xl font-semibold text-white">SMPOR Preview â€” {{ $periodLabelValue }}</h1>
+                <h1 class="text-2xl font-semibold text-white">SMPOR Preview — {{ $periodLabelValue }}</h1>
             </div>
             <a href="{{ route('employee.accomplishment-submission') }}"
                 class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-800 transition">
@@ -31,11 +31,11 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
                 <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Employee</p>
-                    <p class="mt-1 font-semibold text-white">{{ $employeeName ?? 'â€”' }}</p>
+                    <p class="mt-1 font-semibold text-white">{{ $employeeName ?? '—' }}</p>
                 </div>
                 <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Office/Unit</p>
-                    <p class="mt-1 font-semibold text-white">{{ $officeName ?? 'â€”' }}</p>
+                    <p class="mt-1 font-semibold text-white">{{ $officeName ?? '—' }}</p>
                 </div>
                 <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Period</p>
@@ -82,7 +82,7 @@
                                     </tr>
                                     @forelse ($sectionRows as $row)
                                         <tr class="bg-slate-900/40">
-                                            <td class="px-4 py-3 font-semibold">{{ $row['expected_output'] ?? 'â€”' }}</td>
+                                            <td class="px-4 py-3 font-semibold">{{ $row['expected_output'] ?? '—' }}</td>
                                             @foreach ($smporMonthLabels as $monthLabel)
                                                 <td class="px-4 py-3 text-right">{{ $formatSmporValue($row[$key][$monthLabel] ?? 0) }}</td>
                                             @endforeach

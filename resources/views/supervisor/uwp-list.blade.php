@@ -27,7 +27,7 @@
                         Office / Unit
                     </span>
                     <p class="text-sm font-medium text-slate-200">
-                        Office / Unit: {{ $office?->name ?? 'â€”' }}
+                        Office / Unit: {{ $office?->name ?? '—' }}
                     </p>
                 </div>
             </div>
@@ -52,7 +52,7 @@
                             @foreach ($lists as $list)
                                 <tr class="hover:bg-slate-900/50 transition" data-uwp-row="{{ (int) $list->id }}">
                                     <td class="px-4 py-3">
-                                        {{ $list->office?->name ?? 'â€”' }}
+                                        {{ $list->office?->name ?? '—' }}
                                     </td>
 
                                     <td class="px-4 py-3">
@@ -672,7 +672,7 @@
                 creationActiveTab = 'overview';
                 // Sync period label
                 const sel = document.getElementById('creationPeriodSelect');
-                if (sel) document.getElementById('creationModalPeriod').textContent = sel.options[sel.selectedIndex]?.text ?? 'â€”';
+                if (sel) document.getElementById('creationModalPeriod').textContent = sel.options[sel.selectedIndex]?.text ?? '—';
                 const modal = document.getElementById('uwpCreationModal');
                 modal.classList.remove('hidden');
                 modal.classList.add('flex');
@@ -742,7 +742,7 @@
                         <div class="line-clamp-2 text-sm font-semibold leading-snug text-white">${mfo.title || '<span class="text-slate-500 italic">Untitled MFO</span>'}</div>
                         <div class="mt-2 flex flex-wrap items-center gap-2">
                             <span class="inline-flex rounded-md border px-2 py-0.5 text-xs font-medium ${badgeClass}">${type.charAt(0).toUpperCase() + type.slice(1)}</span>
-                            <span class="text-xs text-slate-400">${mfo.weight_percent ?? 'â€”'}%</span>
+                            <span class="text-xs text-slate-400">${mfo.weight_percent ?? '—'}%</span>
                             <span class="text-xs text-slate-500">${(mfo.indicators || []).length} indicator${(mfo.indicators || []).length === 1 ? '' : 's'}</span>
                         </div>`;
                     btn.addEventListener('click', () => {
@@ -782,7 +782,7 @@
                 const overviewEl = document.getElementById('creationOverviewIndicators');
                 const inds = mfo.indicators || [];
                 overviewEl.innerHTML = inds.length
-                    ? inds.map(ind => `<button type="button" class="flex w-full items-start justify-between rounded-xl border border-gray-700 bg-slate-900/40 px-4 py-3 text-left hover:bg-slate-900/60 transition"><span class="text-sm text-slate-100">${ind.text || 'â€”'}</span><span class="ml-3 rounded-md bg-slate-900 px-2 py-0.5 text-xs text-slate-400">${ind.targetQuantity ? ind.targetQuantity + ' ' : ''}${ind.targetTimeline || ''}</span></button>`).join('')
+                    ? inds.map(ind => `<button type="button" class="flex w-full items-start justify-between rounded-xl border border-gray-700 bg-slate-900/40 px-4 py-3 text-left hover:bg-slate-900/60 transition"><span class="text-sm text-slate-100">${ind.text || '—'}</span><span class="ml-3 rounded-md bg-slate-900 px-2 py-0.5 text-xs text-slate-400">${ind.targetQuantity ? ind.targetQuantity + ' ' : ''}${ind.targetTimeline || ''}</span></button>`).join('')
                     : '<p class="text-sm text-slate-500">No success indicators yet. Add one from the "Success Indicators" tab.</p>';
 
                 // Indicators table
@@ -790,9 +790,9 @@
                 tbody.innerHTML = inds.length
                     ? inds.map((ind, i) => `
                         <tr class="hover:bg-slate-900/30">
-                            <td class="px-4 py-3 text-slate-100">${ind.text || 'â€”'}</td>
-                            <td class="px-4 py-3 text-slate-400 text-xs">${ind.targetTimeline || 'â€”'}</td>
-                            <td class="px-4 py-3 text-center text-slate-300">${ind.targetQuantity ?? 'â€”'}</td>
+                            <td class="px-4 py-3 text-slate-100">${ind.text || '—'}</td>
+                            <td class="px-4 py-3 text-slate-400 text-xs">${ind.targetTimeline || '—'}</td>
+                            <td class="px-4 py-3 text-center text-slate-300">${ind.targetQuantity ?? '—'}</td>
                             <td class="px-4 py-3 text-center">
                                 <button onclick="creationEditIndicator(${i})" class="mr-2 text-xs text-blue-400 hover:text-blue-300">Edit</button>
                                 <button onclick="creationDeleteIndicator(${i})" class="text-xs text-rose-400 hover:text-rose-300">Del</button>
@@ -866,15 +866,15 @@
                 const idx = parseInt(sel.value);
                 const ind = mfo.indicators[idx];
                 if (!ind) return;
-                label.textContent = ind.text || 'â€”';
+                label.textContent = ind.text || '—';
                 if (!ind.standards) ind.standards = {5:{q:'',e:'',t:''},4:{q:'',e:'',t:''},3:{q:'',e:'',t:''},2:{q:'',e:'',t:''},1:{q:'',e:'',t:''}};
                 tbody.innerHTML = [5,4,3,2,1].map(r => {
                     const s = ind.standards[r] || {q:'',e:'',t:''};
                     return `<tr class="hover:bg-slate-900/30">
                         <td class="px-4 py-3 font-semibold text-white">${r}</td>
-                        <td class="px-4 py-3 text-slate-300 text-xs">${s.q || '<span class="text-slate-600">â€”</span>'}</td>
-                        <td class="px-4 py-3 text-slate-300 text-xs">${s.e || '<span class="text-slate-600">â€”</span>'}</td>
-                        <td class="px-4 py-3 text-slate-300 text-xs">${s.t || '<span class="text-slate-600">â€”</span>'}</td>
+                        <td class="px-4 py-3 text-slate-300 text-xs">${s.q || '<span class="text-slate-600">—</span>'}</td>
+                        <td class="px-4 py-3 text-slate-300 text-xs">${s.e || '<span class="text-slate-600">—</span>'}</td>
+                        <td class="px-4 py-3 text-slate-300 text-xs">${s.t || '<span class="text-slate-600">—</span>'}</td>
                         <td class="px-4 py-3 text-center">
                             <button onclick="creationOpenStdEdit(${idx},${r},'q')" class="mr-1 text-[10px] text-blue-400 hover:text-blue-300">Q</button>
                             <button onclick="creationOpenStdEdit(${idx},${r},'e')" class="mr-1 text-[10px] text-blue-400 hover:text-blue-300">E</button>
@@ -891,7 +891,7 @@
                 if (!ind || !ind.standards) return;
                 creationStdEditRating = { indicatorIdx, rating, dim };
                 const dimLabel = dim === 'q' ? 'Quality' : dim === 'e' ? 'Efficiency' : 'Timeliness';
-                document.getElementById('creationStdEditLabel').textContent = `Rating ${rating} â€” ${dimLabel}`;
+                document.getElementById('creationStdEditLabel').textContent = `Rating ${rating} — ${dimLabel}`;
                 document.getElementById('creationStdEditText').value = ind.standards[rating]?.[dim] ?? '';
                 const modal = document.getElementById('creationStandardEditModal');
                 modal.classList.remove('hidden');
@@ -927,13 +927,13 @@
                 const ind = mfo.indicators[idx];
                 if (!ind) return;
                 if (!ind.assignees) ind.assignees = [];
-                label.textContent = ind.text || 'â€”';
+                label.textContent = ind.text || '—';
                 const assigned = new Set(ind.assignees.map(a => a.id));
                 tbody.innerHTML = creationOfficeEmployees.map(emp => {
                     const isAssigned = assigned.has(emp.id);
                     return `<tr class="hover:bg-slate-900/30">
                         <td class="px-4 py-3 text-slate-100">${emp.name}</td>
-                        <td class="px-4 py-3 text-slate-400 text-xs">${emp.office || 'â€”'}</td>
+                        <td class="px-4 py-3 text-slate-400 text-xs">${emp.office || '—'}</td>
                         <td class="px-4 py-3 text-center">
                             <button onclick="creationToggleAssignee(${idx},${emp.id},'${emp.name.replace(/'/g, "\\'")}')"
                                     class="rounded-full px-3 py-1 text-xs font-semibold transition ${isAssigned ? 'bg-rose-500/10 border border-rose-500/30 text-rose-300 hover:bg-rose-500/20' : 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/20'}">

@@ -13,8 +13,8 @@
         } else {
             $statusBadgeClasses .= 'bg-amber-500/10 text-amber-200 border-amber-500/40';
         }
-        $periodLabelValue = $periodLabel ?? 'â€”';
-        $periodHeaderLabel = $periodLabelValue === 'â€”' ? 'No active period' : $periodLabelValue;
+        $periodLabelValue = $periodLabel ?? '—';
+        $periodHeaderLabel = $periodLabelValue === '—' ? 'No active period' : $periodLabelValue;
 
         $smporMonthLabels = !empty($smporMonths ?? []) && is_array($smporMonths)
             ? array_values($smporMonths)
@@ -287,7 +287,7 @@
                                     </tr>
                                     @forelse ($sectionRows as $row)
                                         <tr class="bg-slate-900/40">
-                                            <td class="px-4 py-3 font-semibold">{{ $row['expected_output'] ?? 'â€”' }}</td>
+                                            <td class="px-4 py-3 font-semibold">{{ $row['expected_output'] ?? '—' }}</td>
                                             @foreach ($smporMonthLabels as $monthLabel)
                                                 <td class="px-4 py-3 text-right">{{ $formatSmporValue($row['quantity'][$monthLabel] ?? 0) }}</td>
                                             @endforeach
@@ -340,7 +340,7 @@
                                             $rowQualityAvg = $rowQty > 0 ? $rowQuality / $rowQty : 0;
                                         @endphp
                                         <tr class="bg-slate-900/40">
-                                            <td class="px-4 py-3 font-semibold">{{ $row['expected_output'] ?? 'â€”' }}</td>
+                                            <td class="px-4 py-3 font-semibold">{{ $row['expected_output'] ?? '—' }}</td>
                                             @foreach ($smporMonthLabels as $monthLabel)
                                                 <td class="px-4 py-3 text-right">{{ $formatSmporValue($row['quality'][$monthLabel] ?? 0) }}</td>
                                             @endforeach
@@ -394,7 +394,7 @@
                                             $rowTimelinessAvg = $rowQty > 0 ? $rowTimeliness / $rowQty : 0;
                                         @endphp
                                         <tr class="bg-slate-900/40">
-                                            <td class="px-4 py-3 font-semibold">{{ $row['expected_output'] ?? 'â€”' }}</td>
+                                            <td class="px-4 py-3 font-semibold">{{ $row['expected_output'] ?? '—' }}</td>
                                             @foreach ($smporMonthLabels as $monthLabel)
                                                 <td class="px-4 py-3 text-right">{{ $formatSmporValue($row['timeliness'][$monthLabel] ?? 0) }}</td>
                                             @endforeach
@@ -492,7 +492,7 @@
                                     <tbody class="divide-y divide-slate-800">
                                         @forelse ($sectionRows as $rowIndex => $row)
                                             <tr class="bg-slate-900/40">
-                                                <td class="px-4 py-3 font-semibold text-slate-100">{{ $row['major_output'] ?? 'â€”' }}</td>
+                                                <td class="px-4 py-3 font-semibold text-slate-100">{{ $row['major_output'] ?? '—' }}</td>
                                                 <td class="px-4 py-3">
                                                     <a href="javascript:void(0)"
                                                        data-ipcr-open-indicators
@@ -902,7 +902,7 @@
 
                 function buildStandardsCell(values) {
                     if (!Array.isArray(values) || values.length === 0) {
-                        return '<span class="text-slate-400">â€”</span>';
+                        return '<span class="text-slate-400">—</span>';
                     }
 
                     return `
@@ -949,7 +949,7 @@
                         } else {
                             ipcrIndicatorsTbody.innerHTML = selectedIndicators.map((indicator, indicatorIndex) => `
                                 <tr class="bg-slate-900/40 hover:bg-slate-900/60 transition">
-                                    <td class="px-4 py-4 text-slate-100 font-medium leading-snug break-words">${escapeHtml(indicator?.indicator_text ?? 'â€”')}</td>
+                                    <td class="px-4 py-4 text-slate-100 font-medium leading-snug break-words">${escapeHtml(indicator?.indicator_text ?? '—')}</td>
                                     <td class="px-4 py-4 text-right tabular-nums whitespace-nowrap text-slate-200">${formatQuantity(indicator?.q)}</td>
                                     <td class="px-4 py-4 text-right tabular-nums whitespace-nowrap text-slate-200">${formatIndicatorRating(indicator?.e)}</td>
                                     <td class="px-4 py-4 text-right tabular-nums whitespace-nowrap text-slate-200">${formatIndicatorRating(indicator?.t)}</td>
@@ -987,7 +987,7 @@
                     if (!indicator) return;
 
                     if (ipcrStandardsIndicatorText) {
-                        ipcrStandardsIndicatorText.textContent = indicator.indicator_text || 'â€”';
+                        ipcrStandardsIndicatorText.textContent = indicator.indicator_text || '—';
                     }
 
                     const payload = normalizeStandardsPayload(indicator.standards_payload);

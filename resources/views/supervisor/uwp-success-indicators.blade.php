@@ -166,9 +166,9 @@
                                     <thead class="bg-slate-900/80 text-xs uppercase tracking-wider text-slate-400">
                                         <tr>
                                             <th class="w-16 px-4 py-3 text-center font-semibold border-r border-gray-700">Rating</th>
-                                            <th class="px-4 py-3 text-left font-semibold text-cyan-400/80 border-r border-gray-700">Q â€” Quality</th>
-                                            <th class="px-4 py-3 text-left font-semibold text-violet-400/80 border-r border-gray-700">E â€” Efficiency</th>
-                                            <th class="px-4 py-3 text-left font-semibold text-amber-400/80">T â€” Timeliness</th>
+                                            <th class="px-4 py-3 text-left font-semibold text-cyan-400/80 border-r border-gray-700">Q — Quality</th>
+                                            <th class="px-4 py-3 text-left font-semibold text-violet-400/80 border-r border-gray-700">E — Efficiency</th>
+                                            <th class="px-4 py-3 text-left font-semibold text-amber-400/80">T — Timeliness</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-800">
@@ -241,7 +241,7 @@
                     'id' => $u->id,
                     'name' => $u->name,
                     'office_id' => $u->office_id,
-                    'unit' => 'â€”',
+                    'unit' => '—',
                 ])
                 ->values()
                 ->all();
@@ -562,7 +562,7 @@
                         tr.className = 'hover:bg-slate-900/30';
                         tr.innerHTML = `
                             <td class="px-4 py-3 text-slate-100">${escapeHtml(emp.name || '--')}</td>
-                            <td class="px-4 py-3 text-slate-300">${escapeHtml(emp.unit || 'â€”')}</td>
+                            <td class="px-4 py-3 text-slate-300">${escapeHtml(emp.unit || '—')}</td>
                             <td class="px-4 py-3 text-right">
                                 ${canEdit ? `<button type="button" data-toggle-assignee="${emp.id}" class="rounded-lg border ${isAssigned ? 'border-rose-500/30 bg-rose-500/10 text-rose-200 hover:bg-rose-500/15' : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200 hover:bg-emerald-500/15'} px-2.5 py-1 text-xs font-semibold">${isAssigned ? 'Unassign' : 'Assign'}</button>` : '<span class="text-xs text-slate-600">--</span>'}
                             </td>

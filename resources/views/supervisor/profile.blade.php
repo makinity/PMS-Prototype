@@ -99,14 +99,14 @@
                                 <label class="block mb-2 text-sm font-medium text-white">Employee ID</label>
                                 <input type="text"
                                        class="!bg-gray-700 !border-gray-600 !text-white text-sm rounded-lg block w-full p-2.5 opacity-60 cursor-not-allowed"
-                                       value="{{ auth()->user()->employee_id ?? 'â€”' }}" disabled>
+                                       value="{{ auth()->user()->employee_id ?? '—' }}" disabled>
                             </div>
 
                             <div class="md:col-span-2">
                                 <label class="block mb-2 text-sm font-medium text-white">Department</label>
                                 <input type="text"
                                        class="!bg-gray-700 !border-gray-600 !text-white text-sm rounded-lg block w-full p-2.5 opacity-60 cursor-not-allowed"
-                                       value="{{ auth()->user()->office?->name ?? 'â€”' }}" disabled>
+                                       value="{{ auth()->user()->office?->name ?? '—' }}" disabled>
                             </div>
                         </div>
 

@@ -166,9 +166,9 @@
                                     <thead class="bg-slate-900/80 text-xs uppercase tracking-wider text-slate-400">
                                         <tr>
                                             <th class="w-16 px-4 py-3 text-center font-semibold border-r border-gray-700">Rating</th>
-                                            <th class="px-4 py-3 text-left font-semibold text-cyan-400/80 border-r border-gray-700">Q â€” Quality</th>
-                                            <th class="px-4 py-3 text-left font-semibold text-violet-400/80 border-r border-gray-700">E â€” Efficiency</th>
-                                            <th class="px-4 py-3 text-left font-semibold text-amber-400/80">T â€” Timeliness</th>
+                                            <th class="px-4 py-3 text-left font-semibold text-cyan-400/80 border-r border-gray-700">Q — Quality</th>
+                                            <th class="px-4 py-3 text-left font-semibold text-violet-400/80 border-r border-gray-700">E — Efficiency</th>
+                                            <th class="px-4 py-3 text-left font-semibold text-amber-400/80">T — Timeliness</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-800">
@@ -231,7 +231,7 @@
                     'id' => $u->id,
                     'name' => $u->name,
                     'office_id' => $u->office_id,
-                    'unit' => 'â€”',
+                    'unit' => '—',
                 ])
                 ->values()
                 ->all();
@@ -268,7 +268,7 @@
                                 .map((x) => ({
                                     id: Number(x.id ?? x.employee_id ?? 0),
                                     name: String(x.employee?.name ?? x.name ?? ''),
-                                    unit: String(x.employee?.office?.name ?? x.unit ?? 'â€”'),
+                                    unit: String(x.employee?.office?.name ?? x.unit ?? '—'),
                                 }))
                                 .filter((x) => x.id > 0 || x.name)
                             : [],
@@ -565,7 +565,7 @@
                             tr.className = 'hover:bg-slate-900/30';
                             tr.innerHTML = `
                                 <td class="px-4 py-3 text-slate-100">${escapeHtml(emp.name || '--')}</td>
-                                <td class="px-4 py-3 text-slate-300">${escapeHtml(emp.unit || 'â€”')}</td>
+                                <td class="px-4 py-3 text-slate-300">${escapeHtml(emp.unit || '—')}</td>
                             `;
                             assigneesListEl.appendChild(tr);
                         });
@@ -582,7 +582,7 @@
                         tr.className = 'hover:bg-slate-900/30';
                         tr.innerHTML = `
                             <td class="px-4 py-3 text-slate-100">${escapeHtml(emp.name || '--')}</td>
-                            <td class="px-4 py-3 text-slate-300">${escapeHtml(emp.unit || 'â€”')}</td>
+                            <td class="px-4 py-3 text-slate-300">${escapeHtml(emp.unit || '—')}</td>
                         `;
                         assigneesListEl.appendChild(tr);
                     });

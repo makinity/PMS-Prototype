@@ -2,13 +2,13 @@
 
 @section('main-content')
     @php
-        $periodLabelValue = $periodLabel ?? 'â€”';
+        $periodLabelValue = $periodLabel ?? '—';
     @endphp
 
     <section class="space-y-4">
         <div class="flex items-center justify-between">
             <div>
-                <h1 class="text-2xl font-semibold text-white">IPCR Accomplishment Report â€” {{ $periodLabelValue }}</h1>
+                <h1 class="text-2xl font-semibold text-white">IPCR Accomplishment Report — {{ $periodLabelValue }}</h1>
             </div>
             <a href="{{ $backUrl ?? route('supervisor.employee-submissions') }}"
                 class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-800 transition">
@@ -20,11 +20,11 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
                 <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Employee</p>
-                    <p class="mt-1 font-semibold text-white">{{ $employeeName ?? 'â€”' }}</p>
+                    <p class="mt-1 font-semibold text-white">{{ $employeeName ?? '—' }}</p>
                 </div>
                 <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Office/Unit</p>
-                    <p class="mt-1 font-semibold text-white">{{ $officeName ?? 'â€”' }}</p>
+                    <p class="mt-1 font-semibold text-white">{{ $officeName ?? '—' }}</p>
                 </div>
                 <div class="rounded-lg border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase text-slate-500">Period</p>
@@ -57,7 +57,7 @@
                                 <tbody class="divide-y divide-slate-800">
                                     @forelse (($section['rows'] ?? []) as $rowIndex => $row)
                                         <tr class="bg-slate-900/40">
-                                            <td class="px-4 py-3 font-semibold text-white">{{ $row['major_output'] ?? 'â€”' }}</td>
+                                            <td class="px-4 py-3 font-semibold text-white">{{ $row['major_output'] ?? '—' }}</td>
                                             <td class="px-4 py-3">
                                                 <button type="button"
                                                     data-ipcr-open-indicators
@@ -184,7 +184,7 @@
                 return typeof payload === 'object' ? payload : {};
             }
             function buildStandardsCell(values) {
-                if (!Array.isArray(values) || values.length === 0) return '<span class="text-slate-400">â€”</span>';
+                if (!Array.isArray(values) || values.length === 0) return '<span class="text-slate-400">—</span>';
                 return `<ul class="list-disc space-y-1 pl-4 text-xs text-slate-200">${values.map((v) => `<li>${escapeHtml(v)}</li>`).join('')}</ul>`;
             }
             function formatIndicatorRating(value) {
@@ -236,7 +236,7 @@
                     } else {
                         ipcrIndicatorsTbody.innerHTML = selectedIndicators.map((indicator, indicatorIndex) => `
                             <tr class="bg-slate-900/40 hover:bg-slate-900/60 transition">
-                                <td class="px-4 py-4 text-slate-100 font-medium leading-snug break-words">${escapeHtml(indicator?.indicator_text ?? 'â€”')}</td>
+                                <td class="px-4 py-4 text-slate-100 font-medium leading-snug break-words">${escapeHtml(indicator?.indicator_text ?? '—')}</td>
                                 <td class="px-4 py-4 text-right tabular-nums whitespace-nowrap text-slate-200">${formatQuantity(indicator?.q)}</td>
                                 <td class="px-4 py-4 text-right tabular-nums whitespace-nowrap text-slate-200">${formatIndicatorRating(indicator?.e)}</td>
                                 <td class="px-4 py-4 text-right tabular-nums whitespace-nowrap text-slate-200">${formatIndicatorRating(indicator?.t)}</td>
@@ -255,7 +255,7 @@
             function renderStandardsModal(indicatorIndex) {
                 const indicator = selectedIndicators?.[indicatorIndex];
                 if (!indicator) return;
-                if (ipcrStandardsIndicatorText) ipcrStandardsIndicatorText.textContent = indicator.indicator_text || 'â€”';
+                if (ipcrStandardsIndicatorText) ipcrStandardsIndicatorText.textContent = indicator.indicator_text || '—';
                 const payload = normalizeStandardsPayload(indicator.standards_payload);
                 const ratings = ['5', '4', '3', '2', '1'];
                 if (ipcrStandardsTbody) {
@@ -265,7 +265,7 @@
                             const val = ratingPayload?.[key] ?? ratingPayload?.[key.toLowerCase()] ?? null;
                             if (Array.isArray(val)) return buildStandardsCell(val);
                             if (typeof val === 'string' && val.trim()) return `<span class="text-xs text-slate-200">${escapeHtml(val)}</span>`;
-                            return '<span class="text-slate-400">â€”</span>';
+                            return '<span class="text-slate-400">—</span>';
                         };
                         return `<tr class="bg-slate-900/40 align-top"><td class="px-4 py-3 font-semibold text-slate-100">${rating}</td><td class="px-4 py-3">${getCell('q')}</td><td class="px-4 py-3">${getCell('e')}</td><td class="px-4 py-3">${getCell('t')}</td></tr>`;
                     }).join('');

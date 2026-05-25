@@ -308,9 +308,9 @@
 
                 <!-- SYSTEM RULE -->
                 <div class="rounded-lg border border-gray-700 bg-slate-950 px-3 py-2 text-[11px] text-slate-400">
-                    â€¢ Tasks must align with approved UWP outputs<br>
-                    â€¢ Duration is tracked automatically<br>
-                    â€¢ Draft until submitted inside ORS
+                    • Tasks must align with approved UWP outputs<br>
+                    • Duration is tracked automatically<br>
+                    • Draft until submitted inside ORS
                 </div>
 
                 <!-- ACTIONS (RESTORED â€“ LOADING SAFE) -->
@@ -343,131 +343,152 @@
         class="ors-modal fixed inset-0 z-[60] hidden flex items-start justify-center overflow-y-auto bg-black/60 px-4 py-6 sm:px-6">
         <div class="flex w-full max-w-[95vw] sm:max-w-xl md:max-w-2xl lg:max-w-3xl
             max-h-[calc(100vh-3rem)] flex-col overflow-hidden
-            rounded-2xl border border-gray-700 bg-slate-900 shadow-xl">
-            <div class="shrink-0 border-b border-gray-700 bg-slate-900/95 p-5 backdrop-blur">
-                <div class="flex items-start justify-between">
-                    <div>
-                        <h2 class="text-lg font-semibold text-white" id="taskDetailTitle">Task Details</h2>
-                        <p class="text-xs text-slate-400" id="taskDetailDate">Date: --</p>
+            rounded-2xl border border-gray-700 bg-slate-900 shadow-2xl shadow-black/40">
+
+            {{-- Header --}}
+            <div class="shrink-0 border-b border-gray-700 bg-gradient-to-r from-slate-900 via-slate-900 to-slate-800/80 px-6 py-5">
+                <div class="flex items-start justify-between gap-4">
+                    <div class="min-w-0 flex-1">
+                        <h2 class="text-lg font-bold leading-snug text-white" id="taskDetailTitle">Task Details</h2>
+                        <p class="mt-1 text-xs text-slate-400" id="taskDetailDate">Date: --</p>
                     </div>
                     <button onclick="closeOrsModal('taskDetailsModal')"
-                            class="text-slate-400 hover:text-white">
-                        x
+                            class="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-700 text-slate-400 transition hover:bg-slate-800 hover:text-white">
+                        <i class="fa-solid fa-xmark text-sm"></i>
                     </button>
                 </div>
-
-                <div class="mt-3 flex flex-wrap gap-2 text-xs">
+                <div class="mt-3">
                     <span id="taskDetailStatusBadge" class="status-chip border-slate-700 bg-slate-800 text-slate-200">--</span>
                 </div>
             </div>
 
-            <div class="flex-1 overflow-y-auto p-5 pb-24">
-                <div class="grid grid-cols-1 gap-3 text-sm md:grid-cols-2">
-                    <div>
-                        <p class="text-xs text-slate-400">Supervisor</p>
-                        <p class="text-slate-200" id="taskDetailClient">--</p>
+            {{-- Body --}}
+            <div class="flex-1 overflow-y-auto px-6 py-5 pb-24">
+
+                {{-- Info Grid --}}
+                <div class="space-y-3">
+                    <div class="rounded-xl border border-slate-700/60 bg-slate-950/40 px-4 py-3">
+                        <p class="text-[11px] uppercase tracking-[0.14em] text-slate-500">Supervisor</p>
+                        <p class="mt-1 text-sm font-medium text-slate-100" id="taskDetailClient">--</p>
                     </div>
-                    <div class="md:col-span-2">
-                        <p class="text-xs text-slate-400">MFO / UWP Output</p>
-                        <p class="text-slate-200" id="taskDetailMfo">--</p>
-                    </div>
-                    <div class="md:col-span-2">
-                        <p class="text-xs text-slate-400">Quantity</p>
-                        <input id="taskDetailQuantity"
-                               type="text"
-                               class="mt-1 w-full rounded-lg border border-gray-700 bg-slate-950 px-3 py-2 text-sm text-slate-200"
-                               placeholder="e.g., 12 transactions">
-                    </div>
-                    <div>
-                        <p class="text-xs text-slate-400">Status</p>
-                        <p class="text-slate-200" id="taskDetailStatusText">--</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-slate-400">Duration</p>
-                        <p class="text-slate-200" id="taskDetailDuration">--</p>
-                    </div>
-                    <div class="md:col-span-2">
-                        <p class="text-xs text-slate-400">Notes</p>
-                        <p class="text-slate-200" id="taskDetailNotes">--</p>
+                    <div class="rounded-xl border border-slate-700/60 bg-slate-950/40 px-4 py-3">
+                        <p class="text-[11px] uppercase tracking-[0.14em] text-slate-500">MFO / UWP Output</p>
+                        <p class="mt-1 text-sm font-medium text-slate-100" id="taskDetailMfo">--</p>
                     </div>
                 </div>
 
-                <div class="mt-4 rounded-xl border border-gray-700 bg-slate-900/40 p-3 text-sm">
-                    <p class="text-[11px] uppercase text-slate-400">Submission & Output</p>
+                {{-- Quantity --}}
+                <div class="mt-4">
+                    <p class="text-[11px] uppercase tracking-[0.14em] text-slate-500">Quantity</p>
+                    <input id="taskDetailQuantity"
+                           type="text"
+                           style="background-color:#020617;color:#e2e8f0;border-color:#334155;"
+                           class="mt-1.5 w-full rounded-xl border px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500"
+                           placeholder="e.g., 12 transactions">
+                </div>
 
-                    <div class="mt-3 grid grid-cols-1 gap-3 md:grid-cols-3">
+                {{-- Status & Duration --}}
+                <div class="mt-4 grid grid-cols-2 gap-4">
+                    <div class="rounded-xl border border-slate-700/60 bg-slate-950/40 px-4 py-3">
+                        <p class="text-[11px] uppercase tracking-[0.14em] text-slate-500">Status</p>
+                        <p class="mt-1 text-sm font-semibold text-slate-100" id="taskDetailStatusText">--</p>
+                    </div>
+                    <div class="rounded-xl border border-slate-700/60 bg-slate-950/40 px-4 py-3">
+                        <p class="text-[11px] uppercase tracking-[0.14em] text-slate-500">Duration</p>
+                        <p class="mt-1 text-sm font-semibold tabular-nums text-slate-100" id="taskDetailDuration">--</p>
+                    </div>
+                </div>
+
+                {{-- Notes --}}
+                <div class="mt-4 rounded-xl border border-slate-700/60 bg-slate-950/40 px-4 py-3">
+                    <p class="text-[11px] uppercase tracking-[0.14em] text-slate-500">Notes</p>
+                    <p class="mt-1 text-sm text-slate-200" id="taskDetailNotes">--</p>
+                </div>
+
+                {{-- Submission & Output Section --}}
+                <div class="mt-5 rounded-xl border border-slate-700/60 bg-slate-950/30 p-4">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Submission & Output</p>
+
+                    <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
                         <div>
-                            <p class="text-xs text-slate-400">Output State</p>
+                            <p class="text-[11px] uppercase tracking-[0.14em] text-slate-500">Output State</p>
                             <span id="taskDetailOutputState"
-                                class="mt-1 inline-flex rounded-full border border-slate-700 bg-slate-800 px-2 py-1 text-xs text-slate-200">
+                                class="mt-1.5 inline-flex rounded-full border border-slate-700 bg-slate-800 px-2.5 py-1 text-xs font-medium text-slate-200">
                                 No output yet
                             </span>
                         </div>
                         <div>
-                            <p class="text-xs text-slate-400">Evidence</p>
+                            <p class="text-[11px] uppercase tracking-[0.14em] text-slate-500">Evidence</p>
                             <span id="taskDetailEvidenceState"
-                                class="mt-1 inline-flex rounded-full border border-slate-700 bg-slate-800 px-2 py-1 text-xs text-slate-200">
+                                class="mt-1.5 inline-flex rounded-full border border-slate-700 bg-slate-800 px-2.5 py-1 text-xs font-medium text-slate-200">
                                 None
                             </span>
-                            <p id="taskDetailEvidenceFile" class="mt-1 text-[11px] text-slate-400">--</p>
+                            <p id="taskDetailEvidenceFile" class="mt-1.5 max-w-full truncate text-[11px] text-slate-400">--</p>
                         </div>
                         <div>
-                            <p class="text-xs text-slate-400">Submitted At</p>
-                            <p class="text-slate-200" id="taskDetailSubmittedAt">--</p>
+                            <p class="text-[11px] uppercase tracking-[0.14em] text-slate-500">Submitted At</p>
+                            <p class="mt-1.5 text-sm text-slate-200" id="taskDetailSubmittedAt">--</p>
                         </div>
                     </div>
 
-                    <div class="mt-3 space-y-2">
-                        <label class="text-xs text-slate-300">Output Upload</label>
+                    {{-- Upload --}}
+                    <div class="mt-4">
+                        <label class="text-[11px] uppercase tracking-[0.14em] text-slate-500">Output Upload</label>
                         <input id="taskDetailUpload"
                             type="file"
                             multiple
-                            class="block w-full rounded-lg border border-gray-700 bg-slate-900 px-3 py-2 text-xs text-slate-200 file:mr-3 file:rounded-md file:border-0 file:bg-slate-800 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-slate-200">
+                            class="mt-1.5 block w-full rounded-xl border border-slate-700 bg-slate-950/60 px-3 py-2.5 text-xs text-slate-200 file:mr-3 file:rounded-lg file:border-0 file:bg-blue-500/20 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-blue-200 hover:file:bg-blue-500/30">
                     </div>
 
-                    <div class="mt-3 flex flex-wrap gap-2" id="taskDetailActions">
+                    {{-- Action Buttons --}}
+                    <div class="mt-4 flex flex-wrap justify-end gap-2" id="taskDetailActions">
                         <button id="taskDetailStartBtn"
                                 type="button"
-                                class="inline-flex items-center gap-2 rounded-lg border border-blue-500/60 bg-blue-500/10 px-3 py-1.5 text-xs font-semibold text-blue-100 hover:bg-blue-500/20">
+                                class="inline-flex items-center gap-2 rounded-lg border border-blue-500/50 bg-blue-500/10 px-3.5 py-2 text-xs font-semibold text-blue-100 transition hover:bg-blue-500/20">
+                            <i class="fa-solid fa-play text-[10px]"></i>
                             <span data-button-label>Start Task</span>
                             <span data-button-spinner class="hidden h-3 w-3 animate-spin rounded-full border-2 border-blue-200/30 border-t-blue-100"></span>
                         </button>
                         <button id="taskDetailPauseBtn"
                                 type="button"
-                                class="hidden inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-slate-800">
+                                class="hidden inline-flex items-center gap-2 rounded-lg border border-slate-600 bg-slate-800/60 px-3.5 py-2 text-xs font-semibold text-slate-200 transition hover:bg-slate-700">
+                            <i class="fa-solid fa-pause text-[10px]"></i>
                             <span data-button-label>Pause</span>
                             <span data-button-spinner class="hidden h-3 w-3 animate-spin rounded-full border-2 border-slate-500/40 border-t-slate-200"></span>
                         </button>
                         <button id="taskDetailResumeBtn"
                                 type="button"
-                                class="hidden inline-flex items-center gap-2 rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-100 hover:bg-amber-500/20">
+                                class="hidden inline-flex items-center gap-2 rounded-lg border border-amber-500/50 bg-amber-500/10 px-3.5 py-2 text-xs font-semibold text-amber-100 transition hover:bg-amber-500/20">
+                            <i class="fa-solid fa-play text-[10px]"></i>
                             <span data-button-label>Resume</span>
                             <span data-button-spinner class="hidden h-3 w-3 animate-spin rounded-full border-2 border-amber-200/30 border-t-amber-100"></span>
                         </button>
                         <button id="taskDetailStopBtn"
                                 type="button"
-                                class="hidden inline-flex items-center gap-2 rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-100 hover:bg-amber-500/20">
+                                class="hidden inline-flex items-center gap-2 rounded-lg border border-amber-500/50 bg-amber-500/10 px-3.5 py-2 text-xs font-semibold text-amber-100 transition hover:bg-amber-500/20">
+                            <i class="fa-solid fa-stop text-[10px]"></i>
                             <span data-button-label>Stop (Draft)</span>
                             <span data-button-spinner class="hidden h-3 w-3 animate-spin rounded-full border-2 border-amber-200/30 border-t-amber-100"></span>
                         </button>
                         <button id="taskDetailSubmitBtn"
                                 type="button"
-                                class="hidden inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-slate-900 hover:bg-emerald-600">
+                                class="hidden inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-3.5 py-2 text-xs font-semibold text-slate-900 transition hover:bg-emerald-400">
+                            <i class="fa-solid fa-paper-plane text-[10px]"></i>
                             <span data-button-label>Submit for Review</span>
                             <span data-button-spinner class="hidden h-3 w-3 animate-spin rounded-full border-2 border-emerald-900/30 border-t-emerald-900"></span>
                         </button>
                     </div>
 
                     <p id="taskDetailLockMessage" class="mt-2 hidden text-[11px] text-emerald-300">
-                        Submitted (Locked) â€” visible in MPOR monthly summary. SMPOR is system-generated after validation.
+                        Submitted (Locked) — visible in MPOR monthly summary. SMPOR is system-generated after validation.
                     </p>
                     <p id="taskDetailDraftMessage" class="mt-2 text-[11px] text-slate-400"></p>
                 </div>
             </div>
 
-            <div class="shrink-0 flex justify-end gap-2 border-t border-gray-700 bg-slate-900/95 p-4 backdrop-blur">
+            <div class="shrink-0 flex justify-end border-t border-gray-700 bg-slate-900/95 px-6 py-4 backdrop-blur">
                 <button onclick="closeOrsModal('taskDetailsModal')"
-                        class="rounded-lg border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800">
+                        class="rounded-xl border border-slate-700 px-5 py-2 text-xs font-medium text-slate-300 transition hover:bg-slate-800">
                     Close
                 </button>
             </div>
@@ -1557,7 +1578,7 @@
                         if (monthLocked && monthLockReason) {
                             lockMsg.textContent = monthLockReason;
                         } else {
-                            lockMsg.textContent = 'Submitted (Locked) â€” visible in MPOR monthly summary. SMPOR is system-generated after validation.';
+                            lockMsg.textContent = 'Submitted (Locked) — visible in MPOR monthly summary. SMPOR is system-generated after validation.';
                         }
                         lockMsg.classList.toggle('hidden', !locked);
                         lockMsg.style.display = locked ? '' : 'none';

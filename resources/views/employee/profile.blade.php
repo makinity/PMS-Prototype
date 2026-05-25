@@ -88,7 +88,7 @@
                                 <label class="block mb-2 text-sm font-medium text-white">Position</label>
                                 <input type="text"
                                        class="!bg-gray-700 !border-gray-600 !text-white text-sm rounded-lg block w-full p-2.5 opacity-60 cursor-not-allowed"
-                                       value="{{ auth()->user()->position ?? 'â€”' }}" disabled>
+                                       value="{{ auth()->user()->position ?? '—' }}" disabled>
                                 <p class="mt-1 text-xs text-gray-400">Updated by HR</p>
                             </div>
 
@@ -96,14 +96,14 @@
                                 <label class="block mb-2 text-sm font-medium text-white">Employee ID</label>
                                 <input type="text"
                                        class="!bg-gray-700 !border-gray-600 !text-white text-sm rounded-lg block w-full p-2.5 opacity-60 cursor-not-allowed"
-                                       value="{{ auth()->user()->employee_id ?? 'â€”' }}" disabled>
+                                       value="{{ auth()->user()->employee_id ?? '—' }}" disabled>
                             </div>
 
                             <div>
                                 <label class="block mb-2 text-sm font-medium text-white">Department</label>
                                 <input type="text"
                                        class="!bg-gray-700 !border-gray-600 !text-white text-sm rounded-lg block w-full p-2.5 opacity-60 cursor-not-allowed"
-                                       value="{{ auth()->user()->office?->name ?? 'â€”' }}" disabled>
+                                       value="{{ auth()->user()->office?->name ?? '—' }}" disabled>
                             </div>
                         </div>
 

@@ -22,7 +22,7 @@
         </div>
         <div class="rounded-xl border border-gray-700 bg-slate-900/40 px-4 py-3 text-right">
             <p class="text-[11px] uppercase tracking-[0.24em] text-slate-500">Active Period</p>
-            <p class="mt-1 text-sm font-semibold text-white">{{ $activePeriod?->name ?? 'â€”' }}</p>
+            <p class="mt-1 text-sm font-semibold text-white">{{ $activePeriod?->name ?? '—' }}</p>
         </div>
     </div>
 
@@ -65,10 +65,10 @@
                         @endphp
                         <tr class="hover:bg-slate-950/40">
                             <td class="px-5 py-4">
-                                <div class="font-medium text-white">{{ $uwp->office?->name ?? 'â€”' }}</div>
+                                <div class="font-medium text-white">{{ $uwp->office?->name ?? '—' }}</div>
                                 <div class="mt-1 text-xs text-slate-500">UWP #{{ $uwp->id }}</div>
                             </td>
-                            <td class="px-5 py-4 text-slate-300">{{ $uwp->creator?->name ?? 'â€”' }}</td>
+                            <td class="px-5 py-4 text-slate-300">{{ $uwp->creator?->name ?? '—' }}</td>
                             <td class="px-5 py-4 text-center text-slate-300">{{ $outputCount }}</td>
                             <td class="px-5 py-4 text-center">
                                 <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold {{ $statusMeta['class'] }}">{{ $statusMeta['label'] }}</span>
@@ -125,19 +125,19 @@
             <div class="grid gap-3 border-b border-gray-700 px-5 py-4 sm:grid-cols-4">
                 <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase tracking-wide text-slate-500">Office / Unit</p>
-                    <p class="mt-1 text-sm font-semibold text-white">{{ $currentOpcrPayload['opcr']['office']['name'] ?? 'â€”' }}</p>
+                    <p class="mt-1 text-sm font-semibold text-white">{{ $currentOpcrPayload['opcr']['office']['name'] ?? '—' }}</p>
                 </div>
                 <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase tracking-wide text-slate-500">Period</p>
-                    <p class="mt-1 text-sm font-semibold text-white">{{ $currentOpcrPayload['opcr']['period']['name'] ?? 'â€”' }}</p>
+                    <p class="mt-1 text-sm font-semibold text-white">{{ $currentOpcrPayload['opcr']['period']['name'] ?? '—' }}</p>
                 </div>
                 <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase tracking-wide text-slate-500">Source UWP IDs</p>
-                    <p class="mt-1 text-sm font-semibold text-white">{{ $currentOpcrPayload['opcr']['source_uwp']['id'] ?? 'â€”' }}</p>
+                    <p class="mt-1 text-sm font-semibold text-white">{{ $currentOpcrPayload['opcr']['source_uwp']['id'] ?? '—' }}</p>
                 </div>
                 <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase tracking-wide text-slate-500">Source Status</p>
-                    <p class="mt-1 text-sm font-semibold text-white">{{ ucwords(str_replace('_', ' ', (string) ($currentOpcrPayload['opcr']['source_uwp']['status'] ?? 'â€”'))) }}</p>
+                    <p class="mt-1 text-sm font-semibold text-white">{{ ucwords(str_replace('_', ' ', (string) ($currentOpcrPayload['opcr']['source_uwp']['status'] ?? '—'))) }}</p>
                 </div>
             </div>
 
@@ -157,10 +157,10 @@
                         @forelse (($currentOpcrPayload['outputs'] ?? []) as $output)
                             <tr class="hover:bg-slate-950/40">
                                 <td class="px-5 py-4 align-top">
-                                    <div class="font-medium text-white">{{ $output['source_supervisor'] ?? 'â€”' }}</div>
-                                    <div class="mt-1 text-xs text-slate-500">UWP #{{ $output['source_uwp_id'] ?? 'â€”' }}</div>
+                                    <div class="font-medium text-white">{{ $output['source_supervisor'] ?? '—' }}</div>
+                                    <div class="mt-1 text-xs text-slate-500">UWP #{{ $output['source_uwp_id'] ?? '—' }}</div>
                                 </td>
-                                <td class="px-5 py-4 align-top text-white">{{ $output['title'] ?? 'â€”' }}</td>
+                                <td class="px-5 py-4 align-top text-white">{{ $output['title'] ?? '—' }}</td>
                                 <td class="px-5 py-4 align-top text-center text-slate-300">
                                     <a href="{{ route('dept-head.opcr.success-indicators', ['opcr' => $currentOpcr->id, 'mfoId' => $output['mfo_id']]) }}" class="group inline-flex items-center justify-center gap-1.5 text-cyan-400 hover:text-cyan-300 transition" title="View Success Indicators">
                                         <i class="fa-regular fa-eye transition group-hover:scale-110"></i>
@@ -177,10 +177,10 @@
                                     @elseif ($targetQuantity !== null)
                                         {{ $targetQuantity }}
                                     @else
-                                        â€”
+                                        —
                                     @endif
                                 </td>
-                                <td class="px-5 py-4 align-top text-slate-300">{{ ($output['weight_percent'] ?? '') !== '' ? $output['weight_percent'] . '%' : 'â€”' }}</td>
+                                <td class="px-5 py-4 align-top text-slate-300">{{ ($output['weight_percent'] ?? '') !== '' ? $output['weight_percent'] . '%' : '—' }}</td>
                                 <td class="px-5 py-4 align-top">
                                     @php $functionType = strtolower((string) ($output['function_type'] ?? '')); @endphp
                                     @if ($functionType === 'core')

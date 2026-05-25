@@ -25,19 +25,19 @@
 <div class="mb-4 grid gap-3 rounded-xl border border-gray-700 bg-slate-900/80 p-5 md:grid-cols-5">
     <div>
         <p class="text-xs uppercase tracking-widest text-slate-500">Office / Unit</p>
-        <p class="mt-1 font-medium text-slate-100">{{ $uwpPayload['office']['name'] ?? 'â€”' }}</p>
+        <p class="mt-1 font-medium text-slate-100">{{ $uwpPayload['office']['name'] ?? '—' }}</p>
     </div>
     <div>
         <p class="text-xs uppercase tracking-widest text-slate-500">Supervisor</p>
-        <p class="mt-1 font-medium text-slate-100">{{ $uwpPayload['supervisor']['name'] ?? 'â€”' }}</p>
+        <p class="mt-1 font-medium text-slate-100">{{ $uwpPayload['supervisor']['name'] ?? '—' }}</p>
     </div>
     <div>
         <p class="text-xs uppercase tracking-widest text-slate-500">Department Head</p>
-        <p class="mt-1 font-medium text-slate-100">{{ $uwpPayload['department_head']['name'] ?? 'â€”' }}</p>
+        <p class="mt-1 font-medium text-slate-100">{{ $uwpPayload['department_head']['name'] ?? '—' }}</p>
     </div>
     <div>
         <p class="text-xs uppercase tracking-widest text-slate-500">Performance Period</p>
-        <p class="mt-1 font-medium text-slate-100">{{ $uwpPayload['period']['name'] ?? 'â€”' }}</p>
+        <p class="mt-1 font-medium text-slate-100">{{ $uwpPayload['period']['name'] ?? '—' }}</p>
     </div>
     <div>
         <p class="text-xs uppercase tracking-widest text-slate-500">Status</p>
@@ -50,7 +50,7 @@
         <p class="text-sm font-semibold">Returned Remarks</p>
         <p class="mt-1 text-xs text-rose-200/80">
             {{ $uwpPayload['returned_by_role'] === 'dept-head' ? 'Returned by Department Head' : 'Returned for revision' }}
-            @if (!empty($uwpPayload['returned_at'])) â€¢ {{ \Illuminate\Support\Carbon::parse($uwpPayload['returned_at'])->format('M d, Y h:i A') }} @endif
+            @if (!empty($uwpPayload['returned_at'])) • {{ \Illuminate\Support\Carbon::parse($uwpPayload['returned_at'])->format('M d, Y h:i A') }} @endif
         </p>
         <div class="mt-2 whitespace-pre-line text-sm text-rose-100">{{ $uwpPayload['return_remarks'] }}</div>
     </div>
@@ -246,7 +246,7 @@
         if (output.weight_percent) weightEl.classList.remove('hidden');
         else weightEl.classList.add('hidden');
 
-        summaryEl.textContent = `Target Quantity: ${output.target_quantity || 'â€”'} â€¢ Timeline: ${output.target_timeline || 'â€”'}`;
+        summaryEl.textContent = `Target Quantity: ${output.target_quantity || '—'} • Timeline: ${output.target_timeline || '—'}`;
 
         const indicators = output.success_indicators || [];
         overviewIndicatorsEl.innerHTML = indicators.length
@@ -261,8 +261,8 @@
                 return `
                     <tr>
                         <td class="px-4 py-3 align-top text-slate-100">${si.indicator_text || 'Untitled indicator'}</td>
-                        <td class="px-4 py-3 align-top text-slate-300">${si.target_quantity || 'â€”'} / ${si.target_timeline || 'â€”'}</td>
-                        <td class="px-4 py-3 align-top text-slate-300">${(si.assignees || []).length ? si.assignees.join(', ') : 'â€”'}</td>
+                        <td class="px-4 py-3 align-top text-slate-300">${si.target_quantity || '—'} / ${si.target_timeline || '—'}</td>
+                        <td class="px-4 py-3 align-top text-slate-300">${(si.assignees || []).length ? si.assignees.join(', ') : '—'}</td>
                         <td class="px-4 py-3 align-top text-slate-300">${standardsCount}</td>
                     </tr>
                 `;

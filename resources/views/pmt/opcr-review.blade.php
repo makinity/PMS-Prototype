@@ -9,52 +9,31 @@
     </div>
 
     <div class="rounded-2xl border border-gray-700 bg-slate-900/40 p-4">
-        <div class="mb-4 flex flex-wrap items-end justify-between gap-4">
-            <form method="GET" action="{{ route('pmt.opcr.review.index') }}" id="pmt-opcr-search-form" class="flex flex-wrap items-end justify-start gap-2">
-                <input type="hidden" name="status" value="{{ $selectedStatus }}">
-                <div class="min-w-[260px]">
-                    <label for="pmt-opcr-search" class="mb-1 block text-xs uppercase tracking-wide text-slate-500">Search</label>
-                    <div class="flex items-center gap-2">
-                        <input
-                            id="pmt-opcr-search"
-                            type="text"
-                            name="search"
-                            value="{{ $searchTerm ?? '' }}"
-                            placeholder="Search office, period, OPCR ID..."
-                            autocomplete="off"
-                            style="background:#0f172a;color:#e5e7eb;"
-                            class="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none"
-                            data-live-opcr-search>
-                        <button type="submit" class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-700 bg-slate-950 text-slate-200 transition hover:bg-slate-800" aria-label="Search OPCR records">
-                            <i class="fa-solid fa-magnifying-glass text-sm"></i>
-                        </button>
-                    </div>
-                </div>
-                @if (($searchTerm ?? '') !== '')
-                    <a href="{{ route('pmt.opcr.review.index', $selectedStatus !== '' ? ['status' => $selectedStatus] : []) }}"
-                       class="rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:bg-slate-800">
-                        Clear
-                    </a>
-                @endif
-            </form>
-
-            <form method="GET" action="{{ route('pmt.opcr.review.index') }}" class="flex items-end justify-end gap-2">
-                <input type="hidden" name="search" value="{{ $searchTerm ?? '' }}">
-                <div>
-                    <label for="opcr-status" class="mb-1 block text-xs uppercase tracking-wide text-slate-500">Status</label>
-                    <select id="opcr-status"
-                            name="status"
-                            onchange="this.form.submit()"
-                            style="background:#0f172a;color:#e5e7eb;"
-                            class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none">
-                        <option value="" {{ $selectedStatus === '' ? 'selected' : '' }}>All Status</option>
-                        <option value="submitted" {{ $selectedStatus === 'submitted' ? 'selected' : '' }}>Submitted</option>
-                        <option value="endorsed" {{ $selectedStatus === 'endorsed' ? 'selected' : '' }}>Endorsed</option>
-                        <option value="approved" {{ $selectedStatus === 'approved' ? 'selected' : '' }}>Approved</option>
-                        <option value="returned" {{ $selectedStatus === 'returned' ? 'selected' : '' }}>Returned</option>
-                    </select>
-                </div>
-            </form>
+        <div class="mb-4 flex flex-wrap items-end gap-3">
+            <div class="min-w-[220px] flex-1">
+                <label for="pmt-opcr-search" class="mb-1 block text-xs uppercase tracking-[0.14em] text-slate-400">Search</label>
+                <input
+                    id="pmt-opcr-search"
+                    type="text"
+                    placeholder="Search office, period, OPCR ID..."
+                    autocomplete="off"
+                    data-live-opcr-search
+                    style="background-color:#020617;color:#e2e8f0;border-color:#334155;"
+                    class="w-full rounded-xl border px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500">
+            </div>
+            <div class="w-full min-w-[180px] sm:w-auto">
+                <label for="opcr-status" class="mb-1 block text-xs uppercase tracking-[0.14em] text-slate-400">Status</label>
+                <select id="opcr-status"
+                        data-live-opcr-status
+                        style="background-color:#020617;color:#e2e8f0;border-color:#334155;"
+                        class="w-full rounded-xl border px-3 py-2 text-sm text-slate-200 [color-scheme:dark]">
+                    <option value="">All</option>
+                    <option value="submitted" {{ ($selectedStatus ?? '') === 'submitted' ? 'selected' : '' }}>Submitted</option>
+                    <option value="endorsed" {{ ($selectedStatus ?? '') === 'endorsed' ? 'selected' : '' }}>Endorsed</option>
+                    <option value="approved" {{ ($selectedStatus ?? '') === 'approved' ? 'selected' : '' }}>Approved</option>
+                    <option value="returned" {{ ($selectedStatus ?? '') === 'returned' ? 'selected' : '' }}>Returned</option>
+                </select>
+            </div>
         </div>
 
         <div class="overflow-x-auto">
@@ -86,7 +65,7 @@
                                 'OPCR ' . $opcr->id,
                             ])));
                         @endphp
-                        <tr class="border-t border-gray-700" data-opcr-row data-search-text="{{ $searchHaystack }}">
+                        <tr class="border-t border-gray-700" data-opcr-row data-search-text="{{ $searchHaystack }}" data-status="{{ $opcr->status }}">
                             <td class="px-4 py-3 text-white">{{ $officeName }}</td>
                             <td class="px-4 py-3">{{ $periodName }}</td>
                             <td class="px-4 py-3">
@@ -117,17 +96,22 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.querySelector('[data-live-opcr-search]');
+    const statusSelect = document.querySelector('[data-live-opcr-status]');
     const rows = Array.from(document.querySelectorAll('[data-opcr-row]'));
     const noMatchRow = document.getElementById('pmt-opcr-no-match-row');
     const emptyRow = document.getElementById('pmt-opcr-empty-row');
     if (!searchInput || !rows.length) return;
 
-    const applySearch = () => {
+    const applyFilter = () => {
         const term = String(searchInput.value || '').trim().toLowerCase();
+        const status = String(statusSelect?.value || '').toLowerCase();
         let matches = 0;
         rows.forEach((row) => {
             const hay = String(row.getAttribute('data-search-text') || '').toLowerCase();
-            const visible = term === '' || hay.includes(term);
+            const rowStatus = String(row.getAttribute('data-status') || '').toLowerCase();
+            const matchesTerm = term === '' || hay.includes(term);
+            const matchesStatus = status === '' || rowStatus === status;
+            const visible = matchesTerm && matchesStatus;
             row.classList.toggle('hidden', !visible);
             if (visible) matches++;
         });
@@ -135,8 +119,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (emptyRow) emptyRow.classList.toggle('hidden', true);
     };
 
-    searchInput.addEventListener('input', applySearch);
-    applySearch();
+    searchInput.addEventListener('input', applyFilter);
+    if (statusSelect) statusSelect.addEventListener('change', applyFilter);
+    applyFilter();
 });
 </script>
 @endpush

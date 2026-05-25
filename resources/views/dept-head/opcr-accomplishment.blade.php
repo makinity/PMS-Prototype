@@ -13,33 +13,8 @@
         </div>
         <div class="rounded-xl border border-gray-700 bg-slate-900/40 px-4 py-3 text-right">
             <p class="text-[11px] uppercase tracking-[0.24em] text-slate-500">Active Period</p>
-            <p class="mt-1 text-sm font-semibold text-white">{{ $activePeriod?->name ?? 'â€”' }}</p>
+            <p class="mt-1 text-sm font-semibold text-white">{{ $activePeriod?->name ?? '—' }}</p>
         </div>
-    </div>
-
-    <div class="flex items-center justify-between gap-4 rounded-2xl border border-blue-500/20 bg-blue-500/5 px-6 py-4">
-        <div class="flex items-center gap-4">
-            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-blue-500/20 text-blue-400">
-                <i class="fa-solid fa-chart-line text-xl"></i>
-            </div>
-            <div>
-                <h3 class="font-bold text-white">Performance Consolidation</h3>
-            </div>
-        </div>
-        @if ($canSubmitFinalRating)
-            <form action="{{ route('dept-head.opcr.submit-calibration', $currentOpcr->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to submit the final office calibration to PMT?')">
-                @csrf
-                <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-500 active:scale-95">
-                    <i class="fa-solid fa-paper-plane"></i>
-                    Submit Final OPCR to PMT
-                </button>
-            </form>
-        @else
-            <div class="rounded-lg border border-slate-700 bg-slate-800/50 px-4 py-2 text-xs text-slate-400">
-                <i class="fa-solid fa-circle-info mr-1"></i>
-                Submit button will appear once all staff IPCRs are calibrated and OPCR is approved.
-            </div>
-        @endif
     </div>
 
     <section class="overflow-hidden rounded-2xl border border-gray-700 bg-slate-900/40 shadow-xl">
@@ -97,8 +72,8 @@
                     @forelse (($currentOpcrPayload['outputs'] ?? []) as $output)
                         <tr class="hover:bg-slate-950/40 transition">
                             <td class="px-5 py-4 align-top">
-                                <div class="font-medium text-white">{{ $output['title'] ?? 'â€”' }}</div>
-                                <div class="mt-1 text-xs text-slate-500">Source: {{ $output['source_supervisor'] ?? 'â€”' }}</div>
+                                <div class="font-medium text-white">{{ $output['title'] ?? '—' }}</div>
+                                <div class="mt-1 text-xs text-slate-500">Source: {{ $output['source_supervisor'] ?? '—' }}</div>
                             </td>
                             <td class="px-5 py-4 align-top text-slate-300">
                                 @php
@@ -110,7 +85,7 @@
                                 @elseif ($targetQuantity !== null)
                                     {{ $targetQuantity }}
                                 @else
-                                    â€”
+                                    —
                                 @endif
                             </td>
                             <td class="px-5 py-4 align-top">
@@ -138,7 +113,7 @@
                                 @endphp
                                 <div class="text-[10px] uppercase font-bold {{ $ratingClass }}">{{ $ratingLabel }}</div>
                             </td>
-                            <td class="px-5 py-4 align-top text-slate-300">{{ ($output['weight_percent'] ?? '') !== '' ? $output['weight_percent'] . '%' : 'â€”' }}</td>
+                            <td class="px-5 py-4 align-top text-slate-300">{{ ($output['weight_percent'] ?? '') !== '' ? $output['weight_percent'] . '%' : '—' }}</td>
                         </tr>
                     @empty
                         <tr>

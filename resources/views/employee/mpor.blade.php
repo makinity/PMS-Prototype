@@ -7,8 +7,8 @@
          * Keep this small guard only (no hardcoded defaults, no computations).
          */
         $mporMonthYear = $mporMonthYear ?? now()->format('F Y');
-        $employeeName = $employeeName ?? (auth()->user()->name ?? 'â€”');
-        $officeName = $officeName ?? (optional(auth()->user()->office)->name ?? 'â€”');
+        $employeeName = $employeeName ?? (auth()->user()->name ?? '—');
+        $officeName = $officeName ?? (optional(auth()->user()->office)->name ?? '—');
 
         $mporStatus = $mporStatus ?? 'draft';
         $isMporLocked = $isMporLocked ?? in_array($mporStatus, ['submitted', 'endorsed'], true);

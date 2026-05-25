@@ -16,18 +16,19 @@
         </div>
 
         {{-- Filters: single row --}}
-        <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <div class="relative flex-1">
-                <i class="fa-solid fa-magnifying-glass pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-500"></i>
+        <div class="flex flex-wrap items-end gap-3">
+            <div class="min-w-[220px] flex-1">
+                <label for="mpor-search" class="mb-1 block text-xs uppercase tracking-[0.14em] text-slate-400">Search</label>
                 <input type="text" id="mpor-search" value="{{ $search }}"
                     placeholder="Search employee..."
-                    style="color-scheme: dark; background-color: #0f172a;"
-                    class="w-full rounded-lg border border-slate-700 bg-slate-900 py-2.5 pl-10 pr-3 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-0">
+                    style="background-color:#020617;color:#e2e8f0;border-color:#334155;"
+                    class="w-full rounded-xl border px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500">
             </div>
-            <div class="shrink-0">
+            <div class="w-full min-w-[180px] sm:w-auto">
+                <label for="mpor-month" class="mb-1 block text-xs uppercase tracking-[0.14em] text-slate-400">Month</label>
                 <input type="month" id="mpor-month" value="{{ $month }}"
-                    style="color-scheme: dark; background-color: #0f172a;"
-                    class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none focus:ring-0 sm:w-44">
+                    style="background-color:#020617;color:#e2e8f0;border-color:#334155;"
+                    class="w-full rounded-xl border px-3 py-2 text-sm text-slate-200 [color-scheme:dark] sm:w-44">
             </div>
         </div>
 

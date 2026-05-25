@@ -11,19 +11,21 @@
 <div class="mb-6 flex flex-col gap-4 rounded-xl border border-gray-700 bg-slate-900/80 p-5 md:flex-row md:items-center md:justify-between">
     <div>
         <p class="text-xs uppercase tracking-wide text-slate-400">Performance Period</p>
-        <p class="font-medium text-slate-100">{{ $activePeriod->name ?? 'â€”' }}</p>
+        <p class="font-medium text-slate-100">{{ $activePeriod->name ?? '—' }}</p>
     </div>
 
     @php
         $statusFilter = strtolower((string) ($selectedStatus ?? request('status', '')));
     @endphp
     <form method="GET" action="{{ route('dept-head.uwp.index') }}">
+        <label for="dh-uwp-status" class="mb-1 block text-xs uppercase tracking-[0.14em] text-slate-400">Status</label>
         <select
+            id="dh-uwp-status"
             name="status"
             onchange="this.form.submit()"
-            class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            style="background:#0f172a;color:#e5e7eb;">
-            <option value="" {{ $statusFilter === '' ? 'selected' : '' }}>All Status</option>
+            style="background-color:#020617;color:#e2e8f0;border-color:#334155;"
+            class="w-full rounded-xl border px-3 py-2 text-sm text-slate-200 [color-scheme:dark]">
+            <option value="" {{ $statusFilter === '' ? 'selected' : '' }}>All</option>
             <option value="submitted" {{ $statusFilter === 'submitted' ? 'selected' : '' }}>Submitted</option>
             <option value="consolidated" {{ $statusFilter === 'consolidated' ? 'selected' : '' }}>Consolidated</option>
             <option value="returned" {{ $statusFilter === 'returned' ? 'selected' : '' }}>Returned</option>
@@ -63,8 +65,8 @@
                         };
                     @endphp
                     <tr class="transition hover:bg-slate-800/40">
-                        <td class="px-4 py-3 text-sm font-medium text-slate-100">{{ $uwp->office?->name ?? 'â€”' }}</td>
-                        <td class="px-4 py-3 text-sm text-slate-300">{{ $uwp->creator?->name ?? 'â€”' }}</td>
+                        <td class="px-4 py-3 text-sm font-medium text-slate-100">{{ $uwp->office?->name ?? '—' }}</td>
+                        <td class="px-4 py-3 text-sm text-slate-300">{{ $uwp->creator?->name ?? '—' }}</td>
                         <td class="px-4 py-3 text-center text-sm text-slate-300">Unit-Level Plan</td>
                         <td class="px-4 py-3 text-center text-sm">
                             <span class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium {{ $badge['bg'] }} {{ $badge['text'] }} {{ $badge['border'] }}">

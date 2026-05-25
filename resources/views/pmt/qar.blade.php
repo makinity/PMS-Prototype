@@ -97,40 +97,24 @@
         @endif
 
         <div class="rounded-2xl border border-gray-700 bg-slate-900/40 p-4">
-            <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-                <h2 class="text-lg font-semibold text-white">QAR Approval Queue</h2>
-                <div class="flex flex-wrap items-center justify-end gap-2">
-                    <form method="GET" action="{{ route('pmt.qar') }}" data-search-form data-loading-label="Searching..." class="flex items-center gap-2">
-                        @if ($quarterInputValue > 0)
-                            <input type="hidden" name="q" value="{{ $quarterInputValue }}">
-                        @endif
-                        <input
-                            type="text"
-                            name="office"
-                            value="{{ $officeSearchSafe }}"
-                            placeholder="Search office..."
-                            style="background:#0f172a;color:#e5e7eb;"
-                            class="rounded-lg border border-slate-700 bg-slate-950/50 px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:border-sky-500/50 focus:ring-0"
-                        >
-                        <button
-                            type="submit"
-                            data-submit-button
-                            class="rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:bg-slate-800">
-                            <span data-button-spinner class="mr-2 hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-slate-400/40 border-t-slate-100"></span>
-                            <span data-button-label>Search</span>
-                        </button>
-                        @if ($officeSearchSafe !== '')
-                            <a
-                                data-clear-link
-                                href="{{ route('pmt.qar', $quarterInputValue > 0 ? ['q' => $quarterInputValue] : []) }}"
-                                class="rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:bg-slate-800">
-                                Clear
-                            </a>
-                        @endif
-                    </form>
-                    <span class="inline-flex items-center rounded-full border border-slate-700 bg-slate-900/70 px-3 py-1 text-xs text-slate-300">
-                        Records: {{ $headersSafe->count() }}
-                    </span>
+            <div class="mb-4 flex flex-wrap items-end gap-3">
+                <div class="min-w-[220px] flex-1">
+                    <label for="qar-live-search" class="mb-1 block text-xs uppercase tracking-[0.14em] text-slate-400">Search</label>
+                    <input id="qar-live-search" type="text" placeholder="Search office, quarter, status..."
+                        data-live-qar-search
+                        style="background-color:#020617;color:#e2e8f0;border-color:#334155;"
+                        class="w-full rounded-xl border px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500">
+                </div>
+                <div class="w-full min-w-[180px] sm:w-auto">
+                    <label for="qar-status-filter" class="mb-1 block text-xs uppercase tracking-[0.14em] text-slate-400">Status</label>
+                    <select id="qar-status-filter"
+                            data-live-qar-status
+                            style="background-color:#020617;color:#e2e8f0;border-color:#334155;"
+                            class="w-full rounded-xl border px-3 py-2 text-sm text-slate-200 [color-scheme:dark]">
+                        <option value="">All</option>
+                        <option value="dept_head_endorsed">Endorsed</option>
+                        <option value="pmt_approved">Approved</option>
+                    </select>
                 </div>
             </div>
 
@@ -155,7 +139,9 @@
                                 $isApproved = $statusKey === 'pmt_approved';
                                 $endorsedDate = $header->approved_at ?? $header->generated_at;
                             @endphp
-                            <tr>
+                            <tr data-qar-row
+                                data-status="{{ $statusKey }}"
+                                data-search-text="{{ strtolower(($header->office?->name ?? '') . ' ' . ($header->quarter_key ?? '') . ' ' . $meta['label']) }}">
                                 <td class="px-4 py-3 font-semibold text-white">{{ $header->office?->name ?? 'Office' }}</td>
                                 <td class="px-4 py-3">{{ $header->quarter_key ?? ($quarterKey ?? '-') }}</td>
                                 <td class="px-4 py-3">
@@ -183,6 +169,9 @@
                                 </td>
                             </tr>
                         @endforelse
+                        <tr id="qar-no-match-row" class="hidden">
+                            <td colspan="6" class="px-4 py-8 text-center text-sm text-slate-400">No matching records found.</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -357,6 +346,30 @@
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function() {
+                // Live search & status filter
+                const qarSearchInput = document.querySelector('[data-live-qar-search]');
+                const qarStatusSelect = document.querySelector('[data-live-qar-status]');
+                const qarRows = Array.from(document.querySelectorAll('[data-qar-row]'));
+                const qarNoMatch = document.getElementById('qar-no-match-row');
+
+                function applyQarFilter() {
+                    const term = String(qarSearchInput?.value || '').trim().toLowerCase();
+                    const status = String(qarStatusSelect?.value || '').toLowerCase();
+                    let visible = 0;
+                    qarRows.forEach(row => {
+                        const hay = String(row.dataset.searchText || '').toLowerCase();
+                        const rowStatus = String(row.dataset.status || '').toLowerCase();
+                        const show = (term === '' || hay.includes(term)) && (status === '' || rowStatus === status);
+                        row.classList.toggle('hidden', !show);
+                        if (show) visible++;
+                    });
+                    if (qarNoMatch) qarNoMatch.classList.toggle('hidden', visible > 0 || qarRows.length === 0);
+                }
+
+                qarSearchInput?.addEventListener('input', applyQarFilter);
+                qarStatusSelect?.addEventListener('change', applyQarFilter);
+                applyQarFilter();
+
                 const replaceRootFromHtml = (html) => {
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(html, 'text/html');

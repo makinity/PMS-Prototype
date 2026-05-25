@@ -147,40 +147,40 @@
                         <p class="text-[11px] uppercase tracking-[0.18em] text-slate-500">Status</p>
                         <div class="mt-2">
                             <span id="viewSubmissionStatus"
-                                class="inline-flex items-center rounded-full border border-slate-600 bg-slate-800/70 px-3 py-1 text-xs font-semibold text-slate-200">â€”</span>
+                                class="inline-flex items-center rounded-full border border-slate-600 bg-slate-800/70 px-3 py-1 text-xs font-semibold text-slate-200">—</span>
                         </div>
                     </div>
 
                     <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                         <p class="text-[11px] uppercase tracking-[0.18em] text-slate-500">Submitted At</p>
-                        <p id="viewSubmissionSubmittedAt" class="mt-2 text-base font-semibold text-white">â€”</p>
+                        <p id="viewSubmissionSubmittedAt" class="mt-2 text-base font-semibold text-white">—</p>
                     </div>
 
                     <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4">
                         <p class="text-[11px] uppercase tracking-[0.18em] text-emerald-500/70">Performance Score</p>
-                        <p id="viewSubmissionScore" class="mt-2 text-xl font-bold text-emerald-400">â€”</p>
+                        <p id="viewSubmissionScore" class="mt-2 text-xl font-bold text-emerald-400">—</p>
                     </div>
 
                     <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4">
                         <p class="text-[11px] uppercase tracking-[0.18em] text-emerald-500/70">Performance Rating</p>
-                        <p id="viewSubmissionRating" class="mt-2 text-base font-bold text-emerald-400 uppercase tracking-wider">â€”</p>
+                        <p id="viewSubmissionRating" class="mt-2 text-base font-bold text-emerald-400 uppercase tracking-wider">—</p>
                     </div>
 
                     {{-- Row 2 (3 equal cards under the 2-card row) --}}
                     <div class="grid grid-cols-1 gap-3 lg:col-span-2 lg:grid-cols-3">
                         <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                             <p class="text-[11px] uppercase tracking-[0.18em] text-slate-500">Employee</p>
-                            <p id="viewSubmissionEmployee" class="mt-2 text-base font-semibold text-white">â€”</p>
+                            <p id="viewSubmissionEmployee" class="mt-2 text-base font-semibold text-white">—</p>
                         </div>
 
                         <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                             <p class="text-[11px] uppercase tracking-[0.18em] text-slate-500">Office</p>
-                            <p id="viewSubmissionOffice" class="mt-2 text-base font-semibold text-white">â€”</p>
+                            <p id="viewSubmissionOffice" class="mt-2 text-base font-semibold text-white">—</p>
                         </div>
 
                         <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-4">
                             <p class="text-[11px] uppercase tracking-[0.18em] text-slate-500">Period</p>
-                            <p id="viewSubmissionPeriod" class="mt-2 text-base font-semibold text-white">â€”</p>
+                            <p id="viewSubmissionPeriod" class="mt-2 text-base font-semibold text-white">—</p>
                         </div>
                     </div>
                 </div>

@@ -201,22 +201,22 @@
                         <ul class="mt-2 space-y-1 menu-stagger">
                             <li>
                                 <a href="{{ route('dept-head.opcr') }}" class="sidebar-link" @if($isOpcr) aria-current="page" @endif>
-                                    <i class="sidebar-icon fa-solid fa-building-circle-arrow-right"></i>
-                                    <span>OPCR Planning (Stage I)</span>
+                                    <i class="sidebar-icon fa-solid fa-building"></i>
+                                    <span>OPCR Planning</span>
                                 </a>
                             </li>
 
                             <li>
                                 <a href="{{ route('dept-head.opcr.accomplishment') }}" class="sidebar-link" @if($isOpcrAcc) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-building-circle-check"></i>
-                                    <span>OPCR Evaluation (Stage III)</span>
+                                    <span>Office Evaluation</span>
                                 </a>
                             </li>
 
                             <li>
                                 <a href="{{ route('dept-head.qar') }}" class="sidebar-link" @if($isQar) aria-current="page" @endif>
                                     <i class="sidebar-icon fa-solid fa-calendar-check"></i>
-                                    <span>QAR (Quarterly Accomplishment)</span>
+                                    <span>QAR</span>
                                 </a>
                             </li>
 

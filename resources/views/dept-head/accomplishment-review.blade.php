@@ -155,12 +155,12 @@
 
                     <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4">
                         <p class="text-[11px] uppercase tracking-[0.18em] text-emerald-500/70">Performance Score</p>
-                        <p id="viewSubmissionScore" class="mt-2 text-xl font-bold text-emerald-400">â€”</p>
+                        <p id="viewSubmissionScore" class="mt-2 text-xl font-bold text-emerald-400">—</p>
                     </div>
 
                     <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4">
                         <p class="text-[11px] uppercase tracking-[0.18em] text-emerald-500/70">Performance Rating</p>
-                        <p id="viewSubmissionRating" class="mt-2 text-base font-bold text-emerald-400 uppercase tracking-wider">â€”</p>
+                        <p id="viewSubmissionRating" class="mt-2 text-base font-bold text-emerald-400 uppercase tracking-wider">—</p>
                     </div>
 
                     {{-- Row 2 (3 equal cards under the 2-card row) --}}

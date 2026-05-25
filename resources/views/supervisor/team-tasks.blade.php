@@ -40,18 +40,18 @@
                 <span class="text-xs text-slate-400">Read-only supervision list</span>
             </div>
 
-            <div class="mb-4 flex flex-wrap gap-3 rounded-lg border border-gray-700 bg-slate-900/40 p-4">
-                <div class="flex-1 min-w-[180px]">
-                    <label for="tt-search" class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Search</label>
+            <div class="mb-4 flex flex-wrap items-end gap-3 rounded-lg border border-gray-700 bg-slate-900/40 p-4">
+                <div class="flex-1 min-w-[220px]">
+                    <label for="tt-search" class="mb-1 block text-xs uppercase tracking-[0.14em] text-slate-400">Search</label>
                     <input id="tt-search" type="text" placeholder="Search employee..."
-                        style="background:#0f172a;color:#e5e7eb;"
-                        class="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-slate-200 placeholder-slate-500">
+                        style="background-color:#020617;color:#e2e8f0;border-color:#334155;"
+                        class="w-full rounded-xl border px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500">
                 </div>
-                <div>
-                    <label for="tt-status" class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Status</label>
+                <div class="w-full min-w-[180px] sm:w-auto">
+                    <label for="tt-status" class="mb-1 block text-xs uppercase tracking-[0.14em] text-slate-400">Status</label>
                     <select id="tt-status"
-                        style="background:#0f172a;color:#e5e7eb;"
-                        class="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-slate-200">
+                        style="background-color:#020617;color:#e2e8f0;border-color:#334155;"
+                        class="w-full rounded-xl border px-3 py-2 text-sm text-slate-200 [color-scheme:dark]">
                         @foreach ($statusOptions as $statusOption)
                             <option value="{{ $statusOption }}">
                                 {{ $statusOption === 'all' ? 'All' : ucfirst($statusOption) }}
@@ -87,7 +87,7 @@
                                             <img src="https://ui-avatars.com/api/?name={{ urlencode($entry->employee->name ?? 'Employee') }}&background=1e40af&color=fff&size=64"
                                                 alt="{{ $entry->employee->name ?? 'Employee' }}"
                                                 class="h-8 w-8 rounded-full object-cover ring-1 ring-slate-600/80">
-                                            <span>{{ $entry->employee->name ?? 'â€”' }}</span>
+                                            <span>{{ $entry->employee->name ?? '—' }}</span>
                                         </div>
                                     </td>
                                     <td class="px-4 py-3">
@@ -95,7 +95,7 @@
                                             {{ ucfirst($status) }}
                                         </span>
                                     </td>
-                                    <td class="px-4 py-3">{{ $entry->quantity ?: 'â€”' }}</td>
+                                    <td class="px-4 py-3">{{ $entry->quantity ?: '—' }}</td>
                                     <td class="px-4 py-3">
                                         @if ($status === 'rated' || (int) ($entry->supervisor_id ?? 0) !== (int) ($supervisor->id ?? 0))
                                             <button type="button"
