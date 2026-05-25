@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\AccomplishmentSubmission;
 use App\Models\Ipcr;
 use App\Models\PerformancePeriod;
+use App\Notifications\WorkflowEventNotification;
+use App\Services\WorkflowNotificationDispatcher;
 use App\Support\ResolvesIpcrTargetScores;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -645,6 +647,28 @@ class AccomplishmentController extends Controller
             'supervisor_id' => Auth::id(),
             'supervisor_action_at' => now(),
         ]);
+
+        // Notify Dept Head
+        $submission->loadMissing(['employee:id,name,office_id', 'employee.office.head']);
+        $deptHead = $submission->employee?->office?->head;
+        if ($deptHead) {
+            $supervisor = Auth::user();
+            app(WorkflowNotificationDispatcher::class)->notifyUser(
+                $deptHead,
+                new WorkflowEventNotification(
+                    title: 'Accomplishment Endorsed by Supervisor',
+                    body: ($supervisor->name ?? 'Supervisor') . " endorsed {$submission->employee->name}'s accomplishment for your review.",
+                    url: route('dept-head.acc-review.show', ['id' => $submission->id]),
+                    type: 'info',
+                    meta: [
+                        'event' => 'accomplishment.endorsed_to_dept_head',
+                        'submission_id' => $submission->id,
+                        'office_id' => $submission->office_id,
+                        'source_role' => 'supervisor',
+                    ],
+                )
+            );
+        }
 
         if ($request->wantsJson()) return response()->json(['status' => 'supervisor_endorsed']);
         return back()->with('success', 'Submission successfully endorsed to Department Head.');

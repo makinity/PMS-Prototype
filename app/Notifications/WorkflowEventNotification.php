@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Notification;
 
 class WorkflowEventNotification extends Notification
@@ -20,7 +21,7 @@ class WorkflowEventNotification extends Notification
 
     public function via($notifiable): array
     {
-        return ['database'];
+        return ['database', 'broadcast'];
     }
 
     public function toArray($notifiable): array
@@ -33,5 +34,9 @@ class WorkflowEventNotification extends Notification
             'meta' => $this->meta,
         ];
     }
-}
 
+    public function toBroadcast($notifiable): BroadcastMessage
+    {
+        return new BroadcastMessage($this->toArray($notifiable));
+    }
+}

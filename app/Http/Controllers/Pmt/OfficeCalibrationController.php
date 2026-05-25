@@ -210,6 +210,29 @@ class OfficeCalibrationController extends Controller
                     meta: $meta
                 )
             );
+
+            // Notify Dept Head that OPCR calibration was released
+            $opcr->loadMissing('office.head');
+            $deptHead = $opcr->office?->head;
+            if ($deptHead) {
+                $user = Auth::user();
+                $notifier->notifyUser(
+                    $deptHead,
+                    new WorkflowEventNotification(
+                        title: 'OPCR Calibration Released',
+                        body: ($user->name ?? 'PMT') . " released the official OPCR rating for your office.",
+                        url: route('dept-head.opcr'),
+                        type: 'success',
+                        meta: [
+                            'event' => 'opcr.calibration_released',
+                            'opcr_id' => $opcr->id,
+                            'office_id' => $opcr->office_id,
+                            'performance_period_id' => $opcr->performance_period_id,
+                            'source_role' => 'pmt',
+                        ],
+                    )
+                );
+            }
         }
 
         return back()->with('success', 'OPCR official rating released to the office.');
@@ -236,6 +259,29 @@ class OfficeCalibrationController extends Controller
             'released_at' => null,
             'locked_at' => null,
         ]);
+
+        // Notify Dept Head that OPCR calibration was returned
+        $opcr->loadMissing('office.head');
+        $deptHead = $opcr->office?->head;
+        if ($deptHead) {
+            $user = Auth::user();
+            app(WorkflowNotificationDispatcher::class)->notifyUser(
+                $deptHead,
+                new WorkflowEventNotification(
+                    title: 'OPCR Calibration Returned',
+                    body: ($user->name ?? 'PMT') . " returned your OPCR calibration for revision.",
+                    url: route('dept-head.opcr'),
+                    type: 'alert',
+                    meta: [
+                        'event' => 'opcr.calibration_returned',
+                        'opcr_id' => $opcr->id,
+                        'office_id' => $opcr->office_id,
+                        'performance_period_id' => $opcr->performance_period_id,
+                        'source_role' => 'pmt',
+                    ],
+                )
+            );
+        }
 
         return back()->with('success', 'OPCR returned successfully.');
     }

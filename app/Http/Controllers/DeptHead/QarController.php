@@ -10,6 +10,8 @@ use App\Models\PerformancePeriod;
 use App\Models\QarHeader;
 use App\Models\QarMporLink;
 use App\Models\QarRow;
+use App\Notifications\WorkflowEventNotification;
+use App\Services\WorkflowNotificationDispatcher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -782,6 +784,26 @@ class QarController extends Controller
         $state['approved_at'] = $approvedAt->toDateTimeString();
         $state['generated_at'] = Carbon::parse($header?->generated_at ?? $generatedAt)->toDateTimeString();
         $request->session()->put($sessionKey, $state);
+
+        // Notify PMT that QAR was endorsed
+        if ($header) {
+            app(WorkflowNotificationDispatcher::class)->notifyRole(
+                'pmt',
+                new WorkflowEventNotification(
+                    title: 'QAR Endorsed by Department Head',
+                    body: ($deptHead->name ?? 'Department Head') . " endorsed a QAR for PMT review.",
+                    url: route('pmt.qar.show', ['qarHeader' => $header->id]),
+                    type: 'info',
+                    meta: [
+                        'event' => 'qar.endorsed_to_pmt',
+                        'qar_header_id' => $header->id,
+                        'office_id' => $officeId,
+                        'performance_period_id' => $period->id,
+                        'source_role' => 'dept-head',
+                    ],
+                )
+            );
+        }
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json(['status' => 'endorsed', 'message' => 'QAR endorsed and saved.']);

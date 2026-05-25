@@ -239,6 +239,7 @@
                 }
 
                 function closeModal() {
+                    if (!modal) return;
                     modal.classList.add('hidden');
                     document.body.classList.remove('overflow-hidden');
                     activeTrigger = null;
@@ -246,6 +247,7 @@
                 }
 
                 function openModal(trigger) {
+                    if (!modal || !confirmBtn || !title || !body) return;
                     activeTrigger = trigger;
                     title.textContent = trigger.dataset.actionTitle || 'Action';
                     body.textContent = trigger.dataset.actionMessage || 'Prototype action preview.';
@@ -264,34 +266,36 @@
                     });
                 });
 
-                confirmBtn.addEventListener('click', function () {
-                    const isSaveDraft = activeTrigger && activeTrigger.hasAttribute('data-save-draft-btn');
-                    if (isSaveDraft) {
+                if (modal && confirmBtn && title && body) {
+                    confirmBtn.addEventListener('click', function () {
+                        const isSaveDraft = activeTrigger && activeTrigger.hasAttribute('data-save-draft-btn');
+                        if (isSaveDraft) {
+                            setButtonLoading(confirmBtn, true, confirmBtn.dataset.actionLoading);
+                            setButtonLoading(activeTrigger, true, activeTrigger.dataset.actionLoading || confirmBtn.dataset.actionLoading);
+                            submitUwp(saveDraftUrl);
+                            return;
+                        }
+
                         setButtonLoading(confirmBtn, true, confirmBtn.dataset.actionLoading);
-                        setButtonLoading(activeTrigger, true, activeTrigger.dataset.actionLoading || confirmBtn.dataset.actionLoading);
-                        submitUwp(saveDraftUrl);
-                        return;
-                    }
+                        if (activeTrigger) {
+                            setButtonLoading(activeTrigger, true, activeTrigger.dataset.actionLoading || confirmBtn.dataset.actionLoading);
+                        }
 
-                    setButtonLoading(confirmBtn, true, confirmBtn.dataset.actionLoading);
-                    if (activeTrigger) {
-                        setButtonLoading(activeTrigger, true, activeTrigger.dataset.actionLoading || confirmBtn.dataset.actionLoading);
-                    }
+                        setTimeout(() => {
+                            setButtonLoading(confirmBtn, false);
+                            if (activeTrigger) setButtonLoading(activeTrigger, false);
+                            closeModal();
+                        }, 1200);
+                    });
 
-                    setTimeout(() => {
-                        setButtonLoading(confirmBtn, false);
-                        if (activeTrigger) setButtonLoading(activeTrigger, false);
-                        closeModal();
-                    }, 1200);
-                });
+                    modal.addEventListener('click', function (event) {
+                        if (event.target === modal) closeModal();
+                    });
 
-                modal.addEventListener('click', function (event) {
-                    if (event.target === modal) closeModal();
-                });
-
-                modal.querySelectorAll('[data-employee-modal-close]').forEach((button) => {
-                    button.addEventListener('click', closeModal);
-                });
+                    modal.querySelectorAll('[data-employee-modal-close]').forEach((button) => {
+                        button.addEventListener('click', closeModal);
+                    });
+                }
 
                 // Success Indicator workspace UI moved to a dedicated page.
 

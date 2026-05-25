@@ -181,6 +181,28 @@ class OpcrController extends Controller
                     );
                 }
 
+                // Notify Dept Head that OPCR was approved
+                $opcr->loadMissing('office.head');
+                $deptHead = $opcr->office?->head;
+                if ($deptHead) {
+                    $notifier->notifyUser(
+                        $deptHead,
+                        new WorkflowEventNotification(
+                            title: 'OPCR Approved by PMT',
+                            body: "{$user->name} approved your office OPCR.",
+                            url: route('dept-head.opcr'),
+                            type: 'success',
+                            meta: [
+                                'event' => 'opcr.pmt_approved',
+                                'opcr_id' => $opcr->id,
+                                'office_id' => $opcr->office_id,
+                                'performance_period_id' => $opcr->performance_period_id,
+                                'source_role' => 'pmt',
+                            ],
+                        )
+                    );
+                }
+
                 return $redirect('success', 'OPCR final approved.');
             }
 
@@ -212,6 +234,28 @@ class OpcrController extends Controller
                     'returned_by_role' => 'pmt',
                     'return_remarks' => $remarks,
                 ]);
+
+            // Notify Dept Head that OPCR was returned
+            $opcr->loadMissing('office.head');
+            $deptHead = $opcr->office?->head;
+            if ($deptHead) {
+                app(WorkflowNotificationDispatcher::class)->notifyUser(
+                    $deptHead,
+                    new WorkflowEventNotification(
+                        title: 'OPCR Returned by PMT',
+                        body: "{$user->name} returned your office OPCR for revision.",
+                        url: route('dept-head.opcr'),
+                        type: 'alert',
+                        meta: [
+                            'event' => 'opcr.pmt_returned',
+                            'opcr_id' => $opcr->id,
+                            'office_id' => $opcr->office_id,
+                            'performance_period_id' => $opcr->performance_period_id,
+                            'source_role' => 'pmt',
+                        ],
+                    )
+                );
+            }
 
             return $redirect('success', 'OPCR returned to Supervisors for UWP correction.');
         });

@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    @auth
+        <meta name="auth-user-id" content="{{ auth()->id() }}">
+    @endauth
     <title>Supervisor Page</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -384,6 +387,7 @@
     @stack('scripts')
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    @include('partials.realtime-notifications')
     <script>
     (function() {
         const sidebar = document.getElementById('manager-sidebar');

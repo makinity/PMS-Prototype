@@ -11,6 +11,9 @@ use App\Models\Mpor;
 use App\Models\OrsEntry;
 use App\Models\PerformancePeriod;
 use App\Models\QarHeader;
+use App\Models\User;
+use App\Notifications\WorkflowEventNotification;
+use App\Services\WorkflowNotificationDispatcher;
 use App\Support\ResolvesIpcrTargetScores;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -1856,6 +1859,30 @@ class SmporIpcrAccomplishmentController extends Controller
         } catch (\Throwable $e) {
             DB::rollBack();
             return back()->withErrors(['Submission failed: ' . $e->getMessage()]);
+        }
+
+        // Notify Supervisor
+        if ($supervisorId) {
+            $supervisor = User::find($supervisorId);
+            if ($supervisor) {
+                app(WorkflowNotificationDispatcher::class)->notifyUser(
+                    $supervisor,
+                    new WorkflowEventNotification(
+                        title: 'Accomplishment Submitted',
+                        body: "{$user->name} submitted accomplishments for review.",
+                        url: route('supervisor.submissions.show', ['id' => $submission->id]),
+                        type: 'info',
+                        meta: [
+                            'event' => 'accomplishment.submitted_to_supervisor',
+                            'submission_id' => $submission->id,
+                            'employee_id' => $user->id,
+                            'office_id' => $user->office_id,
+                            'performance_period_id' => $period->id,
+                            'source_role' => 'employee',
+                        ],
+                    )
+                );
+            }
         }
 
         if ($request->wantsJson() || $request->ajax()) {

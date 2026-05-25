@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="auth-user-id" content="{{ auth()->id() }}">
     <title>Performance Management Team</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -592,5 +593,6 @@
         updateMobileLogoVisibility();
     })();
     </script>
+    @include('partials.realtime-notifications')
 </body>
 </html>

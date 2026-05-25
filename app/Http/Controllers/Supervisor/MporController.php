@@ -430,6 +430,27 @@ class MporController extends Controller
             'endorsed_by' => auth()->id(),
         ]);
 
+        $mpor->loadMissing(['employee:id,name,office_id', 'employee.office.head']);
+        $deptHead = $mpor->employee?->office?->head;
+        if ($deptHead) {
+            $supervisor = auth()->user();
+            app(WorkflowNotificationDispatcher::class)->notifyUser(
+                $deptHead,
+                new WorkflowEventNotification(
+                    title: 'MPOR Endorsed by Supervisor',
+                    body: ($supervisor->name ?? 'Supervisor') . " endorsed an MPOR for {$mpor->employee->name} ({$mpor->month}).",
+                    url: route('dept-head.qar'),
+                    type: 'info',
+                    meta: [
+                        'event' => 'mpor.endorsed_to_dept_head',
+                        'mpor_id' => $mpor->id,
+                        'office_id' => $mpor->office_id,
+                        'source_role' => 'supervisor',
+                    ],
+                )
+            );
+        }
+
         if (request()->wantsJson()) return response()->json(['status' => 'endorsed']);
         return back()->with('success', 'MPOR endorsed to Department Head.');
     }

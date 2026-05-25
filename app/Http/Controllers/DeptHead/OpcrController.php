@@ -303,6 +303,24 @@ class OpcrController extends Controller
             ])->save();
         });
 
+        // Notify PMT that OPCR was submitted for calibration
+        app(WorkflowNotificationDispatcher::class)->notifyRole(
+            'pmt',
+            new WorkflowEventNotification(
+                title: 'OPCR Submitted for Calibration',
+                body: ($user->name ?? 'Department Head') . " submitted an OPCR for final calibration.",
+                url: route('pmt.office-calibration.show', ['opcr' => $model->id]),
+                type: 'info',
+                meta: [
+                    'event' => 'opcr.submitted_for_calibration',
+                    'opcr_id' => $model->id,
+                    'office_id' => $model->office_id,
+                    'performance_period_id' => $model->performance_period_id,
+                    'source_role' => 'dept-head',
+                ],
+            )
+        );
+
         if ($request->expectsJson()) {
             return response()->json(['success' => true, 'message' => 'Final OPCR submitted to PMT for Calibration.']);
         }

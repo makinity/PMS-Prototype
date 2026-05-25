@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\AccomplishmentSubmission;
 use App\Models\Ipcr;
 use App\Models\PerformancePeriod;
+use App\Notifications\WorkflowEventNotification;
+use App\Services\WorkflowNotificationDispatcher;
 use App\Support\ResolvesIpcrTargetScores;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -674,6 +676,24 @@ class AccomplishmentReviewController extends Controller
             'dept_head_id' => Auth::id(),
             'dept_head_action_at' => now(),
         ]);
+
+        // Notify PMT
+        $user = Auth::user();
+        app(WorkflowNotificationDispatcher::class)->notifyRole(
+            'pmt',
+            new WorkflowEventNotification(
+                title: 'Accomplishment Endorsed by Dept Head',
+                body: ($user->name ?? 'Department Head') . " endorsed an accomplishment for PMT review.",
+                url: route('pmt.acc-review.show', ['id' => $submission->id]),
+                type: 'info',
+                meta: [
+                    'event' => 'accomplishment.endorsed_to_pmt',
+                    'submission_id' => $submission->id,
+                    'office_id' => $submission->office_id,
+                    'source_role' => 'dept-head',
+                ],
+            )
+        );
 
         if ($request->wantsJson()) return response()->json(['status' => 'dept_head_endorsed']);
         return back()->with('success', 'Submission successfully endorsed to PMT.');
