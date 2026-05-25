@@ -114,7 +114,11 @@ class OpcrController extends Controller
         ]);
 
         $redirectToList = (bool) $request->boolean('redirect_to_list');
-        $redirect = function (string $type, string $message) use ($redirectToList) {
+        $wantsJson = $request->expectsJson() || $request->ajax();
+        $redirect = function (string $type, string $message) use ($redirectToList, $wantsJson, $request) {
+            if ($wantsJson) {
+                return response()->json(['status' => $type, 'message' => $message], $type === 'error' ? 422 : 200);
+            }
             if ($redirectToList) {
                 return redirect()->route('pmt.opcr.review.index')->with($type, $message);
             }

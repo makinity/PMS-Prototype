@@ -930,26 +930,7 @@
 
                 const summaryEvents = buildSummaryEvents();
 
-                function setButtonLoading(button, isLoading, loadingText) {
-                    if (!button) return;
-                    const label = button.querySelector('[data-button-label]');
-                    const spinner = button.querySelector('[data-button-spinner]');
-                    if (label && !button.dataset.originalLabel) {
-                        button.dataset.originalLabel = label.textContent.trim();
-                    }
-
-                    if (isLoading) {
-                        button.disabled = true;
-                        button.classList.add('opacity-80', 'cursor-wait');
-                        spinner?.classList.remove('hidden');
-                        if (label && loadingText) label.textContent = loadingText;
-                    } else {
-                        button.disabled = false;
-                        button.classList.remove('opacity-80', 'cursor-wait');
-                        spinner?.classList.add('hidden');
-                        if (label && button.dataset.originalLabel) label.textContent = button.dataset.originalLabel;
-                    }
-                }
+                const setButtonLoading = window.setButtonLoading || function() {};
 
                 function openOrsModalStack(modalId) {
                     const modalEl = document.getElementById(modalId);

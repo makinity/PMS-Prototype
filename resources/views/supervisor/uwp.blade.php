@@ -142,18 +142,7 @@
                 </label>
             </div>
             <div id="uwp-functions-wrapper" class="space-y-6"></div>
-            @if ($canEdit)
-                <div class="mt-8 flex justify-center">
-                    <button type="button"
-                            id="uwp-add-function"
-                            class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-600/70 bg-gradient-to-b from-cyan-500/15 to-slate-800/80 px-5 py-3 text-sm font-semibold text-slate-100 shadow-sm transition hover:-translate-y-0.5 hover:border-cyan-400/60 hover:from-cyan-400/20 hover:to-slate-700/80 hover:shadow focus:outline-none focus:ring-2 focus:ring-cyan-500/60 md:w-auto">
-                        <svg class="h-4 w-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M10 4v12m6-6H4" />
-                        </svg>
-                        <span>Add Function</span>
-                    </button>
-                </div>
-            @endif
+
 
             <div class="sticky bottom-0 z-30 -mx-5 mt-6 border-t border-gray-700 bg-slate-950/95 px-5 py-4 backdrop-blur">
                 <div class="flex flex-wrap items-center justify-between gap-3">
@@ -217,26 +206,7 @@
                     return;
                 }
 
-                function setButtonLoading(button, isLoading, loadingText) {
-                    if (!button) return;
-                    const label = button.querySelector('[data-button-label]');
-                    const spinner = button.querySelector('[data-button-spinner]');
-                    if (label && !button.dataset.originalLabel) {
-                        button.dataset.originalLabel = label.textContent.trim();
-                    }
-
-                    if (isLoading) {
-                        button.disabled = true;
-                        button.classList.add('opacity-70', 'cursor-wait');
-                        if (spinner) spinner.classList.remove('hidden');
-                        if (label && loadingText) label.textContent = loadingText;
-                    } else {
-                        button.disabled = false;
-                        button.classList.remove('opacity-70', 'cursor-wait');
-                        if (spinner) spinner.classList.add('hidden');
-                        if (label && button.dataset.originalLabel) label.textContent = button.dataset.originalLabel;
-                    }
-                }
+                const setButtonLoading = window.setButtonLoading || function() {};
 
                 function closeModal() {
                     if (!modal) return;
@@ -306,7 +276,6 @@
                 const assignmentsPayloadInput = document.getElementById('assignments_payload');
                 const functionsPayloadInput = document.getElementById('functions_payload');
                 const functionsWrapper = document.getElementById('uwp-functions-wrapper');
-                const addFunctionBtn = document.getElementById('uwp-add-function');
                 const submitUwpBtn = document.querySelector('[data-submit-uwp-btn]');
 
                 const selectedUwpId = @json($selectedUwpId);
@@ -377,7 +346,7 @@
                 const uwpState = {
                     functions: Array.isArray(serverFunctions) && serverFunctions.length > 0
                         ? serverFunctions
-                        : (selectedUwpId ? seededFunctions : []),
+                        : seededFunctions,
                 };
 
                 uwpState.functions = (uwpState.functions || []).map((func) => ({
@@ -598,10 +567,7 @@
                     if (func.type === 'core') {
                         return 'Each row is a measurable, loggable core output. No scoring here; capture targets only.';
                     }
-                    if (func.type === 'support') {
-                        return 'Log support outputs that enable the unit. Keep them measurable and planned.';
-                    }
-                    return 'Define custom outputs for this function. Keep them measurable and planned.';
+                    return 'Log support outputs that enable the unit. Keep them measurable and planned.';
                 }
 
                 function standardsArrayToMatrix(standards) {
@@ -741,18 +707,18 @@
 
                 function createFunctionContainer() {
                     return {
-                        title: '',
-                        titlePlaceholder: 'Enter Function Title (e.g., Special Projects / Administrative Tasks)',
-                        type: 'custom',
-                        weight: 0,
-                        isCustom: true,
+                        title: 'Core Functions',
+                        titlePlaceholder: '',
+                        type: 'core',
+                        weight: 80,
+                        isCustom: false,
                         mfos: [],
                     };
                 }
 
                 function normalizeFunctionType(type) {
                     const value = String(type || '').toLowerCase();
-                    return ['core', 'support', 'custom'].includes(value) ? value : 'custom';
+                    return ['core', 'support'].includes(value) ? value : 'core';
                 }
 
                 function isFunctionTypeTaken(type, exceptIndex = -1) {
@@ -767,12 +733,9 @@
 
                 function resolveFunctionTypeSelection(type, currentIndex) {
                     const normalized = normalizeFunctionType(type);
-                    if (!['core', 'support'].includes(normalized)) {
-                        return 'custom';
-                    }
 
                     if (isFunctionTypeTaken(normalized, currentIndex)) {
-                        return 'custom';
+                        return normalized === 'core' ? 'support' : 'core';
                     }
 
                     return normalized;
@@ -793,7 +756,7 @@
                         const description = getFunctionDescription(func);
                         const inputDisabled = isDraft ? '' : 'disabled';
                         const mutedClass = isDraft ? '' : 'opacity-60 pointer-events-none';
-                        const canDeleteFunction = isDraft && functionType === 'custom';
+                        const canDeleteFunction = false;
                         const coreTakenByOther = isFunctionTypeTaken('core', funcIndex);
                         const supportTakenByOther = isFunctionTypeTaken('support', funcIndex);
                         const isFunctionConfirmOpen = activeFunctionConfirmId === funcIndex;
@@ -898,14 +861,24 @@
                                 <div class="flex flex-wrap items-start justify-between gap-3">
                                     <div class="space-y-1">
                                         <div class="flex flex-wrap items-center gap-2">
-                                            <input type="text"
-                                                data-function-title
+                                            <select
+                                                data-function-type
                                                 data-function-index="${funcIndex}"
-                                                value="${escapeHtml(func.title)}"
-                                                class="rounded-lg border border-gray-700 bg-slate-950 px-3 py-2 text-lg font-semibold text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none ${mutedClass}"
+                                                class="rounded-lg border border-gray-700 bg-slate-950 px-3 py-2 text-sm font-semibold text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none ${mutedClass}"
                                                 style="background:#0f172a;color:#e5e7eb;"
                                                 ${inputDisabled}>
-                                            <span class="inline-flex items-center rounded-full border border-slate-700 bg-slate-800 px-3 py-1 text-xs font-semibold text-slate-300" data-function-weight-label="${funcIndex}">(${weightValue}%)</span>
+                                                <option value="core" ${functionType === 'core' ? 'selected' : ''} ${functionType !== 'core' && coreTakenByOther ? 'disabled' : ''}>Core</option>
+                                                <option value="support" ${functionType === 'support' ? 'selected' : ''} ${functionType !== 'support' && supportTakenByOther ? 'disabled' : ''}>Support</option>
+                                            </select>
+
+                                            <input type="number" min="0" max="100"
+                                                data-function-weight
+                                                data-function-index="${funcIndex}"
+                                                value="${weightValue}"
+                                                class="w-24 rounded-lg border border-gray-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none ${mutedClass}"
+                                                style="background:#0f172a;color:#e5e7eb;"
+                                                ${inputDisabled}>
+
                                         </div>
                                         <p class="text-sm text-slate-400">${description}</p>
                                         ${isDraft
@@ -914,63 +887,15 @@
                                         }
                                     </div>
                                     <div class="flex flex-wrap items-center justify-end gap-2">
-                                        <select
-                                            data-function-type
-                                            data-function-index="${funcIndex}"
-                                            class="rounded-lg border border-gray-700 bg-slate-950 px-3 py-2 text-xs text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none ${mutedClass}"
-                                            style="background:#0f172a;color:#e5e7eb;"
-                                            ${inputDisabled}>
-                                            <option value="core" ${functionType === 'core' ? 'selected' : ''} ${functionType !== 'core' && coreTakenByOther ? 'disabled' : ''}>Core</option>
-                                            <option value="support" ${functionType === 'support' ? 'selected' : ''} ${functionType !== 'support' && supportTakenByOther ? 'disabled' : ''}>Support</option>
-                                            <option value="custom" ${functionType === 'custom' ? 'selected' : ''}>Custom</option>
-                                        </select>
-
-                                        <input type="number" min="0" max="100"
-                                            data-function-weight
-                                            data-function-index="${funcIndex}"
-                                            value="${weightValue}"
-                                            class="w-24 rounded-lg border border-gray-700 bg-slate-950 px-3 py-2 text-xs text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 focus:outline-none ${mutedClass}"
-                                            style="background:#0f172a;color:#e5e7eb;"
-                                            ${inputDisabled}>
-
                                         ${isDraft ? `
                                             <button type="button"
                                                 data-action="add-mfo"
                                                 data-function-index="${funcIndex}"
-                                                class="inline-flex items-center gap-1 rounded-lg border border-blue-500/50 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-200 hover:bg-blue-500/20">
+                                                class="inline-flex items-center gap-1 rounded-lg border border-blue-500/50 bg-blue-500/10 px-3 py-2 text-xs font-semibold text-blue-200 hover:bg-blue-500/20">
                                                 <span class="fa-solid fa-plus text-[10px]"></span>
                                                 <span>+ Add MFO</span>
                                             </button>
                                         ` : ''}
-
-                                        ${canDeleteFunction ? `
-                                            <button type="button"
-                                                data-action="trigger-remove-function"
-                                                data-function-index="${funcIndex}"
-                                                aria-label="Remove Function"
-                                                title="Remove Function"
-                                                class="${isFunctionConfirmOpen ? 'hidden' : 'inline-flex'} h-8 w-8 items-center justify-center rounded-lg text-red-400 opacity-0 transition hover:bg-red-500/10 hover:text-red-300 focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:opacity-100 group-hover:opacity-100">
-                                                <svg class="h-4 w-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-7 0h8m-9 3 1 9a1 1 0 0 0 1 .9h6a1 1 0 0 0 1-.9l1-9M10 11v6M14 11v6"/>
-                                                </svg>
-                                            </button>
-                                            <div data-function-delete-confirm="${funcIndex}" class="${isFunctionConfirmOpen ? 'inline-flex' : 'hidden'} items-center gap-1">
-                                                <button
-                                                    type="button"
-                                                    data-action="cancel-remove-function"
-                                                    class="rounded-full border border-slate-600 px-2.5 py-1 text-[11px] font-semibold text-slate-300 transition hover:bg-slate-800">
-                                                    Cancel
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    data-action="confirm-remove-function"
-                                                    data-function-index="${funcIndex}"
-                                                    class="rounded-full border border-red-500/40 bg-red-500/10 px-2.5 py-1 text-[11px] font-semibold text-red-300 transition hover:bg-red-500/20 hover:text-red-200 focus:outline-none focus:ring-2 focus:ring-red-500/40">
-                                                    Remove
-                                                </button>
-                                            </div>
-                                        ` : ''}
-
                                     </div>
                                 </div>
 
@@ -1010,17 +935,7 @@
                         const cards = functionsWrapper?.querySelectorAll('[data-function-card]');
                         const lastCard = cards && cards.length ? cards[cards.length - 1] : null;
                         if (!lastCard) return;
-
                         lastCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-                        const titleInput = lastCard.querySelector('[data-function-title]');
-                        if (titleInput && typeof titleInput.focus === 'function') {
-                            try {
-                                titleInput.focus({ preventScroll: true });
-                            } catch (error) {
-                                titleInput.focus();
-                            }
-                        }
                     });
                 }
 
@@ -1076,7 +991,7 @@
 
                 function buildFunctionsPayload() {
                     return uwpState.functions.map((func) => ({
-                        title: func.title,
+                        title: func.type === 'core' ? 'Core Functions' : 'Support Functions',
                         type: func.type,
                         weight: func.weight,
                         mfos: (func.mfos || []).map((mfo) => {
@@ -1104,7 +1019,7 @@
                     let sortOrder = 1;
 
                     uwpState.functions.forEach((func) => {
-                        const functionCode = ['core', 'support', 'custom'].includes(func.type) ? func.type : 'custom';
+                        const functionCode = ['core', 'support'].includes(func.type) ? func.type : 'core';
                         const weight = Number(func.weight || 0);
 
                         (func.mfos || []).forEach((mfo) => {
@@ -1270,20 +1185,12 @@
                 if (functionsWrapper) {
                     functionsWrapper.addEventListener('input', (event) => {
                         const target = event.target;
-                        if (target.matches('[data-function-title]')) {
-                            const idx = Number(target.dataset.functionIndex);
-                            if (!Number.isNaN(idx) && uwpState.functions[idx]) {
-                                uwpState.functions[idx].title = target.value;
-                            }
-                        }
 
                         if (target.matches('[data-function-weight]')) {
                             const idx = Number(target.dataset.functionIndex);
                             if (!Number.isNaN(idx) && uwpState.functions[idx]) {
                                 const weight = clampNumber(target.value, 0, 100);
                                 uwpState.functions[idx].weight = weight;
-                                const label = functionsWrapper.querySelector(`[data-function-weight-label="${idx}"]`);
-                                if (label) label.textContent = `(${weight}%)`;
                             }
                         }
 
@@ -1317,7 +1224,8 @@
                                 const selectedType = normalizeFunctionType(target.value);
                                 const resolvedType = resolveFunctionTypeSelection(selectedType, idx);
                                 uwpState.functions[idx].type = resolvedType;
-                                uwpState.functions[idx].isCustom = resolvedType === 'custom';
+                                uwpState.functions[idx].isCustom = false;
+                                uwpState.functions[idx].title = resolvedType === 'core' ? 'Core Functions' : 'Support Functions';
                                 if (resolvedType !== selectedType) {
                                     target.value = resolvedType;
                                 }
@@ -1390,7 +1298,7 @@
                     });
                 }
 
-                if (addFunctionBtn && isDraft) addFunctionBtn.addEventListener('click', addFunction);
+                // Add Function button removed — only Core and Support exist
 
                 if (submitUwpBtn && isDraft) {
                     submitUwpBtn.addEventListener('click', () => {

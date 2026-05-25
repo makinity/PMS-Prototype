@@ -172,10 +172,6 @@
                         Success Indicators
                     </h2>
                 </div>
-                <button type="button" data-close-modal
-                        class="shrink-0 rounded-lg border border-gray-700 bg-slate-900/40 px-2.5 py-2 text-slate-400 hover:text-white hover:bg-slate-950">
-                    Ã¢Å“â€¢
-                </button>
             </div>
 
             <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -229,10 +225,6 @@
                     <h2 id="ipcr-standards-title" class="mt-1 text-lg font-semibold text-white truncate">Standards (Q/E/T)</h2>
                     <p class="text-sm text-slate-400">Read-only | Encoded by Supervisor during UWP Draft; locked after submission</p>
                 </div>
-                <button type="button" data-close-modal
-                        class="shrink-0 rounded-lg border border-gray-700 bg-slate-900/40 px-2.5 py-2 text-slate-400 hover:text-white hover:bg-slate-950">
-                    Ã¢Å“â€¢
-                </button>
             </div>
 
             <div class="mt-5 rounded-xl border border-gray-700 bg-slate-900/40 overflow-hidden">
@@ -498,7 +490,7 @@
 
         function normalizeFunctionType(type) {
             const normalized = String(type || '').trim().toLowerCase();
-            return normalized !== '' ? normalized : 'custom';
+            return ['core', 'support'].includes(normalized) ? normalized : 'core';
         }
 
         function getFunctionSections() {
@@ -532,7 +524,6 @@
 
             if (type === 'core') return 'Core Functions';
             if (type === 'support') return 'Support Functions';
-            if (type === 'custom') return 'Custom Functions';
 
             return (type || 'Other').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) + ' Functions';
         }
@@ -589,26 +580,7 @@
 
         renderFunctionSections();
 
-        function setButtonLoading(button, isLoading, loadingText) {
-            if (!button) return;
-            const label = button.querySelector('[data-button-label]');
-            const spinner = button.querySelector('[data-button-spinner]');
-            if (label && !button.dataset.originalLabel) {
-                button.dataset.originalLabel = label.textContent.trim();
-            }
-
-            if (isLoading) {
-                button.disabled = true;
-                button.classList.add('opacity-70', 'cursor-wait');
-                if (spinner) spinner.classList.remove('hidden');
-                if (label && loadingText) label.textContent = loadingText;
-            } else {
-                button.disabled = false;
-                button.classList.remove('opacity-70', 'cursor-wait');
-                if (spinner) spinner.classList.add('hidden');
-                if (label && button.dataset.originalLabel) label.textContent = button.dataset.originalLabel;
-            }
-        }
+        const setButtonLoading = window.setButtonLoading || function() {};
 
         // --------- COMMIT BUTTON DEMO (status updates + disable after commit) ----------
         const statusBadge = document.getElementById('ipcr-status-badge');

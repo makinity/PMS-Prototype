@@ -480,7 +480,6 @@ class UwpExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTit
         $label = match ($type) {
             'core' => 'CORE FUNCTIONS (80%)',
             'support' => 'SUPPORT FUNCTIONS (20%)',
-            'custom' => 'CUSTOM FUNCTIONS',
             default => strtoupper(str_replace('_', ' ', $type)) . ' FUNCTIONS',
         };
 
@@ -490,7 +489,7 @@ class UwpExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTit
     private function normalizeFunctionType(?string $type, ?string $fallback): string
     {
         $normalized = strtolower(trim((string) $type));
-        if (in_array($normalized, ['core', 'support', 'custom'], true)) {
+        if (in_array($normalized, ['core', 'support'], true)) {
             return $normalized;
         }
 
@@ -504,7 +503,7 @@ class UwpExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTit
             }
         }
 
-        return 'custom';
+        return 'support';
     }
 
     private function resolveSignatureBlocks(): array

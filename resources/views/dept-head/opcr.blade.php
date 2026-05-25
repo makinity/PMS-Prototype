@@ -113,7 +113,7 @@
                             default => 'border-slate-500/30 bg-slate-500/10 text-slate-300',
                         };
                     @endphp
-                    <span class="rounded-full border px-3 py-1 {{ $opcrBadge }}">{{ ucwords(str_replace('_', ' ', $opcrStatus)) }}</span>
+                    <span data-opcr-status-badge class="rounded-full border px-3 py-1 {{ $opcrBadge }}">{{ ucwords(str_replace('_', ' ', $opcrStatus)) }}</span>
                 @else
                     <span class="rounded-full border border-slate-700 bg-slate-950/70 px-3 py-1 text-slate-300">No OPCR yet</span>
                 @endif
@@ -185,10 +185,8 @@
                                     @php $functionType = strtolower((string) ($output['function_type'] ?? '')); @endphp
                                     @if ($functionType === 'core')
                                         <span class="rounded-md border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-300">Core</span>
-                                    @elseif ($functionType === 'support')
-                                        <span class="rounded-md border border-blue-400/30 bg-blue-500/10 px-2 py-1 text-xs font-medium text-blue-300">Support</span>
                                     @else
-                                        <span class="rounded-md border border-slate-500/20 bg-slate-500/10 px-2 py-1 text-xs font-medium text-slate-300">{{ $functionType !== '' ? ucfirst($functionType) : 'Custom' }}</span>
+                                        <span class="rounded-md border border-blue-400/30 bg-blue-500/10 px-2 py-1 text-xs font-medium text-blue-300">Support</span>
                                     @endif
                                 </td>
                             </tr>
@@ -270,6 +268,8 @@
             <p id="opcr-confirm-eyebrow" class="text-xs font-semibold uppercase tracking-[0.22em]"></p>
             <h3 id="opcr-confirm-title" class="mt-2 text-xl font-semibold text-white"></h3>
             <p id="opcr-confirm-message" class="mt-2 text-sm text-slate-400"></p>
+            <textarea id="opcr-confirm-remarks" name="remarks" rows="3" placeholder="Enter remarks..." class="mt-3 hidden w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-white placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40"></textarea>
+            <p id="opcr-confirm-remarks-error" class="mt-1 hidden text-[11px] text-rose-300">Remarks are required.</p>
         </div>
         <div class="flex items-center justify-end gap-3 px-6 py-5">
             <button type="button" id="opcr-confirm-cancel"
@@ -310,6 +310,7 @@ document.addEventListener('DOMContentLoaded', function() {
             message:  'This OPCR will be sent back to the supervisors for adjustment. You can re-endorse it once the changes are made.',
             btnClass: 'bg-rose-600 hover:bg-rose-500',
             formId:   'form-opcr-return',
+            needsRemarks: true,
         },
         endorse: {
             eyebrow:  'Endorse OPCR',
@@ -318,10 +319,14 @@ document.addEventListener('DOMContentLoaded', function() {
             message:  'This consolidated OPCR will be submitted to the PMT for final review and approval. This action cannot be undone.',
             btnClass: 'bg-emerald-600 hover:bg-emerald-500',
             formId:   'form-opcr-endorse',
+            needsRemarks: false,
         },
     };
 
     let pendingFormId = null;
+    let pendingNeedsRemarks = false;
+    const confirmRemarks = document.getElementById('opcr-confirm-remarks');
+    const confirmRemarksError = document.getElementById('opcr-confirm-remarks-error');
 
     document.querySelectorAll('[data-confirm-action]').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -330,12 +335,19 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!meta) return;
 
             pendingFormId = meta.formId;
+            pendingNeedsRemarks = meta.needsRemarks;
 
             confirmEyebrow.textContent  = meta.eyebrow;
             confirmEyebrow.className    = `text-xs font-semibold uppercase tracking-[0.22em] ${meta.eyebrowClass}`;
             confirmTitle.textContent    = meta.title;
             confirmMsg.textContent      = meta.message;
             confirmProceed.className    = `rounded-xl px-5 py-2 text-sm font-bold text-white transition shadow-lg ${meta.btnClass}`;
+
+            if (confirmRemarks) {
+                confirmRemarks.classList.toggle('hidden', !meta.needsRemarks);
+                confirmRemarks.value = '';
+            }
+            if (confirmRemarksError) confirmRemarksError.classList.add('hidden');
 
             confirmModal.classList.remove('hidden');
             confirmModal.classList.add('flex');
@@ -356,9 +368,61 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    confirmProceed.addEventListener('click', () => {
-        if (pendingFormId) {
-            document.getElementById(pendingFormId)?.submit();
+    confirmProceed.addEventListener('click', async () => {
+        if (!pendingFormId) return;
+        const form = document.getElementById(pendingFormId);
+        if (!form) return;
+
+        // Validate remarks if needed
+        if (pendingNeedsRemarks && confirmRemarks) {
+            const val = confirmRemarks.value.trim();
+            if (!val) {
+                if (confirmRemarksError) confirmRemarksError.classList.remove('hidden');
+                confirmRemarks.focus();
+                return;
+            }
+            if (confirmRemarksError) confirmRemarksError.classList.add('hidden');
+        }
+
+        confirmProceed.disabled = true;
+        confirmProceed.innerHTML = '<svg class="inline h-4 w-4 animate-spin mr-1" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" class="opacity-25"/><path d="M4 12a8 8 0 018-8" stroke="currentColor" stroke-width="3" stroke-linecap="round" class="opacity-75"/></svg> Processing...';
+
+        try {
+            const formData = new FormData(form);
+            if (pendingNeedsRemarks && confirmRemarks) {
+                formData.set('remarks', confirmRemarks.value.trim());
+            }
+            const res = await fetch(form.action, {
+                method: 'POST',
+                headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': formData.get('_token') },
+                body: formData,
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Operation failed.');
+
+            confirmModal.classList.add('hidden');
+            confirmModal.classList.remove('flex');
+
+            if (window.PMSnackbar) window.PMSnackbar.show({ type: 'success', message: data.message || 'Done.' });
+
+            // Update status badge
+            const statusBadge = document.querySelector('[data-opcr-status-badge]');
+            if (statusBadge && pendingFormId === 'form-opcr-return') {
+                statusBadge.className = 'rounded-full border px-3 py-1 border-rose-500/30 bg-rose-500/10 text-rose-300';
+                statusBadge.textContent = 'Returned';
+            }
+
+            // Disable action buttons
+            document.querySelectorAll('[data-confirm-action]').forEach(b => {
+                b.disabled = true;
+                b.classList.add('opacity-60', 'pointer-events-none');
+            });
+        } catch (e) {
+            if (window.PMSnackbar) window.PMSnackbar.show({ type: 'error', message: e.message || 'Failed.' });
+        } finally {
+            confirmProceed.disabled = false;
+            confirmProceed.textContent = 'Confirm';
+            pendingFormId = null;
         }
     });
 
@@ -409,11 +473,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function showSnackbar(msg, isError = false) {
-        const el = document.createElement('div');
-        el.className = `fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] rounded-lg px-5 py-3 text-sm font-semibold shadow-lg ${isError ? 'border border-rose-500/30 bg-rose-500/10 text-rose-200' : 'border border-emerald-500/30 bg-emerald-500/10 text-emerald-200'}`;
-        el.innerHTML = `<i class="fa-solid ${isError ? 'fa-exclamation-circle' : 'fa-check-circle'} mr-2"></i>${msg}`;
-        document.body.appendChild(el);
-        setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 3000);
+        if (window.PMSnackbar) {
+            window.PMSnackbar.show({ type: isError ? 'error' : 'success', message: msg });
+        }
     }
 
     document.querySelectorAll('[data-signature-close]').forEach(btn => {

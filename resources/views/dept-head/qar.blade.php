@@ -33,7 +33,7 @@
         $hasIncoming = !empty($incomingMporsSafe);
         $hasConsolidated = !empty($consolidatedMporsSafe);
 
-        $canEndorse = in_array($status, ['draft', 'returned'], true) && $hasConsolidated;
+        $canEndorse = $hasConsolidated;
 
         $approvedDateLabel = $isEndorsed && !empty($approvedAt)
             ? \Illuminate\Support\Carbon::parse($approvedAt)->format('M d, Y g:i A')

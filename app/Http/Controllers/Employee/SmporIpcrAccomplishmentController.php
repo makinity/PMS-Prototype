@@ -683,7 +683,6 @@ class SmporIpcrAccomplishmentController extends Controller
             $defaultTitle = match ($functionType) {
                 'core' => 'CORE FUNCTION',
                 'support' => 'SUPPORT FUNCTION',
-                'custom' => 'CUSTOM FUNCTION',
                 default => strtoupper(str_replace('_', ' ', $functionType)) . ' FUNCTION',
             };
             $candidateTitle = trim((string) ($function->name ?? ''));
@@ -719,11 +718,7 @@ class SmporIpcrAccomplishmentController extends Controller
     {
         $value = strtolower(trim($functionType));
 
-        if ($value === '') {
-            return 'custom';
-        }
-
-        return $value;
+        return in_array($value, ['core', 'support'], true) ? $value : 'support';
     }
 
     private function initializeMonthMap(array $monthLabels): array
@@ -1091,7 +1086,7 @@ class SmporIpcrAccomplishmentController extends Controller
                     $aggregateMap[$label] = $initializeMonthlyBuckets();
                 }
 
-                $functionType = $this->normalizeFunctionType((string) ($entry->ipcrItem?->function_type ?? ($outputSectionMap[$label] ?? 'custom')));
+                $functionType = $this->normalizeFunctionType((string) ($entry->ipcrItem?->function_type ?? ($outputSectionMap[$label] ?? 'core')));
                 if (!isset($labelGroupMap[$label])) {
                     $labelGroupMap[$label] = $functionType;
                 }
@@ -1162,7 +1157,7 @@ class SmporIpcrAccomplishmentController extends Controller
 
             $remainingLabels = collect($aggregateMap)
                 ->keys()
-                ->filter(fn ($label) => ($labelGroupMap[$label] ?? $outputSectionMap[$label] ?? 'custom') === $sectionType)
+                ->filter(fn ($label) => ($labelGroupMap[$label] ?? $outputSectionMap[$label] ?? 'core') === $sectionType)
                 ->reject(fn ($label) => in_array($label, $orderedLabels, true))
                 ->sort(static fn (string $a, string $b): int => strnatcasecmp($a, $b))
                 ->values()

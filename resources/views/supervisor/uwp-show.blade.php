@@ -25,7 +25,7 @@
 
         $flattenedOutputs = collect($functions)
             ->flatMap(fn ($fn) => collect($fn['mfos'] ?? [])->map(fn ($mfo) => [
-                'function_type' => strtolower((string) ($fn['function_type'] ?? 'custom')),
+                'function_type' => strtolower((string) ($fn['function_type'] ?? 'core')),
                 'function_name' => (string) ($fn['name'] ?? ''),
                 'function_weight' => $fn['weight_percent'] ?? null,
                 'mfo' => $mfo,
@@ -350,7 +350,7 @@
 
                     list.forEach((item, idx) => {
                         const mfo = item.mfo || {};
-                        const type = String(item.function_type || 'custom').toLowerCase();
+                        const type = String(item.function_type || 'core').toLowerCase();
                         const badgeClass = type === 'core'
                             ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-400'
                             : (type === 'support'
@@ -398,7 +398,7 @@
                     }
 
                     const mfo = item.mfo || {};
-                    const type = String(item.function_type || 'custom').toLowerCase();
+                    const type = String(item.function_type || 'core').toLowerCase();
 
                     titleEl.textContent = mfo.title || 'Untitled Output';
                     typeBadgeEl.classList.remove('hidden');
@@ -409,7 +409,7 @@
                                 ? 'border-blue-400/30 bg-blue-500/10 text-blue-300'
                                 : 'border-slate-700 bg-slate-900/60 text-slate-300')
                     }`;
-                    typeBadgeEl.textContent = type ? (type.charAt(0).toUpperCase() + type.slice(1)) : 'Custom';
+                    typeBadgeEl.textContent = type ? (type.charAt(0).toUpperCase() + type.slice(1)) : 'Support';
 
                     if (item.function_weight !== null && item.function_weight !== undefined && String(item.function_weight) !== '') {
                         weightEl.classList.remove('hidden');

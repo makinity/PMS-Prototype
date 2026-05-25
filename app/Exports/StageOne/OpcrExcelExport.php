@@ -536,7 +536,6 @@ class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
         $label = match ($type) {
             'core' => 'CORE FUNCTIONS',
             'support' => 'SUPPORT FUNCTIONS',
-            'custom' => 'CUSTOM FUNCTIONS',
             default => strtoupper(str_replace('_', ' ', $type)) . ' FUNCTIONS',
         };
 
@@ -552,7 +551,7 @@ class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
     private function normalizeFunctionType(string $type): string
     {
         $normalized = strtolower(trim($type));
-        return $normalized !== '' ? $normalized : 'custom';
+        return in_array($normalized, ['core', 'support'], true) ? $normalized : 'support';
     }
 
     private function writeFooterBlock(Worksheet $sheet, int $startRow): void

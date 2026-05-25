@@ -71,7 +71,7 @@ class IpcrTargetController extends Controller
                 $functionTypeLabels = [];
 
                 foreach ($functions as $function) {
-                    $type = $this->normalizeFunctionType((string) ($function->function_type ?? 'custom'));
+                    $type = $this->normalizeFunctionType((string) ($function->function_type ?? 'core'));
                     $key = $type . '_percent';
                     $functionHeaderMeta[$key] = ($functionHeaderMeta[$key] ?? 0) + (float) ($function->weight_percent ?? 0);
 
@@ -223,11 +223,11 @@ class IpcrTargetController extends Controller
     {
         $normalized = strtolower(trim((string) $type));
 
-        if (in_array($normalized, ['core', 'support', 'custom'], true)) {
+        if (in_array($normalized, ['core', 'support'], true)) {
             return $normalized;
         }
 
-        return $normalized !== '' ? $normalized : 'custom';
+        return 'core';
     }
 
     private function formatFunctionTypeLabel(string $type): string
@@ -235,7 +235,6 @@ class IpcrTargetController extends Controller
         return match ($type) {
             'core' => 'Core Functions',
             'support' => 'Support Functions',
-            'custom' => 'Custom Functions',
             default => ucwords(str_replace('_', ' ', $type)) . ' Functions',
         };
     }

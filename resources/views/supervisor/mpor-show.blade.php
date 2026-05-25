@@ -227,11 +227,9 @@
             const actionSection = document.getElementById('mpor-action-section');
 
             function showSnackbar(msg, isError = false) {
-                const el = document.createElement('div');
-                el.className = `fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] rounded-lg px-5 py-3 text-sm font-semibold shadow-lg ${isError ? 'border border-rose-500/30 bg-rose-500/10 text-rose-200' : 'border border-emerald-500/30 bg-emerald-500/10 text-emerald-200'}`;
-                el.innerHTML = `<i class="fa-solid ${isError ? 'fa-exclamation-circle' : 'fa-check-circle'} mr-2"></i>${msg}`;
-                document.body.appendChild(el);
-                setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 3000);
+                if (window.PMSnackbar) {
+                    window.PMSnackbar.show({ type: isError ? 'error' : 'success', message: msg });
+                }
             }
 
             function setLoading(btn, loading) {

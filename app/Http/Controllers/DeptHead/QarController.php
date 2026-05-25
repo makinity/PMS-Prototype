@@ -1006,10 +1006,10 @@ class QarController extends Controller
         $normalized = strtolower(trim((string) $type));
 
         if ($normalized === '') {
-            return 'custom';
+            return 'support';
         }
 
-        if (in_array($normalized, ['core', 'support', 'custom'], true)) {
+        if (in_array($normalized, ['core', 'support'], true)) {
             return $normalized;
         }
 
@@ -1021,7 +1021,7 @@ class QarController extends Controller
             return 'core';
         }
 
-        return $normalized;
+        return 'support';
     }
 
     private function buildSectionMeta(string $type, ?float $weight = null): array
@@ -1029,7 +1029,6 @@ class QarController extends Controller
         $base = match ($type) {
             'core' => 'CORE FUNCTIONS',
             'support' => 'SUPPORT FUNCTIONS',
-            'custom' => 'CUSTOM FUNCTIONS',
             default => strtoupper(ucwords(str_replace('_', ' ', $type)) . ' FUNCTIONS'),
         };
 

@@ -38,7 +38,7 @@
         </div>
         <div>
             <p class="text-[11px] uppercase tracking-wide text-slate-500">Status</p>
-            <span class="mt-1 inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold {{ $statusMeta['class'] }}">{{ $statusMeta['label'] }}</span>
+            <span data-opcr-status-badge class="mt-1 inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold {{ $statusMeta['class'] }}">{{ $statusMeta['label'] }}</span>
         </div>
     </div>
 
@@ -404,6 +404,49 @@ document.addEventListener('DOMContentLoaded', () => {
     const returnBtn = document.getElementById('pmt-show-return');
     const approveBtn = document.getElementById('pmt-show-approve');
 
+    async function submitReviewAction(action, btn) {
+        showButtonLoading(btn, true);
+        try {
+            const res = await fetch(form.getAttribute('action'), {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || form.querySelector('[name="_token"]')?.value,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    opcr_id: form.querySelector('[name="opcr_id"]')?.value,
+                    action: action,
+                    remarks: remarks?.value || '',
+                    redirect_to_list: '0',
+                }),
+            });
+            const data = await res.json();
+            if (!res.ok || data.status === 'error') {
+                showButtonLoading(btn, false);
+                if (window.PMSnackbar) window.PMSnackbar.show({ type: 'error', message: data.message || 'Operation failed.' });
+                return;
+            }
+            if (window.PMSnackbar) window.PMSnackbar.show({ type: 'success', message: data.message });
+            // Update DOM: disable form, update status badge
+            const statusBadge = document.querySelector('[data-opcr-status-badge]');
+            if (statusBadge) {
+                statusBadge.className = action === 'approve'
+                    ? 'mt-1 inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold border-cyan-500/30 bg-cyan-500/10 text-cyan-300'
+                    : 'mt-1 inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold border-rose-500/30 bg-rose-500/10 text-rose-300';
+                statusBadge.textContent = action === 'approve' ? 'Approved' : 'Returned';
+            }
+            // Disable action buttons
+            [returnBtn, approveBtn].forEach(b => {
+                if (b) { b.disabled = true; b.classList.add('opacity-60', 'pointer-events-none'); }
+            });
+            showButtonLoading(btn, false);
+        } catch (err) {
+            showButtonLoading(btn, false);
+            if (window.PMSnackbar) window.PMSnackbar.show({ type: 'error', message: 'Network error. Please try again.' });
+        }
+    }
+
     returnBtn?.addEventListener('click', () => {
         const value = String(remarks?.value || '').trim();
         if (!value) {
@@ -412,15 +455,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         remarksError?.classList.add('hidden');
-        actionInput.value = 'return';
-        showButtonLoading(returnBtn, true);
-        form.submit();
+        submitReviewAction('return', returnBtn);
     });
 
     approveBtn?.addEventListener('click', () => {
-        actionInput.value = 'approve';
-        showButtonLoading(approveBtn, true);
-        form.submit();
+        submitReviewAction('approve', approveBtn);
     });
 
     document.querySelectorAll('[data-pmt-modal-close]').forEach((btn) => {

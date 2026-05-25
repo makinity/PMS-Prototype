@@ -346,10 +346,10 @@ class MporController extends Controller
         $normalized = strtolower(trim((string) $type));
 
         if ($normalized === '') {
-            return 'custom';
+            return 'support';
         }
 
-        if (in_array($normalized, ['core', 'support', 'custom'], true)) {
+        if (in_array($normalized, ['core', 'support'], true)) {
             return $normalized;
         }
 
@@ -361,7 +361,7 @@ class MporController extends Controller
             return 'core';
         }
 
-        return $normalized;
+        return 'support';
     }
 
     private function formatFunctionLabel(string $type, ?float $weight = null): string
@@ -369,7 +369,6 @@ class MporController extends Controller
         $base = match ($type) {
             'core' => 'Core Functions',
             'support' => 'Support Functions',
-            'custom' => 'Custom Functions',
             default => ucwords(str_replace('_', ' ', $type)) . ' Functions',
         };
 

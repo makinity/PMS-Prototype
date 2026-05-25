@@ -1021,25 +1021,7 @@
                 }
             });
 
-            function setButtonLoading(button, isLoading, loadingText) {
-                if (!button) return;
-                const label = button.querySelector('[data-button-label]');
-                const spinner = button.querySelector('[data-button-spinner]');
-                if (label && !button.dataset.originalLabel) {
-                    button.dataset.originalLabel = label.textContent.trim();
-                }
-                if (isLoading) {
-                    button.disabled = true;
-                    button.classList.add('opacity-70', 'cursor-wait');
-                    if (spinner) spinner.classList.remove('hidden');
-                    if (label && loadingText) label.textContent = loadingText;
-                } else {
-                    button.disabled = false;
-                    button.classList.remove('opacity-70', 'cursor-wait');
-                    if (spinner) spinner.classList.add('hidden');
-                    if (label && button.dataset.originalLabel) label.textContent = button.dataset.originalLabel;
-                }
-            }
+            const setButtonLoading = window.setButtonLoading || function() {};
 
             const orsLogForm = document.getElementById('ors-log-form');
             const orsLogTaskSubmitBtn = document.getElementById('orsLogTaskSubmitBtn');

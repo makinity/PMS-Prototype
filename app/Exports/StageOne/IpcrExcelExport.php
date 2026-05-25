@@ -352,7 +352,6 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
         $grouped = [
             'core' => [],
             'support' => [],
-            'custom' => [],
         ];
 
         foreach ($this->ipcr->items as $item) {
@@ -375,7 +374,6 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
         return [
             'core' => array_values($grouped['core']),
             'support' => array_values($grouped['support']),
-            'custom' => array_values($grouped['custom']),
         ];
     }
 
@@ -469,11 +467,7 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
             return 'support';
         }
 
-        if ($normalized === 'core') {
-            return 'core';
-        }
-
-        return 'custom';
+        return 'core';
     }
 
     private function estimateRowHeight(string ...$cells): float
@@ -574,7 +568,6 @@ class IpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
         $label = match ($type) {
             'core' => 'CORE FUNCTIONS (80%)',
             'support' => 'SUPPORT FUNCTIONS (20%)',
-            'custom' => 'CUSTOM FUNCTIONS',
             default => strtoupper(str_replace('_', ' ', $type)) . ' FUNCTIONS',
         };
 

@@ -42,7 +42,7 @@
                             default => 'border-slate-500/30 bg-slate-500/10 text-slate-300',
                         };
                     @endphp
-                    <span class="rounded-full border px-3 py-1 {{ $ipcrBadge }}">
+                    <span data-status-badge class="rounded-full border px-3 py-1 {{ $ipcrBadge }}">
                         {{ $currentPayload['status_label'] ?? 'Draft' }}
                     </span>
                 @else
@@ -67,7 +67,7 @@
                 </div>
                 <div class="rounded-xl border border-gray-700 bg-slate-900/40 p-3">
                     <p class="text-[11px] uppercase tracking-wide text-slate-500">Adjusted Score</p>
-                    <p class="mt-1 text-sm font-semibold text-blue-300">{{ $currentPayload['adjusted_score'] !== null ? number_format((float) $currentPayload['adjusted_score'], 2) : '-' }}</p>
+                    <p data-adjusted-score class="mt-1 text-sm font-semibold text-blue-300">{{ $currentPayload['adjusted_score'] !== null ? number_format((float) $currentPayload['adjusted_score'], 2) : '-' }}</p>
                 </div>
             </div>
 
@@ -166,6 +166,11 @@
                                             <span id="release-spinner" class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-cyan-300/30 border-t-cyan-300"></span>
                                             <span id="release-label">Release Official Result</span>
                                         </button>
+                                    @else
+                                        <button type="button" id="btnRelease" class="hidden inline-flex items-center gap-2 rounded border border-cyan-600 bg-cyan-600/20 px-4 py-2 text-sm font-semibold text-cyan-300 hover:bg-cyan-600/30">
+                                            <span id="release-spinner" class="hidden h-3.5 w-3.5 animate-spin rounded-full border-2 border-cyan-300/30 border-t-cyan-300"></span>
+                                            <span id="release-label">Release Official Result</span>
+                                        </button>
                                     @endif
                                 </div>
                             </div>
@@ -180,11 +185,9 @@
                         const returnUrl = '{{ route("pmt.employee-calibration.return", $currentIpcr->id) }}';
 
                         function showSnackbar(msg, isError = false) {
-                            const el = document.createElement('div');
-                            el.className = `fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] rounded-lg px-5 py-3 text-sm font-semibold shadow-lg ${isError ? 'border border-rose-500/30 bg-rose-500/10 text-rose-200' : 'border border-emerald-500/30 bg-emerald-500/10 text-emerald-200'}`;
-                            el.innerHTML = `<i class="fa-solid ${isError ? 'fa-exclamation-circle' : 'fa-check-circle'} mr-2"></i>${msg}`;
-                            document.body.appendChild(el);
-                            setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 3000);
+                            if (window.PMSnackbar) {
+                                window.PMSnackbar.show({ type: isError ? 'error' : 'success', message: msg });
+                            }
                         }
 
                         function setLoading(btn, spinnerId, labelId, loading, text) {
@@ -216,6 +219,18 @@
                                     remarks: document.getElementById('pmtRemarksInput')?.value || '',
                                 });
                                 showSnackbar('Rating adjusted successfully.');
+                                // Show Release button and update displayed values
+                                const releaseBtn = document.getElementById('btnRelease');
+                                if (releaseBtn) releaseBtn.classList.remove('hidden');
+                                // Update adjusted score display
+                                const adjScoreEl = document.querySelector('[data-adjusted-score]');
+                                if (adjScoreEl) adjScoreEl.textContent = document.getElementById('adjustedScoreInput').value;
+                                // Update status badge
+                                const statusBadge = document.querySelector('[data-status-badge]');
+                                if (statusBadge) {
+                                    statusBadge.textContent = 'Calibrated (Adjusted)';
+                                    statusBadge.className = 'inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold border-cyan-500/30 bg-cyan-500/10 text-cyan-300';
+                                }
                             } catch (err) {
                                 showSnackbar(err.message, true);
                             } finally {

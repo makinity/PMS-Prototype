@@ -183,11 +183,9 @@
         });
 
         function showSnackbar(message, isError = false) {
-            const snackbar = document.createElement('div');
-            snackbar.className = `fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] rounded-lg px-5 py-3 text-sm font-semibold shadow-lg transition-all duration-300 ${isError ? 'border border-rose-500/30 bg-rose-500/10 text-rose-200' : 'border border-emerald-500/30 bg-emerald-500/10 text-emerald-200'}`;
-            snackbar.innerHTML = `<i class="fa-solid ${isError ? 'fa-exclamation-circle' : 'fa-check-circle'} mr-2"></i>${message}`;
-            document.body.appendChild(snackbar);
-            setTimeout(() => { snackbar.style.opacity = '0'; setTimeout(() => snackbar.remove(), 300); }, 3000);
+            if (window.PMSnackbar) {
+                window.PMSnackbar.show({ type: isError ? 'error' : 'success', message });
+            }
         }
     })();
     </script>

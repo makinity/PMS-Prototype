@@ -308,7 +308,7 @@ class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
     private function buildSectionDefinitions(): array
     {
         $sections = [];
-        $priority = ['core' => 'A', 'support' => 'B', 'custom' => 'C'];
+        $priority = ['core' => 'A', 'support' => 'B'];
         foreach ($this->sectionMeta as $type => $meta) {
             $sections[] = ['type' => $type, 'label' => ($priority[$type] ?? 'D') . ". " . strtoupper($type) . " FUNCTIONS (" . $meta['weight_percent'] . "%)"];
         }
@@ -316,7 +316,7 @@ class OpcrExcelExport implements FromArray, WithStyles, WithColumnWidths, WithTi
         return $sections;
     }
 
-    private function normalizeFunctionType(string $t): string { $t = strtolower(trim($t)); return in_array($t, ['core','support']) ? $t : 'custom'; }
+    private function normalizeFunctionType(string $t): string { $t = strtolower(trim($t)); return in_array($t, ['core','support']) ? $t : 'support'; }
 
     private function writeFooterBlock(Worksheet $sheet, int $row): void
     {

@@ -132,7 +132,7 @@
 
         </div>
     </section>
-    
+
     {{-- UWP preview modal removed: migrated to dedicated show page. --}}
 
     <!-- Success Indicators Modal -->
