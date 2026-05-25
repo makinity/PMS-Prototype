@@ -34,12 +34,17 @@
 
     const unlockNotificationSound = () => {
         const audio = createNotificationAudio();
+        // Create and resume an AudioContext to satisfy autoplay policy
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (ctx.state === 'suspended') ctx.resume();
+        // Try playing a silent moment to fully unlock the audio element
         audio.play().then(() => {
             audio.pause();
             audio.currentTime = 0;
-            canPlayNotificationSound = true;
-            console.info(`${debugPrefix} Audio unlocked.`);
         }).catch(() => {});
+        // Mark as unlocked regardless — the user gesture satisfies autoplay policy
+        canPlayNotificationSound = true;
+        console.info(`${debugPrefix} Audio unlocked.`);
     };
 
     const bindAudioUnlock = () => {
