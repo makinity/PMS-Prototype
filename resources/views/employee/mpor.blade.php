@@ -33,15 +33,56 @@
         $mporEmptyReason = trim((string) ($mporEmptyReason ?? ''));
         $isReturned = strtolower((string) $mporStatus) === 'returned';
         $returnRemarks = trim((string) ($mpor?->return_remarks ?? ''));
+        $allMporRows = collect($sectionRows)->flatten(1);
+        $hasMporRows = $allMporRows->isNotEmpty();
+        $includedRatedCount = count($includedRatedTasks);
+        $excludedTaskCount = max(count($orsTasks) - $includedRatedCount, 0);
+        $statusKey = strtolower((string) $mporStatus);
+        $statusLabel = match ($statusKey) {
+            'submitted' => 'Submitted',
+            'approved' => 'Approved',
+            'endorsed' => 'Endorsed',
+            'returned' => 'Returned',
+            default => 'Draft',
+        };
+        $statusClasses = match ($statusKey) {
+            'submitted', 'approved', 'endorsed' => 'border-emerald-500/30 bg-emerald-500/10 text-emerald-100',
+            'returned' => 'border-rose-500/30 bg-rose-500/10 text-rose-100',
+            default => 'border-sky-500/30 bg-sky-500/10 text-sky-100',
+        };
+        $monthDate = \Carbon\Carbon::createFromFormat('Y-m', $month ?? now()->format('Y-m'));
+        $previousMonth = $monthDate->copy()->subMonth()->format('Y-m');
+        $nextMonth = $monthDate->copy()->addMonth()->format('Y-m');
+        $canSubmitMpor = ! $isMporLocked && $hasMporRows && $includedRatedCount > 0;
+        $readinessSteps = [
+            [
+                'label' => 'IPCR targets committed',
+                'done' => $hasMporRows,
+                'hint' => $hasMporRows ? 'Targets are available for this month.' : 'Commit or lock your IPCR targets first.',
+                'href' => route('employee.ipcr-target'),
+                'action' => 'Check IPCR',
+                'icon' => 'fa-bullseye',
+            ],
+            [
+                'label' => 'ORS entries rated',
+                'done' => $includedRatedCount > 0,
+                'hint' => $includedRatedCount > 0 ? "{$includedRatedCount} rated entries found." : 'Add ORS entries and wait for supervisor rating.',
+                'href' => route('employee.ors'),
+                'action' => 'Open ORS',
+                'icon' => 'fa-list-check',
+            ],
+            [
+                'label' => 'Ready to submit',
+                'done' => $canSubmitMpor || $isMporLocked,
+                'hint' => $isMporLocked ? 'This MPOR has already been submitted.' : ($canSubmitMpor ? 'You can submit this MPOR.' : 'Submission unlocks after the first two steps.'),
+                'href' => null,
+                'action' => null,
+                'icon' => 'fa-paper-plane',
+            ],
+        ];
     @endphp
 
     <section class="space-y-6">
-        @if ($mporEmptyReason !== '')
-            <div class="rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
-                {{ $mporEmptyReason }}
-            </div>
-        @endif
-
         @if ($isReturned)
             <div id="mporReturnedBanner" class="rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-100">
                 <p class="font-semibold">MPOR returned by Supervisor</p>
@@ -56,49 +97,158 @@
             </div>
         @endif
 
-        <div class="flex flex-col gap-3 md:gap-4 md:flex-row md:items-start md:justify-between">
-            <div class="min-w-0">
-                <h1 class="mt-1 text-xl font-bold leading-tight text-white sm:text-2xl md:text-3xl">MONTHLY PERFORMANCE OUTPUT REPORT</h1>
+        <div class="rounded-2xl border border-gray-700 bg-slate-900/40 p-4 sm:p-5">
+            <div class="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+                <div class="min-w-0">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold {{ $statusClasses }}">
+                            <i class="fa-solid {{ $isMporLocked ? 'fa-circle-check' : ($isReturned ? 'fa-circle-exclamation' : 'fa-pen') }} text-[0.65rem]"></i>
+                            {{ $statusLabel }}
+                        </span>
+                        <span class="rounded-full border border-slate-700 bg-slate-950/60 px-3 py-1 text-xs font-medium text-slate-300">
+                            {{ $mporMonthYear }}
+                        </span>
+                    </div>
 
-                <div class="mt-3 grid grid-cols-2 gap-2 text-xs uppercase tracking-[0.2em] text-white sm:grid-cols-3">
-                    <div class="rounded-lg border border-gray-700 bg-slate-900/40 px-3 py-2">
-                        <p class="text-[0.6rem] text-slate-500">NAME</p>
-                        <p class="mt-0.5 truncate text-sm font-semibold normal-case tracking-normal">{{ $employeeName }}</p>
+                    <h1 class="mt-3 text-xl font-bold leading-tight text-white sm:text-2xl md:text-3xl">Monthly Performance Output Report</h1>
+                    <p class="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
+                        Your MPOR is generated from committed IPCR targets and rated ORS entries for the selected month.
+                    </p>
+
+                    <div class="mt-4 grid gap-2 text-xs uppercase tracking-[0.18em] text-white sm:grid-cols-3">
+                        <div class="rounded-lg border border-gray-700 bg-slate-950/35 px-3 py-2">
+                            <p class="text-[0.6rem] text-slate-500">Name</p>
+                            <p class="mt-0.5 truncate text-sm font-semibold normal-case tracking-normal">{{ $employeeName }}</p>
+                        </div>
+                        <div class="rounded-lg border border-gray-700 bg-slate-950/35 px-3 py-2">
+                            <p class="text-[0.6rem] text-slate-500">Office / Division</p>
+                            <p class="mt-0.5 truncate text-sm font-semibold normal-case tracking-normal">{{ $officeName }}</p>
+                        </div>
+                        <div class="rounded-lg border border-gray-700 bg-slate-950/35 px-3 py-2">
+                            <p class="text-[0.6rem] text-slate-500">Month</p>
+                            <p class="mt-0.5 truncate text-sm font-semibold normal-case tracking-normal">{{ $mporMonthYear }}</p>
+                        </div>
                     </div>
-                    <div class="rounded-lg border border-gray-700 bg-slate-900/40 px-3 py-2">
-                        <p class="text-[0.6rem] text-slate-500">OFFICE / DIVISION</p>
-                        <p class="mt-0.5 truncate text-sm font-semibold normal-case tracking-normal">{{ $officeName }}</p>
+                </div>
+
+                <div class="w-full space-y-3 xl:w-auto xl:min-w-[24rem] xl:shrink-0">
+                    <div class="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:justify-end">
+                        <a href="{{ route('employee.mpor', ['month' => $previousMonth]) }}"
+                            class="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-slate-700 bg-slate-950/60 px-3 text-sm font-medium text-slate-300 transition hover:border-slate-500 hover:bg-slate-800 sm:w-[6.5rem]">
+                            <i class="fa-solid fa-chevron-left text-xs"></i>
+                            Prev
+                        </a>
+                        <form method="GET" action="{{ route('employee.mpor') }}" class="col-span-2 row-start-1 sm:col-auto sm:row-auto">
+                            <label for="mporMonthPicker" class="sr-only">Select MPOR month</label>
+                            <div class="mpor-month-shell">
+                                <i class="fa-solid fa-calendar-days text-xs text-slate-400"></i>
+                                <input id="mporMonthPicker" type="month" name="month" value="{{ $month }}"
+                                    class="mpor-month-input"
+                                    onchange="this.form.submit()">
+                            </div>
+                        </form>
+                        <a href="{{ route('employee.mpor', ['month' => $nextMonth]) }}"
+                            class="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-slate-700 bg-slate-950/60 px-3 text-sm font-medium text-slate-300 transition hover:border-slate-500 hover:bg-slate-800 sm:w-[6.5rem]">
+                            Next
+                            <i class="fa-solid fa-chevron-right text-xs"></i>
+                        </a>
                     </div>
-                    <div class="col-span-2 rounded-lg border border-gray-700 bg-slate-900/40 px-3 py-2 sm:col-span-1">
-                        <p class="text-[0.6rem] text-slate-500">MONTH</p>
-                        <p class="mt-0.5 truncate text-sm font-semibold normal-case tracking-normal">{{ $mporMonthYear }}</p>
+
+                    <div id="mporActionButtons" class="grid w-full gap-2 sm:grid-cols-2">
+                        @if ($isMporLocked)
+                            <button type="button" disabled
+                                class="inline-flex cursor-not-allowed items-center justify-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-center text-sm font-semibold text-emerald-200">
+                                <i class="fa-solid fa-circle-check text-xs"></i>
+                                Submitted
+                            </button>
+                        @elseif ($canSubmitMpor)
+                            <button type="button" data-modal-target="mporSubmitConfirmModal" data-modal-toggle="mporSubmitConfirmModal"
+                                class="group inline-flex items-center justify-center gap-2 rounded-lg border border-blue-500/50 bg-blue-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-[0_8px_20px_-12px_rgba(59,130,246,0.9)] transition hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400/60 focus:ring-offset-2 focus:ring-offset-slate-950">
+                                <i class="fa-solid fa-paper-plane text-xs text-blue-100 transition group-hover:translate-x-0.5"></i>
+                                {{ $isReturned ? 'Resubmit MPOR' : 'Submit MPOR' }}
+                            </button>
+                        @else
+                            <button type="button" disabled
+                                class="inline-flex cursor-not-allowed items-center justify-center gap-2 rounded-lg border border-slate-700 bg-slate-950/50 px-3 py-2 text-center text-sm font-semibold text-slate-500"
+                                title="Complete IPCR targets and rated ORS entries first.">
+                                <i class="fa-solid fa-lock text-xs"></i>
+                                Not Ready
+                            </button>
+                        @endif
+
+                        <a href="{{ route('employee.mpor.export.excel', ['month' => $month]) }}"
+                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-600 bg-slate-900/70 px-3 py-2 text-center text-sm font-medium text-slate-200 transition hover:border-slate-500 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400/40 focus:ring-offset-2 focus:ring-offset-slate-950">
+                            <i class="fa-solid fa-file-arrow-down text-xs text-slate-300"></i>
+                            Export Excel
+                        </a>
                     </div>
                 </div>
             </div>
 
-            <div id="mporActionButtons" class="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-row md:items-center">
-                @if (! $isMporLocked)
-                    <button type="button" data-modal-target="mporSubmitConfirmModal" data-modal-toggle="mporSubmitConfirmModal"
-                        class="group inline-flex items-center justify-center gap-2 rounded-lg border border-blue-500/50 bg-gradient-to-b from-blue-500 to-blue-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-[0_8px_20px_-12px_rgba(59,130,246,0.9)] transition hover:from-blue-400 hover:to-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400/60 focus:ring-offset-2 focus:ring-offset-slate-950 sm:min-w-[10.5rem] sm:flex-none">
-                        <i class="fa-solid fa-paper-plane text-xs text-blue-100 transition group-hover:translate-x-0.5"></i>
-                        {{ $isReturned ? 'Resubmit MPOR' : 'Submit MPOR' }}
-                    </button>
-                @else
-                    <button type="button" disabled
-                        class="inline-flex cursor-not-allowed items-center justify-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-center text-sm font-semibold text-emerald-200 opacity-80 sm:min-w-[10.5rem] sm:flex-none">
-                        <i class="fa-solid fa-circle-check text-xs"></i>
-                        Submitted
-                    </button>
-                @endif
-
-                <a href="{{ route('employee.mpor.export.excel') }}"
-                    class="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-600 bg-slate-900/70 px-3 py-2 text-center text-sm font-medium text-slate-200 transition hover:border-slate-500 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400/40 focus:ring-offset-2 focus:ring-offset-slate-950 sm:min-w-[8.75rem] sm:flex-none">
-                    <i class="fa-solid fa-file-arrow-down text-xs text-slate-300"></i>
-                    Export PDF
-                </a>
+            <div class="mt-5 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+                <div class="rounded-lg border border-gray-700 bg-slate-950/35 px-3 py-2">
+                    <p class="text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-slate-500">Rated entries</p>
+                    <p class="mt-1 text-xl font-bold text-white tabular-nums">{{ $includedRatedCount }}</p>
+                </div>
+                <div class="rounded-lg border border-gray-700 bg-slate-950/35 px-3 py-2">
+                    <p class="text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-slate-500">Output rows</p>
+                    <p class="mt-1 text-xl font-bold text-white tabular-nums">{{ $allMporRows->count() }}</p>
+                </div>
+                <div class="rounded-lg border border-gray-700 bg-slate-950/35 px-3 py-2">
+                    <p class="text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-slate-500">Quantity total</p>
+                    <p class="mt-1 text-xl font-bold text-white tabular-nums">{{ number_format(data_get($grandTotals, 'qtyTotal', 0), 0) }}</p>
+                </div>
+                <div class="rounded-lg border border-gray-700 bg-slate-950/35 px-3 py-2">
+                    <p class="text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-slate-500">Needs attention</p>
+                    <p class="mt-1 text-xl font-bold text-white tabular-nums">{{ $excludedTaskCount }}</p>
+                </div>
             </div>
         </div>
 
+        @if (! $hasMporRows || $includedRatedCount === 0 || $mporEmptyReason !== '')
+            <div class="rounded-2xl border border-slate-700 bg-slate-900/40 p-4 sm:p-5">
+                <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <div>
+                        <div class="flex items-center gap-3">
+                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-sky-500/30 bg-sky-500/10 text-sky-100">
+                                <i class="fa-solid fa-route"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-white">Complete these steps to submit MPOR</p>
+                                <p class="mt-1 text-sm leading-6 text-slate-400">
+                                    {{ $mporEmptyReason !== '' ? $mporEmptyReason : 'Your MPOR will populate automatically after IPCR targets and rated ORS entries are available.' }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid gap-2 lg:min-w-[34rem]">
+                        @foreach ($readinessSteps as $step)
+                            <div class="flex flex-col gap-3 rounded-xl border {{ $step['done'] ? 'border-emerald-500/25 bg-emerald-500/10' : 'border-slate-700 bg-slate-950/40' }} px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
+                                <div class="flex min-w-0 items-center gap-3">
+                                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border {{ $step['done'] ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200' : 'border-slate-700 bg-slate-900 text-slate-400' }}">
+                                        <i class="fa-solid {{ $step['done'] ? 'fa-check' : $step['icon'] }} text-xs"></i>
+                                    </span>
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-semibold {{ $step['done'] ? 'text-emerald-100' : 'text-white' }}">{{ $step['label'] }}</p>
+                                        <p class="text-xs leading-5 {{ $step['done'] ? 'text-emerald-100/70' : 'text-slate-400' }}">{{ $step['hint'] }}</p>
+                                    </div>
+                                </div>
+
+                                @if (! $step['done'] && $step['href'])
+                                    <a href="{{ $step['href'] }}"
+                                        class="inline-flex shrink-0 justify-center rounded-lg border border-slate-600 px-3 py-1.5 text-xs font-semibold text-slate-100 transition hover:border-slate-500 hover:bg-slate-800 sm:min-w-[6.5rem]">
+                                        {{ $step['action'] }}
+                                    </a>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if ($hasMporRows)
         {{-- Mobile: Hybrid tabs + output drawer --}}
         <div class="space-y-4 lg:hidden" id="mporMobileWorkspace">
             <div class="rounded-2xl border border-gray-700 bg-slate-900/40 p-4">
@@ -279,7 +429,31 @@
                 </div>
             </div>
         </div>
+        @else
+            <div class="rounded-2xl border border-dashed border-slate-700 bg-slate-900/30 p-6 text-center">
+                <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-xl border border-slate-700 bg-slate-950/70 text-slate-300">
+                    <i class="fa-solid fa-table-list"></i>
+                </div>
+                <h2 class="mt-4 text-base font-semibold text-white">No MPOR rows to show</h2>
+                <p class="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-400">
+                    MPOR rows are created from committed IPCR targets. Once your IPCR targets are committed and ORS entries are rated, this table will populate automatically.
+                </p>
+                <div class="mt-4 flex flex-col justify-center gap-2 sm:flex-row">
+                    <a href="{{ route('employee.ipcr-target') }}"
+                        class="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-600 bg-slate-900/70 px-3 py-2 text-sm font-semibold text-slate-100 transition hover:border-slate-500 hover:bg-slate-800">
+                        <i class="fa-solid fa-bullseye text-xs"></i>
+                        Check IPCR Target
+                    </a>
+                    <a href="{{ route('employee.ors') }}"
+                        class="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-600 bg-slate-900/70 px-3 py-2 text-sm font-semibold text-slate-100 transition hover:border-slate-500 hover:bg-slate-800">
+                        <i class="fa-solid fa-list-check text-xs"></i>
+                        Open ORS
+                    </a>
+                </div>
+            </div>
+        @endif
 
+        @if ($hasMporRows)
         <div class="grid gap-4 lg:grid-cols-2">
             <div class="rounded-2xl border border-gray-700 bg-slate-900/40 p-4 text-xs uppercase tracking-[0.3em] text-slate-400">
                 <div class="flex items-center justify-between text-[0.6rem] tracking-[0.3em] text-slate-500">
@@ -324,6 +498,7 @@
                 </div>
             </div>
         </div>
+        @endif
 
         <div id="mporSubmitConfirmModal" tabindex="-1" aria-hidden="true"
             class="fixed left-0 right-0 top-0 z-50 hidden h-[calc(100%-1rem)] max-h-full w-full items-center justify-center overflow-y-auto overflow-x-hidden md:inset-0">
@@ -668,6 +843,65 @@
         #mporSectionFilter option {
             background-color: #020617;
             color: #e2e8f0;
+        }
+
+        .mpor-month-input {
+            appearance: none;
+            -webkit-appearance: none;
+            background: transparent;
+            border: 0;
+            color-scheme: dark;
+            color: #f8fafc;
+            font-size: 0.875rem;
+            font-weight: 700;
+            line-height: 1.25rem;
+            outline: none;
+            width: 8.25rem;
+        }
+
+        .mpor-month-shell {
+            align-items: center;
+            background-color: rgba(2, 6, 23, 0.6);
+            border: 1px solid #334155;
+            border-radius: 0.5rem;
+            display: flex;
+            gap: 0.5rem;
+            height: 2.75rem;
+            justify-content: center;
+            padding: 0 0.75rem;
+            transition: border-color 150ms ease, background-color 150ms ease;
+            width: 100%;
+        }
+
+        @media (min-width: 640px) {
+            .mpor-month-shell {
+                width: 11.25rem;
+            }
+        }
+
+        .mpor-month-shell:focus-within {
+            border-color: #3b82f6;
+            background-color: rgba(15, 23, 42, 0.9);
+        }
+
+        .mpor-month-input::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            opacity: 0.8;
+        }
+
+        .mpor-month-input::-webkit-datetime-edit {
+            color: #f8fafc;
+            padding: 0;
+        }
+
+        .mpor-month-input::-webkit-datetime-edit-fields-wrapper {
+            padding: 0;
+        }
+
+        .mpor-month-input::-webkit-datetime-edit-text,
+        .mpor-month-input::-webkit-datetime-edit-month-field,
+        .mpor-month-input::-webkit-datetime-edit-year-field {
+            color: #f8fafc;
         }
     </style>
 @endpush
